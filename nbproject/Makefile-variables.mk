@@ -7,13 +7,13 @@ CND_BASEDIR=`pwd`
 CND_BUILDDIR=build
 CND_DISTDIR=dist
 # Debug configuration
-CND_PLATFORM_Debug=MinGW-w64-Windows
-CND_ARTIFACT_DIR_Debug=dist/Debug/MinGW-w64-Windows
-CND_ARTIFACT_NAME_Debug=libteonet.dll
-CND_ARTIFACT_PATH_Debug=dist/Debug/MinGW-w64-Windows/libteonet.dll
-CND_PACKAGE_DIR_Debug=dist/Debug/MinGW-w64-Windows/package
-CND_PACKAGE_NAME_Debug=libteonet.dll.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/MinGW-w64-Windows/package/libteonet.dll.tar
+CND_PLATFORM_Debug=GNU-Linux-x86
+CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
+CND_ARTIFACT_NAME_Debug=libteonet.so
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libteonet.so
+CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
+CND_PACKAGE_NAME_Debug=libteonet.so.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/libteonet.so.tar
 # Release configuration
 CND_PLATFORM_Release=MinGW-w64-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/MinGW-w64-Windows

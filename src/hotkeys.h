@@ -1,0 +1,105 @@
+/**
+ * File:   hotkeys.h
+ * Author: Kirill Scherba
+ *
+ * Created on April 16, 2015, 10:43 PM
+ *
+ * Hot keys monitor module
+ *
+ */
+
+#ifndef HOTKEYS_H
+#define	HOTKEYS_H
+
+#include "config/config.h"
+
+#include <ev.h>
+#ifndef HAVE_MINGW
+#include <sys/termios.h>
+#endif
+
+#include "config/conf.h"
+#include "net_core.h"
+
+/**
+ * Ping timer data
+ */
+typedef struct ping_timer_data {
+
+    char *peer_name;
+    size_t peer_name_len;
+    struct ev_loop *loop;
+    ksnCoreClass *kn;
+    ev_timer w;
+
+} ping_timer_data;
+
+/**
+ * Monitor timer data
+ */
+typedef struct monitor_timer_data {
+
+    struct ev_loop *loop;
+    ksnCoreClass *kn;
+    ev_timer w;
+
+} monitor_timer_data;
+
+/**
+ * Peer timer data
+ */
+typedef struct peer_timer_data {
+
+    struct ev_loop *loop;
+    ksnCoreClass *kn;
+    int num_lines;
+    ev_timer tw;
+    ev_idle iw;
+
+} peer_timer_data;
+
+
+/**
+ * Hot keys class data
+ */
+typedef struct ksnetHotkeysClass  {
+
+    int non_blocking; ///< Non blocking mode: 1 - non-blocking
+    #ifdef HAVE_MINGW
+    int initial_settings, new_settings; ///< Keybord settings
+    #else
+    struct termios initial_settings, new_settings; ///< Keybord settings
+    #endif
+    int wait_y; ///< Wait y (yes) mode
+    int peer_m; ///< Show peer mode: 0 - single; 1 - continously
+    int last_hotkey; ///< Last hotkey
+    int str_number; ///< Nuber of current string
+    char str[3][KSN_BUFFER_SM_SIZE]; ///< Strings
+
+    ping_timer_data *pt;
+    monitor_timer_data *mt;
+    peer_timer_data *pet;
+
+} ksnetHotkeysClass;
+
+extern const char *PING, *TRACE, *MONITOR, *TRIPTIME;
+
+#define PING_LEN 5
+#define TRACE_LEN 6
+#define MONITOR_LEN 8
+#define TRIPTIME_LEN 9
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+void hotkeys_cb(void *ke, void *data);
+
+ksnetHotkeysClass *ksnetHotkeysInit(void *ke);
+void ksnetHotkeysDestroy(ksnetHotkeysClass *kh);
+
+#ifdef	__cplusplus
+}
+#endif
+
+#endif	/* HOTKEYS_H */

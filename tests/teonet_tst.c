@@ -12,10 +12,23 @@
  * Simple C Test Suite
  */
 
+#include "ev_mgr.h"
+
 void test1(int argc, char** argv) {
     printf("teonet test 1\n");
     
     printf("Teonet library ver 0.0.1 connection test\n");
+    
+    // Initialize ksnet event manager and Read configuration (defaults,
+    // command line, configuration file)
+    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, NULL/*event_cb*/, READ_OPTIONS|READ_CONFIGURATION);
+
+    // Hello message
+    ksnet_printf(&ke->ksn_cfg, MESSAGE,
+            "KSMesh UDP Client Server test ver. 0.0.1\n\n");
+
+    // Start KSNet
+    ksnetEvMgrRun(ke);
 }
 
 void test2() {

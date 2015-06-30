@@ -13,6 +13,7 @@
             </make-dep-projects>
             <sourceRootList>
                 <sourceRootElem>src</sourceRootElem>
+                <sourceRootElem>embedded</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
@@ -29,6 +30,8 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>Kirill</word>
+            <word>Scherba</word>
             <word>Teonet</word>
         </spellchecker-wordlist>
     </configuration>
