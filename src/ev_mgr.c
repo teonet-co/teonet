@@ -106,7 +106,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Initialize TIMER idle watchers
     ev_idle_init (&ke->idle_w, idle_cb);
-//    ke->idle_w.data = ke->kc;
+    ke->idle_w.data = ke->kc;
 
     // Initialize STDIN idle watchers
     ev_idle_init (&ke->idle_stdin_w, idle_stdin_cb);
@@ -553,8 +553,8 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
  */
 void modules_init(ksnetEvMgrClass *ke) {
 
-//    ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL);
-//    ke->kh = ksnetHotkeysInit(ke);
+    ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL);
+    ke->kh = ksnetHotkeysInit(ke);
 //    ke->kvpn = ksnVpnInit(ke);
 //    ke->kt = ksnTcpInit(ke);
 //    ke->kter = ksnTermInit(ke);
@@ -570,6 +570,6 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 //    ksnTermDestroy(ke->kter);
 //    ksnTcpDestroy(ke->kt);
 //    ksnVpnDestroy(ke->kvpn);
-//    ksnetHotkeysDestroy(ke->kh);
-//    ksnCoreDestroy(ke->kc);
+    ksnetHotkeysDestroy(ke->kh);
+    ksnCoreDestroy(ke->kc);
 }

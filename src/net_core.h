@@ -20,7 +20,9 @@
 
 #include "net_arp.h"
 #include "net_com.h"
+#if KSNET_CRYPT
 #include "crypt.h"
+#endif
 
 // External constants
 extern const char *localhost;
@@ -40,7 +42,9 @@ typedef struct ksnCoreClass {
     double last_check_event; ///< Last time of check host event
     ksnetArpClass *ka;       ///< Arp table class object
     ksnCommandClass *kco;    ///< Command class object
-//    ksnCryptClass *kcr;      ///< Crypt class object
+    #if KSNET_CRYPT
+    ksnCryptClass *kcr;      ///< Crypt class object
+    #endif
     ev_io host_w;            ///< Event Manager host (this host) watcher
     void *ke;                ///< Pointer to Event manager class object
 

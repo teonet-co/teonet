@@ -15,8 +15,7 @@ extern "C" {
 #define PACKAGE_NAME "teonet" 
 #define VERSION "0.0.1"
 
-#define HAVE_LINUX 
-    
+#define HAVE_LINUX   
     
 #ifdef	__cplusplus
 }
