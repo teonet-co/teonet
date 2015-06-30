@@ -224,7 +224,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     // Create packet
     size_t packet_len;
-//printf("ksnCoreSendto, data_len: %d\n", data_len);
+    //printf("ksnCoreSendto, data_len: %d\n", data_len);
     void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
 
     /* Divide packet to small parts

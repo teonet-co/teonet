@@ -108,6 +108,7 @@ void hotkeys_cb(void *ke, void *data) {
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
 //            , kev->kvpn == NULL ? "" : " "COLOR_DW"v"COLOR_END" - show VPN\n"
+            , ""
             #ifdef DEBUG_KSNET
             , (kev->ksn_cfg.show_debug_f ? SHOW : DONT_SHOW)
             , (kev->ksn_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)

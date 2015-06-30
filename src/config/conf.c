@@ -53,7 +53,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_peers_f = 0;
 
     // This host
-    ksn_cfg->port = 0; //8005;
+    ksn_cfg->port = 8000; //8005;
     char *name = getRandomHostName();
     strncpy(ksn_cfg->host_name, name, KSN_MAX_HOST_NAME);
     free(name);
