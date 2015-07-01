@@ -31,7 +31,7 @@ void host_cb (EV_P_ ev_io *w, int revents); // Host callback
 void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
 void stdin_cb (EV_P_ ev_io *w, int revents); // STDIN callback
-void modules_init(ksnetEvMgrClass *ke); // Initialize modules
+int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
 /**
@@ -108,84 +108,86 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     #endif
 
     // Initialize modules
-    modules_init(ke);
+    if(modules_init(ke)) {
+        
+        // Initialize TIMER idle watchers
+        ev_idle_init (&ke->idle_w, idle_cb);
+        ke->idle_w.data = ke->kc;
 
-    // Initialize TIMER idle watchers
-    ev_idle_init (&ke->idle_w, idle_cb);
-    ke->idle_w.data = ke->kc;
+        // Initialize STDIN idle watchers
+        ev_idle_init (&ke->idle_stdin_w, idle_stdin_cb);
 
-    // Initialize STDIN idle watchers
-    ev_idle_init (&ke->idle_stdin_w, idle_stdin_cb);
+        // Initialize Check activity watcher
+        ev_idle_init (&ke->idle_activity_w, idle_activity_cb);
+        ke->idle_activity_w.data = ke;
 
-    // Initialize Check activity watcher
-    ev_idle_init (&ke->idle_activity_w, idle_activity_cb);
-    ke->idle_activity_w.data = ke;
+        // Initialize and start main timer watcher, it is a repeated timer
+        ev_timer_init (&ke->timer_w, timer_cb, 0.0, KSNET_EVENT_MGR_TIMER);
+        ke->timer_w.data = ke;
+        ev_timer_start (loop, &ke->timer_w);
 
-    // Initialize and start main timer watcher, it is a repeated timer
-    ev_timer_init (&ke->timer_w, timer_cb, 0.0, KSNET_EVENT_MGR_TIMER);
-    ke->timer_w.data = ke;
-    ev_timer_start (loop, &ke->timer_w);
+        // Initialize and start signals watchers
+        // SIGINT
+        ev_signal_init (&sigint_w, sigint_cb, SIGINT);
+        sigint_w.data = ke;
+        ev_signal_start (loop, &sigint_w);
 
-    // Initialize and start signals watchers
-    // SIGINT
-    ev_signal_init (&sigint_w, sigint_cb, SIGINT);
-    sigint_w.data = ke;
-    ev_signal_start (loop, &sigint_w);
+        // SIGQUIT
+        #ifdef SIGQUIT
+        ev_signal_init (&sigquit_w, sigint_cb, SIGQUIT);
+        sigquit_w.data = ke;
+        ev_signal_start (loop, &sigquit_w);
+        #endif
+
+        // SIGTERM
+        #ifdef SIGTERM
+        ev_signal_init (&sigterm_w, sigint_cb, SIGTERM);
+        sigterm_w.data = ke;
+        ev_signal_start (loop, &sigterm_w);
+        #endif
+
+        // SIGKILL
+        #ifdef SIGKILL
+        ev_signal_init (&sigkill_w, sigint_cb, SIGKILL);
+        sigkill_w.data = ke;
+        ev_signal_start (loop, &sigkill_w);
+        #endif
+
+        // SIGSTOP
+        #ifdef SIGSTOP
+        ev_signal_init (&sigstop_w, sigint_cb, SIGSTOP);
+        sigstop_w.data = ke;
+        ev_signal_start (loop, &sigstop_w);
+        #endif
+
+        // Initialize and start keyboard input watcher
+        ev_init (&stdin_w, stdin_cb);
+        ev_io_set (&stdin_w, STDIN_FILENO, EV_READ);
+        stdin_w.data = ke;
+        ev_io_start (loop, &stdin_w);
+
+        // Initialize and start a async signal watcher for event add
+        ev_async_init (&ke->sig_async_w, sig_async_cb);
+        ke->sig_async_w.data = ke;
+        ev_async_start (loop, &ke->sig_async_w);
+
+        // Run event loop
+        ev_run(loop, 0);
+
+    }
     
-    // SIGQUIT
-    #ifdef SIGQUIT
-    ev_signal_init (&sigquit_w, sigint_cb, SIGQUIT);
-    sigquit_w.data = ke;
-    ev_signal_start (loop, &sigquit_w);
-    #endif
-
-    // SIGTERM
-    #ifdef SIGTERM
-    ev_signal_init (&sigterm_w, sigint_cb, SIGTERM);
-    sigterm_w.data = ke;
-    ev_signal_start (loop, &sigterm_w);
-    #endif
-
-    // SIGKILL
-    #ifdef SIGKILL
-    ev_signal_init (&sigkill_w, sigint_cb, SIGKILL);
-    sigkill_w.data = ke;
-    ev_signal_start (loop, &sigkill_w);
-    #endif
-
-    // SIGSTOP
-    #ifdef SIGSTOP
-    ev_signal_init (&sigstop_w, sigint_cb, SIGSTOP);
-    sigstop_w.data = ke;
-    ev_signal_start (loop, &sigstop_w);
-    #endif
-
-    // Initialize and start keyboard input watcher
-    ev_init (&stdin_w, stdin_cb);
-    ev_io_set (&stdin_w, STDIN_FILENO, EV_READ);
-    stdin_w.data = ke;
-    ev_io_start (loop, &stdin_w);
-
-    // Initialize and start a async signal watcher for event add
-    ev_async_init (&ke->sig_async_w, sig_async_cb);
-    ke->sig_async_w.data = ke;
-    ev_async_start (loop, &ke->sig_async_w);
-
-    // Run event loop
-    ev_run(loop, 0);
-
     // Destroy modules
-    modules_destroy(ke);
+    modules_destroy(ke);    
 
     // Destroy event loop (and free memory)
     ev_loop_destroy(loop);
 
-    // Free memory
-    free(ke);
-
     #ifdef DEBUG_KSNET
     ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: stopped.\n");
     #endif
+
+    // Free memory
+    free(ke);
 
     return 0;
 }
@@ -561,15 +563,20 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
 /**
  * Initialize connected to Event Manager Modules
  */
-void modules_init(ksnetEvMgrClass *ke) {
+int modules_init(ksnetEvMgrClass *ke) {
 
-    ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL);
+    ke->kc = NULL;
+    ke->kh = NULL;
+    
+    if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;   
     ke->kh = ksnetHotkeysInit(ke);
     
 //    ke->kvpn = ksnVpnInit(ke);
 //    ke->kt = ksnTcpInit(ke);
 //    ke->kter = ksnTermInit(ke);
 //    ke->ktun = ksnTunInit(ke);
+    
+    return 1;
 }
 
 /**

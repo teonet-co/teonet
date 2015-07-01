@@ -366,8 +366,11 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
  */
 void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
 
-    _keys_non_blocking_stop(kh);
-    free(kh);
+    if(kh != NULL) {
+        
+        _keys_non_blocking_stop(kh);
+        free(kh);
+    }
 }
 
 

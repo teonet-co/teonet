@@ -46,7 +46,7 @@ int calculate_lines(char *str);
 
 void set_nonblock(int fd);
 
-const char* ksnet_getDataDir(void);
+const char* getDataPath(void);
 const char *ksnet_getSysConfigDir(void);
 
 ksnet_stringArr getIPs(/*ksnet_config *conf*/);

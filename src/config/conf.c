@@ -128,7 +128,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     for(i = 0; i < 2; i++) {
 
         if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-        else strncpy(buf, ksnet_getDataDir(), KSN_BUFFER_SIZE);
+        else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
         if(conf->network[0]) {
             strncat(buf, "/", KSN_BUFFER_SIZE);
             strncat(buf, conf->network, KSN_BUFFER_SIZE);
@@ -141,7 +141,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
 
         // Print the parsed values to save configuration file
         {
-            strncpy(buf, ksnet_getDataDir(), KSN_BUFFER_SIZE);
+            strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE);
                 strncat(buf, conf->network, KSN_BUFFER_SIZE);
@@ -165,7 +165,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         char *uconf = ksnet_formatMessage("/teonet-%d.conf", port_param);
         for(i = 0; i < 2; i++) {
             if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-            else strncpy(buf, ksnet_getDataDir(), KSN_BUFFER_SIZE);
+            else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE);
                 strncat(buf, conf->network, KSN_BUFFER_SIZE);
@@ -221,7 +221,7 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
     for(i = 0; i < 2; i++) {
         if(i != type) continue;
         if(!i) strncpy(buf, ksnet_getSysConfigDir(), BUF_SIZE);
-        else strncpy(buf, ksnet_getDataDir(), BUF_SIZE);
+        else strncpy(buf, getDataPath(), BUF_SIZE);
         if(network != NULL && network[0]) {
             strncat(buf, "/", BUF_SIZE);
             strncat(buf, network, BUF_SIZE);

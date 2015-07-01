@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <libgen.h>
 
 #include "config/config.h"
 
@@ -246,7 +247,7 @@ char *getRandomHostName(void) {
  *
  * @return NULL terminated static string
  */
-const char* ksnet_getDataDir(void) {
+const char* getDataPath(void) {
 
     static char* dataDir = NULL;
 
@@ -294,6 +295,87 @@ char *DATA_DIR = ksnet_formatMessage(".%s", getprogname());
     return dataDir;
 }
 
+#if NOT_USED_YET
+char *getExecPath (char *path, size_t dest_len, char *argv0) {
+    
+    char *baseName = NULL;
+    char *systemPath = NULL;
+    char *candidateDir = NULL;
+
+    // the easiest case: we are in linux
+    if (readlink ("/proc/self/exe", path, dest_len) != -1) {
+        
+        dirname(path);
+        strcat(path, "/");
+        return path;
+    }
+
+    // Ups... not in linux, no  guarantee 
+
+    // check if we have something like execve("foobar", NULL, NULL) 
+    if (argv0 == NULL) {
+        
+        // we surrender and give current path instead 
+        if(getcwd(path, dest_len) == NULL ) return NULL;
+        strcat(path, "/");
+        return path;
+    }
+
+
+    // argv[0] 
+    // if dest_len < PATH_MAX may cause buffer overflow 
+    if ((realpath (argv0, path)) && (!access (path, F_OK))) {
+        
+        dirname(path);
+        strcat(path, "/");
+        return path;
+    }
+
+    // Current path 
+    baseName = basename(argv0);
+    if (getcwd (path, dest_len - strlen (baseName) - 1) == NULL)
+        return NULL;
+
+    strcat(path, "/");
+    strcat(path, baseName);
+    if (access (path, F_OK) == 0) {
+    
+        dirname (path);
+        strcat  (path, "/");
+        return path;
+    }
+
+    // Try the PATH. 
+    systemPath = getenv ("PATH");
+    if (systemPath != NULL) {
+    
+        dest_len--;
+        systemPath = strdup (systemPath);
+        for (candidateDir = strtok (systemPath, ":"); candidateDir != NULL; candidateDir = strtok (NULL, ":"))
+        {
+            strncpy (path, candidateDir, dest_len);
+            strncat (path, "/", dest_len);
+            strncat (path, baseName, dest_len);
+
+            if (access(path, F_OK) == 0)
+            {
+                free (systemPath);
+                dirname (path);
+                strcat  (path, "/");
+                return path;
+            }
+        }
+        free(systemPath);
+        dest_len++;
+    }
+
+    // again someone has use execve: we dont knowe the executable name; we surrender and give instead current path 
+    if (getcwd (path, dest_len - 1) == NULL) return NULL;
+    strcat  (path, "/");
+    return path;
+}
+#endif
+
 #ifndef HAVE_MINGW
 /**
  * Set socket or FD to non blocking mode
@@ -306,6 +388,7 @@ void set_nonblock(int fd) {
     fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 }
 #endif
+
 /**
  * Getting path to ksnet configuration folder
  *
@@ -355,7 +438,7 @@ ksnet_stringArr getIPs(/*ksnet_config *conf*/) {
     struct ifaddrs * ifa = NULL;
     void * tmpAddrPtr = NULL;
 
-#ifndef HAVE_MINGW
+    #ifndef HAVE_MINGW
     getifaddrs(&ifAddrStruct);
 
     for(ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next ) {
@@ -386,7 +469,8 @@ ksnet_stringArr getIPs(/*ksnet_config *conf*/) {
     }
 
     if(ifAddrStruct != NULL) freeifaddrs(ifAddrStruct);
-#endif
+    #endif
+
     return arr;
 }
 
