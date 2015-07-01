@@ -26,18 +26,22 @@
  */
 ksnetArpClass *ksnetArpInit(void *ke) {
 
+    #define kev ((ksnetEvMgrClass*)(ke))
+
     ksnetArpClass *ka = malloc(sizeof(ksnetArpClass));
     ka->map = pblMapNewHashMap();
     ka->ke = ke;
-
+    
     ksnetArpAddHost(
         ka,
-        ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name,
-        "0.0.0.0",
-        ((ksnetEvMgrClass*)ke)->ksn_cfg.port
+        kev->ksn_cfg.host_name,
+        "0.0.0.0",        
+        kev->kc->port
     );
 
     return ka;
+    
+    #undef kev 
 }
 
 /**

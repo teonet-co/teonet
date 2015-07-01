@@ -47,8 +47,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "version",        no_argument,       0, 'v' },
         { "app_name",       no_argument,       0,  0  },
         { "app_description",no_argument,       0,  0  },
-        { "uuid",           no_argument,       0,  0 },
+        { "uuid",           no_argument,       0,  0  },
         { "port",           required_argument, 0, 'p' },
+        { "port_increment", no_argument,       &conf->port_inc_f, 1 },
         { "r_port",         required_argument, 0, 'r' },
         { "r_address",      required_argument, 0, 'a' },
         { "network",        required_argument, 0, 'n' },
@@ -244,7 +245,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --app_name           Show this application name\n"
     "      --app_description    Show this application description\n"
     "  -n, --network=value      Set network name to connect to\n"
-    "  -p, --port=value         Set port number (default 7000)\n"
+    "  -p, --port=value         Set port number (default 8000)\n"
+    "      --port_increment     Increment port if busy\n"
     "  -a, --r_address=value    Set remote server address (default localhost)\n"
     "  -r, --r_port=value       Set remote server port number (default 8000)\n"
     "      --hot_keys           Switch on the hot keys monitor\n"

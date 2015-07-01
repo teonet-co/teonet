@@ -87,6 +87,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     else kc->addr = addr;
     kc->last_check_event = 0;
 
+    ((ksnetEvMgrClass*)ke)->kc = kc;
     kc->ka = ksnetArpInit(ke);
     kc->kco = ksnCommandInit(kc);
     #if KSNET_CRYPT
@@ -96,7 +97,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     // Create and bind host socket
     if(ksnCoreBind(kc)) {
 
-        ksnCoreDestroy(kc);
+        //ksnCoreDestroy(kc);
         return NULL;
     }
 
@@ -150,7 +151,9 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
  */
 int ksnCoreBind(ksnCoreClass *kc) {
 
-    struct sockaddr_in addr;	/* our address */
+    int i;
+    struct sockaddr_in addr;	// Our address 
+    ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg; // Pointer to configure
 
     #ifdef HAVE_MINGW
     // Request Winsock version 2.2
@@ -168,15 +171,25 @@ int ksnCoreBind(ksnCoreClass *kc) {
         return -1;
     }
 
-    // Bind the socket to any valid IP address and a specific port */
-    memset((char *)&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(kc->port);
+    // Bind the socket to any valid IP address and a specific port, increment 
+    // port if busy 
+    for(i=0;;) {
+        
+        memset((char *)&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        addr.sin_port = htons(kc->port);
 
-    if(bind(kc->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        perror("bind failed");
-        return -2;
+        if(bind(kc->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+
+            #ifdef DEBUG_KSNET
+            ksnet_printf(ksn_cfg, DEBUG, "Try port %d ...\n", kc->port++);
+            #endif
+            perror("bind failed");
+            if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
+            else return -2;
+        }
+        else break;
     }
 
     printf("Start listen at port %d\n", kc->port);

@@ -18,6 +18,7 @@
 #define KSN_BUFFER_32_SIZE 32          ///< Size of small buffer for string
 
 #define KSN_MAX_HOST_NAME 31
+#define NUMBER_TRY_PORTS 1000
 
 #ifndef RELEASE_KSNET
 #define DEBUG_KSNET  1
@@ -46,6 +47,7 @@ typedef struct _ksnet_cfg {
 
     // Host name & port
     long port;                              ///< This host port number
+    int  port_inc_f;                        ///< Increment host port if busy
     char host_name[KSN_MAX_HOST_NAME];      ///< This host name
 
     // R-Host

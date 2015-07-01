@@ -245,7 +245,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
                 (*num)++;
             }
         }
-        *((uint32_t *)(data + ptr)) = ke->ksn_cfg.port; ptr += sizeof(uint32_t); // Port
+        *((uint32_t *)(data + ptr)) = ke->kc->port; ptr += sizeof(uint32_t); // Port
 
         // Send data to r-host
         ksnCoreSendto(ke->kc, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port,
