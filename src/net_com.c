@@ -11,7 +11,6 @@
 #include <string.h>
 
 #include "ev_mgr.h"
-//#include "utils/utils.h"
 
 /**
  * KSNet CMD_PEER command data
