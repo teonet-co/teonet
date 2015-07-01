@@ -23,19 +23,25 @@
 const char *null_str = "";
 
 // Local functions
-void idle_cb (EV_P_ ev_idle *w, int revents);
-void idle_stdin_cb (EV_P_ ev_idle *w, int revents);
-void idle_activity_cb(EV_P_ ev_idle *w, int revents);
-void timer_cb (EV_P_ ev_timer *w, int revents);
-void host_cb (EV_P_ ev_io *w, int revents);
-void sig_async_cb (EV_P_ ev_async *w, int revents);
-void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents);
-void stdin_cb (EV_P_ ev_io *w, int revents);
-void modules_init(ksnetEvMgrClass *ke);
-void modules_destroy(ksnetEvMgrClass *ke);
+void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
+void idle_stdin_cb (EV_P_ ev_idle *w, int revents); // STDIN idle callback
+void idle_activity_cb(EV_P_ ev_idle *w, int revents); // Idle activity callback
+void timer_cb (EV_P_ ev_timer *w, int revents); // Timer callback
+void host_cb (EV_P_ ev_io *w, int revents); // Host callback
+void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
+void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
+void stdin_cb (EV_P_ ev_io *w, int revents); // STDIN callback
+void modules_init(ksnetEvMgrClass *ke); // Initialize modules
+void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
 /**
  * Initialize KSNet Event Manager and network
+ * 
+ * @param argc
+ * @param argv
+ * @param event_cb
+ * @param options
+ * @return 
  */
 ksnetEvMgrClass *ksnetEvMgrInit(
   int argc, char** argv,
@@ -91,7 +97,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     struct ev_loop *loop = EV_DEFAULT;
     ke->ksnet_event_mgr_loop = loop;
 
-    // Watchers
+    // Define watchers
     ev_io stdin_w;       // STDIN watcher
     ev_signal sigint_w;  // Signal SIGINT watcher
     ev_signal sigterm_w; // Signal SIGTERM watcher
@@ -125,24 +131,28 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ev_signal_init (&sigint_w, sigint_cb, SIGINT);
     sigint_w.data = ke;
     ev_signal_start (loop, &sigint_w);
+    
     // SIGQUIT
     #ifdef SIGQUIT
     ev_signal_init (&sigquit_w, sigint_cb, SIGQUIT);
     sigquit_w.data = ke;
     ev_signal_start (loop, &sigquit_w);
     #endif
+
     // SIGTERM
     #ifdef SIGTERM
     ev_signal_init (&sigterm_w, sigint_cb, SIGTERM);
     sigterm_w.data = ke;
     ev_signal_start (loop, &sigterm_w);
     #endif
+
     // SIGKILL
     #ifdef SIGKILL
     ev_signal_init (&sigkill_w, sigint_cb, SIGKILL);
     sigkill_w.data = ke;
     ev_signal_start (loop, &sigkill_w);
     #endif
+
     // SIGSTOP
     #ifdef SIGSTOP
     ev_signal_init (&sigstop_w, sigint_cb, SIGSTOP);
@@ -213,35 +223,35 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
  */
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
 
-//    if(ke->ksn_cfg.r_host_addr[0] && !ke->ksn_cfg.r_host_name[0]) {
-//
-//        // Create data with list of local IPs and port
-//        ksnet_stringArr ips = getIPs(); // IPs array
-//        uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
-//        void *data = malloc(len*16 + sizeof(uint8_t) + sizeof(uint32_t)); // Data
-//        size_t ptr = sizeof(uint8_t); // Pointer (to first IP)
-//        uint8_t *num = (uint8_t *) data; // Real number of IPs
-//        *num = 0;
-//        // Fill data with IPs and Port
-//        int i, ip_len;
-//        for(i=0; i < len; i++) {
-//
-//            if(ip_is_private(ips[i])) {
-//
-//                ip_len =  strlen(ips[i]) + 1;
-//                memcpy(data + ptr, ips[i], ip_len); ptr += ip_len;
-//                (*num)++;
-//            }
-//        }
-//        *((uint32_t *)(data + ptr)) = ke->ksn_cfg.port; ptr += sizeof(uint32_t); // Port
-//
-//        // Send data to r-host
-//        ksnCoreSendto(ke->kc, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port,
-//                      CMD_CONNECT_R, data, ptr);
-//
-//        free(data);
-//        ksnet_stringArrFree(&ips);
-//    }
+    if(ke->ksn_cfg.r_host_addr[0] && !ke->ksn_cfg.r_host_name[0]) {
+
+        // Create data with list of local IPs and port
+        ksnet_stringArr ips = getIPs(); // IPs array
+        uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
+        void *data = malloc(len*16 + sizeof(uint8_t) + sizeof(uint32_t)); // Data
+        size_t ptr = sizeof(uint8_t); // Pointer (to first IP)
+        uint8_t *num = (uint8_t *) data; // Real number of IPs
+        *num = 0;
+        // Fill data with IPs and Port
+        int i, ip_len;
+        for(i=0; i < len; i++) {
+
+            if(ip_is_private(ips[i])) {
+
+                ip_len =  strlen(ips[i]) + 1;
+                memcpy(data + ptr, ips[i], ip_len); ptr += ip_len;
+                (*num)++;
+            }
+        }
+        *((uint32_t *)(data + ptr)) = ke->ksn_cfg.port; ptr += sizeof(uint32_t); // Port
+
+        // Send data to r-host
+        ksnCoreSendto(ke->kc, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port,
+                      CMD_CONNECT_R, data, ptr);
+
+        free(data);
+        ksnet_stringArrFree(&ips);
+    }
 }
 
 /**
@@ -266,8 +276,8 @@ void open_local_port(ksnetEvMgrClass *ke) {
                                                ip_arr[1], ip_arr[2]);
 
             // Send to IP to open port
-//            ksnCoreSendto(ke->kc, ip_str, ke->ksn_cfg.r_port,
-//                      CMD_NONE, NULL_STR, 1);
+            ksnCoreSendto(ke->kc, ip_str, ke->ksn_cfg.r_port,
+                      CMD_NONE, NULL_STR, 1);
 
             printf("Send to: %s:%d\n", ip_str, (int)ke->ksn_cfg.r_port);
 
@@ -336,7 +346,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
 
     // Idle count
     if(!kev->idle_count) {
-// TODO:       open_local_port(kev);
+        // TODO:       open_local_port(kev);
         if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0);
         connect_r_host_cb(kev);
     }
@@ -538,12 +548,12 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
     connect_r_host_cb(w->data);
 
     // Check activity
-//    if(!ksnetArpGetAll(((ksnetEvMgrClass *)w->data)->kc->ka, check_connected_cb,
-//                       NULL)) {
-//
-//        // Stop this watcher if not checked
-//        ev_idle_stop(EV_A_ w);
-//    }
+    if(!ksnetArpGetAll(((ksnetEvMgrClass *)w->data)->kc->ka, check_connected_cb,
+                       NULL)) {
+
+        // Stop this watcher if not checked
+        ev_idle_stop(EV_A_ w);
+    }
 }
 
 #pragma GCC diagnostic pop
@@ -555,6 +565,7 @@ void modules_init(ksnetEvMgrClass *ke) {
 
     ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL);
     ke->kh = ksnetHotkeysInit(ke);
+    
 //    ke->kvpn = ksnVpnInit(ke);
 //    ke->kt = ksnTcpInit(ke);
 //    ke->kter = ksnTermInit(ke);
@@ -570,6 +581,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 //    ksnTermDestroy(ke->kter);
 //    ksnTcpDestroy(ke->kt);
 //    ksnVpnDestroy(ke->kvpn);
+    
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 }

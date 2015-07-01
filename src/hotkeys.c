@@ -287,34 +287,6 @@ void hotkeys_cb(void *ke, void *data) {
             }
             break;
 
-//        // Direct connect
-//        case 'C':
-//            // Got hot key
-//            if(kh->non_blocking) {
-//                kh->str_number = 0;
-//                printf("Direct connect to: ");
-//                fflush(stdout);
-//                _keys_non_blocking_stop(kh); // Switch STDIN to string
-//            }
-//            // Got requested strings
-//            else switch(kh->str_number) {
-//                // Got 'direct connect to' string
-//                case 0:
-//                    if(((char*)data)[0]) {
-//                        trimlf((char*)data);
-//                        peer_send_cmd_direct_connect(kn, data);
-//                    }
-//                    _keys_non_blocking_start(kh); // Switch STDIN to hot key
-//                    break;
-//            }
-//            break;
-
-//        // Direct connect all
-//        case 'A':
-//            puts("Direct connect all child ...");
-//            ksnetArpGetAllChild(kn, peer_send_cmd_direct_connect);
-//            break;
-
         // Quit
         case 'q':
             puts("Press y to quit application");
