@@ -14,8 +14,13 @@
 
 #include "ev_mgr.h"
 
-void test1(int argc, char** argv) {
+void test1() {
     printf("teonet test 1\n");
+    //printf("%%TEST_FAILED%% time=0 testname=test1 (teonet) message=error message sample\n");    
+}
+
+void test2(int argc, char** argv) {
+    printf("teonet test 2\n");
     
     printf("Teonet library ver 0.0.1 connection test\n");
     
@@ -31,22 +36,17 @@ void test1(int argc, char** argv) {
     ksnetEvMgrRun(ke);
 }
 
-void test2() {
-    printf("teonet test 2\n");
-    //printf("%%TEST_FAILED%% time=0 testname=test2 (teonet) message=error message sample\n");
-}
-
 int main(int argc, char** argv) {
     
     printf("%%SUITE_STARTING%% teonet\n");
     printf("%%SUITE_STARTED%%\n");
 
     printf("%%TEST_STARTED%% test1 (teonet)\n");
-    test1(argc, argv);
+    test1();
     printf("%%TEST_FINISHED%% time=0 test1 (teonet) \n");
 
     printf("%%TEST_STARTED%% test2 (teonet)\n");
-    test2();
+    test2(argc, argv);
     printf("%%TEST_FINISHED%% time=0 test2 (teonet) \n");
 
     printf("%%SUITE_FINISHED%% time=0\n");

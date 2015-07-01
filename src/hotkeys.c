@@ -127,14 +127,15 @@ void hotkeys_cb(void *ke, void *data) {
                     kh->pet = peer_timer_init(kc);
                     kh->pet->num_lines = num_lines;
                 }
-                printf("\nPress p to %s continuously refresh\n",
-                       (kh->peer_m ? STOP : START));
+                printf("\n");
             }
             else if(kh->peer_m) {
                 kh->peer_m = 0;
                 peer_timer_stop(&kh->pet);
-                printf("Peer timer stopped\n");
+                //printf("Peer timer stopped\n");
             }
+            printf("Press p to %s continuously refresh\n",
+                   (kh->peer_m ? STOP : START));
             break;
 
 //        // Show VPN
