@@ -14,6 +14,52 @@
 
 #include "ev_mgr.h"
 
+/**
+ * KSNetwork Events callback
+ *
+ * @param ke
+ * @param event
+ * @param data
+ * @param data_len
+ */
+void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
+              size_t data_len) {
+
+    switch(event) {
+
+        // Send immediately after event manager starts
+        case EV_K_STARTED:
+            printf("Event: Event manager started\n");
+            //host_started_cb(ke);
+            break;
+
+        // Send when new peer connected to this host (and to the mesh)
+        case EV_K_CONNECTED:
+            printf("Event: Peer '%s' was connected\n", ((ksnCorePacketData*)data)->from);
+            break;
+
+        case EV_K_DISCONNECTED:
+            printf("Event: Peer '%s' was disconnected\n", ((ksnCorePacketData*)data)->from);
+            break;
+
+        // Send when data received
+        case EV_K_RECEIVED:
+            printf("Event: Data received\n");
+            //host_received_cb(ke, data, data_len);
+            break;
+
+        // Send when idle (every 11.5 sec idle time)
+        case EV_K_IDLE:
+            printf("Event: Idle time\n");
+            //host_idle_cb(ke);
+            break;
+
+        // Undefined event (an error)
+        default:
+            break;
+    }
+}
+
 void test1() {
     printf("teonet test 1\n");
     //printf("%%TEST_FAILED%% time=0 testname=test1 (teonet) message=error message sample\n");    
@@ -26,7 +72,7 @@ void test2(int argc, char** argv) {
     
     // Initialize ksnet event manager and Read configuration (defaults,
     // command line, configuration file)
-    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, NULL/*event_cb*/, READ_OPTIONS|READ_CONFIGURATION);
+    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /* NULL */, READ_OPTIONS|READ_CONFIGURATION);
 
     // Hello message
     ksnet_printf(&ke->ksn_cfg, MESSAGE,

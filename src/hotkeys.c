@@ -278,7 +278,7 @@ void hotkeys_cb(void *ke, void *data) {
                 // Request string 'to'
                 if(kh->mt == NULL) {
                     kh->mt = monitor_timer_init(kc);
-                    printf("Network monitor started\n");
+                    printf("Network monitor started (press M to stop)\n");
                 }
                 // Stop ping timer
                 else {
@@ -458,7 +458,7 @@ int monitor_timer_one_cb(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp
 
     // Reset monitor time
     //ksnet_arp_data *arp_data = ksnetArpGet(ka, peer_name);
-    printf("\n%s%s: %.3f ms %s ",
+    printf("%s%s: %.3f ms %s \n",
             arp_data->monitor_time == 0.0 ? getANSIColor(LIGHTRED) : getANSIColor(LIGHTGREEN),
             peer_name, arp_data->monitor_time * 1000.0,
             getANSIColor(NONE));
@@ -487,7 +487,7 @@ void monitor_timer_cb(EV_P_ ev_timer *w, int revents) {
 
     printf("Network monitor => send request to: ");
     ksnetArpGetAll(mt->kn->ka, monitor_timer_one_cb, NULL);
-    printf("\n");
+    //printf("\n");
 }
 
 /**
