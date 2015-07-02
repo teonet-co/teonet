@@ -92,6 +92,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ke->runEventMgr = 1;
     ke->timer_val = 0;
     ke->idle_count = 0;
+    ke->idle_activity_count = 0;
 
     // Event loop
     struct ev_loop *loop = EV_DEFAULT;
@@ -110,7 +111,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     // Initialize modules
     if(modules_init(ke)) {
         
-        // Initialize TIMER idle watchers
+        // Initialize idle watchers
         ev_idle_init (&ke->idle_w, idle_cb);
         ke->idle_w.data = ke->kc;
 
@@ -200,7 +201,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: ksnet_evMgrAsync\n");
+    ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: make Async call to Event manager\n");
     #endif
 
     // Add something to queue and send async signal to event loop
@@ -328,7 +329,12 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 }
 
 /**
- * Idle callback, started if timer and wakeup host event checker if nothing done
+ * Idle callback (runs every 11.5 second of Idle time)
+ * 
+ * This callback started by event manager timer after every 
+ * CHECK_EVENTS_AFTER = 11.5 second. Send two user event: 
+ * first EV_K_STARTED sent at startup (when application started) 
+ * and second EV_K_IDLE sent every tick.
  *
  * @param loop
  * @param w
@@ -339,20 +345,23 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     #define kev ((ksnetEvMgrClass *)((ksnCoreClass *)w->data)->ke)
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                 "Event manager: idle check host events\n");
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, "Event manager: idle callback %d\n", 
+            kev->idle_count);
     #endif
 
     // Stop this watcher
-    ev_idle_stop (EV_A_ w);
+    ev_idle_stop(EV_A_ w);
 
-    // Idle count
+    // Idle count startup (first time run)
     if(!kev->idle_count) {
         // TODO:       open_local_port(kev);
         if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0);
         connect_r_host_cb(kev);
     }
+    // Idle count max value
     else if(kev->idle_count == UINT32_MAX) kev->idle_count = 0;
+    
+    // Increment count
     kev->idle_count++;
 
     // Check host events to send him service information
@@ -361,14 +370,16 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     // Send idle Event
     if(kev->event_cb != NULL) {
         kev->event_cb(kev, EV_K_IDLE , NULL, 0);
-        ksnCoreSetEventTime(kev->kc);
     }
+    
+    // Set last host event time
+    ksnCoreSetEventTime(kev->kc);
 
     #undef kev
 }
 
 /**
- * Timer callback, runs every KSNET_TCT_TUNNEL_TIMER (1.5 sec)
+ * Timer callback (runs every KSNET_EVENT_MGR_TIMER = 0.5 sec)
  *
  * @param loop
  * @param w
@@ -391,21 +402,20 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
         #ifdef DEBUG_KSNET
         if( !(ke->timer_val % show_interval) ) {
             ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                    "Event manager: timer (%.1f sec: %f)\n",
+                    "Event manager: timer (%.1f sec of %f)\n",
                     show_interval*KSNET_EVENT_MGR_TIMER, ksnetEvMgrGetTime(ke));
         }
         #endif
 
         // Start idle watcher
         if(ksnetEvMgrGetTime(ke) - ke->kc->last_check_event > CHECK_EVENTS_AFTER) {
-            ev_idle_start (EV_A_ & ke->idle_w);
+            ev_idle_start(EV_A_ & ke->idle_w);
         }
 
         // Check connected and request trip time
         if( !(ke->timer_val % activity_interval) ) {
             ev_idle_start(EV_A_ & ke->idle_activity_w);
         }
-
     }
     // Send break to exit from event loop
     else ev_break(EV_A_ EVBREAK_ALL);
@@ -429,7 +439,7 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 }
 
 /**
- * Async Event (Signal)
+ * Async Event callback (Signal)
  *
  * @param loop
  * @param w
@@ -439,7 +449,7 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                 "Event manager: sig_async_cb\n");
+                 "Event manager: async event callback\n");
     #endif
 
     // Do something ...
@@ -457,7 +467,7 @@ typedef struct stdin_idle_data {
 } stdin_idle_data;
 
 /**
- * STDIN has data callback
+ * STDIN (has data) callback
  *
  * @param loop
  * @param w
@@ -467,7 +477,7 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                 "Event manager: stdin_cb\n");
+                 "Event manager: STDIN (has data) callback\n");
     #endif
 
     void *data;
@@ -513,7 +523,7 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(& ((stdin_idle_data *)w->data)->ke->ksn_cfg, DEBUG_VV,
-                 "Event manager: idle STDIN has data callback (%c)\n",
+                 "Event manager: STDIN idle (process data) callback (%c)\n",
                  *((int*)((stdin_idle_data *)w->data)->data));
     #endif
 
@@ -524,44 +534,57 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
     hotkeys_cb(((stdin_idle_data *)w->data)->ke,
                ((stdin_idle_data *)w->data)->data);
 
-    // Free watcher data
-    free(((stdin_idle_data *)w->data)->data);
-    free(w->data);
-
     // Start STDIN watcher
     ev_io_start(EV_A_ ((stdin_idle_data *)w->data)->stdin_w);
+
+    // Free watchers data
+    free(((stdin_idle_data *)w->data)->data);
+    free(w->data);
 }
 
 /**
- * Check activity Idle callback
+ * Check activity Idle callback. 
+ * 
+ * Start(restart) connection to R-Host and check connections to all peers.
  *
  * @param loop
  * @param w
  * @param revents
  */
 void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
+    
+    #define kev ((ksnetEvMgrClass *)w->data)
 
     #ifdef DEBUG_KSNET
     ksnet_printf(& ((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                 "Event manager: idle Check activity callback\n");
+                "Event manager: idle activity callback %d\n", 
+                kev->idle_activity_count);
     #endif
 
-    // Start/restart connection to R-Host
+    // Start(restart) connection to R-Host
     connect_r_host_cb(w->data);
 
-    // Check activity
-    if(!ksnetArpGetAll(((ksnetEvMgrClass *)w->data)->kc->ka, check_connected_cb,
-                       NULL)) {
+    // Check connected
+    if(!ksnetArpGetAll(kev->kc->ka, check_connected_cb, NULL)) {
 
         // Stop this watcher if not checked
         ev_idle_stop(EV_A_ w);
+            
+        // Increment count
+        if(kev->idle_activity_count == UINT32_MAX) kev->idle_activity_count = 0;
+        kev->idle_activity_count++;
     }
+    
+    #undef kev
 }
 
 #pragma GCC diagnostic pop
 
 /**
  * Initialize connected to Event Manager Modules
+ * 
+ * @param ke
+ * @return 
  */
 int modules_init(ksnetEvMgrClass *ke) {
 
@@ -581,6 +604,8 @@ int modules_init(ksnetEvMgrClass *ke) {
 
 /**
  * Destroy modules
+ * 
+ * @param ke
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
 
