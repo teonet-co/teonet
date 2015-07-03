@@ -60,8 +60,9 @@ ksnetEvMgrClass *ksnetEvMgrInit(
     app_argv[0] = (char*)"peer_name";   // peer name argument name
     //app_argv[1] = (char*)"file_name";   // file name argument name
 
+    // Initial configuration, set defaults, read defaults from command line  
     ksnet_configInit(&ke->ksn_cfg); // Set configuration default
-    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
+    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default) 
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
 

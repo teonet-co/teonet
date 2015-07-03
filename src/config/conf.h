@@ -26,7 +26,7 @@
 
 #define KSNET_CRYPT  0
 
-typedef struct _ksnet_cfg {
+typedef struct ksnet_cfg {
 
     // Flags
     int show_connect_f,    ///< Show connection message
