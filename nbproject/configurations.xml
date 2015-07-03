@@ -37,6 +37,8 @@
         <itemPath>src/config/conf.c</itemPath>
         <itemPath>src/config/opt.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="modules" displayName="modules" projectFiles="true">
+      </logicalFolder>
       <logicalFolder name="f1" displayName="utils" projectFiles="true">
         <itemPath>src/utils/rlutil.h</itemPath>
         <itemPath>src/utils/string_arr.c</itemPath>
