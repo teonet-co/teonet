@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/config/opt.o \
 	${OBJECTDIR}/src/ev_mgr.o \
 	${OBJECTDIR}/src/hotkeys.o \
+	${OBJECTDIR}/src/modules.o \
 	${OBJECTDIR}/src/net_arp.o \
 	${OBJECTDIR}/src/net_com.o \
 	${OBJECTDIR}/src/net_core.o \
@@ -96,6 +97,11 @@ ${OBJECTDIR}/src/hotkeys.o: src/hotkeys.c
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/hotkeys.o src/hotkeys.c
+
+${OBJECTDIR}/src/modules.o: src/modules.c 
+	${MKDIR} -p ${OBJECTDIR}/src
+	${RM} "$@.d"
+	$(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/modules.o src/modules.c
 
 ${OBJECTDIR}/src/net_arp.o: src/net_arp.c 
 	${MKDIR} -p ${OBJECTDIR}/src
@@ -193,6 +199,19 @@ ${OBJECTDIR}/src/hotkeys_nomain.o: ${OBJECTDIR}/src/hotkeys.o src/hotkeys.c
 	    $(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/hotkeys_nomain.o src/hotkeys.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/hotkeys.o ${OBJECTDIR}/src/hotkeys_nomain.o;\
+	fi
+
+${OBJECTDIR}/src/modules_nomain.o: ${OBJECTDIR}/src/modules.o src/modules.c 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/modules.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/modules_nomain.o src/modules.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/modules.o ${OBJECTDIR}/src/modules_nomain.o;\
 	fi
 
 ${OBJECTDIR}/src/net_arp_nomain.o: ${OBJECTDIR}/src/net_arp.o src/net_arp.c 

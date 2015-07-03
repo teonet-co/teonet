@@ -594,6 +594,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     
     if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;   
     ke->kh = ksnetHotkeysInit(ke);
+    ke->km = ksnModulesInit(ke);
     
 //    ke->kvpn = ksnVpnInit(ke);
 //    ke->kt = ksnTcpInit(ke);
@@ -615,6 +616,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 //    ksnTcpDestroy(ke->kt);
 //    ksnVpnDestroy(ke->kvpn);
     
+    ksnModulesDestroy(ke->km);
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 }
