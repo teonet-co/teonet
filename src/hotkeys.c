@@ -336,7 +336,8 @@ void _keys_non_blocking_start(ksnetHotkeysClass *kh) {
 /**
  * Initialize hot keys module
  *
- * @return
+ * @param ke
+ * @return 
  */
 ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 

@@ -15,6 +15,7 @@
 #include "utils/utils.h"
 
 #include "hotkeys.h"
+#include "modules.h"
 
 //#include "vpn.h"
 //#include "net_tcp.h"
@@ -46,6 +47,8 @@ typedef struct ksnetEvMgrClass {
 
     ksnCoreClass *kc;  ///< KSNet core class
     ksnetHotkeysClass *kh; ///< Hotkeys class
+    ksnModulesClass *km; ///< Modules class
+    
 //    ksnVpnClass *kvpn; ///< VPN class
 //    ksnTcpClass *kt; /// TCP Client/Server class
 //    ksnTermClass *kter; // Terminal class
