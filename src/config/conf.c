@@ -53,14 +53,14 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_peers_f = 0;
 
     // This host
-    ksn_cfg->port = 8000; //8005;
+    ksn_cfg->port = 9000; //8005;
     ksn_cfg->port_inc_f = 1;
     char *name = getRandomHostName();
     strncpy(ksn_cfg->host_name, name, KSN_MAX_HOST_NAME);
     free(name);
 
     // Remote host default
-    ksn_cfg->r_port = 8000;
+    ksn_cfg->r_port = 9000;
     ksn_cfg->r_host_name[0] = '\0';
     ksn_cfg->r_host_addr[0] = '\0';
 

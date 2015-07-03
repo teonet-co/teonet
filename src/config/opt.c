@@ -245,10 +245,10 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --app_name           Show this application name\n"
     "      --app_description    Show this application description\n"
     "  -n, --network=value      Set network name to connect to\n"
-    "  -p, --port=value         Set port number (default 8000)\n"
+    "  -p, --port=value         Set port number (default 9000)\n"
     "      --port_increment     Increment port if busy\n"
     "  -a, --r_address=value    Set remote server address (default localhost)\n"
-    "  -r, --r_port=value       Set remote server port number (default 8000)\n"
+    "  -r, --r_port=value       Set remote server port number (default 9000)\n"
     "      --hot_keys           Switch on the hot keys monitor\n"
     #ifdef DEBUG_KSNET
     "      --show_debug         Show debug messages\n"
