@@ -1,4 +1,4 @@
-/** 
+/**
  * File:   modules.c
  * Author: Kirill Scherba
  *
@@ -12,26 +12,30 @@
 
 /**
  * Initialize module
- * 
+ *
  * @param ke
- * @return 
+ * @return
  */
 ksnModulesClass *ksnModulesInit(void *ke) {
-    
+
     ksnModulesClass *km = malloc(sizeof(ksnModulesClass));
-    
+    km->ke = ke;
+
     return km;
 }
 
 /**
  * Destroy module
- * 
+ *
  * @param km
  */
-void ksnModulesDestroy(ksnModulesClass **km) {
-    
-    free(*km);
-    km = NULL;
+void ksnModulesDestroy(ksnModulesClass *km) {
+
+    if(km != NULL) {
+        ksnetEvMgrClass *ke = km->ke;
+        free(km);
+        ke->km = NULL;
+    }
 }
 
 //void ksnModulesAdd();

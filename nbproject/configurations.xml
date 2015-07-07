@@ -14,20 +14,16 @@
       <logicalFolder name="f2" displayName="config" projectFiles="true">
         <itemPath>src/config/conf.h</itemPath>
         <itemPath>src/config/config.h</itemPath>
+        <itemPath>net_arp.h</itemPath>
+        <itemPath>src/net_com.h</itemPath>
+        <itemPath>src/net_core.h</itemPath>
         <itemPath>src/config/opt.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f3" displayName="modules" projectFiles="true">
       </logicalFolder>
       <logicalFolder name="f1" displayName="utils" projectFiles="true">
         <itemPath>src/utils/string_arr.h</itemPath>
         <itemPath>src/utils/utils.h</itemPath>
       </logicalFolder>
       <itemPath>src/ev_mgr.h</itemPath>
-      <itemPath>src/hotkeys.h</itemPath>
-      <itemPath>src/modules.h</itemPath>
-      <itemPath>src/net_arp.h</itemPath>
-      <itemPath>src/net_com.h</itemPath>
-      <itemPath>src/net_core.h</itemPath>
       <itemPath>src/teonet.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -41,8 +37,6 @@
         <itemPath>src/config/conf.c</itemPath>
         <itemPath>src/config/opt.c</itemPath>
       </logicalFolder>
-      <logicalFolder name="modules" displayName="modules" projectFiles="true">
-      </logicalFolder>
       <logicalFolder name="f1" displayName="utils" projectFiles="true">
         <itemPath>src/utils/rlutil.h</itemPath>
         <itemPath>src/utils/string_arr.c</itemPath>
@@ -50,7 +44,9 @@
       </logicalFolder>
       <itemPath>src/ev_mgr.c</itemPath>
       <itemPath>src/hotkeys.c</itemPath>
+      <itemPath>src/hotkeys.h</itemPath>
       <itemPath>src/modules.c</itemPath>
+      <itemPath>src/modules.h</itemPath>
       <itemPath>src/net_arp.c</itemPath>
       <itemPath>src/net_com.c</itemPath>
       <itemPath>src/net_core.c</itemPath>
@@ -82,7 +78,7 @@
   <confs>
     <conf name="Debug" type="2">
       <toolsSet>
-        <compilerSet>GNU|GNU</compilerSet>
+        <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
@@ -134,6 +130,8 @@
           <output>${TESTDIR}/TestFiles/f1</output>
         </linkerTool>
       </folder>
+      <item path="net_arp.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/config/conf.h" ex="false" tool="3" flavor2="0">
@@ -157,8 +155,6 @@
       <item path="src/modules.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="src/net_arp.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/net_com.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -222,6 +218,8 @@
           <output>${TESTDIR}/TestFiles/f1</output>
         </linkerTool>
       </folder>
+      <item path="net_arp.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/config/conf.h" ex="false" tool="3" flavor2="0">
@@ -245,8 +243,6 @@
       <item path="src/modules.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="src/net_arp.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/net_com.c" ex="false" tool="0" flavor2="0">
       </item>
