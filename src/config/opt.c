@@ -256,9 +256,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     "      --show_connect       Show connection messages\n"
     "      --show_peers         Show peers screen after connection\n"
-    "\n"
-    "  -d, --daemon             Start this application in daemon mode\n"
-    "  -k, --kill               Kill previous started application in daemon mode\n"
+//    "\n"
+//    "  -d, --daemon             Start this application in daemon mode\n"
+//    "  -k, --kill               Kill previous started application in daemon mode\n"
       "\n",
     basename(app_name_cpy), app_argv_str
            );
