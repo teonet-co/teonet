@@ -19,11 +19,15 @@
         <itemPath>src/net_core.h</itemPath>
         <itemPath>src/config/opt.h</itemPath>
       </logicalFolder>
+      <logicalFolder name="f3" displayName="modules" projectFiles="true">
+        <itemPath>src/modules/vpn.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="f1" displayName="utils" projectFiles="true">
         <itemPath>src/utils/string_arr.h</itemPath>
         <itemPath>src/utils/utils.h</itemPath>
       </logicalFolder>
       <itemPath>src/ev_mgr.h</itemPath>
+      <itemPath>src/modules.h</itemPath>
       <itemPath>src/teonet.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -37,6 +41,9 @@
         <itemPath>src/config/conf.c</itemPath>
         <itemPath>src/config/opt.c</itemPath>
       </logicalFolder>
+      <logicalFolder name="f3" displayName="modules" projectFiles="true">
+        <itemPath>src/modules/vpn.c</itemPath>
+      </logicalFolder>
       <logicalFolder name="f1" displayName="utils" projectFiles="true">
         <itemPath>src/utils/rlutil.h</itemPath>
         <itemPath>src/utils/string_arr.c</itemPath>
@@ -46,7 +53,6 @@
       <itemPath>src/hotkeys.c</itemPath>
       <itemPath>src/hotkeys.h</itemPath>
       <itemPath>src/modules.c</itemPath>
-      <itemPath>src/modules.h</itemPath>
       <itemPath>src/net_arp.c</itemPath>
       <itemPath>src/net_com.c</itemPath>
       <itemPath>src/net_core.c</itemPath>
@@ -69,6 +75,7 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
     </logicalFolder>
+    <itemPath>README</itemPath>
   </logicalFolder>
   <sourceRootList>
     <Elem>src</Elem>
@@ -98,6 +105,7 @@
             <linkerLibLibItem>pbl</linkerLibLibItem>
             <linkerLibLibItem>confuse</linkerLibLibItem>
             <linkerLibLibItem>uuid</linkerLibLibItem>
+            <linkerLibLibItem>tuntap</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
         <requiredProjects>
@@ -113,6 +121,8 @@
           </makeArtifact>
         </requiredProjects>
       </compileType>
+      <item path="README" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="embedded/libpbl/src/makefile" ex="false" tool="3" flavor2="0">
       </item>
       <folder path="TestFiles/f1">
@@ -153,6 +163,10 @@
       <item path="src/modules.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/modules.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/modules/vpn.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="0">
       </item>
@@ -201,6 +215,8 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="README" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="embedded/libpbl/src/makefile" ex="false" tool="3" flavor2="0">
       </item>
       <folder path="TestFiles/f1">
@@ -241,6 +257,10 @@
       <item path="src/modules.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="src/modules.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/modules/vpn.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="0">
       </item>

@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/ev_mgr.o \
 	${OBJECTDIR}/src/hotkeys.o \
 	${OBJECTDIR}/src/modules.o \
+	${OBJECTDIR}/src/modules/vpn.o \
 	${OBJECTDIR}/src/net_arp.o \
 	${OBJECTDIR}/src/net_com.o \
 	${OBJECTDIR}/src/net_core.o \
@@ -68,7 +69,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-Lembedded/libpbl/src -lev -lpbl -lconfuse -luuid
+LDLIBSOPTIONS=-Lembedded/libpbl/src -lev -lpbl -lconfuse -luuid -ltuntap
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -102,6 +103,11 @@ ${OBJECTDIR}/src/modules.o: src/modules.c
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/modules.o src/modules.c
+
+${OBJECTDIR}/src/modules/vpn.o: src/modules/vpn.c 
+	${MKDIR} -p ${OBJECTDIR}/src/modules
+	${RM} "$@.d"
+	$(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/modules/vpn.o src/modules/vpn.c
 
 ${OBJECTDIR}/src/net_arp.o: src/net_arp.c 
 	${MKDIR} -p ${OBJECTDIR}/src
@@ -212,6 +218,19 @@ ${OBJECTDIR}/src/modules_nomain.o: ${OBJECTDIR}/src/modules.o src/modules.c
 	    $(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/modules_nomain.o src/modules.c;\
 	else  \
 	    ${CP} ${OBJECTDIR}/src/modules.o ${OBJECTDIR}/src/modules_nomain.o;\
+	fi
+
+${OBJECTDIR}/src/modules/vpn_nomain.o: ${OBJECTDIR}/src/modules/vpn.o src/modules/vpn.c 
+	${MKDIR} -p ${OBJECTDIR}/src/modules
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/modules/vpn.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.c) -g -Isrc -Iembedded/libpbl/src -fPIC  -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/modules/vpn_nomain.o src/modules/vpn.c;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/modules/vpn.o ${OBJECTDIR}/src/modules/vpn_nomain.o;\
 	fi
 
 ${OBJECTDIR}/src/net_arp_nomain.o: ${OBJECTDIR}/src/net_arp.o src/net_arp.c 

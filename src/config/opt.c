@@ -58,6 +58,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
         { "show_connect",   no_argument,       &conf->show_connect_f, 1 },
         { "show_peers",     no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
+        { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
 
         { 0, 0, 0, 0 }
     };
@@ -256,12 +257,12 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     "      --show_connect       Show connection messages\n"
     "      --show_peers         Show peers screen after connection\n"
+    "      --vpn_start          Start VPN\n"
 //    "\n"
 //    "  -d, --daemon             Start this application in daemon mode\n"
 //    "  -k, --kill               Kill previous started application in daemon mode\n"
     "\n",
-    basename(app_name_cpy), app_argv_str
-           );
+    basename(app_name_cpy), app_argv_str);
 
     free(app_name_cpy);
 }
