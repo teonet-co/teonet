@@ -76,7 +76,7 @@ void send_to_all(ksnVpnClass *kvpn, void *data, size_t data_len);
 
 #define KSNET_VPN_DEFAULT_ALLOW 1
 #define DEBUG_THIS DEBUG //MESSAGE  // Debug type
-#define SHOW_DEBUG 1    // Show debug in critical sections
+#define SHOW_DEBUG 0    // Show debug in critical sections
 #define KSN_VPN_USE_HASH_MAP
 
 

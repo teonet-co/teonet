@@ -21,7 +21,7 @@
 #define NUMBER_TRY_PORTS 1000
 
 #ifndef RELEASE_KSNET
-#define DEBUG_KSNET  0
+#define DEBUG_KSNET  1
 #endif
 
 #define KSNET_CRYPT  0
