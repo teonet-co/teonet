@@ -76,7 +76,7 @@ void send_to_all(ksnVpnClass *kvpn, void *data, size_t data_len);
 
 #define KSNET_VPN_DEFAULT_ALLOW 1
 #define DEBUG_THIS DEBUG //MESSAGE  // Debug type
-#define SHOW_DEBUG 0    // Show debug in critical sections
+#define SHOW_DEBUG 1    // Show debug in critical sections
 #define KSN_VPN_USE_HASH_MAP
 
 
@@ -96,6 +96,7 @@ void* ksnVpnInit(void *ke) {
     kvpn->ksn_tap_dev = NULL;          ///< TUNTAP Device
     kvpn->tuntap_name = NULL;          ///< TUNTAP Device name
 
+    ((ksnetEvMgrClass*)ke)->kvpn = kvpn;
     kvpn->ke = ke;
 
     // Create VPN Hash Map
