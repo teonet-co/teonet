@@ -76,7 +76,7 @@ void test2(int argc, char** argv) {
 
     // Hello message
     ksnet_printf(&ke->ksn_cfg, MESSAGE,
-            "KSMesh UDP Client Server test ver. 0.0.1\n\n");
+            "KSMesh UDP Client Server test ver. " VERSION "\n\n");
 
     // Start KSNet
     ksnetEvMgrRun(ke);
