@@ -17,7 +17,7 @@
 #include "conf.h"
 
 #include "confuse.h"
-//#include "config.h"
+#include "config/config.h"
 #include "utils/utils.h"
 
 extern const char *localhost;
@@ -65,12 +65,14 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->r_host_addr[0] = '\0';
 
     // VPN
+//    #if M_ENAMBE_VPN
     ksn_cfg->vpn_dev_name[0] = '\0';
     //strncpy(ksn_cfg->vpn_dev_name, "teovpn", KSN_MAX_HOST_NAME);
     ksn_cfg->vpn_dev_hwaddr[0] = '\0';
     ksn_cfg->vpn_ip[0] = '\0';
     ksn_cfg->vpn_ip_net = 24;
     ksn_cfg->vpn_connect_f = 0;
+//    #endif
 }
 
 /**
@@ -112,11 +114,13 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("show_peers_f", &conf->show_peers_f),
         CFG_SIMPLE_BOOL("hot_keys_f", &conf->hot_keys_f),
 
+        #if M_ENAMBE_VPN
         CFG_SIMPLE_BOOL("vpn_connect_f", &conf->vpn_connect_f),
         CFG_SIMPLE_STR("vpn_ip", &vpn_ip),
         CFG_SIMPLE_INT("vpn_ip_net", &conf->vpn_ip_net),
         CFG_SIMPLE_STR("vpn_dev_name", &vpn_dev_name),
         CFG_SIMPLE_STR("vpn_dev_hwaddr", &vpn_dev_hwaddr),
+        #endif
 
         CFG_END()
     };

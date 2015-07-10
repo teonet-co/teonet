@@ -26,6 +26,10 @@
 
 #define KSNET_CRYPT  0
 
+// Modules enable 
+#define M_ENAMBE_VPN 1
+
+
 typedef struct ksnet_cfg {
 
     // Flags

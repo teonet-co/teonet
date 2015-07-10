@@ -25,6 +25,8 @@
 #include "tuntap.h"
 #include "utils/utils.h"
 
+#if M_ENAMBE_VPN
+
 /**
  * MAC address structure
  */
@@ -556,3 +558,5 @@ void *map_find_by_mac(ksnVpnClass *kvpn, mac_addr *mac) {
     size_t val_len;
     return pblMapGet(kvpn->ksnet_vpn_map, mac, sizeof(mac_addr), &val_len);
 }
+
+#endif
