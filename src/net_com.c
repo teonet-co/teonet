@@ -89,6 +89,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_disconnected_cb(kco, rd);
             break;
 
+        #if M_ENAMBE_VPN
         case CMD_VPN:
             processed = cmd_vpn_cb(
                 ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->kvpn,
@@ -97,6 +98,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 rd->data_len
             );
             break;
+        #endif
 
 //        case CMD_TUN:
 //            processed = cmd_tun_cb(

@@ -107,8 +107,11 @@ void hotkeys_cb(void *ke, void *data) {
 //            " "COLOR_DW"A"COLOR_END" - direct connect to all peers\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
-//            , kev->kvpn == NULL ? "" : " "COLOR_DW"v"COLOR_END" - show VPN\n"
+            #if M_ENAMBE_VPN
+            , kev->kvpn == NULL ? "" : " "COLOR_DW"v"COLOR_END" - show VPN\n"
+            #else
             , ""
+            #endif
             #ifdef DEBUG_KSNET
             , (kev->ksn_cfg.show_debug_f ? SHOW : DONT_SHOW)
             , (kev->ksn_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
@@ -138,10 +141,12 @@ void hotkeys_cb(void *ke, void *data) {
                    (kh->peer_m ? STOP : START));
             break;
 
-//        // Show VPN
-//        case 'v':
-//            ksnVpnListShow(kev->kvpn);
-//            break;
+        // Show VPN
+        #if M_ENAMBE_VPN
+        case 'v':
+            ksnVpnListShow(kev->kvpn);
+            break;
+        #endif
 
         // Show debug
         case 'd':
