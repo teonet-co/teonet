@@ -15,8 +15,9 @@
 #include "utils/utils.h"
 
 #include "hotkeys.h"
+//#include "modules.h"
+#include "modules/vpn.h"
 
-//#include "vpn.h"
 //#include "net_tcp.h"
 //#include "net_tun.h"
 //#include "net_core.h"
@@ -44,9 +45,11 @@ typedef enum ksnetEvMgrEvents {
  */
 typedef struct ksnetEvMgrClass {
 
+    // Pointers to Modules classes
     ksnCoreClass *kc;  ///< KSNet core class
     ksnetHotkeysClass *kh; ///< Hotkeys class
-//    ksnVpnClass *kvpn; ///< VPN class
+//    ksnModulesClass *km; ///< Modules class    
+    ksnVpnClass *kvpn; ///< VPN class    
 //    ksnTcpClass *kt; /// TCP Client/Server class
 //    ksnTermClass *kter; // Terminal class
 //    ksnTunClass *ktun; // Tunnel class

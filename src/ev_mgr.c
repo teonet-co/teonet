@@ -594,8 +594,12 @@ int modules_init(ksnetEvMgrClass *ke) {
     
     if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;   
     ke->kh = ksnetHotkeysInit(ke);
+       
+    // VPN Module
+    #if M_ENAMBE_VPN
+    ke->kvpn = ksnVpnInit(ke);
+    #endif
     
-//    ke->kvpn = ksnVpnInit(ke);
 //    ke->kt = ksnTcpInit(ke);
 //    ke->kter = ksnTermInit(ke);
 //    ke->ktun = ksnTunInit(ke);
@@ -613,8 +617,10 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 //    ksnTunDestroy(ke->ktun);
 //    ksnTermDestroy(ke->kter);
 //    ksnTcpDestroy(ke->kt);
-//    ksnVpnDestroy(ke->kvpn);
-    
+
+    #if M_ENAMBE_VPN
+    ksnVpnDestroy(ke->kvpn);
+    #endif
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 }
