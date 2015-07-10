@@ -89,14 +89,16 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_disconnected_cb(kco, rd);
             break;
 
-//        case CMD_VPN:
-//            processed = cmd_vpn_cb(
-//                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->kvpn,
-//                rd->from,
-//                rd->data,
-//                rd->data_len
-//            );
-//            break;
+        #if M_ENAMBE_VPN
+        case CMD_VPN:
+            processed = cmd_vpn_cb(
+                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->kvpn,
+                rd->from,
+                rd->data,
+                rd->data_len
+            );
+            break;
+        #endif
 
 //        case CMD_TUN:
 //            processed = cmd_tun_cb(

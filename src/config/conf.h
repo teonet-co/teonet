@@ -26,6 +26,10 @@
 
 #define KSNET_CRYPT  0
 
+// Modules enable 
+#define M_ENAMBE_VPN 1
+
+
 typedef struct ksnet_cfg {
 
     // Flags
@@ -35,7 +39,7 @@ typedef struct ksnet_cfg {
         show_peers_f,   ///< Show peers at start up
         hot_keys_f,    ///< Show hotkeys when press h
         crypt_f,      ///< Encrypt/Decrypt packets
-        vpn_connect_f;  ///< VPN start flag
+        vpn_connect_f;  ///< Start VPN flag
 
     // Network
     char network[KSN_BUFFER_SM_SIZE/2];     ///< Network
