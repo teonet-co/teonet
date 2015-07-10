@@ -595,15 +595,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;   
     ke->kh = ksnetHotkeysInit(ke);
        
-//    // Modules initialize and add
-//    ksnModuleElement *modules = malloc(sizeof(ksnModuleElement)*1);
-//    //
-//    strncpy(modules[0].name, "vpn", KSN_BUFFER_SM_SIZE);
-//    modules[0].init = ksnVpnInit;
-//    modules[0].destroy = ksnVpnDestroy;
-//    //
-//    ke->km = ksnModulesInit(ke, modules, 1);
-    
+    // VPN Module
     #if M_ENAMBE_VPN
     ke->kvpn = ksnVpnInit(ke);
     #endif
@@ -629,7 +621,6 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
     #endif
-//    ksnModulesDestroy(ke->km);
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 }

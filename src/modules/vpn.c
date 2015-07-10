@@ -559,4 +559,4 @@ void *map_find_by_mac(ksnVpnClass *kvpn, mac_addr *mac) {
     return pblMapGet(kvpn->ksnet_vpn_map, mac, sizeof(mac_addr), &val_len);
 }
 
-#endif
+#endif // M_ENAMBE_VPN

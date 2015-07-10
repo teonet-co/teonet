@@ -45,11 +45,11 @@ typedef enum ksnetEvMgrEvents {
  */
 typedef struct ksnetEvMgrClass {
 
+    // Pointers to Modules classes
     ksnCoreClass *kc;  ///< KSNet core class
     ksnetHotkeysClass *kh; ///< Hotkeys class
 //    ksnModulesClass *km; ///< Modules class    
-    ksnVpnClass *kvpn; ///< VPN class
-    
+    ksnVpnClass *kvpn; ///< VPN class    
 //    ksnTcpClass *kt; /// TCP Client/Server class
 //    ksnTermClass *kter; // Terminal class
 //    ksnTunClass *ktun; // Tunnel class
