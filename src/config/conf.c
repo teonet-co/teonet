@@ -14,9 +14,9 @@
 #include <libgen.h>
 #include <sys/stat.h>
 
-#include "conf.h"
+#include <confuse.h>
 
-#include "confuse.h"
+#include "config/conf.h"
 #include "config/config.h"
 #include "utils/utils.h"
 
@@ -53,7 +53,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_peers_f = 0;
 
     // This host
-    ksn_cfg->port = 9000; //8005;
+    ksn_cfg->port = 9000; 
     ksn_cfg->port_inc_f = 1;
     char *name = getRandomHostName();
     strncpy(ksn_cfg->host_name, name, KSN_MAX_HOST_NAME);
@@ -65,14 +65,12 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->r_host_addr[0] = '\0';
 
     // VPN
-//    #if M_ENAMBE_VPN
     ksn_cfg->vpn_dev_name[0] = '\0';
-    //strncpy(ksn_cfg->vpn_dev_name, "teovpn", KSN_MAX_HOST_NAME);
+    //strncpy(ksn_cfg->vpn_dev_name, "teonet", KSN_MAX_HOST_NAME);
     ksn_cfg->vpn_dev_hwaddr[0] = '\0';
     ksn_cfg->vpn_ip[0] = '\0';
     ksn_cfg->vpn_ip_net = 24;
     ksn_cfg->vpn_connect_f = 0;
-//    #endif
 }
 
 /**
@@ -239,6 +237,7 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
     return buf;
 }
 
+#if M_ENAMBE_VPN
 /**
  * Add VPN Hardware address to configuration file
  *
@@ -255,3 +254,4 @@ void ksnet_addHWAddrConfig(ksnet_cfg *conf, char *hwaddr) {
     fprintf(fp, "\nvpn_dev_hwaddr = %s\n", hwaddr);
     fclose(fp);
 }
+#endif
