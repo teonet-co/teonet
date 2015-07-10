@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #define PACKAGE_NAME "teonet" 
-#define VERSION "0.0.1"
+#define VERSION "0.0.2"
 
 #define HAVE_LINUX   
     

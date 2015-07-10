@@ -68,7 +68,7 @@ void test1() {
 void test2(int argc, char** argv) {
     printf("teonet test 2\n");
     
-    printf("Teonet library ver 0.0.1 connection test\n");
+    printf("Teonet library ver " VERSION " connection test\n");
     
     // Initialize ksnet event manager and Read configuration (defaults,
     // command line, configuration file)
