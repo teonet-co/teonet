@@ -26,7 +26,7 @@
 
 #define KSNET_CRYPT  0
 
-// Modules enable 
+// Modules enable
 #define M_ENAMBE_VPN 1
 
 
@@ -61,7 +61,7 @@ typedef struct ksnet_cfg {
     // VPN
     char vpn_dev_name[KSN_MAX_HOST_NAME];
     char vpn_dev_hwaddr[KSN_MAX_HOST_NAME];
-    char vpn_ip[KSN_MAX_HOST_NAME];
+    char vpn_ip[KSN_BUFFER_SM_SIZE/2];
     long vpn_ip_net;
 
     // Helpers
