@@ -60,15 +60,16 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "show_peers",     no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
         #if M_ENAMBE_VPN
         { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
+        { "vpn_ip",         required_argument, 0, 'i' },
         #endif
 
         { 0, 0, 0, 0 }
     };
     static const char *data_path = NULL;
-    
+
     // Get data folder path
-    if(data_path == NULL) { 
-        
+    if(data_path == NULL) {
+
         data_path = getDataPath();
         #ifdef DEBUG_KSNET
         printf("current data path: %s\n", data_path);
@@ -172,6 +173,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
 
+        case 'i':
+          strncpy((char*)conf->vpn_ip, optarg, KSN_BUFFER_SM_SIZE/2);
+          break;
+
         case 'n':
           strncpy((char*)conf->network, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
@@ -261,6 +266,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --show_peers         Show peers screen after connection\n"
     #if M_ENAMBE_VPN
     "      --vpn_start          Start VPN\n"
+    "      --vpn_ip             VPN IP\n"
     #endif
 //    "\n"
 //    "  -d, --daemon             Start this application in daemon mode\n"
