@@ -1,3 +1,6 @@
+./autogen.sh
+make
+
 Third party notes:
 
 PBL - The Program Base Library
