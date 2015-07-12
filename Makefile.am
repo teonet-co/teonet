@@ -12,7 +12,7 @@ if DX_COND_man
 
 endif
 
-SUBDIRS = lib/libpbl/src src src/app po #src/libtuntap src/ksvpn src po dist examples tests ascripts conf
+SUBDIRS = lib/libpbl/src src po #src/app src/libtuntap src/ksvpn src po dist examples tests ascripts conf
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \

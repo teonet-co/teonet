@@ -1,0 +1,102 @@
+# bin_PROGRAMS = ksmqtt_broker echo_server echo_client timer_watcher
+#
+# AM_CFLAGS = -I../include
+
+# ksmqtt_broker_SOURCES = ksmqtt_broker.c
+# timer_watcher_SOURCES = timer_watcher.c
+# echo_serv_SOURCES = echo_serv.c
+# echo_client_SOURCES = echo_client.c
+#
+# LIBS = -L../lib ../lib/libev.a -lm
+
+# SUBDIRS = app
+
+pkgconfigdir = $(libdir)/pkgconfig
+nodist_pkgconfig_DATA = libteonet.pc
+
+if RELEASE_TEONET
+  DRELEASE_TEONET = -DRELEASE_TEONET=1
+else
+  DRELEASE_TEONET =
+endif
+
+AM_CPPFLAGS = \
+	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
+	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
+	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\"
+
+AM_CFLAGS = \
+	 -Wall \
+	 -g \
+	 -I/opt/local/include \
+	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
+	 $(DRELEASE_TEONET) \
+	 -I../lib/libpbl/src/
+#	 -std=gnu99
+
+if MINGW
+AM_CFLAGS += -I../../libev-4.19 -I../../libmcrypt-2.5.7/lib -I../../libtuntap-master
+else
+AM_CFLAGS += -fPIC
+endif
+
+AM_CXX = clang++
+AM_CXXFLAGS = \
+	-std=c++11 \
+	-fPIC \
+	-Wall \
+	-pedantic \
+	-g \
+	-I/opt/local/include
+
+AM_LDFLAGS = \
+ 	 -L/opt/local/lib
+
+LIBS = -lev -ltuntap -lmcrypt ../lib/libpbl/src/libpbl.a
+
+# Not embed confuse flag
+if NOT_E_CONFUSE
+AM_CFLAGS += -I../../confuse-2.7/src
+LIBS += -lconfuse
+endif
+
+# Mac OS only
+if DARWIN
+else
+LIBS += -luuid -lcrypt
+endif
+
+lib_LTLIBRARIES = libteonet.la
+
+## Debug info
+if DEBUG
+  AM_CFLAGS += -g3 -O0
+  AM_CXXFLAGS += -g3 -O0
+else
+  AM_CFLAGS += -O2
+  AM_CXXFLAGS += -O2
+endif
+
+localedir = $(datadir)/locale
+DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
+
+nodist_include_HEADERS = config.h.in
+teonetincludedir=$(includedir)/teonet
+
+teonetinclude_HEADERS =
+
+libteonet_la_SOURCES = *.c
+
+# Not embed confuse flag
+if NOT_E_CONFUSE
+else
+libteonet_la_SOURCES += ../lib/confuse/confuse.c lexer.l
+endif
+
+# AM_LFLAGS=-Pcfg_yy -olex.yy.c
+# lexer.c: lexer.l
+
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 2:0:0
+
+uninstall-local:
+	-rm -r $(teonetincludedir)
