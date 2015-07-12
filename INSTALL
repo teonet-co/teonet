@@ -48,9 +48,6 @@ may remove or edit it.
 you want to change it or regenerate `configure' using a newer version
 of `autoconf'.
 
-   Use './autogen.sh' to generate proget files include configure.
-   Then type 'make' to build all examples
-
    The simplest way to compile this package is:
 
   1. `cd' to the directory containing the package's source code and type
