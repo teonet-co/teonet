@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: teonet
+Description: P2P low-latency UDP full mesh networking library supporting optional reliability
+Version: 0.0.2
+Cflags: -I${includedir}
+Libs: -L${libdir} -lev
