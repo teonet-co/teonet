@@ -63,6 +63,7 @@ typedef struct ksnet_cfg {
     char vpn_dev_hwaddr[KSN_MAX_HOST_NAME];
     char vpn_ip[KSN_BUFFER_SM_SIZE/2];
     long vpn_ip_net;
+    long vpn_mtu;
 
     // Helpers
     int pp;

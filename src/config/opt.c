@@ -61,6 +61,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         #if M_ENAMBE_VPN
         { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
         { "vpn_ip",         required_argument, 0, 'i' },
+        { "vpn_mtu",        required_argument, 0, 'm' },
         #endif
 
         { 0, 0, 0, 0 }
@@ -177,6 +178,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           strncpy((char*)conf->vpn_ip, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
 
+        case 'm':
+          conf->vpn_mtu = atoi(optarg);
+          break;
+
         case 'n':
           strncpy((char*)conf->network, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
@@ -267,6 +272,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #if M_ENAMBE_VPN
     "      --vpn_start          Start VPN\n"
     "      --vpn_ip             VPN IP\n"
+    "      --vpn_mtu            VPN MTU\n"
     #endif
 //    "\n"
 //    "  -d, --daemon             Start this application in daemon mode\n"
