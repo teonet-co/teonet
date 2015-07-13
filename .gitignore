@@ -3,6 +3,7 @@
 /nbproject
 /build/
 /dist/
+/docs/
 /embedded/libpbl/src/*.o
 /embedded/libpbl/src/pblkftst
 /embedded/libpbl/src/pbliftst

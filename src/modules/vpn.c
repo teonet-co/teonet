@@ -145,8 +145,11 @@ void ksnVpnDestroy(void *vpn) {
 /**
  * Get VPN commands from peers and process it (resend to TUNTAP interface
  *
- * @param cmd
- * @return
+ * @param kvpn Pointer to ksnVpnClass
+ * @param from From cstring
+ * @param data Pointer to data
+ * @param data_len Size of data
+ * @return 
  */
 int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
 
