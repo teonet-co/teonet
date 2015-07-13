@@ -9,11 +9,11 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=libteonet.so
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libteonet.so
+CND_ARTIFACT_NAME_Debug=libteonet-issue_9.so
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libteonet-issue_9.so
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=libteonet.so.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/libteonet.so.tar
+CND_PACKAGE_NAME_Debug=libteonet-issue9.so.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/libteonet-issue9.so.tar
 # Release configuration
 CND_PLATFORM_Release=MinGW-w64-Windows
 CND_ARTIFACT_DIR_Release=dist/Release/MinGW-w64-Windows

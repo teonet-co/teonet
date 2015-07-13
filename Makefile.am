@@ -12,7 +12,7 @@ if DX_COND_man
 
 endif
 
-SUBDIRS = embedded/libpbl/src src po #src/app src/libtuntap src/ksvpn src po dist examples tests ascripts conf
+SUBDIRS = embedded/libpbl/src src po tests  #src/app src/libtuntap src/ksvpn src po dist examples tests ascripts conf
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
@@ -51,4 +51,7 @@ uninstall-local:
 
 run:	src/app/teovpn
 	src/app/teovpn just-make --port=9057
+	
+test:	tests/teonet_tst
+	sudo tests/teonet_tst test-01 --show_peers
 
