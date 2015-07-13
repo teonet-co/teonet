@@ -1,4 +1,4 @@
-/*
+/**
  * File:   ev_mgr.c
  * Author: Kirill Scherba
  *
@@ -37,11 +37,13 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 /**
  * Initialize KSNet Event Manager and network
  * 
- * @param argc
- * @param argv
- * @param event_cb
- * @param options
- * @return 
+ * @param argc Number of applications arguments (from main)
+ * @param argv Applications arguments array (from main)
+ * @param event_cb Events callback function called when an event happens
+ * @param options Options set: \n
+ *                READ_OPTIONS - read options from command line parameters; \n 
+ *                READ_CONFIGURATION - read options from configuration file
+ * @return Pointer to created ksnetEvMgrClass
  */
 ksnetEvMgrClass *ksnetEvMgrInit(
   int argc, char** argv,
@@ -79,11 +81,16 @@ void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
     ke->runEventMgr = 0;
 }
 
-/**
- * Start KSNet Event Manager and network
- */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+/**
+ * Start KSNet Event Manager and network communication
+ * 
+ * Start KSNet Event Manager and network communication
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @return Alway 0
+ */
 int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET

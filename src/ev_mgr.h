@@ -1,4 +1,4 @@
-/*
+/**
  * File:   ev_mgr.h
  * Author: Kirill Scherba
  *
