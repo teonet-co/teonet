@@ -1,6 +1,6 @@
 /.f1/
 /.teonet_tst/
-/nbproject/private/
+/nbproject
 /build/
 /dist/
 /embedded/libpbl/src/*.o
@@ -19,9 +19,10 @@
 /tests/Makefile
 /src/Makefile
 /src/Makefile.in
+/src/libteonet.pc
 /src/config/stamp-h1
 /src/config/config.h.in
-/src/libteonet.pc
+/src/config/config.h
 /autom4te.cache/traces.1
 /autom4te.cache/requests
 /autom4te.cache/traces.0
@@ -49,3 +50,5 @@
 /po/Makefile.in.in
 /po/Makefile
 /po/stamp-it
+/tests/teonet_tst
+/Makefile
