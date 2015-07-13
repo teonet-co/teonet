@@ -358,9 +358,9 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         kvpn->tuntap_name = tuntap_get_ifname(kvpn->ksn_tap_dev);
         char *tuntap_haddr = tuntap_get_hwaddr(kvpn->ksn_tap_dev);
 
-        // Set interface name
         ksnetEvMgrClass *ke = kvpn->ke;
 
+        // Set interface name
         if(ke->ksn_cfg.vpn_dev_name[0] != '\0') {
             size_t len = strlen(ke->ksn_cfg.vpn_dev_name);
             char *name = isdigit(ke->ksn_cfg.vpn_dev_name[len-1]) ?
@@ -377,6 +377,11 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
             tuntap_haddr = tuntap_get_hwaddr(kvpn->ksn_tap_dev);
         } else {
             ksnet_addHWAddrConfig(&ke->ksn_cfg, tuntap_haddr);
+        }
+        
+        // Set MTU
+        if(ke->ksn_cfg.vpn_mtu) {
+            tuntap_set_mtu(kvpn->ksn_tap_dev, ke->ksn_cfg.vpn_mtu);
         }
 
         // Show success message

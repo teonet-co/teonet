@@ -71,6 +71,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->vpn_ip[0] = '\0';
     ksn_cfg->vpn_ip_net = 24;
     ksn_cfg->vpn_connect_f = 0;
+    ksn_cfg->vpn_mtu = 0;
 }
 
 /**
@@ -116,6 +117,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("vpn_connect_f", &conf->vpn_connect_f),
         CFG_SIMPLE_STR("vpn_ip", &vpn_ip),
         CFG_SIMPLE_INT("vpn_ip_net", &conf->vpn_ip_net),
+        CFG_SIMPLE_INT("vpn_mtu", &conf->vpn_mtu),
         CFG_SIMPLE_STR("vpn_dev_name", &vpn_dev_name),
         CFG_SIMPLE_STR("vpn_dev_hwaddr", &vpn_dev_hwaddr),
         #endif
