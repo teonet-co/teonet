@@ -3,6 +3,7 @@ AC_INIT([teonet], [0.0.2], [kirill@scherba.ru])
 AC_CONFIG_HEADERS([src/config/config.h])
 
 AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 
 AC_PROG_CC
@@ -134,7 +135,7 @@ AM_CONDITIONAL(VDE, test "$vde" = true)
 AM_CONDITIONAL(TUNEMU, test "$tunemu" = true)
 AM_CONDITIONAL(DARWIN, test "$darwin" = true)
 
-AM_CONDITIONAL(NOT_E_CONFUSE, false)
+AM_CONDITIONAL(NOT_E_CONFUSE, true)
 # test "$darwin" = true)
 
 AC_CACHE_SAVE
@@ -209,11 +210,12 @@ LT_INIT
 #cd ../..
 
 
-AC_CONFIG_FILES([Makefile
+AC_CONFIG_FILES([
+    Makefile
     po/Makefile.in
     src/libteonet.pc
     src/Makefile
-#    src/app/Makefile
+    tests/Makefile
 ])
 AC_PROG_CC
 AC_OUTPUT

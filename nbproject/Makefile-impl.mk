@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=teonet
+PROJECTNAME=teonet-issue_9
 
 # Active Configuration
 DEFAULTCONF=Debug

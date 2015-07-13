@@ -31,7 +31,7 @@ AM_CFLAGS = \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
-	 -I../lib/libpbl/src/
+	 -I../embedded/libpbl/src/
 #	 -std=gnu99
 
 if MINGW
@@ -49,10 +49,10 @@ AM_CXXFLAGS = \
 	-g \
 	-I/opt/local/include
 
-AM_LDFLAGS = \
- 	 -L/opt/local/lib
+AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -ltuntap -lmcrypt ../lib/libpbl/src/libpbl.a
+LIBS = -lev -ltuntap ../embedded/libpbl/src/libpbl.a
+# -lmcrypt 
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -80,13 +80,25 @@ endif
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 
-nodist_include_HEADERS = config.h.in
+nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
 
 teonetinclude_HEADERS =
 
-libteonet_la_SOURCES = *.c
-
+libteonet_la_SOURCES = \
+    ev_mgr.c \
+    hotkeys.c \
+    net_arp.c \
+    net_com.c \
+    net_core.c \
+    teonet.c \
+    config/conf.c \
+    config/opt.c \
+    modules/vpn.c \
+    utils/string_arr.c \
+    utils/utils.c
+    
+    
 # Not embed confuse flag
 if NOT_E_CONFUSE
 else
