@@ -7,4 +7,4 @@ Name: @PACKAGE_NAME@
 Description: P2P low-latency UDP full mesh networking library supporting optional reliability
 Version: @PACKAGE_VERSION@
 Cflags: -I${includedir}
-Libs: -L${libdir} -lenet
+Libs: -L${libdir}
