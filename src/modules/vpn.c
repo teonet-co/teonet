@@ -389,8 +389,10 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
 
         // Show success message
         ksnet_printf(&ke->ksn_cfg, MESSAGE,
-                     "Interface %s (addr: %s) opened ...\n",
-                     kvpn->tuntap_name, tuntap_haddr);
+                     "Interface %s (addr: %s, mtu: %d) opened ...\n",
+                     kvpn->tuntap_name, 
+                     tuntap_haddr, 
+                     ke->ksn_cfg.vpn_mtu ? ke->ksn_cfg.vpn_mtu : 1500);
 
         // Interface Up
         if (tuntap_up(kvpn->ksn_tap_dev) == -1) {
