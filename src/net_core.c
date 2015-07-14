@@ -100,6 +100,9 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
         //ksnCoreDestroy(kc);
         return NULL;
     }
+    
+    // Change this host port number to port changed in ksnCoreBind function
+    ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
 
     // Add host socket to the event manager
     #pragma GCC diagnostic push
