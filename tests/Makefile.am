@@ -21,7 +21,7 @@ AM_LDFLAGS += -L../../../libev-4.19 -L../../../confuse-2.7/src -L../../../libtun
 endif
 
 #LIBS = ../libksmesh.la
-LIBS = -lteonet 
+LIBS = -lteonet -lcrypto
 #-lcrypt
 
 
