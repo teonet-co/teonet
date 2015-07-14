@@ -89,12 +89,34 @@ void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data) {
 void ksnetArpAddHost(ksnetArpClass *ka, char* name, char *addr, int port) {
 
     ksnet_arp_data arp;
+    
     memset(&arp, 0, sizeof(arp));
     arp.mode = -1;
     strncpy(arp.addr, addr, sizeof(arp.addr));
     arp.port = port;
 
     ksnetArpAdd(ka, name, &arp);
+}
+
+/**
+ * Change port at existing arp data associated with key (per name)
+ * 
+ * @param ka
+ * @param name
+ * @param port
+ * @return Return NULL if name not found in the map
+ */
+void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
+    
+    size_t valueLength;
+    
+    ksnet_arp_data* arp = pblMapGetStr(ka->map, name, &valueLength); 
+    
+    if(arp != NULL) {
+        arp->port = port;
+    }
+    
+    return arp;
 }
 
 /**
@@ -192,7 +214,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                 // IP
                 data->addr,
 
-                // Direct connect
+                // Port
                 data->port,
 
                 // Trip time

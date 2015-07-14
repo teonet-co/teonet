@@ -60,6 +60,7 @@ ksnetArpClass *ksnetArpInit(void *ke);
 void ksnetArpDestroy(ksnetArpClass *ka);
 void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data);
 void ksnetArpAddHost(ksnetArpClass *ka, char* name, char *addr, int port);
+void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port);
 ksnet_arp_data * ksnetArpGet(ksnetArpClass *ka, char *name);
 void ksnetArpRemove(ksnetArpClass *ka, char* name);
 int ksnetArpShow(ksnetArpClass *ka);

@@ -23,7 +23,6 @@ AM_LDFLAGS =  -L/opt/local/lib -L../src
 #LIBS = ../src/libteonet.la
 LIBS = -lteonet 
 
-
 bin_PROGRAMS = teovpn 
 
 teovpn_SOURCES = teovpn.c

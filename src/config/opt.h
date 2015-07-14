@@ -15,6 +15,7 @@
 
 #define READ_OPTIONS 01
 #define READ_CONFIGURATION 02
+#define READ_ALL READ_OPTIONS|READ_CONFIGURATION
 
 #ifdef	__cplusplus
 extern "C" {
