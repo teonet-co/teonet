@@ -1,6 +1,6 @@
-/*
+/**
  * File:   teonet.c
- * Author: ka_scherba
+ * Author: Kirill Scherba
  *
  * Created on Jun 30, 2015, 10:31:15 AM
  */
@@ -70,7 +70,7 @@ void test2(int argc, char** argv) {
     
     printf("Teonet library ver " VERSION " connection test\n");
     
-    // Initialize ksnet event manager and Read configuration (defaults,
+    // Initialize teonet event manager and Read configuration (defaults,
     // command line, configuration file)
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /* NULL */, READ_OPTIONS|READ_CONFIGURATION);
 
@@ -78,7 +78,7 @@ void test2(int argc, char** argv) {
     ksnet_printf(&ke->ksn_cfg, MESSAGE,
             "KSMesh UDP Client Server test ver. " VERSION "\n\n");
 
-    // Start KSNet
+    // Start teonet
     ksnetEvMgrRun(ke);
 }
 

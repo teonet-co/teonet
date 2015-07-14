@@ -45,9 +45,10 @@ AM_CXXFLAGS = \
 	-std=c++11 \
 	-fPIC \
 	-Wall \
-	-pedantic \
 	-g \
 	-I/opt/local/include
+
+#	-pedantic 
 
 AM_LDFLAGS = -L/opt/local/lib
 
@@ -63,7 +64,8 @@ endif
 # Mac OS only
 if DARWIN
 else
-LIBS += -luuid -lcrypt
+LIBS += -luuid 
+#-lcrypt
 endif
 
 lib_LTLIBRARIES = libteonet.la

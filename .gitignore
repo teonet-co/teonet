@@ -1,5 +1,6 @@
 /.f1/
 /.teonet_tst/
+/.teovpn/
 /nbproject
 /build/
 /dist/
@@ -53,3 +54,7 @@
 /po/stamp-it
 /tests/teonet_tst
 /Makefile
+/app/.libs
+/app/teovpn
+/app/Makefile
+/app/Makefile.in
