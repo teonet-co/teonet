@@ -45,9 +45,10 @@ AM_CXXFLAGS = \
 	-std=c++11 \
 	-fPIC \
 	-Wall \
-	-pedantic \
 	-g \
 	-I/opt/local/include
+
+#	-pedantic 
 
 AM_LDFLAGS = -L/opt/local/lib
 

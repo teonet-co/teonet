@@ -3,8 +3,8 @@ AM_CFLAGS = \
 	 -Wall \
 	 -g \
 	 -I/opt/local/include \
-	 -DKSMESH_SYS_CONFIG_DIR=\""${sysconfdir}/ksmesh"\" \
-	 $(DRELEASE_KSMESH) \
+	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
+	 $(DRELEASE_TEONE) \
 	 -I../src \
 	 -I../embedded/libpbl/src
 
