@@ -19,6 +19,9 @@
 /ylwrap
 /tests/Makefile.in
 /tests/Makefile
+/tests/teonet_tst
+/tests/.libs/
+/src/.libs/
 /src/Makefile
 /src/Makefile.in
 /src/libteonet.pc
@@ -52,7 +55,6 @@
 /po/Makefile.in.in
 /po/Makefile
 /po/stamp-it
-/tests/teonet_tst
 /Makefile
 /app/.libs
 /app/teovpn
