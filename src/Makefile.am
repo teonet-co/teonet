@@ -63,7 +63,8 @@ endif
 # Mac OS only
 if DARWIN
 else
-LIBS += -luuid -lcrypt
+LIBS += -luuid 
+#-lcrypt
 endif
 
 lib_LTLIBRARIES = libteonet.la

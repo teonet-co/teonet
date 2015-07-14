@@ -53,3 +53,6 @@
 /po/stamp-it
 /tests/teonet_tst
 /Makefile
+/app/Makefile
+/app/.libs/teovpn
+/app/Makefile.in

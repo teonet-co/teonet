@@ -1,6 +1,6 @@
-/*
+/**
  * File:   teonet.c
- * Author: ka_scherba
+ * Author: Kirill Scherba
  *
  * Created on Jun 30, 2015, 10:31:15 AM
  */
