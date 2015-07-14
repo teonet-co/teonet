@@ -21,7 +21,7 @@ AM_LDFLAGS =  -L/opt/local/lib -L../src
 #endif
 
 #LIBS = ../src/libteonet.la
-LIBS = -lteonet 
+LIBS = -lteonet -lcrypto
 
 bin_PROGRAMS = teovpn 
 

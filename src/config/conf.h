@@ -24,7 +24,7 @@
 #define DEBUG_KSNET  1
 #endif
 
-#define KSNET_CRYPT  0
+#define KSNET_CRYPT  1
 
 // Modules enable
 #define M_ENAMBE_VPN 1
