@@ -15,6 +15,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "ev_mgr.h"
 
@@ -66,9 +67,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
         // Send by timer
         case EV_K_TIMER:
-            printf("Event: Timer\n");
-            //host_idle_cb(ke);
-            ksnCoreSendCmdto(ke->kc, "teorecv", CMD_USER, "Hello!", 7);
+            {
+                const char *teorecv = "teorecv";
+                if(strcmp(teorecv, ksnetEvMgrGetHostName(ke))) {
+                    ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, "Hello!", 7);
+                }
+            }
             break;
 
         // Undefined event (an error)
@@ -91,6 +95,9 @@ int main(int argc, char** argv) {
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb,
             READ_OPTIONS|READ_CONFIGURATION);
+
+    // Set custom timer interval
+    ksnetEvMgrSetCustomTimer(ke, 1.00);
 
     // Hello message
     ksnet_printf(&ke->ksn_cfg, MESSAGE, "Started...\n\n");
