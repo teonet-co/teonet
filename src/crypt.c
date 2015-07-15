@@ -63,8 +63,8 @@ void handleErrors(void)
   abort();
 }
 
-int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
-  unsigned char *iv, unsigned char *ciphertext)
+size_t encrypt(unsigned char *plaintext, size_t plaintext_len, unsigned char *key,
+  unsigned char *iv, void *ciphertext)
 {
   EVP_CIPHER_CTX *ctx;
 
@@ -165,7 +165,8 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 
     // Create buffer if it NULL
     if(buffer == NULL) {
-        buffer = calloc(1, *encrypt_len + sizeof(uint16_t));
+        //buffer = calloc(1, *encrypt_len + sizeof(uint16_t));
+        buffer = malloc(*encrypt_len + sizeof(uint16_t));
     }
 
     // Fill buffer
@@ -179,11 +180,11 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     // Encrypt package
 //    ksnEncrypt(kcr, buffer + ptr, *encrypt_len);
     
-    // Encrypt the plaintext 
-//    ciphertext_len = encrypt(plaintext, strlen ((char *)plaintext), key, iv,
-//                            ciphertext);
+    // Encrypt the package 
+    *encrypt_len = encrypt(package, package_len, kcr->key, kcr->iv,
+                            buffer + ptr);
 
-    *encrypt_len += ptr;
+//    *encrypt_len += ptr;
 
     return buffer;
 }
@@ -201,4 +202,21 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
                         size_t package_len, size_t *decrypt_len) {
     
+    size_t ptr = 0;
+
+    *decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);
+    unsigned char *decrypted = malloc(*decrypt_len + 1);
+    
+    // Decrypt the package
+    *decrypt_len = decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
+        decrypted);
+
+    // Add a NULL terminator. We are expecting printable text 
+    decrypted[*decrypt_len] = '\0';
+    
+    // Copy and free decrypted buffer
+    memcpy(package + ptr, decrypted, *decrypt_len + 1);
+    free(decrypted);
+  
+    return package + ptr;
 }
