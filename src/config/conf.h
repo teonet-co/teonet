@@ -24,7 +24,7 @@
 #define DEBUG_KSNET  1
 #endif
 
-#define KSNET_PORT_DEFAULT "9700"
+#define KSNET_PORT_DEFAULT "9000"
 #define KSNET_CRYPT  1
 
 // Modules enable
