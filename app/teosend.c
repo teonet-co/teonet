@@ -1,16 +1,16 @@
-/** 
+/**
  * File:   teosend.c
  * Author: Kirill Scherba
  *
  * Created on July 15, 2015, 5:48 PM
- * 
+ *
  * Test application to send and receive teonet messages.
- * 
+ *
  * - subscribe to timer event
  * - send message by timer
  * - show received messages
  * - show idle event
- * 
+ *
  */
 
 #include <stdio.h>
@@ -63,10 +63,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             printf("Event: Idle time\n");
             //host_idle_cb(ke);
             break;
-            
+
         // Send by timer
         case EV_K_TIMER:
-            break;
             printf("Event: Timer\n");
             //host_idle_cb(ke);
             ksnCoreSendCmdto(ke->kc, "teorecv", CMD_USER, "Hello!", 7);
@@ -80,17 +79,17 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
 /**
  * Main application function
- * 
+ *
  * @param argc
  * @param argv
- * @return 
+ * @return
  */
 int main(int argc, char** argv) {
-    
+
     printf("Teosend ver " TSEND_VERSION "\n");
 
     // Initialize teonet event manager and Read configuration
-    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb, 
+    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb,
             READ_OPTIONS|READ_CONFIGURATION);
 
     // Hello message
@@ -98,6 +97,6 @@ int main(int argc, char** argv) {
 
     // Start teonet
     ksnetEvMgrRun(ke);
-    
+
     return (EXIT_SUCCESS);
 }
