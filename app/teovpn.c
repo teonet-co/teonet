@@ -10,7 +10,7 @@
 
 #include "ev_mgr.h"
 
-#define TVPN_VERSION "0.0.2"
+#define TVPN_VERSION VERSION
 
 /*
  * 
