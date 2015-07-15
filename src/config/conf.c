@@ -42,7 +42,7 @@ void ksnet_configInit(ksnet_cfg *ksn_cfg) {
 void set_defaults(ksnet_cfg *ksn_cfg) {
 
     // Encrypt/Decrypt packets
-    ksn_cfg->crypt_f = 1;
+    ksn_cfg->crypt_f = KSNET_CRYPT;
 
     ksn_cfg->network[0] = '\0';
 
@@ -53,14 +53,14 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_peers_f = 0;
 
     // This host
-    ksn_cfg->port = 9000; 
+    ksn_cfg->port = atoi(KSNET_PORT_DEFAULT); 
     ksn_cfg->port_inc_f = 1;
     char *name = getRandomHostName();
     strncpy(ksn_cfg->host_name, name, KSN_MAX_HOST_NAME);
     free(name);
 
     // Remote host default
-    ksn_cfg->r_port = 9000;
+    ksn_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
     ksn_cfg->r_host_name[0] = '\0';
     ksn_cfg->r_host_addr[0] = '\0';
 
@@ -105,7 +105,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_STR("r_host_addr", &r_host_addr),
         CFG_SIMPLE_INT("r_port", &conf->r_port),
 
+        #if KSNET_CRYPT
         CFG_SIMPLE_BOOL("crypt_f", &conf->crypt_f),
+        #endif
 
         CFG_SIMPLE_BOOL("show_connect_f", &conf->show_connect_f),
         CFG_SIMPLE_BOOL("show_debug_f", &conf->show_debug_f),
