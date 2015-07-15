@@ -412,6 +412,11 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
             ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
                     "Event manager: timer (%.1f sec of %f)\n",
                     show_interval*KSNET_EVENT_MGR_TIMER, ksnetEvMgrGetTime(ke));
+            
+            // Send timer Event
+            if(ke->event_cb != NULL) {
+                ke->event_cb(ke, EV_K_TIMER , NULL, 0);
+            }
         }
         #endif
 
