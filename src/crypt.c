@@ -14,8 +14,6 @@
 #include <openssl/err.h>
 
 #include "crypt.h"
-//#include "utils/utils.h"
-//#include "config/conf.h"
 #include "ev_mgr.h"
 
 /**
