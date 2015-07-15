@@ -102,6 +102,17 @@ size_t encrypt(unsigned char *plaintext, size_t plaintext_len, unsigned char *ke
   return ciphertext_len;
 }
 
+/**
+ * Decrypt buffer
+ * 
+ * @param ciphertext Encrypted data
+ * @param ciphertext_len Encrypted data length
+ * @param key Key
+ * @param iv IV
+ * @param plaintext Decrypted data
+ * 
+ * @return Decrypted data length
+ */
 int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
   unsigned char *iv, unsigned char *plaintext)
 {
@@ -208,6 +219,7 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     unsigned char *decrypted = malloc(*decrypt_len + 1);
     
     // Decrypt the package
+    printf("decrypt %d bytes ...\n", package_len - ptr);
     *decrypt_len = decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
 
