@@ -49,8 +49,8 @@ typedef struct ksnetEvMgrClass {
     // Pointers to Modules classes
     ksnCoreClass *kc;  ///< KSNet core class
     ksnetHotkeysClass *kh; ///< Hotkeys class
-//    ksnModulesClass *km; ///< Modules class    
-    ksnVpnClass *kvpn; ///< VPN class    
+//    ksnModulesClass *km; ///< Modules class
+    ksnVpnClass *kvpn; ///< VPN class
 //    ksnTcpClass *kt; /// TCP Client/Server class
 //    ksnTermClass *kter; // Terminal class
 //    ksnTunClass *ktun; // Tunnel class
@@ -71,6 +71,9 @@ typedef struct ksnetEvMgrClass {
     ev_timer timer_w;       ///< Timer watcher
     ev_async sig_async_w;   ///< Async signal watcher
 
+    double custom_timer_interval;   ///< Custom timer interval
+    double last_custom_timer;       ///< Last time the custom timer called
+
 } ksnetEvMgrClass;
 
 
@@ -89,6 +92,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke);
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);
+char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke);
+void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval);
 
 #ifdef	__cplusplus
 }
