@@ -36,7 +36,8 @@ typedef enum ksnetEvMgrEvents {
     EV_K_DISCONNECTED,  ///< A peer was disconnected from host
     EV_K_RECEIVED,      ///< This host Received a data
     EV_K_RECEIVED_WRONG,///< Wrong packet received
-    EV_K_IDLE           ///< Idle check host events (after 11.5 after last host send or receive data)
+    EV_K_IDLE,          ///< Idle check host events (after 11.5 after last host send or receive data)
+    EV_K_TIMER          ///< Timer event
 
 } ksnetEvMgrEvents;
 
