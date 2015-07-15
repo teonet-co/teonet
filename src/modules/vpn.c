@@ -27,6 +27,9 @@
 
 #if M_ENAMBE_VPN
 
+// Local functions
+void ksnVpnRunShell(ksnVpnClass *kvpn, char *script);
+
 /**
  * MAC address structure
  */
@@ -126,11 +129,19 @@ void ksnVpnDestroy(void *vpn) {
     if(kvpn != NULL) {
 
         ksnetEvMgrClass *ke = kvpn->ke;
-            
+                    
+        // Destroy tuntap interface
         if(kvpn->ksn_tap_dev != NULL) {
+            
+            // Execute if-down.sh script
+            ksnVpnRunShell(kvpn, "if-down.sh");
+            
+            // Destroy tuntap
             tuntap_destroy(kvpn->ksn_tap_dev);
             kvpn->ksn_tap_dev = NULL;
         }
+        
+        // Free map and class
         pblMapFree(kvpn->ksnet_vpn_map);
         free(kvpn);
         ke->kvpn = NULL;
@@ -140,6 +151,20 @@ void ksnVpnDestroy(void *vpn) {
             "VPN module have been de-initialized\n");
         #endif
     }
+}
+
+/**
+ * Execute system shell script (or application)
+ * 
+ * @param kvpn Pointer to ksnVpnClass
+ * @param script Executable name
+ */
+void ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
+
+    char *buffer = ksnet_formatMessage(
+        "%s/%s %s", getDataPath(), script, kvpn->tuntap_name);
+    system(buffer);
+    free(buffer);
 }
 
 /**
@@ -411,10 +436,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
                              ke->ksn_cfg.vpn_ip, ke->ksn_cfg.vpn_ip_net);
 
                 // Execute if-up.sh script
-                char *buffer = ksnet_formatMessage(
-                    "%s/if-up.sh %s", getDataPath(), kvpn->tuntap_name);
-                system(buffer);
-                free(buffer);
+                ksnVpnRunShell(kvpn, "if-up.sh");
             }
         }
 //clean:

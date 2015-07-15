@@ -52,7 +52,7 @@ AM_CXXFLAGS = \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -ltuntap ../embedded/libpbl/src/libpbl.a
+LIBS = -lev -ltuntap -lcrypt ../embedded/libpbl/src/libpbl.a
 # -lmcrypt 
 
 # Not embed confuse flag
@@ -88,6 +88,7 @@ teonetincludedir=$(includedir)/teonet
 teonetinclude_HEADERS =
 
 libteonet_la_SOURCES = \
+    crypt.c \
     ev_mgr.c \
     hotkeys.c \
     net_arp.c \
