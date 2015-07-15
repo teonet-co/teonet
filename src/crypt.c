@@ -195,7 +195,7 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     *encrypt_len = encrypt(package, package_len, kcr->key, kcr->iv,
                             buffer + ptr);
 
-//    *encrypt_len += ptr;
+    *encrypt_len += ptr;
 
     return buffer;
 }
