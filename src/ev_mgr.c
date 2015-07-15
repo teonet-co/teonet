@@ -36,12 +36,12 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
 /**
  * Initialize KSNet Event Manager and network
- * 
+ *
  * @param argc Number of applications arguments (from main)
  * @param argv Applications arguments array (from main)
  * @param event_cb Events callback function called when an event happens
  * @param options Options set: \n
- *                READ_OPTIONS - read options from command line parameters; \n 
+ *                READ_OPTIONS - read options from command line parameters; \n
  *                READ_CONFIGURATION - read options from configuration file
  * @return Pointer to created ksnetEvMgrClass
  */
@@ -55,6 +55,8 @@ ksnetEvMgrClass *ksnetEvMgrInit(
 
     ksnetEvMgrClass *ke = malloc(sizeof(ksnetEvMgrClass));
     ke->event_cb = event_cb;
+    ke->custom_timer_interval = 0.0;
+    ke->last_custom_timer = 0.0;
 
     // KSNet parameters
     const int app_argc = 1;             // number of application arguments
@@ -62,9 +64,9 @@ ksnetEvMgrClass *ksnetEvMgrInit(
     app_argv[0] = (char*)"peer_name";   // peer name argument name
     //app_argv[1] = (char*)"file_name";   // file name argument name
 
-    // Initial configuration, set defaults, read defaults from command line  
+    // Initial configuration, set defaults, read defaults from command line
     ksnet_configInit(&ke->ksn_cfg); // Set configuration default
-    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default) 
+    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
 
@@ -85,9 +87,9 @@ void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 /**
  * Start KSNet Event Manager and network communication
- * 
+ *
  * Start KSNet Event Manager and network communication
- * 
+ *
  * @param ke Pointer to ksnetEvMgrClass
  * @return Alway 0
  */
@@ -118,7 +120,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Initialize modules
     if(modules_init(ke)) {
-        
+
         // Initialize idle watchers
         ev_idle_init (&ke->idle_w, idle_cb);
         ke->idle_w.data = ke->kc;
@@ -184,9 +186,9 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         ev_run(loop, 0);
 
     }
-    
+
     // Destroy modules
-    modules_destroy(ke);    
+    modules_destroy(ke);
 
     // Destroy event loop (and free memory)
     ev_loop_destroy(loop);
@@ -199,6 +201,28 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     free(ke);
 
     return 0;
+}
+
+/**
+ * Set custom timer interval
+ *
+ * @param ke
+ * @param time_interval
+ */
+void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval) {
+
+    ke->custom_timer_interval = time_interval;
+}
+
+/**
+ * Return host name
+ *
+ * @param ke
+ * @return
+ */
+char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
+
+    return ke->ksn_cfg.host_name;
 }
 
 /**
@@ -338,10 +362,10 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
 /**
  * Idle callback (runs every 11.5 second of Idle time)
- * 
- * This callback started by event manager timer after every 
- * CHECK_EVENTS_AFTER = 11.5 second. Send two user event: 
- * first EV_K_STARTED sent at startup (when application started) 
+ *
+ * This callback started by event manager timer after every
+ * CHECK_EVENTS_AFTER = 11.5 second. Send two user event:
+ * first EV_K_STARTED sent at startup (when application started)
  * and second EV_K_IDLE sent every tick.
  *
  * @param loop
@@ -353,7 +377,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     #define kev ((ksnetEvMgrClass *)((ksnCoreClass *)w->data)->ke)
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, "Event manager: idle callback %d\n", 
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, "Event manager: idle callback %d\n",
             kev->idle_count);
     #endif
 
@@ -368,7 +392,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     }
     // Idle count max value
     else if(kev->idle_count == UINT32_MAX) kev->idle_count = 0;
-    
+
     // Increment count
     kev->idle_count++;
 
@@ -379,7 +403,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     if(kev->event_cb != NULL) {
         kev->event_cb(kev, EV_K_IDLE , NULL, 0);
     }
-    
+
     // Set last host event time
     ksnCoreSetEventTime(kev->kc);
 
@@ -400,6 +424,7 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
     #endif
     const int activity_interval = 23;
     ksnetEvMgrClass *ke = w->data;
+    double t = ksnetEvMgrGetTime(ke);
 
     if(ke->runEventMgr) {
 
@@ -411,9 +436,19 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
         if( !(ke->timer_val % show_interval) ) {
             ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
                     "Event manager: timer (%.1f sec of %f)\n",
-                    show_interval*KSNET_EVENT_MGR_TIMER, ksnetEvMgrGetTime(ke));
+                    show_interval*KSNET_EVENT_MGR_TIMER, t);
+
         }
         #endif
+
+        // Send custom timer Event
+        if(ke->event_cb != NULL &&
+           ke->custom_timer_interval &&
+           (t - ke->last_custom_timer > ke->custom_timer_interval)) {
+
+            ke->last_custom_timer = t;
+            ke->event_cb(ke, EV_K_TIMER , NULL, 0);
+        }
 
         // Start idle watcher
         if(ksnetEvMgrGetTime(ke) - ke->kc->last_check_event > CHECK_EVENTS_AFTER) {
@@ -492,7 +527,7 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
 
     // Get string
     if(((ksnetEvMgrClass *)w->data)->kh->non_blocking == 0) {
-        
+
         char *buffer = malloc(KSN_BUFFER_SM_SIZE);
         fgets(buffer, KSN_BUFFER_SM_SIZE , stdin);
         data = buffer;
@@ -551,8 +586,8 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 }
 
 /**
- * Check activity Idle callback. 
- * 
+ * Check activity Idle callback.
+ *
  * Start(restart) connection to R-Host and check connections to all peers.
  *
  * @param loop
@@ -560,12 +595,12 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
  * @param revents
  */
 void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
-    
+
     #define kev ((ksnetEvMgrClass *)w->data)
 
     #ifdef DEBUG_KSNET
     ksnet_printf(& ((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                "Event manager: idle activity callback %d\n", 
+                "Event manager: idle activity callback %d\n",
                 kev->idle_activity_count);
     #endif
 
@@ -577,12 +612,12 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
 
         // Stop this watcher if not checked
         ev_idle_stop(EV_A_ w);
-            
+
         // Increment count
         if(kev->idle_activity_count == UINT32_MAX) kev->idle_activity_count = 0;
         kev->idle_activity_count++;
     }
-    
+
     #undef kev
 }
 
@@ -590,33 +625,33 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
 
 /**
  * Initialize connected to Event Manager Modules
- * 
+ *
  * @param ke
- * @return 
+ * @return
  */
 int modules_init(ksnetEvMgrClass *ke) {
 
     ke->kc = NULL;
     ke->kh = NULL;
-    
-    if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;   
+
+    if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;
     ke->kh = ksnetHotkeysInit(ke);
-       
+
     // VPN Module
     #if M_ENAMBE_VPN
     ke->kvpn = ksnVpnInit(ke);
     #endif
-    
+
 //    ke->kt = ksnTcpInit(ke);
 //    ke->kter = ksnTermInit(ke);
 //    ke->ktun = ksnTunInit(ke);
-    
+
     return 1;
 }
 
 /**
  * Destroy modules
- * 
+ *
  * @param ke
  */
 void modules_destroy(ksnetEvMgrClass *ke) {

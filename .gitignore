@@ -1,6 +1,7 @@
 /.f1/
 /.teonet_tst/
 /.teovpn/
+/.teosend/
 /nbproject
 /build/
 /dist/
@@ -15,6 +16,7 @@
 /embedded/libpbl/src/pblkfblockprint
 /embedded/libpbl/src/pblSetTest
 /embedded/libpbl/src/pblhttst
+/mkinstalldirs
 /aclocal.m4
 /ylwrap
 /tests/Makefile.in
@@ -60,3 +62,4 @@
 /app/teovpn
 /app/Makefile
 /app/Makefile.in
+/app/teosend

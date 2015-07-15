@@ -1,4 +1,4 @@
-/** 
+/**
  * File:   crypt.h
  * Author: Kirill Scherba
  *
@@ -18,7 +18,7 @@
 
 /**
  * Module initialize
- * 
+ *
  * @return Pointer to created ksnCryptClass
  */
 ksnCryptClass *ksnCryptInit(void *ke) {
@@ -28,14 +28,14 @@ ksnCryptClass *ksnCryptInit(void *ke) {
 
     // A 128 bit IV
     const char *iv = "0123456789012345";
-    strncpy(kcr->iv, iv, BLOCK_SIZE);
+    strncpy((char*)kcr->iv, iv, BLOCK_SIZE);
 
     static const char *key = "01234567890123456789012345678901";
     kcr->key = (unsigned char*) key;
     kcr->key_len = strlen(key); // 32 - 256 bits
     kcr->blocksize = BLOCK_SIZE;
-    
-    // Initialize the library 
+
+    // Initialize the library
     ERR_load_crypto_strings();
     OpenSSL_add_all_algorithms();
     OPENSSL_config(NULL);
@@ -45,13 +45,13 @@ ksnCryptClass *ksnCryptInit(void *ke) {
 
 /**
  * Module initialize
- * 
+ *
  * @param kcr
  */
 void ksnCryptDestroy(ksnCryptClass *kcr) {
 
 
-    // Clean up 
+    // Clean up
     EVP_cleanup();
     ERR_free_strings();
 
@@ -59,14 +59,14 @@ void ksnCryptDestroy(ksnCryptClass *kcr) {
 }
 
 void handleErrors(void) {
-    
+
   ERR_print_errors_fp(stderr);
   abort();
 }
 
-size_t encrypt(unsigned char *plaintext, size_t plaintext_len, 
+size_t encrypt(unsigned char *plaintext, size_t plaintext_len,
         unsigned char *key, unsigned char *iv, void *ciphertext) {
-    
+
   EVP_CIPHER_CTX *ctx;
 
   int len;
@@ -105,18 +105,18 @@ size_t encrypt(unsigned char *plaintext, size_t plaintext_len,
 
 /**
  * Decrypt buffer
- * 
+ *
  * @param ciphertext Encrypted data
  * @param ciphertext_len Encrypted data length
  * @param key Key
  * @param iv IV
  * @param plaintext Decrypted data
- * 
+ *
  * @return Decrypted data length
  */
 int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     unsigned char *iv, unsigned char *plaintext) {
-    
+
   EVP_CIPHER_CTX *ctx;
 
   int len;
@@ -168,7 +168,7 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
  */
 void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
                         size_t package_len, void *buffer, size_t *encrypt_len) {
-    
+
     size_t ptr = 0;
 
     // Calculate encrypted length
@@ -191,11 +191,11 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 
     // Encrypt package
 //    ksnEncrypt(kcr, buffer + ptr, *encrypt_len);
-    
-    // Encrypt the package 
+
+    // Encrypt the package
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
-                "Encrypt %d bytes to %d bytes buffer ...\n", 
+                "Encrypt %d bytes to %d bytes buffer ...\n",
                 package_len, (int)(*encrypt_len));
     #endif
     *encrypt_len = encrypt(package, package_len, kcr->key, kcr->iv,
@@ -218,29 +218,29 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
  */
 void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
                         size_t package_len, size_t *decrypt_len) {
-    
+
     size_t ptr = 0;
 
     *decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);
     unsigned char *decrypted = malloc(package_len - ptr); //*decrypt_len + 1);
-    
+
     // Decrypt the package
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
-                "Decrypt %d bytes from %d bytes package ...\n", 
+                "Decrypt %d bytes from %d bytes package ...\n",
                 *decrypt_len, package_len - ptr);
     #endif
     *decrypt_len = decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
 
-    // Add a NULL terminator. We are expecting printable text 
+    // Add a NULL terminator. We are expecting printable text
     decrypted[*decrypt_len] = '\0';
-    
+
     // Copy and free decrypted buffer
     memcpy(package + ptr, decrypted, *decrypt_len + 1);
 //    printf("decrypt %d bytes (2)...\n", *decrypt_len);
     free(decrypted);
 //    printf("decrypt %d bytes (3)...\n", *decrypt_len);
-  
+
     return package + ptr;
 }
