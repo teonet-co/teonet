@@ -91,7 +91,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     kc->ka = ksnetArpInit(ke);
     kc->kco = ksnCommandInit(kc);
     #if KSNET_CRYPT
-    kc->kcr = ksnCryptInit();
+    kc->kcr = ksnCryptInit(ke);
     #endif
 
     // Create and bind host socket

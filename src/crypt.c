@@ -14,23 +14,26 @@
 #include <openssl/err.h>
 
 #include "crypt.h"
-
+//#include "utils/utils.h"
+//#include "config/conf.h"
+#include "ev_mgr.h"
 
 /**
  * Module initialize
  * 
  * @return Pointer to created ksnCryptClass
  */
-ksnCryptClass *ksnCryptInit() {
+ksnCryptClass *ksnCryptInit(void *ke) {
 
     ksnCryptClass *kcr = malloc(sizeof(ksnCryptClass));
+    kcr->ke = ke;
 
     // A 128 bit IV
     const char *iv = "0123456789012345";
     strncpy(kcr->iv, iv, BLOCK_SIZE);
 
     static const char *key = "01234567890123456789012345678901";
-    kcr->key = (char*) key;
+    kcr->key = (unsigned char*) key;
     kcr->key_len = strlen(key); // 32 - 256 bits
     kcr->blocksize = BLOCK_SIZE;
     
@@ -57,15 +60,15 @@ void ksnCryptDestroy(ksnCryptClass *kcr) {
     free(kcr);
 }
 
-void handleErrors(void)
-{
+void handleErrors(void) {
+    
   ERR_print_errors_fp(stderr);
   abort();
 }
 
-size_t encrypt(unsigned char *plaintext, size_t plaintext_len, unsigned char *key,
-  unsigned char *iv, void *ciphertext)
-{
+size_t encrypt(unsigned char *plaintext, size_t plaintext_len, 
+        unsigned char *key, unsigned char *iv, void *ciphertext) {
+    
   EVP_CIPHER_CTX *ctx;
 
   int len;
@@ -114,8 +117,8 @@ size_t encrypt(unsigned char *plaintext, size_t plaintext_len, unsigned char *ke
  * @return Decrypted data length
  */
 int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
-  unsigned char *iv, unsigned char *plaintext)
-{
+    unsigned char *iv, unsigned char *plaintext) {
+    
   EVP_CIPHER_CTX *ctx;
 
   int len;
@@ -192,6 +195,11 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 //    ksnEncrypt(kcr, buffer + ptr, *encrypt_len);
     
     // Encrypt the package 
+    #ifdef DEBUG_KSNET
+    ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
+                "Encrypt %d bytes to %d bytes buffer ...\n", 
+                package_len, (int)(*encrypt_len));
+    #endif
     *encrypt_len = encrypt(package, package_len, kcr->key, kcr->iv,
                             buffer + ptr);
 
@@ -216,10 +224,14 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     size_t ptr = 0;
 
     *decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);
-    unsigned char *decrypted = malloc(*decrypt_len + 1);
+    unsigned char *decrypted = malloc(package_len - ptr); //*decrypt_len + 1);
     
     // Decrypt the package
-    printf("decrypt %d bytes ...\n", package_len - ptr);
+    #ifdef DEBUG_KSNET
+    ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
+                "Decrypt %d bytes from %d bytes package ...\n", 
+                *decrypt_len, package_len - ptr);
+    #endif
     *decrypt_len = decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
 
@@ -228,7 +240,9 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     
     // Copy and free decrypted buffer
     memcpy(package + ptr, decrypted, *decrypt_len + 1);
+//    printf("decrypt %d bytes (2)...\n", *decrypt_len);
     free(decrypted);
+//    printf("decrypt %d bytes (3)...\n", *decrypt_len);
   
     return package + ptr;
 }
