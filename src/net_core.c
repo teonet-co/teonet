@@ -483,7 +483,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
         // Decrypt package
         #if KSNET_CRYPT
-        if(ke->ksn_cfg.crypt_f) {
+        if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
             data = ksnDecryptPackage(kc->kcr, buf, recvlen, &data_len);
         }
         

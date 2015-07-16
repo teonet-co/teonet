@@ -177,7 +177,6 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 
     // Create buffer if it NULL
     if(buffer == NULL) {
-        //buffer = calloc(1, *encrypt_len + sizeof(uint16_t));
         buffer = malloc(*encrypt_len + sizeof(uint16_t));
     }
 
@@ -188,9 +187,6 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     if(free_buf_len) {
         memset(buffer + ptr + package_len, 0, free_buf_len);
     }
-
-    // Encrypt package
-//    ksnEncrypt(kcr, buffer + ptr, *encrypt_len);
 
     // Encrypt the package
     #ifdef DEBUG_KSNET
@@ -238,9 +234,22 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
 
     // Copy and free decrypted buffer
     memcpy(package + ptr, decrypted, *decrypt_len + 1);
-//    printf("decrypt %d bytes (2)...\n", *decrypt_len);
     free(decrypted);
-//    printf("decrypt %d bytes (3)...\n", *decrypt_len);
 
     return package + ptr;
+}
+
+/**
+ * Simple check if the packet is encrypted
+ * 
+ * @param data
+ * @param package_len
+ * @return 
+ */
+int ksnCheckEncrypted(void *package, size_t package_len) {
+    
+    size_t ptr = 0;
+    size_t decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);  
+    
+    return decrypt_len < package_len && !((package_len - ptr) % BLOCK_SIZE);
 }
