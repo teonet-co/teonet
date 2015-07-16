@@ -22,8 +22,9 @@ enum ksnCMD {
     CMD_VPN,            ///< VPN command
     CMD_TUN,            ///< Tunnel command
 
+    CMD_SPLIT = 127,    ///< Group of packets (Splited packets)
+            
     CMD_USER = 128      ///< User command
-
 };
 
 /**
