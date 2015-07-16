@@ -61,7 +61,7 @@ void ksnCryptDestroy(ksnCryptClass *kcr) {
 void handleErrors(void) {
 
   ERR_print_errors_fp(stderr);
-  abort();
+  //abort();
 }
 
 size_t encrypt(unsigned char *plaintext, size_t plaintext_len,
@@ -74,27 +74,40 @@ size_t encrypt(unsigned char *plaintext, size_t plaintext_len,
   int ciphertext_len;
 
   /* Create and initialise the context */
-  if(!(ctx = EVP_CIPHER_CTX_new())) handleErrors();
+  if(!(ctx = EVP_CIPHER_CTX_new())) {
+      handleErrors();
+      return 0;
+  }
 
   /* Initialise the encryption operation. IMPORTANT - ensure you use a key
    * and IV size appropriate for your cipher
    * In this example we are using 256 bit AES (i.e. a 256 bit key). The
    * IV size for *most* modes is the same as the block size. For AES this
    * is 128 bits */
-  if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+  if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
+      
     handleErrors();
+    return 0;
+  }
 
   /* Provide the message to be encrypted, and obtain the encrypted output.
    * EVP_EncryptUpdate can be called multiple times if necessary
    */
-  if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+  if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len)) {
+      
     handleErrors();
+    return 0;
+  }
   ciphertext_len = len;
 
   /* Finalise the encryption. Further ciphertext bytes may be written at
    * this stage.
    */
-  if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) handleErrors();
+  if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) {
+      
+      handleErrors();
+      return 0;
+  }
   ciphertext_len += len;
 
   /* Clean up */
@@ -124,27 +137,41 @@ int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
   int plaintext_len;
 
   /* Create and initialise the context */
-  if(!(ctx = EVP_CIPHER_CTX_new())) handleErrors();
+  if(!(ctx = EVP_CIPHER_CTX_new())) {
+      
+      handleErrors();
+      return 0;
+  }
 
   /* Initialise the decryption operation. IMPORTANT - ensure you use a key
    * and IV size appropriate for your cipher
    * In this example we are using 256 bit AES (i.e. a 256 bit key). The
    * IV size for *most* modes is the same as the block size. For AES this
    * is 128 bits */
-  if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+  if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
+      
     handleErrors();
+    return 0;
+  }
 
   /* Provide the message to be decrypted, and obtain the plaintext output.
    * EVP_DecryptUpdate can be called multiple times if necessary
    */
-  if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len))
+  if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len)) {
+      
     handleErrors();
+    return 0;
+  }
   plaintext_len = len;
 
   /* Finalise the decryption. Further plaintext bytes may be written at
    * this stage.
    */
-  if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) handleErrors();
+  if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) {
+      
+      handleErrors();
+      return 0;
+  }
   plaintext_len += len;
 
   /* Clean up */
@@ -177,7 +204,6 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 
     // Create buffer if it NULL
     if(buffer == NULL) {
-        //buffer = calloc(1, *encrypt_len + sizeof(uint16_t));
         buffer = malloc(*encrypt_len + sizeof(uint16_t));
     }
 
@@ -188,9 +214,6 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     if(free_buf_len) {
         memset(buffer + ptr + package_len, 0, free_buf_len);
     }
-
-    // Encrypt package
-//    ksnEncrypt(kcr, buffer + ptr, *encrypt_len);
 
     // Encrypt the package
     #ifdef DEBUG_KSNET
@@ -238,9 +261,22 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
 
     // Copy and free decrypted buffer
     memcpy(package + ptr, decrypted, *decrypt_len + 1);
-//    printf("decrypt %d bytes (2)...\n", *decrypt_len);
     free(decrypted);
-//    printf("decrypt %d bytes (3)...\n", *decrypt_len);
 
     return package + ptr;
+}
+
+/**
+ * Simple check if the packet is encrypted
+ * 
+ * @param data
+ * @param package_len
+ * @return 
+ */
+int ksnCheckEncrypted(void *package, size_t package_len) {
+    
+    size_t ptr = 0;
+    size_t decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);  
+    
+    return decrypt_len < package_len && !((package_len - ptr) % BLOCK_SIZE);
 }

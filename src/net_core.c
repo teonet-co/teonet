@@ -472,7 +472,9 @@ void host_cb(EV_P_ ev_io *w, int revents) {
             (struct sockaddr *)&remaddr, &addrlen);
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, "Net core: host_cb %d \n", recvlen);
+    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+            "Net core: host_cb receive %d bytes from %s\n", 
+            recvlen, inet_ntoa(remaddr.sin_addr));
     #endif
 
     // Data received
@@ -483,7 +485,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
         // Decrypt package
         #if KSNET_CRYPT
-        if(ke->ksn_cfg.crypt_f) {
+        if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
             data = ksnDecryptPackage(kc->kcr, buf, recvlen, &data_len);
         }
         
