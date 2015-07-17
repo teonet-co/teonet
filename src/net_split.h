@@ -13,12 +13,17 @@
 
 #include "ev_mgr.h"
 
+#define MAX_DATA_LEN 448
+#define MAX_PACKET_LEN 0x7FFF
+
 /**
  * KSNet split class data
  */
 typedef struct ksnSplitClass {
     
     ksnCommandClass *kc;
+    PblMap* map;    ///< Hash Map to store splitted packets
+    uint16_t packet_number; ///< Large packet number
     
 } ksnSplitClass;
 
@@ -29,6 +34,9 @@ extern "C" {
 
 ksnSplitClass *ksnSplitInit(ksnCommandClass *kc);
 void ksnSplitDestroy(ksnSplitClass *ks);
+
+void **ksnSplitPacket(ksnSplitClass *ks, void *packet, size_t packet_len, int *num_subpackets);
+ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd);
 
 
 #ifdef	__cplusplus

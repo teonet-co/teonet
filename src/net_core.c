@@ -21,6 +21,7 @@ typedef int socklen_t;
 #endif
 
 #include "ev_mgr.h"
+#include "net_split.h"
 #include "utils/utils.h"
 
 // Constants
@@ -97,7 +98,6 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     // Create and bind host socket
     if(ksnCoreBind(kc)) {
 
-        //ksnCoreDestroy(kc);
         return NULL;
     }
     
@@ -210,7 +210,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
  * @param data Pointer to data
  * @param data_len Data size
  *
- * @return
+ * @return Return 0 if success; -1 if data length is too lage (more than 32319)
  */
 int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
                   void *data, size_t data_len) {
@@ -221,98 +221,68 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
     #endif
 
 
-    int retval;
+    int retval = 0;
 
-    struct sockaddr_in remaddr;         // remote address
-    const socklen_t addrlen = sizeof(remaddr);// length of addresses
+    if(data_len <= MAX_PACKET_LEN - MAX_DATA_LEN) {
+    
+        struct sockaddr_in remaddr;         // remote address
+        const socklen_t addrlen = sizeof(remaddr);// length of addresses
 
-    memset((char *) &remaddr, 0, addrlen);
-    remaddr.sin_family = AF_INET;
-    remaddr.sin_port = htons(port);
-    #ifndef HAVE_MINGW
-    if(inet_aton(addr, &remaddr.sin_addr) == 0) {
-            //fprintf(stderr, "inet_aton() failed\n");
-            return(-2);
-    }
-    #else
-    remaddr.sin_addr.s_addr = inet_addr(addr);
-    #endif
-
-    // Create packet
-    size_t packet_len;
-    //printf("ksnCoreSendto, data_len: %d\n", data_len);
-    void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
-
-    /* Divide packet to small parts
-
-    const int MTU = 1600;
-    int MAX_UDP_DATA = MTU - 46 - sizeof(uint16_t); // 46 - UDP Header, sizeof(uint16_t) - packet length
-    MAX_UDP_DATA -= MAX_UDP_DATA % 16; // The encryption bloc = 16
-
-    !!! MSG_MORE does not work under MAC OS
-    #ifndef MSG_MORE
-    #define MSG_MORE 0
-    #endif
-
-    // Send packet longe than MTU with MSG_MORE flag
-    if(packet_len > MAX_UDP_DATA) {
-
-        size_t ptr = 0, len = MAX_UDP_DATA;
-
-        // Send long data with MSG_MORE flag
-        if(MSG_MORE) {
-
-            do {
-                sendto_encrypt(kc, packet + ptr, len);
-
-                ptr += len;
-                len = packet_len - ptr;
-                if(len > MAX_UDP_DATA) len = MAX_UDP_DATA;
-            }
-            while(len);
-
-            // Send empty data without MSG_MORE flag
-            retval = sendto(kc->fd, NULL_STR, 0, 0,
-                                (struct sockaddr *)&remaddr, addrlen);
-
-            // Test of sending data with MSG_MORE flag
-            //retval = sendto(kc->fd, packet + ptr, len, MSG_MORE,
-            //                    (struct sockaddr *)&remaddr, addrlen);
-            //retval = sendto(kc->fd, " - with add", 7, MSG_MORE,
-            //                    (struct sockaddr *)&remaddr, addrlen);
-            //retval = sendto(kc->fd, "", 0, 0,
-            //                    (struct sockaddr *)&remaddr, addrlen);
+        memset((char *) &remaddr, 0, addrlen);
+        remaddr.sin_family = AF_INET;
+        remaddr.sin_port = htons(port);
+        #ifndef HAVE_MINGW
+        if(inet_aton(addr, &remaddr.sin_addr) == 0) {
+                //fprintf(stderr, "inet_aton() failed\n");
+                return(-2);
         }
+        #else
+        remaddr.sin_addr.s_addr = inet_addr(addr);
+        #endif
 
-        // Split long packet to several compatible
+        // Create packet
+        size_t packet_len;
+        void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
+
+        // Split large packet
+        int num_subpackets;
+        void **packets = ksnSplitPacket(kc->kco->ks, packet, packet_len, &num_subpackets);    
+
+        // Send large packet
+        if(num_subpackets) {
+
+            int i;
+
+            // Encrypt and send subpackets
+            for(i = 0; i < num_subpackets; i++) {
+
+                // Create packet
+                size_t packet_len;
+                size_t data_len = *(uint16_t*)(packets[i]);
+                void *packet = ksnCoreCreatePacket(kc, CMD_SPLIT, 
+                        packets[i] + sizeof(uint16_t), data_len + sizeof(uint16_t)*2, 
+                        &packet_len);
+
+                // Encrypt and send one spitted subpacket
+                sendto_encrypt(kc, packet, packet_len);
+
+                // Free memory
+                free(packet);
+                free(packets[i]);
+            }
+            free(packets);
+        } 
+        
+        // Send small packet
         else {
-            uint8_t buf[MAX_UDP_DATA];
-            size_t header_len = packet_len - data_len;
-
-            size_t max_data_len = MAX_UDP_DATA - header_len;
-            memcpy(buf, packet, header_len);
-            len = max_data_len;
-
-            do {
-                memcpy(buf + header_len, data + ptr, len);
-                sendto_encrypt(kc, buf, len + header_len);
-
-                ptr += len;
-                len = data_len - ptr;
-                if(len > max_data_len) len = max_data_len;
-            }
-            while(len);
+            // Encrypt and send one not spitted packet
+            sendto_encrypt(kc, packet, packet_len);
         }
+
+        // Free packet
+        free(packet);
     }
-    // Send packet less or equal than MTU
-    else
-    */
-
-    // Encrypt and send packet
-    sendto_encrypt(kc, packet, packet_len);
-
-    // Free packet
-    free(packet);
+    else retval = -1;   // Error: To lage packet
 
     // Set last host event time
     ksnCoreSetEventTime(kc);
