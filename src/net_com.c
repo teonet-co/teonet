@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "ev_mgr.h"
+#include "net_split.h"
 
 /**
  * KSNet CMD_PEER command data
@@ -38,6 +39,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
 
     ksnCommandClass *kco = malloc(sizeof(ksnCommandClass));
     kco->kc = kc;
+    kco->ks = ksnSplitInit(kc);    
 
     return kco;
 }
@@ -48,6 +50,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
  */
 void ksnCommandDestroy(ksnCommandClass *kco) {
 
+    ksnSplitDestroy(kco->ks);
     free(kco);
 }
 

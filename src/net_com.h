@@ -33,6 +33,7 @@ enum ksnCMD {
 typedef struct ksnCommandClass {
 
     void *kc; ///< Pointer to KSNet core class object
+    void *ks; ///< Pointer to KSNet split class
 
 } ksnCommandClass;
 
