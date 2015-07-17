@@ -50,7 +50,7 @@ void ksnSplitDestroy(ksnSplitClass *ks) {
  * @param num_subpackets
  * @return 
  */
-void **ksnSplitPacket(ksnSplitClass *ks, void *packet, size_t packet_len, int *num_subpackets) {
+void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packet_len, int *num_subpackets) {
     
     *num_subpackets = 0;
     void **packets = NULL;    
@@ -65,7 +65,7 @@ void **ksnSplitPacket(ksnSplitClass *ks, void *packet, size_t packet_len, int *n
         
         for(i = 0; i < *num_subpackets; i++) {
             
-            packets[i] = malloc(sizeof(MAX_DATA_LEN) + sizeof(uint16_t) * 3);
+            packets[i] = malloc(sizeof(MAX_DATA_LEN) + sizeof(uint16_t) * 3 + !i ? sizeof(uint8_t):0);
             
             int is_last = i == *num_subpackets - 1;
             size_t ptr = 0;
@@ -73,7 +73,8 @@ void **ksnSplitPacket(ksnSplitClass *ks, void *packet, size_t packet_len, int *n
             *(uint16_t*)(packets[i]) = data_len; ptr += sizeof(uint16_t); // Set Data length in buffer
             *(uint16_t*)(packets[i] + ptr) = (uint16_t) packet_number; ptr += sizeof(uint16_t); // Packet number
             *(uint16_t*)(packets[i] + ptr) = (uint16_t) i & is_last ? 0x8000 : 0; ptr += sizeof(uint16_t); // Subpacket number 
-            memcpy(packets[i] + ptr, packet + MAX_DATA_LEN * i, data_len); // Subpacket data
+            memcpy(packets[i] + ptr, packet + MAX_DATA_LEN * i, data_len); ptr += data_len; // Subpacket data
+            if(!i) *(uint8_t*)(packets[i] + ptr) = cmd; // Add CMD to data
         }
     }
     
@@ -98,7 +99,6 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     
     // Parse command
     size_t ptr_d = 0;
-    char *from = rd->from; // From
     uint16_t packet_num = *(uint16_t*)rd->data; ptr_d += sizeof(uint16_t); // Packet number
     int last_packet = *(uint16_t*)(rd->data + ptr_d) & (MAX_PACKET_LEN + 1); // Is this last packet
     uint16_t subpacket_num = *(uint16_t*)(rd->data + ptr_d) & MAX_PACKET_LEN; ptr_d += sizeof(uint16_t); // Subpacket number
@@ -111,31 +111,72 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
      * uint16_t sub_packet_num 
      */ 
     
+    // Create maps key macros
+    #define create_key(subpacket_num) \
+    size_t key_len = sizeof(uint8_t) + rd->from_len + sizeof(uint16_t)*2; \
+    void *key = malloc(key_len); \
+    size_t ptr = 0; \
+    *(uint8_t*)key = rd->from_len; ptr += sizeof(uint8_t); \
+    memcpy(key + ptr, rd->from, rd->from_len); ptr += rd->from_len; \
+    *(uint16_t*)(key + ptr) = packet_num ; ptr += sizeof(packet_num); \
+    *(uint16_t*)(key + ptr) = subpacket_num ; ptr += sizeof(subpacket_num)
+        
     // Add subpacket to map
-    if(!last_packet) {
-        
-        // Create maps key
-        size_t key_len = sizeof(uint8_t) + rd->from_len + sizeof(uint16_t)*2;
-        void *key = malloc(key_len);
-        size_t ptr = 0;
-        *(uint8_t*)key = rd->from_len; ptr += sizeof(uint8_t); // from length
-        memcpy(key + ptr, rd->from, rd->from_len); ptr += rd->from_len; // from
-        *(uint16_t*)(key + ptr) = packet_num ; ptr += sizeof(packet_num); // packet number
-        *(uint16_t*)(key + ptr) = subpacket_num ; ptr += sizeof(subpacket_num); // subpacket number
-
-        // Add subpacket to map
-        pblMapAdd(ks->map, key, key_len, rd->data + ptr_d, rd->data_len - ptr_d);
-    }
+    create_key(subpacket_num);
+    pblMapAdd(ks->map, key, key_len, rd->data + ptr_d, rd->data_len - ptr_d);
+    free(key);
     
-    // TODO: Combine subpackets to large packet and create ksnCorePacketData
-    else {
-        
+    // Combine subpackets to large packet and create ksnCorePacketData
+    if(last_packet) {
+                
         // Create memory buffer for combined block
-        
+        size_t data_len = 0, data_len_alloc = MAX_DATA_LEN * 2;
+        void *data = malloc(data_len_alloc);
+
+        // Create new rds
+        rds = malloc(sizeof(ksnCorePacketData));
+       
         // Get subpackets from map and add it to combined block
+        int i;
+        for(i = 0; i <= subpacket_num; i++) {
+            
+            // Get subpacket from map
+            create_key(i);
+            size_t data_s_len;
+            void *data_s = pblMapGet(ks->map, key, key_len, &data_s_len);
+            free(key);
+
+            // Check error (the subpacket has not received or added to the map)
+            if(data_s == NULL) return NULL;
+            
+            // Get command from first subpacket
+            if(!i) {                      
+                rds->cmd = *(uint8_t*)(data_s + (data_s_len - sizeof(uint8_t)));
+                data_s_len -= sizeof(uint8_t);
+            }
+            
+            // Reallocate memory
+            if(data_len_alloc < data_len + data_s_len) {
+                data_len_alloc = data_len + data_s_len;
+                data = realloc(data, data_len_alloc);
+            }
+            
+            // Combine data
+            memcpy(data + data_len, data_s, data_s_len);
+            data_len += data_s_len;           
+        }
         
         // Create new ksnCorePacketData for combined block
-        
+        rds->addr = rd->addr;
+        rds->arp = rd->arp;
+        rds->data = data;
+        rds->data_len = data_len;
+        rds->from = rd->from;
+        rds->from_len = rd->from_len;
+        rds->mtu = rd->mtu;
+        rds->port = rd->port;
+        rds->raw_data = NULL;
+        rds->raw_data_len = 0;
     }
     
     return rds;
@@ -151,6 +192,9 @@ void ksnSplitFreRds(ksnSplitClass *ks, ksnCorePacketData *rd) {
     
     if(rd != NULL) {
         
+        free(rd->data);
         free(rd);
     }
 }
+
+#undef create_key
