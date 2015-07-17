@@ -35,9 +35,9 @@ extern "C" {
 ksnSplitClass *ksnSplitInit(ksnCommandClass *kc);
 void ksnSplitDestroy(ksnSplitClass *ks);
 
-void **ksnSplitPacket(ksnSplitClass *ks, void *packet, size_t packet_len, int *num_subpackets);
+void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packet_len, int *num_subpackets);
 ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd);
-
+void ksnSplitFreRds(ksnSplitClass *ks, ksnCorePacketData *rd);
 
 #ifdef	__cplusplus
 }

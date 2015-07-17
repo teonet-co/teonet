@@ -240,13 +240,9 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
         remaddr.sin_addr.s_addr = inet_addr(addr);
         #endif
 
-        // Create packet
-        size_t packet_len;
-        void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
-
         // Split large packet
         int num_subpackets;
-        void **packets = ksnSplitPacket(kc->kco->ks, packet, packet_len, &num_subpackets);    
+        void **packets = ksnSplitPacket(kc->kco->ks, cmd, data, data_len, &num_subpackets);    
 
         // Send large packet
         if(num_subpackets) {
@@ -275,12 +271,18 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
         
         // Send small packet
         else {
+
+            // Create packet
+            size_t packet_len;
+            void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
+
             // Encrypt and send one not spitted packet
             sendto_encrypt(kc, packet, packet_len);
+            
+            // Free packet
+            free(packet);
         }
 
-        // Free packet
-        free(packet);
     }
     else retval = -1;   // Error: To lage packet
 
