@@ -103,6 +103,17 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             break;
         #endif
 
+        case CMD_SPLIT:
+            {
+                ksnCorePacketData *rds = ksnSplitCombine(kco->ks, rd);
+                if(rds != NULL) {
+                    processed = ksnCommandCheck(kco, rds);
+                    ksnSplitFreRds(kco->ks, rds);
+                }
+                else processed = 1;
+            }
+            break;
+
 //        case CMD_TUN:
 //            processed = cmd_tun_cb(
 //                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ktun,
