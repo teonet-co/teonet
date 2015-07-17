@@ -94,6 +94,7 @@ libteonet_la_SOURCES = \
     net_arp.c \
     net_com.c \
     net_core.c \
+    net_split.c \
     teonet.c \
     config/conf.c \
     config/opt.c \
