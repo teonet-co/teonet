@@ -48,12 +48,12 @@ AM_CXXFLAGS = \
 	-g \
 	-I/opt/local/include
 
-#	-pedantic 
+#	-pedantic
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -ltuntap -lcrypt ../embedded/libpbl/src/libpbl.a
-# -lmcrypt 
+LIBS = -lev -ltuntap ../embedded/libpbl/src/libpbl.a
+#-lcrypt
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -64,8 +64,7 @@ endif
 # Mac OS only
 if DARWIN
 else
-LIBS += -luuid 
-#-lcrypt
+LIBS += -luuid
 endif
 
 lib_LTLIBRARIES = libteonet.la
@@ -101,8 +100,8 @@ libteonet_la_SOURCES = \
     modules/vpn.c \
     utils/string_arr.c \
     utils/utils.c
-    
-    
+
+
 # Not embed confuse flag
 if NOT_E_CONFUSE
 else

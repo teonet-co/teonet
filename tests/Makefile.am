@@ -25,14 +25,7 @@ LIBS = -lteonet -lcrypto
 #-lcrypt
 
 
-bin_PROGRAMS = teonet_tst  # ksmqtt_broker echo_server echo_client timer_watcher
+bin_PROGRAMS = teonet_tst teolarge  # ksmqtt_broker echo_server echo_client timer_watcher
 
 teonet_tst_SOURCES = teonet_tst.c
-#clitest_SOURCES = clitest.c
-
-# ksmqtt_broker_SOURCES = ksmqtt_broker.c
-# timer_watcher_SOURCES = timer_watcher.c
-# echo_serv_SOURCES = echo_serv.c
-# echo_client_SOURCES = echo_client.c
-#
-# LIBS = -L../lib ../lib/libev.a -lm
+teolarge_SOURCES = teolarge.c
