@@ -161,7 +161,6 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             create_key(i);
             size_t data_s_len;
             void *data_s = pblMapGet(ks->map, key, key_len, &data_s_len);
-            free(key);
 
             // Check error (the subpacket has not received or added to the map)
             if(data_s == NULL) return NULL;
@@ -182,7 +181,11 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             // Combine data
             memcpy(data + data_len, data_s, data_s_len);
             data_len += data_s_len;
-        }
+
+            // Remove subpacket from map
+            pblMapRemove(ks->map, key, key_len, &data_s_len);
+            free(key);
+       }
 
         printf("ksnSplitCombine: combine %d subpackets to large %d bytes packet\n", subpacket_num+1, (int)data_len);
 
