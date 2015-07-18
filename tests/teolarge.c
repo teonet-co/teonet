@@ -29,13 +29,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Send by timer
         case EV_K_TIMER:
             {
-                char buffer[KSN_BUFFER_SIZE];
+                char buffer[KSN_BUFFER_DB_SIZE];
 
                 const char *teorecv = "teolrec";
                 if(strcmp(teorecv, ksnetEvMgrGetHostName(ke))) {
 
                     strcpy(buffer, "Large Hello!");
-                    ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, KSN_BUFFER_SIZE);
+                    ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, KSN_BUFFER_DB_SIZE);
                 }
             }
             break;
@@ -44,9 +44,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_RECEIVED:
             {
                 ksnCorePacketData *rd = data;
-                printf("Event: Data received %d bytes\n", (int)data_len);
+                //printf("Event: Data received %d bytes\n", (int) rd->data_len);
                 //host_received_cb(ke, data, data_len);
-                printf("Command: %d, Data: %s, got from: %s\n", rd->cmd, (char*)rd->data, rd->from);
+                printf("Command: %d, Data: %s (%d bytes), got from: %s\n", rd->cmd, (char*)rd->data, (int)rd->data_len, rd->from);
             }
             break;
 
