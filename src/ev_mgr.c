@@ -46,6 +46,7 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
  * @return Pointer to created ksnetEvMgrClass
  */
 ksnetEvMgrClass *ksnetEvMgrInit(
+
   int argc, char** argv,
   void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len),
   int options
@@ -65,7 +66,7 @@ ksnetEvMgrClass *ksnetEvMgrInit(
     //app_argv[1] = (char*)"file_name";   // file name argument name
 
     // Initial configuration, set defaults, read defaults from command line
-    ksnet_configInit(&ke->ksn_cfg); // Set configuration default
+    ksnet_configInit(&ke->ksn_cfg, ke); // Set configuration default
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
@@ -96,7 +97,8 @@ void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
 int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: started ...\n");
+    //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: started ...\n");
+    printf("Event manager: started ...\n");
     #endif
 
     ke->runEventMgr = 1;
@@ -248,7 +250,7 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke) {
  */
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
 
-    return ev_now(ke->ksnet_event_mgr_loop);
+    return ke->runEventMgr ? ev_now(ke->ksnet_event_mgr_loop) : 0.0;
 }
 
 /**

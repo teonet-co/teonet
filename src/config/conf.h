@@ -33,6 +33,8 @@
 
 typedef struct ksnet_cfg {
 
+    void *ke; ///< Poiner to ksnetEventManager
+
     // Flags
     int show_connect_f,    ///< Show connection message
         show_debug_f,     ///< Show debug messages
@@ -79,7 +81,7 @@ extern "C" {
 
 void ksnet_addHWAddrConfig(ksnet_cfg *conf, char *hwaddr);
 void read_config(ksnet_cfg *conf, int port_param);
-void ksnet_configInit(ksnet_cfg *ksn_cfg);
+void ksnet_configInit(ksnet_cfg *ksn_cfg, void *ke);
 
 #ifdef	__cplusplus
 }

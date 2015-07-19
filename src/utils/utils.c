@@ -17,6 +17,7 @@
 #include "config/conf.h"
 #include "utils.h"
 
+double ksnetEvMgrGetTime(void *ke);
 
 /**
  * KSNet printf. @see vprintf
@@ -63,6 +64,8 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
     }
 
     if(show_it) {
+
+        printf("%f: ", ksnetEvMgrGetTime(ksn_cfg->ke));
 
         va_list args;
         va_start(args, format);
@@ -297,41 +300,41 @@ char *DATA_DIR = ksnet_formatMessage(".%s", getprogname());
 
 #if NOT_USED_YET
 char *getExecPath (char *path, size_t dest_len, char *argv0) {
-    
+
     char *baseName = NULL;
     char *systemPath = NULL;
     char *candidateDir = NULL;
 
     // the easiest case: we are in linux
     if (readlink ("/proc/self/exe", path, dest_len) != -1) {
-        
+
         dirname(path);
         strcat(path, "/");
         return path;
     }
 
-    // Ups... not in linux, no  guarantee 
+    // Ups... not in linux, no  guarantee
 
-    // check if we have something like execve("foobar", NULL, NULL) 
+    // check if we have something like execve("foobar", NULL, NULL)
     if (argv0 == NULL) {
-        
-        // we surrender and give current path instead 
+
+        // we surrender and give current path instead
         if(getcwd(path, dest_len) == NULL ) return NULL;
         strcat(path, "/");
         return path;
     }
 
 
-    // argv[0] 
-    // if dest_len < PATH_MAX may cause buffer overflow 
+    // argv[0]
+    // if dest_len < PATH_MAX may cause buffer overflow
     if ((realpath (argv0, path)) && (!access (path, F_OK))) {
-        
+
         dirname(path);
         strcat(path, "/");
         return path;
     }
 
-    // Current path 
+    // Current path
     baseName = basename(argv0);
     if (getcwd (path, dest_len - strlen (baseName) - 1) == NULL)
         return NULL;
@@ -339,16 +342,16 @@ char *getExecPath (char *path, size_t dest_len, char *argv0) {
     strcat(path, "/");
     strcat(path, baseName);
     if (access (path, F_OK) == 0) {
-    
+
         dirname (path);
         strcat  (path, "/");
         return path;
     }
 
-    // Try the PATH. 
+    // Try the PATH.
     systemPath = getenv ("PATH");
     if (systemPath != NULL) {
-    
+
         dest_len--;
         systemPath = strdup (systemPath);
         for (candidateDir = strtok (systemPath, ":"); candidateDir != NULL; candidateDir = strtok (NULL, ":"))
@@ -369,7 +372,7 @@ char *getExecPath (char *path, size_t dest_len, char *argv0) {
         dest_len++;
     }
 
-    // again someone has use execve: we dont knowe the executable name; we surrender and give instead current path 
+    // again someone has use execve: we dont knowe the executable name; we surrender and give instead current path
     if (getcwd (path, dest_len - 1) == NULL) return NULL;
     strcat  (path, "/");
     return path;
