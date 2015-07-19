@@ -12,6 +12,8 @@
 
 #include "net_split.h"
 
+#define ke ((ksnetEvMgrClass*)(((ksnCoreClass*)(ks->kc->kc))->ke))
+
 /**
  * Initialize split module
  *
@@ -62,36 +64,30 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
 
         *num_subpackets = packet_len / MAX_DATA_LEN + ((packet_len % MAX_DATA_LEN) ? 1:0);
         const size_t PACKETS_AR_LEN = sizeof(void*) * (*num_subpackets);
- //       printf("ksnSplitPacket: start split %d bytes packet to %d subpackets\n", (int)packet_len, *num_subpackets);
 
         packets = malloc(PACKETS_AR_LEN);
-//        printf("ksnSplitPacket: size of packets: %d\n", (int)PACKETS_AR_LEN);
 
         for(i = 0; i < *num_subpackets; i++) {
 
-//            printf("ksnSplitPacket: before malloc\n");
             packets[i] = malloc(MAX_DATA_LEN + sizeof(uint16_t) * 3 + (!i ? sizeof(uint8_t):0));
 
-//            printf("ksnSplitPacket: malloc packets[%d]\n", i);
-//
             int is_last = i == *num_subpackets - 1;
             size_t ptr = 0;
             uint16_t data_len = is_last ? packet_len - MAX_DATA_LEN * i : MAX_DATA_LEN; // Calculate data length
             *(uint16_t*)(packets[i]) = i ? data_len : data_len + sizeof(uint8_t); ptr += sizeof(uint16_t); // Set Data length in buffer
-//            printf("ksnSplitPacket: 0\n");
             *(uint16_t*)(packets[i] + ptr) = (uint16_t) packet_number; ptr += sizeof(uint16_t); // Packet number
-//            printf("ksnSplitPacket: 1\n");
-            *(uint16_t*)(packets[i] + ptr) = (uint16_t) i | (is_last ? 0x8000 : 0); /* printf("ksnSplitPacket: subpacket %d\n", *(uint16_t*)(packets[i] + ptr)); */ ptr += sizeof(uint16_t); // Subpacket number
+            *(uint16_t*)(packets[i] + ptr) = (uint16_t) i | (is_last ? 0x8000 : 0); ptr += sizeof(uint16_t); // Subpacket number
             memcpy(packets[i] + ptr, packet + MAX_DATA_LEN * i, data_len); ptr += data_len; // Subpacket data
-//            printf("ksnSplitPacket: 3\n");
             if(!i) {
                 *(uint8_t*)(packets[i] + ptr) = cmd; // Add CMD to data
-//                printf("ksnSplitPacket: cmd = %d\n", cmd);
             }
-//            printf("ksnSplitPacket: 4\n");
         }
 
-        printf("ksnSplitPacket: %d bytes packet was splitted to %d subpackets\n", (int)packet_len, *num_subpackets);
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
+            "ksnSplitPacket: %d bytes packet was splitted to %d subpackets\n",
+            (int)packet_len, *num_subpackets);
+        #endif
     }
 
     return packets;
@@ -141,7 +137,6 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     create_key(subpacket_num);
     pblMapAdd(ks->map, key, key_len, rd->data + ptr_d, rd->data_len - ptr_d);
     free(key);
-//    printf("ksnSplitCombine: add subpacket %d to map\n", subpacket_num);
 
     // Combine subpackets to large packet and create ksnCorePacketData
     if(last_packet) {
@@ -168,7 +163,6 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             // Get command from first subpacket
             if(!i) {
                 rds->cmd = *(uint8_t*)(data_s + (data_s_len - sizeof(uint8_t)));
-//                printf("ksnSplitCombine: rds->cmd = %d\n", rds->cmd);
                 data_s_len -= sizeof(uint8_t);
             }
 
@@ -187,7 +181,11 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             free(key);
        }
 
-        printf("ksnSplitCombine: combine %d subpackets to large %d bytes packet\n", subpacket_num+1, (int)data_len);
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
+            "ksnSplitCombine: combine %d subpackets to large %d bytes packet\n",
+            subpacket_num+1, (int)data_len);
+        #endif
 
         // Create new ksnCorePacketData for combined block
         rds->addr = rd->addr;
@@ -221,3 +219,4 @@ void ksnSplitFreRds(ksnSplitClass *ks, ksnCorePacketData *rd) {
 }
 
 #undef create_key
+#undef ke
