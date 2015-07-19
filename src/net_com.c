@@ -39,7 +39,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
 
     ksnCommandClass *kco = malloc(sizeof(ksnCommandClass));
     kco->kc = kc;
-    kco->ks = ksnSplitInit(kc);
+    kco->ks = ksnSplitInit(kco);
 
     return kco;
 }

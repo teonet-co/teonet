@@ -21,7 +21,7 @@
  */
 typedef struct ksnSplitClass {
     
-    ksnCommandClass *kc;
+    ksnCommandClass *kco;
     PblMap* map;    ///< Hash Map to store splitted packets
     uint16_t packet_number; ///< Large packet number
     
