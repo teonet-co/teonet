@@ -65,7 +65,8 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
     if(show_it) {
 
-        printf("%f: ", ksnetEvMgrGetTime(ksn_cfg->ke));
+        if(type != MESSAGE)
+            printf("%f: ", ksnetEvMgrGetTime(ksn_cfg->ke));
 
         va_list args;
         va_start(args, format);
