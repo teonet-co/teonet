@@ -196,7 +196,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ev_loop_destroy(loop);
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: stopped.\n");
+    //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: stopped.\n");
+    printf("Event manager: stopped.\n");
     #endif
 
     // Free memory
