@@ -12,7 +12,7 @@
 
 #include "net_split.h"
 
-#define ke ((ksnetEvMgrClass*)(((ksnCoreClass*)(ks->kc->kc))->ke))
+//#define ke ((ksnetEvMgrClass*)(((ksnCoreClass*)(ks->kc->kc))->ke))
 
 /**
  * Initialize split module
@@ -84,7 +84,8 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
         }
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
+        //ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
+        printf(
             "ksnSplitPacket: %d bytes packet was splitted to %d subpackets\n",
             (int)packet_len, *num_subpackets);
         #endif
@@ -182,7 +183,8 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
        }
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
+        //ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
+        printf(
             "ksnSplitCombine: combine %d subpackets to large %d bytes packet\n",
             subpacket_num+1, (int)data_len);
         #endif
@@ -219,4 +221,4 @@ void ksnSplitFreRds(ksnSplitClass *ks, ksnCorePacketData *rd) {
 }
 
 #undef create_key
-#undef ke
+//#undef ke
