@@ -23,6 +23,7 @@
 /tests/Makefile.in
 /tests/Makefile
 /tests/teonet_tst
+/tests/teolarge
 /tests/.libs/
 /src/.libs/
 /src/Makefile
