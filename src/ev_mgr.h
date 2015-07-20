@@ -37,7 +37,8 @@ typedef enum ksnetEvMgrEvents {
     EV_K_RECEIVED,      ///< This host Received a data
     EV_K_RECEIVED_WRONG,///< Wrong packet received
     EV_K_IDLE,          ///< Idle check host events (after 11.5 after last host send or receive data)
-    EV_K_TIMER          ///< Timer event
+    EV_K_TIMER,         ///< Timer event
+    EV_K_ASYNC          ///< Async event
 
 } ksnetEvMgrEvents;
 
@@ -73,6 +74,8 @@ typedef struct ksnetEvMgrClass {
 
     double custom_timer_interval;   ///< Custom timer interval
     double last_custom_timer;       ///< Last time the custom timer called
+    
+    PblMap* async_queue;
 
 } ksnetEvMgrClass;
 
@@ -90,7 +93,7 @@ ksnetEvMgrClass *ksnetEvMgrInit(
 );
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
-void ksnetEvMgrAsync(ksnetEvMgrClass *ke);
+void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);
 char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke);
 void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval);
