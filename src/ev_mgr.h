@@ -62,7 +62,7 @@ typedef struct ksnetEvMgrClass {
     uint32_t timer_val; ///< Event loop timer value
     uint32_t idle_count;///< Idle callback count
     uint32_t idle_activity_count;///< Idle activity callback count
-    void (*event_cb)(struct ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len);
+    void (*event_cb)(struct ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data);
     struct ev_loop *ksnet_event_mgr_loop;   ///< Event loop
 
     // Event Manager Watchers
@@ -75,7 +75,8 @@ typedef struct ksnetEvMgrClass {
     double custom_timer_interval;   ///< Custom timer interval
     double last_custom_timer;       ///< Last time the custom timer called
     
-    PblMap* async_queue;
+    PblList* async_queue;   ///< Async data queue
+    pthread_mutex_t async_mutex; ///< Async data queue mutex
 
 } ksnetEvMgrClass;
 
@@ -86,14 +87,14 @@ extern "C" {
 
 ksnetEvMgrClass *ksnetEvMgrInit(
     int argc, char** argv,
-    void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len),
+    void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
     int options
     //void (*read_cl_params)(ksnetEvMgrClass *ke, int argc, char** argv)
     //void (*read_config)(ksnet_cfg *conf, int port_param)
 );
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
-void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len);
+void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);
 char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke);
 void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval);
