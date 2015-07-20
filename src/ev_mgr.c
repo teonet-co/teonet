@@ -15,6 +15,7 @@
 
 #include "ev_mgr.h"
 #include "utils/utils.h"
+#include "utils/rlutil.h"
 
 // Constants
 #define KSNET_EVENT_MGR_TIMER 0.5
@@ -98,7 +99,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
     //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: started ...\n");
-    printf("Event manager: started ...\n");
+    printf("%sEvent manager:%s started ...\n", ANSI_CYAN, ANSI_NONE);
     #endif
 
     ke->runEventMgr = 1;
@@ -197,7 +198,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
     //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: stopped.\n");
-    printf("Event manager: stopped.\n");
+    printf("%sEvent manager:%s stopped.\n", ANSI_CYAN, ANSI_NONE);
     #endif
 
     // Free memory
@@ -236,7 +237,7 @@ char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: make Async call to Event manager\n");
+    ksnet_printf(&ke->ksn_cfg, DEBUG, "%sEvent manager:%s make Async call to Event manager\n", ANSI_CYAN, ANSI_NONE);
     #endif
 
     // Add something to queue and send async signal to event loop
@@ -380,7 +381,8 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     #define kev ((ksnetEvMgrClass *)((ksnCoreClass *)w->data)->ke)
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, "Event manager: idle callback %d\n",
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, "%sEvent manager:%s idle callback %d\n", 
+            ANSI_CYAN, ANSI_NONE,            
             kev->idle_count);
     #endif
 
@@ -438,7 +440,8 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
         #ifdef DEBUG_KSNET
         if( !(ke->timer_val % show_interval) ) {
             ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                    "Event manager: timer (%.1f sec of %f)\n",
+                    "%sEvent manager:%s timer (%.1f sec of %f)\n", 
+                    ANSI_CYAN, ANSI_NONE,
                     show_interval*KSNET_EVENT_MGR_TIMER, t);
 
         }
@@ -478,7 +481,8 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG,
-                 "\nEvent manager: got a signal to stop event manager ...\n");
+            "\n%sEvent manager:%s got a signal to stop event manager ...\n", 
+            ANSI_CYAN, ANSI_NONE);
     #endif
 
     ((ksnetEvMgrClass *)w->data)->runEventMgr = 0;
@@ -495,7 +499,8 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                 "Event manager: async event callback\n");
+            "%sEvent manager:%s async event callback\n", 
+            ANSI_CYAN, ANSI_NONE);
     #endif
 
     // Do something ...
@@ -523,7 +528,8 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                 "Event manager: STDIN (has data) callback\n");
+            "%sEvent manager:%s STDIN (has data) callback\n", 
+            ANSI_CYAN, ANSI_NONE);
     #endif
 
     void *data;
@@ -569,8 +575,9 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(& ((stdin_idle_data *)w->data)->ke->ksn_cfg, DEBUG_VV,
-                 "Event manager: STDIN idle (process data) callback (%c)\n",
-                 *((int*)((stdin_idle_data *)w->data)->data));
+                "%sEvent manager:%s STDIN idle (process data) callback (%c)\n", 
+                ANSI_CYAN, ANSI_NONE,
+                *((int*)((stdin_idle_data *)w->data)->data));
     #endif
 
     // Stop this watcher
@@ -603,7 +610,8 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(& ((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                "Event manager: idle activity callback %d\n",
+                "%sEvent manager:%s idle activity callback %d\n", 
+                ANSI_CYAN, ANSI_NONE,
                 kev->idle_activity_count);
     #endif
 

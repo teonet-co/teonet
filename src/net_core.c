@@ -23,6 +23,7 @@ typedef int socklen_t;
 #include "ev_mgr.h"
 #include "net_split.h"
 #include "utils/utils.h"
+#include "utils/rlutil.h"
 
 // Constants
 const char *localhost = "127.0.0.1";
@@ -217,7 +218,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg, DEBUG_VV,
-                 "Net core: ksnCoreSendto %s:%d %d \n", addr, port, data_len);
+                 "%sNet core:%s ksnCoreSendto %s:%d %d \n", ANSI_GREEN, ANSI_NONE, addr, port, data_len);
     #endif
 
 
@@ -445,8 +446,8 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "Net core: host_cb receive %d bytes from %s\n", 
-            recvlen, inet_ntoa(remaddr.sin_addr));
+            "%sNet core:%s host_cb receive %d bytes from %s\n", 
+            ANSI_GREEN, ANSI_NONE, recvlen, inet_ntoa(remaddr.sin_addr));
     #endif
 
     // Data received

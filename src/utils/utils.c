@@ -16,6 +16,7 @@
 
 #include "config/conf.h"
 #include "utils.h"
+#include "rlutil.h"
 
 double ksnetEvMgrGetTime(void *ke);
 
@@ -66,7 +67,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
     if(show_it) {
 
         if(type != MESSAGE)
-            printf("%f: ", ksnetEvMgrGetTime(ksn_cfg->ke));
+            printf("%s%f:%s ", ANSI_DARKGREY, ksnetEvMgrGetTime(ksn_cfg->ke), ANSI_NONE);
 
         va_list args;
         va_start(args, format);
