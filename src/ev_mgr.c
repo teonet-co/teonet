@@ -181,13 +181,14 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         ev_io_start (loop, &stdin_w);
 
         // Initialize and start a async signal watcher for event add
+        ke->async_queue = pblMapNewHashMap();
         ev_async_init (&ke->sig_async_w, sig_async_cb);
         ke->sig_async_w.data = ke;
         ev_async_start (loop, &ke->sig_async_w);
 
         // Run event loop
         ev_run(loop, 0);
-
+        pblMapFree(ke->async_queue);
     }
 
     // Destroy modules
@@ -234,14 +235,16 @@ char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
  *
  * @param w_accept
  */
-void ksnetEvMgrAsync(ksnetEvMgrClass *ke) {
+void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, "%sEvent manager:%s make Async call to Event manager\n", ANSI_CYAN, ANSI_NONE);
+    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+            "%sEvent manager:%s make Async call to Event manager\n", 
+            ANSI_CYAN, ANSI_NONE);
     #endif
 
     // Add something to queue and send async signal to event loop
-    // ...
+    
     ev_async_send(EV_DEFAULT_ &ke->sig_async_w); // Send async signal to process queue
 }
 
@@ -497,13 +500,21 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
  */
 void sig_async_cb (EV_P_ ev_async *w, int revents) {
 
+    #define kev ((ksnetEvMgrClass*)(w->data))
+
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
             "%sEvent manager:%s async event callback\n", 
             ANSI_CYAN, ANSI_NONE);
     #endif
 
+    
+    // Send async event to user level
+    kev->event_cb(kev, EV_K_ASYNC , NULL, 0);
+    
     // Do something ...
+    
+    #undef kev
 }
 
 /**

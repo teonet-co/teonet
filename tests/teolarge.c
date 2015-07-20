@@ -14,7 +14,7 @@
 #define TLARGE_VERSION VERSION
 
 /**
- * KSNetwork Events callback
+ * Teonet Events callback
  *
  * @param ke
  * @param event
