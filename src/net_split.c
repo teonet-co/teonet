@@ -27,6 +27,7 @@ ksnSplitClass *ksnSplitInit(ksnCommandClass *kco) {
     ks->kco = kco;
     ks->map = pblMapNewHashMap();
     ks->packet_number = 0;
+    ks->last_added = 0;
 
     return ks;
 }
@@ -103,13 +104,7 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
 ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
 
     ksnCorePacketData *rds = NULL;
-
-    /** TODO:
-     * - Save current time when record added to map
-     * - Clear all map before adding new record to map if time from last adding
-     *   is longe than 10 sec
-     *
-     */
+    double current_time = ksnetEvMgrGetTime(kev);
 
     // Parse command
     size_t ptr_d = 0;
@@ -135,10 +130,18 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     *(uint16_t*)(key + ptr) = packet_num ; ptr += sizeof(packet_num); \
     *(uint16_t*)(key + ptr) = subpacket_num ; ptr += sizeof(subpacket_num)
 
+    // Clear all map raws if time from last adding is longe than 10 sec
+    if(current_time - ks->last_added > 10.0 && !pblMapIsEmpty(ks->map)) {
+        pblMapClear(ks->map);
+    }
+
     // Add subpacket to map
     create_key(subpacket_num);
     pblMapAdd(ks->map, key, key_len, rd->data + ptr_d, rd->data_len - ptr_d);
     free(key);
+    
+    // Save current time when record was added to map
+    ks->last_added = current_time;
 
     // Combine subpackets to large packet and create ksnCorePacketData
     if(last_packet) {
