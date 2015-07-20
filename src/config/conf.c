@@ -28,8 +28,9 @@ void set_defaults(ksnet_cfg *ksn_cfg);
 /**
  * Get configuration parameters
  */
-void ksnet_configInit(ksnet_cfg *ksn_cfg) {
+void ksnet_configInit(ksnet_cfg *ksn_cfg, void *ke) {
 
+    ksn_cfg->ke = ke;
     set_defaults(ksn_cfg);
     // TODO: Set port param
     //int port_param = 0;
@@ -53,7 +54,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_peers_f = 0;
 
     // This host
-    ksn_cfg->port = atoi(KSNET_PORT_DEFAULT); 
+    ksn_cfg->port = atoi(KSNET_PORT_DEFAULT);
     ksn_cfg->port_inc_f = 1;
     char *name = getRandomHostName();
     strncpy(ksn_cfg->host_name, name, KSN_MAX_HOST_NAME);

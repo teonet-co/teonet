@@ -15,6 +15,7 @@
 
 #include "crypt.h"
 #include "ev_mgr.h"
+#include "utils/rlutil.h"
 
 /**
  * Module initialize
@@ -218,8 +219,8 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     // Encrypt the package
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
-                "Encrypt %d bytes to %d bytes buffer ...\n",
-                package_len, (int)(*encrypt_len));
+                "%sEncrypt:%s %d bytes to %d bytes buffer ...\n",
+                ANSI_BROWN, ANSI_NONE, package_len, (int)(*encrypt_len));
     #endif
     *encrypt_len = encrypt(package, package_len, kcr->key, kcr->iv,
                             buffer + ptr);
@@ -250,8 +251,8 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     // Decrypt the package
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
-                "Decrypt %d bytes from %d bytes package ...\n",
-                *decrypt_len, package_len - ptr);
+                "%sDecrypt:%s %d bytes from %d bytes package ...\n",
+                ANSI_BROWN, ANSI_NONE, *decrypt_len, package_len - ptr);
     #endif
     *decrypt_len = decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);

@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "ev_mgr.h"
+#include "net_split.h"
 
 /**
  * KSNet CMD_PEER command data
@@ -38,6 +39,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
 
     ksnCommandClass *kco = malloc(sizeof(ksnCommandClass));
     kco->kc = kc;
+    kco->ks = ksnSplitInit(kco);
 
     return kco;
 }
@@ -48,6 +50,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
  */
 void ksnCommandDestroy(ksnCommandClass *kco) {
 
+    ksnSplitDestroy(kco->ks);
     free(kco);
 }
 
@@ -99,6 +102,25 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             );
             break;
         #endif
+
+        case CMD_SPLIT:
+            {
+                ksnCorePacketData *rds = ksnSplitCombine(kco->ks, rd);
+                if(rds != NULL) {
+                    processed = ksnCommandCheck(kco, rds);
+                    if(!processed) {
+                        // Send event callback
+                        ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
+                        if(ke->event_cb != NULL)
+                            ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds));
+
+                        processed = 1;
+                    }
+                    ksnSplitFreRds(kco->ks, rds);
+                }
+                else processed = 1;
+            }
+            break;
 
 //        case CMD_TUN:
 //            processed = cmd_tun_cb(
