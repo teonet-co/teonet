@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 
 #include "fossa.h"
@@ -25,13 +26,17 @@ pthread_t tid; // Fossa thread id
  * @param data_len
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents ev, void *data,
-              size_t data_len) {
+              size_t data_len, void *user_data) {
 
     switch (ev) {
         
         case EV_K_ASYNC:
-            
-            printf("Async event was received\n");
+            {
+                char *d = strndup(data, data_len);
+                printf("Async event was received %d bytes: %s\n", (int)data_len, (char*) d);
+                ns_send(user_data, data, data_len);  // Echo received data back
+                free(d);
+            }
             break;
             
         default:
@@ -55,10 +60,10 @@ static void ev_handler(struct ns_connection *nc, int ev, void *ev_data) {
         case NS_RECV:
             
             // Send event to teonet
-            ksnetEvMgrAsync(nc->mgr->user_data, io->buf, io->len);
+            ksnetEvMgrAsync(nc->mgr->user_data, io->buf, io->len, nc);
                     
             // This event handler implements simple TCP echo server
-            ns_send(nc, io->buf, io->len);  // Echo received data back
+//            ns_send(nc, io->buf, io->len);  // Echo received data back
             mbuf_remove(io, io->len);      // Discard data from recv buffer
             break;
             
@@ -84,7 +89,7 @@ void* fossa(void *ke) {
     ns_bind(&mgr, "1234", ev_handler);  
 
     for (;;) {  
-        ns_mgr_poll(&mgr, 1000);
+        ns_mgr_poll(&mgr, 100);
     }
 
     ns_mgr_free(&mgr);
