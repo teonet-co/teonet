@@ -14,7 +14,7 @@
 #define TLARGE_VERSION VERSION
 
 /**
- * KSNetwork Events callback
+ * Teonet Events callback
  *
  * @param ke
  * @param event
@@ -22,7 +22,7 @@
  * @param data_len
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
-              size_t data_len) {
+              size_t data_len, void *user_data) {
 
     switch(event) {
 

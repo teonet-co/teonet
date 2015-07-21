@@ -21,7 +21,7 @@ AM_LDFLAGS += -L../../../libev-4.19 -L../../../confuse-2.7/src -L../../../libtun
 endif
 
 #LIBS = ../libksmesh.la
-LIBS = -lteonet -lcrypto
+LIBS = -lteonet -lcrypto 
 #-lcrypt
 
 
@@ -29,3 +29,5 @@ bin_PROGRAMS = teonet_tst teolarge  # ksmqtt_broker echo_server echo_client time
 
 teonet_tst_SOURCES = teonet_tst.c
 teolarge_SOURCES = teolarge.c
+
+SUBDIRS = fossa
