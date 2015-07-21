@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <pthread.h>    // Mutex itint
 
 #include "ev_mgr.h"
 #include "utils/utils.h"
@@ -49,7 +50,7 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 ksnetEvMgrClass *ksnetEvMgrInit(
 
   int argc, char** argv,
-  void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len),
+  void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
   int options
   //void (*read_cl_params)(ksnetEvMgrClass *ke, int argc, char** argv)
   //void (*read_config)(ksnet_cfg *conf, int port_param)
@@ -59,6 +60,9 @@ ksnetEvMgrClass *ksnetEvMgrInit(
     ke->event_cb = event_cb;
     ke->custom_timer_interval = 0.0;
     ke->last_custom_timer = 0.0;
+    
+    // Initialize async mutex
+    pthread_mutex_init(&ke->async_mutex, NULL);
 
     // KSNet parameters
     const int app_argc = 1;             // number of application arguments
@@ -71,7 +75,7 @@ ksnetEvMgrClass *ksnetEvMgrInit(
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
-
+    
     return ke;
 }
 
@@ -181,13 +185,17 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         ev_io_start (loop, &stdin_w);
 
         // Initialize and start a async signal watcher for event add
+        ke->async_queue = pblListNewArrayList();
         ev_async_init (&ke->sig_async_w, sig_async_cb);
         ke->sig_async_w.data = ke;
         ev_async_start (loop, &ke->sig_async_w);
 
         // Run event loop
         ev_run(loop, 0);
-
+        
+        // Free async data queue
+        pblListFree(ke->async_queue);
+        pthread_mutex_destroy(&ke->async_mutex);
     }
 
     // Destroy modules
@@ -234,15 +242,29 @@ char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
  *
  * @param w_accept
  */
-void ksnetEvMgrAsync(ksnetEvMgrClass *ke) {
+void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, "%sEvent manager:%s make Async call to Event manager\n", ANSI_CYAN, ANSI_NONE);
+    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+            "%sEvent manager:%s make Async call to Event manager\n", 
+            ANSI_CYAN, ANSI_NONE);
     #endif
 
     // Add something to queue and send async signal to event loop
-    // ...
-    ev_async_send(EV_DEFAULT_ &ke->sig_async_w); // Send async signal to process queue
+    void* element = NULL;
+    if(data != NULL) {
+        element = malloc(data_len + sizeof(uint16_t) + sizeof(void*));
+        size_t ptr = 0;
+        *(void**)element = user_data; ptr += sizeof(void**);
+        *(uint16_t*)(element + ptr) = (uint16_t)data_len; ptr += sizeof(uint16_t);
+        memcpy(element + ptr, data, data_len);
+    }
+    pthread_mutex_lock (&ke->async_mutex);
+    pblListAdd(ke->async_queue, element); 
+    pthread_mutex_unlock (&ke->async_mutex);
+    
+    // Send async signal to process queue
+    ev_async_send(EV_DEFAULT_ &ke->sig_async_w); 
 }
 
 /**
@@ -392,7 +414,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     // Idle count startup (first time run)
     if(!kev->idle_count) {
         // TODO:       open_local_port(kev);
-        if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0);
+        if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
         connect_r_host_cb(kev);
     }
     // Idle count max value
@@ -406,7 +428,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
 
     // Send idle Event
     if(kev->event_cb != NULL) {
-        kev->event_cb(kev, EV_K_IDLE , NULL, 0);
+        kev->event_cb(kev, EV_K_IDLE , NULL, 0, NULL);
     }
 
     // Set last host event time
@@ -453,7 +475,7 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
            (t - ke->last_custom_timer > ke->custom_timer_interval)) {
 
             ke->last_custom_timer = t;
-            ke->event_cb(ke, EV_K_TIMER , NULL, 0);
+            ke->event_cb(ke, EV_K_TIMER , NULL, 0, NULL);
         }
 
         // Start idle watcher
@@ -497,13 +519,29 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
  */
 void sig_async_cb (EV_P_ ev_async *w, int revents) {
 
+    #define kev ((ksnetEvMgrClass*)(w->data))
+
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
             "%sEvent manager:%s async event callback\n", 
             ANSI_CYAN, ANSI_NONE);
     #endif
 
+    // Get data from async queue and send user event with it
+    pthread_mutex_lock (&kev->async_mutex);
+    while(!pblListIsEmpty(kev->async_queue)) {    
+        size_t ptr = 0;
+        void *data = pblListPoll(kev->async_queue);
+        void *user_data = *(void**)data; ptr += sizeof(void**);
+        uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
+        kev->event_cb(kev, EV_K_ASYNC , data + ptr, data_len, user_data);
+        free(data);
+    }
+    pthread_mutex_unlock (&kev->async_mutex);
+    
     // Do something ...
+    
+    #undef kev
 }
 
 /**

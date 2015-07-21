@@ -112,7 +112,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
                         // Send event callback
                         ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
                         if(ke->event_cb != NULL)
-                            ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds));
+                            ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
 
                         processed = 1;
                     }
@@ -395,7 +395,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Send event callback
     if(kev->event_cb != NULL)
-        kev->event_cb(kev, EV_K_DISCONNECTED, (void*)rd, sizeof(*rd));
+        kev->event_cb(kev, EV_K_DISCONNECTED, (void*)rd, sizeof(*rd), NULL);
 
     return 1;
 

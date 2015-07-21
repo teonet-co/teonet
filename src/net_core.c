@@ -532,7 +532,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
                 // Send event callback
                 if(ke->event_cb != NULL)
-                    ke->event_cb(ke, EV_K_CONNECTED, (void*)&rd, sizeof(rd));
+                    ke->event_cb(ke, EV_K_CONNECTED, (void*)&rd, sizeof(rd), NULL);
             }
 
             // Set last activity time
@@ -547,7 +547,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
             // Send event callback
             if(ke->event_cb != NULL)
-                ke->event_cb(ke, event, (void*)&rd, sizeof(rd));
+                ke->event_cb(ke, event, (void*)&rd, sizeof(rd), NULL);
 
         }
     }

@@ -30,7 +30,7 @@
  * @param data_len
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
-              size_t data_len) {
+              size_t data_len, void *user_data) {
 
     switch(event) {
 
