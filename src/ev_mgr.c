@@ -112,8 +112,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ke->idle_activity_count = 0;
 
     // Event loop
-    struct ev_loop *loop = EV_DEFAULT;
-    ke->ksnet_event_mgr_loop = loop;
+    struct ev_loop *loop = ev_loop_new (0); //EV_DEFAULT;
+    ke->ev_loop = loop;
 
     // Define watchers
     ev_io stdin_w;       // STDIN watcher
@@ -286,7 +286,7 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
     pthread_mutex_unlock (&ke->async_mutex);
     
     // Send async signal to process queue
-    ev_async_send(EV_DEFAULT_ &ke->sig_async_w); 
+    ev_async_send(ke->ev_loop,/*EV_DEFAULT_*/ &ke->sig_async_w); 
 }
 
 /**
@@ -296,7 +296,7 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
  */
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
 
-    return ke->runEventMgr ? ev_now(ke->ksnet_event_mgr_loop) : 0.0;
+    return ke->runEventMgr ? ev_now(ke->ev_loop) : 0.0;
 }
 
 /**
@@ -469,9 +469,9 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
 void timer_cb(EV_P_ ev_timer *w, int revents) {
 
     #ifdef DEBUG_KSNET
-    const int show_interval = 10;
+    const int show_interval = 5 / KSNET_EVENT_MGR_TIMER /* 10 */;
     #endif
-    const int activity_interval = 23;
+    const int activity_interval = 11.5 / KSNET_EVENT_MGR_TIMER /* 23 */;
     ksnetEvMgrClass *ke = w->data;
     double t = ksnetEvMgrGetTime(ke);
 

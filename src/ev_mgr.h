@@ -64,7 +64,7 @@ typedef struct ksnetEvMgrClass {
     uint32_t idle_count;///< Idle callback count
     uint32_t idle_activity_count;///< Idle activity callback count
     void (*event_cb)(struct ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data);
-    struct ev_loop *ksnet_event_mgr_loop;   ///< Event loop
+    struct ev_loop *ev_loop;   ///< Event loop
 
     // Event Manager Watchers
     ev_idle idle_w;         ///< Idle TIMER watcher
