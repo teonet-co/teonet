@@ -446,7 +446,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         ev_io *tuntap_io = (struct ev_io*) malloc (sizeof(struct ev_io));
         ev_io_init (tuntap_io, tuntap_io_cb, kvpn->tuntap_fd, EV_READ);
         tuntap_io->data = kvpn;
-        ev_io_start (EV_DEFAULT_ tuntap_io);
+        ev_io_start (ke->ev_loop,/*EV_DEFAULT_*/ tuntap_io);
     }
 
     return retval;

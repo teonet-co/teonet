@@ -110,7 +110,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     #pragma GCC diagnostic ignored "-Wstrict-aliasing"
     ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
     kc->host_w.data = kc;
-    ev_io_start(EV_DEFAULT_ &kc->host_w);
+    ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop,/*EV_DEFAULT_*/ &kc->host_w);
     #pragma GCC diagnostic pop
 
     return kc;

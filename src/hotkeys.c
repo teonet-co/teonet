@@ -423,7 +423,7 @@ ping_timer_data *ping_timer_init(ksnCoreClass *kn, char *peer) {
     pt->kn = kn;
 
     // Initialize and start main timer watcher, it is a repeated timer
-    pt->loop = EV_DEFAULT;
+    pt->loop = ((ksnetEvMgrClass*)kn->ke)->ev_loop; /*EV_DEFAULT*/;
     ev_timer_init (&pt->w, ping_timer_cb, 0.0, 1.0);
     pt->w.data = pt;
     ev_timer_start (pt->loop, &pt->w);
@@ -459,13 +459,15 @@ void ping_timer_stop(ping_timer_data **pt) {
  * @param kn
  * @param peer_name
  */
-int monitor_timer_one_cb(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data) {
+int monitor_timer_one_cb(ksnetArpClass *ka, char *peer_name, 
+        ksnet_arp_data *arp_data, void *data) {
 
 
     // Reset monitor time
     //ksnet_arp_data *arp_data = ksnetArpGet(ka, peer_name);
     printf("%s%s: %.3f ms %s \n",
-            arp_data->monitor_time == 0.0 ? getANSIColor(LIGHTRED) : getANSIColor(LIGHTGREEN),
+            arp_data->monitor_time == 0.0 ? 
+                getANSIColor(LIGHTRED) : getANSIColor(LIGHTGREEN),
             peer_name, arp_data->monitor_time * 1000.0,
             getANSIColor(NONE));
     arp_data->monitor_time = 0;
@@ -510,7 +512,7 @@ monitor_timer_data *monitor_timer_init(ksnCoreClass *kn) {
     mt->kn = kn;
 
     // Initialize and start main timer watcher, it is a repeated timer
-    mt->loop = EV_DEFAULT;
+    mt->loop = ((ksnetEvMgrClass*)kn->ke)->ev_loop; /*EV_DEFAULT*/;
     ev_timer_init (&mt->w, monitor_timer_cb, MONITOR_TIMER_INTERVAL, MONITOR_TIMER_INTERVAL);
     mt->w.data = mt;
     ev_timer_start (mt->loop, &mt->w);
@@ -600,7 +602,7 @@ peer_timer_data *peer_timer_init(ksnCoreClass *kn) {
     pet->kn = kn;
 
     // Initialize and start main timer watcher, it is a repeated timer
-    pet->loop = EV_DEFAULT;
+    pet->loop = ((ksnetEvMgrClass*)kn->ke)->ev_loop; /*EV_DEFAULT*/;
     ev_idle_init (&pet->iw, peer_idle_cb);
     pet->iw.data = pet;
     ev_timer_init (&pet->tw, peer_timer_cb, PEER_TIMER_INTERVAL, PEER_TIMER_INTERVAL);

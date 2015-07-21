@@ -50,7 +50,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 if(strcmp(teorecv, ksnetEvMgrGetHostName(ke))) {
 
                     strcpy(buffer, "Large Hello!");
-                    ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, KSN_BUFFER_DB_SIZE);
+                    ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, 
+                            KSN_BUFFER_DB_SIZE);
                 }
             }
             break;
@@ -59,9 +60,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_RECEIVED:
             {
                 ksnCorePacketData *rd = data;
-                //printf("Event: Data received %d bytes\n", (int) rd->data_len);
-                //host_received_cb(ke, data, data_len);
-                printf("Command: %d, Data: %s (%d bytes), got from: %s\n", rd->cmd, (char*)rd->data, (int)rd->data_len, rd->from);
+                printf("Command: %d, Data: %s (%d bytes), got from: %s\n", 
+                        rd->cmd, (char*)rd->data, (int)rd->data_len, rd->from);
             }
             break;
 
@@ -70,6 +70,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             break;
     }
 }
+
 /**
  * Main application function
  *
@@ -79,7 +80,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  */
 int main(int argc, char** argv) {
 
-    printf("Teolarger " TLARGE_VERSION "\n");
+    printf("Teolarge " TLARGE_VERSION "\n");
 
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb,
