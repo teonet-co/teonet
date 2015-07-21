@@ -67,6 +67,6 @@
 /app/teosend
 /tests/fossa/Makefile.in
 /tests/fossa/Makefile
-/tests/fossa/.libs/teofossa
-/.teofossa/teonet.conf.out
+/tests/fossa/.libs/
 /tests/fossa/teofossa
+/.teofossa/teonet.conf.out

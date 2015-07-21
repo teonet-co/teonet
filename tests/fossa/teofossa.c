@@ -1,7 +1,33 @@
-/* 
+/** 
  * File:   teofossa.c
- * Author: kirill
+ * Author: Kirill Scherba
  *
+ * Check integration teonet with fossa.
+ * The Teonet runs in main thread and the fossa runs in separate thread.
+ * 
+ * How to run the test:
+ * 
+ * 1) Start this test application in terminal:
+ * 
+ *      tests/fossa/teofossa teofossa -a 127.0.0.1
+ * 
+ * 2) Start telnet in other terminal:
+ * 
+ *      telnet 0 1234
+ * 
+ * 3) Type in the terminal some text:
+ * 
+ *      Hello world!
+ * 
+ * 4) Press Ctrl+C in the teonet terminal window to stop this test.
+ * 
+ * The text "Hello world!" will be:
+ * 
+ *   - received by fossa in fossa event handler
+ *   - resends to teonet with the ksnetEvMgrAsync function
+ *   - send back to terminal with fossa ns_send function in teonet event handler
+ * 
+ * 
  * Created on July 20, 2015, 5:09 PM
  */
 
@@ -32,10 +58,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents ev, void *data,
         
         case EV_K_ASYNC:
             {
-                char *d = strndup(data, data_len);
+                char *d = strndup(data, data_len); // Create temporary data buffer to add 0 at the end of string
+                d[strcspn(d, "\r\n")] = 0; // Remove trailing CRLF
                 printf("Async event was received %d bytes: %s\n", (int)data_len, (char*) d);
+                
+                // This event handler implements simple TCP echo server
                 ns_send(user_data, data, data_len);  // Echo received data back
-                free(d);
+                free(d); // Free temporary data buffer
             }
             break;
             
@@ -62,8 +91,7 @@ static void ev_handler(struct ns_connection *nc, int ev, void *ev_data) {
             // Send event to teonet
             ksnetEvMgrAsync(nc->mgr->user_data, io->buf, io->len, nc);
                     
-            // This event handler implements simple TCP echo server
-//            ns_send(nc, io->buf, io->len);  // Echo received data back
+            // Discard data from recv buffer
             mbuf_remove(io, io->len);      // Discard data from recv buffer
             break;
             
