@@ -15,12 +15,13 @@
 #include "ev_mgr.h"
 
 /**
- * KSNetwork Events callback
+ * Teonet event handler
  *
  * @param ke
  * @param event
  * @param data
  * @param data_len
+ * @param user_data
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {

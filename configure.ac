@@ -136,7 +136,10 @@ AM_CONDITIONAL(TUNEMU, test "$tunemu" = true)
 AM_CONDITIONAL(DARWIN, test "$darwin" = true)
 
 AM_CONDITIONAL(NOT_E_CONFUSE, true)
-# test "$darwin" = true)
+AM_CONDITIONAL(TEO_THREAD, true)
+# if test $TEO_THREAD = "true"; then
+# AC_DEFINE(TEO_THREAD, 1, [Teonet run in thread])
+# fi
 
 AC_CACHE_SAVE
 

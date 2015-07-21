@@ -31,11 +31,14 @@ AM_CFLAGS = \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
-	 -I../embedded/libpbl/src/
-#	 -std=gnu99
+	 -I../embedded/libpbl/src/ 
+	
+if TEO_THREAD	
+AM_CFLAGS += -DTEO_THREAD
+endif
 
 if MINGW
-AM_CFLAGS += -I../../libev-4.19 -I../../libmcrypt-2.5.7/lib -I../../libtuntap-master
+AM_CFLAGS += -I../../libev-4.19 -I../../libtuntap-master
 else
 AM_CFLAGS += -fPIC
 endif
@@ -48,12 +51,9 @@ AM_CXXFLAGS = \
 	-g \
 	-I/opt/local/include
 
-#	-pedantic
-
 AM_LDFLAGS = -L/opt/local/lib
 
 LIBS = -lev -ltuntap ../embedded/libpbl/src/libpbl.a
-#-lcrypt
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
