@@ -32,6 +32,7 @@ extern const char *null_str;
 typedef enum ksnetEvMgrEvents {
 
     EV_K_STARTED,       ///< Calls immediately after event manager starts
+    EV_K_STOPPED,       ///< Calls after event manager stopped
     EV_K_CONNECTED,     ///< New peer connected to host
     EV_K_DISCONNECTED,  ///< A peer was disconnected from host
     EV_K_RECEIVED,      ///< This host Received a data
@@ -77,6 +78,8 @@ typedef struct ksnetEvMgrClass {
     
     PblList* async_queue;   ///< Async data queue
     pthread_mutex_t async_mutex; ///< Async data queue mutex
+    
+    int tid; ///< Thread ID
 
 } ksnetEvMgrClass;
 
@@ -93,6 +96,9 @@ ksnetEvMgrClass *ksnetEvMgrInit(
     //void (*read_config)(ksnet_cfg *conf, int port_param)
 );
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
+#ifdef TEO_THREAD
+int ksnetEvMgrRunThread(ksnetEvMgrClass *ke);
+#endif
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);

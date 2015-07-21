@@ -7,6 +7,10 @@ AM_CFLAGS = \
 	 $(DRELEASE_TEONE) \
 	 -I../src \
 	 -I../embedded/libpbl/src
+	
+if TEO_THREAD	
+AM_CFLAGS += -DTEO_THREAD
+endif	
 
 if MINGW
 AM_CFLAGS += -I../../../confuse-2.7/src -I../../../libev-4.19/ -I../../../libtuntap-master
@@ -21,6 +25,9 @@ AM_LDFLAGS += -L../../../libev-4.19 -L../../../confuse-2.7/src -L../../../libtun
 endif
 
 LIBS = -lteonet -lcrypto 
+if TEO_THREAD	
+LIBS += -pthread
+endif
 
 bin_PROGRAMS = teolarge teosend
 

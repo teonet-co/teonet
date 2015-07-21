@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <pthread.h>    // Mutex itint
+#include <pthread.h>    // For mutex and TEO_TREAD
 
 #include "ev_mgr.h"
 #include "utils/utils.h"
@@ -209,11 +209,33 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     printf("%sEvent manager:%s stopped.\n", ANSI_CYAN, ANSI_NONE);
     #endif
 
+    // Send stopped event to user level
+    if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STOPPED, NULL, 0, NULL);
+
     // Free memory
     free(ke);
 
     return 0;
 }
+
+#ifdef TEO_THREAD
+void *_ksnetEvMgrRunThread(void *ke) {
+   
+    ksnetEvMgrRun(ke);
+    
+    return NULL;
+}
+
+int ksnetEvMgrRunThread(ksnetEvMgrClass *ke) {
+    
+    // Start fossa thread
+    int err = pthread_create(&ke->tid, NULL, &_ksnetEvMgrRunThread, ke);
+    if (err != 0) printf("\nCan't create thread :[%s]", strerror(err));
+    else printf("\nThread created successfully\n");
+    
+    return err;
+}
+#endif
 
 /**
  * Set custom timer interval
