@@ -20,11 +20,9 @@ AM_LDFLAGS =  -L/opt/local/lib -L../src
 #AM_LDFLAGS += -L../../../libev-4.19 -L../../../confuse-2.7/src -L../../../libtuntap-master -L../../../libmcrypt-2.5.7/lib
 #endif
 
-#LIBS = ../src/libteonet.la
 LIBS = -lteonet -lcrypto
 
-bin_PROGRAMS = teovpn teosend
+bin_PROGRAMS = teovpn
 
 teovpn_SOURCES = teovpn.c
 
-teosend_SOURCES = teosend.c

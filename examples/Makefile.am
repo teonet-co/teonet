@@ -22,6 +22,9 @@ endif
 
 LIBS = -lteonet -lcrypto 
 
-bin_PROGRAMS = teonet_tst
+bin_PROGRAMS = teolarge teosend
 
-teonet_tst_SOURCES = teonet_tst.c
+teolarge_SOURCES = teolarge.c
+teosend_SOURCES = teosend.c
+
+SUBDIRS = fossa

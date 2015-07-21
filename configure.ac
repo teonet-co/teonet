@@ -215,8 +215,9 @@ AC_CONFIG_FILES([
     po/Makefile.in
     src/libteonet.pc
     src/Makefile
+    examples/Makefile
+    examples/fossa/Makefile
     tests/Makefile
-    tests/fossa/Makefile
     app/Makefile
 ])
 AC_PROG_CC
