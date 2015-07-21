@@ -1,6 +1,8 @@
 /** 
  * File:   teovpn.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
+ * 
+ * Teonet VPN application.
  *
  * Created on July 14, 2015, 9:52 AM
  */

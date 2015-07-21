@@ -6,6 +6,16 @@
  *
  * Test application to send and receive teonet messages.
  *
+ * How to execute this test:
+ * 
+ * 1) Start one teonet test application in terminal:
+ * 
+ *      tests/teosend teosend -p 9500
+ * 
+ * 2) Start another test application in other terminal:
+ * 
+ *      tests/teosend teorecv -r 9500 -a 127.0.0.1
+ *
  * - subscribe to timer event
  * - send message by timer
  * - show received messages

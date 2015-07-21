@@ -1,11 +1,11 @@
 /** 
  * File:   teofossa.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Check integration teonet with fossa.
  * The Teonet runs in main thread and the fossa runs in separate thread.
  * 
- * How to run the test:
+ * How to execute this test:
  * 
  * 1) Start this test application in terminal:
  * 

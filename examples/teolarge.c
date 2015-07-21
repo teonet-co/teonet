@@ -1,6 +1,21 @@
 /**
  * File:   teolarge.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
+ * 
+ * Send and receive large data blocks between teonet applications.
+ * 
+ * How to execute this test:
+ * 
+ * 1) Start one teonet test application in terminal:
+ * 
+ *      tests/teolarge teolarge -p 9500
+ * 
+ * 2) Start another test application in other terminal:
+ * 
+ *      tests/teolarge teorecv -r 9500 -a 127.0.0.1
+ * 
+ * The first application with name teolarge will send data blocks 2048 bytes 
+ * length to the teorecv application.
  *
  * Created on July 18, 2015, 3:06 PM
  */
@@ -31,7 +46,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             {
                 char buffer[KSN_BUFFER_DB_SIZE];
 
-                const char *teorecv = "teolrec";
+                const char *teorecv = "teorecv";
                 if(strcmp(teorecv, ksnetEvMgrGetHostName(ke))) {
 
                     strcpy(buffer, "Large Hello!");
