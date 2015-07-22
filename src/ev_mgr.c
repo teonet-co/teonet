@@ -201,15 +201,6 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             sigstop_w.data = ke;
             ev_signal_start (loop, &sigstop_w);
             #endif
-
-//            // Initialize and start STDIN keyboard input watcher
-//            ev_init (&stdin_w, stdin_cb);
-//            ev_io_set (&stdin_w, STDIN_FILENO, EV_READ);
-//            stdin_w.data = ke;
-//            ev_io_start (loop, &stdin_w);
-//            
-//            // Initialize STDIN idle watchers
-//            ev_idle_init (&ke->idle_stdin_w, idle_stdin_cb);
         }
 
         // Initialize and start a async signal watcher for event add
