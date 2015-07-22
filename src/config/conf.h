@@ -24,8 +24,9 @@
 #define DEBUG_KSNET  1
 #endif
 
-#define KSNET_PORT_DEFAULT "9000"
-#define KSNET_CRYPT  1
+#define KSNET_EVENT_MGR_TIMER 0.25  ///< Main event manager timer interval
+#define KSNET_PORT_DEFAULT "9000" ///< Main network port
+#define KSNET_CRYPT  1 ///< Crypt packages
 
 // Modules enable
 #define M_ENAMBE_VPN 1

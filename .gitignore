@@ -74,3 +74,6 @@
 /tests/Makefile
 /tests/Makefile.in
 /tests/teonet_tst
+/examples/teomulti
+/.teomulti/teonet-9301.conf
+/.teomulti/teonet.conf.out

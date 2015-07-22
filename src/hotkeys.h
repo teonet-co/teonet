@@ -1,6 +1,6 @@
 /**
  * File:   hotkeys.h
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on April 16, 2015, 10:43 PM
  *
@@ -64,6 +64,7 @@ typedef struct peer_timer_data {
  */
 typedef struct ksnetHotkeysClass  {
 
+    void *ke;
     int non_blocking; ///< Non blocking mode: 1 - non-blocking
     #ifdef HAVE_MINGW
     int initial_settings, new_settings; ///< Keybord settings
@@ -79,6 +80,9 @@ typedef struct ksnetHotkeysClass  {
     ping_timer_data *pt;
     monitor_timer_data *mt;
     peer_timer_data *pet;
+    
+    ev_io stdin_w; ///< STDIN watcher
+    ev_idle idle_stdin_w; ///< Idle STDIN watcher
 
 } ksnetHotkeysClass;
 
@@ -92,8 +96,6 @@ extern const char *PING, *TRACE, *MONITOR, *TRIPTIME;
 #ifdef	__cplusplus
 extern "C" {
 #endif
-
-void hotkeys_cb(void *ke, void *data);
 
 ksnetHotkeysClass *ksnetHotkeysInit(void *ke);
 void ksnetHotkeysDestroy(ksnetHotkeysClass *kh);
