@@ -93,7 +93,7 @@ extern const char *PING, *TRACE, *MONITOR, *TRIPTIME;
 extern "C" {
 #endif
 
-void hotkeys_cb(void *ke, void *data);
+void hotkeys_cb(void *ke, void *data, ev_idle *w);
 
 ksnetHotkeysClass *ksnetHotkeysInit(void *ke);
 void ksnetHotkeysDestroy(ksnetHotkeysClass *kh);

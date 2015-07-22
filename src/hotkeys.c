@@ -69,7 +69,7 @@ const char
 /**
  * Callback procedure which called by event manager when STDIN FD has any data
  */
-void hotkeys_cb(void *ke, void *data) {
+void hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
     #define kev ((ksnetEvMgrClass*)ke) // Event manager
     #define kh  kev->kh   // Hotkeys class
@@ -105,6 +105,7 @@ void hotkeys_cb(void *ke, void *data) {
             " "COLOR_DW"M"COLOR_END" - monitor network %s\n"
 //            " "COLOR_DW"C"COLOR_END" - direct connect to peer\n"
 //            " "COLOR_DW"A"COLOR_END" - direct connect to all peers\n"
+            "%s"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
             #if M_ENAMBE_VPN
@@ -118,6 +119,7 @@ void hotkeys_cb(void *ke, void *data) {
             #endif
             , (kh->pt != NULL ? "(running now, press i to stop)" : "")
             , (kh->mt != NULL ? "(running now, press M to stop)" : "")
+            , kev->num_nets > 1 ? " "COLOR_DW"n"COLOR_END" - switch to other network\n" : ""
             );
             break;
 
@@ -203,6 +205,70 @@ void hotkeys_cb(void *ke, void *data) {
             }
             break;
 
+        // Switch network
+        case 'n':
+            if(kev->num_nets > 1) {
+                
+                if(kh->non_blocking) {
+                    
+                    // Request string with new network number
+                    kh->str_number = 0;
+                    printf("Enter new network number "
+                           "(from 1 to %d, current net is %d): ",  
+                           (int)kev->num_nets, (int)kev->n_num + 1);
+                    fflush(stdout);
+                    // Switch STDIN to receive string
+                    _keys_non_blocking_stop(kh);
+                }
+                
+                // Got requested strings
+                else switch(kh->str_number) {
+                    
+                    // Got number in string
+                    case 0:
+                        
+                        // Switch STDIN to receive hot key
+                        trimlf((char*)data);
+                        if(((char*)data)[0]) {
+                            strncpy(kh->str[kh->str_number], (char*)data, KSN_BUFFER_SM_SIZE);
+                            // Switch to entered network number 
+                            int n_num = atoi(kh->str[kh->str_number]);
+                            if(n_num >= 1 && n_num <= kev->num_nets) {
+                                
+                                n_num--;
+                                if(n_num != kev->n_num) {
+                                    
+                                    ksnetEvMgrClass *p_ke = ke;
+                                    
+                                    // Destroy hotkeys module
+//                                    ksnetHotkeysDestroy(kh);
+                                    
+                                    // Switch to new network
+//                                    printf("Net num %d, %p %p\n", p_ke->n_num, p_ke->n_prev, p_ke->n_next);
+                                    for(;;) {
+                                        if(n_num < p_ke->n_num) p_ke = p_ke->n_prev;
+                                        else if(n_num > p_ke->n_num) p_ke = p_ke->n_next;
+                                        else {
+                                            // Initialize hotheys module
+//                                            kh = ksnetHotkeysInit(p_ke);
+                                            ((stdin_idle_data *)(w->data))->ke = p_ke;
+                                            break;
+                                        }
+//                                        printf("Net num %d, %p\n", n_num, p_ke);
+                                        //break;
+                                    }
+                                    printf("Switch to network #%d\n", n_num + 1);
+                                }
+                                else printf("Already in network #%d\n", n_num + 1);
+                            }
+                        }
+                        _keys_non_blocking_start(kh); // Switch STDIN to hot key
+                        
+                        break;
+                }
+            }
+            break;
+            
         // Send ping
         case 'i':
             // Got hot key
@@ -348,7 +414,7 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 
     ksnetHotkeysClass *kh = malloc(sizeof(ksnetHotkeysClass));
 
-    tcgetattr(0,&kh->initial_settings);
+    tcgetattr(0, &kh->initial_settings);
     _keys_non_blocking_start(kh);
     kh->wait_y = Y_NONE;
     kh->peer_m = 0;

@@ -59,12 +59,12 @@ typedef struct ksnetEvMgrClass {
 //
     ksnet_cfg ksn_cfg; ///< KSNet configuration
 
-    int runEventMgr;    ///< Run even manages (stop if 0)
+    int runEventMgr; ///< Run even manages (stop if 0)
     uint32_t timer_val; ///< Event loop timer value
-    uint32_t idle_count;///< Idle callback count
-    uint32_t idle_activity_count;///< Idle activity callback count
+    uint32_t idle_count; ///< Idle callback count
+    uint32_t idle_activity_count; ///< Idle activity callback count
     void (*event_cb)(struct ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data);
-    struct ev_loop *ev_loop;   ///< Event loop
+    struct ev_loop *ev_loop; ///< Event loop
 
     // Event Manager Watchers
     ev_idle idle_w;         ///< Idle TIMER watcher
@@ -79,9 +79,24 @@ typedef struct ksnetEvMgrClass {
     PblList* async_queue;   ///< Async data queue
     pthread_mutex_t async_mutex; ///< Async data queue mutex
     
-    int tid; ///< Thread ID
+    size_t n_num; ///< Network number
+    void *n_prev; ///< Previouse network
+    void *n_next; ///< Next network
+    size_t num_nets; ///< Number of networks
+    
 
 } ksnetEvMgrClass;
+
+/**
+ * STDIN idle watcher data
+ */
+typedef struct stdin_idle_data {
+
+    ksnetEvMgrClass *ke;
+    void *data;
+    ev_io *stdin_w;
+
+} stdin_idle_data;
 
 
 #ifdef	__cplusplus
@@ -92,8 +107,12 @@ ksnetEvMgrClass *ksnetEvMgrInit(
     int argc, char** argv,
     void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
     int options
-    //void (*read_cl_params)(ksnetEvMgrClass *ke, int argc, char** argv)
-    //void (*read_config)(ksnet_cfg *conf, int port_param)
+);
+ksnetEvMgrClass *ksnetEvMgrInitPort(
+    int argc, char** argv,
+    void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+    int options,
+    int port
 );
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
 #ifdef TEO_THREAD
