@@ -1,6 +1,6 @@
 /**
  * File:   hotkeys.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on April 16, 2015, 10:43 PM
  *
@@ -28,6 +28,8 @@ enum wait_y {
 };
 
 // Local functions
+void stdin_cb (EV_P_ ev_io *w, int revents); // STDIN callback
+void idle_stdin_cb (EV_P_ ev_idle *w, int revents); // STDIN idle callback
 ping_timer_data *ping_timer_init(ksnCoreClass *kn, char *peer);
 void ping_timer_stop(ping_timer_data **pt);
 monitor_timer_data *monitor_timer_init(ksnCoreClass *kn);
@@ -69,19 +71,19 @@ const char
 /**
  * Callback procedure which called by event manager when STDIN FD has any data
  */
-void hotkeys_cb(void *ke, void *data, ev_idle *w) {
+int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
     #define kev ((ksnetEvMgrClass*)ke) // Event manager
-    #define kh  kev->kh   // Hotkeys class
+    #define khv  kev->kh   // Hotkeys class
     #define kc  kev->kc   // Net core class
 
     int hotkey;
 
     // Check hot key
-    if(!kh->non_blocking) hotkey = kh->last_hotkey;
+    if(!khv->non_blocking) hotkey = khv->last_hotkey;
     else hotkey = *(int*)data;
 
-    if(hotkey != 'y') kh->wait_y = Y_NONE;
+    if(hotkey != 'y') khv->wait_y = Y_NONE;
     switch(hotkey) {
 
         // Help
@@ -117,30 +119,30 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
             , (kev->ksn_cfg.show_debug_f ? SHOW : DONT_SHOW)
             , (kev->ksn_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
             #endif
-            , (kh->pt != NULL ? "(running now, press i to stop)" : "")
-            , (kh->mt != NULL ? "(running now, press M to stop)" : "")
+            , (khv->pt != NULL ? "(running now, press i to stop)" : "")
+            , (khv->mt != NULL ? "(running now, press M to stop)" : "")
             , kev->num_nets > 1 ? " "COLOR_DW"n"COLOR_END" - switch to other network\n" : ""
             );
             break;
 
         // Show peers
         case 'p':
-            if(kh->pet == NULL) {
+            if(khv->pet == NULL) {
                 int num_lines = ksnetArpShow(kc->ka);
-                if(kh->last_hotkey == hotkey) kh->peer_m = !kh->peer_m;
-                if(kh->peer_m) {
-                    kh->pet = peer_timer_init(kc);
-                    kh->pet->num_lines = num_lines;
+                if(khv->last_hotkey == hotkey) khv->peer_m = !khv->peer_m;
+                if(khv->peer_m) {
+                    khv->pet = peer_timer_init(kc);
+                    khv->pet->num_lines = num_lines;
                 }
                 printf("\n");
             }
-            else if(kh->peer_m) {
-                kh->peer_m = 0;
-                peer_timer_stop(&kh->pet);
+            else if(khv->peer_m) {
+                khv->peer_m = 0;
+                peer_timer_stop(&khv->pet);
                 //printf("Peer timer stopped\n");
             }
             printf("Press p to %s continuously refresh\n",
-                   (kh->peer_m ? STOP : START));
+                   (khv->peer_m ? STOP : START));
             break;
 
         // Show VPN
@@ -167,27 +169,27 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
         // Send message
         case 'm':
             // Got hot key
-            if(kh->non_blocking) {
+            if(khv->non_blocking) {
                 // Request string 'to'
-                kh->str_number = 0;
+                khv->str_number = 0;
                 printf("to: ");
                 fflush(stdout);
                 // Switch STDIN to receive string
-                _keys_non_blocking_stop(kh);
+                _keys_non_blocking_stop(khv);
             }
             // Got requested strings
-            else switch(kh->str_number) {
+            else switch(khv->str_number) {
                 // Got 'to' string
                 case 0:
                     trimlf((char*)data);
                     if(((char*)data)[0]) {
-                        strncpy(kh->str[kh->str_number], (char*)data, KSN_BUFFER_SM_SIZE);
+                        strncpy(khv->str[khv->str_number], (char*)data, KSN_BUFFER_SM_SIZE);
                         // Request string 'message'
-                        kh->str_number = 1;
+                        khv->str_number = 1;
                         printf("message: ");
                         fflush(stdout);
                     }
-                    else _keys_non_blocking_start(kh);
+                    else _keys_non_blocking_start(khv);
                     break;
                 // Got 'message' string
                 case 1:
@@ -195,12 +197,12 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
                     if(((char*)data)[0]) {
                         // Send message
                         printf("Send message => to: '%s', message: '%s'\n",
-                               kh->str[0], (char*)data);
-                        ksnCommandSendCmdEcho(kc->kco, kh->str[0], data,
+                               khv->str[0], (char*)data);
+                        ksnCommandSendCmdEcho(kc->kco, khv->str[0], data,
                                               strlen(data) + 1);
                     }
                     // Switch STDIN to receive hot key
-                    _keys_non_blocking_start(kh);
+                    _keys_non_blocking_start(khv);
                     break;
             }
             break;
@@ -209,30 +211,37 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
         case 'n':
             if(kev->num_nets > 1) {
                 
-                if(kh->non_blocking) {
+                if(khv->non_blocking) {
                     
                     // Request string with new network number
-                    kh->str_number = 0;
+                    khv->str_number = 0;
                     printf("Enter new network number "
                            "(from 1 to %d, current net is %d): ",  
                            (int)kev->num_nets, (int)kev->n_num + 1);
                     fflush(stdout);
+                    
                     // Switch STDIN to receive string
-                    _keys_non_blocking_stop(kh);
+                    _keys_non_blocking_stop(khv);
                 }
                 
                 // Got requested strings
-                else switch(kh->str_number) {
+                else switch(khv->str_number) {
                     
-                    // Got number in string
+                    // Got network number in string
                     case 0:
                         
                         // Switch STDIN to receive hot key
+                        _keys_non_blocking_start(khv);
+
+                        // Parse data
                         trimlf((char*)data);
                         if(((char*)data)[0]) {
-                            strncpy(kh->str[kh->str_number], (char*)data, KSN_BUFFER_SM_SIZE);
+                            
+                            strncpy(khv->str[khv->str_number], 
+                                    (char*)data, KSN_BUFFER_SM_SIZE);
+                            
                             // Switch to entered network number 
-                            int n_num = atoi(kh->str[kh->str_number]);
+                            int n_num = atoi(khv->str[khv->str_number]);
                             if(n_num >= 1 && n_num <= kev->num_nets) {
                                 
                                 n_num--;
@@ -241,54 +250,50 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     ksnetEvMgrClass *p_ke = ke;
                                     
                                     // Destroy hotkeys module
-//                                    ksnetHotkeysDestroy(kh);
+                                    ksnetHotkeysDestroy(khv);
+                                    p_ke->kh = NULL;
                                     
                                     // Switch to new network
-//                                    printf("Net num %d, %p %p\n", p_ke->n_num, p_ke->n_prev, p_ke->n_next);
                                     for(;;) {
                                         if(n_num < p_ke->n_num) p_ke = p_ke->n_prev;
                                         else if(n_num > p_ke->n_num) p_ke = p_ke->n_next;
                                         else {
-                                            // Initialize hotheys module
-//                                            kh = ksnetHotkeysInit(p_ke);
-                                            ((stdin_idle_data *)(w->data))->ke = p_ke;
-                                            break;
+                                            // Initialize hotkeys module
+                                            p_ke->kh = ksnetHotkeysInit(p_ke);
+                                            printf("Switch to network #%d\n", n_num + 1);
+                                            return 1;
                                         }
-//                                        printf("Net num %d, %p\n", n_num, p_ke);
-                                        //break;
                                     }
-                                    printf("Switch to network #%d\n", n_num + 1);
                                 }
                                 else printf("Already in network #%d\n", n_num + 1);
                             }
                         }
-                        _keys_non_blocking_start(kh); // Switch STDIN to hot key
-                        
                         break;
+                    }
                 }
-            }
-            break;
+                break;
             
         // Send ping
         case 'i':
             // Got hot key
-            if(kh->non_blocking) {
+            if(khv->non_blocking) {
 
                 // Request string 'to'
-                if(kh->pt == NULL) {
-                    kh->str_number = 0;
+                if(khv->pt == NULL) {
+                    khv->str_number = 0;
                     printf("Ping to: ");
                     fflush(stdout);
-                    _keys_non_blocking_stop(kh); // Switch STDIN to string
+                    _keys_non_blocking_stop(khv); // Switch STDIN to string
                 }
                 // Stop ping timer
                 else {
-                    ping_timer_stop(&kh->pt);
+                    ping_timer_stop(&khv->pt);
                     printf("Ping stopped\n");
                 }
             }
             // Got requested strings
-            else switch(kh->str_number) {
+            else switch(khv->str_number) {
+                
                 // Got 'to' string
                 case 0:
                     trimlf((char*)data);
@@ -298,9 +303,9 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                "\n"
                                "Press i to stop ping\n\n",
                                (char*)data, PING);
-                        kh->pt = ping_timer_init(kc, (char *)data);
+                        khv->pt = ping_timer_init(kc, (char *)data);
                     }
-                    _keys_non_blocking_start(kh); // Switch STDIN to hot key
+                    _keys_non_blocking_start(khv); // Switch STDIN to hot key
                     break;
             }
             break;
@@ -308,16 +313,16 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
         // Trace route
         case 't':
             // Got hot key
-            if(kh->non_blocking) {
+            if(khv->non_blocking) {
 
                 // Request string 'to'
-                kh->str_number = 0;
+                khv->str_number = 0;
                 printf("Trace to: ");
                 fflush(stdout);
-                _keys_non_blocking_stop(kh); // Switch STDIN to string
+                _keys_non_blocking_stop(khv); // Switch STDIN to string
             }
             // Got requested strings
-            else switch(kh->str_number) {
+            else switch(khv->str_number) {
 
                 // Got 'to' string
                 case 0:
@@ -336,7 +341,7 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
                         memcpy(trace_buf + TRACE_LEN, data, data_len);
                         // TODO: peer_send_cmd_echo(kn, data, (void*)trace_buf, trace_buf_len, 0);
                     }
-                    _keys_non_blocking_start(kh); // Switch STDIN to hot key
+                    _keys_non_blocking_start(khv); // Switch STDIN to hot key
                     break;
             }
             break;
@@ -344,16 +349,16 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
         // Start/Stop network monitor
         case 'M':
             // Got hot key
-            if(kh->non_blocking) {
+            if(khv->non_blocking) {
 
                 // Request string 'to'
-                if(kh->mt == NULL) {
-                    kh->mt = monitor_timer_init(kc);
+                if(khv->mt == NULL) {
+                    khv->mt = monitor_timer_init(kc);
                     printf("Network monitor started (press M to stop)\n");
                 }
                 // Stop ping timer
                 else {
-                    monitor_timer_stop(&kh->mt);
+                    monitor_timer_stop(&khv->mt);
                     printf("Network monitor stopped\n");
                 }
             }
@@ -362,12 +367,12 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
         // Quit
         case 'q':
             puts("Press y to quit application");
-            kh->wait_y = Y_QUIT;
+            khv->wait_y = Y_QUIT;
             break;
 
         // Y - yes
         case 'y':
-            switch(kh->wait_y) {
+            switch(khv->wait_y) {
                 case Y_QUIT:
                     puts("Quit ...");
                     ksnetEvMgrStop(kev);
@@ -375,13 +380,14 @@ void hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 default:
                     break;
             }
-            kh->wait_y = Y_NONE;
+            khv->wait_y = Y_NONE;
             break;
     }
-    kh->last_hotkey = hotkey;
-
+    khv->last_hotkey = hotkey;
+    return 0;
+    
     #undef kc
-    #undef kh
+    #undef khv
     #undef kev
 }
 
@@ -421,7 +427,22 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->pt = NULL;
     kh->mt = NULL;
     kh->pet = NULL;
+    kh->ke = ke;
+    
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
+    // Initialize and start STDIN keyboard input watcher
+    ev_init (&kh->stdin_w, stdin_cb);
+    ev_io_set (&kh->stdin_w, STDIN_FILENO, EV_READ);
+    kh->stdin_w.data = ke;
+    ev_io_start (((ksnetEvMgrClass*)ke)->ev_loop, &kh->stdin_w);
+
+    // Initialize STDIN idle watchers
+    ev_idle_init (&kh->idle_stdin_w, idle_stdin_cb);
+    
+    #pragma GCC diagnostic pop
+    
     // Start show peer
     if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_peers_f) {
         kh->pet = peer_timer_init( ((ksnetEvMgrClass*)ke)->kc );
@@ -439,12 +460,91 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
 
     if(kh != NULL) {
-        
+        ev_io_stop (((ksnetEvMgrClass*)(kh->ke))->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
         free(kh);
     }
 }
 
+/**
+ * STDIN (has data) callback
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void stdin_cb (EV_P_ ev_io *w, int revents) {
+
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
+            "%sEvent manager:%s STDIN (has data) callback\n", 
+            ANSI_CYAN, ANSI_NONE);
+    #endif
+
+    void *data;
+
+    // Get string
+    if(((ksnetEvMgrClass *)w->data)->kh->non_blocking == 0) {
+
+        char *buffer = malloc(KSN_BUFFER_SM_SIZE);
+        fgets(buffer, KSN_BUFFER_SM_SIZE , stdin);
+        data = buffer;
+    }
+    // Get character
+    else {
+        int ch = getchar();
+        putchar(ch);
+        putchar('\n');
+        data = malloc(sizeof(int));
+        *(int*)data = ch;
+    }
+
+    // Create STDIN idle watcher data
+    stdin_idle_data *id = malloc(sizeof(stdin_idle_data));
+    id->ke = ((ksnetEvMgrClass *)w->data);
+    id->data = data;
+    id->stdin_w = w;
+    ((ksnetEvMgrClass *)w->data)->kh->idle_stdin_w.data = id;
+
+    // Stop this watcher
+    ev_io_stop(EV_A_ w);
+
+    // Start STDIN idle watcher
+    ev_idle_start(EV_A_ & ((ksnetEvMgrClass *)w->data)->kh->idle_stdin_w);
+}
+
+/**
+ * STDIN Idle callback: execute STDIN callback in idle time
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
+
+    #ifdef DEBUG_KSNET
+    ksnet_printf(& ((stdin_idle_data *)w->data)->ke->ksn_cfg, DEBUG_VV,
+                "%sEvent manager:%s STDIN idle (process data) callback (%c)\n", 
+                ANSI_CYAN, ANSI_NONE,
+                *((int*)((stdin_idle_data *)w->data)->data));
+    #endif
+
+    // Stop this watcher
+    ev_idle_stop(EV_A_ w);
+
+    // Call the hot keys module callback
+    if(!hotkeys_cb(((stdin_idle_data *)w->data)->ke,
+               ((stdin_idle_data *)w->data)->data,
+               w)) {
+    
+        // Start STDIN watcher
+        ev_io_start(EV_A_ ((stdin_idle_data *)w->data)->stdin_w);
+    }
+
+    // Free watchers data
+    free(((stdin_idle_data *)w->data)->data);
+    free(w->data);
+}
 
 /******************************************************************************/
 /* Ping timer functions                                                       */
