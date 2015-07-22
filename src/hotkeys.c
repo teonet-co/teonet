@@ -268,10 +268,10 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                 else printf("Already in network #%d\n", n_num + 1);
                             }
                         }
+                                            break;
+                                        }
+                                    }
                         break;
-                }
-            }
-            break;
             
         // Send ping
         case 'i':
