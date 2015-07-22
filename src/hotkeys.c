@@ -269,9 +269,9 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                             }
                         }
                         break;
+                    }
                 }
-            }
-            break;
+                break;
             
         // Send ping
         case 'i':
