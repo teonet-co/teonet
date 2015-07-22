@@ -1,6 +1,6 @@
 /**
  * File:   ev_mgr.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on April 11, 2015, 2:13 AM
  *
@@ -25,13 +25,11 @@ const char *null_str = "";
 
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
-void idle_stdin_cb (EV_P_ ev_idle *w, int revents); // STDIN idle callback
 void idle_activity_cb(EV_P_ ev_idle *w, int revents); // Idle activity callback
 void timer_cb (EV_P_ ev_timer *w, int revents); // Timer callback
 void host_cb (EV_P_ ev_io *w, int revents); // Host callback
 void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
-void stdin_cb (EV_P_ ev_io *w, int revents); // STDIN callback
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
@@ -92,7 +90,7 @@ ksnetEvMgrClass *ksnetEvMgrInit(
   int options
     ) {
     
-    _ksnetEvMgrInit(argc, argv, event_cb, options, 0);
+    return _ksnetEvMgrInit(argc, argv, event_cb, options, 0);
 }
 
 ksnetEvMgrClass *ksnetEvMgrInitPort(
@@ -103,7 +101,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
   int port
     ) {
     
-    _ksnetEvMgrInit(argc, argv, event_cb, options, port);
+    return _ksnetEvMgrInit(argc, argv, event_cb, options, port);
 }
 
 /**
@@ -142,7 +140,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ke->ev_loop = loop;
 
     // Define watchers
-    ev_io stdin_w;       // STDIN watcher
+//    ev_io stdin_w;       // STDIN watcher
     ev_signal sigint_w;  // Signal SIGINT watcher
     ev_signal sigterm_w; // Signal SIGTERM watcher
     #ifndef HAVE_MINGW
@@ -203,15 +201,6 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             sigstop_w.data = ke;
             ev_signal_start (loop, &sigstop_w);
             #endif
-
-            // Initialize and start STDIN keyboard input watcher
-            ev_init (&stdin_w, stdin_cb);
-            ev_io_set (&stdin_w, STDIN_FILENO, EV_READ);
-            stdin_w.data = ke;
-            ev_io_start (loop, &stdin_w);
-            
-            // Initialize STDIN idle watchers
-            ev_idle_init (&ke->idle_stdin_w, idle_stdin_cb);
         }
 
         // Initialize and start a async signal watcher for event add
@@ -598,87 +587,6 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
 }
 
 /**
- * STDIN (has data) callback
- *
- * @param loop
- * @param w
- * @param revents
- */
-void stdin_cb (EV_P_ ev_io *w, int revents) {
-
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-            "%sEvent manager:%s STDIN (has data) callback\n", 
-            ANSI_CYAN, ANSI_NONE);
-    #endif
-
-    void *data;
-
-    // Get string
-    if(((ksnetEvMgrClass *)w->data)->kh->non_blocking == 0) {
-
-        char *buffer = malloc(KSN_BUFFER_SM_SIZE);
-        fgets(buffer, KSN_BUFFER_SM_SIZE , stdin);
-        data = buffer;
-    }
-    // Get character
-    else {
-        int ch = getchar();
-        putchar(ch);
-        putchar('\n');
-        data = malloc(sizeof(int));
-        *(int*)data = ch;
-    }
-
-    // Create STDIN idle watcher data
-    stdin_idle_data *id = malloc(sizeof(stdin_idle_data));
-    id->ke = ((ksnetEvMgrClass *)w->data);
-    id->data = data;
-    id->stdin_w = w;
-    ((ksnetEvMgrClass *)w->data)->idle_stdin_w.data = id;
-
-    // Stop this watcher
-    ev_io_stop(EV_A_ w);
-
-    // Start STDIN idle watcher
-    ev_idle_start(EV_A_ & ((ksnetEvMgrClass *)w->data)->idle_stdin_w);
-}
-
-/**
- * STDIN Idle callback: execute STDIN callback in idle time
- *
- * @param loop
- * @param w
- * @param revents
- */
-void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
-
-    #ifdef DEBUG_KSNET
-    ksnet_printf(& ((stdin_idle_data *)w->data)->ke->ksn_cfg, DEBUG_VV,
-                "%sEvent manager:%s STDIN idle (process data) callback (%c)\n", 
-                ANSI_CYAN, ANSI_NONE,
-                *((int*)((stdin_idle_data *)w->data)->data));
-    #endif
-
-    // Stop this watcher
-    ev_idle_stop(EV_A_ w);
-
-    // Call the hot keys module callback
-    hotkeys_cb(((stdin_idle_data *)w->data)->ke,
-               ((stdin_idle_data *)w->data)->data,
-               w);
-    
-//    ((stdin_idle_data *)w->data)->stdin_w->data
-
-    // Start STDIN watcher
-    ev_io_start(EV_A_ ((stdin_idle_data *)w->data)->stdin_w);
-
-    // Free watchers data
-    free(((stdin_idle_data *)w->data)->data);
-    free(w->data);
-}
-
-/**
  * Check activity Idle callback.
  *
  * Start(restart) connection to R-Host and check connections to all peers.
@@ -757,6 +665,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
     #endif
-    if(!ke->n_num) ksnetHotkeysDestroy(ke->kh);
+    //if(!ke->n_num) 
+    ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 }

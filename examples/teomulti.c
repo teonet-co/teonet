@@ -86,6 +86,7 @@ int main(int argc, char** argv) {
     // Start teonet threads
     for(i = 0; i < TEONET_NUM; i++) {
         
+        // Set teonet thread parameters
         teonet[i].ke = NULL;
         teonet[i].n_num = i;
         teonet[i].num_nets = TEONET_NUM;
@@ -99,6 +100,7 @@ int main(int argc, char** argv) {
         else teonet[i].n_prev = NULL;     
         teonet[i].n_next = NULL;
         
+        // Create teonet thread
         int err = pthread_create(&teonet[i].tid, NULL, &teonet_t, &teonet[i]);
         if (err != 0) printf("\nCan't create thread :[%s]", strerror(err));
         else printf("\nThread created successfully\n");
@@ -108,31 +110,44 @@ int main(int argc, char** argv) {
             usleep(100);
         }
         
+        // Add next net parameter to previous network
         if(i) teonet[i-1].ke->n_next = teonet[i].ke;
 
-        // Show previous/next 
-        if(i) {
-            int j;
-            for(j = 0; j < 2; j++) {
-                printf("Net #%d started, n_prev: %p, n_next: %p\n", 
-                       (int)teonet[j+i-1].n_num, 
-                       (void *)teonet[j+i-1].n_prev, 
-                       (void *)teonet[j+i-1].n_next);
-                if(!(i == TEONET_NUM - 1)) break;
-            }
-        }
+//        // Show previous/next 
+//        if(i) {
+//            int j;
+//            for(j = 0; j < 2; j++) {
+//                printf("Net #%d started, n_prev: %p, n_next: %p\n", 
+//                       (int)teonet[j+i-1].n_num, 
+//                       (void *)teonet[j+i-1].n_prev, 
+//                       (void *)teonet[j+i-1].n_next);
+//                if(!(i == TEONET_NUM - 1)) break;
+//            }
+//        }
     }
     
-    // Wait while main thread is running
-    for(;teonet[0].ke->runEventMgr;) usleep(100);
-    usleep(KSNET_EVENT_MGR_TIMER*1000000);
+    // Wait while threads running
+    for(;;) {
+        
+        int isRunning = 1;
+        for(i = 0; i < TEONET_NUM; i++) {
+            if(!teonet[i].ke->runEventMgr) {
+                isRunning = 0;
+                break;
+            }
+        }
+        if(!isRunning) break;
+        usleep(100);
+    }    
     
     // Stop other threads
-    for(i = 1; i < TEONET_NUM; i++) {
+    for(i = 0; i < TEONET_NUM; i++) {
         
         ksnetEvMgrStop(teonet[i].ke);
     }
+    
+    // Wait threads stopped
     usleep(KSNET_EVENT_MGR_TIMER*1000000);
-
+    
     return (EXIT_SUCCESS);
 }

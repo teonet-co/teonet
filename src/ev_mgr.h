@@ -68,7 +68,6 @@ typedef struct ksnetEvMgrClass {
 
     // Event Manager Watchers
     ev_idle idle_w;         ///< Idle TIMER watcher
-    ev_idle idle_stdin_w;   ///< Idle STDIN watcher
     ev_idle idle_activity_w;///< Idle Check activity watcher
     ev_timer timer_w;       ///< Timer watcher
     ev_async sig_async_w;   ///< Async signal watcher
