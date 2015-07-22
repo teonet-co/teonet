@@ -148,6 +148,6 @@ int main(int argc, char** argv) {
     
     // Wait threads stopped
     usleep(KSNET_EVENT_MGR_TIMER*1000000);
-
+    
     return (EXIT_SUCCESS);
 }
