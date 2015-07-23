@@ -1,6 +1,6 @@
 /**
  * File:   ev_mgr.h
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on April 11, 2015, 2:13 AM
  */
