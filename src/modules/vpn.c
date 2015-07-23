@@ -129,7 +129,11 @@ void ksnVpnDestroy(void *vpn) {
     if(kvpn != NULL) {
 
         ksnetEvMgrClass *ke = kvpn->ke;
-                    
+        // Stop watcher
+        if(kvpn->tuntap_io != NULL) {
+            ev_io_stop (ke->ev_loop, kvpn->tuntap_io);
+            free(kvpn->tuntap_io);
+        }
         // Destroy tuntap interface
         if(kvpn->ksn_tap_dev != NULL) {
             
@@ -372,6 +376,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
     int retval = 0;
 
     kvpn->ksn_tap_dev = tuntap_init();
+    kvpn->tuntap_io = NULL;
 
     if(tuntap_start(kvpn->ksn_tap_dev,
                     TUNTAP_MODE_ETHERNET /*TUNTAP_MODE_TUNNEL*/,
@@ -443,10 +448,10 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         // Switch to non-block mode
 
         // Create TUNTAP Get data event callback
-        ev_io *tuntap_io = (struct ev_io*) malloc (sizeof(struct ev_io));
-        ev_io_init (tuntap_io, tuntap_io_cb, kvpn->tuntap_fd, EV_READ);
-        tuntap_io->data = kvpn;
-        ev_io_start (ke->ev_loop,/*EV_DEFAULT_*/ tuntap_io);
+        kvpn->tuntap_io = (struct ev_io*) malloc (sizeof(struct ev_io));
+        ev_io_init (kvpn->tuntap_io, tuntap_io_cb, kvpn->tuntap_fd, EV_READ);
+        kvpn->tuntap_io->data = kvpn;
+        ev_io_start (ke->ev_loop, kvpn->tuntap_io);
     }
 
     return retval;

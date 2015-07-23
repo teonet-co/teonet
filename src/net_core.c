@@ -110,7 +110,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     #pragma GCC diagnostic ignored "-Wstrict-aliasing"
     ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
     kc->host_w.data = kc;
-    ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop,/*EV_DEFAULT_*/ &kc->host_w);
+    ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
     #pragma GCC diagnostic pop
 
     return kc;
@@ -129,6 +129,9 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
 
         // Send disconnect to all
         ksnetArpGetAll((kc)->ka, send_cmd_disconnect_cb, NULL);
+        
+        // Stop watcher
+        ev_io_stop(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
 
         close((kc)->fd);
         free((kc)->name);
