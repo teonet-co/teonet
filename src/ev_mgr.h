@@ -15,7 +15,6 @@
 #include "utils/utils.h"
 
 #include "hotkeys.h"
-//#include "modules.h"
 #include "modules/vpn.h"
 
 //#include "net_tcp.h"
@@ -49,9 +48,9 @@ typedef enum ksnetEvMgrEvents {
 typedef struct ksnetEvMgrClass {
 
     // Pointers to Modules classes
+    void *km; ///< Pointer to multi net class
     ksnCoreClass *kc;  ///< KSNet core class
     ksnetHotkeysClass *kh; ///< Hotkeys class
-//    ksnModulesClass *km; ///< Modules class
     ksnVpnClass *kvpn; ///< VPN class
 //    ksnTcpClass *kt; /// TCP Client/Server class
 //    ksnTermClass *kter; // Terminal class
@@ -83,6 +82,14 @@ typedef struct ksnetEvMgrClass {
     void *n_next; ///< Next network
     size_t num_nets; ///< Number of networks
     
+    // Define signals watchers
+    ev_signal sigint_w;  ///< Signal SIGINT watcher
+    ev_signal sigterm_w; ///< Signal SIGTERM watcher
+    #ifndef HAVE_MINGW
+    ev_signal sigquit_w; ///< Signal SIGQUIT watcher
+    ev_signal sigkill_w; ///< Signal SIGKILL watcher
+    ev_signal sigstop_w; ///< Signal SIGSTOP watcher
+    #endif    
 
 } ksnetEvMgrClass;
 
@@ -114,6 +121,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     int port
 );
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
+int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async);
 #ifdef TEO_THREAD
 int ksnetEvMgrRunThread(ksnetEvMgrClass *ke);
 #endif

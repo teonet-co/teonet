@@ -72,6 +72,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->last_custom_timer = 0.0;
     ke->runEventMgr = 0;
     ke->event_cb = event_cb;
+    ke->km = NULL;
     ke->num_nets = 1;
     ke->n_num = 0;
     ke->n_prev = NULL;
@@ -128,17 +129,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ke->idle_activity_count = 0;
 
     // Event loop
-    struct ev_loop *loop = ke->n_num ? ev_loop_new (0) : EV_DEFAULT;
+    struct ev_loop *loop = ke->n_num && ke->km == NULL ? ev_loop_new (0) : EV_DEFAULT;
     ke->ev_loop = loop;
-
-    // Define watchers
-    ev_signal sigint_w;  // Signal SIGINT watcher
-    ev_signal sigterm_w; // Signal SIGTERM watcher
-    #ifndef HAVE_MINGW
-    ev_signal sigquit_w; // Signal SIGQUIT watcher
-    ev_signal sigkill_w; // Signal SIGKILL watcher
-    ev_signal sigstop_w; // Signal SIGSTOP watcher
-    #endif
 
     // Initialize modules
     if(modules_init(ke)) {
@@ -161,36 +153,36 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             
             // Initialize and start signals watchers
             // SIGINT
-            ev_signal_init (&sigint_w, sigint_cb, SIGINT);
-            sigint_w.data = ke;
-            ev_signal_start (loop, &sigint_w);
+            ev_signal_init (&ke->sigint_w, sigint_cb, SIGINT);
+            ke->sigint_w.data = ke;
+            ev_signal_start (loop, &ke->sigint_w);
 
             // SIGQUIT
             #ifdef SIGQUIT
-            ev_signal_init (&sigquit_w, sigint_cb, SIGQUIT);
-            sigquit_w.data = ke;
-            ev_signal_start (loop, &sigquit_w);
+            ev_signal_init (&ke->sigquit_w, sigint_cb, SIGQUIT);
+            ke->sigquit_w.data = ke;
+            ev_signal_start (loop, &ke->sigquit_w);
             #endif
 
             // SIGTERM
             #ifdef SIGTERM
-            ev_signal_init (&sigterm_w, sigint_cb, SIGTERM);
-            sigterm_w.data = ke;
-            ev_signal_start (loop, &sigterm_w);
+            ev_signal_init (&ke->sigterm_w, sigint_cb, SIGTERM);
+            ke->sigterm_w.data = ke;
+            ev_signal_start (loop, &ke->sigterm_w);
             #endif
 
             // SIGKILL
             #ifdef SIGKILL
-            ev_signal_init (&sigkill_w, sigint_cb, SIGKILL);
-            sigkill_w.data = ke;
-            ev_signal_start (loop, &sigkill_w);
+            ev_signal_init (&ke->sigkill_w, sigint_cb, SIGKILL);
+            ke->sigkill_w.data = ke;
+            ev_signal_start (loop, &ke->sigkill_w);
             #endif
 
             // SIGSTOP
             #ifdef SIGSTOP
-            ev_signal_init (&sigstop_w, sigint_cb, SIGSTOP);
-            sigstop_w.data = ke;
-            ev_signal_start (loop, &sigstop_w);
+            ev_signal_init (&ke->sigstop_w, sigint_cb, SIGSTOP);
+            ke->sigstop_w.data = ke;
+            ev_signal_start (loop, &ke->sigstop_w);
             #endif
         }
 
@@ -202,30 +194,62 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
         // Run event loop
         ke->runEventMgr = 1;
-        ev_run(loop, 0);
+        if(ke->km == NULL) ev_run(loop, 0);
+        else return 0;
         
-        // Free async data queue
-        pblListFree(ke->async_queue);
-        pthread_mutex_destroy(&ke->async_mutex);
+        ksnetEvMgrFree(ke, 1); // Free class variables and watchers after run
     }
+    
+    ksnetEvMgrFree(ke, 0); // Free class variables and watchers after run
+    
+    return 0;
+}
 
-    // Destroy modules
-    modules_destroy(ke);
+/**
+ * Free ksnetEvMgrClass after run
+ * 
+ * @param ke
+ * @param free_async 1 - free async queue data and destroy queue mutex; 
+ *                   0 - free basic class data;
+ *                   2 - free all - async queue data and basic class data
+ * 
+ * @return 
+ */
+int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
+    
+    // Free async data queue and destroy queue mutex
+    if(free_async) {
+        
+        pblListFree(ke->async_queue);
+        pthread_mutex_destroy(&ke->async_mutex);        
+    }
+    
+    // Free all other class data
+    if(free_async == 0 || free_async == 2) {
+        
+        // Stop watchers
+        ev_async_stop(ke->ev_loop, &ke->sig_async_w);
+        ev_timer_stop(ke->ev_loop, &ke->timer_w);
 
-    // Destroy event loop (and free memory)
-    ev_loop_destroy(loop);
+        // Destroy modules
+        modules_destroy(ke);
 
-    #ifdef DEBUG_KSNET
-    //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: stopped.\n");
-    printf("%sEvent manager:%s stopped.\n", ANSI_CYAN, ANSI_NONE);
-    #endif
+        // Destroy event loop (and free memory)
+        if(ke->km == NULL || !ke->n_num) ev_loop_destroy(ke->ev_loop);
 
-    // Send stopped event to user level
-    if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STOPPED, NULL, 0, NULL);
+        #ifdef DEBUG_KSNET
+        //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: stopped.\n");
+        printf("%sEvent manager:%s at port %d stopped.\n", ANSI_CYAN, ANSI_NONE,
+               (int)ke->ksn_cfg.port );
+        #endif
 
-    // Free memory
-    free(ke);
+        // Send stopped event to user level
+        if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STOPPED, NULL, 0, NULL);
 
+        // Free memory
+        free(ke);
+    }
+    
     return 0;
 }
 
@@ -436,8 +460,8 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     #define kev ((ksnetEvMgrClass *)((ksnCoreClass *)w->data)->ke)
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, "%sEvent manager:%s idle callback %d\n", 
-            ANSI_CYAN, ANSI_NONE,            
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+            "%sEvent manager:%s idle callback %d\n", ANSI_CYAN, ANSI_NONE,            
             kev->idle_count);
     #endif
 
@@ -656,7 +680,6 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
     #endif
-    //if(!ke->n_num) 
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 }

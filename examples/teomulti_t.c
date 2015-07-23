@@ -19,8 +19,8 @@
 #define TMULTI_T_VERSION VERSION
 
 #define TEONET_NUM 3
-const int TEONET_PORT[TEONET_NUM] = { 9301, 9302, 9303 }; // Port numbers
-const char *TEONET_NAME[TEONET_NUM] = { "TEO-A", "TEO-B", "TEO-C" }; // Hosts names
+const int TEONET_PORTS[TEONET_NUM] = { 9301, 9302, 9303 }; // Port numbers
+const char *TEONET_NAMES[TEONET_NUM] = { "TEO-A", "TEO-B", "TEO-C" }; // Hosts names
 
 typedef struct teonet_multi {
     
@@ -94,8 +94,8 @@ int main(int argc, char** argv) {
         teonet[i].argv = argv;
         teonet[i].event_cb = NULL;
         teonet[i].options = READ_OPTIONS|READ_CONFIGURATION;
-        teonet[i].port = TEONET_PORT[i];
-        teonet[i].name = TEONET_NAME[i];
+        teonet[i].port = TEONET_PORTS[i];
+        teonet[i].name = TEONET_NAMES[i];
         if(i) teonet[i].n_prev = teonet[i-1].ke;
         else teonet[i].n_prev = NULL;     
         teonet[i].n_next = NULL;
