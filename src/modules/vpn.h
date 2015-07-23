@@ -27,6 +27,7 @@ typedef struct ksnVpnClass {
     char *tuntap_name;              ///< TUNTAP Device name
     int tuntap_fd;                  ///< TUNTAP Device FD
     void *ke;                       ///< Pointer to Event manager class object
+    ev_io *tuntap_io;               ///< Tuntap watcher
 
 } ksnVpnClass;
 

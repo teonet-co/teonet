@@ -29,12 +29,13 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teolarge teosend teomulti
+bin_PROGRAMS = teolarge teosend teomulti teomulti_t
 
 teolarge_SOURCES = teolarge.c
 teosend_SOURCES = teosend.c
+teomulti_t_SOURCES = teomulti_t.c
 teomulti_SOURCES = teomulti.c
 
-teomulti_LDFLAGS = $(AM_LDFLAGS) -pthread
+teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
 
 SUBDIRS = fossa

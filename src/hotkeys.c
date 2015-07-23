@@ -16,6 +16,7 @@
 
 #include "hotkeys.h"
 #include "ev_mgr.h"
+#include "net_multi.h"
 #include "utils/rlutil.h"
 #include "utils/utils.h"
 
@@ -213,6 +214,13 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 
                 if(khv->non_blocking) {
                     
+                    // Show list of networks
+                    if(kev->km != NULL) {
+                        char *net_list = ksnMultiShowListStr(kev->km);
+                        printf("%s", net_list);
+                        free(net_list);
+                    }
+                    
                     // Request string with new network number
                     khv->str_number = 0;
                     printf("Enter new network number "
@@ -253,20 +261,31 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     ksnetHotkeysDestroy(khv);
                                     p_ke->kh = NULL;
                                     
-                                    // Switch to new network
-                                    for(;;) {
-                                        if(n_num < p_ke->n_num) p_ke = p_ke->n_prev;
-                                        else if(n_num > p_ke->n_num) p_ke = p_ke->n_next;
-                                        else {
-                                            // Initialize hotkeys module
-                                            p_ke->kh = ksnetHotkeysInit(p_ke);
-                                            printf("Switch to network #%d\n", n_num + 1);
-                                            return 1;
+                                    // Switch to new network (thread theme)
+                                    if(p_ke->km == NULL) {
+                                        for(;;) {
+                                            if(n_num < p_ke->n_num) p_ke = p_ke->n_prev;
+                                            else if(n_num > p_ke->n_num) p_ke = p_ke->n_next;
+                                            else {
+                                                // Initialize hotkeys module
+                                                #define switch_to_net(p_ke) \
+                                                p_ke->kh = ksnetHotkeysInit(p_ke); \
+                                                printf("Switched to network #%d\n", n_num + 1); \
+                                                return 1
+
+                                                switch_to_net(p_ke);
+                                            }
                                         }
+                                    }
+                                    // Switch to new network (multi net module theme)
+                                    else {
+                                        p_ke = (ksnetEvMgrClass *)ksnMultiGet(p_ke->km, n_num);
+                                        switch_to_net(p_ke);
                                     }
                                 }
                                 else printf("Already in network #%d\n", n_num + 1);
                             }
+                            else printf("Wrong network number #%d\n", n_num);
                         }
                         break;
                     }
