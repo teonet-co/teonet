@@ -9,6 +9,7 @@
 #define	EV_MGR_H
 
 #include <ev.h>
+#include <pthread.h>
 
 #include "config/opt.h"
 #include "config/conf.h"
@@ -73,15 +74,15 @@ typedef struct ksnetEvMgrClass {
 
     double custom_timer_interval;   ///< Custom timer interval
     double last_custom_timer;       ///< Last time the custom timer called
-    
+
     PblList* async_queue;   ///< Async data queue
     pthread_mutex_t async_mutex; ///< Async data queue mutex
-    
+
     size_t n_num; ///< Network number
     void *n_prev; ///< Previouse network
     void *n_next; ///< Next network
     size_t num_nets; ///< Number of networks
-    
+
     // Define signals watchers
     ev_signal sigint_w;  ///< Signal SIGINT watcher
     ev_signal sigterm_w; ///< Signal SIGTERM watcher
@@ -89,7 +90,7 @@ typedef struct ksnetEvMgrClass {
     ev_signal sigquit_w; ///< Signal SIGQUIT watcher
     ev_signal sigkill_w; ///< Signal SIGKILL watcher
     ev_signal sigstop_w; ///< Signal SIGSTOP watcher
-    #endif    
+    #endif
 
 } ksnetEvMgrClass;
 

@@ -36,6 +36,7 @@
 /examples/teomulti
 /examples/teomulti_t
 /src/.libs/
+/src/.deps/
 /src/Makefile
 /src/Makefile.in
 /src/libteonet.pc
