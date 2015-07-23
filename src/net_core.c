@@ -22,7 +22,6 @@ typedef int socklen_t;
 
 #include "ev_mgr.h"
 #include "net_split.h"
-#include "net_multi.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 
@@ -222,8 +221,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg, DEBUG_VV,
-                 "%sNet core:%s ksnCoreSendto %s:%d %d \n", 
-                 ANSI_GREEN, ANSI_NONE, addr, port, data_len);
+                 "%sNet core:%s ksnCoreSendto %s:%d %d \n", ANSI_GREEN, ANSI_NONE, addr, port, data_len);
     #endif
 
 
@@ -313,26 +311,9 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
     ksnet_arp_data *arp = ksnetArpGet(kc->ka, to);
 
-    // Send to peer
     if(arp != NULL) {
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
-    }
-    
-    // Send to peer at other network
-    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL) {
-        
-        arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
-                data_len);
-        // ###TODO: Send to peer at other network
-        printf("###TODO: Send to peer at other network\n");
-    }
-    
-    // Send to r-host
-    else {
-        
-        // ###TODO: Send to r-host
-        printf("###TODO: Send to r-host\n");
     }
 
     return arp;
