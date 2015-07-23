@@ -65,7 +65,7 @@ void handleErrors(void) {
   //abort();
 }
 
-size_t encrypt(unsigned char *plaintext, size_t plaintext_len,
+size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
         unsigned char *key, unsigned char *iv, void *ciphertext) {
 
   EVP_CIPHER_CTX *ctx;
@@ -128,7 +128,7 @@ size_t encrypt(unsigned char *plaintext, size_t plaintext_len,
  *
  * @return Decrypted data length
  */
-int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     unsigned char *iv, unsigned char *plaintext) {
 
   EVP_CIPHER_CTX *ctx;
@@ -222,7 +222,7 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
                 "%sEncrypt:%s %d bytes to %d bytes buffer ...\n",
                 ANSI_BROWN, ANSI_NONE, package_len, (int)(*encrypt_len));
     #endif
-    *encrypt_len = encrypt(package, package_len, kcr->key, kcr->iv,
+    *encrypt_len = _encrypt(package, package_len, kcr->key, kcr->iv,
                             buffer + ptr);
 
     *encrypt_len += ptr;
@@ -254,7 +254,7 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
                 "%sDecrypt:%s %d bytes from %d bytes package ...\n",
                 ANSI_BROWN, ANSI_NONE, *decrypt_len, package_len - ptr);
     #endif
-    *decrypt_len = decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
+    *decrypt_len = _decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
 
     // Add a NULL terminator. We are expecting printable text
