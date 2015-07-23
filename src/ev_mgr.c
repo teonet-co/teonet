@@ -33,14 +33,38 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT call
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
-ksnetEvMgrClass *_ksnetEvMgrInit(
+
+/**
+ * Initialize KSNet Event Manager and network
+ *
+ * @param argc Number of applications arguments (from main)
+ * @param argv Applications arguments array (from main)
+ * @param event_cb Events callback function called when an event happens
+ * @param options Options set: \n
+ *                READ_OPTIONS - read options from command line parameters; \n
+ *                READ_CONFIGURATION - read options from configuration file
+ * 
+ * @return Pointer to created ksnetEvMgrClass
+ */
+ksnetEvMgrClass *ksnetEvMgrInit(
+
+  int argc, char** argv,
+  void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+  int options
+    ) {
+    
+    return ksnetEvMgrInitPort(argc, argv, event_cb, options, 0);
+}
+/**
+ * Initialize KSNet Event Manager and network and set new default port
+ *
+ */
+ksnetEvMgrClass *ksnetEvMgrInitPort(
 
   int argc, char** argv,
   void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
   int options,
   int port
-  //void (*read_cl_params)(ksnetEvMgrClass *ke, int argc, char** argv)
-  //void (*read_config)(ksnet_cfg *conf, int port_param)
     ) {
 
     ksnetEvMgrClass *ke = malloc(sizeof(ksnetEvMgrClass));
@@ -70,38 +94,6 @@ ksnetEvMgrClass *_ksnetEvMgrInit(
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
     
     return ke;
-}
-
-/**
- * Initialize KSNet Event Manager and network
- *
- * @param argc Number of applications arguments (from main)
- * @param argv Applications arguments array (from main)
- * @param event_cb Events callback function called when an event happens
- * @param options Options set: \n
- *                READ_OPTIONS - read options from command line parameters; \n
- *                READ_CONFIGURATION - read options from configuration file
- * @return Pointer to created ksnetEvMgrClass
- */
-ksnetEvMgrClass *ksnetEvMgrInit(
-
-  int argc, char** argv,
-  void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
-  int options
-    ) {
-    
-    return _ksnetEvMgrInit(argc, argv, event_cb, options, 0);
-}
-
-ksnetEvMgrClass *ksnetEvMgrInitPort(
-
-  int argc, char** argv,
-  void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
-  int options,
-  int port
-    ) {
-    
-    return _ksnetEvMgrInit(argc, argv, event_cb, options, port);
 }
 
 /**
@@ -140,7 +132,6 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ke->ev_loop = loop;
 
     // Define watchers
-//    ev_io stdin_w;       // STDIN watcher
     ev_signal sigint_w;  // Signal SIGINT watcher
     ev_signal sigterm_w; // Signal SIGTERM watcher
     #ifndef HAVE_MINGW
