@@ -38,7 +38,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents);
 
 
 /******************************************************************************/
-/* TCP Client/Server module methods                                         */
+/* TCP Client/Server module methods                                           */
 /*                                                                            */
 /******************************************************************************/
 
@@ -70,16 +70,18 @@ void ksnTcpDestroy(ksnTcpClass *kt) {
 }
 
 /******************************************************************************/
-/* TCP Server methods                                                                 */
+/* TCP Server methods                                                         */
 /*                                                                            */
 /******************************************************************************/
 
 /**
  * Create TCP server and add it to Event manager
  *
- * @param port
- * @param ksnet_accept_cb
- * @param data
+ * @param port [in] Servers port
+ * @param ksnet_accept_cb Server Accept callback, calls when client is connected
+ * @param data Some user data
+ * @param port_created [out] Servers port may be changed if the input port is busy
+ * 
  * @return
  */
 int ksnTcpServerCreate(
@@ -105,7 +107,7 @@ int ksnTcpServerCreate(
 
         // Initialize and start a watcher to accepts client requests
         w_accept->tcpServerAccept_cb = ksnTcpServerAccept; // TCP Server Accept callback
-        w_accept->ksnet_cb = ksnet_accept_cb; // User Server Accept callback
+        w_accept->ksnet_cb = ksnet_accept_cb; // Users Server Accept callback
         w_accept->events = EV_READ; // Events
         w_accept->fd = sd; // TCP Server socket
         w_accept->data = data; // Some user data
@@ -124,9 +126,10 @@ int ksnTcpServerCreate(
 }
 
 /**
- * Create server socket, bund to port and start listen in
+ * Create TCP server socket, bind to port and start listen in
  *
- * @param port [in/out] Servers port
+ * @param port [in/out] Servers port, it may be changed if selected port is busy
+ * 
  * @return
  */
 int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
@@ -326,11 +329,12 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
         ANSI_MAGENTA, ANSI_NONE, 
         client_sd, client_family == AF_INET6 ? "v6" : "" , client_ip
     );
-//    ksnet_printf(&ke->ksn_cfg, DEBUG, "TCP Server: %d client(s) connected.\n", total_clients);
+    //ksnet_printf(&ke->ksn_cfg, DEBUG, "TCP Server: %d client(s) connected.\n", total_clients);
     #endif
 
     // Execute ksnet callback (to Initialize and start watcher to read Servers client requests)
-    watcher->ksnet_cb(loop, watcher, revents, client_sd);
+    if(watcher->ksnet_cb != NULL)
+        watcher->ksnet_cb(loop, watcher, revents, client_sd);
 
     // Add socket FD to the Event manager FD list
     //ksnet_EventMgrAddFd(client_sd);
@@ -358,10 +362,19 @@ void ksnTcpCb(
 
 
 /******************************************************************************/
-/* TCP Client methods                                                                  */
+/* TCP Client methods                                                         */
 /*                                                                            */
 /******************************************************************************/
 
+/**
+ * Create TCP client and connect to server
+ * 
+ * @param kt Pointer to the ksnTcpClass
+ * @param port Server port
+ * @param server Server IP or name
+ * 
+ * @return Socket description: > 0 - success connection
+ */
 int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 
     /* Variable and structure definitions. */
@@ -377,8 +390,8 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
     /* will be used for this socket. */
     /******************************************/
     /* get a socket descriptor */
-    if((sd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
+    if((sd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    
         ksnet_printf(&kev->ksn_cfg, ERROR_M, 
                 "%sTCP client:%s Client-socket() error\n", 
                 ANSI_LIGHTMAGENTA, ANSI_NONE);
@@ -402,8 +415,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
     serveraddr.sin_family = AF_INET;
     serveraddr.sin_port = htons(port);
 
-    if((serveraddr.sin_addr.s_addr = inet_addr(server)) == (unsigned long) INADDR_NONE)
-    {
+    if((serveraddr.sin_addr.s_addr = inet_addr(server)) == (unsigned long) INADDR_NONE) {  
 
         /* When passing the host name of the server as a */
         /* parameter to this program, use the gethostbyname() */
@@ -411,13 +423,13 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
         /***************************************************/
         /* get host address */
         hostp = gethostbyname(server);
-        if(hostp == (struct hostent *)NULL)
-        {
+        if(hostp == (struct hostent *)NULL) {
+        
             ksnet_printf(&kev->ksn_cfg, ERROR_M,
                     "%sTCP client:%s HOST NOT FOUND --> h_errno = %d\n", 
                     ANSI_LIGHTMAGENTA, ANSI_NONE, h_errno);
             close(sd);
-            return(-1);
+            return(-2);
         }
         memcpy(&serveraddr.sin_addr, hostp->h_addr, sizeof(serveraddr.sin_addr));
     }
@@ -427,20 +439,21 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
     /* connection to the server. */
     /***********************************************/
     /* connect() to server. */
-    if((rc = connect(sd, (struct sockaddr *)&serveraddr, sizeof(serveraddr))) < 0)
-    {
+    if((rc = connect(sd, (struct sockaddr *)&serveraddr, sizeof(serveraddr))) < 0) {
+    
         ksnet_printf(&kev->ksn_cfg, ERROR_M, 
                 "%sTCP client:%s Client-connect() error\n", 
                 ANSI_LIGHTMAGENTA, ANSI_NONE);
         close(sd);
-        return(-1);
+        return(-3);
     }
-    else
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG, 
-            "%sTCP client:%s Connection established...\n", 
-            ANSI_LIGHTMAGENTA, ANSI_NONE);
-    #endif
+    else {
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                "%sTCP client:%s Connection established...\n", 
+                ANSI_LIGHTMAGENTA, ANSI_NONE);
+        #endif
+    }
 
     // Set non block mode
     set_nonblock(sd);
