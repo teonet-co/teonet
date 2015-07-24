@@ -43,6 +43,17 @@ typedef enum ksnetEvMgrEvents {
 } ksnetEvMgrEvents;
 
 /**
+ * Application parameters user data
+ */
+typedef struct ksnetEvMgrAppParam {
+    
+    int app_argc;
+    char **app_argv;
+    char **app_argv_result;
+    
+} ksnetEvMgrAppParam;
+
+/**
  * KSNet event manager functions data
  */
 typedef struct ksnetEvMgrClass {
@@ -118,7 +129,8 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     int argc, char** argv,
     void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
     int options,
-    int port
+    int port,
+    void *user_data
 );
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
 int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async);

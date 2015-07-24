@@ -6,6 +6,7 @@
 /.teofossa/
 /.teomulti_t/
 /.teomulti/
+/.teotcp/
 /nbproject
 /build/
 /dist/
@@ -35,6 +36,7 @@
 /examples/teosend
 /examples/teomulti
 /examples/teomulti_t
+/examples/teotcp
 /src/.libs/
 /src/Makefile
 /src/Makefile.in

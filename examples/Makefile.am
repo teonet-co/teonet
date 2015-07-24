@@ -29,12 +29,13 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teolarge teosend teomulti teomulti_t
+bin_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp
 
 teolarge_SOURCES = teolarge.c
 teosend_SOURCES = teosend.c
 teomulti_t_SOURCES = teomulti_t.c
 teomulti_SOURCES = teomulti.c
+teotcp_SOURCES = teotcp.c
 
 teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
 
