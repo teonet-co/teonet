@@ -190,7 +190,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
         if(bind(kc->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
             #ifdef DEBUG_KSNET
-            ksnet_printf(ksn_cfg, DEBUG, "Try port %d ...\n", kc->port++);
+            ksnet_printf(ksn_cfg, MESSAGE, "Try port %d ...\n", kc->port++);
             #endif
             perror("bind failed");
             if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
@@ -199,7 +199,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
         else break;
     }
 
-    printf("Start listen at port %d\n", kc->port);
+    ksnet_printf(ksn_cfg, MESSAGE, "Start listen at port %d\n", kc->port);
 
     return 0;
 }

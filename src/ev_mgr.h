@@ -102,6 +102,8 @@ typedef struct ksnetEvMgrClass {
     ev_signal sigstop_w; ///< Signal SIGSTOP watcher
     #endif    
 
+    void *user_data; ///< Pointer to user data or NULL if absent
+
 } ksnetEvMgrClass;
 
 /**
