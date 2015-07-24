@@ -479,9 +479,14 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
 
     if(kh != NULL) {
-        ev_io_stop (((ksnetEvMgrClass*)(kh->ke))->ev_loop, &kh->stdin_w);
+        
+        ksnetEvMgrClass *ke = kh->ke;
+        
+        ev_io_stop (ke->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
+        
         free(kh);
+        ke->kh = NULL;
     }
 }
 

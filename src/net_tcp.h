@@ -3,8 +3,9 @@
  * Author: Kirill Scherba
  *
  * Created on March 29, 2015, 6:43 PM
-  * Updated to use in libksmesh on May 06, 2015, 21:55
-*/
+ * Updated to use in libksmesh on May 06, 2015, 21:55
+ * Adapted to use in libteonet on July 24, 2015, 11:56
+ */
 
 #ifndef NET_TCP_H
 #define	NET_TCP_H

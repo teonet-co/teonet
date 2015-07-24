@@ -1,6 +1,6 @@
 /**
  * File:   crypt.h
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on July 14, 2015, 4:04 PM
  */
