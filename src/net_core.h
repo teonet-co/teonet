@@ -1,6 +1,6 @@
 /*
  * File:   net_core.h
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on April 28, 2015, 5:49 AM
  */

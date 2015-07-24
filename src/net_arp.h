@@ -1,6 +1,6 @@
 /**
  * File:   net_arp.h
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on April 12, 2015, 7:19 PM
  *

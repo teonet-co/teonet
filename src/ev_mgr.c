@@ -651,7 +651,10 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kc = NULL;
     ke->kh = NULL;
 
+    // Teonet core module
     if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;
+    
+    // Hotkeys
     if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
 
     // VPN Module
@@ -659,7 +662,9 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kvpn = ksnVpnInit(ke);
     #endif
 
-//    ke->kt = ksnTcpInit(ke);
+    // TCP client/server module
+    ke->kt = ksnTcpInit(ke);
+    
 //    ke->kter = ksnTermInit(ke);
 //    ke->ktun = ksnTunInit(ke);
 
@@ -675,8 +680,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 
 //    ksnTunDestroy(ke->ktun);
 //    ksnTermDestroy(ke->kter);
-//    ksnTcpDestroy(ke->kt);
-
+    ksnTcpDestroy(ke->kt);
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
     #endif
