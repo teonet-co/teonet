@@ -82,7 +82,7 @@ void ksnTcpDestroy(ksnTcpClass *kt) {
  * @param data Some user data
  * @param port_created [out] Servers port may be changed if the input port is busy
  * 
- * @return
+ * @return Servers SD (socket descriptor) > 0 if success
  */
 int ksnTcpServerCreate(
     ksnTcpClass *kt,
@@ -215,7 +215,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
     // Server welcome message
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG,
-            "%sTCP Server:%s started on port %d, socket fd %d ...\n", 
+            "%sTCP Server:%s Started at port %d, socket fd %d ...\n", 
             ANSI_MAGENTA, ANSI_NONE, *port, sd);
     #endif
 

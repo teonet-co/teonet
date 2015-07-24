@@ -1,4 +1,4 @@
-/* 
+/** 
  * File:   teomulti_t.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  *
@@ -51,7 +51,7 @@ void* teonet_t(void *teo) {
             
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(teonet->argc, teonet->argv, 
-            teonet->event_cb, teonet->options, teonet->port);
+            teonet->event_cb, teonet->options, teonet->port, NULL);
     
     // Set network parameters
     ke->n_num = teonet->n_num; // Set network number

@@ -53,10 +53,21 @@ ksnetEvMgrClass *ksnetEvMgrInit(
   int options
     ) {
     
-    return ksnetEvMgrInitPort(argc, argv, event_cb, options, 0);
+    return ksnetEvMgrInitPort(argc, argv, event_cb, options, 0, NULL);
 }
 /**
  * Initialize KSNet Event Manager and network and set new default port
+ *
+ * @param argc Number of applications arguments (from main)
+ * @param argv Applications arguments array (from main)
+ * @param event_cb Events callback function called when an event happens
+ * @param options Options set: \n
+ *                READ_OPTIONS - read options from command line parameters; \n
+ *                READ_CONFIGURATION - read options from configuration file
+ * @param port Set default port number if non 0
+ * @param user_data Pointer to user data or NULL if absent
+ * 
+ * @return Pointer to created ksnetEvMgrClass
  *
  */
 ksnetEvMgrClass *ksnetEvMgrInitPort(
@@ -64,7 +75,8 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
   int argc, char** argv,
   void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
   int options,
-  int port
+  int port,
+  void *user_data
     ) {
 
     ksnetEvMgrClass *ke = malloc(sizeof(ksnetEvMgrClass));
@@ -86,6 +98,9 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     char *app_argv[app_argc];           // array for argument names
     app_argv[0] = (char*)"peer_name";   // peer name argument name
     //app_argv[1] = (char*)"file_name";   // file name argument name
+    if(options&APP_PARAM) {
+        
+    }
 
     // Initial configuration, set defaults, read defaults from command line
     ksnet_configInit(&ke->ksn_cfg, ke); // Set configuration default
