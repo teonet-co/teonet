@@ -230,7 +230,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         printf("\n");
     }
 
-    return argv;
+    return &argv[optind];
 }
 
 /**

@@ -33,6 +33,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Calls immediately after event manager starts
         case EV_K_STARTED:
         {
+            // Type of application (client or server)
+//            printf("Type of application: %s\n", 
+//                ((ksnetEvMgrAppParam*)user_data)->app_argv_result[1]);
+            
             // Start TCP server
             int port_created, 
                 fd = ksnTcpServerCreate(ke->kt, SERVER_PORT, NULL, NULL, 
@@ -58,7 +62,7 @@ int main(int argc, char** argv) {
     printf("Teotcp ver " TTCP_VERSION "\n");
     
     // Application parameters
-    char *app_argv[] = { "", "app-type"}; 
+    char *app_argv[] = { "", "app_type"}; 
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 2;
     app_param.app_argv = app_argv;
