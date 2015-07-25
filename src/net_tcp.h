@@ -42,9 +42,10 @@ extern "C" {
 ksnTcpClass *ksnTcpInit(void *ke);
 void ksnTcpDestroy(ksnTcpClass *kt);
 
-int ksnTcpServerCreate(ksnTcpClass *kt, int port, void (*ksnet_cb) (struct ev_loop *loop, struct ev_ksnet_io *watcher, int revents, int fd), void *data, int *port_created);
 void ksnTcpCb(struct ev_loop *loop, int fd, void (*ksnet_read_cb)(struct ev_loop *loop, ev_io *watcher, int revents), void* data);
+void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher);
 
+int ksnTcpServerCreate(ksnTcpClass *kt, int port, void (*ksnet_cb) (struct ev_loop *loop, struct ev_ksnet_io *watcher, int revents, int fd), void *data, int *port_created);
 int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server);
 
 #ifdef	__cplusplus

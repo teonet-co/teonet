@@ -52,6 +52,10 @@ typedef struct ksnet_cfg {
     char app_prompt[KSN_BUFFER_SM_SIZE/2];      ///< Application prompt
     char app_name[KSN_BUFFER_SM_SIZE/2];        ///< Application name
     char app_description[KSN_BUFFER_SM_SIZE/2]; ///< Application description
+    
+    // Application parameters
+    int app_argc; ///< Number of requered application parameters    
+    char **app_argv; ///< Array of application parameters
 
     // Host name & port
     long port;                              ///< This host port number

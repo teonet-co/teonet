@@ -109,20 +109,20 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     // Initial configuration, set defaults, read defaults from command line
     ksnet_configInit(&ke->ksn_cfg, ke); // Set configuration default
     if(port) ke->ksn_cfg.port = port; // Set port default
-    char **argv_ret;
+    char **argv_ret = NULL;
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
-    
-    if(options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
-        
-        ((ksnetEvMgrAppParam*)user_data)->app_argv_result = argv_ret;
-        
-        printf("Type of application: %s\n", 
-                ((ksnetEvMgrAppParam*)user_data)->app_argv_result[1]);
 
-    }
-    
+    ke->ksn_cfg.app_argc = app_argc;
+    ke->ksn_cfg.app_argv = argv_ret;
+//    
+//    if(options&APP_PARAM && user_data != NULL && 
+//       ((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
+//        
+//        ((ksnetEvMgrAppParam*)user_data)->app_argv_result = argv_ret;
+//    }
+//    
     return ke;
 }
 
