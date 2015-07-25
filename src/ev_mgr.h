@@ -49,7 +49,7 @@ typedef struct ksnetEvMgrAppParam {
     
     int app_argc;
     char **app_argv;
-    char **app_argv_result;
+//    char **app_argv_result;
     
 } ksnetEvMgrAppParam;
 

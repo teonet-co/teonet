@@ -69,6 +69,38 @@ void ksnTcpDestroy(ksnTcpClass *kt) {
     ke->kt = NULL;
 }
 
+/**
+ * Set callback to receive client data
+ *
+ * @param loop
+ * @param fd
+ * @param ksnet_read_cb
+ */
+void ksnTcpCb(
+    struct ev_loop *loop,
+    int fd,
+    void (*ksnet_cb)(struct ev_loop *loop, ev_io *watcher, int revents),
+    void* data) {
+
+    // Define READ event (event when TCP server data is available for reading)
+    struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+    w_client->data = data;
+    ev_io_init (w_client, ksnet_cb, fd, EV_READ);
+    ev_io_start (loop, w_client);
+}
+
+/**
+ * Stop receive client data callback 
+ * @param loop
+ * @param watcher
+ */
+void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher) {
+    
+    close(watcher->fd); // Close socket
+    ev_io_stop(loop, watcher); // Stop watcher
+    free(watcher); // Free watchers memory
+}
+
 /******************************************************************************/
 /* TCP Server methods                                                         */
 /*                                                                            */
@@ -103,7 +135,7 @@ int ksnTcpServerCreate(
     int sd, server_port = port;
     if( (sd = ksnTcpServerStart(kt, &server_port)) > 0 ) {
 
-        *port_created = server_port;
+        if(port_created != NULL) *port_created = server_port;
 
         // Initialize and start a watcher to accepts client requests
         w_accept->tcpServerAccept_cb = ksnTcpServerAccept; // TCP Server Accept callback
@@ -120,7 +152,7 @@ int ksnTcpServerCreate(
                            w_accept->tcpServerAccept_cb, w_accept->fd, EV_READ);
         #pragma GCC diagnostic pop
     }
-    else *port_created = 0;
+    else if(port_created != NULL) *port_created = 0;
 
     return sd;
 }
@@ -338,26 +370,6 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
 
     // Add socket FD to the Event manager FD list
     //ksnet_EventMgrAddFd(client_sd);
-}
-
-/**
- * Set callback to accepted client
- *
- * @param loop
- * @param fd
- * @param ksnet_read_cb
- */
-void ksnTcpCb(
-    struct ev_loop *loop,
-    int fd,
-    void (*ksnet_cb)(struct ev_loop *loop, ev_io *watcher, int revents),
-              void* data) {
-
-    // Define READ event (event when TCP server data is available for reading)
-    struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
-    w_client->data = data;
-    ev_io_init (w_client, ksnet_cb, fd, EV_READ);
-    ev_io_start (loop, w_client);
 }
 
 
