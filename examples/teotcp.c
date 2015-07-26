@@ -28,33 +28,65 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
     
     #define BUF_LEN 1024
     char buffer[BUF_LEN];
+    int close_flg = 0;
     
     // Read data
     int read_len = read(w->fd, buffer, BUF_LEN-1);
     buffer[read_len] = 0;
     
     //Show message
-    printf("Server receive %d bytes data: %s\n", read_len, buffer); 
+    printf("Server received %d bytes data: %s\n", read_len, buffer); 
     
     // Process received data
     if(read_len) {
         
-        // Send the data back to client
-        write(w->fd, buffer, read_len);
+        // Create temporary buffer
+        char *d = strdup(buffer); // Copy buffer
+        d[strcspn(d, "\r\n")] = 0; // Remove trailing CRLF
 
-        // Check quit command
-        buffer[strcspn(buffer, "\r\n")] = 0; // Remove trailing CRLF
-        if(!strcmp(buffer,"quit")) {
-            printf("The connection to client %d is closed\n", w->fd);
-            ksnTcpCbStop(loop, w);
+        // Check quit client command
+        if(!strcmp(d,"quit")) {            
+            printf("The connection to client %d was closed\n", w->fd);
+            close_flg = 1;
         }
+        
+        // Check destroy server command
+        else if(!strcmp(d,"destroy")) {            
+            printf("The TCP server %d was destroyed\n", w->fd);
+            ksnTcpServerStopAll(((ksnetEvMgrClass *)w->data)->kt);
+        }
+
+        // Check destroy server command
+        else if(!strcmp(d,"close_all")) {            
+            int fd = ksnTcpGetServer(((ksnetEvMgrClass *)w->data)->kt, w->fd);
+            if(fd) {
+                printf("Close all TCP server %d clients\n", fd);            
+                ksnTcpServerStopAllClients(((ksnetEvMgrClass *)w->data)->kt, fd);
+                printf("OK\n");
+            }
+            else {
+                printf("Can't find server of %d client\n", w->fd);
+            }
+        }
+
+        // Send the data back to client
+        else {
+            write(w->fd, buffer, read_len);            
+        }
+        
+        // Free temporary buffer
+        free(d);
     }
     
-    // Client was disconnected - stop this watcher
-    else {
-        
-        printf("The client %d was disconnected\n", w->fd);
-        ksnTcpCbStop(loop, w);
+    // Client has disconnected - stop this watcher
+    else {        
+        printf("The client %d has disconnected\n", w->fd);
+        close_flg = 1;
+    }
+    
+    // Close connection and free watcher
+    if(close_flg) {        
+        ksnTcpCbStop(loop, w, 1);
     }
 }
 
@@ -66,13 +98,14 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
  * @param revents
  * @param fd
  */
-void tcp_server_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
+void tcp_server_accept_cb(struct ev_loop *loop, ev_ksnet_io *w,
                        int revents, int fd) {
     
     printf("Client %d connected\n", fd);
     
-    ksnTcpCb(((ksnetEvMgrClass *)w->io.data)->ev_loop, fd, 
-            tcp_server_receive_cb,NULL);
+    // Connect clients fd to event manager
+    ksnTcpCb(((ksnetEvMgrClass *)w->io.data)->ev_loop, w, fd, 
+            tcp_server_receive_cb, w->io.data);
 }
 
 /**
@@ -82,6 +115,7 @@ void tcp_server_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
  * @param event
  * @param data
  * @param data_len
+ * @param user_data
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
