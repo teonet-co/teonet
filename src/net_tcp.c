@@ -35,6 +35,8 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents);
 #define ev_ksnet_io_start(loop, ev, cb, fd, events) \
     ev_io_init (ev, cb, fd, events); \
     ev_io_start (loop, ev)
+#define ev_ksnet_io_stop(loop, watcher) \
+    ev_io_stop (loop, watcher)
 
 
 /******************************************************************************/
@@ -52,6 +54,7 @@ ksnTcpClass *ksnTcpInit(void *ke) {
 
     ksnTcpClass *kt = malloc(sizeof(ksnTcpClass));
     kt->ke = ke;
+    kt->map = pblMapNewHashMap();
 
     return kt;
 }
@@ -65,6 +68,13 @@ void ksnTcpDestroy(ksnTcpClass *kt) {
 
     ksnetEvMgrClass *ke = kt->ke;
     
+    // Stop TCP servers
+    ksnTcpServerStopAll(kt);
+    
+    // Free servers and clients map
+    pblMapFree(kt->map);
+    
+    // Free ksnTcpClass
     free(kt);
     ke->kt = NULL;
 }
@@ -72,31 +82,40 @@ void ksnTcpDestroy(ksnTcpClass *kt) {
 /**
  * Set callback to receive client data
  *
- * @param loop
- * @param fd
- * @param ksnet_read_cb
+ * @param loop Event loop
+ * @param w Server watcher
+ * @param fd Client fd
+ * @param ksnet_read_cb Data received callback
+ * @oaram data User data will connected to client watcher
  */
-void ksnTcpCb(
+struct ev_io *ksnTcpCb(
     struct ev_loop *loop,
+    ev_ksnet_io *w,
     int fd,
     void (*ksnet_cb)(struct ev_loop *loop, ev_io *watcher, int revents),
     void* data) {
 
     // Define READ event (event when TCP server data is available for reading)
-    struct ev_io *w_client = (struct ev_io*) malloc (sizeof(struct ev_io));
+    struct ev_io *w_client = (ev_io*) malloc (sizeof(ev_io));
     w_client->data = data;
     ev_io_init (w_client, ksnet_cb, fd, EV_READ);
     ev_io_start (loop, w_client);
+    
+    // Add watcher to client map
+    pblMapAdd(w->clients_map, &fd, sizeof(fd), &w_client, sizeof(*w_client));
+    
+    return w_client;
 }
 
 /**
  * Stop receive client data callback 
  * @param loop
  * @param watcher
+ * @param close_fl
  */
-void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher) {
+void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_fl) {
     
-    close(watcher->fd); // Close socket
+    if(close_fl) close(watcher->fd); // Close socket
     ev_io_stop(loop, watcher); // Stop watcher
     free(watcher); // Free watchers memory
 }
@@ -119,7 +138,7 @@ void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher) {
 int ksnTcpServerCreate(
     ksnTcpClass *kt,
     int port,
-    void (*ksnet_accept_cb) (struct ev_loop *loop, struct ev_ksnet_io *watcher, int revents, int fd),
+    void (*ksnet_accept_cb) (struct ev_loop *loop, ev_ksnet_io *watcher, int revents, int fd),
     void *data,
     int *port_created) {
 
@@ -129,7 +148,7 @@ int ksnTcpServerCreate(
             ANSI_MAGENTA, ANSI_NONE, port);
     #endif
 
-    ev_ksnet_io *w_accept = (ev_ksnet_io*) malloc(sizeof(struct ev_ksnet_io));
+    ev_ksnet_io *w_accept = (ev_ksnet_io*) malloc(sizeof(ev_ksnet_io));
 
     // Start TCP server
     int sd, server_port = port;
@@ -145,16 +164,160 @@ int ksnTcpServerCreate(
         w_accept->data = data; // Some user data
         w_accept->io.data = kev;
 
+        // Create clients map
+        w_accept->clients_map = pblMapNewHashMap();
+
         // Start watcher
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wstrict-aliasing"
         ev_ksnet_io_start (kev->ev_loop, &w_accept->io,
                            w_accept->tcpServerAccept_cb, w_accept->fd, EV_READ);
         #pragma GCC diagnostic pop
+
+        // Add server to TCP servers map
+        pblMapAdd(kt->map, &sd, sizeof(sd), &w_accept, sizeof(ev_ksnet_io*));       
     }
-    else if(port_created != NULL) *port_created = 0;
+    
+    // Can't create server
+    else { 
+        if(port_created != NULL) *port_created = 0;
+        free(w_accept);
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, ERROR_M,
+                "%sTCP Server:%s Can't create TCP server at port %d\n", 
+                ANSI_MAGENTA, ANSI_NONE, port);
+        #endif
+    }
 
     return sd;
+}
+
+/**
+ * Stop and destroy TCP server
+ * 
+ * @param kt
+ * @param sd
+ * 
+ * @return 
+ */
+void ksnTcpServerStop(ksnTcpClass *kt, int sd) {
+    
+    size_t valueLength;
+    ev_ksnet_io **w_accept = pblMapGet(kt->map, &sd, sizeof(sd), &valueLength);
+    if(w_accept != NULL) {
+        
+        // Stop and destroy all TCP server clients
+        ksnTcpServerStopAllClients(kt, sd);
+        
+        // Free clients map
+        pblMapFree((*w_accept)->clients_map);
+        
+        // Close socked and stop watcher
+        close((*w_accept)->fd);
+        ev_ksnet_io_stop (kev->ev_loop, &((*w_accept)->io));
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, DEBUG,
+                "%sTCP Server:%s Server fd %d was stopped\n", 
+                ANSI_MAGENTA, ANSI_NONE, (*w_accept)->fd);
+        #endif      
+        
+        free(*w_accept);
+        pblMapRemove(kt->map, &sd, sizeof(sd), &valueLength);
+    }
+}
+
+/**
+ * Stop and destroy all TCP server clients
+ * 
+ * @param kt
+ * @param sd
+ * 
+ * @return 
+ */
+void ksnTcpServerStopAllClients(ksnTcpClass *kt, int sd) {
+    
+    size_t valueLength;
+    ev_ksnet_io **w_accept = pblMapGet(kt->map, &sd, sizeof(sd), &valueLength);
+    if(w_accept != NULL) {
+        
+        // Stop and destroy all server clients
+        PblIterator *it = pblMapIteratorNew((*w_accept)->clients_map);
+        if(it != NULL) {
+            while(pblIteratorHasNext(it)) {
+                void *entry = pblIteratorNext(it);
+                ev_io **w = (ev_io **) pblMapEntryValue(entry);  
+                ksnTcpCbStop(kev->ev_loop, *w, 1);
+                printf("Stop client %d\n", (*w)->fd);
+            }
+            pblIteratorFree(it);
+        }        
+        
+        pblMapClear((*w_accept)->clients_map);
+    }
+}
+
+/**
+ * Get server SD by clients SD
+ * 
+ * @param kt
+ * @param sd
+ * 
+ * @return
+ */
+int ksnTcpGetServer(ksnTcpClass *kt, int sd) {
+    
+    int server_sd = 0;
+    
+    PblIterator *it = pblMapIteratorNew(kt->map);
+    if(it != NULL) {
+        while(pblIteratorHasNext(it)) {
+            void *entry = pblIteratorNext(it);
+            ev_ksnet_io **w = (ev_ksnet_io **) pblMapEntryValue(entry); 
+//            PblIterator *it = pblMapIteratorNew(w->clients_map);
+//            if(it != NULL) {
+//                while(pblIteratorHasNext(it)) {
+//                    void *entry = pblIteratorNext(it);
+//                    int *fd = (int *) pblMapEntryKey(entry); 
+//                    if(*fd == sd ) {
+//                        server_sd = *fd;
+//                        break;
+//                    }
+//                }
+//                pblIteratorFree(it);
+//            }
+//            if(server_sd) break;
+            size_t valueLength;
+            if(pblMapGet((*w)->clients_map, &sd, sizeof(sd), &valueLength) != NULL) {
+                server_sd = (*w)->fd;
+                break;
+            }
+        }
+        pblIteratorFree(it);
+    }
+    
+    return server_sd;
+}
+
+/**
+ * Stop and destroy all TCP servers
+ * 
+ * @param kt
+ */
+void ksnTcpServerStopAll(ksnTcpClass *kt) {
+    
+    int stop = 0;
+    do {
+        PblIterator *it = pblMapIteratorNew(kt->map);
+        if(it != NULL) {
+            if(pblIteratorHasNext(it)) {
+                void *entry = pblIteratorNext(it);
+                int *sd = (int *) pblMapEntryKey(entry);            
+                ksnTcpServerStop(kt, *sd);
+            } else stop = 1;
+            pblIteratorFree(it);
+        } else stop = 1;
+    } while(!stop);
 }
 
 /**
@@ -291,7 +454,6 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
             #endif
         }
 
-
         return;
     }
 
@@ -368,6 +530,11 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
     if(watcher->ksnet_cb != NULL)
         watcher->ksnet_cb(loop, watcher, revents, client_sd);
 
+    // TODO: Add client to map
+//    pblMapAdd(watcher->clients_map, &client_sd, sizeof(client_sd),)
+    w->fd; // Server sd
+    client_sd; // Client sd
+    
     // Add socket FD to the Event manager FD list
     //ksnet_EventMgrAddFd(client_sd);
 }

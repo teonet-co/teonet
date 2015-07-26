@@ -10,6 +10,7 @@
 #ifndef NET_TCP_H
 #define	NET_TCP_H
 
+#include <pbl.h>
 //#include "ev_mgr.h"
 //extern int total_clients; // Total number of connected clients
 
@@ -18,7 +19,8 @@
  */
 typedef struct ksnTcpClass  {
 
-    void *ke;
+    void *ke; ///< Pointer to ksnetEvMgrClass
+    PblMap *map; ///< Servers MAP
 
 } ksnTcpClass;
 
@@ -32,6 +34,7 @@ typedef struct ev_ksnet_io {
     int fd;
     int events;
     void *data;
+    PblMap *clients_map; ///< TCP clients MAP
 } ev_ksnet_io;
 
 
@@ -42,10 +45,15 @@ extern "C" {
 ksnTcpClass *ksnTcpInit(void *ke);
 void ksnTcpDestroy(ksnTcpClass *kt);
 
-void ksnTcpCb(struct ev_loop *loop, int fd, void (*ksnet_read_cb)(struct ev_loop *loop, ev_io *watcher, int revents), void* data);
-void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher);
+struct ev_io *ksnTcpCb(struct ev_loop *loop, ev_ksnet_io *w, int fd, void (*ksnet_read_cb)(struct ev_loop *loop, ev_io *watcher, int revents), void* data);
+void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_fl);
 
 int ksnTcpServerCreate(ksnTcpClass *kt, int port, void (*ksnet_cb) (struct ev_loop *loop, struct ev_ksnet_io *watcher, int revents, int fd), void *data, int *port_created);
+void ksnTcpServerStop(ksnTcpClass *kt, int sd);
+void ksnTcpServerStopAll(ksnTcpClass *kt);
+void ksnTcpServerStopAllClients(ksnTcpClass *kt, int sd);
+int ksnTcpGetServer(ksnTcpClass *kt, int sd);
+
 int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server);
 
 #ifdef	__cplusplus
