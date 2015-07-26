@@ -72,7 +72,6 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
             if(fd) {
                 printf("Close all TCP server %d clients\n", fd);            
                 ksnTcpServerStopAllClients(((ksnetEvMgrClass *)w->data)->kt, fd);
-                printf("OK\n");
             }
             else {
                 printf("Can't find server of %d client\n", w->fd);
@@ -96,7 +95,7 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
     
     // Close connection and free watcher
     if(close_flg) {        
-        ksnTcpCbStop(loop, w, 1);
+        ksnTcpCbStop(loop, w, 1, 1);
     }
 }
 
