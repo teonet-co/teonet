@@ -44,8 +44,18 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
         char *d = strdup(buffer); // Copy buffer
         d[strcspn(d, "\r\n")] = 0; // Remove trailing CRLF
 
-        // Check quit client command
-        if(!strcmp(d,"quit")) {            
+        // Help client command
+        if(!strcmp(d,"help")) {    
+            
+            char *b = "TCP Client commands:\n"
+                      "close -- close this client\n"
+                      "close_all -- close all clients of this TCP server\n"
+                      "destroy -- destroy this TCP server\n";
+            write(w->fd, b, strlen(b));
+        }
+        
+        // Check close client command
+        else if(!strcmp(d,"close")) {            
             printf("The connection to client %d was closed\n", w->fd);
             close_flg = 1;
         }
