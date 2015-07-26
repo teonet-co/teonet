@@ -118,6 +118,13 @@ void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_fl) {
     if(close_fl) close(watcher->fd); // Close socket
     ev_io_stop(loop, watcher); // Stop watcher
     free(watcher); // Free watchers memory
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&((ksnetEvMgrClass*)watcher->data)->ksn_cfg, DEBUG,
+            "%sTCP Server:%s Stop client %d\n", 
+            ANSI_MAGENTA, ANSI_NONE, watcher->fd);
+    #endif
+
 }
 
 /******************************************************************************/
@@ -248,7 +255,11 @@ void ksnTcpServerStopAllClients(ksnTcpClass *kt, int sd) {
                 void *entry = pblIteratorNext(it);
                 ev_io **w = (ev_io **) pblMapEntryValue(entry);  
                 ksnTcpCbStop(kev->ev_loop, *w, 1);
-                printf("Stop client %d\n", (*w)->fd);
+//                #ifdef DEBUG_KSNET
+//                    ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, DEBUG,
+//                            "%sTCP Server:%s Stop client %d\n", 
+//                            ANSI_MAGENTA, ANSI_NONE, (*w)->fd);
+//                #endif
             }
             pblIteratorFree(it);
         }        
