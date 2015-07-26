@@ -46,7 +46,7 @@ ksnTcpClass *ksnTcpInit(void *ke);
 void ksnTcpDestroy(ksnTcpClass *kt);
 
 struct ev_io *ksnTcpCb(struct ev_loop *loop, ev_ksnet_io *w, int fd, void (*ksnet_read_cb)(struct ev_loop *loop, ev_io *watcher, int revents), void* data);
-void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_fl);
+void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_flg, int remove_flg);
 
 int ksnTcpServerCreate(ksnTcpClass *kt, int port, void (*ksnet_cb) (struct ev_loop *loop, struct ev_ksnet_io *watcher, int revents, int fd), void *data, int *port_created);
 void ksnTcpServerStop(ksnTcpClass *kt, int sd);
