@@ -15,6 +15,8 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
+#ifdef M_ENAMBE_TUN
+
 /**
  * Tunnel commands
  */
@@ -591,3 +593,5 @@ void cmd_tun_disconnected_cb(ksnTunClass * ktun, uint16_t fd) {
     shutdown(fd, SHUT_RDWR);
     //close(fd);
 }
+
+#endif
