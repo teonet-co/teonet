@@ -8,6 +8,7 @@
 /.teomulti/
 /.teotcp/
 /.teotun/
+/.teoterm/
 /nbproject
 /build/
 /dist/
@@ -39,6 +40,7 @@
 /examples/teomulti_t
 /examples/teotcp
 /examples/teotun
+/examples/teoterm
 /src/.libs/
 /src/.deps/
 /src/Makefile
