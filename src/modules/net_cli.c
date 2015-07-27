@@ -756,6 +756,7 @@ struct cli_def *cli_init(ksnetEvMgrClass *ke)
     if (!(cli = calloc(sizeof(struct cli_def), 1)))
         return 0;
 
+    ke->cli = cli;
     cli->ke = ke;
     cli->regular_count = 0;
     cli->debug_regular = 0;

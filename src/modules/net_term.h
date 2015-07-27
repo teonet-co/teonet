@@ -22,7 +22,7 @@ struct my_context {
  */
 typedef struct ksnTermClass {
 
-    void *ke; // Pointer to ksnTermClass
+    void *ke; // Pointer to ksnEvMgrClass
 
     struct my_context myctx;
     struct cli_def *cli;
