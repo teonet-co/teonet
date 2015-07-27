@@ -122,12 +122,14 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             }
             break;
 
-//        case CMD_TUN:
-//            processed = cmd_tun_cb(
-//                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ktun,
-//                rd
-//            );
-//            break;
+        #ifdef M_ENAMBE_TUN
+        case CMD_TUN:
+            processed = cmd_tun_cb(
+                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ktun,
+                rd
+            );
+            break;
+        #endif
 
         default:
             break;
