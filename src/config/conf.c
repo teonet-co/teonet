@@ -73,6 +73,10 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->vpn_ip_net = 24;
     ksn_cfg->vpn_connect_f = 0;
     ksn_cfg->vpn_mtu = 0;
+    
+    // Terminal
+//    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
+//    strncpy(ksn_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
 }
 
 /**
