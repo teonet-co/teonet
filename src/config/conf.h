@@ -32,6 +32,7 @@
 #define M_ENAMBE_VPN 1
 #define M_ENAMBE_TCP 1
 #define M_ENAMBE_TUN 1
+#define M_ENAMBE_TERM 1
 
 
 typedef struct ksnet_cfg {
@@ -74,6 +75,10 @@ typedef struct ksnet_cfg {
     char vpn_ip[KSN_BUFFER_SM_SIZE/2];
     long vpn_ip_net;
     long vpn_mtu;
+    
+    // Terminal
+//    char t_username[KSN_BUFFER_SM_SIZE/2]; ///< User name to login to terminal
+//    char t_password[KSN_BUFFER_SM_SIZE/2]; ///< Password to login to terminal
 
     // Helpers
     int pp;
