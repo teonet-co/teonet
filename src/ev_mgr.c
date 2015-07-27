@@ -99,10 +99,12 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     char *app_argv[app_argc];           // array for argument names
     app_argv[0] = (char*)"peer_name";   // peer name argument name
     //app_argv[1] = (char*)"file_name";   // file name argument name
-    if(options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
-        int i;
-        for(i = 1; i < ((ksnetEvMgrAppParam*)user_data)->app_argc; i++) {
-            app_argv[i] = ((ksnetEvMgrAppParam*)user_data)->app_argv[i];
+    if(options&APP_PARAM && user_data != NULL) {
+        if(((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
+            int i;
+            for(i = 1; i < ((ksnetEvMgrAppParam*)user_data)->app_argc; i++) {
+                app_argv[i] = ((ksnetEvMgrAppParam*)user_data)->app_argv[i];
+            }
         }
     }
 
@@ -692,7 +694,9 @@ int modules_init(ksnetEvMgrClass *ke) {
     #endif
 
     // TCP client/server module
+    #if M_ENAMBE_TCP
     ke->kt = ksnTcpInit(ke);
+    #endif
     
 //    ke->kter = ksnTermInit(ke);
 //    ke->ktun = ksnTunInit(ke);
@@ -709,7 +713,10 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 
 //    ksnTunDestroy(ke->ktun);
 //    ksnTermDestroy(ke->kter);
+    
+    #if M_ENAMBE_TCP
     ksnTcpDestroy(ke->kt);
+    #endif
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
     #endif
