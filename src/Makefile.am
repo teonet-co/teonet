@@ -99,6 +99,7 @@ libteonet_la_SOURCES = \
     config/conf.c \
     config/opt.c \
     modules/net_tcp.c \
+    modules/net_tun.c \
     modules/vpn.c \
     utils/string_arr.c \
     utils/utils.c
