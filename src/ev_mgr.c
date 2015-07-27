@@ -697,9 +697,13 @@ int modules_init(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_TCP
     ke->kt = ksnTcpInit(ke);
     #endif
+
+    // TCP Tunnel module  
+    #ifdef M_ENAMBE_TUN
+    ke->ktun = ksnTunInit(ke);
+    #endif
     
 //    ke->kter = ksnTermInit(ke);
-//    ke->ktun = ksnTunInit(ke);
 
     return 1;
 }
@@ -711,9 +715,11 @@ int modules_init(ksnetEvMgrClass *ke) {
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
 
-//    ksnTunDestroy(ke->ktun);
 //    ksnTermDestroy(ke->kter);
     
+    #ifdef M_ENAMBE_TUN
+    ksnTunDestroy(ke->ktun);
+    #endif
     #if M_ENAMBE_TCP
     ksnTcpDestroy(ke->kt);
     #endif
