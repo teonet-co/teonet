@@ -1,6 +1,6 @@
 /**
  * File:   net_com.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on April 29, 2015, 7:57 PM
  *
