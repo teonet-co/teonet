@@ -1,6 +1,6 @@
 /**
  * File:   net_tun.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on May 10, 2015, 3:27 PM
  *
@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 
 #include "ev_mgr.h"
+#include "utils/rlutil.h"
 
 /**
  * Tunnel commands
@@ -151,8 +152,8 @@ void ksn_tun_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *watcher,
         #ifdef DEBUG_KSNET
         ksnet_printf(
                 & ((ksnetEvMgrClass *)(tun_d->ktun->ke))->ksn_cfg, DEBUG,
-                "TUN Server: Can't create tunnel to %s, disconnect... \n",
-                tun_d->to
+                "%sTUN Server:%s Can't create tunnel to %s, disconnect... \n",
+                ANSI_BLUE, ANSI_NONE, tun_d->to
         );
         #endif
         shutdown(fd, SHUT_RDWR);
@@ -163,8 +164,8 @@ void ksn_tun_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *watcher,
         #ifdef DEBUG_KSNET
         ksnet_printf(
                 & ((ksnetEvMgrClass *)(tun_d->ktun->ke))->ksn_cfg, DEBUG,
-                "TUN Server: Tunnel to %s created \n",
-                tun_d->to
+                "%sTUN Server:%s Tunnel to %s created \n",
+                ANSI_BLUE, ANSI_NONE, tun_d->to
         );
         #endif
     }
@@ -412,8 +413,8 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
         #ifdef DEBUG_KSNET
         ksnet_printf(
             & ((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke)->ksn_cfg , DEBUG,
-            "TUN Server: Connection closed. Stop listening FD %d\n",
-            w->fd
+            "%sTUN Server:%s Connection closed. Stop listening FD %d\n",
+            ANSI_BLUE, ANSI_NONE, w->fd
         );
         #endif
 
