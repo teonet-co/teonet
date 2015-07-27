@@ -129,6 +129,7 @@ void ksnVpnDestroy(void *vpn) {
     if(kvpn != NULL) {
 
         ksnetEvMgrClass *ke = kvpn->ke;
+        
         // Stop watcher
         if(kvpn->tuntap_io != NULL) {
             ev_io_stop (ke->ev_loop, kvpn->tuntap_io);

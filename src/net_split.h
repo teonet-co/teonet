@@ -1,6 +1,6 @@
 /** 
  * File:   net_split.h
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on July 17, 2015, 10:20 AM
  * 

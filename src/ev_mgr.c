@@ -53,10 +53,21 @@ ksnetEvMgrClass *ksnetEvMgrInit(
   int options
     ) {
     
-    return ksnetEvMgrInitPort(argc, argv, event_cb, options, 0);
+    return ksnetEvMgrInitPort(argc, argv, event_cb, options, 0, NULL);
 }
 /**
  * Initialize KSNet Event Manager and network and set new default port
+ *
+ * @param argc Number of applications arguments (from main)
+ * @param argv Applications arguments array (from main)
+ * @param event_cb Events callback function called when an event happens
+ * @param options Options set: \n
+ *                READ_OPTIONS - read options from command line parameters; \n
+ *                READ_CONFIGURATION - read options from configuration file
+ * @param port Set default port number if non 0
+ * @param user_data Pointer to user data or NULL if absent
+ * 
+ * @return Pointer to created ksnetEvMgrClass
  *
  */
 ksnetEvMgrClass *ksnetEvMgrInitPort(
@@ -64,7 +75,8 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
   int argc, char** argv,
   void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
   int options,
-  int port
+  int port,
+  void *user_data
     ) {
 
     ksnetEvMgrClass *ke = malloc(sizeof(ksnetEvMgrClass));
@@ -77,23 +89,42 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->n_num = 0;
     ke->n_prev = NULL;
     ke->n_next = NULL;
+    ke->user_data = user_data;
     
     // Initialize async mutex
     pthread_mutex_init(&ke->async_mutex, NULL);
 
     // KSNet parameters
-    const int app_argc = 1;             // number of application arguments
+    const int app_argc = options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1 ? ((ksnetEvMgrAppParam*)user_data)->app_argc : 1; // number of application arguments
     char *app_argv[app_argc];           // array for argument names
     app_argv[0] = (char*)"peer_name";   // peer name argument name
     //app_argv[1] = (char*)"file_name";   // file name argument name
+    if(options&APP_PARAM && user_data != NULL) {
+        if(((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
+            int i;
+            for(i = 1; i < ((ksnetEvMgrAppParam*)user_data)->app_argc; i++) {
+                app_argv[i] = ((ksnetEvMgrAppParam*)user_data)->app_argv[i];
+            }
+        }
+    }
 
     // Initial configuration, set defaults, read defaults from command line
     ksnet_configInit(&ke->ksn_cfg, ke); // Set configuration default
     if(port) ke->ksn_cfg.port = port; // Set port default
+    char **argv_ret = NULL;
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
-    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
-    
+    if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
+
+    ke->ksn_cfg.app_argc = app_argc;
+    ke->ksn_cfg.app_argv = argv_ret;
+//    
+//    if(options&APP_PARAM && user_data != NULL && 
+//       ((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
+//        
+//        ((ksnetEvMgrAppParam*)user_data)->app_argv_result = argv_ret;
+//    }
+//    
     return ke;
 }
 
@@ -651,7 +682,10 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kc = NULL;
     ke->kh = NULL;
 
+    // Teonet core module
     if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;
+    
+    // Hotkeys
     if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
 
     // VPN Module
@@ -659,7 +693,11 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kvpn = ksnVpnInit(ke);
     #endif
 
-//    ke->kt = ksnTcpInit(ke);
+    // TCP client/server module
+    #if M_ENAMBE_TCP
+    ke->kt = ksnTcpInit(ke);
+    #endif
+    
 //    ke->kter = ksnTermInit(ke);
 //    ke->ktun = ksnTunInit(ke);
 
@@ -675,8 +713,10 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 
 //    ksnTunDestroy(ke->ktun);
 //    ksnTermDestroy(ke->kter);
-//    ksnTcpDestroy(ke->kt);
-
+    
+    #if M_ENAMBE_TCP
+    ksnTcpDestroy(ke->kt);
+    #endif
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
     #endif

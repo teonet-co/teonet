@@ -17,8 +17,8 @@
 
 #include "hotkeys.h"
 #include "modules/vpn.h"
+#include "modules/net_tcp.h"
 
-//#include "net_tcp.h"
 //#include "net_tun.h"
 //#include "net_core.h"
 //#include "net_term.h"
@@ -44,6 +44,16 @@ typedef enum ksnetEvMgrEvents {
 } ksnetEvMgrEvents;
 
 /**
+ * Application parameters user data
+ */
+typedef struct ksnetEvMgrAppParam {
+    
+    int app_argc;
+    char **app_argv;
+    
+} ksnetEvMgrAppParam;
+
+/**
  * KSNet event manager functions data
  */
 typedef struct ksnetEvMgrClass {
@@ -53,7 +63,7 @@ typedef struct ksnetEvMgrClass {
     ksnCoreClass *kc;  ///< KSNet core class
     ksnetHotkeysClass *kh; ///< Hotkeys class
     ksnVpnClass *kvpn; ///< VPN class
-//    ksnTcpClass *kt; /// TCP Client/Server class
+    ksnTcpClass *kt; /// TCP Client/Server class
 //    ksnTermClass *kter; // Terminal class
 //    ksnTunClass *ktun; // Tunnel class
 //
@@ -92,6 +102,8 @@ typedef struct ksnetEvMgrClass {
     ev_signal sigstop_w; ///< Signal SIGSTOP watcher
     #endif
 
+    void *user_data; ///< Pointer to user data or NULL if absent
+
 } ksnetEvMgrClass;
 
 /**
@@ -119,7 +131,8 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     int argc, char** argv,
     void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
     int options,
-    int port
+    int port,
+    void *user_data
 );
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
 int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async);

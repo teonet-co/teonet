@@ -34,7 +34,8 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md) {
             
             // Initialize network
             ksnetEvMgrClass *ke = ksnetEvMgrInitPort(md->argc, md->argv, 
-                md->event_cb, READ_OPTIONS|READ_CONFIGURATION, md->ports[i]);
+                md->event_cb, READ_OPTIONS|READ_CONFIGURATION, md->ports[i], 
+                NULL);
             
             // Set network parameters
             ke->km = km; // Pointer to multi net module
