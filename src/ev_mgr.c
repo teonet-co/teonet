@@ -703,7 +703,9 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->ktun = ksnTunInit(ke);
     #endif
     
-//    ke->kter = ksnTermInit(ke);
+    #ifdef M_ENAMBE_TERM
+    ke->kter = ksnTermInit(ke);
+    #endif
 
     return 1;
 }
@@ -715,8 +717,9 @@ int modules_init(ksnetEvMgrClass *ke) {
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
 
-//    ksnTermDestroy(ke->kter);
-    
+    #ifdef M_ENAMBE_TERM
+    ksnTermDestroy(ke->kter);
+    #endif
     #ifdef M_ENAMBE_TUN
     ksnTunDestroy(ke->ktun);
     #endif
