@@ -22,6 +22,8 @@
 #include "net_tcp.h"
 #include "utils/rlutil.h"
 
+#if M_ENAMBE_TCP
+
 #define KSNET_TRY_PORT 1000
 #define KSNET_IPV6_ENABLE
 
@@ -642,3 +644,5 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 
     return sd;
 }
+
+#endif

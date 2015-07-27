@@ -16,8 +16,8 @@
 
 #include "hotkeys.h"
 #include "modules/vpn.h"
+#include "modules/net_tcp.h"
 
-#include "net_tcp.h"
 //#include "net_tun.h"
 //#include "net_core.h"
 //#include "net_term.h"
@@ -49,7 +49,6 @@ typedef struct ksnetEvMgrAppParam {
     
     int app_argc;
     char **app_argv;
-//    char **app_argv_result;
     
 } ksnetEvMgrAppParam;
 

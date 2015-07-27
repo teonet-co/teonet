@@ -15,7 +15,8 @@
 
 #include "ev_mgr.h"
 
-#define TTCP_VERSION VERSION    
+#define TTCP_VERSION "0.0.1"    
+#define SERVER_PORT 9050
     
 /**
  * TCP server receive data from client callback
@@ -45,7 +46,7 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
         d[strcspn(d, "\r\n")] = 0; // Remove trailing CRLF
 
         // Help client command
-        if(!strcmp(d,"help")) {    
+        if(!strcmp(d,"help") || !strcmp(d,"?")) {    
             
             char *b = "TCP Client commands:\n"
                       "close -- close this client\n"
@@ -55,7 +56,7 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
         }
         
         // Check close client command
-        else if(!strcmp(d,"close")) {            
+        else if(!strcmp(d,"close")) {
             printf("The connection to client %d was closed\n", w->fd);
             close_flg = 1;
         }
@@ -141,14 +142,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if(!strcmp(ke->ksn_cfg.app_argv[1], "server")) {
                 
                 // Start TCP server
-                int port_created, 
-                    fd = ksnTcpServerCreate(ke->kt, ke->ksn_cfg.port, 
+                int port_created;
+                ksnTcpServerCreate(ke->kt, SERVER_PORT, 
                         tcp_server_accept_cb, NULL, &port_created);
             }
             
             //Client
             else if(!strcmp(ke->ksn_cfg.app_argv[1], "client")) {
-                
+                printf("Client mode example is under construction yet,\n"
+                       "trying system telnet application ...\n"); 
+                char *buffer = ksnet_formatMessage("telnet 0 %d", SERVER_PORT);
+                system(buffer);
+                free(buffer);
+                ksnetEvMgrStop(ke);
             }
         }
         break;
@@ -168,7 +174,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  */
 int main(int argc, char** argv) {
 
-    printf("Teotcp ver " TTCP_VERSION "\n");
+    printf("Teotcp example ver " TTCP_VERSION ", based on teonet ver. " VERSION "\n");
     
     // Application parameters
     char *app_argv[] = { "", "app_type"}; 

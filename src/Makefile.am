@@ -95,10 +95,10 @@ libteonet_la_SOURCES = \
     net_core.c \
     net_multi.c \
     net_split.c \
-    net_tcp.c \
     teonet.c \
     config/conf.c \
     config/opt.c \
+    modules/net_tcp.c \
     modules/vpn.c \
     utils/string_arr.c \
     utils/utils.c
