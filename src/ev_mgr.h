@@ -38,7 +38,8 @@ typedef enum ksnetEvMgrEvents {
     EV_K_RECEIVED_WRONG,///< Wrong packet received
     EV_K_IDLE,          ///< Idle check host events (after 11.5 after last host send or receive data)
     EV_K_TIMER,         ///< Timer event
-    EV_K_ASYNC          ///< Async event
+    EV_K_ASYNC,         ///< Async event           
+    EV_K_TERM_STARTED   ///< After terminal started (in place to define commands 
 
 } ksnetEvMgrEvents;
 
@@ -102,6 +103,8 @@ typedef struct ksnetEvMgrClass {
     #endif
 
     void *user_data; ///< Pointer to user data or NULL if absent
+    
+    struct cli_def *cli;
 
 } ksnetEvMgrClass;
 

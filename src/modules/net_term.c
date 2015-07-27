@@ -545,6 +545,8 @@ struct cli_def *ksnTermCliInit(ksnTermClass *kter) {
 
             cli_register_command(cli, cc, "remove", cmd_ksnet_tunnel_remove, PRIVILEGE_UNPRIVILEGED,
                 MODE_EXEC, "Remove tunnel from list");
+            
+    if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_TERM_STARTED, NULL, 0, NULL);
 
     /**************************************************************************/
     /* Test Commands                                                          */
