@@ -366,7 +366,9 @@ int cmd_tun_cb(ksnTunClass * ktun, ksnCorePacketData *rd) {
         case TUN_DATA:
         {
             uint16_t *fd = from_fd;
-            cmd_tun_write_cb(*fd, rd->data + ptr, rd->data_len - ptr);
+            size_t data_len = rd->data_len - ptr;
+            if(data_len >= 0)
+                cmd_tun_write_cb(*fd, rd->data + ptr, data_len);
         }
         break;
 
@@ -478,7 +480,8 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
  */
 inline void cmd_tun_write_cb(uint16_t fd, void *data, size_t data_len) {
 
-    write(fd, data, data_len);
+    ssize_t len = write(fd, data, data_len);
+    if(len <= 0 ); // Writing error
 }
 
 /**
