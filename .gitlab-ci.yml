@@ -16,6 +16,6 @@ types:
 job1:
   type: build
   script:
-    - autogen.sh
+    - ./autogen.sh
   only:
     - master
