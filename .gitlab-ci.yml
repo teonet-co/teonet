@@ -4,13 +4,15 @@
 before_script:
   - docker info
 
+types:
+  - build
+
 build_image:
+  type: build
   script:
     - docker build -t ubuntu:14:04
     - docker run ubuntu:14:04 /script/to/run/tests
     
-types:
-  - build
 
 job1:
   type: build
@@ -18,4 +20,3 @@ job1:
     - autogen.sh
   only:
     - master
-    
