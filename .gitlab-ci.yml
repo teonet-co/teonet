@@ -2,9 +2,13 @@
 
 # Run before each script
 before_script:
-  - export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
-  - apt-get install -y git
+  - docker info
 
+build_image:
+  script:
+    - docker build -t ubuntu:14:04
+    - docker run ubuntu:14:04 /script/to/run/tests
+    
 types:
   - build
 
