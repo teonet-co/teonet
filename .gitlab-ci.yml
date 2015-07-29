@@ -17,7 +17,7 @@ job1:
   type: build
   script:
     #- sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc
-    sh/build-ubuntu.sh
+    - sh/build-ubuntu.sh
     - ./autogen.sh
     - make
   only:

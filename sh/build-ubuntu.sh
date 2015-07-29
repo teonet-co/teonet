@@ -10,8 +10,8 @@ sudo apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev
 sudo apt-get install -y cmake g++ 
 
 # Get libtuntap
-git clone git@gitlab.ksproject.org:ksnet/ksmesh.git #http://gitlab.ksproject.org/ksnet/ksmesh.git
-cd ksmesh/distr
+#git clone git@gitlab.ksproject.org:ksnet/ksmesh.git #http://gitlab.ksproject.org/ksnet/ksmesh.git
+cd distr
 unzip libtuntap.zip
 cd libtuntap-master
 
@@ -21,6 +21,6 @@ make
 sudo make install
 
 # Remove libtuntap source
-cd ../..
-rm -fr ksmesh
+cd ..
+#rm -fr ksmesh
 
