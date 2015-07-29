@@ -11,7 +11,7 @@ build_image:
   type: build
   script:
     - docker build -t ubuntu:14:04
-    - docker run ubuntu:14:04 /script/to/run/tests
+    - docker run ubuntu:14:04 apt-get install git
     
 job1:
   type: build
