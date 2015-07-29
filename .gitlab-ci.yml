@@ -1,34 +1,17 @@
-# Refs to skip
-skip_refs: “deploy*”
+types:
+  - build
+  - test
+  - deploy
 
-# Run before each script
-
-# Refs to skip
-skip_refs: “deploy*”
-
-# Run before each script
-before_script:
-  - export PATH=$HOME/bin:/usr/local/bin:/usr/bin:/bin
-  - gem install bundler
-  - cp config/database.yml.mysql config/database.yml
-  - cp config/gitlab.yml.example config/gitlab.yml
-  - touch log/application.log
-  - touch log/test.log
-  - bundle install --without postgres production --jobs $(nproc)
-  - “bundle exec rake db:create RAILS_ENV=test”
-
-# Parallel jobs, each line is a parallel build
-jobs:
-  - script: “rake spec”
-    runner: “ruby,postgres”
-    name: “Rspec”
-  - script: “rake spinach”
-    runner: “ruby,mysql”
-    name: “Spinach”
-    tags: true
-    branches: false
-
+job1:
+  type: build
+  script:
+    - autogen.sh
+  only:
+    - master
+    
 # Parallel deploy jobs
 on_success:
   - “cap deploy production”
   - “cap deploy staging”
+  
