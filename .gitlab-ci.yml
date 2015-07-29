@@ -1,12 +1,15 @@
 # version 0.0.1
 
+# Run before each script
+before_script:
+  - apt-get install -y git
+
 types:
   - build
 
 job1:
   type: build
   script:
-    - apt-get install -y git
     - autogen.sh
   only:
     - master
