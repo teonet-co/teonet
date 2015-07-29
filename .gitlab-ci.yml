@@ -1,7 +1,5 @@
 types:
   - build
-  - test
-  - deploy
 
 job1:
   type: build
@@ -9,4 +7,3 @@ job1:
     - autogen.sh
   only:
     - master
-    
