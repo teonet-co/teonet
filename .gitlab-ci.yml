@@ -10,8 +10,3 @@ job1:
   only:
     - master
     
-# Parallel deploy jobs
-on_success:
-  - “cap deploy production”
-  - “cap deploy staging”
-  
