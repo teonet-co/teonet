@@ -22,5 +22,5 @@ sudo make install
 
 # Remove libtuntap source
 cd ..
-#rm -fr ksmesh
+rm -fr libtuntap-master
 
