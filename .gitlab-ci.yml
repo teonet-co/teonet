@@ -6,6 +6,7 @@ types:
 job1:
   type: build
   script:
+    - apt-get install -y git
     - autogen.sh
   only:
     - master
