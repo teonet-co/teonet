@@ -18,3 +18,4 @@ job1:
     - autogen.sh
   only:
     - master
+    
