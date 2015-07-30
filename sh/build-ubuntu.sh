@@ -27,3 +27,5 @@ sudo make install
 cd ..
 rm -fr libtuntap-master
 
+# Update system dynamic libraries configuration
+sudo ldconfig

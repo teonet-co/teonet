@@ -36,3 +36,6 @@ cmake ./
 make
 make install
 cd ../..
+
+# Update system dynamic libraries configuration
+ldconfig
