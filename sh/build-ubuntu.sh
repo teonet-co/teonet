@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Upgrade Ubuntu
+sudo apt-get update
+sudo apt-get upgrade
+
 # Autoconf dependence
 sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc
 
@@ -10,7 +14,6 @@ sudo apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev
 sudo apt-get install -y cmake g++ 
 
 # Get libtuntap
-#git clone git@gitlab.ksproject.org:ksnet/ksmesh.git #http://gitlab.ksproject.org/ksnet/ksmesh.git
 cd distr
 unzip libtuntap.zip
 cd libtuntap-master
