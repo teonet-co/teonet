@@ -13,8 +13,9 @@ types:
 #    - docker build -t ubuntu:14:04
 #    - docker run ubuntu:14:04 apt-get install git
     
-job1:
+job_ubuntu:
   type: build
+  image: ubuntu_teonet
   script:
     #- sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc
     - sh/build-ubuntu.sh
