@@ -2,7 +2,7 @@
 
 # Upgrade Ubuntu
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get -y upgrade
 
 # Autoconf dependence
 sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc
