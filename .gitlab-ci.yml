@@ -20,7 +20,7 @@ job_ubuntu:
     - sh/build-ubuntu.sh
     - ./autogen.sh
     - make
-    - app/teovpn
+    - app/teovpn -?
   only:
     - master
     
@@ -31,7 +31,7 @@ job_centos:
     - sh/build-centos.sh
     - ./autogen.sh
     - make
-    - app/teovpn
+    - app/teovpn -?
   only:
     - master    
     
