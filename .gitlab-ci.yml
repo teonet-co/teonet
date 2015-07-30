@@ -17,7 +17,7 @@ job_ubuntu:
   type: build
   image: ubuntu_teonet
   script:
-    - sh/build-ubuntu.sh
+    #- sh/build-ubuntu.sh
     - ./autogen.sh
     - make
     - app/teovpn -?
@@ -28,7 +28,18 @@ job_centos:
   type: build
   image: centos_teonet
   script:
-    - sh/build-centos.sh
+    #- sh/build-centos.sh
+    - ./autogen.sh
+    - make
+    - app/teovpn -?
+  only:
+    - master    
+
+job_fedora:
+  type: build
+  image: fedora_teonet
+  script:
+    #- sh/build-centos.sh
     - ./autogen.sh
     - make
     - app/teovpn -?
