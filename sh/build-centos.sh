@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Update Centos
-yum update
+yum -y update
 
 # Autoconf dependence
 yum install -y autoconf intltool libtool glib2-devel doxygen make gcc

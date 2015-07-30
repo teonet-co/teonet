@@ -17,9 +17,19 @@ job_ubuntu:
   type: build
   image: ubuntu_teonet
   script:
-    #- sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc
     - sh/build-ubuntu.sh
     - ./autogen.sh
     - make
   only:
     - master
+    
+job_centos:
+  type: build
+  image: centos_teonet
+  script:
+    - sh/build-centos.sh
+    - ./autogen.sh
+    - make
+  only:
+    - master    
+    
