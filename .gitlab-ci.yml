@@ -15,7 +15,7 @@ types:
     
 job_ubuntu:
   type: build
-  runner: ubuntu_teonet
+  image: ubuntu_teonet
   script:
     #- sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc
     - sh/build-ubuntu.sh
