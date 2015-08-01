@@ -11,7 +11,7 @@ sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gc
 sudo apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev
 
 # Libtuntap dependence
-sudo apt-get install -y cmake g++ 
+sudo apt-get install -y cmake g++ unzip
 
 # Get libtuntap
 cd distr
