@@ -31,9 +31,9 @@ AM_CFLAGS = \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
-	 -I../embedded/libpbl/src/ 
-	
-if TEO_THREAD	
+	 -I../embedded/libpbl/src/
+
+if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD
 endif
 
@@ -53,7 +53,7 @@ AM_CXXFLAGS = \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -ltuntap ../embedded/libpbl/src/libpbl.a -lcrypt
+LIBS = -lev -ltuntap ../embedded/libpbl/src/libpbl.a
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -64,7 +64,7 @@ endif
 # Mac OS only
 if DARWIN
 else
-LIBS += -luuid
+LIBS += -luuid -lcrypt
 endif
 
 lib_LTLIBRARIES = libteonet.la
