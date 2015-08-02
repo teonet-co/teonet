@@ -37,6 +37,19 @@ int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *recv_
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
+// UDP / UDT functions
+#define ksn_socket(domain, type, protocol) \
+            socket(domain, type, protocol)
+
+#define ksn_bind(fd, addr, addr_len) \
+            bind(fd, addr, addr_len)
+
+#define ksn_sendto(fd, data, data_len, flags, remaddr, addrlen) \
+            sendto(fd, data, data_len, flags, remaddr, addrlen)
+
+#define ksn_recvfrom(fd, buf, buf_len, flags, remaddr, addrlen) \
+            recvfrom(fd, buf, buf_len, flags, remaddr, addrlen)
+
 /**
  * Encrypt packet and sent to
  *
@@ -53,18 +66,18 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
             size_t data_len; \
             char *buffer = NULL; /*[KSN_BUFFER_DB_SIZE];*/ \
             void *data = ksnEncryptPackage(kc->kcr, DATA, D_LEN, buffer, &data_len); \
-            retval = sendto(kc->fd, data, data_len, 0, \
+            retval = ksn_sendto(kc->fd, data, data_len, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
             free(data); \
         } \
         else { \
-            retval = sendto(kc->fd, DATA, D_LEN, 0, \
+            retval = ksn_sendto(kc->fd, DATA, D_LEN, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
         } \
     }
 #else
 #define sendto_encrypt(kc, DATA, D_LEN) \
-    retval = sendto(kc->fd, DATA, D_LEN, 0, \
+    retval = ksn_sendto(kc->fd, DATA, D_LEN, 0, \
                         (struct sockaddr *)&remaddr, addrlen);
 #endif
 
@@ -173,7 +186,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
     #endif
 
     // Create a UDP socket
-    if((kc->fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    if((kc->fd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("cannot create socket\n");
         return -1;
     }
@@ -187,7 +200,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
         addr.sin_addr.s_addr = htonl(INADDR_ANY);
         addr.sin_port = htons(kc->port);
 
-        if(bind(kc->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        if(ksn_bind(kc->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
             #ifdef DEBUG_KSNET
             ksnet_printf(ksn_cfg, MESSAGE, "Try port %d ...\n", kc->port++);
@@ -444,7 +457,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     int recvlen;                            // # bytes received
 
     // Receive data
-    recvlen = recvfrom(kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 0,
+    recvlen = ksn_recvfrom(kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 0,
             (struct sockaddr *)&remaddr, &addrlen);
 
     #ifdef DEBUG_KSNET

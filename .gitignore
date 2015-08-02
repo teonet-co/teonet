@@ -11,7 +11,7 @@
 /.teoterm/
 /nbproject
 /build/
-/dist/
+/distr/udt4/
 /docs/
 /embedded/libpbl/src/*.o
 /embedded/libpbl/src/pblkftst
