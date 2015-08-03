@@ -23,6 +23,7 @@
 #if KSNET_CRYPT
 #include "crypt.h"
 #endif
+#include "net_tr-udp.h"
 
 // External constants
 extern const char *localhost;
@@ -42,6 +43,7 @@ typedef struct ksnCoreClass {
     double last_check_event; ///< Last time of check host event
     ksnetArpClass *ka;       ///< Arp table class object
     ksnCommandClass *kco;    ///< Command class object
+    ksnTrUdpClass *ku;       ///< RT-UDP class object
     #if KSNET_CRYPT
     ksnCryptClass *kcr;      ///< Crypt class object
     #endif

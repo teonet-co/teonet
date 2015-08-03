@@ -103,6 +103,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     kc->last_check_event = 0;
 
     ((ksnetEvMgrClass*)ke)->kc = kc;
+    kc->ku = ksnTrUdpInit(kc);
     kc->ka = ksnetArpInit(ke);
     kc->kco = ksnCommandInit(kc);
     #if KSNET_CRYPT
@@ -141,18 +142,19 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         ksnetEvMgrClass *ke = kc->ke;
 
         // Send disconnect to all
-        ksnetArpGetAll((kc)->ka, send_cmd_disconnect_cb, NULL);
+        ksnetArpGetAll(kc->ka, send_cmd_disconnect_cb, NULL);
         
         // Stop watcher
         ev_io_stop(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
 
-        close((kc)->fd);
-        free((kc)->name);
-        if((kc)->addr != NULL) free((kc)->addr);
-        ksnetArpDestroy((kc)->ka);
-        ksnCommandDestroy((kc)->kco);
+        close(kc->fd);
+        free(kc->name);
+        if(kc->addr != NULL) free(kc->addr);
+        ksnetArpDestroy(kc->ka);
+        ksnCommandDestroy(kc->kco);
+        ksnTrUdpInit(kc->ku);
         #if KSNET_CRYPT
-        ksnCryptDestroy((kc)->kcr);
+        ksnCryptDestroy(kc->kcr);
         #endif
         free(kc);
         ke->kc = NULL;
