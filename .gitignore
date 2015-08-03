@@ -85,3 +85,4 @@
 /tests/Makefile
 /tests/Makefile.in
 /tests/teonet_tst
+/lib/confuse/.deps/
