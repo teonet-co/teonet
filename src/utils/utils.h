@@ -43,6 +43,7 @@ char *trim(char *str);
 char *trimlf(char *str);
 //char* itoa(int ival);
 int calculate_lines(char *str);
+int inarray(int val, const int *arr, int size);
 
 void set_nonblock(int fd);
 

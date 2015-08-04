@@ -22,6 +22,7 @@ typedef int socklen_t;
 
 #include "ev_mgr.h"
 #include "net_split.h"
+#include "net_tr-udp.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 
@@ -44,11 +45,11 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
 #define ksn_bind(fd, addr, addr_len) \
             bind(fd, addr, addr_len)
 
-#define ksn_sendto(fd, data, data_len, flags, remaddr, addrlen) \
-            sendto(fd, data, data_len, flags, remaddr, addrlen)
+#define ksn_sendto(ku, fd, cmd, data, data_len, flags, remaddr, addrlen) \
+            ksnTRUDPsendto(ku, fd, cmd, data, data_len, flags, remaddr, addrlen)
 
-#define ksn_recvfrom(fd, buf, buf_len, flags, remaddr, addrlen) \
-            recvfrom(fd, buf, buf_len, flags, remaddr, addrlen)
+#define ksn_recvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen) \
+            ksnTRUDPrecvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen)
 
 /**
  * Encrypt packet and sent to
@@ -60,24 +61,24 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
  * @return
  */
 #if KSNET_CRYPT
-#define sendto_encrypt(kc, DATA, D_LEN) \
+#define sendto_encrypt(kc, cmd, DATA, D_LEN) \
     { \
         if(((ksnetEvMgrClass*)kc->ke)->ksn_cfg.crypt_f) { \
             size_t data_len; \
             char *buffer = NULL; /*[KSN_BUFFER_DB_SIZE];*/ \
             void *data = ksnEncryptPackage(kc->kcr, DATA, D_LEN, buffer, &data_len); \
-            retval = ksn_sendto(kc->fd, data, data_len, 0, \
+            retval = ksn_sendto(kc->ku, kc->fd, cmd, data, data_len, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
             free(data); \
         } \
         else { \
-            retval = ksn_sendto(kc->fd, DATA, D_LEN, 0, \
+            retval = ksn_sendto(kc->ku, kc->fd, cmd, DATA, D_LEN, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
         } \
     }
 #else
-#define sendto_encrypt(kc, DATA, D_LEN) \
-    retval = ksn_sendto(kc->fd, DATA, D_LEN, 0, \
+#define sendto_encrypt(kc, cmd, DATA, D_LEN) \
+    retval = ksn_sendto(kc->ku, kc->fd, cmd, DATA, D_LEN, 0, \
                         (struct sockaddr *)&remaddr, addrlen);
 #endif
 
@@ -103,7 +104,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     kc->last_check_event = 0;
 
     ((ksnetEvMgrClass*)ke)->kc = kc;
-    kc->ku = ksnTrUdpInit(kc);
+    kc->ku = ksnTRUDPInit(kc);
     kc->ka = ksnetArpInit(ke);
     kc->kco = ksnCommandInit(kc);
     #if KSNET_CRYPT
@@ -152,7 +153,7 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        ksnTrUdpInit(kc->ku);
+        ksnTRUDPInit(kc->ku);
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif
@@ -236,7 +237,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg, DEBUG_VV,
-                 "%sNet core:%s ksnCoreSendto %s:%d %d \n", ANSI_GREEN, ANSI_NONE, addr, port, data_len);
+                 "%sNet core:%s >> ksnCoreSendto %s:%d %d \n", ANSI_GREEN, ANSI_NONE, addr, port, data_len);
     #endif
 
 
@@ -279,7 +280,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
                         &packet_len);
 
                 // Encrypt and send one spitted subpacket
-                sendto_encrypt(kc, packet, packet_len);
+                sendto_encrypt(kc, CMD_SPLIT, packet, packet_len);
 
                 // Free memory
                 free(packet);
@@ -296,7 +297,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
             void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
 
             // Encrypt and send one not spitted packet
-            sendto_encrypt(kc, packet, packet_len);
+            sendto_encrypt(kc, cmd, packet, packet_len);
             
             // Free packet
             free(packet);
@@ -353,10 +354,10 @@ void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
     void *packet = malloc(*packet_len);
 
     // Copy packet data
-    *((uint8_t *)packet) = kc->name_len; ptr += sizeof(uint8_t);
-    memcpy(packet + ptr, kc->name, kc->name_len); ptr += kc->name_len;
-    *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t);
-    memcpy(packet + ptr, data, data_len); ptr += data_len;
+    *((uint8_t *)packet) = kc->name_len; ptr += sizeof(uint8_t); // Name length
+    memcpy(packet + ptr, kc->name, kc->name_len); ptr += kc->name_len; // Name
+    *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t); // Command
+    memcpy(packet + ptr, data, data_len); ptr += data_len; // Data
 
     return packet;
 }
@@ -459,12 +460,12 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     int recvlen;                            // # bytes received
 
     // Receive data
-    recvlen = ksn_recvfrom(kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 0,
-            (struct sockaddr *)&remaddr, &addrlen);
+    recvlen = ksn_recvfrom(ke->kc->ku, kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
+              0, (struct sockaddr *)&remaddr, &addrlen);
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sNet core:%s host_cb receive %d bytes from %s\n", 
+            "%sNet core:%s << host_cb receive %d bytes from %s\n", 
             ANSI_GREEN, ANSI_NONE, recvlen, inet_ntoa(remaddr.sin_addr));
     #endif
 
@@ -572,7 +573,10 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
     // Socket disconnected
     else {
-        printf("Disconnected ...\n");
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+                "TR-UDP protocol data, dropped or disconnected ...\n");
+        #endif
     }
 
     // Set last host event time

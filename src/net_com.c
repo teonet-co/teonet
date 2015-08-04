@@ -230,14 +230,14 @@ int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Ping answer
     if(!strcmp(rd->data, PING)) {
         // Show command message
-        #ifdef DEBUG_KSNET
-        ksnet_printf(& ke->ksn_cfg, DEBUG,
+//        #ifdef DEBUG_KSNET
+        ksnet_printf(& ke->ksn_cfg, MESSAGE,
             "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             rd->data_len, // command data length
             rd->from,     // from
             triptime
         );
-        #endif
+//        #endif
     }
 
     // Trim time answer
