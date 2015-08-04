@@ -10,22 +10,38 @@
 #ifndef NET_TR_UDP_H
 #define	NET_TR_UDP_H
 
+#ifdef HAVE_MINGW
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+typedef int socklen_t;
+#else
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#endif
+
 /**
  * Teonet TR-UDP class data
  */
-typedef struct ksnTrUdpClass {
+typedef struct ksnTRUDPClass {
     
     void *kc; ///< Pointer to KSNet core class object
     
-} ksnTrUdpClass;
+} ksnTRUDPClass;
 
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-ksnTrUdpClass *ksnTrUdpInit(void *kc);
-void ksnTrUdpDestroy(ksnTrUdpClass *tu);
+ksnTRUDPClass *ksnTRUDPInit(void *kc);
+void ksnTRUDPDestroy(ksnTRUDPClass *tu);
+
+ssize_t ksnTRUDPsendto (ksnTRUDPClass *tu, int fd, int cmd, const void *buf, 
+                        size_t buf_len, int flags, __CONST_SOCKADDR_ARG addr,
+		        socklen_t addr_len);
+ssize_t ksnTRUDPrecvfrom (ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len, 
+                          int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
 
 #ifdef	__cplusplus
 }

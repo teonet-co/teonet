@@ -417,6 +417,26 @@ const char *ksnet_getSysConfigDir(void) {
     return sysConfigDir;
 }
 
+/**
+ * Check if a value exist in a array
+ * 
+ * @param val Integer value
+ * @param arr Integer array
+ * @param size Array size
+ * 
+ * @return 
+ */
+int inarray(int val, const int *arr, int size) {
+    
+    int i;
+    for (i=0; i < size; i++) {
+        if (arr[i] == val)
+            return 1;
+    }
+    return 0;
+}
+
+
 #include <sys/types.h>
 #ifdef HAVE_MINGW
 #include <winsock2.h>
