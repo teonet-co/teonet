@@ -26,6 +26,7 @@ typedef int socklen_t;
 typedef struct ksnTRUDPClass {
     
     void *kc; ///< Pointer to KSNet core class object
+    PblMap *ip_map; ///< IP:port map
     
 } ksnTRUDPClass;
 
@@ -42,6 +43,15 @@ ssize_t ksnTRUDPsendto (ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
 		        socklen_t addr_len);
 ssize_t ksnTRUDPrecvfrom (ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len, 
                           int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
+
+
+int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, int id, __CONST_SOCKADDR_ARG addr, 
+        socklen_t addr_len);
+int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, int id, const void *data, size_t data_len, 
+        __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+int ksnTRUDPSendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr, 
+        socklen_t addr_len);
+int ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu);
 
 #ifdef	__cplusplus
 }
