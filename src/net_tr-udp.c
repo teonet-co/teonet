@@ -46,16 +46,16 @@ typedef struct sl_data {
   
 } sl_data;
 
-/**
- * Receive heap data
- */
-typedef struct rh_data {
-    
-    uint32_t id;
-    void *data;
-    size_t data_len;
-    
-} rh_data;
+///**
+// * Receive heap data
+// */
+//typedef struct rh_data {
+//    
+//    uint32_t id;
+//    void *data;
+//    size_t data_len;
+//    
+//} rh_data;
 
 /**
  * Send List timer data structure
@@ -142,13 +142,12 @@ ev_timer *sl_timer_start(ksnTRUDPClass *, PblMap *sl, uint32_t id, int fd,
 void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 
-int receive_compare(const void* prev, const void* next);
+int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
 int ksnTRUDPReceiveHeapAdd(PblHeap *receive_heap, uint32_t id, void *data, 
         size_t data_len);
 rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap);
 int ksnTRUDPReceiveHeapElementFree(rh_data *rh_d);
 int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap);
-int ksnTRUDPReceiveHeapRemoveAt(PblHeap *receive_heap, int index);
 void ksnTRUDPReceiveHeapRemoveAll(PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu);
 
@@ -337,8 +336,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     tru_send_header.message_type = tru_ack;
                     sendto(fd, &tru_send_header, tru_ptr, 0, addr, *addr_len);
                     
-                    // TODO: If Message ID Equals to Expected ID send to core or 
-                    // save to message Heap sorted by ID
+                    // If Message ID Equals to Expected ID send message to core
+                    // or save to message Heap sorted by ID
                     // ksnTRUDPReceiveHeapAdd();    
                     
                     ip_map_data *ip_map_d = ksnTRUDPIpMapData(tu, addr, NULL);
@@ -357,16 +356,28 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     // Save to Received message Heap
                     else {
                         
-                        // TODO: Test the Heap to make sure it sorted right
                         ksnTRUDPReceiveHeapAdd(ip_map_d->receive_heap, 
                                 tru_header->id, buf + tru_ptr, 
                                 tru_header->payload_length); 
                         
-                        // TODO: loop Received message Heap and send saved 
-                        // messages recursively if records ID Equals to 
+                        // Check Received message Heap and send saved 
+                        // messages to core if first records ID Equals to 
                         // Expected ID
-                        //
-                        // ip_map_d->expected_id
+                        if(pblHeapSize(ip_map_d->receive_heap)) {
+                            rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(ip_map_d->receive_heap);
+                            if(ip_map_d->expected_id == rh_d->id) {
+                                ksnTRUDPReceiveHeapRemoveFirst(ip_map_d->receive_heap);
+                                
+                                // Return message from Heap to core
+                                recvlen = rh_d->data_len;
+                                memcpy(buf, rh_d->data, recvlen);
+                                
+                                // Change Expected ID
+                                ip_map_d->expected_id++;
+                                
+                                // TODO: How to send next Heap data
+                            }
+                        }
                     }
                                         
                 }   break;
@@ -459,7 +470,8 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
         ip_map_d_new.expected_id = 0;
         ip_map_d_new.send_list = pblMapNewHashMap();
         ip_map_d_new.receive_heap = pblHeapNew();
-        pblHeapSetCompareFunction(ip_map_d_new.receive_heap, receive_compare);
+        pblHeapSetCompareFunction(ip_map_d_new.receive_heap, 
+                ksnTRUDPReceiveHeapCompare);
         pblMapAdd(tu->ip_map, key, key_len, &ip_map_d_new, sizeof(ip_map_d_new));
         ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
         
@@ -776,18 +788,19 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
  ******************************************************************************/
 
 /**
- * Receive Heap compare function
+ * Receive Heap compare function. Set lower ID first
  * 
  * @param prev
  * @param next
  * @return 
  */
-int receive_compare(const void* prev, const void* next) {
+int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next) {
     
     int rv = 0;
-    
-    if(((rh_data*)prev)->id < ((rh_data*)next)->id) rv = -1;
-    else if(((rh_data*)prev)->id > ((rh_data*)next)->id) rv = 1;
+        
+    if( (*((rh_data**)prev))->id > (*((rh_data**)next))->id) rv = -1;
+    else 
+    if( (*((rh_data**)prev))->id < (*((rh_data**)next))->id) rv = 1;
     
     return rv;
 }
@@ -809,7 +822,7 @@ int ksnTRUDPReceiveHeapAdd(PblHeap *receive_heap, uint32_t id, void *data,
     rh_d->data = malloc(data_len);
     memcpy(rh_d->data, data, data_len);
         
-    return pblHeapInsert(receive_heap, rh_d);;
+    return pblHeapInsert(receive_heap, rh_d);
 }
 
 /**
@@ -855,18 +868,6 @@ inline int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap) {
 }
 
 /**
- * Remove element with selected index from Receive Heap
- * 
- * @param receive_heap
- * @param index
- * @return 
- */
-inline int ksnTRUDPReceiveHeapRemoveAt(PblHeap *receive_heap, int index) {
-    
-    return ksnTRUDPReceiveHeapElementFree(pblHeapRemoveAt(receive_heap, index));
-}
-
-/**
  * Remove all elements from Receive Heap
  * 
  * @param receive_heap
@@ -875,7 +876,7 @@ void ksnTRUDPReceiveHeapRemoveAll(PblHeap *receive_heap) {
 
     int i, num = pblHeapSize(receive_heap);
     for(i = num -1; i >= 0; i--) {
-        ksnTRUDPReceiveHeapRemoveAt(receive_heap, i);
+        ksnTRUDPReceiveHeapElementFree(pblHeapRemoveAt(receive_heap, i));
     }
 }
 
