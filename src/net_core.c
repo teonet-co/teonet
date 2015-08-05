@@ -237,7 +237,8 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg, DEBUG_VV,
-                 "%sNet core:%s >> ksnCoreSendto %s:%d %d \n", ANSI_GREEN, ANSI_NONE, addr, port, data_len);
+                 "%sNet core:%s >> ksnCoreSendto %s:%d %d \n", 
+                 ANSI_GREEN, ANSI_NONE, addr, port, data_len);
     #endif
 
 
@@ -327,7 +328,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
     ksnet_arp_data *arp = ksnetArpGet(kc->ka, to);
 
-    if(arp != NULL) {
+    if(arp != NULL && arp->mode != -1) {
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
