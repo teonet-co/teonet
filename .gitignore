@@ -86,3 +86,4 @@
 /tests/Makefile.in
 /tests/teonet_tst
 /lib/confuse/.deps/
+/tests/rt_udp

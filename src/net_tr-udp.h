@@ -30,6 +30,16 @@ typedef struct ksnTRUDPClass {
     
 } ksnTRUDPClass;
 
+/**
+ * Receive heap data
+ */
+typedef struct rh_data {
+    
+    uint32_t id;
+    void *data;
+    size_t data_len;
+    
+} rh_data;
 
 #ifdef	__cplusplus
 extern "C" {
@@ -43,6 +53,8 @@ ssize_t ksnTRUDPsendto (ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
 		        socklen_t addr_len);
 ssize_t ksnTRUDPrecvfrom (ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len, 
                           int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
+
+int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
 
 #ifdef	__cplusplus
 }

@@ -470,7 +470,8 @@ void host_cb(EV_P_ ev_io *w, int revents) {
             ANSI_GREEN, ANSI_NONE, recvlen, inet_ntoa(remaddr.sin_addr));
     #endif
 
-    // Data received
+    // TODO: make function from this code and use it in Receive Message Heap
+    // Data received    
     if(recvlen > 0) {
 
         void *data; // Decrypted packet data
