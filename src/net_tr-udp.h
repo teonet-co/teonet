@@ -44,16 +44,6 @@ ssize_t ksnTRUDPsendto (ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
 ssize_t ksnTRUDPrecvfrom (ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len, 
                           int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
 
-
-int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, int id, __CONST_SOCKADDR_ARG addr, 
-        socklen_t addr_len);
-int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, int id, int fd, int cmd, 
-        const void *data, size_t data_len, int flags, 
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
-int ksnTRUDPSendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr, 
-        socklen_t addr_len);
-int ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu);
-
 #ifdef	__cplusplus
 }
 #endif
