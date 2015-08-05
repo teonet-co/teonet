@@ -459,7 +459,7 @@ int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, int id, int fd, int cmd,
     
     // Create ACK timeout timer
     ev_timer *w = malloc(sizeof(ev_timer));
-    ev_timer_init(w, sl_timer_cb, 0.0, 2.0);    
+    ev_timer_init(w, sl_timer_cb, 0.0, 2.0); ///< TODO: Set real timer value 
     sl_timer_cb_data *sl_data = malloc(sizeof(sl_timer_cb_data));
     sl_data->tu = tu;
     sl_data->sl = *sl;
