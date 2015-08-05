@@ -166,7 +166,8 @@ ssize_t ksnTRUDPsendto (ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         #endif
 
         // Add packet to Sent message list (Acknowledge Pending Messages)
-        ksnTRUDPSendListAdd(tu, tru_header.id, buf, buf_len, addr, addr_len);
+        ksnTRUDPSendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
+                addr, addr_len);
     } 
     else {
         #ifdef DEBUG_KSNET
@@ -276,12 +277,14 @@ ssize_t ksnTRUDPrecvfrom (ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                 // The RESET messages reset messages counter. (has not payload)  
                 // Return zero length of this message.    
                 case tru_reset:
+                    
                     #ifdef DEBUG_KSNET
                     ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
                         "%sTR-UDP:%s +++ got RESET command\n", 
                         ANSI_LIGHTGREEN, ANSI_NONE
                     );
                     #endif
+
                     // TODO: Process RESET command
                     recvlen = 0;
                     break;
@@ -362,18 +365,83 @@ int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, int id, __CONST_SOCKADDR_ARG addr,
 }
 
 /**
+ * Send List timer data structure
+ */
+typedef struct sl_timer_cb_data {
+
+    ksnTRUDPClass *tu;
+    int id;
+    int fd;
+    int cmd;
+    int flags;
+    PblMap *sl;
+    __CONST_SOCKADDR_ARG addr;
+    socklen_t addr_len;
+
+} sl_timer_cb_data;
+
+/**
+ * Send list timer callback
+ * 
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
+    
+    sl_timer_cb_data *sl_data = w->data;
+    ksnTRUDPClass *tu = sl_data->tu;
+
+    // Stop this timer
+    ev_timer_stop(EV_A_ w);
+
+    // Get message from list
+    size_t data_len;
+    char key[KSN_BUFFER_SM_SIZE];
+    size_t key_len = ksnTRUDPSendListGetKey(sl_data->addr, key, KSN_BUFFER_SM_SIZE);
+    void *data = pblMapGet(sl_data->sl, key, key_len, &data_len);
+    
+    if(data != NULL) {
+        
+        // Resend message
+        ksnTRUDPsendto(tu, sl_data->fd, sl_data->cmd, data, data_len, 
+                           sl_data->flags, sl_data->addr, sl_data->addr_len);
+
+        // Remove record from list
+        ksnTRUDPSendListRemove(tu, sl_data->id, sl_data->addr, sl_data->addr_len);
+    }
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+      "%sTR-UDP:%s timeout for message with id %d was happened\n", 
+      ANSI_LIGHTGREEN, ANSI_NONE,
+      sl_data->id
+    );
+    #endif
+   
+    // Free watcher and its data
+    free(w->data);
+    free(w);
+}
+
+/**
  * Add packet to Sent message list (Acknowledge Pending Messages)
  * 
  * @param tu
  * @param id
+ * @param fd
+ * @param cmd
  * @param data
  * @param data_len
+ * @param flags
  * @param addr
  * @param addr_len
+ * 
  * @return 
  */
-int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, int id, const void *data, 
-        size_t data_len, __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
+int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, int id, int fd, int cmd, 
+        const void *data, size_t data_len, int flags, 
+        __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
        
     // Get Send List by address from ip_map
     size_t val_len;
@@ -389,10 +457,24 @@ int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, int id, const void *data,
         sl = &sendl;
     }
     
+    // Create ACK timeout timer
+    ev_timer *w = malloc(sizeof(ev_timer));
+    ev_timer_init(w, sl_timer_cb, 0.0, 2.0);    
+    sl_timer_cb_data *sl_data = malloc(sizeof(sl_timer_cb_data));
+    sl_data->tu = tu;
+    sl_data->sl = *sl;
+    sl_data->id = id;
+    sl_data->fd = fd;
+    sl_data->cmd = cmd;
+    sl_data->flags = flags;
+    sl_data->addr = addr;
+    sl_data->addr_len = addr_len;
+    w->data = sl_data;
+    ev_timer_start(kev->ev_loop, w);
+    
     // Add message to Send List
     pblMapAdd(*sl, &id, sizeof(id), (void*)data, data_len);
     
-    //ksnetEvMgrClass *ke = ((ksnCoreClass*)tu->kc)->ke;
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
       "%sTR-UDP:%s message with id %d was added to %s Send List (len %d)\n", 
