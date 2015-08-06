@@ -458,7 +458,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     struct sockaddr_in remaddr;             // remote address
     socklen_t addrlen = sizeof(remaddr);    // length of addresses
     unsigned char buf[KSN_BUFFER_DB_SIZE];  // Message buffer
-    int recvlen;                            // # bytes received
+    size_t recvlen;                         // # bytes received
 
     // Receive data
     recvlen = ksn_recvfrom(ke->kc->ku, kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
@@ -471,6 +471,25 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     #endif
 
     // TODO: make function from this code and use it in Receive Message Heap
+    ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);
+
+    // Set last host event time
+    ksnCoreSetEventTime(kc);
+}
+
+/**
+ * Process ksnet packet
+ * 
+ * @param kc
+ * @param buf
+ * @param recvlen
+ * @param remaddr
+ */
+void ksnCoreProcessPacket (ksnCoreClass *kc, unsigned char *buf, size_t recvlen, 
+        __SOCKADDR_ARG remaddr) {   
+    
+    ksnetEvMgrClass *ke = kc->ke;           // ksnetEvMgr Class object
+            
     // Data received    
     if(recvlen > 0) {
 
@@ -513,8 +532,8 @@ void host_cb(EV_P_ ev_io *w, int revents) {
         int event = EV_K_RECEIVED, command_processed = 0;
 
         // Remote peer address and peer
-        rd.addr = inet_ntoa(remaddr.sin_addr); // IP to string
-        rd.port = ntohs(remaddr.sin_port); // Port to integer
+        rd.addr = inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr); // IP to string
+        rd.port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
 
         // Parse packet and check if it valid
         if(!ksnCoreParsePacket(data, data_len, &rd)) {
@@ -580,7 +599,4 @@ void host_cb(EV_P_ ev_io *w, int revents) {
                 "TR-UDP protocol data, dropped or disconnected ...\n");
         #endif
     }
-
-    // Set last host event time
-    ksnCoreSetEventTime(kc);
 }
