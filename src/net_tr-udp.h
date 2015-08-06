@@ -38,6 +38,8 @@ typedef struct rh_data {
     uint32_t id;
     void *data;
     size_t data_len;
+    struct sockaddr addr;
+    socklen_t addr_len;
     
 } rh_data;
 

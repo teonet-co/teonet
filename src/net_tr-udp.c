@@ -144,7 +144,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 
 int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
 int ksnTRUDPReceiveHeapAdd(PblHeap *receive_heap, uint32_t id, void *data, 
-        size_t data_len);
+        size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len);
 rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap);
 int ksnTRUDPReceiveHeapElementFree(rh_data *rh_d);
 int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap);
@@ -358,14 +358,17 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         
                         ksnTRUDPReceiveHeapAdd(ip_map_d->receive_heap, 
                                 tru_header->id, buf + tru_ptr, 
-                                tru_header->payload_length); 
+                                tru_header->payload_length, addr, *addr_len); 
                         
                         // Check Received message Heap and send saved 
                         // messages to core if first records ID Equals to 
                         // Expected ID
-                        if(pblHeapSize(ip_map_d->receive_heap)) {
+                        int num;
+                        while((num = pblHeapSize(ip_map_d->receive_heap))) {
+                            
                             rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(ip_map_d->receive_heap);
                             if(ip_map_d->expected_id == rh_d->id) {
+                                
                                 ksnTRUDPReceiveHeapRemoveFirst(ip_map_d->receive_heap);
                                 
                                 // Return message from Heap to core
@@ -375,7 +378,14 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 // Change Expected ID
                                 ip_map_d->expected_id++;
                                 
-                                // TODO: How to send next Heap data
+                                // Return this packet to core
+                                if(num == 1) break;
+                                
+                                // Process packet
+                                else {
+                                    ksnCoreProcessPacket(kev->kc, buf, recvlen, 
+                                            &rh_d->addr);
+                                }
                             }
                         }
                     }
@@ -815,12 +825,13 @@ int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next) {
  * @return 
  */
 int ksnTRUDPReceiveHeapAdd(PblHeap *receive_heap, uint32_t id, void *data, 
-        size_t data_len) {
+        size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len) {
     
     rh_data *rh_d = malloc(sizeof(rh_data));
     rh_d->id = id;
     rh_d->data = malloc(data_len);
     memcpy(rh_d->data, data, data_len);
+    memcpy(&rh_d->addr, addr, addr_len);
         
     return pblHeapInsert(receive_heap, rh_d);
 }
