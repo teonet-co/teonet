@@ -985,9 +985,9 @@ void ksnTRUDPReset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options) {
 /**
  * Remove send list and receive heap by address and port
  * 
- * @param tu
- * @param addr
- * @param port
+ * @param tu Pointer to ksnTRUDPClass
+ * @param addr IP address
+ * @param port IP port
  * @param options Reset options:
  *          0 - reset mode:  clear send list and receive heap 
  *          1 - remove mode: clear send list and receive heap, 
@@ -1004,12 +1004,17 @@ void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
 }
 
 /**
- * Remove send list and receive heap by key
+ * TR-UDP Reset by key
  * 
- * @param tu
- * @param key
- * @param key_len
- * @param options
+ * Remove send list and receive heap by key.
+ * 
+ * @param tu Pointer to ksnTRUDPClass
+ * @param key Key string in format %s:%d - ip:port
+ * @param key_len Length of key string
+ * @param options Reset options:
+ *          0 - reset mode:  clear send list and receive heap 
+ *          1 - remove mode: clear send list and receive heap, 
+ *                           and remove record from IP Map
  */
 void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options) {
     
