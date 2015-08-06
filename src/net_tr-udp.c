@@ -904,6 +904,7 @@ int ksnTRUDPReceiveHeapAdd(PblHeap *receive_heap, uint32_t id, void *data,
     rh_d->id = id;
     rh_d->data = malloc(data_len);
     memcpy(rh_d->data, data, data_len);
+    rh_d->data_len = data_len;
     memcpy(&rh_d->addr, addr, addr_len);
         
     return pblHeapInsert(receive_heap, rh_d);
