@@ -130,7 +130,8 @@ uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
 void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu);
 PblMap *ksnTRUDPSendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr, 
         char *key_out);
-size_t ksnTRUDPSendListGetKey( __CONST_SOCKADDR_ARG addr, char* key, 
+size_t ksnTRUDPKeyCreate( __CONST_SOCKADDR_ARG addr, char* key, size_t key_len);
+size_t ksnTRUDPKeyCreateAddr( char *addr, int port, char* key, 
         size_t key_len);
 ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu, 
         __CONST_SOCKADDR_ARG addr, char *key_out);
@@ -150,6 +151,9 @@ int ksnTRUDPReceiveHeapElementFree(rh_data *rh_d);
 int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapRemoveAll(PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu);
+
+void ksnTRUDPReset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options);
+void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options);
 
 
 /**
@@ -176,12 +180,11 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
     
     if(tu != NULL) {
         
-        ksnTRUDPSendListDestroyAll(tu);  
-        ksnTRUDPReceiveHeapDestroyAll(tu);
+        ksnTRUDPSendListDestroyAll(tu); // Destroy all send lists
+        ksnTRUDPReceiveHeapDestroyAll(tu); // Destroy all receive heap       
+        pblMapFree(tu->ip_map); // Free IP map
         
-        pblMapFree(tu->ip_map);
-        
-        free(tu);
+        free(tu); // Free class data
     }
 }
 
@@ -430,7 +433,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     );
                     #endif
 
-                    // TODO: Process RESET command
+                    // Process RESET command
+                    ksnTRUDPReset(tu, addr, 0);
                     recvlen = 0; // The received message is processed
                     break;
                     
@@ -469,7 +473,7 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
     // Get ip map data by key
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPSendListGetKey(addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPKeyCreate(addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
     // Create new ip map record if it absent
@@ -514,12 +518,28 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
  * @param key_len
  * @return 
  */
-size_t ksnTRUDPSendListGetKey( __CONST_SOCKADDR_ARG addr, char* key, 
+size_t ksnTRUDPKeyCreate( __CONST_SOCKADDR_ARG addr, char* key, 
         size_t key_len) {
     
     return snprintf(key, key_len, "%s:%d", 
             inet_ntoa(((struct sockaddr_in *)addr)->sin_addr),
             ntohs(((struct sockaddr_in *)addr)->sin_port) );
+}
+
+/**
+ * Create key from address and port
+ * 
+ * @param addr
+ * @param port
+ * @param key
+ * @param key_len
+ * @return 
+ */
+size_t ksnTRUDPKeyCreateAddr( char *addr, int port, char* key, 
+        size_t key_len) {
+    
+    return snprintf(key, key_len, "%s:%d", 
+            addr, port );
 }
 
 /**
@@ -536,7 +556,7 @@ int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, uint32_t id,
 
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPSendListGetKey(addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPKeyCreate(addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
     if(ip_map_d != NULL) {
         
@@ -571,7 +591,7 @@ sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
             
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPSendListGetKey(addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPKeyCreate(addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
     if(ip_map_d != NULL) {
         
@@ -655,15 +675,44 @@ inline uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu,
 }
 
 /**
- * Destroy all Sent message lists
+ * Remove all elements from Send List
+ * 
+ * @param send_list
+ */
+void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
+    
+    PblIterator *it =  pblMapIteratorNew(send_list);
+    if(it != NULL) {
+        while(pblIteratorHasPrevious(it)) {
+            void *entry = pblIteratorPrevious(it);
+            sl_data *sl_d = pblMapEntryValue(entry);
+            ev_timer *w = sl_d != NULL ? sl_d->w : NULL;
+            if(w != NULL) sl_timer_stop(kev->ev_loop, w);
+        }
+        pblIteratorFree(it);
+    }
+    pblMapClear(send_list);
+}
+
+/**
+ * Free all elements and free all Sent message lists
  * 
  * @param tu
  * @return 
  */
 void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu) {
 
-    // TODO: Clear all Send List
-    
+    PblIterator *it =  pblMapIteratorNew(tu->ip_map);
+    if(it != NULL) {
+        while(pblIteratorHasPrevious(it)) {
+            void *entry = pblIteratorPrevious(it);
+            ip_map_data *ip_map_d = pblMapEntryValue(entry);            
+            ksnTRUDPSendListRemoveAll(tu, ip_map_d->send_list);
+            pblMapFree(ip_map_d->send_list);  
+            ip_map_d->send_list = NULL;
+        }
+        pblIteratorFree(it);
+    }    
 }
 
 /*******************************************************************************
@@ -754,7 +803,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     // Get message from list
     size_t data_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPSendListGetKey(sl_t_data->addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPKeyCreate(sl_t_data->addr, key, KSN_BUFFER_SM_SIZE);
     sl_data *sl_d = pblMapGet(sl_t_data->sl, key, key_len, &data_len);
     
     if(sl_d != NULL) {
@@ -889,16 +938,112 @@ void ksnTRUDPReceiveHeapRemoveAll(PblHeap *receive_heap) {
     for(i = num -1; i >= 0; i--) {
         ksnTRUDPReceiveHeapElementFree(pblHeapRemoveAt(receive_heap, i));
     }
+    pblHeapClear(receive_heap);
 }
 
 /**
- * Destroy all Receive Heap
+ * Free all elements and free all Receive Heap
  * 
  * @param tu
  * @return 
  */
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
-    // TODO: Clear all Receive Heap
-    
+    PblIterator *it =  pblMapIteratorNew(tu->ip_map);
+    if(it != NULL) {
+        while(pblIteratorHasPrevious(it)) {
+            void *entry = pblIteratorPrevious(it);
+            ip_map_data *ip_map_d = pblMapEntryValue(entry);
+            ksnTRUDPReceiveHeapRemoveAll(ip_map_d->receive_heap);
+            pblHeapFree(ip_map_d->receive_heap);  
+            ip_map_d->receive_heap = NULL;
+        }
+        pblIteratorFree(it);
+    }
 }
+
+/**
+ * Remove send list and receive heap by input address
+ * 
+ * @param tu Pointer to ksnTRUDPClass
+ * @param addr Peer address
+ * @param options Reset options:
+ *          0 - reset mode:  clear send list and receive heap 
+ *          1 - remove mode: clear send list and receive heap, 
+ *                           and remove record from IP Map
+ */
+void ksnTRUDPReset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options) {
+    
+    // Create key from address
+    char key[KSN_BUFFER_SM_SIZE];
+    size_t key_len = ksnTRUDPKeyCreate(addr, key, KSN_BUFFER_SM_SIZE);
+    
+    // Reset by key
+    ksnTRUDPResetKey(tu, key, key_len, options);    
+}    
+
+/**
+ * Remove send list and receive heap by address and port
+ * 
+ * @param tu
+ * @param addr
+ * @param port
+ * @param options Reset options:
+ *          0 - reset mode:  clear send list and receive heap 
+ *          1 - remove mode: clear send list and receive heap, 
+ *                           and remove record from IP Map
+ */
+void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
+ 
+    // Create key from address
+    char key[KSN_BUFFER_SM_SIZE];
+    size_t key_len = ksnTRUDPKeyCreateAddr(addr, port, key, KSN_BUFFER_SM_SIZE);
+    
+    // Reset by key
+    ksnTRUDPResetKey(tu, key, key_len, options);
+}
+
+/**
+ * Remove send list and receive heap by key
+ * 
+ * @param tu
+ * @param key
+ * @param key_len
+ * @param options
+ */
+void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options) {
+    
+    // Get ip_map 
+    size_t val_len;
+    ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);   
+    
+    // Remove send list and receive heap
+    if(ip_map_d != NULL) {
+        
+        // Reset or remove Send List
+        ksnTRUDPSendListRemoveAll(tu, ip_map_d->send_list); // Remove all elements from Send List
+        if(options) {
+            pblMapFree(ip_map_d->send_list);  // Free Send List
+            ip_map_d->send_list = NULL; // Clear Send List pointer
+        }
+        ip_map_d->id = 0; // Reset send message ID
+        
+        // Reset or remove Receive Heap
+        ksnTRUDPReceiveHeapRemoveAll(ip_map_d->receive_heap); // Remove all elements from Receive Heap
+        if(options) {
+            pblHeapFree(ip_map_d->receive_heap); // Free Receive Heap   
+            ip_map_d->receive_heap = NULL; // Clear Receive Heap pointer
+        }
+        ip_map_d->expected_id = 0; // Reset receive heap expected ID
+        
+        // Remove IP map record (in remove mode))
+        if(options) {
+            pblMapRemove(tu->ip_map, key, key_len, &val_len);
+        }
+    }
+}
+
+
+// TODO: Expand source code documentation
+
+// TODO:  Describe Reset and Reset with remove in WiKi

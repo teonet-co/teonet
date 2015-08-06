@@ -57,6 +57,7 @@ ssize_t ksnTRUDPrecvfrom (ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                           int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
 
 int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
+void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options);
 
 #ifdef	__cplusplus
 }
