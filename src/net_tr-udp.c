@@ -367,12 +367,14 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             
                             printf("Receive Heap Size = %d\n", num);
                             
-                            rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(ip_map_d->receive_heap);
+                            rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(
+                                                    ip_map_d->receive_heap);
                             
                             // Process this message
                             if(ip_map_d->expected_id == rh_d->id) {
                                 
-                                ksnTRUDPReceiveHeapRemoveFirst(ip_map_d->receive_heap);
+                                ksnTRUDPReceiveHeapRemoveFirst(
+                                                    ip_map_d->receive_heap);
                                 
                                 // Return message from Heap to core
                                 recvlen = rh_d->data_len;
@@ -411,6 +413,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         ksnTRUDPReceiveHeapAdd(ip_map_d->receive_heap, 
                                 tru_header->id, buf + tru_ptr, 
                                 tru_header->payload_length, addr, *addr_len); 
+                        
+                        recvlen = 0;
                     }
                                         
                 }   break;
