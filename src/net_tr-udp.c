@@ -369,6 +369,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         int num;
                         while((num = pblHeapSize(ip_map_d->receive_heap))) {
                             
+                            printf("num = %d\n", num);
+                            
                             rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(ip_map_d->receive_heap);
                             if(ip_map_d->expected_id == rh_d->id) {
                                 
@@ -389,7 +391,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                     ksnCoreProcessPacket(kev->kc, buf, recvlen, 
                                             &rh_d->addr);
                                 }
-                            }
+                            } 
+                            else break;
                         }
                     }
                                         
