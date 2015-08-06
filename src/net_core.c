@@ -464,12 +464,6 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     recvlen = ksn_recvfrom(ke->kc->ku, kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
               0, (struct sockaddr *)&remaddr, &addrlen);
 
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sNet core:%s << host_cb receive %d bytes from %s\n", 
-            ANSI_GREEN, ANSI_NONE, recvlen, inet_ntoa(remaddr.sin_addr));
-    #endif
-
     // TODO: make function from this code and use it in Receive Message Heap
     ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);
 
@@ -492,6 +486,13 @@ void ksnCoreProcessPacket (ksnCoreClass *kc, unsigned char *buf, size_t recvlen,
             
     // Data received    
     if(recvlen > 0) {
+
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+                "%sNet core:%s << host_cb receive %d bytes from %s\n", 
+                ANSI_GREEN, ANSI_NONE, 
+                recvlen, inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr));
+        #endif
 
         void *data; // Decrypted packet data
         size_t data_len; // Decrypted packet data length

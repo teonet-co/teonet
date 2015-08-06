@@ -365,19 +365,22 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         int num;
                         while((num = pblHeapSize(ip_map_d->receive_heap))) {
                             
-                            printf("Receive Heap Size = %d\n", num);
-                            
                             rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(
                                                     ip_map_d->receive_heap);
-                            
+
+                            printf("Receive Heap Size = %d, id = %d\n", 
+                                    num, rh_d->id);
+                                                                                    
                             // Process this message
                             if(ip_map_d->expected_id == rh_d->id) {
                             
+                                printf("Process\n");
+                                
                                 // Process packet
                                 ksnCoreProcessPacket(kev->kc, rh_d->data, 
                                             rh_d->data_len, &rh_d->addr);
                                 
-                               // Remove first record
+                                // Remove first record
                                 ksnTRUDPReceiveHeapRemoveFirst(
                                                     ip_map_d->receive_heap);
                                 
@@ -390,6 +393,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             
                             // Drop saved message
                             else {
+                                printf("Drop\n");
                                 recvlen = 0;
                                 break;
                             }
@@ -403,7 +407,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     
                     // Save to Received message Heap
                     else {
-                        printf("Add to receive heap \n");
+                        printf("Add to receive heap, id = %d, len = %d\n", 
+                                tru_header->id, tru_header->payload_length);
+                        
                         ksnTRUDPReceiveHeapAdd(ip_map_d->receive_heap, 
                                 tru_header->id, buf + tru_ptr, 
                                 tru_header->payload_length, addr, *addr_len); 

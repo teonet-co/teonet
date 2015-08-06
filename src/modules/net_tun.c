@@ -447,7 +447,7 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
         #ifdef DEBUG_KSNET
         ksnet_printf(
             & ((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke)->ksn_cfg , DEBUG,
-            "TUN %sTUN Server:%s : read error\n", ANSI_BLUE, ANSI_NONE
+            "%sTUN Server:%s : read error\n", ANSI_BLUE, ANSI_NONE
         );
         #endif
 
