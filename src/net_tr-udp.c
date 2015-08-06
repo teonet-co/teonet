@@ -345,7 +345,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     
                     ip_map_data *ip_map_d = ksnTRUDPIpMapData(tu, addr, NULL);
                     
-                    // Prepare to send to core if ID Equals to Expected ID
+                    // Send to core if ID Equals to Expected ID
                     if(tru_header->id == ip_map_d->expected_id) {
                             
                         // Extract message from TR-UDP buffer
@@ -354,19 +354,10 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         
                         // Change Expected ID
                         ip_map_d->expected_id++;
-                    } 
-                    
-                    // Drop old (repeated) message 
-                    else if(tru_header->id < ip_map_d->expected_id) {
-                        recvlen = 0;
-                    }
-                    
-                    // Save to Received message Heap
-                    else {
                         
-                        ksnTRUDPReceiveHeapAdd(ip_map_d->receive_heap, 
-                                tru_header->id, buf + tru_ptr, 
-                                tru_header->payload_length, addr, *addr_len); 
+                        // Process packet
+                        ksnCoreProcessPacket(kev->kc, buf, recvlen, addr);
+                        recvlen = 0;
                         
                         // Check Received message Heap and send saved 
                         // messages to core if first records ID Equals to 
@@ -374,7 +365,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         int num;
                         while((num = pblHeapSize(ip_map_d->receive_heap))) {
                             
-                            printf("num = %d\n", num);
+                            printf("Receive Heap Size = %d\n", num);
                             
                             rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(ip_map_d->receive_heap);
                             
@@ -397,6 +388,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 else {
                                     ksnCoreProcessPacket(kev->kc, buf, recvlen, 
                                             &rh_d->addr);
+                                    recvlen = 0;
                                 }
                             } 
                             
@@ -406,6 +398,19 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 break;
                             }
                         }
+                    } 
+                    
+                    // Drop old (repeated) message 
+                    else if(tru_header->id < ip_map_d->expected_id) {
+                        recvlen = 0;
+                    }
+                    
+                    // Save to Received message Heap
+                    else {
+                        
+                        ksnTRUDPReceiveHeapAdd(ip_map_d->receive_heap, 
+                                tru_header->id, buf + tru_ptr, 
+                                tru_header->payload_length, addr, *addr_len); 
                     }
                                         
                 }   break;
