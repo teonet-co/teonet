@@ -19,7 +19,7 @@
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 0
 
-#define kev ((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke))
+#define KEV ((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke))
 #define MAX_ACK_WAIT 2.0
 
 /**
@@ -91,19 +91,19 @@ typedef struct ksnTRUDP_header {
  * TR-UDP message type
  */
 enum ksnTRUDP_type {
-    tru_data, ///< The DATA messages are carrying payload. (has payload)
+    TRU_DATA, ///< The DATA messages are carrying payload. (has payload)
     /**
      * The ACK messages are used to acknowledge the arrival of the DATA and 
      * RESET messages. (has not payload) 
      */
-    tru_ack,
-    tru_reset ///< The RESET messages reset messages counter. (has not payload)
+    TRU_ASK,
+    TRU_RESET ///< The RESET messages reset messages counter. (has not payload)
 
 };
 
 
 // Local methods
-size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr, char* key, 
+size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr, char* key,
         size_t key_len);
 size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, char *addr, int port, char* key,
         size_t key_len);
@@ -130,7 +130,7 @@ void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 //
 int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
-int ksnTRUDPReceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, 
+int ksnTRUDPReceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
         uint32_t id, void *data,
         size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len);
 rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap);
@@ -140,7 +140,9 @@ void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu);
 //
 void ksnTRUDPReset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options);
+void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options);
 void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options);
+void ksnTRUDPResetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr);
 
 
 /*****************************************************************************
@@ -148,6 +150,7 @@ void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
  *  Main functions
  * 
  *****************************************************************************/
+
 /**
  * Initialize TR-UDP class
  * 
@@ -180,6 +183,14 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
     }
 }
 
+// Make TR-UDP Header
+#define MakeHeader(tru_header, type, buf_len) \
+    tru_header.version_major = VERSION_MAJOR; \
+    tru_header.version_minor = VERSION_MINOR; \
+    tru_header.payload_length = buf_len; \
+    tru_header.message_type = type; \
+    tru_header.timestamp = 0
+                
 /**
  * Send to peer through TR-UDP transport
  * 
@@ -197,7 +208,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         socklen_t addr_len) {
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s got %d bytes data to send, cmd %d\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
             buf_len, cmd
@@ -218,11 +229,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         }
 
         // Make TR-UDP Header
-        tru_header.version_major = VERSION_MAJOR;
-        tru_header.version_minor = VERSION_MINOR;
-        tru_header.message_type = tru_data;
-        tru_header.payload_length = buf_len;
-        tru_header.timestamp = 0;
+        MakeHeader(tru_header, TRU_DATA, buf_len);
 
         // Get new message ID
         tru_header.id = ksnTRUDPSendListNewID(tu, addr, addr_len);
@@ -238,7 +245,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         buf = tru_buf;
 
 #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s >> send %d bytes message of type: %d "
                 "with %d bytes data payload to %s:%d\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
@@ -252,10 +259,9 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         // Add packet to Sent message list (Acknowledge Pending Messages)
         ksnTRUDPSendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags,
                 addr, addr_len);
-    }
-    else {
+    } else {
 #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s >> skip this packet, "
                 "send %d bytes direct by UDP to: %s:%d\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
@@ -282,6 +288,28 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
  */
 ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         int flags, __SOCKADDR_ARG addr, socklen_t *addr_len) {
+    
+    /**
+     * Send ACK to sender subroutine  
+     * 
+     * @param tu
+     * @param fd
+     * @param buf
+     * @param buf_len
+     * @param flags
+     * @param addr
+     * @param addr_len
+     * @return 
+     */
+    #define ksnTRUDPSendACK() { \
+        \
+        ksnTRUDP_header tru_send_header; \
+        memcpy(&tru_send_header, tru_header, tru_ptr); \
+        tru_send_header.payload_length = 0; \
+        tru_send_header.message_type = TRU_ASK; \
+        const socklen_t addr_len = sizeof(struct sockaddr_in); \
+        sendto(fd, &tru_send_header, tru_ptr, 0, addr, addr_len); \
+    }    
 
     const size_t tru_ptr = sizeof (ksnTRUDP_header); // Header size
 
@@ -289,7 +317,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
     ssize_t recvlen = recvfrom(fd, buf, buf_len, flags, addr, addr_len);
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s << got %d bytes packet, from %s:%d\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
             recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
@@ -306,7 +334,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         if (recvlen - tru_ptr == tru_header->payload_length) {
 
 #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+            ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                     "%sTR-UDP:%s process %d bytes message of type %d, "
                     "with %d bytes data payload\n",
                     ANSI_LIGHTGREEN, ANSI_NONE,
@@ -316,18 +344,14 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
 
             switch (tru_header->message_type) {
 
-                    // The DATA messages are carrying payload. (has payload)
-                    // Process this message.
-                    // Return message with payload if there is expected message or 
-                    // zero len message if this message was push to queue.
-                case tru_data:
+                // The DATA messages are carrying payload. (has payload)
+                // Process this message.
+                // Return message with payload if there is expected message or 
+                // zero len message if this message was push to queue.
+                case TRU_DATA:
                 {
                     // Send ACK to sender
-                    ksnTRUDP_header tru_send_header;
-                    memcpy(&tru_send_header, tru_header, tru_ptr);
-                    tru_send_header.payload_length = 0;
-                    tru_send_header.message_type = tru_ack;
-                    sendto(fd, &tru_send_header, tru_ptr, 0, addr, *addr_len);
+                    ksnTRUDPSendACK();
 
                     // If Message ID Equals to Expected ID send message to core
                     // or save to message Heap sorted by ID
@@ -343,7 +367,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         ip_map_d->expected_id++;
 
                         // Process packet
-                        ksnCoreProcessPacket(kev->kc, buf + tru_ptr,
+                        ksnCoreProcessPacket(KEV->kc, buf + tru_ptr,
                                 tru_header->payload_length, addr);
                         recvlen = 0;
                         printf("Processed id %d\n", tru_header->id);
@@ -366,7 +390,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 printf("Process\n");
 
                                 // Process packet
-                                ksnCoreProcessPacket(kev->kc, rh_d->data,
+                                ksnCoreProcessPacket(KEV->kc, rh_d->data,
                                         rh_d->data_len, &rh_d->addr);
 
                                 // Remove first record
@@ -378,7 +402,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
 
                                 recvlen = 0;
                             }
-
                                 // Drop saved message
                             else {
                                 printf("Drop\n");
@@ -387,14 +410,12 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             }
                         }
                     }
-
-                    // Drop old (repeated) message 
+                        // Drop old (repeated) message 
                     else if (tru_header->id < ip_map_d->expected_id) {
                         recvlen = 0;
                         printf("Drop old (repeated) message with id %d\n",
                                 tru_header->id);
-                    }
-                    // Save to Received message Heap
+                    }                        // Save to Received message Heap
                     else {
                         printf("Add to receive heap, id = %d, len = %d, expected id = %d\n",
                                 tru_header->id, tru_header->payload_length,
@@ -408,16 +429,16 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     }
 
                 }
-                break;
+                    break;
 
-                    // The ACK messages are used to acknowledge the arrival of the 
-                    // DATA and RESET messages. (has not payload)
-                    // Return zero length of this message.    
-                case tru_ack:
+                // The ACK messages are used to acknowledge the arrival of the 
+                // DATA and RESET messages. (has not payload)
+                // Return zero length of this message.    
+                case TRU_ASK:
                 {
 
 #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                             "%sTR-UDP:%s +++ got ACK to message ID %d\n",
                             ANSI_LIGHTGREEN, ANSI_NONE,
                             tru_header->id
@@ -428,7 +449,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     sl_data *sl_d = ksnTRUDPSendListGetData(tu, tru_header->id,
                             addr, *addr_len);
                     ev_timer *w = sl_d != NULL ? sl_d->w : NULL;
-                    if (w != NULL) sl_timer_stop(kev->ev_loop, w);
+                    if (w != NULL) sl_timer_stop(KEV->ev_loop, w);
 
                     // Remove message from SendList
                     ksnTRUDPSendListRemove(tu, tru_header->id, addr, *addr_len);
@@ -436,21 +457,22 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     recvlen = 0; // The received message is processed
 
                 }
-                break;
+                    break;
 
                     // The RESET messages reset messages counter. (has not payload)  
                     // Return zero length of this message.    
-                case tru_reset:
+                case TRU_RESET:
 
 #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                             "%sTR-UDP:%s +++ got RESET command\n",
                             ANSI_LIGHTGREEN, ANSI_NONE
                             );
 #endif
-
+                    
                     // Process RESET command
                     ksnTRUDPReset(tu, addr, 0);
+                    ksnTRUDPSendACK(); // Send ACK
                     recvlen = 0; // The received message is processed
                     break;
 
@@ -461,8 +483,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
             }
         } else {
 
-            #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+#ifdef DEBUG_KSNET
+            ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                     "%sTR-UDP:%s skip received packet\n",
                     ANSI_LIGHTGREEN, ANSI_NONE
                     );
@@ -513,7 +535,7 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
         ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
 #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s create new ip_map record with key %s (num records: %d)\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 key, pblMapSize(tu->ip_map)
@@ -561,7 +583,7 @@ size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, char *addr, int port, char* key,
 
 /*****************************************************************************
  *
- *  Send list functions
+ *  Reset functions
  * 
  *****************************************************************************/
 
@@ -622,7 +644,7 @@ void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
 void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options) {
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s reset %s, options: %d\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
             key, options
@@ -659,6 +681,20 @@ void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
     }
 }
 
+/**
+ * TODO: Send reset command to peer
+ * 
+ * @param tu
+ * @param addr
+ */
+void ksnTRUDPResetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
+
+    ksnTRUDP_header tru_header; // Header buffer
+    MakeHeader(tru_header, TRU_RESET, 0); // Make TR-UDP Header
+    const socklen_t addr_len = sizeof(struct sockaddr_in); // Length of addresses   
+    sendto(fd, &tru_header, sizeof(tru_header), 0, addr, addr_len); // Send
+}
+
 
 /*****************************************************************************
  *
@@ -687,7 +723,7 @@ int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, uint32_t id,
         pblMapRemove(ip_map_d->send_list, &id, sizeof (id), &val_len);
 
 #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s message with id %d was removed from %s Send List "
                 "(len %d)\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
@@ -774,7 +810,7 @@ int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s message with id %d was added to %s Send List (len %d)\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
             id, key, pblMapSize(sl)
@@ -806,7 +842,7 @@ inline uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu,
 void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s sent message lists remove all\n",
             ANSI_LIGHTGREEN, ANSI_NONE
             );
@@ -818,7 +854,7 @@ void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
             void *entry = pblIteratorPrevious(it);
             sl_data *sl_d = pblMapEntryValue(entry);
             ev_timer *w = sl_d != NULL ? sl_d->w : NULL;
-            if (w != NULL) sl_timer_stop(kev->ev_loop, w);
+            if (w != NULL) sl_timer_stop(KEV->ev_loop, w);
         }
         pblIteratorFree(it);
     }
@@ -834,7 +870,7 @@ void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
 void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu) {
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s sent message lists destroy all\n",
             ANSI_LIGHTGREEN, ANSI_NONE
             );
@@ -877,7 +913,7 @@ ev_timer *sl_timer_start(ksnTRUDPClass *tu, PblMap *sl, uint32_t id, int fd,
         int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s send list timer start, message id %d\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
             id
@@ -896,7 +932,7 @@ ev_timer *sl_timer_start(ksnTRUDPClass *tu, PblMap *sl, uint32_t id, int fd,
     sl_t_data->addr = addr;
     sl_t_data->addr_len = addr_len;
     w->data = sl_t_data;
-    ev_timer_start(kev->ev_loop, w);
+    ev_timer_start(KEV->ev_loop, w);
 
     return w;
 }
@@ -912,7 +948,7 @@ inline void sl_timer_stop(EV_P_ ev_timer *w) {
 
 #ifdef DEBUG_KSNET
     ksnTRUDPClass *tu = ((sl_timer_cb_data *) w->data)->tu;
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s send list timer stop, message id %d\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
             ((sl_timer_cb_data *) w->data)->id
@@ -955,7 +991,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         ksnTRUDPSendListRemove(tu, sl_t_data->id, sl_t_data->addr, sl_t_data->addr_len);
 
 #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s timeout for message with id %d was happened, data resent\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 sl_t_data->id
@@ -963,10 +999,9 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 #endif
 
         sl_d->w = NULL;
-    }
-    else {
+    } else {
 #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s timer for removed message with id %d was happened\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 sl_t_data->id
@@ -1018,7 +1053,7 @@ int ksnTRUDPReceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id
     if (tu != NULL) {
         char key[KSN_BUFFER_SM_SIZE];
         ksnTRUDPKeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s receive heap %s add %d bytes\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 key, data_len
@@ -1086,7 +1121,7 @@ inline int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap) {
 void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s receive heap remove all\n",
             ANSI_LIGHTGREEN, ANSI_NONE
             );
@@ -1108,7 +1143,7 @@ void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
 #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    ksnet_printf(&KEV->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s receive heap destroy all\n",
             ANSI_LIGHTGREEN, ANSI_NONE
             );

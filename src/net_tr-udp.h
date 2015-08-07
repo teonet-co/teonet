@@ -24,40 +24,42 @@ typedef int socklen_t;
  * Teonet TR-UDP class data
  */
 typedef struct ksnTRUDPClass {
-    
     void *kc; ///< Pointer to KSNet core class object
     PblMap *ip_map; ///< IP:port map
-    
+
 } ksnTRUDPClass;
 
 /**
  * Receive heap data
  */
 typedef struct rh_data {
-    
     uint32_t id;
     void *data;
     size_t data_len;
     struct sockaddr addr;
     socklen_t addr_len;
-    
+
 } rh_data;
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
+
+// Main functions
 ksnTRUDPClass *ksnTRUDPInit(void *kc);
 void ksnTRUDPDestroy(ksnTRUDPClass *tu);
 
-ssize_t ksnTRUDPsendto (ksnTRUDPClass *tu, int fd, int cmd, const void *buf, 
-                        size_t buf_len, int flags, __CONST_SOCKADDR_ARG addr,
-		        socklen_t addr_len);
-ssize_t ksnTRUDPrecvfrom (ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len, 
-                          int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
+        size_t buf_len, int flags, __CONST_SOCKADDR_ARG addr,
+        socklen_t addr_len);
+ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
+        int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
 
+
+// Used in tests
 int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
-void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options);
+
 
 #ifdef	__cplusplus
 }
