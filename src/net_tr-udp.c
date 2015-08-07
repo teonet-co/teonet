@@ -204,10 +204,10 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
                        size_t buf_len, int flags, __CONST_SOCKADDR_ARG addr,
 		       socklen_t addr_len) {
     
-    ksnetEvMgrClass *ke = ((ksnCoreClass*)tu->kc)->ke;
+//    ksnetEvMgrClass *ke = ((ksnCoreClass*)tu->kc)->ke;
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
         "%sTR-UDP:%s got %d bytes data to send, cmd %d\n", 
         ANSI_LIGHTGREEN, ANSI_NONE,
         buf_len, cmd
@@ -248,7 +248,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         buf = tru_buf;
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
             "%sTR-UDP:%s >> send %d bytes message of type: %d "
             "with %d bytes data payload to %s:%d\n", 
             ANSI_LIGHTGREEN, ANSI_NONE,
@@ -265,7 +265,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
     } 
     else {
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
             "%sTR-UDP:%s >> skip this packet, "
             "send %d bytes direct by UDP to: %s:%d\n", 
             ANSI_LIGHTGREEN, ANSI_NONE,
