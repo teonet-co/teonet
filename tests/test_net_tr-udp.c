@@ -47,10 +47,10 @@ void test1() {
         
     // Add some records to Receive Heap
     CU_ASSERT(pblHeapSize(receive_heap) == 0);
-    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 15, "Hello 15", 9, &addr, addr_len));
-    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 12, "Hello 12", 9, &addr, addr_len));
-    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap,  9, "Hello  9", 9, &addr, addr_len));
-    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 14, "Hello 14", 9, &addr, addr_len));
+    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 15, "Hello 15", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 12, "Hello 12", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap,  9, "Hello  9", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 <= ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 14, "Hello 14", 9, (__SOCKADDR_ARG) &addr, addr_len));
     CU_ASSERT(pblHeapSize(receive_heap) == 4);
     
     // Get saved Heap records and remove it
