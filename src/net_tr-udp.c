@@ -144,12 +144,12 @@ void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 
 int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
-int ksnTRUDPReceiveHeapAdd(PblHeap *receive_heap, uint32_t id, void *data, 
+int ksnTRUDPReceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id, void *data, 
         size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len);
 rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap);
 int ksnTRUDPReceiveHeapElementFree(rh_data *rh_d);
 int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap);
-void ksnTRUDPReceiveHeapRemoveAll(PblHeap *receive_heap);
+void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu);
 
 void ksnTRUDPReset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options);
@@ -349,10 +349,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     // Send to core if ID Equals to Expected ID
                     if(tru_header->id == ip_map_d->expected_id) {
                             
-//                        // Extract message from TR-UDP buffer
-//                        recvlen = tru_header->payload_length;
-//                        if(recvlen > 0) memmove(buf, buf + tru_ptr, recvlen);
-                        
                         // Change Expected ID
                         ip_map_d->expected_id++;
                         
@@ -391,7 +387,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 ip_map_d->expected_id++;
                                 
                                 recvlen = 0;
-//                                if(num == 1) break;
                             } 
                             
                             // Drop saved message
@@ -416,7 +411,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 tru_header->id, tru_header->payload_length,
                                 ip_map_d->expected_id);
                         
-                        ksnTRUDPReceiveHeapAdd(ip_map_d->receive_heap, 
+                        ksnTRUDPReceiveHeapAdd(tu, ip_map_d->receive_heap, 
                                 tru_header->id, buf + tru_ptr, 
                                 tru_header->payload_length, addr, *addr_len); 
                         
@@ -544,8 +539,8 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
  * Create key from address
  * 
  * @param addr
- * @param key
- * @param key_len
+ * @param key [out]
+ * @param key_len Key buffer length
  * @return 
  */
 size_t ksnTRUDPKeyCreate( __CONST_SOCKADDR_ARG addr, char* key, 
@@ -711,6 +706,13 @@ inline uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu,
  */
 void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
     
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+        "%sTR-UDP:%s sent message lists remove all\n", 
+        ANSI_LIGHTGREEN, ANSI_NONE
+    );
+    #endif
+
     PblIterator *it =  pblMapIteratorNew(send_list);
     if(it != NULL) {
         while(pblIteratorHasPrevious(it)) {
@@ -731,6 +733,13 @@ void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
  * @return 
  */
 void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu) {
+
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+        "%sTR-UDP:%s sent message lists destroy all\n", 
+        ANSI_LIGHTGREEN, ANSI_NONE
+    );
+    #endif
 
     PblIterator *it =  pblMapIteratorNew(tu->ip_map);
     if(it != NULL) {
@@ -903,9 +912,21 @@ int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next) {
  * @param data_len
  * @return 
  */
-int ksnTRUDPReceiveHeapAdd(PblHeap *receive_heap, uint32_t id, void *data, 
+int ksnTRUDPReceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id, void *data, 
         size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len) {
     
+    #ifdef DEBUG_KSNET
+    if(tu != NULL) {
+        char key[KSN_BUFFER_SM_SIZE];
+        ksnTRUDPKeyCreate(addr, key, KSN_BUFFER_SM_SIZE);
+        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+            "%sTR-UDP:%s receive heap %s add %d bytes\n", 
+            ANSI_LIGHTGREEN, ANSI_NONE,
+            key, data_len
+        );
+    }
+    #endif
+
     rh_data *rh_d = malloc(sizeof(rh_data));
     rh_d->id = id;
     rh_d->data = malloc(data_len);
@@ -963,7 +984,14 @@ inline int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap) {
  * 
  * @param receive_heap
  */
-void ksnTRUDPReceiveHeapRemoveAll(PblHeap *receive_heap) {
+void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
+
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+        "%sTR-UDP:%s receive heap remove all\n", 
+        ANSI_LIGHTGREEN, ANSI_NONE
+    );
+    #endif
 
     int i, num = pblHeapSize(receive_heap);
     for(i = num -1; i >= 0; i--) {
@@ -980,12 +1008,19 @@ void ksnTRUDPReceiveHeapRemoveAll(PblHeap *receive_heap) {
  */
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+        "%sTR-UDP:%s receive heap destroy all\n", 
+        ANSI_LIGHTGREEN, ANSI_NONE
+    );
+    #endif
+    
     PblIterator *it =  pblMapIteratorNew(tu->ip_map);
     if(it != NULL) {
         while(pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
-            ksnTRUDPReceiveHeapRemoveAll(ip_map_d->receive_heap);
+            ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
             pblHeapFree(ip_map_d->receive_heap);  
             ip_map_d->receive_heap = NULL;
         }
@@ -1049,6 +1084,14 @@ void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
  */
 void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options) {
     
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+        "%sTR-UDP:%s reset %s, options: %d\n", 
+        ANSI_LIGHTGREEN, ANSI_NONE,
+        key, options
+    );
+    #endif    
+    
     // Get ip_map 
     size_t val_len;
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);   
@@ -1065,7 +1108,7 @@ void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
         ip_map_d->id = 0; // Reset send message ID
         
         // Reset or remove Receive Heap
-        ksnTRUDPReceiveHeapRemoveAll(ip_map_d->receive_heap); // Remove all elements from Receive Heap
+        ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap); // Remove all elements from Receive Heap
         if(options) {
             pblHeapFree(ip_map_d->receive_heap); // Free Receive Heap   
             ip_map_d->receive_heap = NULL; // Clear Receive Heap pointer
