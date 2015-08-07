@@ -90,7 +90,10 @@ void test2() {
 }
 
 void test3() {
+    
+//    size_t ksnTRUDPKeyCreateAddr(tu, addr, port, key, key_len);
     //CU_ASSERT(1);
+    CU_PASS("done");
 }
 
 int main() {
@@ -110,7 +113,7 @@ int main() {
     /* Add the tests to the suite */
     if ((NULL == CU_add_test(pSuite, "pblHeap functions", test1)) ||
         (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test2)) ||
-        (NULL == CU_add_test(pSuite, "test3", test3))
+        (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test3))
             ) {       
         CU_cleanup_registry();
         return CU_get_error();

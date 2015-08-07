@@ -384,7 +384,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
 
 /*****************************************************************************
  *
- *  Utilite functions
+ *  Utility functions
  * 
  *****************************************************************************/
 
@@ -456,7 +456,7 @@ size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
  * 
  * @param addr
  * @param port
- * @param key
+ * @param key [out]
  * @param key_len
  * @return 
  */

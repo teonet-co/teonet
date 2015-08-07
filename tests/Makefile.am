@@ -29,8 +29,7 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teonet_tst rt_udp test_net_tr_udp
+bin_PROGRAMS = teonet_tst test_net_tr_udp
 
 teonet_tst_SOURCES = teonet_tst.c
-rt_udp_SOURCES = rt_udp.c
 test_net_tr_udp_SOURCES = test_net_tr-udp.c
