@@ -20,10 +20,10 @@ void test1() {
     pblHeapSetCompareFunction(receive_heap, ksnTRUDPReceiveHeapCompare);
     
     // Add some records to Receive Heap
-    ksnTRUDPReceiveHeapAdd(receive_heap, 15, "Hello", 6);
-    ksnTRUDPReceiveHeapAdd(receive_heap, 12, "Hello", 6);
-    ksnTRUDPReceiveHeapAdd(receive_heap, 9, "Hello", 6);
-    ksnTRUDPReceiveHeapAdd(receive_heap, 14, "Hello", 6);
+    ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 15, "Hello", 6);
+    ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 12, "Hello", 6);
+    ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 9, "Hello", 6);
+    ksnTRUDPReceiveHeapAdd(NULL, receive_heap, 14, "Hello", 6);
     
     // Show Receive Heap and remove from Heap
     while(pblHeapSize(receive_heap)) {
