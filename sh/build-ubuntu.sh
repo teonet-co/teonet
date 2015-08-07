@@ -5,7 +5,7 @@ sudo apt-get update
 sudo apt-get -y upgrade
 
 # Autoconf dependence
-sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc
+sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc libcunit1-dev
 
 # Project dependence
 sudo apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev
