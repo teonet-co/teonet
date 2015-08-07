@@ -1002,9 +1002,10 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                "%sTR-UDP:%s timeout for message with id %d was happened, "
+                "%sTR-UDP:%s %stimeout for message with id %d was happened%s, "
                 "data resent\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
+                ANSI_RED, ANSI_NONE,
                 sl_t_data->id
         );
         #endif
