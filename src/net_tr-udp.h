@@ -45,9 +45,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
 
 
-// Used in tests
-int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
-
 
 #ifdef	__cplusplus
 }
