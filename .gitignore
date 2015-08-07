@@ -87,3 +87,4 @@
 /tests/teonet_tst
 /lib/confuse/.deps/
 /tests/rt_udp
+/tests/test_net_tr_udp
