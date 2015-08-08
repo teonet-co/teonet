@@ -20,6 +20,15 @@
 
 double ksnetEvMgrGetTime(void *ke);
 
+// Test mode (for tests only)
+static int KSN_TEST_MODE = 0;
+inline void KSN_SET_TEST_MODE(int test_mode) {
+    KSN_TEST_MODE = test_mode;
+}
+inline int KSN_GET_TEST_MODE(int test_mode) {
+    return KSN_TEST_MODE;
+}
+
 /**
  * KSNet printf. @see vprintf
  *

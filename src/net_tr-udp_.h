@@ -15,6 +15,7 @@
  * IP map records data
  */
 typedef struct ip_map_data {
+    
     uint32_t id; ///< Send message ID 
     uint32_t expected_id; ///< Receive message expected ID 
     PblMap *send_list; ///< Send messages list
@@ -107,8 +108,8 @@ enum ksnTRUDP_type {
 // Local methods
 size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr, char* key,
         size_t key_len);
-size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, char *addr, int port, char* key,
-        size_t key_len);
+size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port, 
+        char* key, size_t key_len);
 ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 //
