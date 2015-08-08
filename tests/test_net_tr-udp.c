@@ -28,13 +28,11 @@ char* itoa(int ival) {
     return strdup(buffer);
 }
 
+CU_pSuite pSuite = NULL;
+
 /*
  * CUnit Test Suite
  */
-
-int init_suite(void) {
-    return 0;
-}
 
 int clean_suite(void) {
     return 0;
@@ -151,12 +149,28 @@ void test3() {
     CU_ASSERT_STRING_EQUAL_FATAL(key, tst_key);
 }
 
+int init_suite(void) {    
+    return 0;
+}
+
+int add_tests(void) {
+    
+    /* Add the tests to the suite */
+    if ((NULL == CU_add_test(pSuite, "pblHeap functions", test1)) ||
+        (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test2)) ||
+        (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test3))
+            ) {       
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    
+    return 0;
+}
+
 int main() {
     
     KSN_SET_TEST_MODE(1);
             
-    CU_pSuite pSuite = NULL;
-
     /* Initialize the CUnit test registry */
     if (CUE_SUCCESS != CU_initialize_registry())
         return CU_get_error();
@@ -167,15 +181,7 @@ int main() {
         CU_cleanup_registry();
         return CU_get_error();
     }
-
-    /* Add the tests to the suite */
-    if ((NULL == CU_add_test(pSuite, "pblHeap functions", test1)) ||
-        (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test2)) ||
-        (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test3))
-            ) {       
-        CU_cleanup_registry();
-        return CU_get_error();
-    }
+    add_tests();
 
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);
