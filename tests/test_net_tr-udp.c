@@ -14,6 +14,20 @@
 #include "ev_mgr.h"
 #include "net_tr-udp_.h"
 
+/**
+ * Convert integer to string
+ *
+ * @param ival
+ * @return
+ */
+char* itoa(int ival) {
+
+    char buffer[KSN_BUFFER_SIZE];
+    snprintf(buffer, KSN_BUFFER_SIZE, "%d", ival);
+
+    return strdup(buffer);
+}
+
 /*
  * CUnit Test Suite
  */
@@ -74,9 +88,8 @@ void test1() {
     CU_ASSERT(pblHeapSize(receive_heap) == 0);
             
     // Destroy Receive Heap
-    pblHeapFree(receive_heap);
-    
-    CU_PASS("done");
+    pblHeapFree(receive_heap);    
+    CU_PASS("pblHeapFree done");
 }
 
 /**
@@ -85,18 +98,63 @@ void test1() {
 void test2() {
     
     ksnTRUDPClass *tu;
-    CU_ASSERT((tu= ksnTRUDPInit(NULL)) != NULL);
-    CU_ASSERT(tu->ip_map != NULL);
+    CU_ASSERT_PTR_NOT_NULL_FATAL((tu = ksnTRUDPInit(NULL)));
+    CU_ASSERT_PTR_NOT_NULL_FATAL(tu->ip_map);
+    //ksnTRUDPDestroy(tu);
 }
 
 void test3() {
+
+    // Test constants and variables
+    const char *tst_key = "127.0.0.1:1327";
+    const char *addr_str = "127.0.0.1"; 
+    char key[KSN_BUFFER_SM_SIZE];
+    struct sockaddr_in addr;
+    const int port = 1327;
+    size_t key_len;
+
+    // Fill address 
+    if(inet_aton(addr_str, &addr.sin_addr) == 0) CU_ASSERT(1 == 0);
+    addr.sin_port = htons(port);
+
+    /* ---------------------------------------------------------------------- */
+    ksnTRUDPClass *tu = ksnTRUDPInit(NULL); // Initialize ksnTRUDPClass
+    CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
+   
+    // 1) ksnTRUDPIpMapData: Get IP map record by address or create new record if not exist
+    ip_map_data *ip_map_d = ksnTRUDPIpMapData(tu, (__CONST_SOCKADDR_ARG) &addr,
+            key, KSN_BUFFER_SM_SIZE);
+    CU_ASSERT_STRING_EQUAL(key, tst_key); // Check key
+    CU_ASSERT_PTR_NOT_NULL_FATAL(ip_map_d); // Check IP map created
+    CU_ASSERT(ip_map_d->id == 0); // Check IP map created
+    CU_ASSERT(ip_map_d->expected_id == 0); // Check IP map created
+    CU_ASSERT_PTR_NOT_NULL_FATAL(ip_map_d->send_list); // Check send list created
+    CU_ASSERT_PTR_NOT_NULL_FATAL(ip_map_d->receive_heap); // Check receive heap created
+    CU_ASSERT(pblMapSize(ip_map_d->send_list) == 0); // Check send list functional
+    CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0); // Check receive heap functional
     
-//    size_t ksnTRUDPKeyCreateAddr(tu, addr, port, key, key_len);
-    //CU_ASSERT(1);
-    CU_PASS("done");
+    //ksnTRUDPDestroy(tu); // Destroy ksnTRUDPClass
+
+     /* ---------------------------------------------------------------------- */
+    // 2) ksnTRUDPKeyCreate: Create key from address
+    key_len = ksnTRUDPKeyCreate(NULL, (__CONST_SOCKADDR_ARG) &addr, key, 
+            KSN_BUFFER_SM_SIZE);
+    // Check key
+    CU_ASSERT(key_len == strlen(tst_key));
+    CU_ASSERT_STRING_EQUAL_FATAL(key, tst_key);
+
+    /* ---------------------------------------------------------------------- */
+    // 3) ksnTRUDPKeyCreateAddr: Create key from string address and integer port
+    key_len = ksnTRUDPKeyCreateAddr(NULL, addr_str, port, key, KSN_BUFFER_SM_SIZE);
+    // Check key
+    CU_ASSERT(key_len == strlen(tst_key));
+    CU_ASSERT_STRING_EQUAL_FATAL(key, tst_key);
 }
 
 int main() {
+    
+    KSN_SET_TEST_MODE(1);
+            
     CU_pSuite pSuite = NULL;
 
     /* Initialize the CUnit test registry */
@@ -121,7 +179,9 @@ int main() {
 
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);
+    //CU_list_tests_to_file();
     CU_basic_run_tests();
+    //CU_console_run_tests();
     CU_cleanup_registry();
     return CU_get_error();
 }

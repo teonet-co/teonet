@@ -421,11 +421,13 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
         ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
         #ifdef DEBUG_KSNET
+        if(!KSN_GET_TEST_MODE())
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                "%sTR-UDP:%s create new ip_map record with key %s (num records: %d)\n",
+                "%sTR-UDP:%s create new ip_map record with key %s "
+                "(num records: %d)\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 key, pblMapSize(tu->ip_map)
-        );
+        );        
         #endif  
     }
 
@@ -460,7 +462,7 @@ size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
  * @param key_len
  * @return 
  */
-size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, char *addr, int port, char* key,
+inline size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port, char* key,
         size_t key_len) {
 
     return snprintf(key, key_len, "%s:%d", addr, port);

@@ -54,6 +54,9 @@ ksnet_stringArr getIPs(/*ksnet_config *conf*/);
 int ip_is_private(char *ip);
 int ip_to_array(char* ip, uint8_t *arr);
 
+void KSN_SET_TEST_MODE(int test_mode);
+int KSN_GET_TEST_MODE();
+
 #ifdef	__cplusplus
 }
 #endif
