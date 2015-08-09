@@ -303,7 +303,7 @@ void test_2_5() {
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
     CU_ASSERT_STRING_EQUAL(sl_d_get->data, "Some data 4");
 
-    // TODO: 7 ksnTRUDPSendListDestroyAll: Free all elements and free all Sent message lists
+    // 7 ksnTRUDPSendListDestroyAll: Free all elements and free all Sent message lists
     ksnTRUDPsendListDestroyAll(tu);
     CU_PASS("Destroy all sent message lists done");
 
