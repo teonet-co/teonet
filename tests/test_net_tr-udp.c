@@ -83,7 +83,7 @@ void test_2_2() {
     kc_emul();
     
     ksnTRUDPClass *tu; // Initialize ksnTRUDPClass
-    CU_ASSERT_PTR_NOT_NULL_FATAL((tu = ksnTRUDPInit(&kc)));
+    CU_ASSERT_PTR_NOT_NULL_FATAL((tu = ksnTRUDPinit(&kc)));
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu->ip_map);
     ksnTRUDPDestroy(tu); // Destroy ksnTRUDPClass
     CU_PASS("Destroy ksnTRUDPClass done");
@@ -110,11 +110,11 @@ void test_2_3() {
     addr.sin_port = htons(port);
 
     /* ---------------------------------------------------------------------- */
-    ksnTRUDPClass *tu = ksnTRUDPInit(&kc); // Initialize ksnTRUDPClass
+    ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
        
-    // 1) ksnTRUDPIpMapData: Get IP map record by address or create new record if not exist
-    ip_map_data *ip_map_d = ksnTRUDPIpMapData(tu, (__CONST_SOCKADDR_ARG) &addr,
+    // 1) ksnTRUDPipMapData: Get IP map record by address or create new record if not exist
+    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, (__CONST_SOCKADDR_ARG) &addr,
             key, KSN_BUFFER_SM_SIZE);
     CU_ASSERT_STRING_EQUAL(key, tst_key); // Check key
     CU_ASSERT_PTR_NOT_NULL_FATAL(ip_map_d); // Check IP map created
@@ -130,7 +130,7 @@ void test_2_3() {
     
      /* ---------------------------------------------------------------------- */
     // 2) ksnTRUDPKeyCreate: Create key from address
-    key_len = ksnTRUDPKeyCreate(NULL, (__CONST_SOCKADDR_ARG) &addr, key, 
+    key_len = ksnTRUDPkeyCreate(NULL, (__CONST_SOCKADDR_ARG) &addr, key, 
             KSN_BUFFER_SM_SIZE);
     // Check key
     CU_ASSERT(key_len == strlen(tst_key));
@@ -138,10 +138,15 @@ void test_2_3() {
 
     /* ---------------------------------------------------------------------- */
     // 3) ksnTRUDPKeyCreateAddr: Create key from string address and integer port
-    key_len = ksnTRUDPKeyCreateAddr(NULL, addr_str, port, key, KSN_BUFFER_SM_SIZE);
+    key_len = ksnTRUDPkeyCreateAddr(NULL, addr_str, port, key, KSN_BUFFER_SM_SIZE);
     // Check key
     CU_ASSERT(key_len == strlen(tst_key));
     CU_ASSERT_STRING_EQUAL_FATAL(key, tst_key);
+}
+
+// Test RT-UDP reset functions
+void test_2_4() {
+    
 }
 
 /**
@@ -154,7 +159,8 @@ int add_suite_2_tests(void) {
     // Add the tests to the suite 
     if ((NULL == CU_add_test(pSuite, "pblHeap functions", test_2_1)) ||
         (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test_2_2)) ||
-        (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test_2_3))
+        (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test_2_3)) ||
+        (NULL == CU_add_test(pSuite, "RT-UDP reset functions", test_2_4))                
             ) {       
         CU_cleanup_registry();
         return CU_get_error();
