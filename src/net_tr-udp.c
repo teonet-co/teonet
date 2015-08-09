@@ -56,7 +56,7 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
 
     if (tu != NULL) {
 
-        ksnTRUDPSendListDestroyAll(tu); // Destroy all send lists
+        ksnTRUDPsendListDestroyAll(tu); // Destroy all send lists
         ksnTRUDPReceiveHeapDestroyAll(tu); // Destroy all receive heap       
         pblMapFree(tu->ip_map); // Free IP map
 
@@ -765,7 +765,7 @@ void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
  * @param tu
  * @return 
  */
-void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu) {
+void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,

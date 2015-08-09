@@ -20,7 +20,8 @@ extern CU_pSuite pSuite;
 #define kc_emul() \
   ksnetEvMgrClass ke; \
   ksnCoreClass kc; \
-  kc.ke = &ke
+  kc.ke = &ke; \
+  ke.ev_loop = ev_loop_new (0)
 
 /**
  * Test pblHeap functions
@@ -273,6 +274,15 @@ void test_2_5() {
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
     CU_ASSERT(pblMapSize(sl) == 2);    
     
+    // Add 3 message to send list
+    id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    CU_ASSERT(id == 2);
+    sl_d.w = NULL;
+    sl_d.data = (void*) "Some data 3";
+    sl_d.data_len = 12;
+    pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
+    CU_ASSERT(pblMapSize(sl) == 3);    
+    
     // 3) ksnTRUDPSendListGetData: Get Send List timer watcher and stop it
     sl_data *sl_d_get = ksnTRUDPSendListGetData(tu, 1, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
@@ -280,11 +290,22 @@ void test_2_5() {
     
     // 4) ksnTRUDPsendListRemove: Remove record from send list
     ksnTRUDPsendListRemove(tu, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
-    CU_ASSERT(pblMapSize(sl) == 1);
+    CU_ASSERT(pblMapSize(sl) == 2);
     
     // 5) ksnTRUDPsendListRemove: Remove all record from send list
     ksnTRUDPsendListRemoveAll(tu, sl);
     CU_ASSERT(pblMapSize(sl) == 0);
+    
+    // 6 ksnTRUDPsendListAdd: Add packet to Sent message list 
+    id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));    
+    ksnTRUDPsendListAdd(tu, id, 0, 0, "Some data 4", 12, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    sl_d_get = ksnTRUDPSendListGetData(tu, id, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
+    CU_ASSERT_STRING_EQUAL(sl_d_get->data, "Some data 4");
+    
+    // TODO: 7 ksnTRUDPSendListDestroyAll: Free all elements and free all Sent message lists
+    ksnTRUDPsendListDestroyAll(tu);
+    CU_PASS("Destroy all sent message lists done");
     
     // Destroy ksnTRUDPClass    
     ksnTRUDPDestroy(tu); 

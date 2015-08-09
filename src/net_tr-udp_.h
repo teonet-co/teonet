@@ -120,7 +120,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         socklen_t addr_len);
-void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu);
+void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu);
 PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         char *key_out, size_t key_len);
 sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
