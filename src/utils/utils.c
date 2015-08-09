@@ -25,7 +25,7 @@ static int KSN_TEST_MODE = 0;
 inline void KSN_SET_TEST_MODE(int test_mode) {
     KSN_TEST_MODE = test_mode;
 }
-inline int KSN_GET_TEST_MODE(int test_mode) {
+inline int KSN_GET_TEST_MODE() {
     return KSN_TEST_MODE;
 }
 
@@ -49,6 +49,9 @@ inline int KSN_GET_TEST_MODE(int test_mode) {
 int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
     int show_it = 0, ret_val = 0;
+    
+    // Skip execution in tests
+    if(KSN_GET_TEST_MODE()) return ret_val;
 
     switch(type) {
 

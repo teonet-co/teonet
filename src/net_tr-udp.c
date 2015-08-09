@@ -421,7 +421,6 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
         ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
         #ifdef DEBUG_KSNET
-        if(!KSN_GET_TEST_MODE())
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s create new ip_map record with key %s "
                 "(num records: %d)\n",
