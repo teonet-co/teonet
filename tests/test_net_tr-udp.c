@@ -211,18 +211,23 @@ void test_2_4() {
 
         /* ---------------------------------------------------------------------- */
         // 1) ksnTRUDPreset: Remove send list and receive heap by input address
-        ksnTRUDPreset(tu, (__CONST_SOCKADDR_ARG) &addr, i);
         if(i == 0) {
+            ksnTRUDPreset(tu, (__CONST_SOCKADDR_ARG) &addr, i);
             CU_ASSERT(pblMapSize(tu->ip_map) == 1);
             CU_ASSERT(pblMapSize(sl) == 0);
             CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0);
-        } else {
+        } 
+        // 2) ksnTRUDPresetAddr: Remove send list and receive heap by input address
+        else {
+            ksnTRUDPresetAddr(tu, addr_str, port, i);
             CU_ASSERT(pblMapSize(tu->ip_map) == 0); // All IP map records was removed 
         }
 
         // Destroy ksnTRUDPClass    
         ksnTRUDPDestroy(tu); 
-        CU_PASS("Destroy ksnTRUDPClass done");    
+        CU_PASS("Destroy ksnTRUDPClass done");  
+        
+        // TODO: ksnTRUDPresetSend: Send reset to peer
     }
 }
 
