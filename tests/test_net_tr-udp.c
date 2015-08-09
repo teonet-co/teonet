@@ -20,7 +20,7 @@ extern CU_pSuite pSuite;
 /**
  * Test pblHeap functions
  */
-void test1() {
+void test_2_1() {
     
     // Create Receive Heap
     rh_data *rh_d;
@@ -72,7 +72,7 @@ void test1() {
 /**
  * Test Initialize/Destroy TR-UDP module
  */
-void test2() {
+void test_2_2() {
     
     ksnTRUDPClass *tu;
     CU_ASSERT_PTR_NOT_NULL_FATAL((tu = ksnTRUDPInit(NULL)));
@@ -83,7 +83,7 @@ void test2() {
 /**
  * Test TR-UDP utility functions
  */
-void test3() {
+void test_2_3() {
 
     // Test constants and variables
     const char *tst_key = "127.0.0.1:1327";
@@ -131,12 +131,17 @@ void test3() {
     CU_ASSERT_STRING_EQUAL_FATAL(key, tst_key);
 }
 
-int add_suite1_tests(void) {
+/**
+ * Add TR-UDP suite tests
+ * 
+ * @return 
+ */
+int add_suite_2_tests(void) {
     
     // Add the tests to the suite 
-    if ((NULL == CU_add_test(pSuite, "pblHeap functions", test1)) ||
-        (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test2)) ||
-        (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test3))
+    if ((NULL == CU_add_test(pSuite, "pblHeap functions", test_2_1)) ||
+        (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test_2_2)) ||
+        (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test_2_3))
             ) {       
         CU_cleanup_registry();
         return CU_get_error();
