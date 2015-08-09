@@ -35,7 +35,7 @@ extern "C" {
 
 
 // Main functions
-ksnTRUDPClass *ksnTRUDPInit(void *kc);
+ksnTRUDPClass *ksnTRUDPinit(void *kc);
 void ksnTRUDPDestroy(ksnTRUDPClass *tu);
 
 ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
@@ -44,7 +44,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
 ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
 
-void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options);
+void ksnTRUDPresetAddr(ksnTRUDPClass *tu, char *addr, int port, int options);
 
 
 #ifdef	__cplusplus

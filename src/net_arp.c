@@ -129,7 +129,7 @@ void ksnetArpRemove(ksnetArpClass *ka, char* name) {
     size_t var_len = 0;
     ksnet_arp_data *arp = pblMapRemoveStr(ka->map, name, &var_len);
     if(arp != (void*)-1) {
-        ksnTRUDPResetAddr( ((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+        ksnTRUDPresetAddr( ((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 1);
     }
 }

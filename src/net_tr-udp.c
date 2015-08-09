@@ -35,10 +35,10 @@
 /**
  * Initialize TR-UDP class
  * 
- * @param kc
- * @return 
+ * @param kc Pointer to ksnCoreClass object 
+ * @return Pointer to created ksnTRUDPClass object
  */
-ksnTRUDPClass *ksnTRUDPInit(void *kc) {
+ksnTRUDPClass *ksnTRUDPinit(void *kc) {
 
     ksnTRUDPClass *tu = malloc(sizeof (ksnTRUDPClass));
     tu->kc = kc;
@@ -50,7 +50,7 @@ ksnTRUDPClass *ksnTRUDPInit(void *kc) {
 /**
  * Destroy TR-UDP class
  * 
- * @param tu
+ * @param tu Pointer to ksnTRUDPClass object
  */
 void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
 
@@ -138,7 +138,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         #endif
 
         // Add packet to Sent message list (Acknowledge Pending Messages)
-        ksnTRUDPSendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags,
+        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags,
                 addr, addr_len);
     } 
     else {
@@ -240,7 +240,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     // ksnTRUDPReceiveHeapAdd();    
 
                     // Read IP Map
-                    ip_map_data *ip_map_d = ksnTRUDPIpMapData(tu, addr, NULL, 0);
+                    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
 
                     // Send to core if ID Equals to Expected ID
                     if (tru_header->id == ip_map_d->expected_id) {
@@ -307,7 +307,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 tru_header->id, tru_header->payload_length,
                                 ip_map_d->expected_id);
 
-                        ksnTRUDPReceiveHeapAdd(tu, ip_map_d->receive_heap,
+                        ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
                                 tru_header->id, buf + tru_ptr,
                                 tru_header->payload_length, addr, *addr_len);
 
@@ -357,7 +357,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     #endif
                     
                     // Process RESET command
-                    ksnTRUDPReset(tu, addr, 0);
+                    ksnTRUDPreset(tu, addr, 0);
                     ksnTRUDPSendACK(); // Send ACK
                     recvlen = 0; // The received message is processed
                     break;
@@ -392,19 +392,19 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
  * Get IP map record by address or create new record if not exist
  * 
  * @param tu Pointer ksnTRUDPClass
- * @param addr 
- * @param key_out [out]
- * @param key_out_len
+ * @param addr Peer address (created in sockaddr_in structure)
+ * @param key_out [out] Buffer to copy created from addr key. Don't copy if NULL
+ * @param key_out_len Length of buffer to copy created key
  * 
- * @return 
+ * @return Pointer to ip_map_data or NULL if not found
  */
-ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
+ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_out_len) {
 
     // Get ip map data by key
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPKeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
     // Create new ip map record if it absent
@@ -439,12 +439,14 @@ ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
 /**
  * Create key from address
  * 
- * @param addr
- * @param key [out]
- * @param key_len Key buffer length
- * @return 
+ * @param tu Pointer ksnTRUDPClass
+ * @param addr Peer address (created in sockaddr_in structure)
+ * @param key [out] Buffer to copy created from addr key. Don't copy if NULL
+ * @param key_out_len Length of buffer to copy created key
+ * 
+ * @return Created key length
  */
-size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
+size_t ksnTRUDPkeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
         char* key, size_t key_len) {
 
     return snprintf(key, key_len, "%s:%d",
@@ -455,13 +457,15 @@ size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
 /**
  * Create key from address and port
  * 
- * @param addr
- * @param port
- * @param key [out]
- * @param key_len
- * @return 
+ * @param tu Pointer ksnTRUDPClass
+ * @param addr String with address (ip)
+ * @param port Port number
+ * @param key [out] Buffer to copy created from addr key. Don't copy if NULL
+ * @param key_out_len Length of buffer to copy created key
+ * 
+ * @return Created key length 
  */
-inline size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port, char* key,
+inline size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port, char* key,
         size_t key_len) {
 
     return snprintf(key, key_len, "%s:%d", addr, port);
@@ -484,35 +488,35 @@ inline size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int por
  *          1 - remove mode: clear send list and receive heap, 
  *                           and remove record from IP Map
  */
-void ksnTRUDPReset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options) {
+void ksnTRUDPreset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options) {
 
     // Create key from address
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPKeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
 
     // Reset by key
-    ksnTRUDPResetKey(tu, key, key_len, options);
+    ksnTRUDPresetKey(tu, key, key_len, options);
 }
 
 /**
  * Remove send list and receive heap by address and port
  * 
  * @param tu Pointer to ksnTRUDPClass
- * @param addr IP address
- * @param port IP port
+ * @param addr String with IP address
+ * @param port IP port number
  * @param options Reset options:
  *          0 - reset mode:  clear send list and receive heap 
  *          1 - remove mode: clear send list and receive heap, 
  *                           and remove record from IP Map
  */
-void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
+void ksnTRUDPresetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
 
     // Create key from address
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPKeyCreateAddr(0, addr, port, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPkeyCreateAddr(0, addr, port, key, KSN_BUFFER_SM_SIZE);
 
     // Reset by key
-    ksnTRUDPResetKey(tu, key, key_len, options);
+    ksnTRUDPresetKey(tu, key, key_len, options);
 }
 
 /**
@@ -528,7 +532,7 @@ void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
  *          1 - remove mode: clear send list and receive heap, 
  *                           and remove record from IP Map
  */
-void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options) {
+void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -569,17 +573,21 @@ void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
 }
 
 /**
- * TODO: Send reset command to peer
+ * Send reset command to peer and add it to send list
  * 
  * @param tu
+ * @param fd
  * @param addr
  */
-void ksnTRUDPResetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
+void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
 
+    // Send reset command to peer
     ksnTRUDP_header tru_header; // Header buffer
     MakeHeader(tru_header, TRU_RESET, 0); // Make TR-UDP Header
     const socklen_t addr_len = sizeof(struct sockaddr_in); // Length of addresses   
     sendto(fd, &tru_header, sizeof(tru_header), 0, addr, addr_len); // Send
+    
+    // TODO: Add sent reset to send list
 }
 
 
@@ -603,7 +611,7 @@ int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, uint32_t id,
 
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPKeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
     if (ip_map_d != NULL) {
 
@@ -638,7 +646,7 @@ sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
 
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPKeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
     if (ip_map_d != NULL) {
 
@@ -657,10 +665,10 @@ sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
  * 
  * @return 
  */
-inline PblMap *ksnTRUDPSendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
+inline PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         char *key_out, size_t key_out_len) {
 
-    return ksnTRUDPIpMapData(tu, addr, key_out, key_out_len)->send_list;
+    return ksnTRUDPipMapData(tu, addr, key_out, key_out_len)->send_list;
 }
 
 /**
@@ -681,13 +689,13 @@ inline PblMap *ksnTRUDPSendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
  * 
  * @return 
  */
-int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
+int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         const void *data, size_t data_len, int flags,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     // Get Send List by address from ip_map (or create new)
     char key[KSN_BUFFER_SM_SIZE];
-    PblMap *sl = ksnTRUDPSendListGet(tu, addr, key, KSN_BUFFER_SM_SIZE);
+    PblMap *sl = ksnTRUDPsendListGet(tu, addr, key, KSN_BUFFER_SM_SIZE);
 
     // Start ACK timeout timer watcher
     ev_timer *w = sl_timer_start(tu, sl, id, fd, cmd, flags, addr, addr_len);
@@ -721,7 +729,7 @@ int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
 inline uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
-    return ksnTRUDPIpMapData(tu, addr, NULL, 0)->id++;
+    return ksnTRUDPipMapData(tu, addr, NULL, 0)->id++;
 }
 
 /**
@@ -868,7 +876,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     // Get message from list
     size_t data_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPKeyCreate(0, sl_t_data->addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPkeyCreate(0, sl_t_data->addr, key, KSN_BUFFER_SM_SIZE);
     sl_data *sl_d = pblMapGet(sl_t_data->sl, key, key_len, &data_len);
 
     if (sl_d != NULL) {
@@ -941,13 +949,13 @@ int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next) {
  * @param data_len
  * @return 
  */
-int ksnTRUDPReceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id, void *data,
-        size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len) {
+int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id, 
+        void *data, size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
     if (tu != NULL) {
         char key[KSN_BUFFER_SM_SIZE];
-        ksnTRUDPKeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+        ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s receive heap %s add %d bytes\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
