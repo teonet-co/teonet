@@ -113,7 +113,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         MakeHeader(tru_header, TRU_DATA, buf_len);
 
         // Get new message ID
-        tru_header.id = ksnTRUDPSendListNewID(tu, addr, addr_len);
+        tru_header.id = ksnTRUDPsendListNewID(tu, addr, addr_len);
 
         // Copy TR-UDP header
         memcpy(tru_buf, &tru_header, tru_ptr);
@@ -338,7 +338,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     if (w != NULL) sl_timer_stop(kev->ev_loop, w);
 
                     // Remove message from SendList
-                    ksnTRUDPSendListRemove(tu, tru_header->id, addr, *addr_len);
+                    ksnTRUDPsendListRemove(tu, tru_header->id, addr, *addr_len);
 
                     recvlen = 0; // The received message is processed
 
@@ -550,7 +550,7 @@ void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
     if (ip_map_d != NULL) {
 
         // Reset or remove Send List
-        ksnTRUDPSendListRemoveAll(tu, ip_map_d->send_list); // Remove all elements from Send List
+        ksnTRUDPsendListRemoveAll(tu, ip_map_d->send_list); // Remove all elements from Send List
         if (options) {
             pblMapFree(ip_map_d->send_list); // Free Send List
             ip_map_d->send_list = NULL; // Clear Send List pointer
@@ -606,7 +606,7 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
  * @param addr_len
  * @return 
  */
-int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, uint32_t id,
+int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     size_t val_len;
@@ -726,7 +726,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
  * @param addr_len
  * @return 
  */
-inline uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu,
+inline uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     return ksnTRUDPipMapData(tu, addr, NULL, 0)->id++;
@@ -737,7 +737,7 @@ inline uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu,
  * 
  * @param send_list
  */
-void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
+void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -779,7 +779,7 @@ void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu) {
         while (pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
-            ksnTRUDPSendListRemoveAll(tu, ip_map_d->send_list);
+            ksnTRUDPsendListRemoveAll(tu, ip_map_d->send_list);
             pblMapFree(ip_map_d->send_list);
             ip_map_d->send_list = NULL;
         }
@@ -887,7 +887,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
                 sl_t_data->addr_len);
 
         // Remove record from list
-        ksnTRUDPSendListRemove(tu, sl_t_data->id, sl_t_data->addr, 
+        ksnTRUDPsendListRemove(tu, sl_t_data->id, sl_t_data->addr, 
                 sl_t_data->addr_len);
 
         #ifdef DEBUG_KSNET

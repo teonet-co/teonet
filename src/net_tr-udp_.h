@@ -113,19 +113,19 @@ size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port,
 ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 //
-int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, uint32_t id,
+int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         const void *data, size_t data_len, int flags,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
-uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
+uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         socklen_t addr_len);
 void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu);
 PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         char *key_out, size_t key_len);
 sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
-void ksnTRUDPSendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list);
+void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list);
 //
 ev_timer *sl_timer_start(ksnTRUDPClass *, PblMap *sl, uint32_t id, int fd,
         int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
