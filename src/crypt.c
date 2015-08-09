@@ -17,6 +17,9 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
+// Number of modules started
+int num_crypt_module = 0;
+
 /**
  * Module initialize
  *
@@ -37,9 +40,12 @@ ksnCryptClass *ksnCryptInit(void *ke) {
     kcr->blocksize = BLOCK_SIZE;
 
     // Initialize the library
-    ERR_load_crypto_strings();
-    OpenSSL_add_all_algorithms();
-    OPENSSL_config(NULL);
+    if(!num_crypt_module) {
+        ERR_load_crypto_strings();
+        OpenSSL_add_all_algorithms();
+        OPENSSL_config(NULL);
+    }
+    num_crypt_module++;
 
     return kcr;
 }
@@ -51,10 +57,12 @@ ksnCryptClass *ksnCryptInit(void *ke) {
  */
 void ksnCryptDestroy(ksnCryptClass *kcr) {
 
-
     // Clean up
-    EVP_cleanup();
-    ERR_free_strings();
+    if(num_crypt_module == 1) {
+        EVP_cleanup();
+        ERR_free_strings();
+    }
+    num_crypt_module--;
 
     free(kcr);
 }
