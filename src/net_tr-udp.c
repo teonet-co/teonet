@@ -509,7 +509,7 @@ void ksnTRUDPreset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options) {
  *          1 - remove mode: clear send list and receive heap, 
  *                           and remove record from IP Map
  */
-void ksnTRUDPresetAddr(ksnTRUDPClass *tu, char *addr, int port, int options) {
+void ksnTRUDPresetAddr(ksnTRUDPClass *tu, const char *addr, int port, int options) {
 
     // Create key from address
     char key[KSN_BUFFER_SM_SIZE];
