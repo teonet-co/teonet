@@ -5,6 +5,7 @@ yum -y update
 
 # Autoconf dependence
 yum install -y autoconf intltool libtool glib2-devel doxygen make gcc
+# sudo zypper in cunit-devel
 
 # Project dependence
 yum install -y openssl-devel libev-devel libuuid-devel
@@ -18,7 +19,7 @@ cd confuse-2.7
 ./configure
 cd src
 cp Makefile Makefile.old
-patch < ../../confuse-2.7-src-Makefile.patch 
+patch < ../../confuse-2.7-src-Makefile.patch
 make
 make install
 cd ../..
