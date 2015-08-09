@@ -1,7 +1,7 @@
 /*
  * File:   test_net_rt_udp.c
  * Author: Kirill Scherba <kirill@scherba.ru>
- * 
+ *
  * TR-UDP module test
  *
  * Created on Aug 7, 2015, 9:31:12 PM
@@ -16,7 +16,7 @@
 
 extern CU_pSuite pSuite;
 
-// Emulate initialization of ksnCoreClass 
+// Emulate initialization of ksnCoreClass
 #define kc_emul() \
   ksnetEvMgrClass ke; \
   ksnCoreClass kc; \
@@ -27,21 +27,21 @@ extern CU_pSuite pSuite;
  * Test pblHeap functions
  */
 void test_2_1() {
-    
+
     // Create Receive Heap
     rh_data *rh_d;
-    PblHeap *receive_heap; 
-    
+    PblHeap *receive_heap;
+
     // Create new Heap and set compare function
     CU_ASSERT((receive_heap = pblHeapNew()) != NULL);
     pblHeapSetCompareFunction(receive_heap, ksnTRUDPReceiveHeapCompare);
-    
+
     // Fill address
     struct sockaddr_in addr;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
     addr.sin_port = htons(0);
     socklen_t addr_len = sizeof(addr);
-        
+
     // Add some records to Receive Heap
     CU_ASSERT(pblHeapSize(receive_heap) == 0);
     CU_ASSERT(0 <= ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 15, "Hello 15", 9, (__SOCKADDR_ARG) &addr, addr_len));
@@ -49,7 +49,7 @@ void test_2_1() {
     CU_ASSERT(0 <= ksnTRUDPreceiveHeapAdd(NULL, receive_heap,  9, "Hello  9", 9, (__SOCKADDR_ARG) &addr, addr_len));
     CU_ASSERT(0 <= ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 14, "Hello 14", 9, (__SOCKADDR_ARG) &addr, addr_len));
     CU_ASSERT(pblHeapSize(receive_heap) == 4);
-    
+
     // Get saved Heap records and remove it
     // 9
     CU_ASSERT( (rh_d = pblHeapGetFirst(receive_heap)) != NULL);
@@ -62,16 +62,16 @@ void test_2_1() {
     // 14
     CU_ASSERT( (rh_d = pblHeapGetFirst(receive_heap)) != NULL);
     CU_ASSERT(rh_d->id == 14);
-    pblHeapRemoveFirst(receive_heap);    
+    pblHeapRemoveFirst(receive_heap);
     // 15
     CU_ASSERT( (rh_d = pblHeapGetFirst(receive_heap)) != NULL);
     CU_ASSERT(rh_d->id == 15);
     pblHeapRemoveFirst(receive_heap);
     //
     CU_ASSERT(pblHeapSize(receive_heap) == 0);
-            
+
     // Destroy Receive Heap
-    pblHeapFree(receive_heap);    
+    pblHeapFree(receive_heap);
     CU_PASS("pblHeapFree done");
 }
 
@@ -79,10 +79,10 @@ void test_2_1() {
  * Test Initialize/Destroy TR-UDP module
  */
 void test_2_2() {
-    
-    // Emulate ksnCoreClass 
+
+    // Emulate ksnCoreClass
     kc_emul();
-    
+
     ksnTRUDPClass *tu; // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL((tu = ksnTRUDPinit(&kc)));
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu->ip_map);
@@ -95,26 +95,26 @@ void test_2_2() {
  */
 void test_2_3() {
 
-    // Emulate ksnCoreClass 
+    // Emulate ksnCoreClass
     kc_emul();
-    
+
     // Test constants and variables
     const char *tst_key = "127.0.0.1:1327";
-    const char *addr_str = "127.0.0.1"; 
+    const char *addr_str = "127.0.0.1";
     char key[KSN_BUFFER_SM_SIZE];
     struct sockaddr_in addr;
     const int port = 1327;
     size_t key_len;
 
-    // Fill address 
+    // Fill address
     if(inet_aton(addr_str, &addr.sin_addr) == 0) CU_ASSERT(1 == 0);
     addr.sin_port = htons(port);
 
     /* ---------------------------------------------------------------------- */
     // Initialize ksnTRUDPClass
-    ksnTRUDPClass *tu = ksnTRUDPinit(&kc); 
+    ksnTRUDPClass *tu = ksnTRUDPinit(&kc);
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
-       
+
     // 1) ksnTRUDPipMapData: Get IP map record by address or create new record if not exist
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, (__CONST_SOCKADDR_ARG) &addr,
             key, KSN_BUFFER_SM_SIZE);
@@ -128,12 +128,12 @@ void test_2_3() {
     CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0); // Check receive heap functional
 
     // Destroy ksnTRUDPClass
-    ksnTRUDPDestroy(tu); 
+    ksnTRUDPDestroy(tu);
     CU_PASS("Destroy ksnTRUDPClass done");
-    
+
      /* ---------------------------------------------------------------------- */
     // 2) ksnTRUDPKeyCreate: Create key from address
-    key_len = ksnTRUDPkeyCreate(NULL, (__CONST_SOCKADDR_ARG) &addr, key, 
+    key_len = ksnTRUDPkeyCreate(NULL, (__CONST_SOCKADDR_ARG) &addr, key,
             KSN_BUFFER_SM_SIZE);
     // Check key
     CU_ASSERT(key_len == strlen(tst_key));
@@ -149,19 +149,19 @@ void test_2_3() {
 
 // Test RT-UDP reset functions
 void test_2_4() {
-    
+
     int i;
     for (i = 0; i < 2; i++) {
-        
-        // Emulate ksnCoreClass 
+
+        // Emulate ksnCoreClass
         kc_emul();
 
         // Test constants and variables
-        const char *addr_str = "127.0.0.1"; 
+        const char *addr_str = "127.0.0.1";
         struct sockaddr_in addr;
         const int port = 1327;
 
-        // Fill address 
+        // Fill address
         if(inet_aton(addr_str, &addr.sin_addr) == 0) CU_ASSERT(1 == 0);
         addr.sin_port = htons(port);
 
@@ -171,7 +171,7 @@ void test_2_4() {
 
         // Add records to send list
         // Create and Get pointer to Send List ---------------------
-        PblMap *sl = ksnTRUDPsendListGet(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0); 
+        PblMap *sl = ksnTRUDPsendListGet(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0);
         CU_ASSERT_PTR_NOT_NULL_FATAL(sl);
         // Get 1 new ID = 0 ------------------
         uint32_t id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
@@ -196,13 +196,13 @@ void test_2_4() {
         // Add records to receive heap
         // Add 1 records to receive heap
         ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0);
-        ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap, ip_map_d->expected_id, 
+        ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap, ip_map_d->expected_id,
                 "Some data 1", 12, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
         CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 1);
         CU_ASSERT(ip_map_d->expected_id == 0);
         // Add 2 records to receive heap
         //ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0);
-        ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap, ip_map_d->expected_id, 
+        ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap, ip_map_d->expected_id,
                 "Some data 2", 12, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
         CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 2);
         CU_ASSERT(ip_map_d->expected_id == 0);
@@ -214,49 +214,49 @@ void test_2_4() {
             CU_ASSERT(pblMapSize(tu->ip_map) == 1);
             CU_ASSERT(pblMapSize(sl) == 0);
             CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0);
-        } 
+        }
         // 2) ksnTRUDPresetAddr: Remove send list and receive heap by input address
         else {
             ksnTRUDPresetAddr(tu, addr_str, port, i);
-            CU_ASSERT(pblMapSize(tu->ip_map) == 0); // All IP map records was removed 
+            CU_ASSERT(pblMapSize(tu->ip_map) == 0); // All IP map records was removed
         }
 
-        // Destroy ksnTRUDPClass    
-        ksnTRUDPDestroy(tu); 
-        CU_PASS("Destroy ksnTRUDPClass done");  
-        
+        // Destroy ksnTRUDPClass
+        ksnTRUDPDestroy(tu);
+        CU_PASS("Destroy ksnTRUDPClass done");
+
         // TODO: ksnTRUDPresetSend: Send reset to peer
     }
 }
 
 // Test RT-UDP send list functions
 void test_2_5() {
-    
-    // Emulate ksnCoreClass 
+
+    // Emulate ksnCoreClass
     kc_emul();
-    
+
     // Test constants and variables
-    const char *addr_str = "127.0.0.1"; 
+    const char *addr_str = "127.0.0.1";
     struct sockaddr_in addr;
     const int port = 1327;
 
-    // Fill address 
+    // Fill address
     if(inet_aton(addr_str, &addr.sin_addr) == 0) CU_ASSERT(1 == 0);
     addr.sin_port = htons(port);
-        
+
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
-    
+
     // 1) ksnTRUDPsendListGet: Create and Get pointer to Send List
-    PblMap *sl = ksnTRUDPsendListGet(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0); 
+    PblMap *sl = ksnTRUDPsendListGet(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0);
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl);
     CU_ASSERT(pblMapSize(sl) == 0);
 
     // 2) ksnTRUDPsendListNewID: Get new ID
     uint32_t id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     CU_ASSERT(id == 0);
-    
+
     // Add 1 message to send list
     sl_data sl_d;
     sl_d.w = NULL;
@@ -264,7 +264,7 @@ void test_2_5() {
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
     CU_ASSERT(pblMapSize(sl) == 1);
-    
+
     // Add 2 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     CU_ASSERT(id == 1);
@@ -272,8 +272,8 @@ void test_2_5() {
     sl_d.data = (void*) "Some data 2";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
-    CU_ASSERT(pblMapSize(sl) == 2);    
-    
+    CU_ASSERT(pblMapSize(sl) == 2);
+
     // Add 3 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     CU_ASSERT(id == 2);
@@ -281,72 +281,96 @@ void test_2_5() {
     sl_d.data = (void*) "Some data 3";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
-    CU_ASSERT(pblMapSize(sl) == 3);    
-    
+    CU_ASSERT(pblMapSize(sl) == 3);
+
     // 3) ksnTRUDPSendListGetData: Get Send List timer watcher and stop it
     sl_data *sl_d_get = ksnTRUDPSendListGetData(tu, 1, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
     CU_ASSERT_STRING_EQUAL(sl_d_get->data, "Some data 2");
-    
+
     // 4) ksnTRUDPsendListRemove: Remove record from send list
     ksnTRUDPsendListRemove(tu, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     CU_ASSERT(pblMapSize(sl) == 2);
-    
+
     // 5) ksnTRUDPsendListRemove: Remove all record from send list
     ksnTRUDPsendListRemoveAll(tu, sl);
     CU_ASSERT(pblMapSize(sl) == 0);
-    
-    // 6 ksnTRUDPsendListAdd: Add packet to Sent message list 
-    id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));    
+
+    // 6 ksnTRUDPsendListAdd: Add packet to Sent message list
+    id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     ksnTRUDPsendListAdd(tu, id, 0, 0, "Some data 4", 12, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     sl_d_get = ksnTRUDPSendListGetData(tu, id, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
     CU_ASSERT_STRING_EQUAL(sl_d_get->data, "Some data 4");
-    
+
     // TODO: 7 ksnTRUDPSendListDestroyAll: Free all elements and free all Sent message lists
     ksnTRUDPsendListDestroyAll(tu);
     CU_PASS("Destroy all sent message lists done");
-    
-    // Destroy ksnTRUDPClass    
-    ksnTRUDPDestroy(tu); 
-    CU_PASS("Destroy ksnTRUDPClass done");  
+
+    // Destroy ksnTRUDPClass
+    ksnTRUDPDestroy(tu);
+    CU_PASS("Destroy ksnTRUDPClass done");
 }
 
 // Test RT-UDP send list timer functions
 void test_2_6() {
-    
-    // Emulate ksnCoreClass 
+
+    // Emulate ksnCoreClass
     kc_emul();
-    
+
+    // Test constants and variables
+    const char *addr_str = "127.0.0.1";
+    struct sockaddr_in addr;
+    const int port = 1327;
+
+    // Fill address
+    if(inet_aton(addr_str, &addr.sin_addr) == 0) CU_ASSERT(1 == 0);
+    addr.sin_port = htons(port);
+
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
-    
-    // TODO: sl_timer_start, sl_timer_stop, sl_timer_cb
 
-    // Destroy ksnTRUDPClass    
-    ksnTRUDPDestroy(tu); 
-    CU_PASS("Destroy ksnTRUDPClass done");      
+    // 1) sl_timer_start: Start the send list timer
+    // Create and Get pointer to Send List
+    PblMap *sl = ksnTRUDPsendListGet(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(sl);
+    // Get new ID
+    uint32_t id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    CU_ASSERT(id == 0);
+    // Start the send list timer
+    ev_timer *w = sl_timer_start(tu, sl, id, 0, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    CU_ASSERT_PTR_NOT_NULL_FATAL(w);
+
+    // TODO: sl_timer_cb: Process send list timer callback
+
+    // 3) sl_timer_stop: Stop the send list timer
+    sl_timer_stop(ke.ev_loop, w);
+    CU_PASS("Stop send list timer done");
+
+    // Destroy ksnTRUDPClass
+    ksnTRUDPDestroy(tu);
+    CU_PASS("Destroy ksnTRUDPClass done");
 }
 
 /**
  * Add TR-UDP suite tests
- * 
- * @return 
+ *
+ * @return
  */
 int add_suite_2_tests(void) {
-    
-    // Add the tests to the suite 
+
+    // Add the tests to the suite
     if ((NULL == CU_add_test(pSuite, "pblHeap functions", test_2_1)) ||
         (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test_2_2)) ||
         (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test_2_3)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP reset functions", test_2_4)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP send list functions", test_2_5)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP send list timer functions", test_2_6))
-            ) {       
+            ) {
         CU_cleanup_registry();
         return CU_get_error();
     }
-    
+
     return 0;
 }
