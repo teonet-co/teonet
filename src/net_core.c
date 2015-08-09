@@ -104,7 +104,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     kc->last_check_event = 0;
 
     ((ksnetEvMgrClass*)ke)->kc = kc;
-    kc->ku = ksnTRUDPInit(kc);
+    kc->ku = ksnTRUDPinit(kc);
     kc->ka = ksnetArpInit(ke);
     kc->kco = ksnCommandInit(kc);
     #if KSNET_CRYPT
@@ -153,7 +153,7 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        ksnTRUDPInit(kc->ku);
+        ksnTRUDPinit(kc->ku);
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif

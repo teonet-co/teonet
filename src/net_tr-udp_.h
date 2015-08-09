@@ -106,22 +106,22 @@ enum ksnTRUDP_type {
 
 
 // Local methods
-size_t ksnTRUDPKeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr, char* key,
+size_t ksnTRUDPkeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr, char* key,
         size_t key_len);
-size_t ksnTRUDPKeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port, 
+size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port, 
         char* key, size_t key_len);
-ip_map_data *ksnTRUDPIpMapData(ksnTRUDPClass *tu,
+ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 //
 int ksnTRUDPSendListRemove(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
-int ksnTRUDPSendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
+int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         const void *data, size_t data_len, int flags,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 uint32_t ksnTRUDPSendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         socklen_t addr_len);
 void ksnTRUDPSendListDestroyAll(ksnTRUDPClass *tu);
-PblMap *ksnTRUDPSendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
+PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         char *key_out, size_t key_len);
 sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
@@ -133,7 +133,7 @@ void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 //
 int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
-int ksnTRUDPReceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
+int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
         uint32_t id, void *data,
         size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len);
 rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap);
@@ -142,10 +142,10 @@ int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu);
 //
-void ksnTRUDPReset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options);
-void ksnTRUDPResetAddr(ksnTRUDPClass *tu, char *addr, int port, int options);
-void ksnTRUDPResetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options);
-void ksnTRUDPResetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr);
+void ksnTRUDPreset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options);
+void ksnTRUDPresetAddr(ksnTRUDPClass *tu, char *addr, int port, int options);
+void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options);
+void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr);
 
 
 #ifdef	__cplusplus
