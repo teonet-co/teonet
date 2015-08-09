@@ -312,6 +312,23 @@ void test_2_5() {
     CU_PASS("Destroy ksnTRUDPClass done");  
 }
 
+// Test RT-UDP send list timer functions
+void test_2_6() {
+    
+    // Emulate ksnCoreClass 
+    kc_emul();
+    
+    // Initialize ksnTRUDPClass
+    ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
+    
+    // TODO: sl_timer_start, sl_timer_stop, sl_timer_cb
+
+    // Destroy ksnTRUDPClass    
+    ksnTRUDPDestroy(tu); 
+    CU_PASS("Destroy ksnTRUDPClass done");      
+}
+
 /**
  * Add TR-UDP suite tests
  * 
@@ -324,7 +341,8 @@ int add_suite_2_tests(void) {
         (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test_2_2)) ||
         (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test_2_3)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP reset functions", test_2_4)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP send list functions", test_2_5))
+        (NULL == CU_add_test(pSuite, "RT-UDP send list functions", test_2_5)) ||
+        (NULL == CU_add_test(pSuite, "RT-UDP send list timer functions", test_2_6))
             ) {       
         CU_cleanup_registry();
         return CU_get_error();
