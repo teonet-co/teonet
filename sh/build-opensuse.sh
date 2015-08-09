@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # Update Centos
-yum -y update
+zypper -y update
 
 # Autoconf dependence
-yum install -y autoconf intltool libtool glib2-devel doxygen make gcc
+zypper install -y autoconf intltool libtool glib2-devel doxygen make gcc patch
 
 # Project dependence
-yum install -y openssl-devel libev-devel libuuid-devel
+zypper install -y openssl-devel libev-devel libuuid-devel
 
 # Install confuse
 cd distr
@@ -25,7 +25,7 @@ make install
 cd ../..
 
 # Libtuntap dependence
-yum install -y cmake gcc-c++ unzip
+zypper install -y cmake gcc-c++ unzip
 
 # Get libtuntap
 cd distr
