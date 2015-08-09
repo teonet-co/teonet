@@ -16,6 +16,11 @@
 
 extern CU_pSuite pSuite;
 
+// Emulate initialization of ksnCoreClass 
+#define kc_emul() \
+  ksnetEvMgrClass ke; \
+  ksnCoreClass kc; \
+  kc.ke = &ke
 
 /**
  * Test pblHeap functions
@@ -74,10 +79,14 @@ void test_2_1() {
  */
 void test_2_2() {
     
-    ksnTRUDPClass *tu;
-    CU_ASSERT_PTR_NOT_NULL_FATAL((tu = ksnTRUDPInit(NULL)));
+    // Emulate ksnCoreClass 
+    kc_emul();
+    
+    ksnTRUDPClass *tu; // Initialize ksnTRUDPClass
+    CU_ASSERT_PTR_NOT_NULL_FATAL((tu = ksnTRUDPInit(&kc)));
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu->ip_map);
-    //ksnTRUDPDestroy(tu);
+    ksnTRUDPDestroy(tu); // Destroy ksnTRUDPClass
+    CU_PASS("Destroy ksnTRUDPClass done");
 }
 
 /**
@@ -85,6 +94,9 @@ void test_2_2() {
  */
 void test_2_3() {
 
+    // Emulate ksnCoreClass 
+    kc_emul();
+    
     // Test constants and variables
     const char *tst_key = "127.0.0.1:1327";
     const char *addr_str = "127.0.0.1"; 
@@ -98,9 +110,9 @@ void test_2_3() {
     addr.sin_port = htons(port);
 
     /* ---------------------------------------------------------------------- */
-    ksnTRUDPClass *tu = ksnTRUDPInit(NULL); // Initialize ksnTRUDPClass
+    ksnTRUDPClass *tu = ksnTRUDPInit(&kc); // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
-   
+       
     // 1) ksnTRUDPIpMapData: Get IP map record by address or create new record if not exist
     ip_map_data *ip_map_d = ksnTRUDPIpMapData(tu, (__CONST_SOCKADDR_ARG) &addr,
             key, KSN_BUFFER_SM_SIZE);
@@ -112,9 +124,10 @@ void test_2_3() {
     CU_ASSERT_PTR_NOT_NULL_FATAL(ip_map_d->receive_heap); // Check receive heap created
     CU_ASSERT(pblMapSize(ip_map_d->send_list) == 0); // Check send list functional
     CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0); // Check receive heap functional
-    
-    //ksnTRUDPDestroy(tu); // Destroy ksnTRUDPClass
 
+    ksnTRUDPDestroy(tu); // Destroy ksnTRUDPClass
+    CU_PASS("Destroy ksnTRUDPClass done");
+    
      /* ---------------------------------------------------------------------- */
     // 2) ksnTRUDPKeyCreate: Create key from address
     key_len = ksnTRUDPKeyCreate(NULL, (__CONST_SOCKADDR_ARG) &addr, key, 
