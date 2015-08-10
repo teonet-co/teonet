@@ -20,7 +20,6 @@
 #define VERSION_MINOR 0
 
 #define kev ((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke))
-#define MAX_ACK_WAIT 2.0
 
 #include "net_tr-udp_.h"
 
@@ -85,7 +84,7 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
  * @return 
  */
 ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
-        size_t buf_len, int flags, __CONST_SOCKADDR_ARG addr,
+        size_t buf_len, int flags, int attempt, __CONST_SOCKADDR_ARG addr,
         socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
@@ -113,7 +112,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         MakeHeader(tru_header, TRU_DATA, buf_len);
 
         // Get new message ID
-        tru_header.id = ksnTRUDPsendListNewID(tu, addr, addr_len);
+        tru_header.id = ksnTRUDPsendListNewID(tu, addr);
 
         // Copy TR-UDP header
         memcpy(tru_buf, &tru_header, tru_ptr);
@@ -138,8 +137,8 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         #endif
 
         // Add packet to Sent message list (Acknowledge Pending Messages)
-        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags,
-                addr, addr_len);
+        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
+                attempt, addr, addr_len);
     } 
     else {
         #ifdef DEBUG_KSNET
@@ -332,13 +331,18 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     #endif
 
                     // Get Send List timer watcher and stop it
-                    sl_data *sl_d = ksnTRUDPSendListGetData(tu, tru_header->id,
-                            addr, *addr_len);
-                    ev_timer *w = sl_d != NULL ? sl_d->w : NULL;
-                    if (w != NULL) sl_timer_stop(kev->ev_loop, w);
+                    sl_data *sl_d = ksnTRUDPsendListGetData(tu, 
+                            tru_header->id, addr);
+                    
+                    if(sl_d != NULL) {
+                        
+                        // Stop watcher
+                        if(sl_d->w != NULL) 
+                            sl_timer_stop(kev->ev_loop, sl_d->w);
 
-                    // Remove message from SendList
-                    ksnTRUDPsendListRemove(tu, tru_header->id, addr, *addr_len);
+                        // Remove message from SendList
+                        ksnTRUDPsendListRemove(tu, tru_header->id, addr);
+                    }
 
                     recvlen = 0; // The received message is processed
 
@@ -607,7 +611,7 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
  * @return 
  */
 int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
+        __CONST_SOCKADDR_ARG addr) {
 
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
@@ -639,8 +643,8 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
  * @param addr_len
  * @return 
  */
-sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
+sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
+        __CONST_SOCKADDR_ARG addr) {
 
     sl_data *sl_d = NULL;
 
@@ -690,7 +694,7 @@ inline PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
  * @return 
  */
 int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
-        const void *data, size_t data_len, int flags,
+        const void *data, size_t data_len, int flags, int attempt, 
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     // Get Send List by address from ip_map (or create new)
@@ -705,6 +709,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     sl_d.w = w;
     sl_d.data = (void*) data;
     sl_d.data_len = data_len;
+    sl_d.attempt = attempt;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
 
     #ifdef DEBUG_KSNET
@@ -727,7 +732,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
  * @return 
  */
 inline uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu,
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
+        __CONST_SOCKADDR_ARG addr) {
 
     return ksnTRUDPipMapData(tu, addr, NULL, 0)->id++;
 }
@@ -864,9 +869,12 @@ inline void sl_timer_stop(EV_P_ ev_timer *w) {
 /**
  * Send list timer callback
  * 
- * @param loop
- * @param w
- * @param revents
+ * The timer event appears if timer was not stopped during timeout. I means that 
+ * packet was not received by peer and we need resend this packet.
+ * 
+ * @param loop Event loop 
+ * @param w Watcher
+ * @param revents Revents (not used, reserved)
  */
 void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
@@ -874,21 +882,22 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     ksnTRUDPClass *tu = sl_t_data->tu;
 
     // Get message from list
-    size_t data_len;
-    char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPkeyCreate(0, sl_t_data->addr, key, KSN_BUFFER_SM_SIZE);
-    sl_data *sl_d = pblMapGet(sl_t_data->sl, key, key_len, &data_len);
+//    size_t data_len;
+//    char key[KSN_BUFFER_SM_SIZE];
+//    size_t key_len = ksnTRUDPkeyCreate(0, sl_t_data->addr, key, KSN_BUFFER_SM_SIZE);
+//    sl_data *sl_d = pblMapGet(sl_t_data->sl, key, key_len, &data_len);
+    sl_data *sl_d = ksnTRUDPsendListGetData(tu, sl_t_data->id, sl_t_data->addr);
 
     if (sl_d != NULL) {
 
         // Resend message
         ksnTRUDPsendto(tu, sl_t_data->fd, sl_t_data->cmd, sl_d->data, 
-                sl_d->data_len, sl_t_data->flags, sl_t_data->addr, 
-                sl_t_data->addr_len);
+                sl_d->data_len, sl_t_data->flags, ++sl_d->attempt, 
+                sl_t_data->addr, sl_t_data->addr_len);
 
-        // Remove record from list
-        ksnTRUDPsendListRemove(tu, sl_t_data->id, sl_t_data->addr, 
-                sl_t_data->addr_len);
+//        // Remove record from list
+//        ksnTRUDPsendListRemove(tu, sl_t_data->id, sl_t_data->addr, 
+//                sl_t_data->addr_len);
 
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -900,7 +909,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         );
         #endif
 
-        sl_d->w = NULL;
+        //sl_d->w = NULL;
         
     } else {
         
