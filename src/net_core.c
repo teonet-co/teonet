@@ -603,9 +603,9 @@ void ksnCoreProcessPacket (ksnCoreClass *kc, unsigned char *buf, size_t recvlen,
 
     // Socket disconnected
     else {
-        #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-                "TR-UDP protocol data, dropped or disconnected ...\n");
-        #endif
+//        #ifdef DEBUG_KSNET
+//        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+//                "TR-UDP protocol data, dropped or disconnected ...\n");
+//        #endif
     }
 }
