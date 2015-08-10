@@ -83,8 +83,8 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
  * 
  * @return 
  */
-ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
-        size_t buf_len, int flags, int attempt, __CONST_SOCKADDR_ARG addr,
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd, 
+        const void *buf, size_t buf_len, int flags, int attempt, __CONST_SOCKADDR_ARG addr,
         socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
@@ -112,7 +112,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int fd, int cmd, const void *buf,
         MakeHeader(tru_header, TRU_DATA, buf_len);
 
         // Get new message ID
-        tru_header.id = ksnTRUDPsendListNewID(tu, addr);
+        tru_header.id = id; 
 
         // Copy TR-UDP header
         memcpy(tru_buf, &tru_header, tru_ptr);
@@ -878,26 +878,25 @@ inline void sl_timer_stop(EV_P_ ev_timer *w) {
  */
 void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
-    sl_timer_cb_data *sl_t_data = w->data;
-    ksnTRUDPClass *tu = sl_t_data->tu;
+    sl_timer_cb_data sl_t_data;
+    memcpy(&sl_t_data, w->data, sizeof(sl_timer_cb_data));
+    ksnTRUDPClass *tu = sl_t_data.tu;
+    
+    // Stop this timer
+    sl_timer_stop(EV_A_ w);    
 
     // Get message from list
-//    size_t data_len;
-//    char key[KSN_BUFFER_SM_SIZE];
-//    size_t key_len = ksnTRUDPkeyCreate(0, sl_t_data->addr, key, KSN_BUFFER_SM_SIZE);
-//    sl_data *sl_d = pblMapGet(sl_t_data->sl, key, key_len, &data_len);
-    sl_data *sl_d = ksnTRUDPsendListGetData(tu, sl_t_data->id, sl_t_data->addr);
+    sl_data *sl_d = ksnTRUDPsendListGetData(tu, sl_t_data.id, sl_t_data.addr);
 
     if (sl_d != NULL) {
 
-        // Resend message
-        ksnTRUDPsendto(tu, sl_t_data->fd, sl_t_data->cmd, sl_d->data, 
-                sl_d->data_len, sl_t_data->flags, ++sl_d->attempt, 
-                sl_t_data->addr, sl_t_data->addr_len);
+        // Clear pointer to this watcher
+        sl_d->w = NULL;
 
-//        // Remove record from list
-//        ksnTRUDPsendListRemove(tu, sl_t_data->id, sl_t_data->addr, 
-//                sl_t_data->addr_len);
+        // Resend message
+        ksnTRUDPsendto(tu, sl_t_data.id, sl_t_data.fd, sl_t_data.cmd, sl_d->data, 
+                sl_d->data_len, sl_t_data.flags, sl_d->attempt+1, 
+                sl_t_data.addr, sl_t_data.addr_len);
 
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -905,24 +904,20 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
                 "data resent\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 ANSI_RED, ANSI_NONE,
-                sl_t_data->id
+                sl_t_data.id
         );
         #endif
-
-        //sl_d->w = NULL;
         
     } else {
         
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s timer for removed message with id %d was happened\n",
-            ANSI_LIGHTGREEN, ANSI_NONE, sl_t_data->id
+            ANSI_LIGHTGREEN, ANSI_NONE, sl_t_data.id
         );
         #endif       
     }
 
-    // Stop this timer
-    sl_timer_stop(EV_A_ w);
 }
 
 /*******************************************************************************

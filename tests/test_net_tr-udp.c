@@ -349,25 +349,26 @@ void test_2_6() {
     // Get new ID
     uint32_t id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 0);
-    // Start the send list timer
-    //ev_timer *w = sl_timer_start(tu, sl, id, 0, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
-    //CU_ASSERT_PTR_NOT_NULL_FATAL(w);    
-    ksnTRUDPsendListAdd(tu, id, 0, 0, "Some data 1", 12, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    // Add message to send list and start the send list timer
+    ksnTRUDPsendListAdd(tu, id, 0, CMD_TUN, "Some data 1", 12, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    CU_ASSERT(pblMapSize(sl) == 1); // Number of records in send list
     
     // 2) sl_timer_cb: Process send list timer callback       
-    // Define timeout timer to stop event loop after 2.2 seconds
+    // Define timer to stop event loop after 2.2 seconds
     ev_timer timeout_watcher;
     ev_timer_init (&timeout_watcher, timeout_cb, MAX_ACK_WAIT + MAX_ACK_WAIT/10.0, 0.);
     ev_timer_start (ke.ev_loop, &timeout_watcher);     
     // Start event loop
     ev_run (ke.ev_loop, 0);   
+    CU_ASSERT(pblMapSize(sl) == 1); // Number of records in send list
     // Check data in send list
     sl_data *sl_d_get = ksnTRUDPsendListGetData(tu, id, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
     CU_ASSERT(sl_d_get->attempt == 1);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get->w);
 
     // TODO: 3) sl_timer_stop: Stop the send list timer
-//    sl_timer_stop(ke.ev_loop, sl_d_get->w);
+    sl_timer_stop(ke.ev_loop, sl_d_get->w);
     CU_PASS("Send list timer was stopped");
 
     // Destroy ksnTRUDPClass
