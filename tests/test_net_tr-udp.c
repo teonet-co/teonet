@@ -354,9 +354,9 @@ void test_2_6() {
     CU_ASSERT(pblMapSize(sl) == 1); // Number of records in send list
     
     // 2) sl_timer_cb: Process send list timer callback       
-    // Define timer to stop event loop after 2.2 seconds
+    // Define timer to stop event loop after 2.2 seconds. This time need to run timer twice.
     ev_timer timeout_watcher;
-    ev_timer_init (&timeout_watcher, timeout_cb, MAX_ACK_WAIT + MAX_ACK_WAIT/10.0, 0.);
+    ev_timer_init (&timeout_watcher, timeout_cb, MAX_ACK_WAIT*2 + MAX_ACK_WAIT*0.2, 0.);
     ev_timer_start (ke.ev_loop, &timeout_watcher);     
     // Start event loop
     ev_run (ke.ev_loop, 0);   
@@ -364,7 +364,7 @@ void test_2_6() {
     // Check data in send list
     sl_data *sl_d_get = ksnTRUDPsendListGetData(tu, id, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
-    CU_ASSERT(sl_d_get->attempt == 1);
+    CU_ASSERT(sl_d_get->attempt == 2); // Number of attempt was done is equal 2
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get->w);
 
     // TODO: 3) sl_timer_stop: Stop the send list timer
