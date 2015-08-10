@@ -252,7 +252,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         ksnCoreProcessPacket(kev->kc, buf + tru_ptr,
                                 tru_header->payload_length, addr);
                         recvlen = 0;
-                        printf("Processed id %d from %s:%d\n", 
+                        printf("recvfrom: Processed id %d from %s:%d\n", 
                             tru_header->id,
                             inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
                             ntohs(((struct sockaddr_in *) addr)->sin_port)
@@ -267,13 +267,13 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(
                                     ip_map_d->receive_heap);
 
-                            printf("Check Receive Heap, len = %d, id = %d\n",
+                            printf("recvfrom: Check Receive Heap, len = %d, id = %d ... ",
                                     num, rh_d->id);
 
                             // Process this message
                             if (ip_map_d->expected_id == rh_d->id) {
 
-                                printf("Process\n");
+                                printf("Processed\n");
 
                                 // Process packet
                                 ksnCoreProcessPacket(kev->kc, rh_d->data,
@@ -290,20 +290,21 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             }
                                 // Drop saved message
                             else {
-                                printf("Drop\n");
+                                printf("Skipped\n");
                                 recvlen = 0;
                                 break;
                             }
                         }
                     }
-                        // Drop old (repeated) message 
+                    // Drop old (repeated) message 
                     else if (tru_header->id < ip_map_d->expected_id) {
                         recvlen = 0;
-                        printf("Drop old (repeated) message with id %d\n",
+                        printf("recvfrom: Drop old (repeated) message with id %d\n",
                                 tru_header->id);
-                    }                        // Save to Received message Heap
+                    }   
+                    // Save to Received message Heap
                     else {
-                        printf("Add to receive heap, id = %d, len = %d, expected id = %d\n",
+                        printf("recvfrom: Add to receive heap, id = %d, len = %d, expected id = %d\n",
                                 tru_header->id, tru_header->payload_length,
                                 ip_map_d->expected_id);
 
