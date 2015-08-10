@@ -465,7 +465,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     recvlen = ksn_recvfrom(ke->kc->ku, kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
               0, (struct sockaddr *)&remaddr, &addrlen);
 
-    // TODO: make function from this code and use it in Receive Message Heap
+    // Process package
     ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);
 
     // Set last host event time

@@ -256,6 +256,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         );
                         ksnCoreProcessPacket(kev->kc, buf + tru_ptr,
                                 tru_header->payload_length, addr);
+                        
                         recvlen = 0;
 
                         // Check Received message Heap and send saved 
@@ -280,7 +281,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                         rh_d->data_len, &rh_d->addr);
 
                                 // Remove first record
-                                ksnTRUDPReceiveHeapRemoveFirst(
+                                ksnTRUDPreceiveHeapRemoveFirst(
                                         ip_map_d->receive_heap);
 
                                 // Change Expected ID
@@ -333,8 +334,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     #endif
 
                     // Get Send List timer watcher and stop it
-                    sl_data *sl_d = ksnTRUDPsendListGetData(tu, 
-                            tru_header->id, addr);
+                    sl_data *sl_d = 
+                        ksnTRUDPsendListGetData(tu, tru_header->id, addr);
                     
                     if(sl_d != NULL) {
                         
@@ -375,12 +376,12 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
             }
         } else {
 
-        #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                "%sTR-UDP:%s skip received packet\n",
-                ANSI_LIGHTGREEN, ANSI_NONE
-        );
-        #endif
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                    "%sTR-UDP:%s skip received packet\n",
+                    ANSI_LIGHTGREEN, ANSI_NONE
+            );
+            #endif
         }
     }
 
@@ -623,14 +624,14 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
 
         pblMapRemove(ip_map_d->send_list, &id, sizeof (id), &val_len);
 
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            "%sTR-UDP:%s message with id %d was removed from %s Send List "
-            "(len %d)\n",
-            ANSI_LIGHTGREEN, ANSI_NONE,
-            id, key, pblMapSize(ip_map_d->send_list)
-    );
-    #endif        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                "%sTR-UDP:%s message with id %d was removed from %s Send List "
+                "(len %d)\n",
+                ANSI_LIGHTGREEN, ANSI_NONE,
+                id, key, pblMapSize(ip_map_d->send_list)
+        );
+        #endif        
     }
 
     return 1;
@@ -895,21 +896,22 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         // Clear pointer to this watcher
         sl_d->w = NULL;
 
-        // Resend message
-        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_t_data.fd, sl_t_data.cmd, 
-                sl_d->data,  sl_d->data_len, sl_t_data.flags, sl_d->attempt+1, 
-                sl_t_data.addr, sl_t_data.addr_len);
-
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s %stimeout for message with id %d was happened%s, "
                 "data resent\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
-                ANSI_RED, ANSI_NONE,
-                sl_t_data.id
+                ANSI_RED, 
+                sl_t_data.id,
+                ANSI_NONE
         );
         #endif
         
+        // Resend message
+        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_t_data.fd, sl_t_data.cmd, 
+                sl_d->data,  sl_d->data_len, sl_t_data.flags, sl_d->attempt+1, 
+                sl_t_data.addr, sl_t_data.addr_len);
+
     } else {
         
         #ifdef DEBUG_KSNET
@@ -1017,7 +1019,7 @@ int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d) {
  * 
  * @return 1 if element removed or 0 heap was empty
  */
-inline int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap) {
+inline int ksnTRUDPreceiveHeapRemoveFirst(PblHeap *receive_heap) {
 
     return ksnTRUDPreceiveHeapElementFree(pblHeapRemoveFirst(receive_heap));
 }

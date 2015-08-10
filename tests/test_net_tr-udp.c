@@ -419,7 +419,7 @@ void test_2_7() {
     CU_ASSERT(rh_d->id == 9);
     
     // 3) ksnTRUDPreceiveHeapRemoveFirst, ksnTRUDPreceiveHeapElementFree: Remove first element from Receive Heap (with lowest ID)
-    CU_ASSERT(ksnTRUDPReceiveHeapRemoveFirst(ip_map_d->receive_heap) == 1);
+    CU_ASSERT(ksnTRUDPreceiveHeapRemoveFirst(ip_map_d->receive_heap) == 1);
     CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 3);
     
     // 4) ksnTRUDPReceiveHeapRemoveAll: Remove all elements from Receive Heap
