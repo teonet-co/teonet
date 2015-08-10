@@ -34,7 +34,7 @@ void test_2_1() {
 
     // Create new Heap and set compare function
     CU_ASSERT((receive_heap = pblHeapNew()) != NULL);
-    pblHeapSetCompareFunction(receive_heap, ksnTRUDPReceiveHeapCompare);
+    pblHeapSetCompareFunction(receive_heap, ksnTRUDPreceiveHeapCompare);
 
     // Fill address
     struct sockaddr_in addr;
@@ -44,10 +44,10 @@ void test_2_1() {
 
     // Add some records to Receive Heap
     CU_ASSERT(pblHeapSize(receive_heap) == 0);
-    CU_ASSERT(0 <= ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 15, "Hello 15", 9, (__SOCKADDR_ARG) &addr, addr_len));
-    CU_ASSERT(0 <= ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 12, "Hello 12", 9, (__SOCKADDR_ARG) &addr, addr_len));
-    CU_ASSERT(0 <= ksnTRUDPreceiveHeapAdd(NULL, receive_heap,  9, "Hello  9", 9, (__SOCKADDR_ARG) &addr, addr_len));
-    CU_ASSERT(0 <= ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 14, "Hello 14", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 15, "Hello 15", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 12, "Hello 12", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(NULL, receive_heap,  9, "Hello  9", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(NULL, receive_heap, 14, "Hello 14", 9, (__SOCKADDR_ARG) &addr, addr_len));
     CU_ASSERT(pblHeapSize(receive_heap) == 4);
 
     // Get saved Heap records and remove it
@@ -326,7 +326,6 @@ static void timeout_cb (EV_P_ ev_timer *w, int revents) {
     ev_break (EV_A_ EVBREAK_ONE);
 }
 
-
 // Test RT-UDP send list timer functions
 void test_2_6() {
 
@@ -380,6 +379,63 @@ void test_2_6() {
     CU_PASS("Destroy ksnTRUDPClass done");
 }
 
+// Test RT-UDP receive heap functions
+void test_2_7() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+
+    // Test constants and variables
+    const size_t addr_len = sizeof(struct sockaddr_in);
+    const char *addr_str = "127.0.0.1";
+    struct sockaddr_in addr;
+    const int port = 1327;
+
+    // Fill address
+    if(inet_aton(addr_str, &addr.sin_addr) == 0) CU_ASSERT(1 == 0);
+    addr.sin_port = htons(port);
+
+    // Initialize ksnTRUDPClass
+    ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
+
+    // Get IP Map
+    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(ip_map_d);
+    
+    // ksnTRUDPReceiveHeapCompare
+    
+    // 1) ksnTRUDPreceiveHeapAdd, ksnTRUDPreceiveHeapCompare: Add record to the Receive Heap
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap, 15, "Hello 15", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap, 12, "Hello 12", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,  9, "Hello  9", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(0 < ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap, 14, "Hello 14", 9, (__SOCKADDR_ARG) &addr, addr_len));
+    CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 4);
+    
+    // 2) ksnTRUDPreceiveHeapGetFirst: Get first element of Receive Heap (with lowest ID) 
+    rh_data *rh_d = ksnTRUDPreceiveHeapGetFirst(ip_map_d->receive_heap);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(rh_d);
+    CU_ASSERT_STRING_EQUAL(rh_d->data, "Hello  9");
+    CU_ASSERT(rh_d->id == 9);
+    
+    // 3) ksnTRUDPreceiveHeapRemoveFirst, ksnTRUDPreceiveHeapElementFree: Remove first element from Receive Heap (with lowest ID)
+    CU_ASSERT(ksnTRUDPReceiveHeapRemoveFirst(ip_map_d->receive_heap) == 1);
+    CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 3);
+    
+    // 4) ksnTRUDPReceiveHeapRemoveAll: Remove all elements from Receive Heap
+    ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
+    CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0);
+    
+    // 5) ksnTRUDPReceiveHeapDestroyAll
+    ksnTRUDPReceiveHeapDestroyAll(tu);
+    CU_PASS("Destroy all receive heap");
+    
+    // Destroy ksnTRUDPClass
+    ksnTRUDPDestroy(tu);
+    CU_PASS("Destroy ksnTRUDPClass done");
+}
+
+
 /**
  * Add TR-UDP suite tests
  *
@@ -393,7 +449,8 @@ int add_suite_2_tests(void) {
         (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test_2_3)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP reset functions", test_2_4)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP send list functions", test_2_5)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP send list timer functions", test_2_6))
+        (NULL == CU_add_test(pSuite, "RT-UDP send list timer functions", test_2_6)) ||
+        (NULL == CU_add_test(pSuite, "RT-UDP receive heap functions", test_2_7))
             ) {
         CU_cleanup_registry();
         return CU_get_error();

@@ -135,12 +135,12 @@ ev_timer *sl_timer_start(ksnTRUDPClass *, PblMap *sl, uint32_t id, int fd,
 void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 //
-int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next);
+int ksnTRUDPreceiveHeapCompare(const void* prev, const void* next);
 int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
         uint32_t id, void *data,
         size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len);
-rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap);
-int ksnTRUDPReceiveHeapElementFree(rh_data *rh_d);
+rh_data *ksnTRUDPreceiveHeapGetFirst(PblHeap *receive_heap);
+int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d);
 int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap);
 void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu);

@@ -264,7 +264,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         int num;
                         while ((num = pblHeapSize(ip_map_d->receive_heap))) {
 
-                            rh_data *rh_d = ksnTRUDPReceiveHeapGetFirst(
+                            rh_data *rh_d = ksnTRUDPreceiveHeapGetFirst(
                                     ip_map_d->receive_heap);
 
                             printf("recvfrom: Check Receive Heap, len = %d, id = %d ... ",
@@ -422,7 +422,7 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         ip_map_d_new.send_list = pblMapNewHashMap();
         ip_map_d_new.receive_heap = pblHeapNew();
         pblHeapSetCompareFunction(ip_map_d_new.receive_heap,
-                ksnTRUDPReceiveHeapCompare);
+                ksnTRUDPreceiveHeapCompare);
         pblMapAdd(tu->ip_map, key, key_len, &ip_map_d_new, sizeof (ip_map_d_new));
         ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
@@ -935,7 +935,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
  * @param next
  * @return 
  */
-int ksnTRUDPReceiveHeapCompare(const void* prev, const void* next) {
+int ksnTRUDPreceiveHeapCompare(const void* prev, const void* next) {
 
     int rv = 0;
 
@@ -986,7 +986,7 @@ int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id
  * @param receive_heap
  * @return  Pointer to rh_data or (void*)-1 at error - The heap is empty
  */
-inline rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap) {
+inline rh_data *ksnTRUDPreceiveHeapGetFirst(PblHeap *receive_heap) {
 
     return pblHeapGetFirst(receive_heap);
 }
@@ -998,7 +998,7 @@ inline rh_data *ksnTRUDPReceiveHeapGetFirst(PblHeap *receive_heap) {
  * 
  * @return 1 if removed or 0 if element absent
  */
-int ksnTRUDPReceiveHeapElementFree(rh_data *rh_d) {
+int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d) {
 
     int rv = 0;
     if (rh_d != (void*) - 1) {
@@ -1019,7 +1019,7 @@ int ksnTRUDPReceiveHeapElementFree(rh_data *rh_d) {
  */
 inline int ksnTRUDPReceiveHeapRemoveFirst(PblHeap *receive_heap) {
 
-    return ksnTRUDPReceiveHeapElementFree(pblHeapRemoveFirst(receive_heap));
+    return ksnTRUDPreceiveHeapElementFree(pblHeapRemoveFirst(receive_heap));
 }
 
 /**
@@ -1039,7 +1039,7 @@ void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
     if(receive_heap != NULL) {
         int i, num = pblHeapSize(receive_heap);
         for (i = num - 1; i >= 0; i--) {
-            ksnTRUDPReceiveHeapElementFree(pblHeapRemoveAt(receive_heap, i));
+            ksnTRUDPreceiveHeapElementFree(pblHeapRemoveAt(receive_heap, i));
         }
         pblHeapClear(receive_heap);
     }
@@ -1065,9 +1065,11 @@ void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu) {
         while (pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
-            ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
-            pblHeapFree(ip_map_d->receive_heap);
-            ip_map_d->receive_heap = NULL;
+            if(ip_map_d->receive_heap != NULL) {
+                ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
+                pblHeapFree(ip_map_d->receive_heap);
+                ip_map_d->receive_heap = NULL;
+            }
         }
         pblIteratorFree(it);
     }
