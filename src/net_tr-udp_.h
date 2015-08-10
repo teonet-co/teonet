@@ -11,7 +11,7 @@
 #ifndef NET_TR_UDP__H
 #define	NET_TR_UDP__H
 
-#define MAX_ACK_WAIT 1.0
+#define MAX_ACK_WAIT 0.5
 
 /**
  * IP map records data
