@@ -54,18 +54,22 @@ void test_2_1() {
     // 9
     CU_ASSERT( (rh_d = pblHeapGetFirst(receive_heap)) != NULL);
     CU_ASSERT(rh_d->id == 9);
+    CU_ASSERT_STRING_EQUAL(rh_d->data, "Hello  9");
     pblHeapRemoveFirst(receive_heap);
     // 12
     CU_ASSERT( (rh_d = pblHeapGetFirst(receive_heap)) != NULL);
     CU_ASSERT(rh_d->id == 12);
+    CU_ASSERT_STRING_EQUAL(rh_d->data, "Hello 12");
     pblHeapRemoveFirst(receive_heap);
     // 14
     CU_ASSERT( (rh_d = pblHeapGetFirst(receive_heap)) != NULL);
     CU_ASSERT(rh_d->id == 14);
+    CU_ASSERT_STRING_EQUAL(rh_d->data, "Hello 14");
     pblHeapRemoveFirst(receive_heap);
     // 15
     CU_ASSERT( (rh_d = pblHeapGetFirst(receive_heap)) != NULL);
     CU_ASSERT(rh_d->id == 15);
+    CU_ASSERT_STRING_EQUAL(rh_d->data, "Hello 15");
     pblHeapRemoveFirst(receive_heap);
     //
     CU_ASSERT(pblHeapSize(receive_heap) == 0);

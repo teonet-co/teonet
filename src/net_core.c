@@ -544,6 +544,13 @@ void ksnCoreProcessPacket (ksnCoreClass *kc, unsigned char *buf, size_t recvlen,
 
         // Check ARP Table and add peer if not present
         else {
+            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+                "%sNet core:%s << got data %d bytes len, cmd = %d, from %s\n",
+                ANSI_GREEN, ANSI_NONE, 
+                rd.data_len, rd.cmd, rd.from);
+            #endif
 
             // Check new peer connected
             if((rd.arp = ksnetArpGet(kc->ka, rd.from)) == NULL) {

@@ -249,14 +249,14 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         ip_map_d->expected_id++;
 
                         // Process packet
-                        ksnCoreProcessPacket(kev->kc, buf + tru_ptr,
-                                tru_header->payload_length, addr);
-                        recvlen = 0;
                         printf("recvfrom: Processed id %d from %s:%d\n", 
                             tru_header->id,
                             inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
                             ntohs(((struct sockaddr_in *) addr)->sin_port)
                         );
+                        ksnCoreProcessPacket(kev->kc, buf + tru_ptr,
+                                tru_header->payload_length, addr);
+                        recvlen = 0;
 
                         // Check Received message Heap and send saved 
                         // messages to core if first records ID Equals to 
@@ -351,8 +351,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                 }
                     break;
 
-                    // The RESET messages reset messages counter. (has not payload)  
-                    // Return zero length of this message.    
+                // The RESET messages reset messages counter. (has not payload)  
+                // Return zero length of this message.    
                 case TRU_RESET:
 
                     #ifdef DEBUG_KSNET
