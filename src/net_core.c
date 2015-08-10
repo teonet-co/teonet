@@ -47,7 +47,7 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
             bind(fd, addr, addr_len)
 
 #define ksn_sendto(tu, fd, cmd, data, data_len, flags, remaddr, addrlen) \
-            ksnTRUDPsendto(tu, ksnTRUDPsendListNewID(tu, remaddr), fd, cmd, data, data_len, flags, 0, remaddr, addrlen)
+            ksnTRUDPsendto(tu, 0, 0, fd, cmd, data, data_len, flags, 0, remaddr, addrlen)
 
 #define ksn_recvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen) \
             ksnTRUDPrecvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen)

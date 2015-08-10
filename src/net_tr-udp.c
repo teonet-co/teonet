@@ -83,9 +83,9 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
  * 
  * @return 
  */
-ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd, 
-        const void *buf, size_t buf_len, int flags, int attempt, __CONST_SOCKADDR_ARG addr,
-        socklen_t addr_len) {
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_fl, uint32_t id, int fd, 
+        int cmd, const void *buf, size_t buf_len, int flags, int attempt, 
+        __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -112,7 +112,8 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         MakeHeader(tru_header, TRU_DATA, buf_len);
 
         // Get new message ID
-        tru_header.id = id; 
+        if(resend_fl) tru_header.id = id; 
+        else tru_header.id = ksnTRUDPsendListNewID(tu, addr);
 
         // Copy TR-UDP header
         memcpy(tru_buf, &tru_header, tru_ptr);
@@ -894,8 +895,8 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         sl_d->w = NULL;
 
         // Resend message
-        ksnTRUDPsendto(tu, sl_t_data.id, sl_t_data.fd, sl_t_data.cmd, sl_d->data, 
-                sl_d->data_len, sl_t_data.flags, sl_d->attempt+1, 
+        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_t_data.fd, sl_t_data.cmd, 
+                sl_d->data,  sl_d->data_len, sl_t_data.flags, sl_d->attempt+1, 
                 sl_t_data.addr, sl_t_data.addr_len);
 
         #ifdef DEBUG_KSNET
