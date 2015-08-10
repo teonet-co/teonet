@@ -11,6 +11,8 @@
 #ifndef NET_TR_UDP__H
 #define	NET_TR_UDP__H
 
+#define MAX_ACK_WAIT 2.0
+
 /**
  * IP map records data
  */
@@ -40,9 +42,11 @@ typedef struct rh_data {
  * Send list data structure
  */
 typedef struct sl_data {
+    
     ev_timer *w;
     void *data;
     size_t data_len;
+    size_t attempt;
 
 } sl_data;
 
@@ -114,17 +118,16 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 //
 int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+        __CONST_SOCKADDR_ARG addr);
 int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
-        const void *data, size_t data_len, int flags,
+        const void *data, size_t data_len, int flags, int attempt,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
-uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
-        socklen_t addr_len);
+uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
 void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu);
 PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         char *key_out, size_t key_len);
-sl_data *ksnTRUDPSendListGetData(ksnTRUDPClass *tu, uint32_t id,
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
+        __CONST_SOCKADDR_ARG addr);
 void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list);
 //
 ev_timer *sl_timer_start(ksnTRUDPClass *, PblMap *sl, uint32_t id, int fd,
