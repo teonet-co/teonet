@@ -20,12 +20,33 @@ typedef int socklen_t;
 #include <sys/socket.h>
 #endif
 
+
+/**
+ * TR-UDP Statistic data
+ */
+typedef struct tr_udp_stat {
+    
+    struct send_list {
+        size_t size_max;
+        size_t size_current;
+        size_t attempt;
+    } send_list;
+    
+    struct receive_heap {
+        size_t size_max;
+        size_t size_current;
+    } receive_heap;
+    
+} tr_udp_stat;
+
 /**
  * Teonet TR-UDP class data
  */
 typedef struct ksnTRUDPClass {
+    
     void *kc; ///< Pointer to KSNet core class object
     PblMap *ip_map; ///< IP:port map
+    tr_udp_stat stat; ///< TR-UDP Statistic data
 
 } ksnTRUDPClass;
 
