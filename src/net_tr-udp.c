@@ -101,7 +101,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int fd,
     #endif
 
     // Check commands array
-    if (!inarray(cmd, not_RTUDP, not_RTUDP_len)) {
+    if (1 && !inarray(cmd, not_RTUDP, not_RTUDP_len)) {
 
         // TR-UDP packet buffer
         const size_t tru_ptr = sizeof (ksnTRUDP_header); // Header size
