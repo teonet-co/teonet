@@ -16,8 +16,13 @@
 extern "C" {
 #endif
 
-    tr_udp_stat *ksnTRUDPstatInit(ksnTRUDPClass *tu);
-
+tr_udp_stat *ksnTRUDPstatInit(ksnTRUDPClass *tu);
+size_t ksnTRUDPstatSendListAdd(ksnTRUDPClass *tu);
+size_t ksnTRUDPstatSendListRemove(ksnTRUDPClass *tu);
+size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu);
+size_t ksnTRUDPstatReceiveHeapAdd(ksnTRUDPClass *tu);
+size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu);
+char * ksnTRUDPstatShow(ksnTRUDPClass *tu);
 
 #ifdef	__cplusplus
 }
