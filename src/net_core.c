@@ -46,8 +46,8 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
 #define ksn_bind(fd, addr, addr_len) \
             bind(fd, addr, addr_len)
 
-#define ksn_sendto(tu, fd, cmd, data, data_len, flags, remaddr, addrlen) \
-            ksnTRUDPsendto(tu, 0, 0, fd, cmd, data, data_len, flags, 0, remaddr, addrlen)
+#define ksn_sendto(tu, cmd, fd, data, data_len, flags, remaddr, addrlen) \
+            ksnTRUDPsendto(tu, 0, 0, cmd, 0, fd, data, data_len, flags, remaddr, addrlen)
 
 #define ksn_recvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen) \
             ksnTRUDPrecvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen)
@@ -68,18 +68,18 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
             size_t data_len; \
             char *buffer = NULL; /*[KSN_BUFFER_DB_SIZE];*/ \
             void *data = ksnEncryptPackage(kc->kcr, DATA, D_LEN, buffer, &data_len); \
-            retval = ksn_sendto(kc->ku, kc->fd, cmd, data, data_len, 0, \
+            retval = ksn_sendto(kc->ku, cmd, kc->fd, data, data_len, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
             free(data); \
         } \
         else { \
-            retval = ksn_sendto(kc->ku, kc->fd, cmd, DATA, D_LEN, 0, \
+            retval = ksn_sendto(kc->ku, cmd, kc->fd, DATA, D_LEN, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
         } \
     }
 #else
 #define sendto_encrypt(kc, cmd, DATA, D_LEN) \
-    retval = ksn_sendto(kc->ku, kc->fd, cmd, DATA, D_LEN, 0, \
+    retval = ksn_sendto(kc->ku, cmd, kc->fd, DATA, D_LEN, 0, \
                         (struct sockaddr *)&remaddr, addrlen);
 #endif
 

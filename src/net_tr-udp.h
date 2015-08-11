@@ -61,8 +61,8 @@ extern "C" {
 ksnTRUDPClass *ksnTRUDPinit(void *kc);
 void ksnTRUDPDestroy(ksnTRUDPClass *tu);
 
-ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_fl, uint32_t id, int fd, 
-        int cmd, const void *buf, size_t buf_len, int flags, int attempt, 
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_fl, uint32_t id, 
+        int cmd, int attempt, int fd, const void *buf, size_t buf_len, int flags, 
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);

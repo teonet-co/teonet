@@ -77,21 +77,21 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
  * Send to peer through TR-UDP transport
  * 
  * @param tu Pointer to ksnTRUDPClass object
- * @param resend_fl New message or resend sent before (0 - new, 1 -resend)
+ * @param resend_flg New message or resend sent before (0 - new, 1 -resend)
  * @param id ID of resend message
- * @param fd File descriptor of UDP connection
  * @param cmd Command to allow TR-UDP
+ * @param attempt Number of attempt of this message
+ * @param fd File descriptor of UDP connection
  * @param buf Buffer with data
  * @param buf_len Data length
  * @param flags Flags (always 0, reserved)
- * @param attempt Number of attempt of this message
  * @param addr Peer address
  * @param addr_len Peer address length
  * 
  * @return Number of bytes sent to UDP
  */
-ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int fd, 
-        int cmd, const void *buf, size_t buf_len, int flags, int attempt, 
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, 
+        int cmd, int attempt, int fd, const void *buf, size_t buf_len, int flags, 
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
@@ -951,8 +951,8 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         #endif
         
         // Resend message
-        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_t_data.fd, sl_t_data.cmd, 
-                sl_d->data,  sl_d->data_len, sl_t_data.flags, sl_d->attempt+1, 
+        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_t_data.cmd, sl_d->attempt+1, sl_t_data.fd, 
+                sl_d->data,  sl_d->data_len, sl_t_data.flags, 
                 sl_t_data.addr, sl_t_data.addr_len);
         
         // Statistic
