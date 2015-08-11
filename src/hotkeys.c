@@ -38,6 +38,8 @@ monitor_timer_data *monitor_timer_init(ksnCoreClass *kn);
 void monitor_timer_stop(monitor_timer_data **mt);
 peer_timer_data *peer_timer_init(ksnCoreClass *kn);
 void peer_timer_stop(peer_timer_data **pet);
+tr_udp_timer_data *tr_udp_timer_init(ksnCoreClass *kn);
+void tr_udp_timer_stop(tr_udp_timer_data **pet);
 void _keys_non_blocking_start(ksnetHotkeysClass *kh);
 /**
  * Stop keyboard non-blocking mode
@@ -130,9 +132,22 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
         // Show UDP statistics
         case 'u': {
-            char *tr_udp_stat = ksnTRUDPstatShow(kc->ku);
-            printf("%s", tr_udp_stat);
-            free(tr_udp_stat);
+            if(khv->put == NULL) {
+                int num_lines = ksnTRUDPstatShow(kc->ku);
+                if(khv->last_hotkey == hotkey) khv->tr_udp_m = !khv->tr_udp_m;
+                if(khv->tr_udp_m) {
+                    khv->put = tr_udp_timer_init(kc);
+                    khv->put->num_lines = num_lines;
+                }
+                printf("\n");
+            }
+            else if(khv->tr_udp_m) {
+                khv->tr_udp_m = 0;
+                tr_udp_timer_stop(&khv->put);
+                printf("TR-UDP timer stopped\n");
+            }
+            printf("Press u to %s continuously refresh\n",
+                   (khv->tr_udp_m ? STOP : START));
         }
             break;
             
@@ -453,9 +468,11 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     _keys_non_blocking_start(kh);
     kh->wait_y = Y_NONE;
     kh->peer_m = 0;
+    kh->tr_udp_m = 0;
     kh->pt = NULL;
     kh->mt = NULL;
     kh->pet = NULL;
+    kh->put = NULL;
     kh->ke = ke;
     
     #pragma GCC diagnostic push
@@ -819,6 +836,100 @@ peer_timer_data *peer_timer_init(ksnCoreClass *kn) {
  * @param pet
  */
 void peer_timer_stop(peer_timer_data **pet) {
+
+    ev_timer_stop((*pet)->loop, &(*pet)->tw);
+    free(*pet);
+
+    *pet = NULL;
+}
+
+/******************************************************************************/
+/* Show TR-UDP timer functions                                                 */
+/*                                                                            */
+/******************************************************************************/
+
+#define TR_UDP_TIMER_INTERVAL 0.150
+
+/**
+ * TR-UDP show idle callback
+ *
+ * @param loop
+ * @param tw
+ * @param revents
+ */
+void tr_udp_idle_cb(EV_P_ ev_idle *iw, int revents) {
+
+    // Pointer to watcher data
+    tr_udp_timer_data *pet = iw->data;
+
+    // Stop idle watcher
+    ev_idle_stop(pet->loop, iw);
+
+    // Clear previous shown lines
+    if(pet->num_lines) printf("\033[%dA\r\033[J\n", pet->num_lines + 3);
+
+    // Show TR-UDP
+    pet->num_lines = ksnTRUDPstatShow(pet->kn->ku);
+    // Show moving line
+    printf("%c", "|/-\\"[pet->num]);
+    if( (++(pet->num)) > 3) pet->num = 0;        
+
+    if(pet->num_lines)
+    printf("\nPress u to %s continuously refresh\n", STOP);
+
+    // Start timer watcher
+    ev_timer_start(pet->loop, &(pet->tw));
+}
+
+/**
+ * TR-UDP timer callback
+ *
+ * @param loop
+ * @param tw
+ * @param revents
+ */
+void tr_udp_timer_cb(EV_P_ ev_timer *tw, int revents) {
+
+    // Pointer to watcher data
+    tr_udp_timer_data *pet = tw->data;
+
+    // Stop peer timer and start peer idle to process timer request in idle time
+    ev_timer_stop(pet->loop, tw);
+    ev_idle_start(pet->loop, &(pet->iw));
+}
+
+/**
+ * Initialize tr_udp timer
+ *
+ * @param kn
+ * @return
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+tr_udp_timer_data *tr_udp_timer_init(ksnCoreClass *kn) {
+
+    tr_udp_timer_data *pet = malloc(sizeof(tr_udp_timer_data));
+    pet->kn = kn;
+    pet->num = 0;
+
+    // Initialize and start main timer watcher, it is a repeated timer
+    pet->loop = ((ksnetEvMgrClass*)kn->ke)->ev_loop; /*EV_DEFAULT*/;
+    ev_idle_init (&pet->iw, tr_udp_idle_cb);
+    pet->iw.data = pet;
+    ev_timer_init (&pet->tw, tr_udp_timer_cb, TR_UDP_TIMER_INTERVAL, TR_UDP_TIMER_INTERVAL);
+    pet->tw.data = pet;
+    ev_timer_start (pet->loop, &pet->tw);
+
+    return pet;
+}
+#pragma GCC diagnostic pop
+
+/**
+ * Stop tr_udp timer
+ *
+ * @param pet
+ */
+void tr_udp_timer_stop(tr_udp_timer_data **pet) {
 
     ev_timer_stop((*pet)->loop, &(*pet)->tw);
     free(*pet);

@@ -6,10 +6,13 @@
  *
  * Created on August 11, 2015, 2:34 PM
  */
+#include <stdlib.h>
 
+#include "ev_mgr.h"
 #include "net_tr-udp.h"
 #include "net_tr-udp_stat.h"
 #include "utils/utils.h"
+#include "net_core.h"
 
 /**
  * Initialize TR-UDP statistic submodule
@@ -114,7 +117,7 @@ inline size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu) {
  * @param tu
  * @return 
  */
-inline char * ksnTRUDPstatShow(ksnTRUDPClass *tu) {
+inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
 
     return ksnet_formatMessage(
         "----------------------------------------\n"
@@ -135,3 +138,18 @@ inline char * ksnTRUDPstatShow(ksnTRUDPClass *tu) {
         , tu->stat.receive_heap.size_current
     );
 }
+
+inline int ksnTRUDPstatShow(ksnTRUDPClass *tu) {
+
+    int num_line = 0;
+    char *str = ksnTRUDPstatShowStr(tu);
+
+    ksnet_printf(&((ksnetEvMgrClass*) (((ksnCoreClass*)tu->kc)->ke))->ksn_cfg, 
+            MESSAGE, "%s", str);
+    num_line = calculate_lines(str);
+
+    free(str);
+
+    return num_line;
+}
+

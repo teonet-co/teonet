@@ -22,7 +22,7 @@ size_t ksnTRUDPstatSendListRemove(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatReceiveHeapAdd(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu);
-char * ksnTRUDPstatShow(ksnTRUDPClass *tu);
+int ksnTRUDPstatShow(ksnTRUDPClass *tu);
 
 #ifdef	__cplusplus
 }
