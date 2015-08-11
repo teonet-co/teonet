@@ -142,8 +142,8 @@ int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
 rh_data *ksnTRUDPreceiveHeapGetFirst(PblHeap *receive_heap);
 int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d);
 int ksnTRUDPreceiveHeapRemoveFirst(PblHeap *receive_heap);
-void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap);
-void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu);
+void ksnTRUDPreceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap);
+void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu);
 //
 void ksnTRUDPreset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options);
 void ksnTRUDPresetAddr(ksnTRUDPClass *tu, const char *addr, int port, int options);

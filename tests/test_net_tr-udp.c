@@ -426,17 +426,19 @@ void test_2_7() {
     CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 3);
     
     // 4) ksnTRUDPReceiveHeapRemoveAll: Remove all elements from Receive Heap
-    ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
+    ksnTRUDPreceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
     CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0);
     
     // 5) ksnTRUDPReceiveHeapDestroyAll
-    ksnTRUDPReceiveHeapDestroyAll(tu);
+    ksnTRUDPreceiveHeapDestroyAll(tu);
     CU_PASS("Destroy all receive heap");
     
     // Destroy ksnTRUDPClass
     ksnTRUDPDestroy(tu);
     CU_PASS("Destroy ksnTRUDPClass done");
 }
+
+// TODO: Test main RT-UDP functions ksnTRUDPsendto ksnTRUDPreceivefrom
 
 
 /**

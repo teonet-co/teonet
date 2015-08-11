@@ -56,7 +56,7 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
     if (tu != NULL) {
 
         ksnTRUDPsendListDestroyAll(tu); // Destroy all send lists
-        ksnTRUDPReceiveHeapDestroyAll(tu); // Destroy all receive heap       
+        ksnTRUDPreceiveHeapDestroyAll(tu); // Destroy all receive heap       
         pblMapFree(tu->ip_map); // Free IP map
 
         free(tu); // Free class data
@@ -588,7 +588,7 @@ void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
         ip_map_d->id = 0; // Reset send message ID
 
         // Reset or remove Receive Heap
-        ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap); // Remove all elements from Receive Heap
+        ksnTRUDPreceiveHeapRemoveAll(tu, ip_map_d->receive_heap); // Remove all elements from Receive Heap
         if (options) {
             pblHeapFree(ip_map_d->receive_heap); // Free Receive Heap   
             ip_map_d->receive_heap = NULL; // Clear Receive Heap pointer
@@ -1064,7 +1064,7 @@ inline int ksnTRUDPreceiveHeapRemoveFirst(PblHeap *receive_heap) {
  * 
  * @param receive_heap
  */
-void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
+void ksnTRUDPreceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -1088,7 +1088,7 @@ void ksnTRUDPReceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
  * @param tu
  * @return 
  */
-void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu) {
+void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -1103,7 +1103,7 @@ void ksnTRUDPReceiveHeapDestroyAll(ksnTRUDPClass *tu) {
             void *entry = pblIteratorPrevious(it);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
             if(ip_map_d->receive_heap != NULL) {
-                ksnTRUDPReceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
+                ksnTRUDPreceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
                 pblHeapFree(ip_map_d->receive_heap);
                 ip_map_d->receive_heap = NULL;
             }
