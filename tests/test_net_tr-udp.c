@@ -182,7 +182,7 @@ void test_2_4() {
         CU_ASSERT(id == 0);
         // Add 1 message to Send List
         sl_data sl_d;
-        sl_d.w = NULL;
+//        sl_d.w = NULL;
         sl_d.data = (void*) "Some data 1";
         sl_d.data_len = 12;
         pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -191,7 +191,7 @@ void test_2_4() {
         id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
         CU_ASSERT(id == 1);
         // Add 2 message to Send List
-        sl_d.w = NULL;
+//        sl_d.w = NULL;
         sl_d.data = (void*) "Some data 2";
         sl_d.data_len = 12;
         pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -263,7 +263,7 @@ void test_2_5() {
 
     // Add 1 message to send list
     sl_data sl_d;
-    sl_d.w = NULL;
+//    sl_d.w = NULL;
     sl_d.data = (void*) "Some data 1";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -272,7 +272,7 @@ void test_2_5() {
     // Add 2 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 1);
-    sl_d.w = NULL;
+//    sl_d.w = NULL;
     sl_d.data = (void*) "Some data 2";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -281,7 +281,7 @@ void test_2_5() {
     // Add 3 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 2);
-    sl_d.w = NULL;
+//    sl_d.w = NULL;
     sl_d.data = (void*) "Some data 3";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -306,7 +306,8 @@ void test_2_5() {
     sl_d_get = ksnTRUDPsendListGetData(tu, id, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
     CU_ASSERT_STRING_EQUAL(sl_d_get->data, "Some data 4");
-    sl_timer_stop(ke.ev_loop, sl_d_get->w);
+    sl_timer_stop(ke.ev_loop, &sl_d_get->w);
+    CU_ASSERT_PTR_NULL(sl_d_get->w.data);
     CU_PASS("Send list timer was stopped");
     
     // 7 ksnTRUDPSendListDestroyAll: Free all elements and free all Sent message lists
@@ -364,14 +365,16 @@ void test_2_6() {
     // Start event loop
     ev_run (ke.ev_loop, 0);   
     CU_ASSERT(pblMapSize(sl) == 1); // Number of records in send list
+    printf(" ev_loop exit ...");
     // Check data in send list
     sl_data *sl_d_get = ksnTRUDPsendListGetData(tu, id, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
     CU_ASSERT(sl_d_get->attempt == 2); // Number of attempt was done is equal 2
-    CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get->w);
 
-    // TODO: 3) sl_timer_stop: Stop the send list timer
-    sl_timer_stop(ke.ev_loop, sl_d_get->w);
+    // 3) sl_timer_stop: Stop the send list timer
+    sl_timer_stop(ke.ev_loop, &sl_d_get->w);
+    CU_ASSERT_PTR_NULL(sl_d_get->w.data);
+    sl_timer_stop(ke.ev_loop, &sl_d_get->w); // Test stop timer twice
     CU_PASS("Send list timer was stopped");
 
     // Destroy ksnTRUDPClass
