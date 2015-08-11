@@ -293,8 +293,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             if (ip_map_d->expected_id == rh_d->id) {
 
                                 #ifdef DEBUG_KSNET
-                                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                    "Processed\n");
+                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                "Processed\n");
                                 #endif
 
                                 // Process packet
@@ -302,7 +302,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                         rh_d->data_len, &rh_d->addr);
 
                                 // Remove first record
-                                ksnTRUDPreceiveHeapRemoveFirst(
+                                ksnTRUDPreceiveHeapRemoveFirst(tu, 
                                         ip_map_d->receive_heap);
 
                                 // Change Expected ID
@@ -313,8 +313,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 // Drop saved message
                             else {
                                 #ifdef DEBUG_KSNET
-                                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                    "Skipped\n");
+                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                "Skipped\n");
                                 #endif
                                 recvlen = 0;
                                 break;
@@ -650,7 +650,7 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
     if (ip_map_d != NULL) {
 
-        // Stop send list timer
+        // Stop send list timer and remove from map
         sl_data *sl_d = pblMapGet(ip_map_d->send_list, &id, sizeof (id), &val_len);
         if(sl_d != (void*)-1) {
             
@@ -660,6 +660,9 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
             // Remove record from send list
             pblMapRemove(ip_map_d->send_list, &id, sizeof (id), &val_len);
             
+                // Statistic
+                ksnTRUDPstatSendListRemove(tu);    
+
             retval = 1;
         }
         
@@ -754,7 +757,10 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
     sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
-            addr, addr_len);    
+            addr, addr_len); 
+    
+    // Statistic
+    ksnTRUDPstatSendListAdd(tu);
     
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -800,9 +806,8 @@ void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
         while (pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
             sl_data *sl_d = pblMapEntryValue(entry);
-//            ev_timer *w = sl_d != NULL ? sl_d->w : NULL;
-//            if (w != NULL) 
             sl_timer_stop(kev->ev_loop, &sl_d->w);
+            ksnTRUDPstatSendListRemove(tu);
         }
         pblIteratorFree(it);
     }
@@ -949,6 +954,9 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_t_data.fd, sl_t_data.cmd, 
                 sl_d->data,  sl_d->data_len, sl_t_data.flags, sl_d->attempt+1, 
                 sl_t_data.addr, sl_t_data.addr_len);
+        
+        // Statistic
+        ksnTRUDPstatSendListAttempt(tu);    
 
     } else {
         
@@ -1016,6 +1024,9 @@ int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id
     rh_d->data_len = data_len;
     memcpy(&rh_d->addr, addr, addr_len);
 
+    // Statistic
+    ksnTRUDPstatReceiveHeapAdd(tu);
+
     return pblHeapInsert(receive_heap, rh_d);
 }
 
@@ -1056,7 +1067,10 @@ int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d) {
  * 
  * @return 1 if element removed or 0 heap was empty
  */
-inline int ksnTRUDPreceiveHeapRemoveFirst(PblHeap *receive_heap) {
+inline int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu, PblHeap *receive_heap) {
+
+    // Statistic
+    ksnTRUDPstatReceiveHeapRemove(tu);
 
     return ksnTRUDPreceiveHeapElementFree(pblHeapRemoveFirst(receive_heap));
 }
@@ -1079,6 +1093,7 @@ void ksnTRUDPreceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
         int i, num = pblHeapSize(receive_heap);
         for (i = num - 1; i >= 0; i--) {
             ksnTRUDPreceiveHeapElementFree(pblHeapRemoveAt(receive_heap, i));
+            ksnTRUDPstatReceiveHeapRemove(tu);
         }
         pblHeapClear(receive_heap);
     }

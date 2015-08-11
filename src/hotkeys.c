@@ -19,6 +19,7 @@
 #include "net_multi.h"
 #include "utils/rlutil.h"
 #include "utils/utils.h"
+#include "net_tr-udp_stat.h"
 
 /**
  * Yes answer action
@@ -109,6 +110,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 //            " "COLOR_DW"C"COLOR_END" - direct connect to peer\n"
 //            " "COLOR_DW"A"COLOR_END" - direct connect to all peers\n"
             "%s"
+            " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
             #if M_ENAMBE_VPN
@@ -126,6 +128,14 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             );
             break;
 
+        // Show UDP statistics
+        case 'u': {
+            char *tr_udp_stat = ksnTRUDPstatShow(kc->ku);
+            printf("%s", tr_udp_stat);
+            free(tr_udp_stat);
+        }
+            break;
+            
         // Show peers
         case 'p':
             if(khv->pet == NULL) {

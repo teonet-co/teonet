@@ -19,6 +19,8 @@ typedef int socklen_t;
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #endif
+#include <stdio.h>
+#include <pbl.h>
 
 
 /**
