@@ -367,19 +367,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     );
                     #endif
 
-                    // Get Send List timer watcher and stop it
-                    sl_data *sl_d = 
-                        ksnTRUDPsendListGetData(tu, tru_header->id, addr);
-                    
-                    if(sl_d != NULL) {
-                        
-                        // Stop watcher
-//                        if(sl_d->w != NULL) 
-                        sl_timer_stop(kev->ev_loop, &sl_d->w);
-
-                        // Remove message from SendList
-                        ksnTRUDPsendListRemove(tu, tru_header->id, addr);
-                    }
+                    // Remove message from SendList and stop timer watcher
+                    ksnTRUDPsendListRemove(tu, tru_header->id, addr);
 
                     recvlen = 0; // The received message is processed
 
@@ -645,19 +634,33 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
  * @param id
  * @param addr
  * @param addr_len
- * @return 
+ * @return 1 - removed; 0 - record does not exist
+ * 
  */
 int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr) {
 
+    int retval = 0;
+    
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
     size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
     if (ip_map_d != NULL) {
 
-        pblMapRemove(ip_map_d->send_list, &id, sizeof (id), &val_len);
+        // Stop send list timer
+        sl_data *sl_d = pblMapGet(ip_map_d->send_list, &id, sizeof (id), &val_len);
+        if(sl_d != (void*)-1) {
+            
+            // Stop send list timer
+            sl_timer_stop(kev->ev_loop, &sl_d->w);
 
+            // Remove record from send list
+            pblMapRemove(ip_map_d->send_list, &id, sizeof (id), &val_len);
+            
+            retval = 1;
+        }
+        
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s message with id %d was removed from %s Send List "
@@ -668,7 +671,7 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         #endif        
     }
 
-    return 1;
+    return retval;
 }
 
 /**
@@ -748,7 +751,8 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     // Start ACK timeout timer watcher
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
-    sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, addr, addr_len);    
+    sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
+            addr, addr_len);    
     
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,

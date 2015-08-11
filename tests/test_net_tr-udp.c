@@ -263,7 +263,7 @@ void test_2_5() {
 
     // Add 1 message to send list
     sl_data sl_d;
-//    sl_d.w = NULL;
+    sl_d.w.data = NULL;
     sl_d.data = (void*) "Some data 1";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -272,7 +272,7 @@ void test_2_5() {
     // Add 2 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 1);
-//    sl_d.w = NULL;
+    sl_d.w.data = NULL;
     sl_d.data = (void*) "Some data 2";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -281,7 +281,7 @@ void test_2_5() {
     // Add 3 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 2);
-//    sl_d.w = NULL;
+    sl_d.w.data = NULL;
     sl_d.data = (void*) "Some data 3";
     sl_d.data_len = 12;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
