@@ -255,11 +255,15 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         ip_map_d->expected_id++;
 
                         // Process packet
-                        printf("recvfrom: Processed id %d from %s:%d\n", 
+                        #ifdef DEBUG_KSNET
+                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                            "%sTR-UDP:%s recvfrom: Processed id %d from %s:%d\n", 
+                            ANSI_LIGHTGREEN, ANSI_NONE,    
                             tru_header->id,
                             inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
                             ntohs(((struct sockaddr_in *) addr)->sin_port)
                         );
+                        #endif
                         ksnCoreProcessPacket(kev->kc, buf + tru_ptr,
                                 tru_header->payload_length, addr);
                         
@@ -274,13 +278,22 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             rh_data *rh_d = ksnTRUDPreceiveHeapGetFirst(
                                     ip_map_d->receive_heap);
 
-                            printf("recvfrom: Check Receive Heap, len = %d, id = %d ... ",
-                                    num, rh_d->id);
+                            #ifdef DEBUG_KSNET
+                            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                    "%sTR-UDP:%s recvfrom: Check Receive Heap, "
+                                    "len = %d, id = %d ... ",
+                                    ANSI_LIGHTGREEN, ANSI_NONE,
+                                    num, rh_d->id
+                            );
+                            #endif
 
                             // Process this message
                             if (ip_map_d->expected_id == rh_d->id) {
 
-                                printf("Processed\n");
+                                #ifdef DEBUG_KSNET
+                                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                    "Processed\n");
+                                #endif
 
                                 // Process packet
                                 ksnCoreProcessPacket(kev->kc, rh_d->data,
@@ -297,7 +310,10 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             }
                                 // Drop saved message
                             else {
-                                printf("Skipped\n");
+                                #ifdef DEBUG_KSNET
+                                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                    "Skipped\n");
+                                #endif
                                 recvlen = 0;
                                 break;
                             }
@@ -305,15 +321,27 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                     }
                     // Drop old (repeated) message 
                     else if (tru_header->id < ip_map_d->expected_id) {
+                        
+                        #ifdef DEBUG_KSNET
+                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                            "%sTR-UDP:%s recvfrom: Drop old (repeated) message "
+                            "with id %d\n",
+                            ANSI_LIGHTGREEN, ANSI_NONE,
+                            tru_header->id);
+                        #endif
+
                         recvlen = 0;
-                        printf("recvfrom: Drop old (repeated) message with id %d\n",
-                                tru_header->id);
                     }   
                     // Save to Received message Heap
                     else {
-                        printf("recvfrom: Add to receive heap, id = %d, len = %d, expected id = %d\n",
-                                tru_header->id, tru_header->payload_length,
-                                ip_map_d->expected_id);
+                        #ifdef DEBUG_KSNET
+                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                            "%sTR-UDP:%s recvfrom: Add to receive heap, "
+                            "id = %d, len = %d, expected id = %d\n",
+                            ANSI_LIGHTGREEN, ANSI_NONE,
+                            tru_header->id, tru_header->payload_length,
+                            ip_map_d->expected_id);
+                        #endif
 
                         ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
                                 tru_header->id, buf + tru_ptr,
