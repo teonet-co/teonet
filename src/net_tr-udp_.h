@@ -11,7 +11,7 @@
 #ifndef NET_TR_UDP__H
 #define	NET_TR_UDP__H
 
-#define MAX_ACK_WAIT 0.5
+#define MAX_ACK_WAIT 0.100  // 100 MS
 
 /**
  * IP map records data
@@ -39,18 +39,6 @@ typedef struct rh_data {
 } rh_data;
 
 /**
- * Send list data structure
- */
-typedef struct sl_data {
-    
-    ev_timer *w;
-    void *data;
-    size_t data_len;
-    size_t attempt;
-
-} sl_data;
-
-/**
  * Send List timer data structure
  */
 typedef struct sl_timer_cb_data {
@@ -59,11 +47,23 @@ typedef struct sl_timer_cb_data {
     int fd;
     int cmd;
     int flags;
-    PblMap *sl;
     __CONST_SOCKADDR_ARG addr;
     socklen_t addr_len;
 
 } sl_timer_cb_data;
+
+/**
+ * Send list data structure
+ */
+typedef struct sl_data {
+    
+    ev_timer w;
+    sl_timer_cb_data w_data;
+    void *data;
+    size_t data_len;
+    size_t attempt;
+
+} sl_data;
 
 /**
  * TR-UDP message header structure
@@ -130,7 +130,7 @@ sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr);
 void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list);
 //
-ev_timer *sl_timer_start(ksnTRUDPClass *, PblMap *sl, uint32_t id, int fd,
+ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *, uint32_t id, int fd,
         int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
