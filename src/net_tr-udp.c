@@ -12,6 +12,7 @@
 
 #include "ev_mgr.h"
 #include "net_tr-udp.h"
+#include "net_tr-udp_stat.h"
 #include "config/conf.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
@@ -42,6 +43,7 @@ ksnTRUDPClass *ksnTRUDPinit(void *kc) {
     ksnTRUDPClass *tu = malloc(sizeof (ksnTRUDPClass));
     tu->kc = kc;
     tu->ip_map = pblMapNewHashMap();
+    ksnTRUDPstatInit(tu);
 
     return tu;
 }
