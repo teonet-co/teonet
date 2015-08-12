@@ -43,8 +43,9 @@ ksnTRUDPClass *ksnTRUDPinit(void *kc) {
     ksnTRUDPClass *tu = malloc(sizeof (ksnTRUDPClass));
     tu->kc = kc;
     tu->ip_map = pblMapNewHashMap();
+    ksnTRUDPregisterProcessPacket(tu, ksnCoreProcessPacket);
     ksnTRUDPstatInit(tu);
-
+    
     return tu;
 }
 
@@ -168,16 +169,21 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
 /**
  * Get data from peer through TR-UDP transport
  * 
+ * @param tu
  * @param fd
- * @param buf
- * @param buf_len
+ * @param buffer
+ * @param buffer_len
  * @param flags
  * @param addr
  * @param addr_len
- * @return 
+ * 
+ * @return If return 0 than the packet is processed by tu->process_packet 
+ *         function. In other case there is value returned by UDP recvfrom 
+ *         function and the buffer contain received data
  */
-ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
-        int flags, __SOCKADDR_ARG addr, socklen_t *addr_len) {
+ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer, 
+                         size_t buffer_len, int flags, __SOCKADDR_ARG addr, 
+                         socklen_t *addr_len) {
     
     /**
      * Send ACK to sender subroutine  
@@ -204,7 +210,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
     const size_t tru_ptr = sizeof (ksnTRUDP_header); // Header size
 
     // Get data
-    ssize_t recvlen = recvfrom(fd, buf, buf_len, flags, addr, addr_len);
+    ssize_t recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -218,7 +224,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
     // Data received
     if (recvlen > 0) {
 
-        ksnTRUDP_header *tru_header = buf;
+        ksnTRUDP_header *tru_header = buffer;
 
         // Check for TR-UDP header
         if (recvlen - tru_ptr == tru_header->payload_length) {
@@ -266,7 +272,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                             ntohs(((struct sockaddr_in *) addr)->sin_port)
                         );
                         #endif
-                        ksnCoreProcessPacket(kev->kc, buf + tru_ptr,
+                        tu->process_packet(kev->kc, buffer + tru_ptr, 
                                 tru_header->payload_length, addr);
                         
                         recvlen = 0;
@@ -298,7 +304,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                                 #endif
 
                                 // Process packet
-                                ksnCoreProcessPacket(kev->kc, rh_d->data,
+                                tu->process_packet(kev->kc, rh_d->data, 
                                         rh_d->data_len, &rh_d->addr);
 
                                 // Remove first record
@@ -346,7 +352,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                         #endif
 
                         ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
-                                tru_header->id, buf + tru_ptr,
+                                tru_header->id, buffer + tru_ptr,
                                 tru_header->payload_length, addr, *addr_len);
 
                         recvlen = 0;
@@ -413,6 +419,19 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
     return recvlen;
 }
 
+/**
+ * Register process packet function for the TR-UDP recvfrom function
+ * 
+ * @param tu
+ * @param pc
+ */
+inline void* ksnTRUDPregisterProcessPacket(ksnTRUDPClass *tu, 
+        ksnTRUDPprocessPacketCb pc) {
+    
+    ksnTRUDPprocessPacketCb process_packet = tu->process_packet;
+    tu->process_packet = pc;    
+    return process_packet;
+}
 
 /*****************************************************************************
  *

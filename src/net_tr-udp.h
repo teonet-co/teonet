@@ -24,6 +24,12 @@ typedef int socklen_t;
 
 
 /**
+ * registerProcessPacket callback function type definition
+ */
+typedef void (*ksnTRUDPprocessPacketCb) (void *kc, void *buf, size_t recvlen, 
+              __SOCKADDR_ARG remaddr);
+
+/**
  * TR-UDP Statistic data
  */
 typedef struct tr_udp_stat {
@@ -49,6 +55,7 @@ typedef struct ksnTRUDPClass {
     void *kc; ///< Pointer to KSNet core class object
     PblMap *ip_map; ///< IP:port map
     tr_udp_stat stat; ///< TR-UDP Statistic data
+    ksnTRUDPprocessPacketCb process_packet; ///< TR-UDP recvfrom Process Packet function
 
 } ksnTRUDPClass;
 
@@ -66,6 +73,8 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_fl, uint32_t id, int attemp
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
+
+void *ksnTRUDPregisterProcessPacket(ksnTRUDPClass *tu, ksnTRUDPprocessPacketCb pc);
 
 void ksnTRUDPresetAddr(ksnTRUDPClass *tu, const char *addr, int port, int options);
 
