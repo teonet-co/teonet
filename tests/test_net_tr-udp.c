@@ -612,9 +612,58 @@ void test_2_8() {
     CU_PASS("Destroy ksnTRUDPClass done");    
 }
 
+uint32_t expected_id = 0;
+
+void process_packet (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG remaddr) {
+    
+    //ksnCoreClass *kc = vkc; // ksnCoreClass Class object
+    
+    uint32_t id;
+    sscanf((char*) buf,"%*s %*s %d", &id);
+    //printf("\nreceive: id %d ...\n", id);
+    CU_ASSERT(id == expected_id);
+    expected_id++;
+}
+
+unsigned int randr(unsigned int min, unsigned int max)
+{
+       double scaled = (double)rand()/RAND_MAX;
+
+       return (max - min +1)*scaled + min;
+}
+
+ssize_t test_sendto(int fd_s, uint32_t id, uint8_t message_type, void *buf, 
+        size_t buf_len, __CONST_SOCKADDR_ARG addr_r, size_t addr_len) {
+    
+    char buf_send[KSN_BUFFER_SIZE];
+    ksnTRUDP_header *tru_header = (ksnTRUDP_header *) buf_send;
+    const size_t tru_ptr = sizeof (ksnTRUDP_header); // TR-UDP header size
+    
+    tru_header->id = id;
+    tru_header->message_type = message_type;
+    tru_header->payload_length = buf_len;
+    tru_header->timestamp = 0;
+    tru_header->version_major= 0;
+    tru_header->version_minor = 0;
+    memcpy(buf_send + tru_ptr, buf, buf_len);
+            
+    return sendto(fd_s, buf_send, tru_ptr + buf_len, 0, addr_r, addr_len);
+}
+
 // Test main RT-UDP function ksnTRUDPreceivefrom
 void test_2_9() {
     
+    /**
+     * Check ACK macro
+     */
+    #define check_ACK(ID) { \
+        recvlen = recvfrom(fd_s, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len); \
+        CU_ASSERT(recvlen == sizeof(ksnTRUDP_header)); \
+        ksnTRUDP_header *rh = (ksnTRUDP_header *) buf; \
+        CU_ASSERT(rh->id == ID); \
+        CU_ASSERT(rh->message_type == TRU_ACK); \
+    }
+
     // Emulate ksnCoreClass
     kc_emul();
 
@@ -624,10 +673,7 @@ void test_2_9() {
     int fd_s, fd_r, port_s = 9027, port_r = 9029;
     const char *addr_str = "127.0.0.1";
     size_t addr_recv_len = addr_len;
-    char buf_send[KSN_BUFFER_SIZE];
-    char buf_recv[KSN_BUFFER_SIZE];
-    ksnTRUDP_header *tru_header = (ksnTRUDP_header *) buf_send;
-    const size_t tru_ptr = sizeof (ksnTRUDP_header); // TR-UDP header size
+    char buf[KSN_BUFFER_SIZE];
     
     // Start test UDP sender
     fd_s = bind_udp(&port_s);
@@ -651,21 +697,55 @@ void test_2_9() {
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
     
-    // TODO: 1) test ksnTRUDPreceivefrom
-    // a) Send DATA to receiver
-    tru_header->id = 1;
-    tru_header->message_type = TRU_DATA;
-    const char *buf = "Hello world - 1"; // Data to send
-    size_t buf_len = strlen(buf) + 1; // Size of send, data
-    memcpy(tru_header + tru_ptr, buf, buf_len);
-    tru_header->payload_length = buf_len;
-    tru_header->timestamp = 0;
-    tru_header->version_major= 0;
-    tru_header->version_minor = 0;
-    ssize_t sent = sendto(fd_s, tru_header, tru_ptr + buf_len, 0, (__CONST_SOCKADDR_ARG)&addr_r, addr_len);
+    // Register process packet function
+    ksnTRUDPregisterProcessPacket(tu, process_packet);
+    
+    // 1) test ksnTRUDPreceivefrom: test receive packets with data
+    // a) Send one message to receiver
+    // ID 0
+    const char *send_str = "Hello world 0"; // Data to send
+    size_t buf_len = strlen(send_str) + 1; // Size of send, data
+    ssize_t sent = test_sendto(fd_s, 0, TRU_DATA, send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
     CU_ASSERT_FATAL(sent > 0);
-    ssize_t recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    ssize_t recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
     CU_ASSERT(recvlen == 0);
+    // get ACK from receiver
+    check_ACK(0);
+    // b) Send two messages with mixed id to receiver
+    // ID 2
+    send_str = "Hello world 2  "; // Data to send
+    buf_len = strlen(send_str) + 1; // Size of send, data
+    sent = test_sendto(fd_s, 2, TRU_DATA, send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
+    CU_ASSERT_FATAL(sent > 0);
+    recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    CU_ASSERT(recvlen == 0);
+    // get ACK from receiver
+    check_ACK(2);
+    // ID 1
+    send_str = "Hello world 1 "; // Data to send
+    buf_len = strlen(send_str) + 1; // Size of send, data
+    sent = test_sendto(fd_s, 1, TRU_DATA, send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
+    CU_ASSERT_FATAL(sent > 0);
+    recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    CU_ASSERT(recvlen == 0);
+    // get ACK from receiver
+    check_ACK(1);
+    // c) send messages with random mixed id from 3 to 25 until recvfrom 
+    // receive all messages from 3 to 25, all repeated id's in this transmission  
+    // will be ignored and dropped
+    // ID 3 - 25 
+    while(expected_id < 26) {
+        uint32_t id = randr(3,25);
+        sprintf(buf, "Hello world %d", id);
+        //printf(" send: %s ...", buf);
+        buf_len = strlen(buf) + 1; // Size of send, data
+        sent = test_sendto(fd_s, id, TRU_DATA, buf, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
+        CU_ASSERT_FATAL(sent > 0);
+        recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+        CU_ASSERT(recvlen == 0);
+        // get ACK from receiver
+        check_ACK(id);
+    }
     
     // Stop test UDP sender & receiver
     close(fd_s);

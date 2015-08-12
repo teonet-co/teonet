@@ -480,10 +480,11 @@ void host_cb(EV_P_ ev_io *w, int revents) {
  * @param recvlen
  * @param remaddr
  */
-void ksnCoreProcessPacket (ksnCoreClass *kc, unsigned char *buf, size_t recvlen, 
+void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, 
         __SOCKADDR_ARG remaddr) {   
     
-    ksnetEvMgrClass *ke = kc->ke;           // ksnetEvMgr Class object
+    ksnCoreClass *kc = vkc; // ksnCoreClass Class object
+    ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
             
     // Data received    
     if(recvlen > 0) {
