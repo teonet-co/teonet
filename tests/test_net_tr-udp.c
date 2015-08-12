@@ -358,9 +358,9 @@ void test_2_6() {
     CU_ASSERT(pblMapSize(sl) == 1); // Number of records in send list
     
     // 2) sl_timer_cb: Process send list timer callback       
-    // Define timer to stop event loop after 2.2 seconds. This time need to run timer twice.
+    // Define timer to stop event loop after MAX_ACK_WAIT * 2 + 20%. This time need to run timer twice.
     ev_timer timeout_watcher;
-    ev_timer_init (&timeout_watcher, timeout_cb, MAX_ACK_WAIT*2 + MAX_ACK_WAIT*0.2, 0.);
+    ev_timer_init (&timeout_watcher, timeout_cb, MAX_ACK_WAIT*2 + MAX_ACK_WAIT * 0.2, 0.0);
     ev_timer_start (ke.ev_loop, &timeout_watcher);     
     // Start event loop
     ev_run (ke.ev_loop, 0);   
@@ -438,8 +438,181 @@ void test_2_7() {
     CU_PASS("Destroy ksnTRUDPClass done");
 }
 
-// TODO: Test main RT-UDP functions ksnTRUDPsendto ksnTRUDPreceivefrom
+#include <unistd.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
+/**
+ * Create and bind UDP socket for client/server
+ *
+ * @param kc
+ * @return
+ */
+int bind_udp(int *port) {
+
+    int fd, i;
+    struct sockaddr_in addr;	// Our address 
+
+    // Create a UDP socket
+    if((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror(" cannot create socket ...");
+        return -1;
+    }
+
+    // Bind the socket to any valid IP address and a specific port, increment 
+    // port if busy 
+    for(i=0;;) {
+        
+        memset((char *)&addr, 0, sizeof(addr));
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_ANY);
+        addr.sin_port = htons(*port);
+
+        if(bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+
+            printf(" try port %d ...", (*port)++);
+            perror("  bind failed ...");
+            if(i++ < NUMBER_TRY_PORTS) continue;
+            else return -2;
+        }
+        else break;
+    }
+
+    //printf(" start UDP at %d, fd = %d ...", *port, fd);
+
+    return fd;
+}
+
+// Test main RT-UDP functions ksnTRUDPsendto and ksnTRUDPreceivefrom
+void test_2_8() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+
+    // Test constants and variables
+    const size_t addr_len = sizeof(struct sockaddr_in);
+    const char *addr_str = "127.0.0.1";
+    struct sockaddr_in addr_s, addr_r;
+    int fd_s, fd_r, port_s = 9027, port_r = 9029;
+
+    // Start test UDP sender
+    fd_s = bind_udp(&port_s);
+    CU_ASSERT(fd_s > 0);
+    
+    // Start test UDP receiver
+    fd_r = bind_udp(&port_r);
+    CU_ASSERT(fd_r > 0);
+    
+    // Fill sender address 
+    if(inet_aton(addr_str, &addr_s.sin_addr) == 0) CU_ASSERT(1 == 0);
+    addr_s.sin_family = AF_INET;
+    addr_s.sin_port = htons(port_s);
+    
+    // Fill receiver address 
+    if(inet_aton(addr_str, &addr_r.sin_addr) == 0) CU_ASSERT(1 == 0);
+    addr_r.sin_family = AF_INET;
+    addr_r.sin_port = htons(port_r);
+    
+    // Initialize ksnTRUDPClass
+    ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
+    
+    // 1) ksnTRUDPsendto: send 2 message from UDP sender to UDP receiver
+    //
+    // Prepare data to SendTo receiver
+    const char *buf = "Hello world - 1"; // Data to send
+    size_t buf_len = strlen(buf) + 1; // Size of send data
+    const size_t tru_ptr = sizeof (ksnTRUDP_header); // TR-UDP header size
+    //
+    // a) SendTo receiver
+    ssize_t sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf, buf_len, 0, 
+        (__CONST_SOCKADDR_ARG) &addr_r, addr_len); // TR-UDP sendto
+    if(sent < 0) printf(" sent to %d = %d: %s ...", port_r, (int)sent, strerror(errno));
+    // Check send result
+    CU_ASSERT_FATAL(sent > 0);
+    CU_ASSERT(sent == buf_len + tru_ptr);
+    //
+    // Prepare data to Read packet from socket
+    struct sockaddr_in addr_recv;
+    char buf_recv[KSN_BUFFER_SIZE];
+    size_t addr_recv_len = sizeof(addr_recv);
+    ksnTRUDP_header *tru_header = (ksnTRUDP_header *) buf_recv;
+    //
+    // b) Receive packet from socket
+    ssize_t recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    if(recvlen < 0) printf(" recv = %d: %s ...", (int)recvlen, strerror(errno));
+    // Check receive result
+    CU_ASSERT_FATAL(recvlen == sent); // Receive length equal send length
+    CU_ASSERT(tru_header->id == 0); // Packet id = 0
+    CU_ASSERT(tru_header->payload_length == buf_len); // Payload length equal send buffer length
+    CU_ASSERT_STRING_EQUAL(buf, buf_recv + tru_ptr); // Content of send buffer equal to received data
+    //
+    // c) Send next packet
+    sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf, buf_len, 0, 
+        (__CONST_SOCKADDR_ARG) &addr_r, addr_len); // TR-UDP sendto
+    CU_ASSERT_FATAL(sent > 0);
+    //
+    // d) Receive packet with next id = 1
+    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    CU_ASSERT(tru_header->id == 1); // Packet id = 1
+    //
+    // e) Check send list - it should contain 2 records (with id = 0 and 1)
+    PblMap *sl = ksnTRUDPsendListGet(tu, (__CONST_SOCKADDR_ARG) &addr_r, NULL, 0);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(sl);
+    CU_ASSERT(pblMapSize(sl) == 2);
+    // 
+    // Define timer to stop event loop after MAX_ACK_WAIT + 20%. This time need to run send list twice.
+    ev_timer timeout_watcher;
+    ev_timer_init (&timeout_watcher, timeout_cb, MAX_ACK_WAIT*1 + MAX_ACK_WAIT*0.2, 0.0);
+    ev_timer_start (ke.ev_loop, &timeout_watcher);     
+    // 
+    // f) Start event loop
+    ev_run (ke.ev_loop, 0);
+    //
+    // g) The sent packets will be resend by send list timer
+    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    CU_ASSERT(tru_header->id == 0); // Packet id = 0
+    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    CU_ASSERT(tru_header->id == 1); // Packet id = 1
+    // Check send list - it should contain 2 records (with id = 0 and 1 and attempt 1)
+    CU_ASSERT(pblMapSize(sl) == 2); // Send list size = 2
+    sl_data *sl_d = ksnTRUDPsendListGetData(tu, 0, (__CONST_SOCKADDR_ARG)&addr_r); // Check id = 0
+    CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d); // id =  0 present
+    CU_ASSERT(sl_d->attempt == 1); // Number of attempt 1
+    sl_d = ksnTRUDPsendListGetData(tu, 1, (__CONST_SOCKADDR_ARG)&addr_r); // Check id = 1
+    CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d); // id =  1 present
+    CU_ASSERT(sl_d->attempt == 1); // Number of attempt 1
+    //
+    // h) Send ACK from receiver to sender to remove one packet from send list
+    tru_header->id = 1;
+    tru_header->message_type = TRU_ACK;
+    tru_header->payload_length = 0;
+    tru_header->timestamp = 0;
+    tru_header->version_major= 0;
+    tru_header->version_minor = 0;
+    sent = sendto(fd_r, tru_header, tru_ptr, 0, (__CONST_SOCKADDR_ARG)&addr_s, addr_len);
+    CU_ASSERT_FATAL(sent > 0);
+    recvlen = ksnTRUDPrecvfrom(tu, fd_s, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    CU_ASSERT(recvlen == 0);
+    CU_ASSERT(pblMapSize(sl) == 1); // Send list size = 1
+    sl_d = ksnTRUDPsendListGetData(tu, 0, (__CONST_SOCKADDR_ARG)&addr_r); // Check id = 0
+    CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d); // id =  0 present    
+    //
+    // j) Clear send list
+    ksnTRUDPsendListRemoveAll(tu, sl);
+    CU_ASSERT(pblMapSize(sl) == 0);
+   
+    // TODO: test ksnTRUDPreceivefrom
+    
+    // Stop test UDP sender & receiver
+    close(fd_s);
+    close(fd_r);
+    
+    // Destroy ksnTRUDPClass
+    ksnTRUDPDestroy(tu);
+    CU_PASS("Destroy ksnTRUDPClass done");    
+}
 
 /**
  * Add TR-UDP suite tests
@@ -455,7 +628,8 @@ int add_suite_2_tests(void) {
         (NULL == CU_add_test(pSuite, "RT-UDP reset functions", test_2_4)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP send list functions", test_2_5)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP send list timer functions", test_2_6)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP receive heap functions", test_2_7))
+        (NULL == CU_add_test(pSuite, "RT-UDP receive heap functions", test_2_7)) ||
+        (NULL == CU_add_test(pSuite, "main RT-UDP functions", test_2_8))
             ) {
         CU_cleanup_registry();
         return CU_get_error();

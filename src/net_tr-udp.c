@@ -90,8 +90,8 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
  * 
  * @return Number of bytes sent to UDP
  */
-ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, 
-        int cmd, int attempt, int fd, const void *buf, size_t buf_len, int flags, 
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attempt, 
+        int cmd, int fd, const void *buf, size_t buf_len, int flags, 
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
@@ -196,7 +196,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         ksnTRUDP_header tru_send_header; \
         memcpy(&tru_send_header, tru_header, tru_ptr); \
         tru_send_header.payload_length = 0; \
-        tru_send_header.message_type = TRU_ASK; \
+        tru_send_header.message_type = TRU_ACK; \
         const socklen_t addr_len = sizeof(struct sockaddr_in); \
         sendto(fd, &tru_send_header, tru_ptr, 0, addr, addr_len); \
     }    
@@ -358,7 +358,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
                 // The ACK messages are used to acknowledge the arrival of the 
                 // DATA and RESET messages. (has not payload)
                 // Return zero length of this message.    
-                case TRU_ASK:
+                case TRU_ACK:
                 {
 
                     #ifdef DEBUG_KSNET
@@ -951,7 +951,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         #endif
         
         // Resend message
-        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_t_data.cmd, sl_d->attempt+1, sl_t_data.fd, 
+        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, sl_t_data.fd, 
                 sl_d->data,  sl_d->data_len, sl_t_data.flags, 
                 sl_t_data.addr, sl_t_data.addr_len);
         
