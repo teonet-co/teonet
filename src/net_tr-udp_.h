@@ -103,7 +103,7 @@ enum ksnTRUDP_type {
      * The ACK messages are used to acknowledge the arrival of the DATA and 
      * RESET messages. (has not payload) 
      */
-    TRU_ASK,
+    TRU_ACK,
     TRU_RESET ///< The RESET messages reset messages counter. (has not payload)
 
 };
