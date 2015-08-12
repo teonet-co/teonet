@@ -518,18 +518,18 @@ void test_2_8() {
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
     
-    // 1) ksnTRUDPsendto: send 2 message from UDP sender to UDP receiver
+    // 1) ksnTRUDPsendto test
     //
     // Prepare data to SendTo receiver
     const char *buf = "Hello world - 1"; // Data to send
     size_t buf_len = strlen(buf) + 1; // Size of send data
     const size_t tru_ptr = sizeof (ksnTRUDP_header); // TR-UDP header size
     //
-    // a) SendTo receiver
+    // a) Send one message receiver
     ssize_t sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf, buf_len, 0, 
         (__CONST_SOCKADDR_ARG) &addr_r, addr_len); // TR-UDP sendto
     if(sent < 0) printf(" sent to %d = %d: %s ...", port_r, (int)sent, strerror(errno));
-    // Check send result
+    // Check sent result
     CU_ASSERT_FATAL(sent > 0);
     CU_ASSERT(sent == buf_len + tru_ptr);
     //
@@ -620,10 +620,15 @@ void test_2_9() {
 
     // Test constants and variables
     const size_t addr_len = sizeof(struct sockaddr_in);
-    const char *addr_str = "127.0.0.1";
-    struct sockaddr_in addr_s, addr_r;
+    struct sockaddr_in addr_s, addr_r, addr_recv;
     int fd_s, fd_r, port_s = 9027, port_r = 9029;
-
+    const char *addr_str = "127.0.0.1";
+    size_t addr_recv_len = addr_len;
+    char buf_send[KSN_BUFFER_SIZE];
+    char buf_recv[KSN_BUFFER_SIZE];
+    ksnTRUDP_header *tru_header = (ksnTRUDP_header *) buf_send;
+    const size_t tru_ptr = sizeof (ksnTRUDP_header); // TR-UDP header size
+    
     // Start test UDP sender
     fd_s = bind_udp(&port_s);
     CU_ASSERT(fd_s > 0);
@@ -646,7 +651,21 @@ void test_2_9() {
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
     
-    // TODO: test ksnTRUDPreceivefrom
+    // TODO: 1) test ksnTRUDPreceivefrom
+    // a) Send DATA to receiver
+    tru_header->id = 1;
+    tru_header->message_type = TRU_DATA;
+    const char *buf = "Hello world - 1"; // Data to send
+    size_t buf_len = strlen(buf) + 1; // Size of send, data
+    memcpy(tru_header + tru_ptr, buf, buf_len);
+    tru_header->payload_length = buf_len;
+    tru_header->timestamp = 0;
+    tru_header->version_major= 0;
+    tru_header->version_minor = 0;
+    ssize_t sent = sendto(fd_s, tru_header, tru_ptr + buf_len, 0, (__CONST_SOCKADDR_ARG)&addr_r, addr_len);
+    CU_ASSERT_FATAL(sent > 0);
+    ssize_t recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    CU_ASSERT(recvlen == 0);
     
     // Stop test UDP sender & receiver
     close(fd_s);
