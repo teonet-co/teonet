@@ -484,7 +484,7 @@ int bind_udp(int *port) {
     return fd;
 }
 
-// Test main RT-UDP functions ksnTRUDPsendto and ksnTRUDPreceivefrom
+// Test main RT-UDP function ksnTRUDPsendto
 void test_2_8() {
     
     // Emulate ksnCoreClass
@@ -603,6 +603,49 @@ void test_2_8() {
     ksnTRUDPsendListRemoveAll(tu, sl);
     CU_ASSERT(pblMapSize(sl) == 0);
    
+    // Stop test UDP sender & receiver
+    close(fd_s);
+    close(fd_r);
+    
+    // Destroy ksnTRUDPClass
+    ksnTRUDPDestroy(tu);
+    CU_PASS("Destroy ksnTRUDPClass done");    
+}
+
+// Test main RT-UDP function ksnTRUDPreceivefrom
+void test_2_9() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+
+    // Test constants and variables
+    const size_t addr_len = sizeof(struct sockaddr_in);
+    const char *addr_str = "127.0.0.1";
+    struct sockaddr_in addr_s, addr_r;
+    int fd_s, fd_r, port_s = 9027, port_r = 9029;
+
+    // Start test UDP sender
+    fd_s = bind_udp(&port_s);
+    CU_ASSERT(fd_s > 0);
+    
+    // Start test UDP receiver
+    fd_r = bind_udp(&port_r);
+    CU_ASSERT(fd_r > 0);
+    
+    // Fill sender address 
+    if(inet_aton(addr_str, &addr_s.sin_addr) == 0) CU_ASSERT(1 == 0);
+    addr_s.sin_family = AF_INET;
+    addr_s.sin_port = htons(port_s);
+    
+    // Fill receiver address 
+    if(inet_aton(addr_str, &addr_r.sin_addr) == 0) CU_ASSERT(1 == 0);
+    addr_r.sin_family = AF_INET;
+    addr_r.sin_port = htons(port_r);
+    
+    // Initialize ksnTRUDPClass
+    ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
+    
     // TODO: test ksnTRUDPreceivefrom
     
     // Stop test UDP sender & receiver
@@ -613,6 +656,7 @@ void test_2_8() {
     ksnTRUDPDestroy(tu);
     CU_PASS("Destroy ksnTRUDPClass done");    
 }
+
 
 /**
  * Add TR-UDP suite tests
@@ -629,7 +673,8 @@ int add_suite_2_tests(void) {
         (NULL == CU_add_test(pSuite, "RT-UDP send list functions", test_2_5)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP send list timer functions", test_2_6)) ||
         (NULL == CU_add_test(pSuite, "RT-UDP receive heap functions", test_2_7)) ||
-        (NULL == CU_add_test(pSuite, "main RT-UDP functions", test_2_8))
+        (NULL == CU_add_test(pSuite, "RT-UDP sendto function", test_2_8)) ||
+        (NULL == CU_add_test(pSuite, "RT-UDP recvfrom function", test_2_9))
             ) {
         CU_cleanup_registry();
         return CU_get_error();
