@@ -30,8 +30,10 @@ typedef struct ip_map_data {
         uint32_t triptime_last10_max; ///< Max trip time in last 10 packets
         uint32_t triptime_min; ///< Min trip time
         uint32_t triptime_avg; ///< Avr trip time
-        uint32_t packets_send; ///< Nuber of data or reset packets sent
-        uint32_t packets_receive; ///< Nuber of data or reset packets receive
+        uint32_t packets_send; ///< Number of data or reset packets sent
+        uint32_t packets_attempt; ///< Number of attempt packets 
+        uint32_t packets_receive; ///< Number of data or reset packets receive
+        uint32_t packets_receive_dropped; ///< Number of dropped received package
         uint32_t ack_receive; ///< Number of ACK packets received
         uint32_t triptime_last10[LAST10_SIZE]; ///< Last 10 trip time
         size_t   idx;
@@ -57,6 +59,7 @@ typedef struct rh_data {
  * Send List timer data structure
  */
 typedef struct sl_timer_cb_data {
+    
     ksnTRUDPClass *tu;
     uint32_t id;
     int fd;
