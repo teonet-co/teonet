@@ -56,6 +56,7 @@ typedef struct ksnTRUDPClass {
     PblMap *ip_map; ///< IP:port map
     tr_udp_stat stat; ///< TR-UDP Common statistic data
     ksnTRUDPprocessPacketCb process_packet; ///< TR-UDP recvfrom Process Packet function
+    double started; ///< Start module time
 
 } ksnTRUDPClass;
 

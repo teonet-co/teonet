@@ -42,6 +42,7 @@ ksnTRUDPClass *ksnTRUDPinit(void *kc) {
 
     ksnTRUDPClass *tu = malloc(sizeof (ksnTRUDPClass));
     tu->kc = kc;
+    tu->started = 0; 
     tu->ip_map = pblMapNewHashMap();
     ksnTRUDPregisterProcessPacket(tu, ksnCoreProcessPacket);
     ksnTRUDPstatInit(tu);
@@ -156,6 +157,10 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
             // Add record to statistic
             ksnTRUDPstatSendListAdd(tu);
         }    
+        
+        // Set statistic start time
+        if(!tu->started) tu->started = 
+                ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke);
     } 
     else {
         #ifdef DEBUG_KSNET
@@ -348,6 +353,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             ANSI_LIGHTGREEN, ANSI_NONE,
                             tru_header->id);
                         #endif
+
+                        ksnTRUDPsetDATAreceiveDropped(tu, addr);
 
                         recvlen = 0;
                     }   
@@ -952,12 +959,14 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     );
     #endif
 
+    // Timer value 
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     double max_ack_wait = ip_map_d->stat.triptime_last10_max / 1000000.0;
-    if(max_ack_wait > 0) max_ack_wait += max_ack_wait * 0.05;
+    if(max_ack_wait > 0) max_ack_wait += max_ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.05 : 0.1);
     else max_ack_wait = MAX_ACK_WAIT;
     
-    ev_timer_init(w, sl_timer_cb, max_ack_wait /*MAX_ACK_WAIT*/, 0.0); ///< TODO: Set real timer value 
+    // Initialize, set user data and start the timer
+    ev_timer_init(w, sl_timer_cb, max_ack_wait, 0.0);
     sl_timer_cb_data *sl_t_data = w_data;
     sl_t_data->tu = tu;
     sl_t_data->id = id;
@@ -966,8 +975,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     sl_t_data->flags = flags;
     sl_t_data->addr = addr;
     sl_t_data->addr_len = addr_len;
-    w->data = sl_t_data;
-        
+    w->data = sl_t_data;        
     ev_timer_start(kev->ev_loop, w);
    
     return w;
@@ -1040,7 +1048,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
                 sl_t_data.addr, sl_t_data.addr_len);
         
         // Statistic
-        ksnTRUDPstatSendListAttempt(tu);    
+        ksnTRUDPstatSendListAttempt(tu, sl_t_data.addr);    
 
     } else {
         

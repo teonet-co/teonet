@@ -19,7 +19,7 @@ extern "C" {
 tr_udp_stat *ksnTRUDPstatInit(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatSendListAdd(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatSendListRemove(ksnTRUDPClass *tu);
-size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu);
+size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
 size_t ksnTRUDPstatReceiveHeapAdd(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu);
 int ksnTRUDPstatShow(ksnTRUDPClass *tu);
@@ -30,6 +30,7 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         ksnTRUDP_header *tru_header);
 void ksnTRUDPsetDATAsendTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
 void ksnTRUDPsetDATAreceiveTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
+void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
 
 #ifdef	__cplusplus
 }

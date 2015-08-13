@@ -77,10 +77,14 @@ inline size_t ksnTRUDPstatSendListRemove(ksnTRUDPClass *tu) {
  * @param tu
  * @return 
  */
-inline size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu) {
+inline size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu, 
+        __CONST_SOCKADDR_ARG addr) {
 
     if(tu == NULL) return 0;
     
+    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
+    ip_map_d->stat.packets_attempt++;
+            
     return ++tu->stat.send_list.attempt;
 }    
         
@@ -127,7 +131,8 @@ inline size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu) {
 inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
 
     
-    uint32_t packets_send = 0, packets_receive = 0, ack_receive = 0;
+    uint32_t packets_send = 0, packets_receive = 0, ack_receive = 0, 
+             packets_dropped = 0;
             
     PblIterator *it =  pblMapIteratorNew(tu->ip_map);
     if(it != NULL) {
@@ -140,6 +145,7 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
             packets_send += ip_map_d->stat.packets_send;
             ack_receive += ip_map_d->stat.ack_receive;
             packets_receive += ip_map_d->stat.packets_receive;
+            packets_dropped += ip_map_d->stat.packets_receive_dropped;
         }
         pblIteratorFree(it);
     }
@@ -148,10 +154,12 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         "----------------------------------------\n"
         "RT-UDP statistics:\n"
         "----------------------------------------\n"
+        "Run time: %f sec\n"
         "\n"
         "Packets sent: %d\n"
         "ACK receive: %d\n"
         "Packets receive: %d\n"
+        "Packets receive and dropped: %d\n"
         "\n"
         "Send list:\n"
         "  size_max: %d\n"
@@ -163,9 +171,11 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         "  size_current: %d\n"
         "\n"
         "----------------------------------------\n"
+        , ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke) - tu->started
         , packets_send
         , ack_receive
         , packets_receive
+        , packets_dropped
         
         , tu->stat.send_list.size_max
         , tu->stat.send_list.size_current
@@ -292,4 +302,10 @@ inline void ksnTRUDPsetDATAreceiveTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG a
     
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);   
     ip_map_d->stat.packets_receive++;
+}
+
+inline void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
+    
+    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);   
+    ip_map_d->stat.packets_receive_dropped++;
 }
