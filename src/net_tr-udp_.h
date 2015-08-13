@@ -22,6 +22,21 @@ typedef struct ip_map_data {
     uint32_t expected_id; ///< Receive message expected ID 
     PblMap *send_list; ///< Send messages list
     PblHeap *receive_heap; ///< Received messages heap
+    
+    #define LAST10_SIZE 10
+    struct {
+        uint32_t triptime_last; ///< Last trip time
+        uint32_t triptime_max; ///< Max trip time
+        uint32_t triptime_last10_max; ///< Max trip time in last 10 packets
+        uint32_t triptime_min; ///< Min trip time
+        uint32_t triptime_avg; ///< Avr trip time
+        uint32_t packets_send; ///< Nuber of data or reset packets sent
+        uint32_t packets_receive; ///< Nuber of data or reset packets receive
+        uint32_t ack_receive; ///< Number of ACK packets received
+        uint32_t triptime_last10[LAST10_SIZE]; ///< Last 10 trip time
+        size_t   idx;
+    } stat;
+    
 
 } ip_map_data;
 
@@ -69,6 +84,7 @@ typedef struct sl_data {
  * TR-UDP message header structure
  */
 typedef struct ksnTRUDP_header {
+    
     unsigned int version_major : 4; ///< Protocol major version number
     unsigned int version_minor : 4; ///< Protocol minor version number
     /**
@@ -116,6 +132,7 @@ size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port,
         char* key, size_t key_len);
 ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
+uint32_t ksnTRUDPtimestamp();
 //
 int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr);

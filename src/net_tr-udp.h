@@ -54,7 +54,7 @@ typedef struct ksnTRUDPClass {
     
     void *kc; ///< Pointer to KSNet core class object
     PblMap *ip_map; ///< IP:port map
-    tr_udp_stat stat; ///< TR-UDP Statistic data
+    tr_udp_stat stat; ///< TR-UDP Common statistic data
     ksnTRUDPprocessPacketCb process_packet; ///< TR-UDP recvfrom Process Packet function
 
 } ksnTRUDPClass;
