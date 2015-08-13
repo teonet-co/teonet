@@ -151,6 +151,11 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         // Add packet to Sent message list (Acknowledge Pending Messages)
         ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
                 attempt, addr, addr_len);
+        
+        if(!resend_flg) {
+            // Add record to statistic
+            ksnTRUDPstatSendListAdd(tu);
+        }    
     } 
     else {
         #ifdef DEBUG_KSNET
@@ -829,14 +834,11 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     sl_d.attempt = attempt;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
 
-    // Start ACK timeout timer watcher
+    // Start ACK timer watcher
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
     sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
             addr, addr_len); 
-    
-    // Statistic
-    ksnTRUDPstatSendListAdd(tu);
     
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -952,9 +954,8 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
 
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     double max_ack_wait = ip_map_d->stat.triptime_last10_max / 1000000.0;
-    if(max_ack_wait > 0) max_ack_wait += max_ack_wait * 0.02;
+    if(max_ack_wait > 0) max_ack_wait += max_ack_wait * 0.05;
     else max_ack_wait = MAX_ACK_WAIT;
-//    printf("max_ack_wait = %.6f sec\n", max_ack_wait);
     
     ev_timer_init(w, sl_timer_cb, max_ack_wait /*MAX_ACK_WAIT*/, 0.0); ///< TODO: Set real timer value 
     sl_timer_cb_data *sl_t_data = w_data;

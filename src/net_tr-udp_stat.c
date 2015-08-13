@@ -126,18 +126,47 @@ inline size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu) {
  */
 inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
 
+    
+    uint32_t packets_send = 0, packets_receive = 0, ack_receive = 0;
+            
+    PblIterator *it =  pblMapIteratorNew(tu->ip_map);
+    if(it != NULL) {
+
+        while(pblIteratorHasNext(it)) {
+        
+            void *entry = pblIteratorNext(it);
+            //char *key = pblMapEntryKey(entry);
+            ip_map_data *ip_map_d =  pblMapEntryValue(entry);
+            packets_send += ip_map_d->stat.packets_send;
+            ack_receive += ip_map_d->stat.ack_receive;
+            packets_receive += ip_map_d->stat.packets_receive;
+        }
+        pblIteratorFree(it);
+    }
+    
     return ksnet_formatMessage(
         "----------------------------------------\n"
         "RT-UDP statistics:\n"
         "----------------------------------------\n"
+        "\n"
+        "Packets sent: %d\n"
+        "ACK receive: %d\n"
+        "Packets receive: %d\n"
+        "\n"
         "Send list:\n"
         "  size_max: %d\n"
         "  size_current: %d\n"
         "  attempts: %d\n"
+        "\n"
         "Receive Heap:\n"
         "  size_max: %d\n"
         "  size_current: %d\n"
+        "\n"
         "----------------------------------------\n"
+        , packets_send
+        , ack_receive
+        , packets_receive
+        
         , tu->stat.send_list.size_max
         , tu->stat.send_list.size_current
         , tu->stat.send_list.attempt
