@@ -72,7 +72,7 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
     tru_header.version_minor = VERSION_MINOR; \
     tru_header.payload_length = buf_len; \
     tru_header.message_type = type; \
-    tru_header.timestamp = 0
+    tru_header.timestamp = ksnTRUDPtimestamp()
                 
 /**
  * Send to peer through TR-UDP transport
@@ -118,6 +118,9 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
 
         // Make TR-UDP Header
         MakeHeader(tru_header, TRU_DATA, buf_len);
+        
+        // Calculate times statistic
+        ksnTRUDPsetDATAsendTime(tu, addr);                    
 
         // Get new message ID
         if(resend_flg) tru_header.id = id; 
@@ -252,6 +255,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     // If Message ID Equals to Expected ID send message to core
                     // or save to message Heap sorted by ID
                     // ksnTRUDPReceiveHeapAdd();    
+                    
+                    // Calculate times statistic
+                    ksnTRUDPsetDATAreceiveTime(tu, addr);                    
 
                     // Read IP Map
                     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
@@ -375,9 +381,12 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     );
                     #endif
 
+                    // Calculate times statistic
+                    ksnTRUDPsetACKtime(tu, addr, tru_header);
+                    
                     // Remove message from SendList and stop timer watcher
                     ksnTRUDPsendListRemove(tu, tru_header->id, addr);
-
+                    
                     recvlen = 0; // The received message is processed
 
                 }
@@ -470,6 +479,7 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
                 ksnTRUDPreceiveHeapCompare);
         pblMapAdd(tu->ip_map, key, key_len, &ip_map_d_new, sizeof (ip_map_d_new));
         ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
+        ksnTRUDPstatAddrInit(tu, addr);
 
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -520,6 +530,53 @@ inline size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int por
         size_t key_len) {
 
     return snprintf(key, key_len, "%s:%d", addr, port);
+}
+
+#ifdef MINGW
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include <stdint.h> // portable: uint64_t   MSVC: __int64 
+
+// MSVC defines this in winsock2.h!?
+typedef struct timeval {
+    long tv_sec;
+    long tv_usec;
+} timeval;
+
+int gettimeofday(struct timeval * tp, struct timezone * tzp)
+{
+    // Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
+    static const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
+
+    SYSTEMTIME  system_time;
+    FILETIME    file_time;
+    uint64_t    time;
+
+    GetSystemTime( &system_time );
+    SystemTimeToFileTime( &system_time, &file_time );
+    time =  ((uint64_t)file_time.dwLowDateTime )      ;
+    time += ((uint64_t)file_time.dwHighDateTime) << 32;
+
+    tp->tv_sec  = (long) ((time - EPOCH) / 10000000L);
+    tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
+    return 0;
+}
+#endif
+
+#include <sys/time.h>
+
+/**
+ * Get current 32 bit timestamp in thousands of milliseconds
+ * 
+ * @return 
+ */
+uint32_t ksnTRUDPtimestamp() {
+    
+    struct timeval te; 
+    gettimeofday(&te, NULL); // get current time
+    //long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
+    long long milliseconds = te.tv_sec*1000000LL + te.tv_usec; // calculate thousands of milliseconds
+    return (uint32_t) (milliseconds & 0xFFFFFFFF);
 }
 
 
@@ -671,7 +728,7 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
 
         // Stop send list timer and remove from map
         sl_data *sl_d = pblMapGet(ip_map_d->send_list, &id, sizeof (id), &val_len);
-        if(sl_d != (void*)-1) {
+        if(sl_d != NULL) {
             
             // Stop send list timer
             sl_timer_stop(kev->ev_loop, &sl_d->w);
@@ -679,8 +736,8 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
             // Remove record from send list
             pblMapRemove(ip_map_d->send_list, &id, sizeof (id), &val_len);
             
-                // Statistic
-                ksnTRUDPstatSendListRemove(tu);    
+            // Statistic
+            ksnTRUDPstatSendListRemove(tu);    
 
             retval = 1;
         }
@@ -893,7 +950,13 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     );
     #endif
 
-    ev_timer_init(w, sl_timer_cb, MAX_ACK_WAIT, 0.0); ///< TODO: Set real timer value 
+    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
+    double max_ack_wait = ip_map_d->stat.triptime_last10_max / 1000000.0;
+    if(max_ack_wait > 0) max_ack_wait += max_ack_wait * 0.02;
+    else max_ack_wait = MAX_ACK_WAIT;
+//    printf("max_ack_wait = %.6f sec\n", max_ack_wait);
+    
+    ev_timer_init(w, sl_timer_cb, max_ack_wait /*MAX_ACK_WAIT*/, 0.0); ///< TODO: Set real timer value 
     sl_timer_cb_data *sl_t_data = w_data;
     sl_t_data->tu = tu;
     sl_t_data->id = id;
@@ -903,8 +966,9 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     sl_t_data->addr = addr;
     sl_t_data->addr_len = addr_len;
     w->data = sl_t_data;
+        
     ev_timer_start(kev->ev_loop, w);
-
+   
     return w;
 }
 
