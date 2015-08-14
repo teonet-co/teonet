@@ -21,6 +21,7 @@ extern CU_pSuite pSuite;
   ksnetEvMgrClass ke; \
   ksnCoreClass kc; \
   kc.ke = &ke; \
+  ke.event_cb = NULL; \
   ke.ev_loop = ev_loop_new (0)
 
 /**
