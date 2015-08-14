@@ -17,13 +17,12 @@
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 0
+//#define VERSION_MAJOR 0
+//#define VERSION_MINOR 0
 
 #define kev ((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke))
 
 #include "net_tr-udp_.h"
-
 
 
 /*****************************************************************************
@@ -69,8 +68,7 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
 
 // Make TR-UDP Header
 #define MakeHeader(tru_header, type, buf_len) \
-    tru_header.version_major = VERSION_MAJOR; \
-    tru_header.version_minor = VERSION_MINOR; \
+    tru_header.version = TR_UDP_PROTOCOL_VERSION; \
     tru_header.payload_length = buf_len; \
     tru_header.message_type = type; \
     tru_header.timestamp = ksnTRUDPtimestamp()
@@ -105,7 +103,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
     #endif
 
     // Check commands array
-    if (!inarray(cmd, not_RTUDP, not_RTUDP_len)) {
+    if(CMD_TRUDP_CHECK(cmd)) {
 
         // TR-UDP packet buffer
         const size_t tru_ptr = sizeof (ksnTRUDP_header); // Header size

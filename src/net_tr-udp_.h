@@ -11,6 +11,7 @@
 #ifndef NET_TR_UDP__H
 #define	NET_TR_UDP__H
 
+#define TR_UDP_PROTOCOL_VERSION 1
 #define MAX_ACK_WAIT 0.100  // 100 MS
 
 /**
@@ -88,12 +89,15 @@ typedef struct sl_data {
  */
 typedef struct ksnTRUDP_header {
     
-    unsigned int version_major : 4; ///< Protocol major version number
-    unsigned int version_minor : 4; ///< Protocol minor version number
+    uint8_t checksum;
+//    unsigned int version_major : 4; ///< Protocol major version number
+//    unsigned int version_minor : 4; ///< Protocol minor version number
+    unsigned int version : 4; ///< Protocol version number
     /**
      * Message type could be of type DATA(0x0), ACK(0x1) and RESET(0x2).
      */
-    uint8_t message_type;
+//    uint8_t message_type;
+    unsigned int message_type : 4;
     /**
      * Payload length defines the number of bytes in the message payload
      */
