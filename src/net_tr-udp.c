@@ -397,6 +397,15 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     // Calculate times statistic
                     ksnTRUDPsetACKtime(tu, addr, tru_header);
                     
+                    // Send event to application
+                    if(kev->event_cb != NULL) {
+                        ksnTRUDPsendListGetData(tu, tru_header->id, addr);
+                        kev->event_cb(kev, EV_K_RECEIVED_ACK, 
+                                (void*)buffer + sizeof(*tru_header), // Pointer to data
+                                tru_header->payload_length, // Data length
+                                &tru_header->id); // Pointer to packet ID
+                    }
+                    
                     // Remove message from SendList and stop timer watcher
                     ksnTRUDPsendListRemove(tu, tru_header->id, addr);
                     
@@ -498,7 +507,6 @@ inline void ksnTRUDPchecksumSet(ksnTRUDP_header *th, uint8_t chk) {
  */
 inline int ksnTRUDPchecksumCheck(ksnTRUDP_header *th) {
       
-    //printf("%02x == %02x - %d ", th->checksum, ksnTRUDPchecksumCalculate(th), th->checksum == ksnTRUDPchecksumCalculate(th));
     return th->checksum == ksnTRUDPchecksumCalculate(th);
 }
 
