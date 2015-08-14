@@ -400,9 +400,19 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     // Send event to application
                     if(kev->event_cb != NULL) {
                         ksnTRUDPsendListGetData(tu, tru_header->id, addr);
+                        char *buf = (void*)buffer + sizeof(*tru_header);
+                        size_t data_len = tru_header->payload_length;
+                        char *data = buf;
+                        #if KSNET_CRYPT
+                        if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, data_len)) {
+                            data = ksnDecryptPackage(kev->kc->kcr, buf, data_len, &data_len);
+                            printf("data = %s\n", data);
+                        }
+                        #endif
+                        
                         kev->event_cb(kev, EV_K_RECEIVED_ACK, 
-                                (void*)buffer + sizeof(*tru_header), // Pointer to data
-                                tru_header->payload_length, // Data length
+                                data, // Pointer to data
+                                data_len, // Data length
                                 &tru_header->id); // Pointer to packet ID
                     }
                     
