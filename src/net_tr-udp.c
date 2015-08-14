@@ -67,11 +67,17 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
 }
 
 // Make TR-UDP Header
-#define MakeHeader(tru_header, type, buf_len) \
+#define MakeHeader(tru_header, packet_id, type, buf_len) \
     tru_header.version = TR_UDP_PROTOCOL_VERSION; \
     tru_header.payload_length = buf_len; \
     tru_header.message_type = type; \
-    tru_header.timestamp = ksnTRUDPtimestamp()
+    tru_header.id = packet_id; \
+    tru_header.timestamp = ksnTRUDPtimestamp(); \
+    SetHeaderChecksum(tru_header)
+
+// Calculate and set checksum in TR-UDP Header
+#define SetHeaderChecksum(tru_header) \
+    ksnTRUDPchecksumSet(&tru_header, ksnTRUDPchecksumCalculate(&tru_header))
                 
 /**
  * Send to peer through TR-UDP transport
@@ -116,14 +122,10 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         }
 
         // Make TR-UDP Header
-        MakeHeader(tru_header, TRU_DATA, buf_len);
+        MakeHeader(tru_header, (resend_flg ? id : ksnTRUDPsendListNewID(tu, addr)), TRU_DATA, buf_len);
         
         // Calculate times statistic
         ksnTRUDPsetDATAsendTime(tu, addr);                    
-
-        // Get new message ID
-        if(resend_flg) tru_header.id = id; 
-        else tru_header.id = ksnTRUDPsendListNewID(tu, addr);
 
         // Copy TR-UDP header
         memcpy(tru_buf, &tru_header, tru_ptr);
@@ -214,6 +216,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
         memcpy(&tru_send_header, tru_header, tru_ptr); \
         tru_send_header.payload_length = 0; \
         tru_send_header.message_type = TRU_ACK; \
+        tru_send_header.checksum = ksnTRUDPchecksumCalculate(&tru_send_header); \
         const socklen_t addr_len = sizeof(struct sockaddr_in); \
         sendto(fd, &tru_send_header, tru_ptr, 0, addr, addr_len); \
     }    
@@ -237,8 +240,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
         ksnTRUDP_header *tru_header = buffer;
 
-        // Check for TR-UDP header
-        if (recvlen - tru_ptr == tru_header->payload_length) {
+        // Check for TR-UDP header and its checksum
+        if (recvlen - tru_ptr == tru_header->payload_length && ksnTRUDPchecksumCheck(tru_header)) {
 
             #ifdef DEBUG_KSNET
             ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -450,6 +453,53 @@ inline void* ksnTRUDPregisterProcessPacket(ksnTRUDPClass *tu,
     ksnTRUDPprocessPacketCb process_packet = tu->process_packet;
     tu->process_packet = pc;    
     return process_packet;
+}
+
+/*****************************************************************************
+ *
+ *  Header checksum functions
+ * 
+ *****************************************************************************/
+
+/**
+ * Calculate TR-UDP header checksum
+ * 
+ * @param th
+ * @return 
+ */
+uint8_t ksnTRUDPchecksumCalculate(ksnTRUDP_header *th) {
+    
+    int i;
+    uint8_t checksum = 0;
+    for(i = 1; i < sizeof(ksnTRUDP_header); i++) {
+        checksum += *((uint8_t*) th + i);
+    }
+    
+    return checksum;
+}
+
+/**
+ * Set TR-UDP header checksum
+ * 
+ * @param th
+ * @param chk
+ * @return 
+ */
+inline void ksnTRUDPchecksumSet(ksnTRUDP_header *th, uint8_t chk) {
+    
+    th->checksum = chk;
+}
+
+/**
+ * Check TR-UDP header checksum
+ * 
+ * @param th
+ * @return 
+ */
+inline int ksnTRUDPchecksumCheck(ksnTRUDP_header *th) {
+      
+    //printf("%02x == %02x - %d ", th->checksum, ksnTRUDPchecksumCalculate(th), th->checksum == ksnTRUDPchecksumCalculate(th));
+    return th->checksum == ksnTRUDPchecksumCalculate(th);
 }
 
 /*****************************************************************************
@@ -701,7 +751,7 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
 
     // Send reset command to peer
     ksnTRUDP_header tru_header; // Header buffer
-    MakeHeader(tru_header, TRU_RESET, 0); // Make TR-UDP Header
+    MakeHeader(tru_header, ksnTRUDPsendListNewID(tu, addr), TRU_RESET, 0); // Make TR-UDP Header
     const socklen_t addr_len = sizeof(struct sockaddr_in); // Length of addresses   
     sendto(fd, &tru_header, sizeof(tru_header), 0, addr, addr_len); // Send
     

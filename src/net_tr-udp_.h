@@ -90,13 +90,10 @@ typedef struct sl_data {
 typedef struct ksnTRUDP_header {
     
     uint8_t checksum;
-//    unsigned int version_major : 4; ///< Protocol major version number
-//    unsigned int version_minor : 4; ///< Protocol minor version number
     unsigned int version : 4; ///< Protocol version number
     /**
      * Message type could be of type DATA(0x0), ACK(0x1) and RESET(0x2).
      */
-//    uint8_t message_type;
     unsigned int message_type : 4;
     /**
      * Payload length defines the number of bytes in the message payload
@@ -140,6 +137,10 @@ size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port,
 ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 uint32_t ksnTRUDPtimestamp();
+//
+uint8_t ksnTRUDPchecksumCalculate(ksnTRUDP_header *th);
+void ksnTRUDPchecksumSet(ksnTRUDP_header *th, uint8_t chk);
+int ksnTRUDPchecksumCheck(ksnTRUDP_header *th);
 //
 int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr);

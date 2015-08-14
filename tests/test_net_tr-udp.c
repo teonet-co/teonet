@@ -590,6 +590,7 @@ void test_2_8() {
     tru_header->payload_length = 0;
     tru_header->timestamp = 0;
     tru_header->version = TR_UDP_PROTOCOL_VERSION;
+    tru_header->checksum = ksnTRUDPchecksumCalculate(tru_header);
     sent = sendto(fd_r, tru_header, tru_ptr, 0, (__CONST_SOCKADDR_ARG)&addr_s, addr_len);
     CU_ASSERT_FATAL(sent > 0);
     recvlen = ksnTRUDPrecvfrom(tu, fd_s, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
@@ -642,9 +643,8 @@ ssize_t test_sendto(int fd_s, uint32_t id, uint8_t message_type, void *buf,
     tru_header->message_type = message_type;
     tru_header->payload_length = buf_len;
     tru_header->timestamp = 0;
-//    tru_header->version_major = 0;
-//    tru_header->version_minor = 0;
-    tru_header->version = 0;
+    tru_header->version = TR_UDP_PROTOCOL_VERSION;
+    tru_header->checksum = ksnTRUDPchecksumCalculate(tru_header);
     memcpy(buf_send + tru_ptr, buf, buf_len);
             
     return sendto(fd_s, buf_send, tru_ptr + buf_len, 0, addr_r, addr_len);
