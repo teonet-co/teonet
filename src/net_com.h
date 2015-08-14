@@ -13,22 +13,35 @@
 
 enum ksnCMD {
 
-    CMD_NONE = 0,       ///< Common command
-    CMD_CONNECT_R,      ///< A Peer want connect to r-host
-    CMD_CONNECT,        ///< Inform peer about connected peer
-    CMD_DISCONNECTED,   ///< Inform peer about disconnected peer
-    CMD_ECHO,           ///< Echo test message: auto replay test message command
-    CMD_ECHO_ANSWER,    ///< Answer to auto replay message command
-    CMD_VPN,            ///< VPN command
-    CMD_TUN,            ///< Tunnel command
-
-    CMD_SPLIT = 127,    ///< Group of packets (Splited packets)
+    // Core level not TR-UDP mode: 0...63
+    CMD_NONE = 0,           ///< #0 Common command
+    CMD_1_RESERVED,         ///< #1 Reserver for future use
+    CMD_2_RESERVED,         ///< #2 Reserver for future use
+    CMD_3_RESERVED,         ///< #3 Reserver for future use
+    CMD_CONNECT_R,          ///< A Peer want connect to r-host
+    CMD_CONNECT,            ///< Inform peer about connected peer
+    CMD_DISCONNECTED,       ///< Inform peer about disconnected peer
+    CMD_VPN,                ///< VPN command
+    
+    // Core level TR-UDP mode: 64...127
+    CMD_64_RESERVED = 64,   ///< #64 Reserver for future use
+    CMD_ECHO,               ///< Echo test message: auto replay test message command
+    CMD_ECHO_ANSWER,        ///< Answer to auto replay message command
+    CMD_TUN,                ///< Tunnel command
+    CMD_SPLIT,              ///< Group of packets (Splited packets)
             
-    CMD_USER = 128      ///< User command
+    // Application level TR-UDP mode: 128...191
+    CMD_128_RESERVED = 128, ///< #128 Reserver for future use
+    CMD_USER,               ///< User command
+            
+    // Application level not TR-UDP mode: 192...255
+    CMD_192_RESERVED = 192, ///< #192 Reserver for future use
+    CMD_USER_NR             ///< User command
 };
 
-static const int not_RTUDP[] = { CMD_NONE, CMD_CONNECT_R, CMD_CONNECT, CMD_DISCONNECTED, CMD_VPN };
-static const size_t not_RTUDP_len = sizeof(not_RTUDP) / sizeof(int);
+#define CMD_TRUDP_CHECK(CMD) (CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED)
+//static const int not_RTUDP[] = { CMD_NONE, CMD_CONNECT_R, CMD_CONNECT, CMD_DISCONNECTED, CMD_VPN };
+//static const size_t not_RTUDP_len = sizeof(not_RTUDP) / sizeof(int);
 
 /**
  * KSNet command class data
