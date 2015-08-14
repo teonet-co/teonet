@@ -90,3 +90,4 @@
 /tests/test_net_tr_udp
 /tests/test_teonet
 /examples/teoack
+/.teoack/teonet.conf.out

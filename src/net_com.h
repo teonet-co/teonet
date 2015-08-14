@@ -40,8 +40,6 @@ enum ksnCMD {
 };
 
 #define CMD_TRUDP_CHECK(CMD) (CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED)
-//static const int not_RTUDP[] = { CMD_NONE, CMD_CONNECT_R, CMD_CONNECT, CMD_DISCONNECTED, CMD_VPN };
-//static const size_t not_RTUDP_len = sizeof(not_RTUDP) / sizeof(int);
 
 /**
  * KSNet command class data
