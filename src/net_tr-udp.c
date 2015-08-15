@@ -399,21 +399,34 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     
                     // Send event to application
                     if(kev->event_cb != NULL) {
-                        ksnTRUDPsendListGetData(tu, tru_header->id, addr);
-                        char *buf = (void*)buffer + sizeof(*tru_header);
-                        size_t data_len = tru_header->payload_length;
-                        char *data = buf;
+                        
+                        sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
+                        char *data = sl_d->data + sizeof(ksnTRUDP_header);
+                        size_t data_len = sl_d->data_len - sizeof(ksnTRUDP_header);
                         #if KSNET_CRYPT
-                        if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, data_len)) {
-                            data = ksnDecryptPackage(kev->kc->kcr, buf, data_len, &data_len);
-                            printf("data = %s\n", data);
+                        if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
+                            data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
                         }
                         #endif
-                        
-                        kev->event_cb(kev, EV_K_RECEIVED_ACK, 
-                                data, // Pointer to data
-                                data_len, // Data length
-                                &tru_header->id); // Pointer to packet ID
+                        ksnCorePacketData rd;
+                        memset(&rd, 0, sizeof(rd));
+
+                        // Remote peer address and peer
+                        rd.addr = inet_ntoa(((struct sockaddr_in*)addr)->sin_addr); // IP to string
+                        rd.port = ntohs(((struct sockaddr_in*)addr)->sin_port); // Port to integer
+
+                        // Parse packet and check if it valid
+                        if(ksnCoreParsePacket(data, data_len, &rd)) {
+
+                            // Send event for CMD for Application level TR-UDP mode: 128...191
+                            if(rd.cmd >= 128 && rd.cmd < 192) {
+                                
+                                kev->event_cb(kev, EV_K_RECEIVED_ACK, 
+                                        (void*)&rd, // Pointer to ksnCorePacketData
+                                        sizeof(rd), // Length of ksnCorePacketData
+                                        &tru_header->id); // Pointer to packet ID
+                            }
+                        }
                     }
                     
                     // Remove message from SendList and stop timer watcher
@@ -885,7 +898,7 @@ inline PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
  * @param fd
  * @param cmd
  * @param data
- * @param data_len
+ * @param data_len Length of data, should be less or equal than KSN_BUFFER_SIZE
  * @param flags
  * @param addr
  * @param addr_len
@@ -902,8 +915,9 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
 
     // Add message to Send List
     sl_data sl_d;
-    sl_d.data = (void*) data;
-    sl_d.data_len = data_len;
+    sl_d.data_len = data_len < KSN_BUFFER_SIZE ? data_len : KSN_BUFFER_SIZE;
+    memcpy(sl_d.data_buf, data, sl_d.data_len);
+    sl_d.data = (void*) sl_d.data_buf;
     sl_d.attempt = attempt;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
 

@@ -287,5 +287,5 @@ int ksnCheckEncrypted(void *package, size_t package_len) {
     size_t ptr = 0;
     size_t decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);  
     
-    return decrypt_len < package_len && !((package_len - ptr) % BLOCK_SIZE);
+    return decrypt_len  && decrypt_len < package_len && !((package_len - ptr) % BLOCK_SIZE);
 }
