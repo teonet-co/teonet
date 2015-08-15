@@ -344,6 +344,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             }
                         }
                     }
+                    
                     // Drop old (repeated) message 
                     else if (tru_header->id < ip_map_d->expected_id) {
                         
@@ -359,6 +360,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                         recvlen = 0;
                     }   
+                    
                     // Save to Received message Heap
                     else {
                         #ifdef DEBUG_KSNET
@@ -561,9 +563,10 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
     // Create new ip map record if it absent
-    ip_map_data ip_map_d_new;
     if (ip_map_d == NULL) {
 
+        ip_map_data ip_map_d_new;
+        
         ip_map_d_new.id = 0;
         ip_map_d_new.expected_id = 0;
         ip_map_d_new.send_list = pblMapNewHashMap();
@@ -583,6 +586,31 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         );        
         #endif  
     }
+
+    // Copy key to output parameter
+    if (key_out != NULL) strncpy(key_out, key, key_out_len);
+
+    return ip_map_d;
+}
+
+/**
+ * Get IP map record by address
+ * 
+ * @param tu Pointer ksnTRUDPClass
+ * @param addr Peer address (created in sockaddr_in structure)
+ * @param key_out [out] Buffer to copy created from addr key. Don't copy if NULL
+ * @param key_out_len Length of buffer to copy created key
+ * 
+ * @return Pointer to ip_map_data or NULL if not found
+ */
+ip_map_data *ksnTRUDPipMapDataTry(ksnTRUDPClass *tu,
+        __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_out_len) {
+
+    // Get ip map data by key
+    size_t val_len;
+    char key[KSN_BUFFER_SM_SIZE];
+    size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
     // Copy key to output parameter
     if (key_out != NULL) strncpy(key_out, key, key_out_len);
