@@ -11,6 +11,9 @@
 #ifndef NET_TR_UDP__H
 #define	NET_TR_UDP__H
 
+#include "config/conf.h"
+
+
 #define TR_UDP_PROTOCOL_VERSION 1
 #define MAX_ACK_WAIT 0.100  // 100 MS
 
@@ -79,6 +82,7 @@ typedef struct sl_data {
     ev_timer w;
     sl_timer_cb_data w_data;
     void *data;
+    char data_buf[KSN_BUFFER_SIZE];
     size_t data_len;
     size_t attempt;
 

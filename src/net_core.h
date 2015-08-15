@@ -67,6 +67,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd, void *dat
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len);
 void ksnCoreProcessPacket (void *kc, void *buf, size_t recvlen, 
         __SOCKADDR_ARG remaddr);
+int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *recv_data);
 #define ksnCoreSetEventTime(kc) kc->last_check_event = ksnetEvMgrGetTime(kc->ke)
 
 #ifdef	__cplusplus

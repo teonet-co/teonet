@@ -37,23 +37,37 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Send by timer
         case EV_K_TIMER:
             {
+                static int idx = 0;
                 char buffer[KSN_BUFFER_DB_SIZE];
 
-                const char *teorecv = "tr-udp-11";
+                char *teorecv = "tr-udp-11";
                 if(strcmp(teorecv, ksnetEvMgrGetHostName(ke))) {
 
-                    strcpy(buffer, "Teoack Hello!");
-                    printf("Send message \"%s\" to %s peer\n", buffer, teorecv);
-                    ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, 
-                            strlen(buffer)+1);
+                    // If teorecv is connected
+                    if (ksnetArpGet(ke->kc->ka, teorecv) != NULL) {
+                    
+                        sprintf(buffer, "#%d: Teoack Hello!", idx++);
+                        printf("\nSend message \"%s\" to %s peer\n", buffer, teorecv);
+                        ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, 
+                                strlen(buffer)+1);
+
+                        ksnetEvMgrSetCustomTimer(ke, 0.00); // Stop timer
+                    }
                 }
             }
             break;            
             
         // Send when ACK received
-        case EV_K_RECEIVED_ACK:
-            // TODO: Got ACK event
-            printf("Got ACK event to ID %d, data: %s\n", *(uint32_t*)user_data, (char*)data);
+        case EV_K_RECEIVED_ACK: 
+            {
+                // TODO: Got ACK event
+                ksnCorePacketData *rd = data;
+                printf("Got ACK event to ID %d, data: %s\n", 
+                       *(uint32_t*)user_data, (char*)rd->data);
+                
+                
+                ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
+            }
             break;
             
         // Undefined event (an error)
