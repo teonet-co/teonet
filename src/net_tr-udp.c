@@ -401,30 +401,32 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     if(kev->event_cb != NULL) {
                         
                         sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
-                        char *data = sl_d->data + sizeof(ksnTRUDP_header);
-                        size_t data_len = sl_d->data_len - sizeof(ksnTRUDP_header);
-                        #if KSNET_CRYPT
-                        if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
-                            data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
-                        }
-                        #endif
-                        ksnCorePacketData rd;
-                        memset(&rd, 0, sizeof(rd));
+                        if(sl_d != NULL) {
+                            char *data = sl_d->data + sizeof(ksnTRUDP_header);
+                            size_t data_len = sl_d->data_len - sizeof(ksnTRUDP_header);
+                            #if KSNET_CRYPT
+                            if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
+                                data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
+                            }
+                            #endif
+                            ksnCorePacketData rd;
+                            memset(&rd, 0, sizeof(rd));
 
-                        // Remote peer address and peer
-                        rd.addr = inet_ntoa(((struct sockaddr_in*)addr)->sin_addr); // IP to string
-                        rd.port = ntohs(((struct sockaddr_in*)addr)->sin_port); // Port to integer
+                            // Remote peer address and peer
+                            rd.addr = inet_ntoa(((struct sockaddr_in*)addr)->sin_addr); // IP to string
+                            rd.port = ntohs(((struct sockaddr_in*)addr)->sin_port); // Port to integer
 
-                        // Parse packet and check if it valid
-                        if(ksnCoreParsePacket(data, data_len, &rd)) {
+                            // Parse packet and check if it valid
+                            if(ksnCoreParsePacket(data, data_len, &rd)) {
 
-                            // Send event for CMD for Application level TR-UDP mode: 128...191
-                            if(rd.cmd >= 128 && rd.cmd < 192) {
-                                
-                                kev->event_cb(kev, EV_K_RECEIVED_ACK, 
-                                        (void*)&rd, // Pointer to ksnCorePacketData
-                                        sizeof(rd), // Length of ksnCorePacketData
-                                        &tru_header->id); // Pointer to packet ID
+                                // Send event for CMD for Application level TR-UDP mode: 128...191
+                                if(rd.cmd >= 128 && rd.cmd < 192) {
+
+                                    kev->event_cb(kev, EV_K_RECEIVED_ACK, 
+                                            (void*)&rd, // Pointer to ksnCorePacketData
+                                            sizeof(rd), // Length of ksnCorePacketData
+                                            &tru_header->id); // Pointer to packet ID
+                                }
                             }
                         }
                     }

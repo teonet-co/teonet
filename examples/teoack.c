@@ -51,7 +51,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, 
                                 strlen(buffer)+1);
 
-                        ksnetEvMgrSetCustomTimer(ke, 0.00); // Stop timer
+                        //ksnetEvMgrSetCustomTimer(ke, 0.00); // Stop timer
                     }
                 }
             }
@@ -66,7 +66,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                        *(uint32_t*)user_data, (char*)rd->data);
                 
                 
-                ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
+                //ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
             }
             break;
             
