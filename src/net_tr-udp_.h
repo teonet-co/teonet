@@ -140,6 +140,8 @@ size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port,
         char* key, size_t key_len);
 ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
+ip_map_data *ksnTRUDPipMapDataTry(ksnTRUDPClass *tu,
+        __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 uint32_t ksnTRUDPtimestamp();
 //
 uint8_t ksnTRUDPchecksumCalculate(ksnTRUDP_header *th);

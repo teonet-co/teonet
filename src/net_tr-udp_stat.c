@@ -249,33 +249,34 @@ void ksnTRUDPstatAddrDestroy(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
 void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr, 
         ksnTRUDP_header *tru_header) {
 
-    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     int i;
+    ip_map_data *ip_map_d = ksnTRUDPipMapDataTry(tu, addr, NULL, 0);
     
-    ip_map_d->stat.triptime_last = ksnTRUDPtimestamp() - tru_header->timestamp;
-    ip_map_d->stat.triptime_avg = 
-            ((uint64_t)ip_map_d->stat.ack_receive * 
-                ip_map_d->stat.triptime_avg + ip_map_d->stat.triptime_last) / 
-            (ip_map_d->stat.ack_receive + 1); 
-    ip_map_d->stat.ack_receive++;
-    if(ip_map_d->stat.triptime_last < ip_map_d->stat.triptime_min) 
-        ip_map_d->stat.triptime_min = ip_map_d->stat.triptime_last;
-    if(ip_map_d->stat.triptime_last > ip_map_d->stat.triptime_max) 
-        ip_map_d->stat.triptime_max = ip_map_d->stat.triptime_last;
-    
-    // Add to last 10 array
-    ip_map_d->stat.triptime_last10[ip_map_d->stat.idx] = ip_map_d->stat.triptime_last;
-    if(ip_map_d->stat.idx >= LAST10_SIZE) ip_map_d->stat.idx = 0;
-    else ip_map_d->stat.idx++;
+    if(ip_map_d) {
         
-    // Calculate max in last 10 packet
-    ip_map_d->stat.triptime_last10_max = 0;
-    for(i = 0; i < LAST10_SIZE; i++) {        
-        if(ip_map_d->stat.triptime_last10[i] > ip_map_d->stat.triptime_last10_max)
-            ip_map_d->stat.triptime_last10_max = ip_map_d->stat.triptime_last10[i];
+        ip_map_d->stat.triptime_last = ksnTRUDPtimestamp() - tru_header->timestamp;
+        ip_map_d->stat.triptime_avg = 
+                ((uint64_t)ip_map_d->stat.ack_receive * 
+                    ip_map_d->stat.triptime_avg + ip_map_d->stat.triptime_last) / 
+                (ip_map_d->stat.ack_receive + 1); 
+        ip_map_d->stat.ack_receive++;
+        if(ip_map_d->stat.triptime_last < ip_map_d->stat.triptime_min) 
+            ip_map_d->stat.triptime_min = ip_map_d->stat.triptime_last;
+        if(ip_map_d->stat.triptime_last > ip_map_d->stat.triptime_max) 
+            ip_map_d->stat.triptime_max = ip_map_d->stat.triptime_last;
+
+        // Add to last 10 array
+        ip_map_d->stat.triptime_last10[ip_map_d->stat.idx] = ip_map_d->stat.triptime_last;
+        if(ip_map_d->stat.idx >= LAST10_SIZE) ip_map_d->stat.idx = 0;
+        else ip_map_d->stat.idx++;
+
+        // Calculate max in last 10 packet
+        ip_map_d->stat.triptime_last10_max = 0;
+        for(i = 0; i < LAST10_SIZE; i++) {        
+            if(ip_map_d->stat.triptime_last10[i] > ip_map_d->stat.triptime_last10_max)
+                ip_map_d->stat.triptime_last10_max = ip_map_d->stat.triptime_last10[i];
+        }
     }
-    
-//    printf("ip_map_d->stat.triptime_last10_max = %.3f ms\n", ip_map_d->stat.triptime_last10_max / 1000.0 );
 }
 
 /**
