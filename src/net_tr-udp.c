@@ -422,7 +422,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             // Parse packet and check if it valid
                             if(ksnCoreParsePacket(data, data_len, &rd)) {
                                 
-                                printf("got ACK to cmd %d, from %s:%d  rd.data_len = %d, rd.data = %s\n", rd.cmd, rd.addr, rd.port, (int)rd.data_len, (char*)rd.data);
+                                printf("got ACK to cmd %d, from %s:%d  rd.data_len = %d\n", rd.cmd, rd.addr, rd.port, (int)rd.data_len);
 
                                 // Send event for CMD for Application level TR-UDP mode: 128...191
                                 if(rd.cmd >= 128 && rd.cmd < 192) {
