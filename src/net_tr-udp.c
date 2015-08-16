@@ -334,7 +334,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                                 recvlen = 0;
                             }
-                                // Drop saved message
+                            // Drop saved message
                             else {
                                 #ifdef DEBUG_KSNET
                                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
@@ -433,7 +433,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             &tru_header->id); // Pointer to packet ID
                                 }
                             }
-                            else printf("Wrong ACK to cmd %d, from %s:%d  rd.data_len = %d\n", rd.cmd, rd.addr, rd.port, (int)rd.data_len);
+                            else printf("Wrong ACK from %s:%d  sl_d->data_len = %d\n", rd.addr, rd.port, (int)sl_d->data_len);
                         }
                     }
                     
