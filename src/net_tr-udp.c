@@ -433,7 +433,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             &tru_header->id); // Pointer to packet ID
                                 }
                             }
-                            else printf("Wrong package, from %s:%d \n", rd.addr, rd.port);
+                            else printf("Wrong ACK to cmd %d, from %s:%d  rd.data_len = %d\n", rd.cmd, rd.addr, rd.port, (int)rd.data_len);
                         }
                     }
                     
