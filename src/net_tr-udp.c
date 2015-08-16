@@ -146,6 +146,13 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         );
         #endif
 
+        // Calculate times statistic
+        ksnTRUDPsetDATAsendTime(tu, addr);                    
+        
+        // Set statistic start time
+        if(!tu->started) tu->started = 
+                ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke);
+        
         // Add packet to Sent message list (Acknowledge Pending Messages)
         if(!resend_flg) {
             
@@ -153,8 +160,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
                     attempt, addr, addr_len);
             
             // Add record to statistic
-            ksnTRUDPstatSendListAdd(tu);
-            
+            ksnTRUDPstatSendListAdd(tu);           
         }
         
         // Update record in send list
@@ -162,14 +168,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
             
             sl_data *sl_d = ksnTRUDPsendListGetData(tu, id, addr);
             sl_d->attempt = attempt;
-        }
-        
-        // Calculate times statistic
-        ksnTRUDPsetDATAsendTime(tu, addr);                    
-        
-        // Set statistic start time
-        if(!tu->started) tu->started = 
-                ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke);
+        }        
     } 
     else {
         #ifdef DEBUG_KSNET
