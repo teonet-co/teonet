@@ -124,9 +124,6 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         // Make TR-UDP Header
         MakeHeader(tru_header, (resend_flg ? id : ksnTRUDPsendListNewID(tu, addr)), TRU_DATA, buf_len);
         
-        // Calculate times statistic
-        ksnTRUDPsetDATAsendTime(tu, addr);                    
-
         // Copy TR-UDP header
         memcpy(tru_buf, &tru_header, tru_ptr);
 
@@ -150,14 +147,25 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         #endif
 
         // Add packet to Sent message list (Acknowledge Pending Messages)
-        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
-                attempt, addr, addr_len);
-        
-        // Add record to statistic
         if(!resend_flg) {
             
+            ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
+                    attempt, addr, addr_len);
+            
+            // Add record to statistic
             ksnTRUDPstatSendListAdd(tu);
-        }    
+            
+        }
+        
+        // Update record in send list
+        else {    
+            
+            sl_data *sl_d = ksnTRUDPsendListGetData(tu, id, addr);
+            sl_d->attempt = attempt;
+        }
+        
+        // Calculate times statistic
+        ksnTRUDPsetDATAsendTime(tu, addr);                    
         
         // Set statistic start time
         if(!tu->started) tu->started = 
