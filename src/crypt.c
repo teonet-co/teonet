@@ -264,12 +264,23 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     #endif
     *decrypt_len = _decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
+    
+    // Copy decrypted data (if decrypted, or 
+    if(*decrypt_len) { 
 
-    // Add a NULL terminator. We are expecting printable text
-    decrypted[*decrypt_len] = '\0';
+        // Add a NULL terminator. We are expecting printable text
+        decrypted[*decrypt_len] = '\0';
 
-    // Copy and free decrypted buffer
-    memcpy(package + ptr, decrypted, *decrypt_len + 1);
+        // Copy and free decrypted buffer
+        memcpy(package + ptr, decrypted, *decrypt_len + 1);
+    }
+    
+    // If data not decrypted - return input package with package len
+    else {
+        ptr = 0;
+        *decrypt_len = package_len;
+    }
+    
     free(decrypted);
 
     return package + ptr;
