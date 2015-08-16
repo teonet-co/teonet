@@ -405,7 +405,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         
                         sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
                         if(sl_d != NULL) {
-                            char *data = sl_d->data + sizeof(ksnTRUDP_header);
+                            char *data = sl_d->data_buf + sizeof(ksnTRUDP_header);
                             size_t data_len = sl_d->data_len - sizeof(ksnTRUDP_header);
                             #if KSNET_CRYPT
                             if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
@@ -1160,7 +1160,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         
         // Resend message
         ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, sl_t_data.fd, 
-                sl_d->data,  sl_d->data_len, sl_t_data.flags, 
+                sl_d->data_buf,  sl_d->data_len, sl_t_data.flags, 
                 sl_t_data.addr, sl_t_data.addr_len);
         
         // Statistic
