@@ -153,8 +153,9 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
                 attempt, addr, addr_len);
         
+        // Add record to statistic
         if(!resend_flg) {
-            // Add record to statistic
+            
             ksnTRUDPstatSendListAdd(tu);
         }    
         
@@ -420,6 +421,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                             // Parse packet and check if it valid
                             if(ksnCoreParsePacket(data, data_len, &rd)) {
+                                
+                                printf("got ACK to cmd %d, from %s:%d  rd.data_len = %d, rd.data = %s\n", rd.cmd, rd.addr, rd.port, (int)rd.data_len, (char*)rd.data);
 
                                 // Send event for CMD for Application level TR-UDP mode: 128...191
                                 if(rd.cmd >= 128 && rd.cmd < 192) {
@@ -430,6 +433,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             &tru_header->id); // Pointer to packet ID
                                 }
                             }
+                            else printf("Wrong package, from %s:%d \n", rd.addr, rd.port);
                         }
                     }
                     
@@ -947,21 +951,23 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     sl_data sl_d;
     sl_d.data_len = data_len < KSN_BUFFER_SIZE ? data_len : KSN_BUFFER_SIZE;
     memcpy(sl_d.data_buf, data, sl_d.data_len);
-    sl_d.data = (void*) sl_d.data_buf;
+    //sl_d.data = (void*) sl_d.data_buf;
     sl_d.attempt = attempt;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
 
     // Start ACK timer watcher
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
+    sl_d.data = (void*) sl_d.data_buf;
     sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
             addr, addr_len); 
     
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            "%sTR-UDP:%s message with id %d was added to %s Send List (len %d)\n",
+            "%sTR-UDP:%s message with id %d, command %d was added "
+            "to %s Send List (len %d)\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
-            id, key, pblMapSize(sl)
+            id, cmd, key, pblMapSize(sl)
     );
     #endif
 
