@@ -1082,7 +1082,10 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     // Timer value 
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     double max_ack_wait = ip_map_d->stat.triptime_last10_max / 1000000.0;
-    if(max_ack_wait > 0) max_ack_wait += max_ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.05 : 0.1);
+    if(max_ack_wait > 0) {
+        max_ack_wait += max_ack_wait * 
+            (ip_map_d->stat.packets_attempt < 10 ? 0.05 : 0.1);
+    }
     else max_ack_wait = MAX_ACK_WAIT;
     
     // Initialize, set user data and start the timer
@@ -1151,8 +1154,9 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
     if (sl_d != NULL) {
 
-        #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+//        #ifdef DEBUG_KSNET
+//        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        printf(
                 "%sTR-UDP:%s %stimeout for message with id %d was happened%s, "
                 "data resent\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
@@ -1160,11 +1164,11 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
                 sl_t_data.id,
                 ANSI_NONE
         );
-        #endif
+//        #endif
         
         // Resend message
-        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, sl_t_data.fd, 
-                sl_d->data_buf + sizeof(ksnTRUDP_header),  
+        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
+                sl_t_data.fd, sl_d->data_buf + sizeof(ksnTRUDP_header),  
                 sl_d->data_len - sizeof(ksnTRUDP_header), sl_t_data.flags, 
                 sl_t_data.addr, sl_t_data.addr_len);
         
