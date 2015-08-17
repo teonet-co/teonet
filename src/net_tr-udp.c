@@ -965,7 +965,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     // Start ACK timer watcher
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
-    sl_d.data = (void*) sl_d.data_buf;
+//    sl_d_get->data = (void*) sl_d_get->data_buf; // Set data field
     sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
             addr, addr_len); 
     
