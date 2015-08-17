@@ -160,10 +160,6 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
         if(!tu->started) tu->started = 
                 ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke);
         
-//        // Add (or update) record to send list
-//        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
-//                attempt, addr, addr_len);
-            
         // Set statistic send list size
         if(!resend_flg) ksnTRUDPstatSendListAdd(tu);           
     } 
@@ -234,15 +230,14 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
     // Get data
     ssize_t recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
 
-//    #ifdef DEBUG_KSNET
-//    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-    printf(
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
             "%sTR-UDP:%s << got %d bytes packet, from %s:%d\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
             (int)recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
             ntohs(((struct sockaddr_in *) addr)->sin_port)
     );
-//    #endif
+    #endif
 
     // Data received
     if (recvlen > 0) {
@@ -252,15 +247,14 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
         // Check for TR-UDP header and its checksum
         if (recvlen - tru_ptr == tru_header->payload_length && ksnTRUDPchecksumCheck(tru_header)) {
 
-//            #ifdef DEBUG_KSNET
-//            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            printf(
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s process %d bytes message of type %d, id %d, "
                 "with %d bytes data payload\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 (int)recvlen, tru_header->message_type, tru_header->id, tru_header->payload_length
             );
-//            #endif
+            #endif
 
             switch (tru_header->message_type) {
 
@@ -327,7 +321,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                                 #ifdef DEBUG_KSNET
                                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                "Processed\n");
+                                    "Processed\n");
                                 #endif
 
                                 // Process packet
@@ -347,7 +341,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             else {
                                 #ifdef DEBUG_KSNET
                                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                "Skipped\n");
+                                    "Skipped\n");
                                 #endif
                                 recvlen = 0;
                                 break;
@@ -415,8 +409,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
                         if(sl_d != NULL) {
                             
-                            char *data = sl_d->data_buf; // + sizeof(ksnTRUDP_header);
-                            size_t data_len = sl_d->data_len; // - sizeof(ksnTRUDP_header);
+                            char *data = sl_d->data_buf; 
+                            size_t data_len = sl_d->data_len; 
                             #if KSNET_CRYPT
                             if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
                                 data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
@@ -432,7 +426,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             // Parse packet and check if it valid
                             if(ksnCoreParsePacket(data, data_len, &rd)) {
                                 
-                                printf("got ACK to cmd %d, id %d, from %s:%d  rd.data_len = %d\n", rd.cmd, tru_header->id, rd.addr, rd.port, (int)rd.data_len);
+//                                printf("got ACK to cmd %d, id %d, from %s:%d  rd.data_len = %d\n", rd.cmd, tru_header->id, rd.addr, rd.port, (int)rd.data_len);
 
                                 // Send event for CMD for Application level TR-UDP mode: 128...191
                                 if(rd.cmd >= 128 && rd.cmd < 192) {
@@ -443,7 +437,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             &tru_header->id); // Pointer to packet ID
                                 }
                             }
-                            else printf("Wrong ACK from %s:%d  sl_d->data_len = %d\n", rd.addr, rd.port, (int)sl_d->data_len);
+//                            else printf("Wrong ACK from %s:%d  sl_d->data_len = %d\n", rd.addr, rd.port, (int)sl_d->data_len);
                         }
                     }
                     
@@ -479,13 +473,12 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
             }
         } else {
 
-//            #ifdef DEBUG_KSNET
-//            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            printf(
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                     "%sTR-UDP:%s skip received packet\n",
                     ANSI_LIGHTGREEN, ANSI_NONE
             );
-//            #endif
+            #endif
         }
     }
 
@@ -1159,9 +1152,8 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
     if (sl_d != NULL) {
 
-//        #ifdef DEBUG_KSNET
-//        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-        printf(
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s %stimeout for message with id %d was happened%s, "
                 "resend %d bytes data to %s:%d\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
@@ -1173,13 +1165,9 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
                 ntohs(((struct sockaddr_in *) &sl_t_data.addr)->sin_port)
                 
         );
-//        #endif
+        #endif
         
         // Resend message
-//        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
-//                sl_t_data.fd, sl_d->data_buf + sizeof(ksnTRUDP_header),  
-//                sl_d->data_len - sizeof(ksnTRUDP_header), sl_t_data.flags, 
-//                sl_t_data.addr, sl_t_data.addr_len);
         ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
                 sl_t_data.fd, sl_d->data_buf, sl_d->data_len, sl_t_data.flags, 
                 &sl_t_data.addr, sl_t_data.addr_len);
