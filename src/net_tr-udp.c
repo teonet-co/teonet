@@ -154,21 +154,21 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
                 ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke);
         
         // Add packet to Sent message list (Acknowledge Pending Messages)
-        if(!resend_flg) {
-            
+//         {
+//            
             ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
                     attempt, addr, addr_len);
             
             // Add record to statistic
-            ksnTRUDPstatSendListAdd(tu);           
-        }
+            if(!resend_flg) ksnTRUDPstatSendListAdd(tu);           
+//        }
         
-        // Update record in send list
-        else {    
-            
-            sl_data *sl_d = ksnTRUDPsendListGetData(tu, id, addr);
-            sl_d->attempt = attempt;
-        }        
+//        // Update record in send list
+//        else {    
+//            
+//            sl_data *sl_d = ksnTRUDPsendListGetData(tu, id, addr);
+//            sl_d->attempt = attempt;
+//        }        
     } 
     else {
         #ifdef DEBUG_KSNET
