@@ -32,30 +32,31 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Calls immediately after event manager starts
         case EV_K_STARTED:
             // TODO: Send message to peer
+            
             break;
             
         // Send by timer
         case EV_K_TIMER:
-            {
-                static int idx = 0;
-                char buffer[KSN_BUFFER_DB_SIZE];
+        {
+            static int idx = 0;
+            char buffer[KSN_BUFFER_DB_SIZE];
 
-                char *teorecv = "tr-udp-11";
-                if(strcmp(teorecv, ksnetEvMgrGetHostName(ke))) {
+            char *peer_to = ke->ksn_cfg.app_argv[1]; //"tr-udp-11";
+            if(strcmp(peer_to, ksnetEvMgrGetHostName(ke))) {
 
-                    // If teorecv is connected
-                    if (ksnetArpGet(ke->kc->ka, teorecv) != NULL) {
-                    
-                        sprintf(buffer, "#%d: Teoack Hello!", idx++);
-                        printf("\nSend message \"%s\" to %s peer\n", buffer, teorecv);
-                        ksnCoreSendCmdto(ke->kc, (char*)teorecv, CMD_USER, buffer, 
-                                strlen(buffer)+1);
+                // If peer_to is connected
+                if (ksnetArpGet(ke->kc->ka, peer_to) != NULL) {
 
-                        //ksnetEvMgrSetCustomTimer(ke, 0.00); // Stop timer
-                    }
+                    sprintf(buffer, "#%d: Teoack Hello!", idx++);
+                    printf("\nSend message \"%s\" to %s peer\n", buffer, peer_to);
+                    ksnCoreSendCmdto(ke->kc, (char*)peer_to, CMD_USER, buffer, 
+                            strlen(buffer)+1);
+
+                    ksnetEvMgrSetCustomTimer(ke, 0.00); // Stop timer
                 }
             }
-            break;            
+        }
+        break;            
             
         // Send when ACK received
         case EV_K_RECEIVED_ACK: 
@@ -66,7 +67,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                        *(uint32_t*)user_data, (char*)rd->data);
                 
                 
-                //ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
+                ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
             }
             break;
             
@@ -88,9 +89,16 @@ int main(int argc, char** argv) {
 
     printf("Teoack example ver " TACK_VERSION ", based on teonet ver. " VERSION "\n");
     
+    
+    // Application parameters
+    char *app_argv[] = { "", "peer_to"}; 
+    ksnetEvMgrAppParam app_param;
+    app_param.app_argc = 2;
+    app_param.app_argv = app_argv;
+    
     // Initialize teonet event manager and Read configuration
-    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb,
-            READ_OPTIONS|READ_CONFIGURATION);
+    ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb,
+            READ_OPTIONS|READ_CONFIGURATION|APP_PARAM, 0, &app_param);
     
     // Set custom timer interval
     ksnetEvMgrSetCustomTimer(ke, 1.00);
