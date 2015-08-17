@@ -234,14 +234,15 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
     // Get data
     ssize_t recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
 
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+//    #ifdef DEBUG_KSNET
+//    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+    printf(
             "%sTR-UDP:%s << got %d bytes packet, from %s:%d\n",
             ANSI_LIGHTGREEN, ANSI_NONE,
-            recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+            (int)recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
             ntohs(((struct sockaddr_in *) addr)->sin_port)
     );
-    #endif
+//    #endif
 
     // Data received
     if (recvlen > 0) {
@@ -251,14 +252,15 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
         // Check for TR-UDP header and its checksum
         if (recvlen - tru_ptr == tru_header->payload_length && ksnTRUDPchecksumCheck(tru_header)) {
 
-            #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                "%sTR-UDP:%s process %d bytes message of type %d, "
+//            #ifdef DEBUG_KSNET
+//            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+            printf(
+                "%sTR-UDP:%s process %d bytes message of type %d, id %d, "
                 "with %d bytes data payload\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
-                recvlen, tru_header->message_type, tru_header->payload_length
+                (int)recvlen, tru_header->message_type, tru_header->id, tru_header->payload_length
             );
-            #endif
+//            #endif
 
             switch (tru_header->message_type) {
 
@@ -477,12 +479,13 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
             }
         } else {
 
-            #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+//            #ifdef DEBUG_KSNET
+//            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+            printf(
                     "%sTR-UDP:%s skip received packet\n",
                     ANSI_LIGHTGREEN, ANSI_NONE
             );
-            #endif
+//            #endif
         }
     }
 
@@ -1160,11 +1163,15 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 //        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
         printf(
                 "%sTR-UDP:%s %stimeout for message with id %d was happened%s, "
-                "data resent\n",
+                "resend %d bytes data to %s:%d\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 ANSI_RED, 
                 sl_t_data.id,
-                ANSI_NONE
+                ANSI_NONE, 
+                (int) sl_d->data_len,
+                inet_ntoa(((struct sockaddr_in *) sl_t_data.addr)->sin_addr),
+                ntohs(((struct sockaddr_in *) sl_t_data.addr)->sin_port)
+                
         );
 //        #endif
         
@@ -1174,8 +1181,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 //                sl_d->data_len - sizeof(ksnTRUDP_header), sl_t_data.flags, 
 //                sl_t_data.addr, sl_t_data.addr_len);
         ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
-                sl_t_data.fd, sl_d->data_buf,  
-                sl_d->data_len, sl_t_data.flags, 
+                sl_t_data.fd, sl_d->data_buf, sl_d->data_len, sl_t_data.flags, 
                 sl_t_data.addr, sl_t_data.addr_len);
         
         // Statistic
