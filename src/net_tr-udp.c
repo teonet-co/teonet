@@ -1167,7 +1167,8 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
         
         // Resend message
         ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, sl_t_data.fd, 
-                sl_d->data_buf,  sl_d->data_len, sl_t_data.flags, 
+                sl_d->data_buf + sizeof(ksnTRUDP_header),  
+                sl_d->data_len - sizeof(ksnTRUDP_header), sl_t_data.flags, 
                 sl_t_data.addr, sl_t_data.addr_len);
         
         // Statistic
