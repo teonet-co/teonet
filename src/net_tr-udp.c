@@ -132,6 +132,10 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
 
         // Copy TR-UDP message
         memcpy(tru_buf + tru_ptr, buf, buf_len);
+        
+        // Add (or update) record to send list
+        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
+                attempt, addr, addr_len);        
 
         // New buffer length
         buf_len += tru_ptr;
@@ -156,9 +160,9 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
         if(!tu->started) tu->started = 
                 ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke);
         
-        // Add (or update) record to send list
-        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
-                attempt, addr, addr_len);
+//        // Add (or update) record to send list
+//        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
+//                attempt, addr, addr_len);
             
         // Set statistic send list size
         if(!resend_flg) ksnTRUDPstatSendListAdd(tu);           
@@ -409,8 +413,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
                         if(sl_d != NULL) {
                             
-                            char *data = sl_d->data_buf + sizeof(ksnTRUDP_header);
-                            size_t data_len = sl_d->data_len - sizeof(ksnTRUDP_header);
+                            char *data = sl_d->data_buf; // + sizeof(ksnTRUDP_header);
+                            size_t data_len = sl_d->data_len; // - sizeof(ksnTRUDP_header);
                             #if KSNET_CRYPT
                             if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
                                 data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
@@ -955,14 +959,12 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     sl_data sl_d;
     sl_d.data_len = data_len < KSN_BUFFER_SIZE ? data_len : KSN_BUFFER_SIZE;
     memcpy(sl_d.data_buf, data, sl_d.data_len);
-    //sl_d.data = (void*) sl_d.data_buf;
     sl_d.attempt = attempt;
     pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
 
     // Start ACK timer watcher
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
-//    sl_d_get->data = (void*) sl_d_get->data_buf; // Set data field
     sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
             addr, addr_len); 
     
@@ -1167,9 +1169,13 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 //        #endif
         
         // Resend message
+//        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
+//                sl_t_data.fd, sl_d->data_buf + sizeof(ksnTRUDP_header),  
+//                sl_d->data_len - sizeof(ksnTRUDP_header), sl_t_data.flags, 
+//                sl_t_data.addr, sl_t_data.addr_len);
         ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
-                sl_t_data.fd, sl_d->data_buf + sizeof(ksnTRUDP_header),  
-                sl_d->data_len - sizeof(ksnTRUDP_header), sl_t_data.flags, 
+                sl_t_data.fd, sl_d->data_buf,  
+                sl_d->data_len, sl_t_data.flags, 
                 sl_t_data.addr, sl_t_data.addr_len);
         
         // Statistic
