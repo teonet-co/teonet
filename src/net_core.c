@@ -391,13 +391,6 @@ int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *rd) {
 
         packed_valid = 1;
     } 
-//    else {
-//        printf("rd->from_len: %d, rd->from: %s, "
-//               "rd->from_len + PACKET_HEADER_ADD_SIZE <= packet_len: %d, "
-//               "*((char*)(packet + ptr + rd->from_len - 1)) == '\\0': %d\n", 
-//                rd->from_len, rd->from, 
-//                rd->from_len + PACKET_HEADER_ADD_SIZE <= packet_len, *((char*)(packet + ptr + rd->from_len - 1)) == '\0');
-//    }
 
     return packed_valid;
 }
