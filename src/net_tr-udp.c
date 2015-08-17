@@ -96,8 +96,8 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
  * 
  * @return Number of bytes sent to UDP
  */
-ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attempt, 
-        int cmd, int fd, const void *buf, size_t buf_len, int flags, 
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, 
+        int attempt, int cmd, int fd, const void *buf, size_t buf_len, int flags, 
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
@@ -108,7 +108,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
     );
     #endif
 
-    // Check commands array
+    // TR-UDP: Check commands array
     if(CMD_TRUDP_CHECK(cmd)) {
 
         // TR-UDP packet buffer
@@ -122,7 +122,10 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         }
 
         // Make TR-UDP Header
-        MakeHeader(tru_header, (resend_flg ? id : ksnTRUDPsendListNewID(tu, addr)), TRU_DATA, buf_len);
+        MakeHeader(tru_header, 
+                   resend_flg ? id : ksnTRUDPsendListNewID(tu, addr), 
+                   TRU_DATA, 
+                   buf_len);
         
         // Copy TR-UDP header
         memcpy(tru_buf, &tru_header, tru_ptr);
@@ -146,31 +149,24 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id, int attem
         );
         #endif
 
-        // Calculate times statistic
+        // Set packets time statistics
         ksnTRUDPsetDATAsendTime(tu, addr);                    
         
         // Set statistic start time
         if(!tu->started) tu->started = 
                 ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke);
         
-        // Add packet to Sent message list (Acknowledge Pending Messages)
-//         {
-//            
-            ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
-                    attempt, addr, addr_len);
+        // Add (or update) record to send list
+        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags, 
+                attempt, addr, addr_len);
             
-            // Add record to statistic
-            if(!resend_flg) ksnTRUDPstatSendListAdd(tu);           
-//        }
-        
-//        // Update record in send list
-//        else {    
-//            
-//            sl_data *sl_d = ksnTRUDPsendListGetData(tu, id, addr);
-//            sl_d->attempt = attempt;
-//        }        
+        // Set statistic send list size
+        if(!resend_flg) ksnTRUDPstatSendListAdd(tu);           
     } 
+    
+    // Not TR-UDP
     else {
+        
         #ifdef DEBUG_KSNET
         ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s >> skip this packet, "
@@ -412,6 +408,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         
                         sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
                         if(sl_d != NULL) {
+                            
                             char *data = sl_d->data_buf + sizeof(ksnTRUDP_header);
                             size_t data_len = sl_d->data_len - sizeof(ksnTRUDP_header);
                             #if KSNET_CRYPT
