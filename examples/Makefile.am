@@ -29,7 +29,8 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm teoack
+bin_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm teoack \
+    teoackm
 
 teolarge_SOURCES = teolarge.c
 teosend_SOURCES = teosend.c
@@ -39,7 +40,9 @@ teotcp_SOURCES = teotcp.c
 teotun_SOURCES = teotun.c
 teoterm_SOURCES = teoterm.c
 teoack_SOURCES = teoack.c
+teoackm_SOURCES = teoackm.c
 
 teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
+teoackm_LDFLAGS = $(AM_LDFLAGS) -lev
 
 SUBDIRS = fossa

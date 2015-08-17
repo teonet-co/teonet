@@ -113,6 +113,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 //            " "COLOR_DW"A"COLOR_END" - direct connect to all peers\n"
             "%s"
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
+            " "COLOR_DW"U"COLOR_END" - send Application user event\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
             #if M_ENAMBE_VPN
@@ -149,6 +150,12 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             printf("Press u to %s continuously refresh\n",
                    (khv->tr_udp_m ? STOP : START));
         }
+            break;
+            
+        // Send User event to Application
+        case 'U':
+            if(kev->event_cb != NULL)
+                kev->event_cb(ke, EV_K_USER , NULL, 0, NULL);
             break;
             
         // Show peers

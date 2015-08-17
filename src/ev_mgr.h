@@ -39,6 +39,7 @@ typedef enum ksnetEvMgrEvents {
     EV_K_RECEIVED_ACK,  ///< This host Received ACK to sent data
     EV_K_IDLE,          ///< Idle check host events (after 11.5 after last host send or receive data)
     EV_K_TIMER,         ///< Timer event
+    EV_K_USER,          ///< User press U hotkey
     EV_K_ASYNC,         ///< Async event           
     EV_K_TERM_STARTED   ///< After terminal started (in place to define commands 
 

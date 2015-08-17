@@ -91,3 +91,5 @@
 /tests/test_teonet
 /examples/teoack
 /.teoack/teonet.conf.out
+/examples/teoackm
+/.teoackm/
