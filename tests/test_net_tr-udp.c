@@ -524,12 +524,13 @@ void test_2_8() {
     // 1) ksnTRUDPsendto test
     //
     // Prepare data to SendTo receiver
-    const char *buf = "Hello world - 1"; // Data to send
-    size_t buf_len = strlen(buf) + 1; // Size of send data
+    const char *buf1 = "Hello world - 1"; // Data to send
+    const char *buf2 = "Hello world - 1"; // Data to send
+    size_t buf_len = strlen(buf1) + 1; // Size of send data
     const size_t tru_ptr = sizeof (ksnTRUDP_header); // TR-UDP header size
     //
     // a) Send one message receiver
-    ssize_t sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf, buf_len, 0, 
+    ssize_t sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf1, buf_len, 0, 
         (__CONST_SOCKADDR_ARG) &addr_r, addr_len); // TR-UDP sendto
     if(sent < 0) printf(" sent to %d = %d: %s ...", port_r, (int)sent, strerror(errno));
     // Check sent result
@@ -549,10 +550,10 @@ void test_2_8() {
     CU_ASSERT_FATAL(recvlen == sent); // Receive length equal send length
     CU_ASSERT(tru_header->id == 0); // Packet id = 0
     CU_ASSERT(tru_header->payload_length == buf_len); // Payload length equal send buffer length
-    CU_ASSERT_STRING_EQUAL(buf, buf_recv + tru_ptr); // Content of send buffer equal to received data
+    CU_ASSERT_STRING_EQUAL(buf1, buf_recv + tru_ptr); // Content of send buffer equal to received data
     //
     // c) Send next packet
-    sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf, buf_len, 0, 
+    sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf2, buf_len, 0, 
         (__CONST_SOCKADDR_ARG) &addr_r, addr_len); // TR-UDP sendto
     CU_ASSERT_FATAL(sent > 0);
     //
@@ -583,9 +584,11 @@ void test_2_8() {
     sl_data *sl_d = ksnTRUDPsendListGetData(tu, 0, (__CONST_SOCKADDR_ARG)&addr_r); // Check id = 0
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d); // id =  0 present
     CU_ASSERT(sl_d->attempt == 1); // Number of attempt 1
+    CU_ASSERT_STRING_EQUAL(sl_d->data_buf, buf1); // Receive buffer equal to send buffer
     sl_d = ksnTRUDPsendListGetData(tu, 1, (__CONST_SOCKADDR_ARG)&addr_r); // Check id = 1
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d); // id =  1 present
     CU_ASSERT(sl_d->attempt == 1); // Number of attempt 1
+    CU_ASSERT_STRING_EQUAL(sl_d->data_buf, buf2); // Receive buffer equal to send buffer
     //
     // h) Send ACK from receiver to sender to remove one packet from send list
     tru_header->id = 1;
