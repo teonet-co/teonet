@@ -69,7 +69,6 @@ typedef struct sl_timer_cb_data {
     int fd;
     int cmd;
     int flags;
-    //__CONST_SOCKADDR_ARG addr;
     struct sockaddr addr;
     socklen_t addr_len;
 
@@ -82,7 +81,6 @@ typedef struct sl_data {
     
     ev_timer w;
     sl_timer_cb_data w_data;
-//    void *data;
     char data_buf[KSN_BUFFER_SIZE];
     size_t data_len;
     size_t attempt;
