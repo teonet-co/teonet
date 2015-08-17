@@ -1101,7 +1101,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     sl_t_data->fd = fd;
     sl_t_data->cmd = cmd;
     sl_t_data->flags = flags;
-    sl_t_data->addr = addr;
+    memcpy(&sl_t_data->addr, addr, addr_len);
     sl_t_data->addr_len = addr_len;
     w->data = sl_t_data;        
     ev_timer_start(kev->ev_loop, w);
@@ -1155,7 +1155,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     sl_timer_stop(EV_A_ w);    
 
     // Get message from list
-    sl_data *sl_d = ksnTRUDPsendListGetData(tu, sl_t_data.id, sl_t_data.addr);
+    sl_data *sl_d = ksnTRUDPsendListGetData(tu, sl_t_data.id, &sl_t_data.addr);
 
     if (sl_d != NULL) {
 
@@ -1169,8 +1169,8 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
                 sl_t_data.id,
                 ANSI_NONE, 
                 (int) sl_d->data_len,
-                inet_ntoa(((struct sockaddr_in *) sl_t_data.addr)->sin_addr),
-                ntohs(((struct sockaddr_in *) sl_t_data.addr)->sin_port)
+                inet_ntoa(((struct sockaddr_in *) &sl_t_data.addr)->sin_addr),
+                ntohs(((struct sockaddr_in *) &sl_t_data.addr)->sin_port)
                 
         );
 //        #endif
@@ -1182,10 +1182,10 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 //                sl_t_data.addr, sl_t_data.addr_len);
         ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
                 sl_t_data.fd, sl_d->data_buf, sl_d->data_len, sl_t_data.flags, 
-                sl_t_data.addr, sl_t_data.addr_len);
+                &sl_t_data.addr, sl_t_data.addr_len);
         
         // Statistic
-        ksnTRUDPstatSendListAttempt(tu, sl_t_data.addr);    
+        ksnTRUDPstatSendListAttempt(tu, &sl_t_data.addr);    
 
     } else {
         
