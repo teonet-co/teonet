@@ -191,6 +191,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                         CMD_USER + 1, 
                                         command, strlen(command) + 1
                                 );
+                                
+                                // Free command string memory
+                                free(command);
                             }
                         }
 
@@ -261,7 +264,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                     // Show data or statistic
                     else if(!strncmp((char*)rd->data, CMD_U_DATA_OR_STAT, 
-                            sizeof(CMD_U_DATA_OR_STAT))) {
+                            strlen(CMD_U_DATA_OR_STAT))) {
                         
                         sscanf((char*)rd->data, "%*s %d", 
                                 &show_data_or_statistic_at_server);
