@@ -20,10 +20,12 @@
 // This application commands
 #define CMD_U_STAT  "stat"
 #define CMD_U_RESET "reset"
+#define CMD_U_DATA_OR_STAT "data_or_stat"
 
 #define SERVER_NAME "none"
 
 const char* PRESS_A = "(Press A to return to main application menu)";
+int show_data_or_statistic_at_server = 1;
 
 /**
  * Application states
@@ -140,26 +142,57 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
                             const socklen_t addrlen = sizeof(remaddr); // length of addresses
-                            memset((char *) &remaddr, 0, addrlen);
-                            remaddr.sin_family = AF_INET;
-                            remaddr.sin_port = htons(arp->port);
-                            #ifndef HAVE_MINGW
-                            if(inet_aton(arp->addr, &remaddr.sin_addr) == 0) {
-                                //return(-2);
+//                            memset((char *) &remaddr, 0, addrlen);
+//                            remaddr.sin_family = AF_INET;
+//                            remaddr.sin_port = htons(arp->port);
+//                            #ifndef HAVE_MINGW
+//                            if(inet_aton(arp->addr, &remaddr.sin_addr) == 0) {
+//                                //return(-2);
+//                            }
+//                            #else
+//                            remaddr.sin_addr.s_addr = inet_addr(addr);
+//                            #endif
+                            if(!ksnTRUDPmakeAddr(arp->addr, arp->port, 
+                                    (__SOCKADDR_ARG) &remaddr, &addrlen)) {
+                                
+                                ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, 
+                                        (__CONST_SOCKADDR_ARG) &remaddr);
+                                ksnTRUDPreset(ke->kc->ku, 
+                                        (__CONST_SOCKADDR_ARG) &remaddr, 0);
+                                ksnTRUDPstatReset(ke->kc->ku);
                             }
-                            #else
-                            remaddr.sin_addr.s_addr = inet_addr(addr);
-                            #endif
-
-                            ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, (__CONST_SOCKADDR_ARG) &remaddr);
-                            ksnTRUDPreset(ke->kc->ku, (__CONST_SOCKADDR_ARG) &remaddr, 0);
-                            ksnTRUDPstatReset(ke->kc->ku);
                         }
                         
                         // Show menu
                         ke->event_cb(ke, EV_K_USER , NULL, 0, NULL);
                     }
                     break;
+                    
+                    // Show data or statistic at server
+                    case '5':
+                        show_data_or_statistic_at_server = !show_data_or_statistic_at_server;
+                        ksnet_arp_data *arp = ksnetArpGet(ke->kc->ka, peer_to);
+                        if(arp != NULL) {
+                            // Make address from string
+                            struct sockaddr_in remaddr; // remote address
+                            const socklen_t addrlen = sizeof(remaddr); // length of addresses
+                            if(!ksnTRUDPmakeAddr(arp->addr, arp->port, 
+                                    (__SOCKADDR_ARG) &remaddr, &addrlen)) {
+                                
+                                //Make command string
+                                char *command = ksnet_formatMessage("%s %d", 
+                                        CMD_U_DATA_OR_STAT, 
+                                        show_data_or_statistic_at_server 
+                                );
+                                
+                                // Send command to server
+                                ksnCoreSendCmdto(ke->kc, 
+                                        (char*)peer_to, 
+                                        CMD_USER + 1, 
+                                        command, strlen(command) + 1
+                                );
+                            }
+                        }
 
                     default:
                         break;
@@ -186,9 +219,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                            "  2 - show TR-UDP statistics\n" 
                            "  3 - get and show remote peer TR-UDP statistics\n" 
                            "  4 - send TR-UDP reset\n" 
+                           "  5 - show data or TR-UDP statistic screen at server (now: %s)\n"
                            "  0 - exit\n"
                            "\n"
                            "teoackm $ "
+                           , show_data_or_statistic_at_server ? "data" : "statistic" 
                     );
                     fflush(stdout);
                     app_state = STATE_WAIT_KEY;
@@ -207,7 +242,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 
                 // Server got DATA from client
                 case CMD_USER:
-                    if(strcmp(peer_to, SERVER_NAME)) {
+                    if(strcmp(peer_to, SERVER_NAME) || show_data_or_statistic_at_server) {
                         printf("Got DATA: %s\n", (char*)rd->data); 
                     }
                     break;
@@ -215,11 +250,34 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // Server got CONTROL from client
                 case CMD_USER + 1: 
                 {
+                    // Send statistic back
                     if(!strcmp((char*)rd->data, CMD_U_STAT)) {
+                        
                         char *stat = ksnTRUDPstatShowStr(ke->kc->ku);
                         ksnCoreSendCmdto(ke->kc, rd->from, 
                                 CMD_USER + 2, stat, strlen(stat)+1);
                         free(stat);
+                    }
+                    
+                    // Show data or statistic
+                    else if(!strncmp((char*)rd->data, CMD_U_DATA_OR_STAT, 
+                            sizeof(CMD_U_DATA_OR_STAT))) {
+                        
+                        sscanf((char*)rd->data, "%*s %d", 
+                                &show_data_or_statistic_at_server);
+                        
+                        printf("show_data_or_statistic_at_server %d", 
+                                show_data_or_statistic_at_server);
+                        
+                        // Show DATA - stop TR-UDP statistic
+                        if(show_data_or_statistic_at_server) {
+                            
+                            ke->ksn_cfg.show_tr_udp_f = 0;
+                        }
+                        //Show Statistic - start TR-UDP statistic
+                        else {
+                            ke->ksn_cfg.show_tr_udp_f = 1;
+                        }
                     }
                 }    
                 break;

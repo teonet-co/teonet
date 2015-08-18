@@ -142,6 +142,7 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
 ip_map_data *ksnTRUDPipMapDataTry(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 uint32_t ksnTRUDPtimestamp();
+int ksnTRUDPmakeAddr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *addr_len);
 //
 uint8_t ksnTRUDPchecksumCalculate(ksnTRUDP_header *th);
 void ksnTRUDPchecksumSet(ksnTRUDP_header *th, uint8_t chk);

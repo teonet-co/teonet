@@ -501,6 +501,12 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
         kh->pet = peer_timer_init( ((ksnetEvMgrClass*)ke)->kc );
         kh->peer_m = 1;
     }
+    // Start show TR-UDP statistic
+    else
+    if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_tr_udp_f) {
+        kh->put = tr_udp_timer_init( ((ksnetEvMgrClass*)ke)->kc );
+        kh->tr_udp_m = 1;
+    }
 
     return kh;
 }

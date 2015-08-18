@@ -245,21 +245,10 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
     int retval = 0;
 
     if(data_len <= MAX_PACKET_LEN - MAX_DATA_LEN) {
-    
-        struct sockaddr_in remaddr;         // remote address
-        const socklen_t addrlen = sizeof(remaddr);// length of addresses
 
-        memset((char *) &remaddr, 0, addrlen);
-        remaddr.sin_family = AF_INET;
-        remaddr.sin_port = htons(port);
-        #ifndef HAVE_MINGW
-        if(inet_aton(addr, &remaddr.sin_addr) == 0) {
-                //fprintf(stderr, "inet_aton() failed\n");
-                return(-2);
-        }
-        #else
-        remaddr.sin_addr.s_addr = inet_addr(addr);
-        #endif
+        struct sockaddr_in remaddr;         // remote address
+        socklen_t addrlen = sizeof(remaddr);// length of addresses
+        ksnTRUDPmakeAddr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
         // Split large packet
         int num_subpackets;
