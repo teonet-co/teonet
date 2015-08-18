@@ -138,8 +138,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         if(arp != NULL) {
                             
                             // Make address from string
-                            struct sockaddr_in remaddr;         // remote address
-                            const socklen_t addrlen = sizeof(remaddr);// length of addresses
+                            struct sockaddr_in remaddr; // remote address
+                            const socklen_t addrlen = sizeof(remaddr); // length of addresses
                             memset((char *) &remaddr, 0, addrlen);
                             remaddr.sin_family = AF_INET;
                             remaddr.sin_port = htons(arp->port);
@@ -190,7 +190,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                            "\n"
                            "teoackm $ "
                     );
-                    fflush(stdout); // Prints to screen or whatever your standard out is
+                    fflush(stdout);
                     app_state = STATE_WAIT_KEY;
                 }
             }
@@ -207,8 +207,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 
                 // Server got DATA from client
                 case CMD_USER:
-                    printf("Got DATA: %s\n", 
-                        (char*)rd->data); 
+                    if(strcmp(peer_to, SERVER_NAME)) {
+                        printf("Got DATA: %s\n", (char*)rd->data); 
+                    }
                     break;
                 
                 // Server got CONTROL from client
