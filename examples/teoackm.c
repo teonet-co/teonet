@@ -207,9 +207,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             // ACK event
             ksnCorePacketData *rd = data;
-            printf("Got ACK event to ID %d, data: %s\n", 
-                   *(uint32_t*)user_data, (char*)rd->data);
-
+            if(strcmp(rd->from, "none")) {
+                printf("Got ACK event to ID %d, data: %s\n", 
+                       *(uint32_t*)user_data, (char*)rd->data);
+            }
             //ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
         }
         break;
