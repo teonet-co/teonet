@@ -159,6 +159,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                         printf("Send %d messages to %s\n",num_packets, peer_to);
 
+                        idx = 0;
                         for(i = 0; i < num_packets; i++) {
 
                             sprintf(buffer, "#%d: Teoack Hello!", idx++);
@@ -213,8 +214,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // ACK event
             ksnCorePacketData *rd = data;
             if(strcmp(peer_to, SERVER_NAME) && strcmp((char*)rd->data, CMD_U_STAT)) {
-                printf("Got ACK event to ID %d, data: %s\n", 
-                       *(uint32_t*)user_data, (char*)rd->data);
+//                printf("Got ACK event to ID %d, data: %s\n", 
+//                       *(uint32_t*)user_data, (char*)rd->data);
+                printf("ACK ID: %d\n", *(uint32_t*)user_data);
             }
             //ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
         }
