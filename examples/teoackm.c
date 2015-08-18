@@ -23,6 +23,8 @@
 
 #define SERVER_NAME "none"
 
+const char* PRESS_U = "(Press U to return to main menu)";
+
 /**
  * Teonet Events callback
  *
@@ -96,8 +98,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                "  4 - send TR-UDP reset\n" 
                                "  0 - exit\n"
                                "\n"
-                               "(Press U to return to this menu)\n"
+                               "%s\n"
                                "teoackm $ "
+                               , PRESS_U
                         );
 
                         // Get command
@@ -142,7 +145,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         
                         if(command >= 0 && command <= 4) {                            
                             if(command != 3 && command != 4)
-                                printf("(Press U to return to main menu)\n");
+                                printf("%s\n", PRESS_U);
                             break;                        
                         }
                     }
@@ -180,14 +183,14 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             
             switch(rd->cmd) {
                 
-                // Get DATA from client
+                // Server got DATA from client
                 case CMD_USER:
                     printf("Got DATA ID %d: %s\n", 
                         user_data != NULL ? *(uint32_t*)user_data : -1, 
                         (char*)rd->data); 
                     break;
                 
-                // Get CONTROL from client
+                // Server got CONTROL from client
                 case CMD_USER + 1: 
                 {
                     if(!strcmp((char*)rd->data, CMD_U_STAT)) {
@@ -199,9 +202,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 }    
                 break;
                     
-                // Get statistic from remote peer (server)    
+                // Client got statistic from remote peer (server)    
                 case CMD_USER + 2:                    
-                    printf("%s\n", (char*)rd->data); 
+                    printf("%s%s", (char*)rd->data, PRESS_U); 
                     break;
             }
         }
@@ -212,7 +215,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             // ACK event
             ksnCorePacketData *rd = data;
-            if(strcmp(rd->from, SERVER_NAME)) {
+            if(strcmp(peer_to, SERVER_NAME)) {
                 printf("Got ACK event to ID %d, data: %s\n", 
                        *(uint32_t*)user_data, (char*)rd->data);
             }
