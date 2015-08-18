@@ -13,9 +13,13 @@
 #include <string.h>
 
 #include "ev_mgr.h"
+#include "net_tr-udp_stat.h"
 
 #define TACKM_VERSION "0.0.1"    
-//#define NUM_PACKET 200
+
+// This application commands
+#define CMD_U_STAT  "stat"
+#define CMD_U_RESET "stat"
 
 /**
  * Teonet Events callback
@@ -29,25 +33,23 @@
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
     
+    char *peer_to = ke->ksn_cfg.app_argv[1]; 
+    
     switch(event) {
         
         // Calls immediately after event manager starts
         case EV_K_STARTED:
-        {
-            char *peer_to = ke->ksn_cfg.app_argv[1]; 
             printf("Connecting to peer: %s ...\n", peer_to);
-        }
-        break;
+            break;
             
         // Send when peer connected
-        case EV_K_CONNECTED: 
+        case EV_K_CONNECTED:
         {
             ksnCorePacketData *rd = data;
-            char *peer_to = ke->ksn_cfg.app_argv[1];
             if(!strcmp(rd->from, peer_to))
                 printf("Peer %s connected at %s:%d \n", 
                        rd->from, rd->addr, rd->port);
-        }
+        }    
         break;
             
         // Send when peer disconnected
@@ -55,12 +57,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             printf("disconnected\n");
             ksnCorePacketData *rd = data;
-            char *peer_to = ke->ksn_cfg.app_argv[1];
             if(rd->from != NULL)
-            if(!strcmp(rd->from, peer_to))
-                printf("Peer %s was disconnected \n", 
+                if(!strcmp(rd->from, peer_to))
+                    printf("Peer %s was disconnected \n", 
                 rd->from);
-        }
+        }    
         break;
             
         // Send by timer
@@ -70,7 +71,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             static int i, idx = 0;
             char buffer[KSN_BUFFER_DB_SIZE];
 
-            char *peer_to = ke->ksn_cfg.app_argv[1]; 
             if(strcmp(peer_to, ksnetEvMgrGetHostName(ke))) {
 
                 // If peer_to is connected
@@ -115,11 +115,31 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 _keys_non_blocking_start(ke->kh);
                                 break;
                                 
+                            // Show local statistic
+                            case 2:
+                                ksnTRUDPstatShow(ke->kc->ku);
+                                break;
+                                
+                            // Send request to show remote peer statistic    
+                            case 3:
+                                ksnCoreSendCmdto(ke->kc, 
+                                        (char*)peer_to, 
+                                        CMD_USER + 1, 
+                                        CMD_U_STAT, sizeof(CMD_U_STAT));
+                                break;
+                                
+                            case 4:
+                                break;
+                                
                             default:
                                 break;
                         } 
                         
-                        if(command == 0 || command == 1) break;                        
+                        if(command >= 0 && command <= 4) {                            
+                            if(command != 3 && command != 4)
+                                printf("(Press U to return to main menu)\n");
+                            break;                        
+                        }
                     }
                     
                     // Exit
@@ -131,8 +151,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Send packages
                     else if(command == 1) {
 
-                        printf("Send %d messages to %s\n", 
-                                num_packets, peer_to);
+                        printf("Send %d messages to %s\n",num_packets, peer_to);
 
                         for(i = 0; i < num_packets; i++) {
 
@@ -141,7 +160,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             ksnCoreSendCmdto(ke->kc, (char*)peer_to, 
                                 CMD_USER, buffer, strlen(buffer)+1);
                         }
-                        ksnetEvMgrSetCustomTimer(ke, 3.00); // Set custom timer interval
+                        //ksnetEvMgrSetCustomTimer(ke, 3.00); // Set custom timer interval
                     }
                 }
             }
@@ -153,9 +172,33 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             // DATA event
             ksnCorePacketData *rd = data;
-            printf("Got DATA ID %d: %s\n", 
-                user_data != NULL ? *(uint32_t*)user_data : -1, 
-                (char*)rd->data); 
+            
+            switch(rd->cmd) {
+                
+                // Get DATA from client
+                case CMD_USER:
+                    printf("Got DATA ID %d: %s\n", 
+                        user_data != NULL ? *(uint32_t*)user_data : -1, 
+                        (char*)rd->data); 
+                    break;
+                
+                // Get CONTROL from client
+                case CMD_USER + 1: 
+                {
+                    if(!strcmp((char*)rd->data, CMD_U_STAT)) {
+                        char *stat = ksnTRUDPstatShowStr(ke->kc->ku);
+                        ksnCoreSendCmdto(ke->kc, (char*)peer_to, 
+                                CMD_USER, stat, strlen(stat)+1);
+                        free(stat);
+                    }
+                }    
+                break;
+                    
+                // Get statistic from remote peer (server)    
+                case CMD_USER + 2:                    
+                    printf("%s\n", (char*)rd->data); 
+                    break;
+            }
         }
         break;
             

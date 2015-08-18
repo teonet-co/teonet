@@ -22,6 +22,7 @@ size_t ksnTRUDPstatSendListRemove(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
 size_t ksnTRUDPstatReceiveHeapAdd(ksnTRUDPClass *tu);
 size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu);
+char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu);
 int ksnTRUDPstatShow(ksnTRUDPClass *tu);
 
 void ksnTRUDPstatAddrInit(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
