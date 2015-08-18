@@ -53,13 +53,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Send when peer disconnected
         case EV_K_DISCONNECTED: 
         {
-            printf("EV_K_DISCONNECTED\n");
+            printf("disconnected\n");
             ksnCorePacketData *rd = data;
             char *peer_to = ke->ksn_cfg.app_argv[1];
             if(rd->from != NULL)
             if(!strcmp(rd->from, peer_to))
-                printf("Peer %s was disconnected, %s:%d \n", 
-                rd->from, rd->addr, rd->port);
+                printf("Peer %s was disconnected \n", 
+                rd->from);
         }
         break;
             
