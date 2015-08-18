@@ -91,7 +91,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // DATA event
             ksnCorePacketData *rd = data;
             printf("Got DATA ID %d: %s\n", 
-                   *(uint32_t*)user_data, (char*)rd->data); 
+                user_data != NULL ? *(uint32_t*)user_data : -1, 
+                (char*)rd->data); 
         }
         break;
             
