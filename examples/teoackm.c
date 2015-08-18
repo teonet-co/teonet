@@ -170,6 +170,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                     // Show data or statistic at server
                     case '5':
+                    {
                         show_data_or_statistic_at_server = !show_data_or_statistic_at_server;
                         ksnet_arp_data *arp = ksnetArpGet(ke->kc->ka, peer_to);
                         if(arp != NULL) {
@@ -196,6 +197,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 free(command);
                             }
                         }
+                        
+                        // Show menu
+                        ke->event_cb(ke, EV_K_USER , NULL, 0, NULL);
+                    }
+                    break;
 
                     default:
                         break;
@@ -269,7 +275,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         sscanf((char*)rd->data, "%*s %d", 
                                 &show_data_or_statistic_at_server);
                         
-                        printf("show_data_or_statistic_at_server %d", 
+                        printf("show_data_or_statistic_at_server %d\n", 
                                 show_data_or_statistic_at_server);
                         
                         // Show DATA - stop TR-UDP statistic
