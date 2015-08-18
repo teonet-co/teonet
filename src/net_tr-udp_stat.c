@@ -41,6 +41,11 @@ tr_udp_stat *ksnTRUDPstatInit(ksnTRUDPClass *tu) {
     return &tu->stat;
 }
 
+inline void ksnTRUDPstatReset(ksnTRUDPClass *tu) {
+    
+    ksnTRUDPstatInit(tu);
+}
+
 /**
  * Increment send list size
  * 
@@ -141,7 +146,7 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         
             void *entry = pblIteratorNext(it);
             //char *key = pblMapEntryKey(entry);
-            ip_map_data *ip_map_d =  pblMapEntryValue(entry);
+            ip_map_data *ip_map_d = pblMapEntryValue(entry);
             packets_send += ip_map_d->stat.packets_send;
             ack_receive += ip_map_d->stat.ack_receive;
             packets_receive += ip_map_d->stat.packets_receive;
@@ -152,7 +157,7 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
     
     return ksnet_formatMessage(
         "----------------------------------------\n"
-        "RT-UDP statistics:\n"
+        "TR-UDP statistics:\n"
         "----------------------------------------\n"
         "Run time: %f sec\n"
         "\n"
@@ -214,6 +219,12 @@ inline int ksnTRUDPstatShow(ksnTRUDPClass *tu) {
  * 
  ******************************************************************************/ 
 
+void _ksnTRUDPstatAddrInit(ip_map_data *ip_map_d) {
+    
+    memset(&ip_map_d->stat, 0, sizeof(ip_map_d->stat));
+    ip_map_d->stat.triptime_min = UINT32_MAX;
+}
+
 /**
  * Initialize packets time statistics by address
  * 
@@ -222,10 +233,26 @@ inline int ksnTRUDPstatShow(ksnTRUDPClass *tu) {
  */
 void ksnTRUDPstatAddrInit(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
     
-    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
+    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);    
+    _ksnTRUDPstatAddrInit(ip_map_d);
+}
+
+inline void ksnTRUDPstatAddrReset(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
     
-    memset(&ip_map_d->stat, 0, sizeof(ip_map_d->stat));
-    ip_map_d->stat.triptime_min = UINT32_MAX;
+    ksnTRUDPstatAddrInit(tu, addr);
+}
+
+void ksnTRUDPstatAddrResetAll(ksnTRUDPClass *tu) {
+    
+    PblIterator *it = pblMapIteratorNew(tu->ip_map);
+    if (it != NULL) {
+        while (pblIteratorHasPrevious(it)) {
+            void *entry = pblIteratorPrevious(it);
+            ip_map_data *ip_map_d = pblMapEntryValue(entry);
+            _ksnTRUDPstatAddrInit(ip_map_d);
+        }
+        pblIteratorFree(it);
+    }
 }
 
 /**

@@ -152,7 +152,7 @@ void test_2_3() {
     CU_ASSERT_STRING_EQUAL(key, tst_key);
 }
 
-// Test RT-UDP reset functions
+// Test TR-UDP reset functions
 void test_2_4() {
 
     int i;
@@ -236,7 +236,7 @@ void test_2_4() {
     }
 }
 
-// Test RT-UDP send list functions
+// Test TR-UDP send list functions
 void test_2_5() {
 
     // Emulate ksnCoreClass
@@ -330,7 +330,7 @@ static void timeout_cb (EV_P_ ev_timer *w, int revents) {
     ev_break (EV_A_ EVBREAK_ONE);
 }
 
-// Test RT-UDP send list timer functions
+// Test TR-UDP send list timer functions
 void test_2_6() {
 
     // Emulate ksnCoreClass
@@ -385,7 +385,7 @@ void test_2_6() {
     CU_PASS("Destroy ksnTRUDPClass done");
 }
 
-// Test RT-UDP receive heap functions
+// Test TR-UDP receive heap functions
 void test_2_7() {
     
     // Emulate ksnCoreClass
@@ -487,7 +487,7 @@ int bind_udp(int *port) {
     return fd;
 }
 
-// Test main RT-UDP function ksnTRUDPsendto
+// Test main TR-UDP function ksnTRUDPsendto
 void test_2_8() {
     
     // Emulate ksnCoreClass
@@ -656,7 +656,7 @@ ssize_t test_sendto(int fd_s, uint32_t id, uint8_t message_type, void *buf,
     return sendto(fd_s, buf_send, tru_ptr + buf_len, 0, addr_r, addr_len);
 }
 
-// Test main RT-UDP function ksnTRUDPreceivefrom
+// Test main TR-UDP function ksnTRUDPreceivefrom
 void test_2_9() {
     
     /**
@@ -774,12 +774,12 @@ int add_suite_2_tests(void) {
     if ((NULL == CU_add_test(pSuite, "pblHeap functions", test_2_1)) ||
         (NULL == CU_add_test(pSuite, "Initialize/Destroy TR-UDP module", test_2_2)) ||
         (NULL == CU_add_test(pSuite, "TR-UDP utility functions", test_2_3)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP reset functions", test_2_4)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP send list functions", test_2_5)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP send list timer functions", test_2_6)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP receive heap functions", test_2_7)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP sendto function", test_2_8)) ||
-        (NULL == CU_add_test(pSuite, "RT-UDP recvfrom function", test_2_9))
+        (NULL == CU_add_test(pSuite, "TR-UDP reset functions", test_2_4)) ||
+        (NULL == CU_add_test(pSuite, "TR-UDP send list functions", test_2_5)) ||
+        (NULL == CU_add_test(pSuite, "TR-UDP send list timer functions", test_2_6)) ||
+        (NULL == CU_add_test(pSuite, "TR-UDP receive heap functions", test_2_7)) ||
+        (NULL == CU_add_test(pSuite, "TR-UDP sendto function", test_2_8)) ||
+        (NULL == CU_add_test(pSuite, "TR-UDP recvfrom function", test_2_9))
             ) {
         CU_cleanup_registry();
         return CU_get_error();
