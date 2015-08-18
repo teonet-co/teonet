@@ -117,6 +117,17 @@ extern "C" {
 ksnetHotkeysClass *ksnetHotkeysInit(void *ke);
 void ksnetHotkeysDestroy(ksnetHotkeysClass *kh);
 
+void _keys_non_blocking_start(ksnetHotkeysClass *kh);
+/**
+ * Stop keyboard non-blocking mode
+ *
+ * @param kh
+ */
+#define _keys_non_blocking_stop(kh) \
+    tcsetattr(0, TCSANOW, &kh->initial_settings); \
+    kh->non_blocking = 0
+
+
 #ifdef	__cplusplus
 }
 #endif

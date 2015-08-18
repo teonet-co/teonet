@@ -31,8 +31,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         
         // Calls immediately after event manager starts
         case EV_K_STARTED:
-            // TODO: Send message to peer
-            
             break;
             
         // Send by timer
@@ -60,16 +58,16 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             
         // Send when ACK received
         case EV_K_RECEIVED_ACK: 
-            {
-                // TODO: Got ACK event
-                ksnCorePacketData *rd = data;
-                printf("Got ACK event to ID %d, data: %s\n", 
-                       *(uint32_t*)user_data, (char*)rd->data);
-                
-                
-                ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
-            }
-            break;
+        {
+            // Got ACK event
+            ksnCorePacketData *rd = data;
+            printf("Got ACK event to ID %d, data: %s\n", 
+                   *(uint32_t*)user_data, (char*)rd->data);
+
+
+            ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
+        }
+        break;
             
         // Undefined event (an error)
         default:

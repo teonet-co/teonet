@@ -40,16 +40,6 @@ peer_timer_data *peer_timer_init(ksnCoreClass *kn);
 void peer_timer_stop(peer_timer_data **pet);
 tr_udp_timer_data *tr_udp_timer_init(ksnCoreClass *kn);
 void tr_udp_timer_stop(tr_udp_timer_data **pet);
-void _keys_non_blocking_start(ksnetHotkeysClass *kh);
-/**
- * Stop keyboard non-blocking mode
- *
- * @param kh
- */
-#define _keys_non_blocking_stop(kh) \
-    tcsetattr(0, TCSANOW, &kh->initial_settings); \
-    kh->non_blocking = 0
-
 
 // Constants
 #define COLOR_DW "\033[1;37m"
