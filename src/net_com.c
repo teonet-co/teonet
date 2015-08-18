@@ -104,23 +104,23 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #endif
 
         case CMD_SPLIT:
-            {
-                ksnCorePacketData *rds = ksnSplitCombine(kco->ks, rd);
-                if(rds != NULL) {
-                    processed = ksnCommandCheck(kco, rds);
-                    if(!processed) {
-                        // Send event callback
-                        ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
-                        if(ke->event_cb != NULL)
-                            ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
+        {
+            ksnCorePacketData *rds = ksnSplitCombine(kco->ks, rd);
+            if(rds != NULL) {
+                processed = ksnCommandCheck(kco, rds);
+                if(!processed) {
+                    // Send event callback
+                    ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
+                    if(ke->event_cb != NULL)
+                        ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
 
-                        processed = 1;
-                    }
-                    ksnSplitFreRds(kco->ks, rds);
+                    processed = 1;
                 }
-                else processed = 1;
+                ksnSplitFreRds(kco->ks, rds);
             }
-            break;
+            else processed = 1;
+        }
+        break;
 
         #ifdef M_ENAMBE_TUN
         case CMD_TUN:
