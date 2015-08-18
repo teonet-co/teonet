@@ -33,8 +33,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         
         // Calls immediately after event manager starts
         case EV_K_STARTED:
-            // TODO: Send message to peer
-            
             break;
             
         // Send by timer
@@ -57,8 +55,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     //for(;;) {
                         
                     printf("How much package to send (0 - to exit): ");
-                    tcsetattr(0, TCSANOW, &ke->kh->initial_settings); 
-                    ke->kh->non_blocking = 0;
+                    _keys_non_blocking_stop(ke->kh);
                     scanf("%d", &NUM_PACKET);
                     _keys_non_blocking_start(ke->kh);
 
@@ -87,11 +84,21 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             }
         }
         break;            
+        
+        // Send when DATA received
+        case EV_K_RECEIVED:
+        {
+            // DATA event
+            ksnCorePacketData *rd = data;
+            printf("Got DATA ID %d: %s\n", 
+                   *(uint32_t*)user_data, (char*)rd->data); 
+        }
+        break;
             
         // Send when ACK received
         case EV_K_RECEIVED_ACK: 
         {
-            // TODO: Got ACK event
+            // ACK event
             ksnCorePacketData *rd = data;
             printf("Got ACK event to ID %d, data: %s\n", 
                    *(uint32_t*)user_data, (char*)rd->data);
