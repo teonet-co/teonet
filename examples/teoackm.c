@@ -35,6 +35,22 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
             break;
             
+        // Send when peer connected
+        case EV_K_CONNECTED: 
+        {
+            ksnCorePacketData *rd = data;
+            printf("Peer %s connected from %s:%d \n", rd->from, rd->addr, rd->port);
+        }
+        break;
+            
+        // Send when peer disconnected
+        case EV_K_DISCONNECTED: 
+        {
+            ksnCorePacketData *rd = data;
+            printf("Peer %s was disconnected from %s:%d \n", rd->from, rd->addr, rd->port);
+        }
+        break;
+            
         // Send by timer
         case EV_K_USER:    
         case EV_K_TIMER:
