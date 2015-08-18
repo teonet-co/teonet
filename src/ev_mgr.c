@@ -311,6 +311,7 @@ int ksnetEvMgrRunThread(ksnetEvMgrClass *ke) {
  */
 void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval) {
 
+    ke->last_custom_timer = ksnetEvMgrGetTime(ke);
     ke->custom_timer_interval = time_interval;
 }
 
