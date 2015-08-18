@@ -53,11 +53,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // Tunnel parameters message
             printf("The terminal server command 'user' was added\n");
             
-            cli_register_command(ke->cli, NULL, "user", cmd_user, PRIVILEGE_UNPRIVILEGED,
-                    MODE_EXEC, "Show list of teonet peers");
+            cli_register_command(ke->cli, NULL, "user", cmd_user, 
+                    PRIVILEGE_UNPRIVILEGED, MODE_EXEC, 
+                    "Show list of teonet peers");
           
         }
-            break;
+        break;
         
         default:
             break;
