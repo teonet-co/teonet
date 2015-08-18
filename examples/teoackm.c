@@ -21,6 +21,8 @@
 #define CMD_U_STAT  "stat"
 #define CMD_U_RESET "stat"
 
+#define SERVER_NAME "none"
+
 /**
  * Teonet Events callback
  *
@@ -39,7 +41,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         
         // Calls immediately after event manager starts
         case EV_K_STARTED:
-            printf("Connecting to peer: %s ...\n", peer_to);
+            if(strcmp(peer_to, SERVER_NAME))
+                printf("Connecting to peer: %s ...\n", peer_to);
+            else
+                printf("Server mode\n");
             break;
             
         // Send when peer connected
@@ -207,7 +212,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             // ACK event
             ksnCorePacketData *rd = data;
-            if(strcmp(rd->from, "none")) {
+            if(strcmp(rd->from, SERVER_NAME)) {
                 printf("Got ACK event to ID %d, data: %s\n", 
                        *(uint32_t*)user_data, (char*)rd->data);
             }
