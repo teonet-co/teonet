@@ -53,7 +53,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_CONNECTED:
         {
             ksnCorePacketData *rd = data;
-            if(!strcmp(rd->from, peer_to))
+            //if(!strcmp(rd->from, peer_to))
                 printf("Peer %s connected at %s:%d \n", 
                        rd->from, rd->addr, rd->port);
         }    
