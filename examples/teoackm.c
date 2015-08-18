@@ -53,6 +53,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Send when peer disconnected
         case EV_K_DISCONNECTED: 
         {
+            printf("EV_K_DISCONNECTED\n");
             ksnCorePacketData *rd = data;
             char *peer_to = ke->ksn_cfg.app_argv[1];
             if(rd->from != NULL)
@@ -91,6 +92,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                "  0 - exit\n"
                                "\n"
                                "(Press U to return to this menu)\n"
+                               "teoackm $ "
                         );
 
                         // Get command
@@ -117,7 +119,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 break;
                         } 
                         
-                        if(command == 0 || command == 4) break;                        
+                        if(command == 0 || command == 1) break;                        
                     }
                     
                     // Exit
@@ -139,6 +141,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             ksnCoreSendCmdto(ke->kc, (char*)peer_to, 
                                 CMD_USER, buffer, strlen(buffer)+1);
                         }
+                        ksnetEvMgrSetCustomTimer(ke, 3.00); // Set custom timer interval
                     }
                 }
             }
