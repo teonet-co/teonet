@@ -33,13 +33,20 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         
         // Calls immediately after event manager starts
         case EV_K_STARTED:
-            break;
+        {
+            char *peer_to = ke->ksn_cfg.app_argv[1]; 
+            printf("Connecting to peer: %s ...\n", peer_to);
+        }
+        break;
             
         // Send when peer connected
         case EV_K_CONNECTED: 
         {
             ksnCorePacketData *rd = data;
-            printf("Peer %s connected from %s:%d \n", rd->from, rd->addr, rd->port);
+            char *peer_to = ke->ksn_cfg.app_argv[1];
+            if(!strcmp(rd->from, peer_to))
+                printf("Peer %s connected at %s:%d \n", 
+                       rd->from, rd->addr, rd->port);
         }
         break;
             
@@ -47,7 +54,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_DISCONNECTED: 
         {
             ksnCorePacketData *rd = data;
-            printf("Peer %s was disconnected from %s:%d \n", rd->from, rd->addr, rd->port);
+            char *peer_to = ke->ksn_cfg.app_argv[1];
+            if(rd->from != NULL)
+            if(!strcmp(rd->from, peer_to))
+                printf("Peer %s was disconnected, %s:%d \n", 
+                rd->from, rd->addr, rd->port);
         }
         break;
             
@@ -64,30 +75,64 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // If peer_to is connected
                 if (ksnetArpGet(ke->kc->ka, peer_to) != NULL) {
 
-                    int NUM_PACKET;
+                    int num_packets, command;
                     
                     ksnetEvMgrSetCustomTimer(ke, 0.00); // Stop timer
                     
-                    //for(;;) {
+                    for(;;) {
                         
-                    printf("How much package to send (0 - to exit): ");
-                    _keys_non_blocking_stop(ke->kh);
-                    scanf("%d", &NUM_PACKET);
-                    _keys_non_blocking_start(ke->kh);
+                        printf("\n"
+                               "Multi send test menu:\n"
+                               "\n"
+                               "  1 - send packets\n"
+                               "  2 - show TR-UDP statistics\n" 
+                               "  3 - get and show remote peer TR-UDP statistics\n" 
+                               "  4 - send TR-UDP reset\n" 
+                               "  0 - exit\n"
+                               "\n"
+                               "(Press U to return to this menu)\n"
+                        );
 
+                        // Get command
+                        _keys_non_blocking_stop(ke->kh);
+                        scanf("%d", &command);
+                        _keys_non_blocking_start(ke->kh);
+                        
+                        // Check command
+                        switch(command) {
+
+                            // Exit
+                            case 0:
+                                break;
+
+                            // Send packets
+                            case 1:
+                                printf("How much package to send (0 - to exit): ");
+                                _keys_non_blocking_stop(ke->kh);
+                                scanf("%d", &num_packets);
+                                _keys_non_blocking_start(ke->kh);
+                                break;
+                                
+                            default:
+                                break;
+                        } 
+                        
+                        if(command == 0 || command == 4) break;                        
+                    }
+                    
                     // Exit
-                    if(NUM_PACKET <= 0) {
+                    if(command == 0) {
 
                         ev_break (ke->ev_loop, EVBREAK_ONE);
                         break;
                     }
                     // Send packages
-                    else {
+                    else if(command == 1) {
 
                         printf("Send %d messages to %s\n", 
-                                NUM_PACKET, peer_to);
+                                num_packets, peer_to);
 
-                        for(i = 0; i < NUM_PACKET; i++) {
+                        for(i = 0; i < num_packets; i++) {
 
                             sprintf(buffer, "#%d: Teoack Hello!", idx++);
                             printf("Send message \"%s\"\n", buffer);
@@ -95,7 +140,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 CMD_USER, buffer, strlen(buffer)+1);
                         }
                     }
-                    printf("Press U to repeat\n");
                 }
             }
         }
