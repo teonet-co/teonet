@@ -98,9 +98,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                "  4 - send TR-UDP reset\n" 
                                "  0 - exit\n"
                                "\n"
-                               "%s\n"
                                "teoackm $ "
-                               , PRESS_U
                         );
 
                         // Get command
@@ -185,8 +183,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 
                 // Server got DATA from client
                 case CMD_USER:
-                    printf("Got DATA ID %d: %s\n", 
-                        user_data != NULL ? *(uint32_t*)user_data : -1, 
+                    printf("Got DATA: %s\n", 
                         (char*)rd->data); 
                     break;
                 
@@ -204,7 +201,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                 // Client got statistic from remote peer (server)    
                 case CMD_USER + 2:                    
-                    printf("%s%s", (char*)rd->data, PRESS_U); 
+                    printf("%s%s\n", (char*)rd->data, PRESS_U); 
                     break;
             }
         }
@@ -215,7 +212,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             // ACK event
             ksnCorePacketData *rd = data;
-            if(strcmp(peer_to, SERVER_NAME)) {
+            if(strcmp(peer_to, SERVER_NAME) && strcmp((char*)rd->data, CMD_U_STAT)) {
                 printf("Got ACK event to ID %d, data: %s\n", 
                        *(uint32_t*)user_data, (char*)rd->data);
             }
