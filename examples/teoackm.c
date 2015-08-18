@@ -19,11 +19,24 @@
 
 // This application commands
 #define CMD_U_STAT  "stat"
-#define CMD_U_RESET "stat"
+#define CMD_U_RESET "reset"
 
 #define SERVER_NAME "none"
 
-const char* PRESS_U = "(Press U to return to main menu)";
+const char* PRESS_A = "(Press A to return to main application menu)";
+
+/**
+ * Application states
+ */
+enum {
+    
+    STATE_NONE,
+    STATE_WAIT_KEY,
+    STATE_WAIT_STRING
+            
+} state;
+
+int app_state = STATE_NONE; ///< Application state
 
 /**
  * Teonet Events callback
@@ -53,7 +66,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_CONNECTED:
         {
             ksnCorePacketData *rd = data;
-            //if(!strcmp(rd->from, peer_to))
                 printf("Peer %s connected at %s:%d \n", 
                        rd->from, rd->addr, rd->port);
         }    
@@ -64,111 +76,122 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             ksnCorePacketData *rd = data;
             if(rd->from != NULL) {
-                //if(!strcmp(rd->from, peer_to))
-                    printf("Peer %s was disconnected \n", rd->from);
+                printf("Peer %s was disconnected \n", rd->from);
             }
             else printf("Peer was disconnected\n");
         }    
+        break;
+        
+        // Check hotkey
+        case EV_K_HOTKEY:
+        {
+            int i, idx, num_packets, command = *(int*)data;
+            
+            // Check hotkey
+            if(app_state == STATE_WAIT_KEY) {
+                
+                app_state = STATE_NONE;
+                switch(command) {
+
+                    // Exit
+                    case '0':
+                        ev_break (ke->ev_loop, EVBREAK_ONE);
+                        break;
+
+                    // Send packets
+                    case '1':
+                        printf("How much package to send (0 - to exit): ");
+                        _keys_non_blocking_stop(ke->kh);
+                        scanf("%d", &num_packets);
+                        _keys_non_blocking_start(ke->kh);
+
+                        printf("Send %d messages to %s\n",num_packets, peer_to);
+                        idx = 0;
+                        for(i = 0; i < num_packets; i++) {
+                            char buffer[KSN_BUFFER_DB_SIZE];
+                            sprintf(buffer, "#%d: Teoack Hello!", ++idx);
+                            printf("Send message \"%s\"\n", buffer);
+                            ksnCoreSendCmdto(ke->kc, (char*)peer_to, 
+                                CMD_USER, buffer, strlen(buffer)+1);
+                        }   
+                        printf("\nACK ID: ");
+                        break;
+
+                    // Show local statistic
+                    case '2':
+                        ksnTRUDPstatShow(ke->kc->ku);
+                        printf("%s\n", PRESS_A); 
+                        break;
+
+                    // Send request to show remote peer statistic    
+                    case '3':
+                        ksnCoreSendCmdto(ke->kc, 
+                                (char*)peer_to, 
+                                CMD_USER + 1, 
+                                CMD_U_STAT, sizeof(CMD_U_STAT));
+                        break;
+
+                    // Send reset
+                    case '4':
+                    {
+                        ksnet_arp_data *arp = ksnetArpGet(ke->kc->ka, peer_to);
+                        if(arp != NULL) {
+                            
+                            // Make address from string
+                            struct sockaddr_in remaddr;         // remote address
+                            const socklen_t addrlen = sizeof(remaddr);// length of addresses
+                            memset((char *) &remaddr, 0, addrlen);
+                            remaddr.sin_family = AF_INET;
+                            remaddr.sin_port = htons(arp->port);
+                            #ifndef HAVE_MINGW
+                            if(inet_aton(arp->addr, &remaddr.sin_addr) == 0) {
+                                //return(-2);
+                            }
+                            #else
+                            remaddr.sin_addr.s_addr = inet_addr(addr);
+                            #endif
+
+                            ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, (__CONST_SOCKADDR_ARG) &remaddr);
+                            ksnTRUDPreset(ke->kc->ku, (__CONST_SOCKADDR_ARG) &remaddr, 0);
+                            ksnTRUDPstatReset(ke->kc->ku);
+                        }
+                        
+                        // Show menu
+                        ke->event_cb(ke, EV_K_USER , NULL, 0, NULL);
+                    }
+                    break;
+
+                    default:
+                        break;
+                }
+            }         
+        }
         break;
             
         // Send by timer
         case EV_K_USER:    
         case EV_K_TIMER:
         {
-            static int i, idx = 0;
-            char buffer[KSN_BUFFER_DB_SIZE];
-
             if(strcmp(peer_to, ksnetEvMgrGetHostName(ke))) {
 
                 // If peer_to is connected
                 if (ksnetArpGet(ke->kc->ka, peer_to) != NULL) {
 
-                    int num_packets, command;
-                    
                     ksnetEvMgrSetCustomTimer(ke, 0.00); // Stop timer
                     
-                    for(;;) {
-                        
-                        printf("\n"
-                               "Multi send test menu:\n"
-                               "\n"
-                               "  1 - send packets\n"
-                               "  2 - show TR-UDP statistics\n" 
-                               "  3 - get and show remote peer TR-UDP statistics\n" 
-                               "  4 - send TR-UDP reset\n" 
-                               "  0 - exit\n"
-                               "\n"
-                               "teoackm $ "
-                        );
-
-                        // Get command
-                        _keys_non_blocking_stop(ke->kh);
-                        scanf("%d", &command);
-                        _keys_non_blocking_start(ke->kh);
-                        
-                        // Check command
-                        switch(command) {
-
-                            // Exit
-                            case 0:
-                                break;
-
-                            // Send packets
-                            case 1:
-                                printf("How much package to send (0 - to exit): ");
-                                _keys_non_blocking_stop(ke->kh);
-                                scanf("%d", &num_packets);
-                                _keys_non_blocking_start(ke->kh);
-                                break;
-                                
-                            // Show local statistic
-                            case 2:
-                                ksnTRUDPstatShow(ke->kc->ku);
-                                break;
-                                
-                            // Send request to show remote peer statistic    
-                            case 3:
-                                ksnCoreSendCmdto(ke->kc, 
-                                        (char*)peer_to, 
-                                        CMD_USER + 1, 
-                                        CMD_U_STAT, sizeof(CMD_U_STAT));
-                                break;
-                                
-                            case 4:
-                                break;
-                                
-                            default:
-                                break;
-                        } 
-                        
-                        if(command >= 0 && command <= 4) {                            
-                            if(command != 3 && command != 4)
-                                printf("%s\n", PRESS_U);
-                            break;                        
-                        }
-                    }
-                    
-                    // Exit
-                    if(command == 0) {
-
-                        ev_break (ke->ev_loop, EVBREAK_ONE);
-                        break;
-                    }
-                    // Send packages
-                    else if(command == 1) {
-
-                        printf("Send %d messages to %s\n",num_packets, peer_to);
-
-                        idx = 0;
-                        for(i = 0; i < num_packets; i++) {
-
-                            sprintf(buffer, "#%d: Teoack Hello!", idx++);
-                            printf("Send message \"%s\"\n", buffer);
-                            ksnCoreSendCmdto(ke->kc, (char*)peer_to, 
-                                CMD_USER, buffer, strlen(buffer)+1);
-                        }
-                        //ksnetEvMgrSetCustomTimer(ke, 3.00); // Set custom timer interval
-                    }
+                    printf("\n"
+                           "Multi send test menu:\n"
+                           "\n"
+                           "  1 - send packets\n"
+                           "  2 - show TR-UDP statistics\n" 
+                           "  3 - get and show remote peer TR-UDP statistics\n" 
+                           "  4 - send TR-UDP reset\n" 
+                           "  0 - exit\n"
+                           "\n"
+                           "teoackm $ "
+                    );
+                    fflush(stdout); // Prints to screen or whatever your standard out is
+                    app_state = STATE_WAIT_KEY;
                 }
             }
         }
@@ -202,7 +225,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                 // Client got statistic from remote peer (server)    
                 case CMD_USER + 2:                    
-                    printf("%s%s\n", (char*)rd->data, PRESS_U); 
+                    printf("%s%s\n", (char*)rd->data, PRESS_A); 
                     break;
             }
         }
@@ -214,9 +237,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // ACK event
             ksnCorePacketData *rd = data;
             if(strcmp(peer_to, SERVER_NAME) && strcmp((char*)rd->data, CMD_U_STAT)) {
-//                printf("Got ACK event to ID %d, data: %s\n", 
-//                       *(uint32_t*)user_data, (char*)rd->data);
-                printf("ACK ID: %d\n", *(uint32_t*)user_data);
+                printf("%d ", *(uint32_t*)user_data);
+                fflush(stdout);
             }
             //ksnetEvMgrSetCustomTimer(ke, 1.00); // Set custom timer interval
         }

@@ -725,7 +725,7 @@ uint32_t ksnTRUDPtimestamp() {
  *          1 - remove mode: clear send list and receive heap, 
  *                           and remove record from IP Map
  */
-void ksnTRUDPreset(ksnTRUDPClass *tu, __SOCKADDR_ARG addr, int options) {
+void ksnTRUDPreset(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr, int options) {
 
     // Create key from address
     char key[KSN_BUFFER_SM_SIZE];
@@ -802,10 +802,13 @@ void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
         }
         ip_map_d->expected_id = 0; // Reset receive heap expected ID
 
+        // Reset statistic
+        _ksnTRUDPstatAddrInit(ip_map_d);
+        
         // Remove IP map record (in remove mode))
         if (options) {
             pblMapRemove(tu->ip_map, key, key_len, &val_len);
-        }
+        }                
     }
 }
 
@@ -816,7 +819,7 @@ void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
  * @param fd
  * @param addr
  */
-void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __SOCKADDR_ARG addr) {
+void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __CONST_SOCKADDR_ARG addr) {
 
     // Send reset command to peer
     ksnTRUDP_header tru_header; // Header buffer

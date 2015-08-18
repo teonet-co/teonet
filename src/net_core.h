@@ -43,7 +43,7 @@ typedef struct ksnCoreClass {
     double last_check_event; ///< Last time of check host event
     ksnetArpClass *ka;       ///< Arp table class object
     ksnCommandClass *kco;    ///< Command class object
-    ksnTRUDPClass *ku;       ///< RT-UDP class object
+    ksnTRUDPClass *ku;       ///< TR-UDP class object
     #if KSNET_CRYPT
     ksnCryptClass *kcr;      ///< Crypt class object
     #endif

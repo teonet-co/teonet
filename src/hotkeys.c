@@ -103,7 +103,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 //            " "COLOR_DW"A"COLOR_END" - direct connect to all peers\n"
             "%s"
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
-            " "COLOR_DW"U"COLOR_END" - send Application user event\n"
+            " "COLOR_DW"a"COLOR_END" - show application menu\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
             #if M_ENAMBE_VPN
@@ -143,7 +143,8 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             break;
             
         // Send User event to Application
-        case 'U':
+        case 'a':
+        case 'A':
             if(kev->event_cb != NULL)
                 kev->event_cb(ke, EV_K_USER , NULL, 0, NULL);
             break;
@@ -422,6 +423,15 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                     break;
             }
             khv->wait_y = Y_NONE;
+            break;
+            
+        default:
+            if(kev->event_cb != NULL) {                
+                kev->event_cb(kev, EV_K_HOTKEY, 
+                                (void*)&hotkey, // Pointer to integer hotkey
+                                sizeof(hotkey), // Length of integer (hotkey)
+                                NULL); 
+            }
             break;
     }
     khv->last_hotkey = hotkey;
