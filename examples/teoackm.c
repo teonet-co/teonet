@@ -187,8 +187,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 {
                     if(!strcmp((char*)rd->data, CMD_U_STAT)) {
                         char *stat = ksnTRUDPstatShowStr(ke->kc->ku);
-                        ksnCoreSendCmdto(ke->kc, (char*)peer_to, 
-                                CMD_USER, stat, strlen(stat)+1);
+                        ksnCoreSendCmdto(ke->kc, rd->from, 
+                                CMD_USER + 2, stat, strlen(stat)+1);
                         free(stat);
                     }
                 }    
