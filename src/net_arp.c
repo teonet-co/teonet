@@ -223,15 +223,15 @@ ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr)
     char key[KSN_BUFFER_SM_SIZE];
     ksnTRUDPkeyCreate(NULL, addr, key, KSN_BUFFER_SM_SIZE);
     
-    if(ka != NULL && ksnetArpGetAll(ka, find_arp_by_addr_cb, (void*) &fa)) {
-        
-        printf("ARP by address %s was found\n", key);
-        
-    } else {
-        
-        printf("ARP by address %s not found\n", key);
-        
-    }
+//    if(ka != NULL && ksnetArpGetAll(ka, find_arp_by_addr_cb, (void*) &fa)) {
+//        
+//        //printf("ARP by address %s was found\n", key);
+//        
+//    } else {
+//        
+//        //printf("ARP by address %s not found\n", key);
+//        
+//    }
     
     return fa.arp_data;
 }
