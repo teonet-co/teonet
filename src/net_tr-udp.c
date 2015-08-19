@@ -314,7 +314,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             #endif
 
                             // Process this message
-                            if (ip_map_d->expected_id == rh_d->id) {
+                            if (rh_d->id == ip_map_d->expected_id) {
 
                                 #ifdef DEBUG_KSNET
                                 ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
@@ -333,8 +333,18 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                 ip_map_d->expected_id++;
                             }
                             
-                            // TODO: Remove copy of old
-                            //else if (ip_map_d->expected_id == rh_d->id) {
+                            // TODO: Remove already processed
+                            if (rh_d->id < ip_map_d->expected_id) {
+                                
+                                #ifdef DEBUG_KSNET
+                                ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
+                                    "Removed\n");
+                                #endif
+                                
+                                // Remove first record
+                                ksnTRUDPreceiveHeapRemoveFirst(tu, 
+                                        ip_map_d->receive_heap);
+                            }
                             
                             // Drop saved message
                             else {
