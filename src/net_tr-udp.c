@@ -341,7 +341,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     "Skipped\n");
                                 #endif
                                 
-                                break;
+                                break; // while
                             }
                         }
                     }
