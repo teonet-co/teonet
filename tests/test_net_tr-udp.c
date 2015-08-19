@@ -428,11 +428,17 @@ void test_2_7() {
     CU_ASSERT(ksnTRUDPreceiveHeapRemoveFirst(tu, ip_map_d->receive_heap) == 1);
     CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 3);
     
-    // 4) ksnTRUDPReceiveHeapRemoveAll: Remove all elements from Receive Heap
+    // 4) ksnTRUDPreceiveHeapGetFirst: Get first element of Receive Heap (with lowest ID) 
+    rh_d = ksnTRUDPreceiveHeapGetFirst(ip_map_d->receive_heap);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(rh_d);
+    CU_ASSERT_STRING_EQUAL(rh_d->data, "Hello 12");
+    CU_ASSERT(rh_d->id == 12);
+    
+    // 5) ksnTRUDPReceiveHeapRemoveAll: Remove all elements from Receive Heap
     ksnTRUDPreceiveHeapRemoveAll(tu, ip_map_d->receive_heap);
     CU_ASSERT(pblHeapSize(ip_map_d->receive_heap) == 0);
     
-    // 5) ksnTRUDPReceiveHeapDestroyAll
+    // 6) ksnTRUDPReceiveHeapDestroyAll
     ksnTRUDPreceiveHeapDestroyAll(tu);
     CU_PASS("Destroy all receive heap");
     
