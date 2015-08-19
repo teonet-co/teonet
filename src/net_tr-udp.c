@@ -1295,11 +1295,10 @@ int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
     #endif
 
     // Create receive heap data
-    rh_data *rh_d = malloc(sizeof (rh_data));
+    rh_data *rh_d = malloc(sizeof(rh_data) + data_len);
     rh_d->id = id;
-    rh_d->data = malloc(data_len);
-    memcpy(rh_d->data, data, data_len);
     rh_d->data_len = data_len;
+    memcpy(rh_d->data, data, data_len);
     memcpy(&rh_d->addr, addr, addr_len);
 
     // Statistic
@@ -1324,13 +1323,12 @@ inline rh_data *ksnTRUDPreceiveHeapGetFirst(PblHeap *receive_heap) {
  * 
  * @param rh_d
  * 
- * @return 1 if removed or 0 if element absent
+ * @return 1 if removed or 0 if element is absent
  */
 int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d) {
 
     int rv = 0;
-    if (rh_d != (void*) - 1) {
-        free(rh_d->data);
+    if(rh_d != (void*) - 1) {
         free(rh_d);
         rv = 1;
     }
