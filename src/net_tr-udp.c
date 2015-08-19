@@ -573,7 +573,7 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
     // Get ip map data by key
     size_t val_len;
     char key[KSN_BUFFER_SM_SIZE];
-    size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    size_t key_len = ksnTRUDPkeyCreate(tu, addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
     // Create new ip map record if it absent

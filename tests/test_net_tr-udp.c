@@ -21,6 +21,8 @@ extern CU_pSuite pSuite;
   ksnetEvMgrClass ke; \
   ksnCoreClass kc; \
   kc.ke = &ke; \
+  kc.ka = NULL; \
+  ke.kc = &kc; \
   ke.event_cb = NULL; \
   ke.ev_loop = ev_loop_new (0)
 
@@ -99,7 +101,7 @@ void test_2_2() {
  * Test TR-UDP utility functions
  */
 void test_2_3() {
-
+    
     // Emulate ksnCoreClass
     kc_emul();
 
@@ -110,16 +112,17 @@ void test_2_3() {
     struct sockaddr_in addr;
     const int port = 1327;
     size_t key_len;
-
+    
     // Fill address
     if(inet_aton(addr_str, &addr.sin_addr) == 0) CU_ASSERT(1 == 0);
     addr.sin_port = htons(port);
-
+    
     /* ---------------------------------------------------------------------- */
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc);
+    kc.ku = tu;
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
-
+    
     // 1) ksnTRUDPipMapData: Get IP map record by address or create new record if not exist
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, (__CONST_SOCKADDR_ARG) &addr,
             key, KSN_BUFFER_SM_SIZE);
@@ -155,11 +158,11 @@ void test_2_3() {
 // Test TR-UDP reset functions
 void test_2_4() {
 
+    // Emulate ksnCoreClass
+    kc_emul();
+
     int i;
     for (i = 0; i < 2; i++) {
-
-        // Emulate ksnCoreClass
-        kc_emul();
 
         // Test constants and variables
         const char *addr_str = "127.0.0.1";
@@ -171,7 +174,8 @@ void test_2_4() {
         addr.sin_port = htons(port);
 
         // Initialize ksnTRUDPClass
-        ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+        ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass  
+        kc.ku = tu;
         CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
 
         // Add records to send list
@@ -183,8 +187,6 @@ void test_2_4() {
         CU_ASSERT(id == 0);
         // Add 1 message to Send List
         sl_data sl_d;
-//        sl_d.w = NULL;
-//        sl_d.data = (void*) "Some data 1";
         strcpy(sl_d.data_buf, "Some data 1");
         sl_d.data_len = 12;
         pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
@@ -193,13 +195,11 @@ void test_2_4() {
         id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
         CU_ASSERT(id == 1);
         // Add 2 message to Send List
-//        sl_d.w = NULL;
-//        sl_d.data = (void*) "Some data 2";
         strcpy(sl_d.data_buf, "Some data 2");
         sl_d.data_len = 12;
         pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
         CU_ASSERT(pblMapSize(sl) == 2);
-
+        
         // Add records to receive heap
         // Add 1 records to receive heap
         ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, (__CONST_SOCKADDR_ARG) &addr, NULL, 0);
@@ -253,6 +253,7 @@ void test_2_5() {
 
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    kc.ku = tu;
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
 
     // 1) ksnTRUDPsendListGet: Create and Get pointer to Send List
@@ -347,6 +348,7 @@ void test_2_6() {
 
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    kc.ku = tu;
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
 
     // 1) sl_timer_start: Start the send list timer
@@ -403,6 +405,7 @@ void test_2_7() {
 
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    kc.ku = tu;
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
 
     // Get IP Map
@@ -525,6 +528,7 @@ void test_2_8() {
     
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    kc.ku = tu;
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
     
     // 1) ksnTRUDPsendto test
@@ -707,6 +711,7 @@ void test_2_9() {
     
     // Initialize ksnTRUDPClass
     ksnTRUDPClass *tu = ksnTRUDPinit(&kc); // Initialize ksnTRUDPClass
+    kc.ku = tu;
     CU_ASSERT_PTR_NOT_NULL_FATAL(tu);
     
     // Register process packet function

@@ -215,16 +215,15 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
  * @return  Pointer to ARP data
  */
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr) {
-    
+
     find_arp_data fa;
     fa.addr = addr;
     fa.arp_data = NULL;
     
     char key[KSN_BUFFER_SM_SIZE];
-    //size_t key_len = 
-    ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    ksnTRUDPkeyCreate(NULL, addr, key, KSN_BUFFER_SM_SIZE);
     
-    if(ksnetArpGetAll(ka, find_arp_by_addr_cb, (void*) &fa)) {
+    if(ka != NULL && ksnetArpGetAll(ka, find_arp_by_addr_cb, (void*) &fa)) {
         
         printf("ARP by address %s was found\n", key);
         
