@@ -316,7 +316,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         default:
             break;
     }
-}            
+}        
 
 /**
  * Main application function
