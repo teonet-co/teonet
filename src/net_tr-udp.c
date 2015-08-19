@@ -333,8 +333,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                 ip_map_d->expected_id++;
                             }
                             
-                            // TODO: Remove already processed
-                            if (rh_d->id < ip_map_d->expected_id) {
+                            // Remove already processed
+                            else if (rh_d->id < ip_map_d->expected_id) {
                                 
                                 #ifdef DEBUG_KSNET
                                 ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
