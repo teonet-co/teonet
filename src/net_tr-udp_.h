@@ -79,11 +79,12 @@ typedef struct sl_timer_cb_data {
  */
 typedef struct sl_data {
     
-    ev_timer w;
-    sl_timer_cb_data w_data;
-    char data_buf[KSN_BUFFER_SIZE];
-    size_t data_len;
-    size_t attempt;
+    ev_timer w; ///< Watcher
+    sl_timer_cb_data w_data; ///< Watcher data
+    size_t attempt; ///< Number of attempt
+    size_t data_len; ///< Data buffer length
+    char data_buf[]; ///< Data buffer
+    //char data_buf[KSN_BUFFER_DB_SIZE]; ///< Data buffer
 
 } sl_data;
 

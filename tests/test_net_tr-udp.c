@@ -186,18 +186,20 @@ void test_2_4() {
         uint32_t id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
         CU_ASSERT(id == 0);
         // Add 1 message to Send List
-        sl_data sl_d;
-        strcpy(sl_d.data_buf, "Some data 1");
-        sl_d.data_len = 12;
-        pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
+        const size_t sl_d_len = sizeof(sl_data) + 12;
+        char sl_d_buf[sl_d_len];
+        sl_data *sl_d = (void*) sl_d_buf;
+        strcpy(sl_d->data_buf, "Some data 1");
+        sl_d->data_len = 12;
+        pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
         CU_ASSERT(pblMapSize(sl) == 1);
         // Get 2 new ID = 1 ------------------
         id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
         CU_ASSERT(id == 1);
         // Add 2 message to Send List
-        strcpy(sl_d.data_buf, "Some data 2");
-        sl_d.data_len = 12;
-        pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
+        strcpy(sl_d->data_buf, "Some data 2");
+        sl_d->data_len = 12;
+        pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
         CU_ASSERT(pblMapSize(sl) == 2);
         
         // Add records to receive heap
@@ -266,29 +268,31 @@ void test_2_5() {
     CU_ASSERT(id == 0);
 
     // Add 1 message to send list
-    sl_data sl_d;
-    sl_d.w.data = NULL;
-    strcpy(sl_d.data_buf, "Some data 1");
-    sl_d.data_len = 12;
-    pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
+    const size_t sl_d_len = sizeof(sl_data) + 12;
+    char sl_d_buf[sl_d_len];
+    sl_data *sl_d = (void*) sl_d_buf;
+    sl_d->w.data = NULL;
+    strcpy(sl_d->data_buf, "Some data 1");
+    sl_d->data_len = 12;
+    pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
     CU_ASSERT(pblMapSize(sl) == 1);
 
     // Add 2 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 1);
-    sl_d.w.data = NULL;
-    strcpy(sl_d.data_buf, "Some data 2");
-    sl_d.data_len = 12;
-    pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
+    sl_d->w.data = NULL;
+    strcpy(sl_d->data_buf, "Some data 2");
+    sl_d->data_len = 12;
+    pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
     CU_ASSERT(pblMapSize(sl) == 2);
 
     // Add 3 message to send list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 2);
-    sl_d.w.data = NULL;
-    strcpy(sl_d.data_buf, "Some data 3");
-    sl_d.data_len = 12;
-    pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
+    sl_d->w.data = NULL;
+    strcpy(sl_d->data_buf, "Some data 3");
+    sl_d->data_len = 12;
+    pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
     CU_ASSERT(pblMapSize(sl) == 3);
 
     // 3) ksnTRUDPSendListGetData: Get Send List timer watcher and stop it
