@@ -292,8 +292,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         tu->process_packet(kev->kc, buffer + tru_ptr, 
                                 tru_header->payload_length, addr);
                         
-                        recvlen = 0;
-
                         // Check Received message Heap and send saved 
                         // messages to core if first records ID Equals to 
                         // Expected ID
@@ -330,16 +328,16 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                                 // Change Expected ID
                                 ip_map_d->expected_id++;
-
-                                recvlen = 0;
                             }
+                            
                             // Drop saved message
                             else {
+                                
                                 #ifdef DEBUG_KSNET
                                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                                     "Skipped\n");
                                 #endif
-                                recvlen = 0;
+                                
                                 break;
                             }
                         }
@@ -357,8 +355,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         #endif
 
                         ksnTRUDPsetDATAreceiveDropped(tu, addr);
-
-                        recvlen = 0;
                     }   
                     
                     // Save to Received message Heap
@@ -375,12 +371,11 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
                                 tru_header->id, buffer + tru_ptr,
                                 tru_header->payload_length, addr, *addr_len);
-
-                        recvlen = 0;
                     }
-
                 }
-                    break;
+                
+                recvlen = 0; // The received message is processed
+                break;
 
                 // The ACK messages are used to acknowledge the arrival of the 
                 // DATA and RESET messages. (has not payload)
@@ -438,12 +433,10 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     }
                     
                     // Remove message from SendList and stop timer watcher
-                    ksnTRUDPsendListRemove(tu, tru_header->id, addr);
-                    
-                    recvlen = 0; // The received message is processed
-
+                    ksnTRUDPsendListRemove(tu, tru_header->id, addr);                    
                 }
-                    break;
+                recvlen = 0; // The received message is processed
+                break;
 
                 // The RESET messages reset messages counter. (has not payload)  
                 // Return zero length of this message.    
@@ -459,6 +452,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     // Process RESET command
                     ksnTRUDPreset(tu, addr, 0);
                     ksnTRUDPSendACK(); // Send ACK
+                    
                     recvlen = 0; // The received message is processed
                     break;
 
