@@ -196,7 +196,7 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
     find_arp_data *fa = data;
     
     if(ntohs(((struct sockaddr_in *) fa->addr)->sin_port) == arp_data->port &&
-       strcmp(inet_ntoa(((struct sockaddr_in *) fa->addr)->sin_addr), arp_data->addr)) {
+       !strcmp(inet_ntoa(((struct sockaddr_in *) fa->addr)->sin_addr), arp_data->addr)) {
         
         fa->arp_data = arp_data;
         
