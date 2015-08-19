@@ -305,7 +305,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     ip_map_d->receive_heap);
 
                             #ifdef DEBUG_KSNET
-                            ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
+                            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                                     "%sTR-UDP:%s recvfrom: Check Receive Heap,"
                                     " len = %d, id = %d ... ",
                                     ANSI_LIGHTGREEN, ANSI_NONE,
@@ -317,7 +317,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             if (rh_d->id == ip_map_d->expected_id) {
 
                                 #ifdef DEBUG_KSNET
-                                ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
+                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                                     "Processed\n");
                                 #endif
 
@@ -337,7 +337,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             else if (rh_d->id < ip_map_d->expected_id) {
                                 
                                 #ifdef DEBUG_KSNET
-                                ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
+                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                                     "Removed\n");
                                 #endif
                                 
@@ -350,7 +350,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             else {
                                 
                                 #ifdef DEBUG_KSNET
-                                ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
+                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                                     "Skipped\n");
                                 #endif
                                 
