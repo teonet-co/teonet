@@ -26,6 +26,7 @@ typedef struct ip_map_data {
     uint32_t expected_id; ///< Receive message expected ID 
     PblMap *send_list; ///< Send messages list
     PblHeap *receive_heap; ///< Received messages heap
+    ksnet_arp_data *arp;
     
     #define LAST10_SIZE 10
     struct {
@@ -43,7 +44,6 @@ typedef struct ip_map_data {
         size_t   idx;
     } stat;
     
-
 } ip_map_data;
 
 /**
@@ -141,8 +141,12 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
 ip_map_data *ksnTRUDPipMapDataTry(ksnTRUDPClass *tu,
         __CONST_SOCKADDR_ARG addr, char *key_out, size_t key_len);
+size_t ksnTRUDPkeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
+        char* key, size_t key_len);
 uint32_t ksnTRUDPtimestamp();
-int ksnTRUDPmakeAddr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *addr_len);
+int ksnTRUDPmakeAddr(const char *addr, int port, __SOCKADDR_ARG remaddr, 
+        socklen_t *addr_len);
+void ksnTRUDPsetActivity(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr);
 //
 uint8_t ksnTRUDPchecksumCalculate(ksnTRUDP_header *th);
 void ksnTRUDPchecksumSet(ksnTRUDP_header *th, uint8_t chk);

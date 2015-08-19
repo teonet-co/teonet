@@ -280,8 +280,10 @@ void ksnTunListAdd(ksnTunClass *ktun, int fd, struct ksn_tun_accept_data *tun_d)
  */
 void *ksnTunListRemove(ksnTunClass *ktun, int fd) {
 
+    void *ptr;
     size_t val_len;
-    return pblMapRemove(ktun->list, &fd, sizeof(fd), &val_len);
+    return (ptr = pblMapRemove(ktun->list, &fd, sizeof(fd), &val_len)) != 
+            (void*)-1 ? ptr : NULL;
 }
 
 /**
