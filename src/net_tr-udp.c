@@ -306,8 +306,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                             #ifdef DEBUG_KSNET
                             ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
-                                    "%sTR-UDP:%s recvfrom: Check Receive Heap, "
-                                    "len = %d, id = %d ... ",
+                                    "%sTR-UDP:%s recvfrom: Check Receive Heap,"
+                                    " len = %d, id = %d ... ",
                                     ANSI_LIGHTGREEN, ANSI_NONE,
                                     num, rh_d->id
                             );
@@ -362,6 +362,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     
                     // Save to Received message Heap
                     else {
+                        
                         #ifdef DEBUG_KSNET
                         ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                             "%sTR-UDP:%s recvfrom: Add to receive heap, "

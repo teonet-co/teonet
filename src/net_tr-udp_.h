@@ -169,7 +169,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 int ksnTRUDPreceiveHeapCompare(const void* prev, const void* next);
 int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
         uint32_t id, void *data,
-        size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len);
+        size_t data_len, __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 rh_data *ksnTRUDPreceiveHeapGetFirst(PblHeap *receive_heap);
 int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d);
 int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu, PblHeap *receive_heap);
