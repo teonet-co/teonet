@@ -51,11 +51,11 @@ typedef struct ip_map_data {
  */
 typedef struct rh_data {
     
-    uint32_t id;
-    void *data;
-    size_t data_len;
-    struct sockaddr addr;
-    socklen_t addr_len;
+    uint32_t id; ///< ID
+    struct sockaddr addr; ///< Address
+    socklen_t addr_len; ///< Address length
+    size_t data_len; ///< Data length
+    char data[]; ///< Data buffer
     
 } rh_data;
 
