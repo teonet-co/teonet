@@ -464,6 +464,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     
                     // Process RESET command
                     ksnTRUDPreset(tu, addr, 0);
+                    ksnTRUDPstatReset(tu); // TODO: Do we need reset it here?
                     ksnTRUDPSendACK(); // Send ACK
                     
                     // Set last activity time
