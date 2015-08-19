@@ -333,6 +333,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                 ip_map_d->expected_id++;
                             }
                             
+                            // TODO: Remove copy of old
+                            //else if (ip_map_d->expected_id == rh_d->id) {
+                            
                             // Drop saved message
                             else {
                                 
