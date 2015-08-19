@@ -129,14 +129,14 @@ void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
 ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
 
     size_t var_len = 0;
-    printf("ARP map remove '%s' ... ", name);
+    //printf("ARP map remove '%s' ... ", name);
     ksnet_arp_data *arp = pblMapRemoveStr(ka->map, name, &var_len);
     if(arp != (void*)-1) {
         printf("removed %s:%d\n", arp->addr, arp->port);
         ksnTRUDPresetAddr( ((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 1);
     }
-    else printf("not found\n");
+    //else printf("not found\n");
     
     // If not found
     if(arp == (void*)-1) arp = NULL;
