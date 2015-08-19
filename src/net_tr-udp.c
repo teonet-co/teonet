@@ -281,7 +281,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         // Change Expected ID
                         ip_map_d->expected_id++;
 
-                        // Process packet
                         #ifdef DEBUG_KSNET
                         ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                             "%sTR-UDP:%s recvfrom: Processed id %d from %s:%d\n", 
@@ -292,6 +291,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         );
                         #endif
 
+                        // Process packet
                         tu->process_packet(kev->kc, buffer + tru_ptr, 
                                 tru_header->payload_length, addr);
                         
@@ -358,6 +358,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         #endif
 
                         ksnTRUDPsetDATAreceiveDropped(tu, addr);
+                        
+                        // Set last activity time
+                        ksnTRUDPsetActivity(tu, addr);
                     }   
                     
                     // Save to Received message Heap
@@ -375,6 +378,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
                                 tru_header->id, buffer + tru_ptr,
                                 tru_header->payload_length, addr, *addr_len);
+                        
+                        // Set last activity time
+                        ksnTRUDPsetActivity(tu, addr);
                     }
                 }
                 
@@ -437,7 +443,10 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     }
                     
                     // Remove message from SendList and stop timer watcher
-                    ksnTRUDPsendListRemove(tu, tru_header->id, addr);                    
+                    ksnTRUDPsendListRemove(tu, tru_header->id, addr);   
+                    
+                    // Set last activity time
+                    ksnTRUDPsetActivity(tu, addr);
                 }
                 recvlen = 0; // The received message is processed
                 break;
@@ -456,6 +465,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     // Process RESET command
                     ksnTRUDPreset(tu, addr, 0);
                     ksnTRUDPSendACK(); // Send ACK
+                    
+                    // Set last activity time
+                    ksnTRUDPsetActivity(tu, addr);
                     
                     recvlen = 0; // The received message is processed
                     break;
@@ -573,6 +585,7 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         ip_map_d_new.expected_id = 0;
         ip_map_d_new.send_list = pblMapNewHashMap();
         ip_map_d_new.receive_heap = pblHeapNew();
+        ip_map_d_new.arp = ksnetArpFindByAddr(kev->kc->ka, addr);
         pblHeapSetCompareFunction(ip_map_d_new.receive_heap,
                 ksnTRUDPreceiveHeapCompare);
         pblMapAdd(tu->ip_map, key, key_len, &ip_map_d_new, sizeof (ip_map_d_new));
@@ -719,6 +732,24 @@ int ksnTRUDPmakeAddr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen
     #endif
 
     return 0;
+}
+
+/**
+ * Set last activity time
+ * 
+ * @param tu
+ * @param from
+ * @return 
+ */
+void ksnTRUDPsetActivity(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr) {
+    
+    //ksnetArpGetAll
+    ip_map_data *ip_map_d = ksnTRUDPipMapDataTry(tu, addr, NULL, 0);
+    
+    if(ip_map_d != NULL) {
+        if(ip_map_d->arp != NULL) 
+            ip_map_d->arp->last_acrivity = ksnetEvMgrGetTime(kev);
+    }
 }
 
 /*****************************************************************************

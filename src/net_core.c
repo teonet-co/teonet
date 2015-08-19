@@ -469,7 +469,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
  * @param remaddr
  */
 void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, 
-        __SOCKADDR_ARG remaddr) {   
+        __SOCKADDR_ARG remaddr) {
     
     ksnCoreClass *kc = vkc; // ksnCoreClass Class object
     ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
@@ -590,11 +590,11 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         }
     }
 
-    // Socket disconnected
-    else {
+//    // Socket disconnected
+//    else {
 //        #ifdef DEBUG_KSNET
 //        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
 //                "TR-UDP protocol data, dropped or disconnected ...\n");
 //        #endif
-    }
+//    }
 }
