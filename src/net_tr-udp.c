@@ -241,14 +241,16 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
         ksnTRUDP_header *tru_header = buffer;
 
         // Check for TR-UDP header and its checksum
-        if (recvlen - tru_ptr == tru_header->payload_length && ksnTRUDPchecksumCheck(tru_header)) {
+        if (recvlen - tru_ptr == tru_header->payload_length && 
+                ksnTRUDPchecksumCheck(tru_header)) {
 
             #ifdef DEBUG_KSNET
             ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
                 "%sTR-UDP:%s process %d bytes message of type %d, id %d, "
                 "with %d bytes data payload\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
-                (int)recvlen, tru_header->message_type, tru_header->id, tru_header->payload_length
+                (int)recvlen, tru_header->message_type, tru_header->id, 
+                tru_header->payload_length
             );
             #endif
 
@@ -289,6 +291,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             ntohs(((struct sockaddr_in *) addr)->sin_port)
                         );
                         #endif
+
                         tu->process_packet(kev->kc, buffer + tru_ptr, 
                                 tru_header->payload_length, addr);
                         
@@ -302,7 +305,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     ip_map_d->receive_heap);
 
                             #ifdef DEBUG_KSNET
-                            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                            ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
                                     "%sTR-UDP:%s recvfrom: Check Receive Heap, "
                                     "len = %d, id = %d ... ",
                                     ANSI_LIGHTGREEN, ANSI_NONE,
@@ -314,7 +317,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             if (ip_map_d->expected_id == rh_d->id) {
 
                                 #ifdef DEBUG_KSNET
-                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
                                     "Processed\n");
                                 #endif
 
@@ -334,7 +337,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             else {
                                 
                                 #ifdef DEBUG_KSNET
-                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                ksnet_printf(&kev->ksn_cfg, MESSAGE /*DEBUG_VV*/, 
                                     "Skipped\n");
                                 #endif
                                 
@@ -1230,8 +1233,9 @@ int ksnTRUDPreceiveHeapCompare(const void* prev, const void* next) {
  * @param data_len
  * @return 
  */
-int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id, 
-        void *data, size_t data_len, __SOCKADDR_ARG addr, socklen_t addr_len) {
+int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, 
+        uint32_t id, void *data, size_t data_len, __CONST_SOCKADDR_ARG addr, 
+        socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
     if (tu != NULL) {
@@ -1245,6 +1249,7 @@ int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, uint32_t id
     }
     #endif
 
+    // Create receive heap data
     rh_data *rh_d = malloc(sizeof (rh_data));
     rh_d->id = id;
     rh_d->data = malloc(data_len);
