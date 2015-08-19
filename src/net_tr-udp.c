@@ -1009,11 +1009,13 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     PblMap *sl = ksnTRUDPsendListGet(tu, addr, key, KSN_BUFFER_SM_SIZE);
 
     // Add message to Send List
-    sl_data sl_d;
-    sl_d.data_len = data_len < KSN_BUFFER_SIZE ? data_len : KSN_BUFFER_SIZE;
-    memcpy(sl_d.data_buf, data, sl_d.data_len);
-    sl_d.attempt = attempt;
-    pblMapAdd(sl, &id, sizeof (id), (void*) &sl_d, sizeof (sl_d));
+    const size_t sl_d_len = sizeof(sl_data) + data_len;
+    char sl_d_buf[sl_d_len];
+    sl_data *sl_d = (void*) sl_d_buf;
+    sl_d->attempt = attempt;
+    sl_d->data_len = data_len; // < KSN_BUFFER_SIZE ? data_len : KSN_BUFFER_SIZE;
+    memcpy(sl_d->data_buf, data, sl_d->data_len);
+    pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
 
     // Start ACK timer watcher
     size_t valueLength;
