@@ -88,3 +88,4 @@
 /lib/confuse/.deps/
 /app/teodb
 /.teodb/
+/tests/test_pbl_kf
