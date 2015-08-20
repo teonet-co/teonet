@@ -16,6 +16,8 @@
 typedef struct ksnPblKfClass {
     
     void *ke; ///< Pointer to the ksnEvMgrClass
+    char* namespace; ///< Default namespace
+    pblKeyFile_t* k; ///< Opened key file or NULL;
     
 } ksnPblKfClass;
 
@@ -26,6 +28,15 @@ extern "C" {
 
 ksnPblKfClass *ksnPblKfInit(void *ke);
 void ksnPblKfDestroy(ksnPblKfClass *kf);
+
+void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace);
+char *ksnPblKfNamespaceGet(ksnPblKfClass *kf);
+void *ksnPblKfGet(ksnPblKfClass *kf, const char *key, size_t *data_len);
+int ksnPblKfSet(ksnPblKfClass *kf, const char *key, void *data, size_t data_len);
+void *ksnPblKfGetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
+        size_t *data_len);
+int ksnPblKfSetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
+        void *data, size_t data_len);
 
 #ifdef	__cplusplus
 }
