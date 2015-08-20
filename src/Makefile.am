@@ -102,6 +102,7 @@ libteonet_la_SOURCES = \
     modules/net_tcp.c \
     modules/net_term.c \
     modules/net_tun.c \
+    modules/pbl_kf.c \
     modules/vpn.c \
     utils/string_arr.c \
     utils/utils.c

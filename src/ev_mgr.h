@@ -17,6 +17,7 @@
 
 #include "hotkeys.h"
 #include "modules/vpn.h"
+#include "modules/pbl_kf.h"
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
 #include "modules/net_term.h"
@@ -63,9 +64,10 @@ typedef struct ksnetEvMgrClass {
     ksnCoreClass *kc;  ///< KSNet core class
     ksnetHotkeysClass *kh; ///< Hotkeys class
     ksnVpnClass *kvpn; ///< VPN class
-    ksnTcpClass *kt; /// TCP Client/Server class
-    ksnTunClass *ktun; // Tunnel class
-    ksnTermClass *kter; // Terminal class
+    ksnTcpClass *kt; ///< TCP Client/Server class
+    ksnTunClass *ktun; ///< Tunnel class
+    ksnTermClass *kter; ///< Terminal class
+    ksnPblKfClass *kf; ///< PBL KeyFile class
 
     ksnet_cfg ksn_cfg; ///< KSNet configuration
 
