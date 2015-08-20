@@ -41,6 +41,26 @@
 #define TDB_VERSION "0.0.1"
 
 /**
+ * Teonet event handler
+ *
+ * @param ke
+ * @param event
+ * @param data
+ * @param data_len
+ * @param user_data
+ */
+void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
+              size_t data_len, void *user_data) {
+
+    // Switch Teonet event
+    switch(event) {
+
+        default:
+            break;
+    }
+}
+
+/**
  * Main application function
  *
  * @param argc
@@ -49,8 +69,14 @@
  */
 int main(int argc, char** argv) {
     
-    printf("Teodb ver " TDB_VERSION ", based on teonet ver. "
+    printf("Teodb ver " TDB_VERSION ", based on teonet ver "
             VERSION "\n");
+    
+    // Initialize teonet event manager and Read configuration
+    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
+    
+    // Start teonet
+    ksnetEvMgrRun(ke);
 
     return (EXIT_SUCCESS);
 }
