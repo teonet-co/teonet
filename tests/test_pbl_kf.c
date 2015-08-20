@@ -64,7 +64,7 @@ void test_3_2() {
     ksnPblKfNamespaceSet(kf, "test");
     CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
-    if(kf->k == NULL) printf("pbl_errno: %d ...", pbl_errno);
+    //if(kf->k == NULL) printf("pbl_errno: %d ...", pbl_errno);
     
     // Set test data
     int rv = ksnPblKfSet(kf, "test_key", "test data", 10);
@@ -92,6 +92,63 @@ void test_3_2() {
     
     // Remove test file if exist
     remove("test");        
+}
+
+// Set and get data
+void test_3_3() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+    
+    // Remove test file if exist
+    remove("test");
+
+    // Initialize module
+    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
+
+    // Set default namespace - the file at disk should be created
+    ksnPblKfNamespaceSet(kf, "test");
+    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_PTR_NOT_NULL(kf->k);
+    
+    // Set test data
+    int rv = ksnPblKfSet(kf, "test_key_01", "test data - 01", 15);
+    CU_ASSERT(rv == 0);
+
+    // Set test data
+    rv = ksnPblKfSet(kf, "test_key_02", "test data - 02", 15);
+    CU_ASSERT(rv == 0);
+
+    // Set test data
+    rv = ksnPblKfSet(kf, "test_key_03", "test data - 03", 15);
+    CU_ASSERT(rv == 0);
+
+    // Set test data
+    rv = ksnPblKfSet(kf, "test_key_04", "test data - 04", 15);
+    CU_ASSERT(rv == 0);
+
+    // Read test data
+    size_t data_len;
+    char *data = ksnPblKfGet(kf, "test_key_03", &data_len);
+    CU_ASSERT_STRING_EQUAL(data, "test data - 03");
+    CU_ASSERT(data_len == 15);
+    
+    // Set test data with existing key - update the record
+    rv = ksnPblKfSet(kf, "test_key_03", "test data - 03 - second", 24);
+    CU_ASSERT(rv == 0);
+
+    // Read test data
+    data = ksnPblKfGet(kf, "test_key_03", &data_len);
+    CU_ASSERT_STRING_EQUAL(data, "test data - 03 - second");
+    CU_ASSERT(data_len == 24);
+
+    // Destroy module
+    ksnPblKfDestroy(kf);
+    CU_PASS("Destroy ksnPblKfClass done");
+
+    // Remove test file if exist
+    //remove("test");
 }
 
 // Test template
@@ -126,7 +183,8 @@ int main() {
 
     /* Add the tests to the suite */
     if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_3_1)) ||
-        (NULL == CU_add_test(pSuite, "Set default namespace", test_3_2))) {
+        (NULL == CU_add_test(pSuite, "Set default namespace", test_3_2)) ||
+        (NULL == CU_add_test(pSuite, "Set and get data", test_3_3))) {
         
         CU_cleanup_registry();
         return CU_get_error();
