@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <CUnit/Basic.h>
 
+#include "ev_mgr.h"
+#include "modules/pbl_kf.h"
+
 /*
  * CUnit Test Suite
  */
@@ -21,13 +24,91 @@ int clean_suite(void) {
     return 0;
 }
 
-void test1() {
-    CU_ASSERT(2 * 2 == 4);
+#define kc_emul() \
+  ksnetEvMgrClass ke_obj; \
+  ksnetEvMgrClass *ke = &ke_obj
+
+// Initialize/Destroy PBL KeyFile module
+void test_3_1() {
+
+    // Emulate ksnCoreClass
+    kc_emul();
+
+    // Initialize module
+    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
+    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->k);
+    
+    // Destroy module
+    ksnPblKfDestroy(kf);
+    CU_PASS("Destroy ksnPblKfClass done");
 }
 
-void test2() {
-    CU_ASSERT(2 * 2 == 5);
+// Set default namespace
+void test_3_2() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+    
+    // Remove test file if exist
+    remove("test");
+    
+    // Initialize module
+    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
+    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->k);
+    
+    // Set default namespace - the file at disk should be created
+    ksnPblKfNamespaceSet(kf, "test");
+    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_PTR_NOT_NULL(kf->k);
+    if(kf->k == NULL) printf("pbl_errno: %d ...", pbl_errno);
+    
+    // Set test data
+    int rv = ksnPblKfSet(kf, "test_key", "test data", 10);
+    CU_ASSERT(rv == 0);
+    
+    // Set NULL namespace - the file should be flashed and closed
+    ksnPblKfNamespaceSet(kf, NULL);
+    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->k);
+    
+    // Set default namespace again - the file at disk should be opened
+    ksnPblKfNamespaceSet(kf, "test");
+    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_PTR_NOT_NULL(kf->k);
+    
+    // Read test data
+    size_t data_len;
+    char *data = ksnPblKfGet(kf, "test_key", &data_len);
+    CU_ASSERT_STRING_EQUAL(data, "test data");
+    CU_ASSERT(data_len == 10);
+    
+    // Destroy module
+    ksnPblKfDestroy(kf);
+    CU_PASS("Destroy ksnPblKfClass done");   
+    
+    // Remove test file if exist
+    remove("test");        
 }
+
+// Test template
+void test_3_template() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+    
+    // Initialize module
+    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
+    
+    // Destroy module
+    ksnPblKfDestroy(kf);
+    CU_PASS("Destroy ksnPblKfClass done");
+}
+
 
 int main() {
     CU_pSuite pSuite = NULL;
@@ -44,8 +125,8 @@ int main() {
     }
 
     /* Add the tests to the suite */
-    if ((NULL == CU_add_test(pSuite, "test1", test1)) ||
-        (NULL == CU_add_test(pSuite, "test2", test2))) {
+    if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_3_1)) ||
+        (NULL == CU_add_test(pSuite, "Set default namespace", test_3_2))) {
         
         CU_cleanup_registry();
         return CU_get_error();

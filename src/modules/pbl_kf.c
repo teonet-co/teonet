@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <pbl.h>
 
@@ -27,8 +28,8 @@ ksnPblKfClass *ksnPblKfInit(void *ke) {
     
     ksnPblKfClass *kf = malloc(sizeof(ksnPblKfClass));
     kf->namespace = NULL;
-    kf->ke = ke;
     kf->k = NULL;
+    kf->ke = ke;
     
     return kf;
 }
@@ -63,10 +64,22 @@ inline void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
     
     // Set namespace and open (or create) PBL KeyFile
     if(namespace != NULL) {
+        
         kf->namespace = strdup(namespace);
-        char *path = (char*) namespace;
-        kf->k = pblKfOpen(path, 1, NULL);
-        if(kf->k == NULL) kf->k = pblKfCreate(path, NULL);
+        char *path = (char*) namespace;   
+        
+        // If file exists
+        if(access(path, F_OK ) != -1 ) {
+            
+            kf->k = pblKfOpen(path, 1, NULL);
+        } 
+        
+        // If file doesn't exist
+        else {
+            
+            kf->k = pblKfCreate(path, NULL);
+        }
+
     }
     else kf->namespace = NULL;
 }
