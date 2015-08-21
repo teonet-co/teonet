@@ -8,15 +8,23 @@
 #ifndef CQUE_H
 #define	CQUE_H
 
+#include <ev.h>
 #include <pbl.h>
+
+// ksnCQue callback function definition 
+typedef int (*ksnCQueCallback) (uint32_t id, int type, void *data);
 
 /**
  * ksnCQue data structure
  */
 typedef struct ksnCQueData {
     
-    void *callback;
-    char data[];
+    ksnCQueCallback cb; ///< Pointer to callback function
+    ksnCQueClass *kq; ///< Pointer to ksnCQueClass
+    uint32_t id; ///< Callback ID (equal to key)
+    //char data[]; ///< TODO: Some data 
+    void *data; ///< User data
+    ev_timer w; ///< Timeout watcher
     
 } ksnCQueData;
 
