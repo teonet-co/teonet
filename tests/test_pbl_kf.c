@@ -189,7 +189,7 @@ void test_3_4() {
     rv = ksnTDBsetNs(kf, "test", "test_key", "test data updated", 18);
     CU_ASSERT(rv == 0);    
     
-    // Read test data
+    // Read updated test data
     data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data updated");
     CU_ASSERT(data_len == 18);
