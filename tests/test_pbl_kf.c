@@ -160,6 +160,54 @@ void test_3_3() {
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
+// Set and get data without default namespace
+void test_3_4() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+    
+    // Initialize module
+    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
+    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->k);
+    
+    // Remove namespace if exist
+    ksnPblKfNamespaceRemove(kf, "test");
+    
+    // Set test data
+    int rv = ksnPblKfSetNs(kf, "test", "test_key", "test data", 10);
+    CU_ASSERT(rv == 0);    
+    
+    // Read test data
+    size_t data_len;
+    char *data = ksnPblKfGetNs(kf, "test", "test_key", &data_len);
+    CU_ASSERT_STRING_EQUAL(data, "test data");
+    CU_ASSERT(data_len == 10);
+    
+    // Update test data
+    rv = ksnPblKfSetNs(kf, "test", "test_key", "test data updated", 18);
+    CU_ASSERT(rv == 0);    
+    
+    // Read test data
+    data = ksnPblKfGetNs(kf, "test", "test_key", &data_len);
+    CU_ASSERT_STRING_EQUAL(data, "test data updated");
+    CU_ASSERT(data_len == 18);
+    
+    // Delete all records with key
+    rv = ksnPblKfDeleteNs(kf, "test", "test_key");
+    CU_ASSERT(rv == 0);
+    
+    // Try to read deleted data
+    data = ksnPblKfGetNs(kf, "test", "test_key", &data_len);
+    CU_ASSERT_PTR_NULL(data);
+    CU_ASSERT(data_len == 0);
+    
+    // Destroy module
+    ksnPblKfDestroy(kf);
+    CU_PASS("Destroy ksnPblKfClass done");
+}
+
 // Test template
 void test_3_template() {
     
@@ -193,7 +241,8 @@ int main() {
     /* Add the tests to the suite */
     if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_3_1)) ||
         (NULL == CU_add_test(pSuite, "Set default namespace", test_3_2)) ||
-        (NULL == CU_add_test(pSuite, "Set and get data", test_3_3))) {
+        (NULL == CU_add_test(pSuite, "Set and get data with default namespace", test_3_3)) ||
+        (NULL == CU_add_test(pSuite, "Set and get data without default namespace", test_3_4))) {
         
         CU_cleanup_registry();
         return CU_get_error();

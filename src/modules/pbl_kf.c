@@ -82,8 +82,6 @@ void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
         // File path name
         get_file_path(namespace);
         
-        printf("path: %s\n", path);
-        
         // If file exists
         if(access(path, F_OK ) != -1 ) {
             
