@@ -51,14 +51,14 @@ void test_3_2() {
     // Emulate ksnCoreClass
     kc_emul();
     
-    // Remove test file if exist
-    remove("test");
-    
     // Initialize module
     ksnPblKfClass *kf = ksnPblKfInit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
     CU_ASSERT_PTR_NULL(kf->namespace);
     CU_ASSERT_PTR_NULL(kf->k);
+    
+    // Remove namespace if exist
+    ksnPblKfNamespaceRemove(kf, "test");
     
     // Set default namespace - the file at disk should be created
     ksnPblKfNamespaceSet(kf, "test");
@@ -86,12 +86,12 @@ void test_3_2() {
     CU_ASSERT_STRING_EQUAL(data, "test data");
     CU_ASSERT(data_len == 10);
     
+    // Remove namespace if exist
+    //ksnPblKfNamespaceRemove(kf, "test");
+    
     // Destroy module
     ksnPblKfDestroy(kf);
-    CU_PASS("Destroy ksnPblKfClass done");   
-    
-    // Remove test file if exist
-    remove("test");        
+    CU_PASS("Destroy ksnPblKfClass done");       
 }
 
 // Set and get data
@@ -100,12 +100,12 @@ void test_3_3() {
     // Emulate ksnCoreClass
     kc_emul();
     
-    // Remove test file if exist
-    remove("test");
-
     // Initialize module
     ksnPblKfClass *kf = ksnPblKfInit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
+
+    // Remove namespace if exist
+    ksnPblKfNamespaceRemove(kf, "test");
 
     // Set default namespace - the file at disk should be created
     ksnPblKfNamespaceSet(kf, "test");
@@ -134,7 +134,7 @@ void test_3_3() {
     CU_ASSERT_STRING_EQUAL(data, "test data - 03");
     CU_ASSERT(data_len == 15);
     
-    // Set test data with existing key - update the record
+    // Update test data with existing key
     rv = ksnPblKfSet(kf, "test_key_03", "test data - 03 - second", 24);
     CU_ASSERT(rv == 0);
 
@@ -142,13 +142,22 @@ void test_3_3() {
     data = ksnPblKfGet(kf, "test_key_03", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data - 03 - second");
     CU_ASSERT(data_len == 24);
+    
+    // Delete all records with key
+    rv = ksnPblKfDelete(kf, "test_key_03");
+    CU_ASSERT(rv == 0);
+    
+    // Try to read deleted data
+    data = ksnPblKfGet(kf, "test_key_03", &data_len);
+    CU_ASSERT_PTR_NULL(data);
+    CU_ASSERT(data_len == 0);
 
+    // Remove namespace if exist
+    //ksnPblKfNamespaceRemove(kf, "test");    
+    
     // Destroy module
     ksnPblKfDestroy(kf);
     CU_PASS("Destroy ksnPblKfClass done");
-
-    // Remove test file if exist
-    //remove("test");
 }
 
 // Test template
