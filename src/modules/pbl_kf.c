@@ -143,7 +143,7 @@ void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len) {
     
     if(kf->k != NULL) {
         
-        long rc = pblKfFind(kf->k, PBLEQ /*PBLLA*/, (void*) key, strlen(key) + 1, 
+        long rc = pblKfFind(kf->k, /*PBLEQ*/ PBLLA, (void*) key, strlen(key) + 1, 
                 (void*) okey, &okey_len);
         
         if(rc >= 0) {
