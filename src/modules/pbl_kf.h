@@ -31,12 +31,17 @@ void ksnPblKfDestroy(ksnPblKfClass *kf);
 
 void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace);
 char *ksnPblKfNamespaceGet(ksnPblKfClass *kf);
+void ksnPblKfNamespaceRemove(ksnPblKfClass *kf, const char* namespace);
+
 void *ksnPblKfGet(ksnPblKfClass *kf, const char *key, size_t *data_len);
 int ksnPblKfSet(ksnPblKfClass *kf, const char *key, void *data, size_t data_len);
+int ksnPblKfDelete(ksnPblKfClass *kf, const char *key);
+
 void *ksnPblKfGetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
         size_t *data_len);
 int ksnPblKfSetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
         void *data, size_t data_len);
+int ksnPblKfDeleteNs(ksnPblKfClass *kf, const char *namespace, const char *key);
 
 #ifdef	__cplusplus
 }

@@ -11,11 +11,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include <pbl.h>
 
 #include "pbl_kf.h"
 #include "conf.h"
+#include "utils/utils.h"
 
 /**
  * Initialize PBL KeyFile module
@@ -47,13 +49,23 @@ inline void ksnPblKfDestroy(ksnPblKfClass *kf) {
     }
 }
 
+#define get_file_path(namespace) \
+        char path[PATH_MAX], *data_path = (char*)getDataPath(); \
+        mkdir(data_path, 0755); \
+        strncpy(path, data_path, PATH_MAX); \
+        strncat(path, "/", PATH_MAX - strlen(path) - 1); \
+        strncat(path, namespace, PATH_MAX - strlen(path) - 1)
+
 /**
- * Set default namespace
+ * Set current namespace
+ * 
+ * Set namespace to use in ksnPblKfGet, ksnPblKfSet and ksnPblKfDelete functions 
+ * to get, set or delete data without select namespace.
  * 
  * @param kf Pointer to ksnPblKfClass
  * @param namespace String with namespace
  */
-inline void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
+void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
     
     // Free current namespace and close PBL KeyFile
     if(kf->namespace != NULL) free(kf->namespace);
@@ -66,7 +78,11 @@ inline void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
     if(namespace != NULL) {
         
         kf->namespace = strdup(namespace);
-        char *path = (char*) namespace;   
+        
+        // File path name
+        get_file_path(namespace);
+        
+        printf("path: %s\n", path);
         
         // If file exists
         if(access(path, F_OK ) != -1 ) {
@@ -85,7 +101,7 @@ inline void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
 }
 
 /**
- * Get default namespace
+ * Get current namespace
  * 
  * @param kf Pointer to ksnPblKfClass
  * 
@@ -95,6 +111,19 @@ inline void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
 inline char *ksnPblKfNamespaceGet(ksnPblKfClass *kf) {
     
     return kf->namespace != NULL ? strdup(kf->namespace) : NULL;
+}
+
+/**
+ * Remove namespace and all it contains
+ * 
+ * @param kf Pointer to ksnPblKfClass
+ * @param namespace String with namespace
+ */
+void ksnPblKfNamespaceRemove(ksnPblKfClass *kf, const char* namespace) {
+    
+    ksnPblKfNamespaceSet(kf, NULL);
+    get_file_path(namespace);    
+    remove(path); // Remove test file if exist
 }
 
 /**
@@ -109,12 +138,14 @@ inline char *ksnPblKfNamespaceGet(ksnPblKfClass *kf) {
  */
 void *ksnPblKfGet(ksnPblKfClass *kf, const char *key, size_t *data_len) {
     
+    *data_len = 0;
     void *data = NULL;
     char okey[KSN_BUFFER_SM_SIZE];
     size_t okey_len = KSN_BUFFER_SM_SIZE;
+    
     if(kf->k != NULL) {
         
-        long rc = pblKfFind(kf->k, PBLLA, (void*) key, strlen(key) + 1, 
+        long rc = pblKfFind(kf->k, PBLEQ /*PBLLA*/, (void*) key, strlen(key) + 1, 
                 (void*) okey, &okey_len);
         
         if(rc >= 0) {
@@ -154,6 +185,32 @@ int ksnPblKfSet(ksnPblKfClass *kf, const char *key, void *data,
 }
 
 /**
+ * Delete all records with key
+ * 
+ * @param Pointer to ksnPblKfClass
+ * @param key String with key
+ * 
+ * @return 0: call went OK; != 0 if key not found or some error occurred
+ */
+int ksnPblKfDelete(ksnPblKfClass *kf, const char *key) {
+    
+    int retval = -1;
+    
+    if(kf->k != NULL) {
+        
+        void *data;
+        size_t data_len;
+        while((data=ksnPblKfGet(kf, key, &data_len)) != NULL) {
+            pblKfDelete(kf->k);
+            free(data);
+            retval = 0;
+        }
+    }
+    
+    return retval;
+}
+
+/**
  * Get data by key from namespace
  * 
  * @param kf Pointer to ksnPblKfClass
@@ -179,9 +236,10 @@ void *ksnPblKfGetNs(ksnPblKfClass *kf, const char *namespace, const char *key,
  * Add (insert or update) data by key to namespace  
  * 
  * @param kf Pointer to ksnPblKfClass
- * @param key
- * @param data
- * @param data_len
+ * @param namespace String with namespace
+ * @param key String with key
+ * @param data Pointer to data
+ * @param data_len [out] Data length
  * 
  * @return 
  */
@@ -191,6 +249,26 @@ int ksnPblKfSetNs(ksnPblKfClass *kf, const char *namespace, const char *key,
     char *save_namespace = ksnPblKfNamespaceGet(kf);
     ksnPblKfNamespaceSet(kf, namespace);
     int retval = ksnPblKfSet(kf, key, data, data_len);
+    ksnPblKfNamespaceSet(kf, save_namespace);
+    if(save_namespace != NULL) free(save_namespace);
+    
+    return retval;
+}
+
+/**
+ * Delete all records with key
+ * 
+ * @param Pointer to ksnPblKfClass
+ * @param namespace String with namespace
+ * @param key String with key
+ * 
+ * @return 0: call went OK; != 0 if key not found or some error occurred
+ */
+int ksnPblKfDeleteNs(ksnPblKfClass *kf, const char *namespace, const char *key) {
+    
+    char *save_namespace = ksnPblKfNamespaceGet(kf);
+    ksnPblKfNamespaceSet(kf, namespace);
+    int retval = ksnPblKfDelete(kf, key);
     ksnPblKfNamespaceSet(kf, save_namespace);
     if(save_namespace != NULL) free(save_namespace);
     
