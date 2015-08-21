@@ -2,7 +2,7 @@
  * File:   cque.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
- * Module to manage callbacks QUEUE: ksnCQue
+ * Module to manage Callback QUEUE: ksnCQue
  * 
  * Main module functions:
  * 
@@ -13,5 +13,32 @@
  * Created on August 21, 2015, 12:10 PM
  */
 
+#include <stdlib.h>
+
 #include "cque.h"
 
+/**
+ * Initialize ksnCQue module class
+ * 
+ * @param ke Pointer to ksnEvMgrClass
+ * @return 
+ */
+ksnCQue *ksnCQueInit(void *ke) {
+    
+    ksnCQue *kq = malloc(sizeof(ksnCQue));
+    kq->ke = ke;
+    
+    return kq;
+}
+
+/**
+ * Destroy ksnCQue module class
+ * 
+ * @param kq
+ */
+void ksnCQueDestroy(ksnCQue *kq) {
+
+    if(kq != NULL) {
+        free(kq);
+    }
+}
