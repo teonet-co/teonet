@@ -10,7 +10,7 @@
 
 typedef struct ksnCQue {
     
-    
+    void *ke; ///< Pointer to ksnEvMgrClass
     
 } ksnCQue;
 
@@ -18,7 +18,8 @@ typedef struct ksnCQue {
 extern "C" {
 #endif
 
-
+ksnCQue *ksnCQueInit(void *ke);
+void ksnCQueDestroy(ksnCQue *kq);
 
 
 #ifdef	__cplusplus
