@@ -22,13 +22,13 @@
 /**
  * Initialize PBL KeyFile module
  * 
- * @param ke Pointer to ksnPblKfClass
+ * @param ke Pointer to ksnTDBClass
  * 
  * @return 
  */
-ksnPblKfClass *ksnPblKfInit(void *ke) {
+ksnTDBClass *ksnTDBinit(void *ke) {
     
-    ksnPblKfClass *kf = malloc(sizeof(ksnPblKfClass));
+    ksnTDBClass *kf = malloc(sizeof(ksnTDBClass));
     kf->namespace = NULL;
     kf->k = NULL;
     kf->ke = ke;
@@ -39,12 +39,12 @@ ksnPblKfClass *ksnPblKfInit(void *ke) {
 /**
  * Destroy PBL KeyFile module
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  */
-inline void ksnPblKfDestroy(ksnPblKfClass *kf) {
+inline void ksnTDBdestroy(ksnTDBClass *kf) {
     
     if(kf != NULL) {
-        ksnPblKfNamespaceSet(kf, NULL);
+        ksnTDBnamespaceSet(kf, NULL);
         free(kf);
     }
 }
@@ -59,13 +59,13 @@ inline void ksnPblKfDestroy(ksnPblKfClass *kf) {
 /**
  * Set current namespace
  * 
- * Set namespace to use in ksnPblKfGet, ksnPblKfSet and ksnPblKfDelete functions 
+ * Set namespace to use in ksnTdbGet, ksnTdbSet and ksnTdbDelete functions 
  * to get, set or delete data without select namespace.
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  * @param namespace String with namespace
  */
-void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
+void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace) {
     
     // Free current namespace and close PBL KeyFile
     if(kf->namespace != NULL) free(kf->namespace);
@@ -101,12 +101,12 @@ void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace) {
 /**
  * Get current namespace
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  * 
  * @return Return default namespace or NULL if namespace not set, 
  *         should be free after use
  */
-inline char *ksnPblKfNamespaceGet(ksnPblKfClass *kf) {
+inline char *ksnTDBnamespaceGet(ksnTDBClass *kf) {
     
     return kf->namespace != NULL ? strdup(kf->namespace) : NULL;
 }
@@ -114,12 +114,12 @@ inline char *ksnPblKfNamespaceGet(ksnPblKfClass *kf) {
 /**
  * Remove namespace and all it contains
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  * @param namespace String with namespace
  */
-void ksnPblKfNamespaceRemove(ksnPblKfClass *kf, const char* namespace) {
+void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* namespace) {
     
-    ksnPblKfNamespaceSet(kf, NULL);
+    ksnTDBnamespaceSet(kf, NULL);
     get_file_path(namespace);    
     remove(path); // Remove test file if exist
 }
@@ -127,14 +127,14 @@ void ksnPblKfNamespaceRemove(ksnPblKfClass *kf, const char* namespace) {
 /**
  * Get data by key from default namespace
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  * @param key String with key
  * @param data_len [out] Length of data
  * 
  * @return Pointer to data with data_len length or NULL if not found, 
  *         should be free after use
  */
-void *ksnPblKfGet(ksnPblKfClass *kf, const char *key, size_t *data_len) {
+void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len) {
     
     *data_len = 0;
     void *data = NULL;
@@ -163,14 +163,14 @@ void *ksnPblKfGet(ksnPblKfClass *kf, const char *key, size_t *data_len) {
 /**
  * Add (insert or update) data by key to default namespace  
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  * @param key String with key
  * @param data Pointer to data
  * @param data_len Data length
  * 
  * @return 0: call went OK; or an error if != 0
  */
-int ksnPblKfSet(ksnPblKfClass *kf, const char *key, void *data, 
+int ksnTDBset(ksnTDBClass *kf, const char *key, void *data, 
         size_t data_len) {
     
     int retval = -1;
@@ -185,12 +185,12 @@ int ksnPblKfSet(ksnPblKfClass *kf, const char *key, void *data,
 /**
  * Delete all records with key
  * 
- * @param Pointer to ksnPblKfClass
+ * @param Pointer to ksnTDBClass
  * @param key String with key
  * 
  * @return 0: call went OK; != 0 if key not found or some error occurred
  */
-int ksnPblKfDelete(ksnPblKfClass *kf, const char *key) {
+int ksnTDBdelete(ksnTDBClass *kf, const char *key) {
     
     int retval = -1;
     
@@ -198,7 +198,7 @@ int ksnPblKfDelete(ksnPblKfClass *kf, const char *key) {
         
         void *data;
         size_t data_len;
-        while((data=ksnPblKfGet(kf, key, &data_len)) != NULL) {
+        while((data=ksnTDBget(kf, key, &data_len)) != NULL) {
             pblKfDelete(kf->k);
             free(data);
             retval = 0;
@@ -211,20 +211,20 @@ int ksnPblKfDelete(ksnPblKfClass *kf, const char *key) {
 /**
  * Get data by key from namespace
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  * @param namespace String with namespace
  * @param key String with key
  * @param data_len [out] Data length
  * 
  * @return 
  */
-void *ksnPblKfGetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
+void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const char *key, 
         size_t *data_len) {
 
-    char *save_namespace = ksnPblKfNamespaceGet(kf);
-    ksnPblKfNamespaceSet(kf, namespace);
-    void *data = ksnPblKfGet(kf, key, data_len);
-    ksnPblKfNamespaceSet(kf, save_namespace);
+    char *save_namespace = ksnTDBnamespaceGet(kf);
+    ksnTDBnamespaceSet(kf, namespace);
+    void *data = ksnTDBget(kf, key, data_len);
+    ksnTDBnamespaceSet(kf, save_namespace);
     if(save_namespace != NULL) free(save_namespace);
     
     return data;
@@ -233,7 +233,7 @@ void *ksnPblKfGetNs(ksnPblKfClass *kf, const char *namespace, const char *key,
 /**
  * Add (insert or update) data by key to namespace  
  * 
- * @param kf Pointer to ksnPblKfClass
+ * @param kf Pointer to ksnTDBClass
  * @param namespace String with namespace
  * @param key String with key
  * @param data Pointer to data
@@ -241,13 +241,13 @@ void *ksnPblKfGetNs(ksnPblKfClass *kf, const char *namespace, const char *key,
  * 
  * @return 
  */
-int ksnPblKfSetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
+int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const char *key, 
         void *data, size_t data_len) {
     
-    char *save_namespace = ksnPblKfNamespaceGet(kf);
-    ksnPblKfNamespaceSet(kf, namespace);
-    int retval = ksnPblKfSet(kf, key, data, data_len);
-    ksnPblKfNamespaceSet(kf, save_namespace);
+    char *save_namespace = ksnTDBnamespaceGet(kf);
+    ksnTDBnamespaceSet(kf, namespace);
+    int retval = ksnTDBset(kf, key, data, data_len);
+    ksnTDBnamespaceSet(kf, save_namespace);
     if(save_namespace != NULL) free(save_namespace);
     
     return retval;
@@ -256,18 +256,18 @@ int ksnPblKfSetNs(ksnPblKfClass *kf, const char *namespace, const char *key,
 /**
  * Delete all records with key
  * 
- * @param Pointer to ksnPblKfClass
+ * @param Pointer to ksnTDBClass
  * @param namespace String with namespace
  * @param key String with key
  * 
  * @return 0: call went OK; != 0 if key not found or some error occurred
  */
-int ksnPblKfDeleteNs(ksnPblKfClass *kf, const char *namespace, const char *key) {
+int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const char *key) {
     
-    char *save_namespace = ksnPblKfNamespaceGet(kf);
-    ksnPblKfNamespaceSet(kf, namespace);
-    int retval = ksnPblKfDelete(kf, key);
-    ksnPblKfNamespaceSet(kf, save_namespace);
+    char *save_namespace = ksnTDBnamespaceGet(kf);
+    ksnTDBnamespaceSet(kf, namespace);
+    int retval = ksnTDBdelete(kf, key);
+    ksnTDBnamespaceSet(kf, save_namespace);
     if(save_namespace != NULL) free(save_namespace);
     
     return retval;

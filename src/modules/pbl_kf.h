@@ -13,35 +13,35 @@
 /**
  * PBL KeyFile data 
  */
-typedef struct ksnPblKfClass {
+typedef struct ksnTDBClass {
     
     void *ke; ///< Pointer to the ksnEvMgrClass
     char* namespace; ///< Default namespace
     pblKeyFile_t* k; ///< Opened key file or NULL;
     
-} ksnPblKfClass;
+} ksnTDBClass;
 
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-ksnPblKfClass *ksnPblKfInit(void *ke);
-void ksnPblKfDestroy(ksnPblKfClass *kf);
+ksnTDBClass *ksnTDBinit(void *ke);
+void ksnTDBdestroy(ksnTDBClass *kf);
 
-void ksnPblKfNamespaceSet(ksnPblKfClass *kf, const char* namespace);
-char *ksnPblKfNamespaceGet(ksnPblKfClass *kf);
-void ksnPblKfNamespaceRemove(ksnPblKfClass *kf, const char* namespace);
+void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace);
+char *ksnTDBnamespaceGet(ksnTDBClass *kf);
+void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* namespace);
 
-void *ksnPblKfGet(ksnPblKfClass *kf, const char *key, size_t *data_len);
-int ksnPblKfSet(ksnPblKfClass *kf, const char *key, void *data, size_t data_len);
-int ksnPblKfDelete(ksnPblKfClass *kf, const char *key);
+void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len);
+int ksnTDBset(ksnTDBClass *kf, const char *key, void *data, size_t data_len);
+int ksnTDBdelete(ksnTDBClass *kf, const char *key);
 
-void *ksnPblKfGetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
+void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const char *key, 
         size_t *data_len);
-int ksnPblKfSetNs(ksnPblKfClass *kf, const char *namespace, const char *key, 
+int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const char *key, 
         void *data, size_t data_len);
-int ksnPblKfDeleteNs(ksnPblKfClass *kf, const char *namespace, const char *key);
+int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const char *key);
 
 #ifdef	__cplusplus
 }
