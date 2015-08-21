@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "ev_mgr.h"
 #include "cque.h"
 
 /**
@@ -73,7 +74,8 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
     if(cq != NULL) {
         
-        // TODO: Execute callback cq->callback 
+        // Execute queue callback
+        cq->cb(id, 1, cq->data); // Type 1: successful callback
         
         // Remove record from queue
         if(pblMapRemove(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
@@ -86,28 +88,67 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
 }
 
 /**
+ * Callback Queue timeout timer callback
+ * 
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void cq_timer_cb(EV_P_ ev_timer *w, int revents) { 
+    
+    #define cq ((ksnCQueData*)(w->data))
+
+    // Stop this timer watcher
+    ev_timer_stop(EV_A_ w);
+
+    // Execute queue callback
+    cq->cb(cq->id, 0, cq->data); // Type 0: timeout callback
+    
+    // Remove record from Callback Queue
+    size_t data_len;
+    if(pblMapRemove(cq->kq->cque_map, &cq->id, sizeof(cq->id), &data_len) != (void*)-1) {
+            
+        // Do something in success 
+    }
+    
+    #undef cq
+}
+
+/**
  * Add callback to queue
  * 
- * @param kq
- * @param callback
+ * @param kq Pointer to ksnCQue Class
+ * @param callback Callback function
+ * @param timeout Callback timeout. If equal to 0 than timeout sets automatically
+ * @param data  The user data which should be send to the callback function
  * 
  * @return Pointer to added ksnCQueData or NULL if error occurred
  */
-ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, void *callback) {
+ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, void *data) {
     
-    ksnCQueData data, *cq = NULL; // Create CQue data buffer
+    ksnCQueData data_new, *cq = NULL; // Create CQue data buffer
     uint32_t id = kq->id++; // Get new ID
     size_t data_len; // Length of data
     
-    data.callback = callback;
+    // Set Callback Queue data
+    data_new.kq = kq; // ksnCQueClass
+    data_new.id = id; // ID
+    data_new.cb = cb; // Callback
+    data_new.data = data; // User data
     
-    if(pblMapAdd(kq->cque_map, &id, sizeof(id), &data, sizeof(data)) >= 0) {
+    // Add data to the Callback Queue
+    if(pblMapAdd(kq->cque_map, &id, sizeof(id), &data_new, sizeof(data_new)) >= 0) {
         
-        // Successfully added
+        // If successfully added get real ksnCQueData pointer and start timeout 
+        // watcher
         cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);
         if(cq != NULL) {
             
             // TODO: Create timeout watcher
+            // Initialize, set user data and start the timer
+            ev_timer_init(&cq->w, cq_timer_cb, timeout, 0.0);
+            cq->w.data = cq; // Watcher data link to the ksnCQueData
+            ev_timer_start(((ksnetEvMgrClass*)(kq->ke))->ev_loop, &cq->w);
         }
     }
     
