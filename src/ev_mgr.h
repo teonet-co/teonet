@@ -67,7 +67,7 @@ typedef struct ksnetEvMgrClass {
     ksnTcpClass *kt; /// TCP Client/Server class
     ksnTunClass *ktun; // Tunnel class
     ksnTermClass *kter; // Terminal class
-    ksnCQue *kq; ///< Callback QUEUE class
+    ksnCQueClass *kq; ///< Callback QUEUE class
 
     ksnet_cfg ksn_cfg; ///< KSNet configuration
 

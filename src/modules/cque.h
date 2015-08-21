@@ -8,18 +8,38 @@
 #ifndef CQUE_H
 #define	CQUE_H
 
-typedef struct ksnCQue {
+#include <pbl.h>
+
+/**
+ * ksnCQue data structure
+ */
+typedef struct ksnCQueData {
+    
+    void *callback;
+    char data[];
+    
+} ksnCQueData;
+
+/**
+ * ksnCQue Class structure definition
+ */
+typedef struct ksnCQueClass {
     
     void *ke; ///< Pointer to ksnEvMgrClass
+    uint32_t id; ///< New callback queue ID
+    PblMap *cque_map; ///< Pointer to the callback queue pblMap
     
-} ksnCQue;
+} ksnCQueClass;
+
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-ksnCQue *ksnCQueInit(void *ke);
-void ksnCQueDestroy(ksnCQue *kq);
+ksnCQueClass *ksnCQueInit(void *ke);
+void ksnCQueDestroy(ksnCQueClass *kq);
+
+int ksnCQueExec(ksnCQueClass *kq, uint32_t id);
 
 
 #ifdef	__cplusplus
