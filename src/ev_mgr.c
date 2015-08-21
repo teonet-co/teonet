@@ -691,7 +691,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     
     // PBL KeyFile Module
     #if M_ENAMBE_PBLKF
-    ke->kf = ksnPblKfInit(ke);
+    ke->kf = ksnTDBinit(ke);
     #endif
 
     // VPN Module
@@ -736,7 +736,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     ksnVpnDestroy(ke->kvpn);
     #endif
     #if M_ENAMBE_PBLKF
-    ksnPblKfDestroy(ke->kf);
+    ksnTDBdestroy(ke->kf);
     #endif
 
     ksnetHotkeysDestroy(ke->kh);

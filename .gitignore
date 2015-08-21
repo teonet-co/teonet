@@ -89,3 +89,4 @@
 /app/teodb
 /.teodb/
 /tests/test_pbl_kf
+/.test_pbl_kf/

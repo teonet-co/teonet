@@ -35,13 +35,13 @@ void test_3_1() {
     kc_emul();
 
     // Initialize module
-    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
     CU_ASSERT_PTR_NULL(kf->namespace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Destroy module
-    ksnPblKfDestroy(kf);
+    ksnTDBdestroy(kf);
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
@@ -52,37 +52,37 @@ void test_3_2() {
     kc_emul();
     
     // Initialize module
-    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
     CU_ASSERT_PTR_NULL(kf->namespace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Remove namespace if exist
-    ksnPblKfNamespaceRemove(kf, "test");
+    ksnTDBnamespaceRemove(kf, "test");
     
     // Set default namespace - the file at disk should be created
-    ksnPblKfNamespaceSet(kf, "test");
+    ksnTDBnamespaceSet(kf, "test");
     CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     //if(kf->k == NULL) printf("pbl_errno: %d ...", pbl_errno);
     
     // Set test data
-    int rv = ksnPblKfSet(kf, "test_key", "test data", 10);
+    int rv = ksnTDBset(kf, "test_key", "test data", 10);
     CU_ASSERT(rv == 0);
     
     // Set NULL namespace - the file should be flashed and closed
-    ksnPblKfNamespaceSet(kf, NULL);
+    ksnTDBnamespaceSet(kf, NULL);
     CU_ASSERT_PTR_NULL(kf->namespace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Set default namespace again - the file at disk should be opened
-    ksnPblKfNamespaceSet(kf, "test");
+    ksnTDBnamespaceSet(kf, "test");
     CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     
     // Read test data
     size_t data_len;
-    char *data = ksnPblKfGet(kf, "test_key", &data_len);
+    char *data = ksnTDBget(kf, "test_key", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data");
     CU_ASSERT(data_len == 10);
     
@@ -90,7 +90,7 @@ void test_3_2() {
     //ksnPblKfNamespaceRemove(kf, "test");
     
     // Destroy module
-    ksnPblKfDestroy(kf);
+    ksnTDBdestroy(kf);
     CU_PASS("Destroy ksnPblKfClass done");       
 }
 
@@ -101,54 +101,54 @@ void test_3_3() {
     kc_emul();
     
     // Initialize module
-    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
 
     // Remove namespace if exist
-    ksnPblKfNamespaceRemove(kf, "test");
+    ksnTDBnamespaceRemove(kf, "test");
 
     // Set default namespace - the file at disk should be created
-    ksnPblKfNamespaceSet(kf, "test");
+    ksnTDBnamespaceSet(kf, "test");
     CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     
     // Set test data
-    int rv = ksnPblKfSet(kf, "test_key_01", "test data - 01", 15);
+    int rv = ksnTDBset(kf, "test_key_01", "test data - 01", 15);
     CU_ASSERT(rv == 0);
 
     // Set test data
-    rv = ksnPblKfSet(kf, "test_key_02", "test data - 02", 15);
+    rv = ksnTDBset(kf, "test_key_02", "test data - 02", 15);
     CU_ASSERT(rv == 0);
 
     // Set test data
-    rv = ksnPblKfSet(kf, "test_key_03", "test data - 03", 15);
+    rv = ksnTDBset(kf, "test_key_03", "test data - 03", 15);
     CU_ASSERT(rv == 0);
 
     // Set test data
-    rv = ksnPblKfSet(kf, "test_key_04", "test data - 04", 15);
+    rv = ksnTDBset(kf, "test_key_04", "test data - 04", 15);
     CU_ASSERT(rv == 0);
 
     // Read test data
     size_t data_len;
-    char *data = ksnPblKfGet(kf, "test_key_03", &data_len);
+    char *data = ksnTDBget(kf, "test_key_03", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data - 03");
     CU_ASSERT(data_len == 15);
     
     // Update test data with existing key
-    rv = ksnPblKfSet(kf, "test_key_03", "test data - 03 - second", 24);
+    rv = ksnTDBset(kf, "test_key_03", "test data - 03 - second", 24);
     CU_ASSERT(rv == 0);
 
     // Read test data
-    data = ksnPblKfGet(kf, "test_key_03", &data_len);
+    data = ksnTDBget(kf, "test_key_03", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data - 03 - second");
     CU_ASSERT(data_len == 24);
     
     // Delete all records with key
-    rv = ksnPblKfDelete(kf, "test_key_03");
+    rv = ksnTDBdelete(kf, "test_key_03");
     CU_ASSERT(rv == 0);
     
     // Try to read deleted data
-    data = ksnPblKfGet(kf, "test_key_03", &data_len);
+    data = ksnTDBget(kf, "test_key_03", &data_len);
     CU_ASSERT_PTR_NULL(data);
     CU_ASSERT(data_len == 0);
 
@@ -156,7 +156,7 @@ void test_3_3() {
     //ksnPblKfNamespaceRemove(kf, "test");    
     
     // Destroy module
-    ksnPblKfDestroy(kf);
+    ksnTDBdestroy(kf);
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
@@ -167,44 +167,44 @@ void test_3_4() {
     kc_emul();
     
     // Initialize module
-    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
     CU_ASSERT_PTR_NULL(kf->namespace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Remove namespace if exist
-    ksnPblKfNamespaceRemove(kf, "test");
+    ksnTDBnamespaceRemove(kf, "test");
     
     // Set test data
-    int rv = ksnPblKfSetNs(kf, "test", "test_key", "test data", 10);
+    int rv = ksnTDBsetNs(kf, "test", "test_key", "test data", 10);
     CU_ASSERT(rv == 0);    
     
     // Read test data
     size_t data_len;
-    char *data = ksnPblKfGetNs(kf, "test", "test_key", &data_len);
+    char *data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data");
     CU_ASSERT(data_len == 10);
     
     // Update test data
-    rv = ksnPblKfSetNs(kf, "test", "test_key", "test data updated", 18);
+    rv = ksnTDBsetNs(kf, "test", "test_key", "test data updated", 18);
     CU_ASSERT(rv == 0);    
     
     // Read test data
-    data = ksnPblKfGetNs(kf, "test", "test_key", &data_len);
+    data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data updated");
     CU_ASSERT(data_len == 18);
     
     // Delete all records with key
-    rv = ksnPblKfDeleteNs(kf, "test", "test_key");
+    rv = ksnTDBdeleteNs(kf, "test", "test_key");
     CU_ASSERT(rv == 0);
     
     // Try to read deleted data
-    data = ksnPblKfGetNs(kf, "test", "test_key", &data_len);
+    data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
     CU_ASSERT_PTR_NULL(data);
     CU_ASSERT(data_len == 0);
     
     // Destroy module
-    ksnPblKfDestroy(kf);
+    ksnTDBdestroy(kf);
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
@@ -215,11 +215,11 @@ void test_3_template() {
     kc_emul();
     
     // Initialize module
-    ksnPblKfClass *kf = ksnPblKfInit(ke);
+    ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
     
     // Destroy module
-    ksnPblKfDestroy(kf);
+    ksnTDBdestroy(kf);
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
