@@ -68,7 +68,7 @@ static void timeout_cb (EV_P_ ev_timer *w, int revents) {
  */
 void kq_cb(uint32_t id, int type, void *data) {
     
-    printf("CQue callback id: %d, type: %d \n", id, type);
+    //printf("CQue callback id: %d, type: %d \n", id, type);
 }
 
 // Add callback to QUEUE
@@ -122,9 +122,11 @@ void test_4_3() {
     CU_ASSERT(pblMapSize(kq->cque_map) == 2);
     
     // Execute callback queue record 
-    ksnCQueExec(kq, 1);
+    int rv = ksnCQueExec(kq, 1);
+    CU_ASSERT(rv == 0)
     CU_ASSERT(pblMapSize(kq->cque_map) == 1);
-    ksnCQueExec(kq, 0);
+    rv = ksnCQueExec(kq, 0);
+    CU_ASSERT(rv == 0)
     CU_ASSERT(pblMapSize(kq->cque_map) == 0);
     
     // Destroy module
