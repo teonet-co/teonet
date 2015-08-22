@@ -248,3 +248,4 @@ clean:
 	rm -f ${THEEXE9} ${EXE_OBJS9}
 	rm -f isamtest/0*
 
+distdir:

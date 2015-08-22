@@ -84,8 +84,27 @@ DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
 
-teonetinclude_HEADERS =
-
+teonetinclude_HEADERS = \
+    crypt.h \
+    ev_mgr.h \
+    hotkeys.h \
+    net_arp.h \
+    net_com.h \
+    net_core.h \
+    net_multi.h \
+    net_split.h \
+    teonet.h \
+    config/conf.h \
+    config/opt.h \
+    modules/net_cli.h \
+    modules/net_tcp.h \
+    modules/net_term.h \
+    modules/net_tun.h \
+    modules/vpn.h \
+    utils/string_arr.h \
+    utils/utils.h \
+    utils/rlutil.h
+    
 libteonet_la_SOURCES = \
     crypt.c \
     ev_mgr.c \
@@ -106,15 +125,16 @@ libteonet_la_SOURCES = \
     utils/string_arr.c \
     utils/utils.c
 
+EXTRA_DIST = config/teonet.conf.default
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
 else
-libteonet_la_SOURCES += ../lib/confuse/confuse.c lexer.l
+#libteonet_la_SOURCES += ../lib/confuse/confuse.c lexer.l
 endif
 
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
-# lexer.c: lexer.l
+#lexer.c: lexer.l
 
 libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 2:0:0
 
