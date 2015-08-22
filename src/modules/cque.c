@@ -106,7 +106,8 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     
     // Remove record from Callback Queue
     size_t data_len;
-    if(pblMapRemove(cq->kq->cque_map, &cq->id, sizeof(cq->id), &data_len) != (void*)-1) {
+    if(pblMapRemove(cq->kq->cque_map, &cq->id, sizeof(cq->id), 
+            &data_len) != (void*)-1) {
             
         // Do something in success 
     }
