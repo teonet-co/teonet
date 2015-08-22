@@ -25,4 +25,5 @@ LIBS = -lteonet -lcrypto
 
 bin_PROGRAMS = teofossa
 
-teofossa_SOURCES = teofossa.c fossa.c
+teofossa_SOURCES = teofossa.c fossa.c fossa.h
+#EXTRA_DIST = fossa.h
