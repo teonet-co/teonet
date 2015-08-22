@@ -68,7 +68,7 @@ void ksnCQueDestroy(ksnCQueClass *kq) {
  */
 int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     
-    int retval = 0;
+    int retval = -1;
     size_t data_len;
     
     ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
