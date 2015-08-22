@@ -144,7 +144,6 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, vo
         cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);
         if(cq != NULL) {
             
-            // TODO: Create timeout watcher
             // Initialize, set user data and start the timer
             ev_timer_init(&cq->w, cq_timer_cb, timeout, 0.0);
             cq->w.data = cq; // Watcher data link to the ksnCQueData
