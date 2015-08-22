@@ -25,7 +25,7 @@ typedef struct ksnCQueClass {
 /**
  * ksnCQue callback function definition 
  */
-typedef int (*ksnCQueCallback) (uint32_t id, int type, void *data);
+typedef void (*ksnCQueCallback) (uint32_t id, int type, void *data);
 
 /**
  * ksnCQue data structure
@@ -50,6 +50,8 @@ ksnCQueClass *ksnCQueInit(void *ke);
 void ksnCQueDestroy(ksnCQueClass *kq);
 
 int ksnCQueExec(ksnCQueClass *kq, uint32_t id);
+ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
+        void *data);
 
 
 #ifdef	__cplusplus
