@@ -11,7 +11,20 @@
 #include <ev.h>
 #include <pbl.h>
 
-// ksnCQue callback function definition 
+/**
+ * ksnCQue Class structure definition
+ */
+typedef struct ksnCQueClass {
+    
+    void *ke; ///< Pointer to ksnEvMgrClass
+    uint32_t id; ///< New callback queue ID
+    PblMap *cque_map; ///< Pointer to the callback queue pblMap
+    
+} ksnCQueClass;
+
+/**
+ * ksnCQue callback function definition 
+ */
 typedef int (*ksnCQueCallback) (uint32_t id, int type, void *data);
 
 /**
@@ -27,17 +40,6 @@ typedef struct ksnCQueData {
     ev_timer w; ///< Timeout watcher
     
 } ksnCQueData;
-
-/**
- * ksnCQue Class structure definition
- */
-typedef struct ksnCQueClass {
-    
-    void *ke; ///< Pointer to ksnEvMgrClass
-    uint32_t id; ///< New callback queue ID
-    PblMap *cque_map; ///< Pointer to the callback queue pblMap
-    
-} ksnCQueClass;
 
 
 #ifdef	__cplusplus
