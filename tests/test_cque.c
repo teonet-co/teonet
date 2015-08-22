@@ -82,9 +82,11 @@ void test_4_2() {
     CU_ASSERT_PTR_NOT_NULL_FATAL(kq->cque_map);
     
     // Add callback to queue
-    ksnCQueAdd(kq, kq_cb, 0.050, NULL);
+    ksnCQueData *cq = ksnCQueAdd(kq, kq_cb, 0.050, NULL);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(cq);
     CU_ASSERT(pblMapSize(kq->cque_map) == 1);
-    ksnCQueAdd(kq, kq_cb, 0.050, NULL);
+    cq = ksnCQueAdd(kq, kq_cb, 0.050, NULL);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(cq);
     CU_ASSERT(pblMapSize(kq->cque_map) == 2);
     
     // Define timer to stop event loop after 1.0 sec
@@ -93,6 +95,36 @@ void test_4_2() {
     ev_timer_start (ke->ev_loop, &timeout_watcher);     
     // Start event loop
     ev_run (ke->ev_loop, 0);
+    CU_ASSERT(pblMapSize(kq->cque_map) == 0);
+    
+    // Destroy module
+    ksnCQueDestroy(kq);
+    CU_PASS("Destroy ksnPblKfClass done");
+}
+
+// Execute callback to emulate callback event
+void test_4_3() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+
+    // Initialize module
+    ksnCQueClass *kq = ksnCQueInit(ke);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kq);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kq->cque_map);
+    
+    // Add callback to queue
+    ksnCQueData *cq = ksnCQueAdd(kq, kq_cb, 0.050, NULL);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(cq);
+    CU_ASSERT(pblMapSize(kq->cque_map) == 1);
+    cq = ksnCQueAdd(kq, kq_cb, 0.050, NULL);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(cq);
+    CU_ASSERT(pblMapSize(kq->cque_map) == 2);
+    
+    // Execute callback queue record 
+    ksnCQueExec(kq, 1);
+    CU_ASSERT(pblMapSize(kq->cque_map) == 1);
+    ksnCQueExec(kq, 0);
     CU_ASSERT(pblMapSize(kq->cque_map) == 0);
     
     // Destroy module
@@ -116,7 +148,9 @@ int main() {
 
     /* Add the tests to the suite */
     if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_4_1)) ||
-            (NULL == CU_add_test(pSuite, "Add callback to QUEUE", test_4_2))) {
+        (NULL == CU_add_test(pSuite, "Add callback to QUEUE", test_4_2)) ||
+        (NULL == CU_add_test(pSuite, "Execute callback to emulate callback event", test_4_3))) {
+        
         CU_cleanup_registry();
         return CU_get_error();
     }
