@@ -248,4 +248,12 @@ clean:
 	rm -f ${THEEXE9} ${EXE_OBJS9}
 	rm -f isamtest/0*
 
+dist: 
+	make clean
+
+check:
 distdir:
+install:
+installcheck:
+uninstall:
+distclean:

@@ -12,7 +12,7 @@
 # SUBDIRS = app
 
 pkgconfigdir = $(libdir)/pkgconfig
-nodist_pkgconfig_DATA = libteonet.pc
+#nodist_pkgconfig_DATA = libteonet.pc
 
 if RELEASE_TEONET
   DRELEASE_TEONET = -DRELEASE_TEONET=1
@@ -81,10 +81,11 @@ endif
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 
-nodist_include_HEADERS = config/config.h.in
+#nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
 
-teonetinclude_HEADERS = \
+#teonetinclude_HEADERS = 
+nobase_teonetinclude_HEADERS = \
     crypt.h \
     ev_mgr.h \
     hotkeys.h \
@@ -94,6 +95,7 @@ teonetinclude_HEADERS = \
     net_multi.h \
     net_split.h \
     teonet.h \
+    config/config.h \
     config/conf.h \
     config/opt.h \
     modules/net_cli.h \
@@ -104,7 +106,10 @@ teonetinclude_HEADERS = \
     utils/string_arr.h \
     utils/utils.h \
     utils/rlutil.h
-    
+
+teonetinclude_HEADERS = \
+    ../embedded/libpbl/src/pbl.h
+
 libteonet_la_SOURCES = \
     crypt.c \
     ev_mgr.c \
@@ -136,7 +141,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 2:0:0
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 7:0:0
 
 uninstall-local:
 	-rm -r $(teonetincludedir)
