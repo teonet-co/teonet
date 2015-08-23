@@ -29,7 +29,8 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm
+#bin_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm
+noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm
 
 teolarge_SOURCES = teolarge.c
 teosend_SOURCES = teosend.c
