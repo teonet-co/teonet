@@ -23,6 +23,8 @@ endif
 
 LIBS = -lteonet -lcrypto
 
-bin_PROGRAMS = teofossa
+#bin_PROGRAMS = teofossa
+noinst_PROGRAMS = teofossa
 
-teofossa_SOURCES = teofossa.c fossa.c
+teofossa_SOURCES = teofossa.c fossa.c fossa.h
+#EXTRA_DIST = fossa.h
