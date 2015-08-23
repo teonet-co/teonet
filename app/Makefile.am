@@ -24,7 +24,7 @@ AM_LDFLAGS =  -L/opt/local/lib -L../src
 #AM_LDFLAGS += -L../../../confuse-2.7/src -L../../../libev-4.19 -L../../../libtuntap-master
 #endif
 
-LIBS = -lteonet -lcrypto 
+LIBS = -lteonet -lcrypto
 if TEO_THREAD	
 LIBS += -pthread
 endif

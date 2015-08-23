@@ -13,6 +13,8 @@
 /build/
 /distr/udt4/
 /docs/
+/embedded/Makefile
+/embedded/Makefile.in
 /embedded/libpbl/src/*.o
 /embedded/libpbl/src/pblkftst
 /embedded/libpbl/src/pbliftst
@@ -86,3 +88,5 @@
 /tests/Makefile.in
 /tests/teonet_tst
 /lib/confuse/.deps/
+/teonet-*/
+/teonet-*.gz

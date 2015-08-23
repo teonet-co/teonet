@@ -12,7 +12,7 @@ if DX_COND_man
 
 endif
 
-SUBDIRS = embedded/libpbl/src src po tests examples app  #src/app src/libtuntap src/ksvpn src po dist examples tests ascripts conf
+SUBDIRS = embedded/libpbl/src embedded src po tests examples app 
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
@@ -31,10 +31,11 @@ INTLTOOL_FILES = intltool-extract.in \
 	intltool-merge.in \
 	intltool-update.in
 
-EXTRA_DIST = $(teonetdoc_DATA) \
+EXTRA_DIST = \
+	$(teonetdoc_DATA) \
 	$(INTLTOOL_FILES) \
-	tests/test-suite.sh \
 	$(DX_CONFIG)
+#	tests/test-suite.sh
 
 DISTCLEANFILES = intltool-extract \
 	intltool-merge \
@@ -49,9 +50,8 @@ uninstall-local:
 	-rm -r $(teonetdocdir)
 	-rm -r $(teonetsysconfdir)
 
-run:	src/app/teovpn
-	src/app/teovpn just-make --port=9057
-	
+run:	app/teovpn
+	app/teovpn just-make --port=9057
+
 test:	tests/teonet_tst
 	sudo tests/teonet_tst test-01 --show_peers
-
