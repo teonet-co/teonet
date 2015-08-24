@@ -21,6 +21,7 @@ job_ubuntu:
     - ./autogen.sh
     - make
     - app/teovpn -?
+    - sh/make_package deb
   only:
     - master
     
