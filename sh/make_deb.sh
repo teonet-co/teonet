@@ -1,6 +1,8 @@
 #!/bin/sh
 # Create DEBIAN package
 
+set -e
+
 VER=$1
 if [ -z "$2" ]
   then
@@ -13,6 +15,9 @@ PWD=`pwd`
 
 #echo $VER_ARCH
 #exit
+
+sudo apt-get update
+sudo apt-get -y upgrade
 
 echo Create debian package libteonet-$VER_ARCH.deb
 
@@ -33,7 +38,7 @@ Version: $VER
 Section: libdevel
 Priority: optional
 Architecture: $ARCH
-Depends: libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.6)
+Depends: libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4)
 Maintainer: Kirill Scherba <kirill@scherba.ru>
 Description: Teonet library
  Mesh network library.
@@ -49,8 +54,10 @@ dpkg-deb --build libteonet-$VER_ARCH
 rm -rf libteonet-$VER_ARCH
 
 # Install, run application & remove package to check created package
+set +e
 sudo dpkg -i libteonet-$VER_ARCH.deb
+set -e
 sudo apt-get install -y -f
-teovpn
+teovpn -?
 sudo apt-get remove -y libteonet
 sudo apt-get autoremove -y
