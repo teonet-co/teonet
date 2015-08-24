@@ -222,6 +222,7 @@ AC_CONFIG_FILES([
     examples/fossa/Makefile
     tests/Makefile
     app/Makefile
+    sh/Makefile
     embedded/Makefile
 ])
 AC_PROG_CC

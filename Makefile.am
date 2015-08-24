@@ -12,7 +12,7 @@ if DX_COND_man
 
 endif
 
-SUBDIRS = embedded/libpbl/src embedded src po tests examples app 
+SUBDIRS = embedded/libpbl/src embedded src po tests examples app sh
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
