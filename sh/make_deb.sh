@@ -79,3 +79,20 @@ echo " "
 # Remove package  
 sudo apt-get remove -y libteonet
 sudo apt-get autoremove -y
+
+# Create repository files
+sudo apt-get install -y reprepro
+mkdir repo
+mkdir repo/conf
+mv libteonet-$VER_ARCH.deb repo
+cat << EOF > conf/distributions
+Origin: Teonet
+Label: Teonet
+Suite: stable
+Codename: teonet
+Version: 0.1
+Architectures: amd64
+Components: contrib
+Description: Teonet
+EOF
+find ./repo -name \*.deb -exec reprepro -Vb repo includedeb teonet {} \;
