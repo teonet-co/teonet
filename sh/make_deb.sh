@@ -1,26 +1,32 @@
 #!/bin/sh
+# Create DEBIAN package
+
+VER=$1
+PWD=`pwd`
+
+echo Create debian package libteonet-$VER.deb
 
 # Configure and make
 ./configure --prefix=/usr
 make
 
-# Install
-make install DESTDIR=/root/Project/teonet_build/libteonet-0.0.7
+# Install to temporary folder 
+make install DESTDIR=$PWD/libteonet-$VER
 
 # Create DEBIAN control file
-mkdir libteonet-0.0.7/DEBIAN
-sh/make_deb_control.sh > libteonet-0.0.7/DEBIAN/control
+mkdir libteonet-$VER/DEBIAN
+sh/make_deb_control.sh $VER > libteonet-$VER/DEBIAN/control
 
 # Build package
-if [ -f "libteonet-0.0.7.deb" ]
+if [ -f "libteonet-$VER.deb" ]
 then
-    rm libteonet-0.0.7.deb
+    rm libteonet-$VER.deb
 fi
-dpkg-deb --build libteonet-0.0.7
-rm -rf libteonet-0.0.7
+dpkg-deb --build libteonet-$VER
+rm -rf libteonet-$VER
 
-# Imstall & remove package to check created package
-dpkg -i libteonet-0.0.7.deb
-apt-get install -f
+# Install & remove package to check created package
+sudo dpkg -i libteonet-$VER.deb
+sudo apt-get install -f
 teovpn
-apt-get remove -y libteonet
+sudo apt-get remove -y libteonet
