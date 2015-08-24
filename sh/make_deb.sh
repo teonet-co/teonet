@@ -19,20 +19,20 @@ PWD=`pwd`
 sudo apt-get update
 sudo apt-get -y upgrade
 
-echo Create debian package libteonet-$VER_ARCH.deb
+echo Create debian package libteonet_$VER_ARCH.deb
 
 # Configure and make
 ./configure --prefix=/usr
 make
 
 # Install to temporary folder 
-make install DESTDIR=$PWD/libteonet-$VER_ARCH
+make install DESTDIR=$PWD/libteonet_$VER_ARCH
 
 # Create DEBIAN control file
 # Note: Add this to Depends if test will be added to distributive: 
 # libcunit1-dev (>= 2.1-2.dfsg-1)
-mkdir libteonet-$VER_ARCH/DEBIAN
-cat << EOF > libteonet-$VER_ARCH/DEBIAN/control
+mkdir libteonet_$VER_ARCH/DEBIAN
+cat << EOF > libteonet_$VER_ARCH/DEBIAN/control
 Package: libteonet
 Version: $VER
 Section: libdevel
@@ -46,16 +46,16 @@ Description: Teonet library
 EOF
 
 # Build package
-if [ -f "libteonet-$VER_ARCH.deb" ]
+if [ -f "libteonet_$VER_ARCH.deb" ]
 then
-    rm libteonet-$VER_ARCH.deb
+    rm libteonet_$VER_ARCH.deb
 fi
-dpkg-deb --build libteonet-$VER_ARCH
-rm -rf libteonet-$VER_ARCH
+dpkg-deb --build libteonet_$VER_ARCH
+rm -rf libteonet_$VER_ARCH
 
 # Install, run application & to check created package
 set +e
-sudo dpkg -i libteonet-$VER_ARCH.deb
+sudo dpkg -i libteonet_$VER_ARCH.deb
 set -e
 sudo apt-get install -y -f
 teovpn -?
@@ -80,19 +80,32 @@ echo " "
 sudo apt-get remove -y libteonet
 sudo apt-get autoremove -y
 
-# Create repository files
+# Create repository and configuration files
 sudo apt-get install -y reprepro
-mkdir repo
-mkdir repo/conf
-mv libteonet-$VER_ARCH.deb repo
-cat << EOF > conf/distributions
+if [ ! -d "repo" ];   then     
+    mkdir repo
+    mkdir repo/conf 
+
+cat << EOF > repo/conf/distributions
 Origin: Teonet
 Label: Teonet
 Suite: stable
 Codename: teonet
 Version: 0.1
-Architectures: amd64
+Architectures: $ARCH
 Components: contrib
 Description: Teonet
 EOF
-find ./repo -name \*.deb -exec reprepro -Vb repo includedeb teonet {} \;
+
+cat << EOF > repo/conf/options
+
+ask-passphrase
+basedir .
+
+EOF
+fi
+
+# Add DEB packages to local repository
+cd repo
+reprepro includedeb teonet ../*.deb
+cd ..
