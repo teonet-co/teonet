@@ -53,11 +53,29 @@ fi
 dpkg-deb --build libteonet-$VER_ARCH
 rm -rf libteonet-$VER_ARCH
 
-# Install, run application & remove package to check created package
+# Install, run application & to check created package
 set +e
 sudo dpkg -i libteonet-$VER_ARCH.deb
 set -e
 sudo apt-get install -y -f
 teovpn -?
+
+# Show version of installed depends
+echo "Version of depends:"
+echo " "
+echo "libssl-dev:"
+dpkg -s libssl-dev | grep Version:
+echo " "
+echo "libev-dev:"
+dpkg -s libev-dev | grep Version:
+echo " "
+echo "libconfuse-dev:"
+dpkg -s libconfuse-dev | grep Version:
+echo " "
+echo "uuid-dev:"
+dpkg -s uuid-dev | grep Version:
+echo " "
+
+# Remove package  
 sudo apt-get remove -y libteonet
 sudo apt-get autoremove -y
