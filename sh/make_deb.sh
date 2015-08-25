@@ -55,7 +55,7 @@ Priority: optional
 Architecture: $ARCH
 Depends: libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4)
 Maintainer: Kirill Scherba <kirill@scherba.ru>
-Description: Teonet library
+Description: Teonet library version $VER
  Mesh network library.
 
 EOF
@@ -123,16 +123,27 @@ Suite: stable
 Codename: teonet
 Version: 0.1
 Architectures: $ARCH
-Components: contrib
+Components: main
 Description: Teonet
+SignWith: yes
 EOF
 
 cat << EOF > repo/conf/options
 
+verbose
 ask-passphrase
 basedir .
 
 EOF
+
+# Export key
+mkdir repo/key
+gpg --armor --export Kirill Scherba kirill@scherba.ru >> repo/key/deb.gpg.key
+
+# Create the repository tree
+# reprepro --ask-passphrase -Vb repo export
+reprepro --ask-passphrase -Vb repo export
+
 echo ""
 fi
 
@@ -140,6 +151,17 @@ fi
 echo $ANSI_BROWN"Add DEB package to local repository:"$ANSI_NONE
 echo ""
 cd repo
-reprepro includedeb teonet ../*.deb
+reprepro --ask-passphrase -Vb . includedeb teonet ../*.deb
 cd ..
 echo ""
+
+# Add repository this host
+# The key registered at: http://pgp.mit.edu/
+# wget -O - http://repo.ksproject.org/ubuntu/key/deb.gpg.key | sudo apt-key add -
+# sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
+# sudo apt-get update
+#
+
+# Install Teonet library from repository
+# sudo apt-get install -y libteonet
+#
