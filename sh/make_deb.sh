@@ -113,8 +113,9 @@ echo ""
 if [ ! -d "repo" ];   then     
 echo $ANSI_BROWN"Create repository and configuration files:"$ANSI_NONE
 echo ""
-    mkdir repo
-    mkdir repo/conf 
+
+mkdir repo
+mkdir repo/conf 
 
 cat << EOF > repo/conf/distributions
 Origin: Teonet
@@ -138,10 +139,14 @@ EOF
 
 # Export key
 mkdir repo/key
-gpg --armor --export Kirill Scherba kirill@scherba.ru >> repo/key/deb.gpg.key
+gpg --armor --export repository repo@ksproject.org >> repo/key/deb.gpg.key
+# gpg --armor --export-secret-key repository repo@ksproject.org >> repo/key/deb-sec.gpg.key
+
+# Import keys to remote host
+# gpg --import deb.gpg.key
+# gpg --allow-secret-key-import --import deb-sec.gpg.key
 
 # Create the repository tree
-# reprepro --ask-passphrase -Vb repo export
 reprepro --ask-passphrase -Vb repo export
 
 echo ""
@@ -150,17 +155,20 @@ fi
 # Add DEB packages to local repository
 echo $ANSI_BROWN"Add DEB package to local repository:"$ANSI_NONE
 echo ""
-cd repo
-reprepro --ask-passphrase -Vb . includedeb teonet ../*.deb
-cd ..
+reprepro --ask-passphrase -Vb repo includedeb teonet *.deb
 echo ""
 
 # Add repository this host
 # The key registered at: http://pgp.mit.edu/
 # wget -O - http://repo.ksproject.org/ubuntu/key/deb.gpg.key | sudo apt-key add -
+# or
+# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
+#
 # sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
 # sudo apt-get update
 #
+# Edit the sources list (to remove teonet repository)
+# sudo mcedit /etc/apt/sources.list
 
 # Install Teonet library from repository
 # sudo apt-get install -y libteonet
