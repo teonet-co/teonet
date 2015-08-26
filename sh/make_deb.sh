@@ -187,9 +187,20 @@ echo ""
 # sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
 # sudo apt-get update
 #
-# Edit the sources list (to remove teonet repository)
-# sudo mcedit /etc/apt/sources.list
 
 # Install Teonet library from repository
 # sudo apt-get install -y libteonet
 #
+
+# Run application
+# teovpn -?
+
+# Remove Teonet library from repository
+# sudo apt-get remove -y libteonet
+# sudo apt-get autoremove -y
+#
+
+# TODO: Remove teonet repository & key
+# Edit the sources list (to remove teonet repository)
+# sudo mcedit /etc/apt/sources.list
+
