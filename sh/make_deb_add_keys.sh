@@ -15,6 +15,3 @@ if [ -z "$str" ]; then
   echo ""
 fi
 #echo "After Import repository keys..."
-
-# gpg --delete-secret-key  "repository <repo@ksproject.org>"
-# gpg --delete-key  "repository <repo@ksproject.org>"
