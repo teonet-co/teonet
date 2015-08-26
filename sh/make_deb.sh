@@ -132,7 +132,7 @@ Label: Teonet
 Suite: stable
 Codename: teonet
 Version: 0.1
-Architectures: $ARCH
+Architectures: i386 amd64 source
 Components: main
 Description: Teonet
 SignWith: yes
@@ -184,6 +184,7 @@ echo ""
 # or
 # sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
 #
+# sudo apt-get install -y software-properties-common
 # sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
 # sudo apt-get update
 #
