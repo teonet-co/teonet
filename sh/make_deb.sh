@@ -36,7 +36,7 @@ make
 echo ""
 
 # Install to temporary folder 
-echo $ANSI_BROWN"Install to temporary folder:"$ANSI_NONE
+echo $ANSI_BROWN"Make install to temporary folder:"$ANSI_NONE
 echo ""
 make install DESTDIR=$PWD/libteonet_$VER_ARCH
 echo ""
@@ -71,7 +71,7 @@ rm -rf libteonet_$VER_ARCH
 echo ""
 
 # Install and run application to check created package
-echo $ANSI_BROWN"Install and run application to check created package:"$ANSI_NONE
+echo $ANSI_BROWN"Install package and run application to check created package:"$ANSI_NONE
 echo ""
 set +e
 sudo dpkg -i libteonet_$VER_ARCH.deb
@@ -103,21 +103,30 @@ sudo apt-get remove -y libteonet
 sudo apt-get autoremove -y
 echo ""
 
+# Add packet to repository ----------------------------------------------------
+
 # Install reprepro
 echo $ANSI_BROWN"Install reprepro:"$ANSI_NONE
 echo ""
 sudo apt-get install -y reprepro
 echo ""
 
+# Create working directory
+if [ ! -d "repo" ];   then
+    mkdir repo
+fi
+
+REPO="repo/ubuntu"
+
 # Create repository and configuration files
-if [ ! -d "repo" ];   then     
+if [ ! -d "$REPO" ]; then     
 echo $ANSI_BROWN"Create repository and configuration files:"$ANSI_NONE
 echo ""
 
-mkdir repo
-mkdir repo/conf 
+mkdir $REPO
+mkdir $REPO/conf 
 
-cat << EOF > repo/conf/distributions
+cat << EOF > $REPO/conf/distributions
 Origin: Teonet
 Label: Teonet
 Suite: stable
@@ -129,7 +138,7 @@ Description: Teonet
 SignWith: yes
 EOF
 
-cat << EOF > repo/conf/options
+cat << EOF > $REPO/conf/options
 
 verbose
 ask-passphrase
@@ -137,17 +146,27 @@ basedir .
 
 EOF
 
-# Export key
-mkdir repo/key
-gpg --armor --export repository repo@ksproject.org >> repo/key/deb.gpg.key
-# gpg --armor --export-secret-key repository repo@ksproject.org >> repo/key/deb-sec.gpg.key
+# Import repository keys to this host
+echo "Before Import repository keys..."
+str=`gpg --list-keys | grep "repository <repo@ksproject.org>"`
+if [ -z "$str" ]; then 
+  echo $ANSI_BROWN"Add repository keys to this host:"$ANSI_NONE
+  gpg --allow-secret-key-import --import sh/gpg_key/deb-sec.gpg.key
+  gpg --import sh/gpg_key/deb.gpg.key
+fi
+echo "After Import repository keys..."
 
-# Import keys to remote host
-# gpg --import deb.gpg.key
-# gpg --allow-secret-key-import --import deb-sec.gpg.key
+# Remove keys from this host
+# gpg --delete-secret-key  "repository <repo@ksproject.org>"
+# gpg --delete-key  "repository <repo@ksproject.org>"
+
+# Export key to repository folder
+mkdir $REPO/key
+gpg --armor --export repository repo@ksproject.org >> $REPO/key/deb.gpg.key
+# gpg --armor --export-secret-key repository repo@ksproject.org >> $REPO/key/deb-sec.gpg.key
 
 # Create the repository tree
-reprepro --ask-passphrase -Vb repo export
+reprepro --ask-passphrase -Vb $REPO export
 
 echo ""
 fi
@@ -155,10 +174,11 @@ fi
 # Add DEB packages to local repository
 echo $ANSI_BROWN"Add DEB package to local repository:"$ANSI_NONE
 echo ""
-reprepro --ask-passphrase -Vb repo includedeb teonet *.deb
+reprepro --ask-passphrase -Vb $REPO includedeb teonet *.deb
 echo ""
 
-# Add repository this host
+# Add repository to this host
+#
 # The key registered at: http://pgp.mit.edu/
 # wget -O - http://repo.ksproject.org/ubuntu/key/deb.gpg.key | sudo apt-key add -
 # or
