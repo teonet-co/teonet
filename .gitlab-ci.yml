@@ -19,7 +19,7 @@ types:
 job_ubuntu:
   type: build
   image: ubuntu_teonet
-  #volumes: /home/kirill/_repo_:/builds/ksnet/repo:rw
+  #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
   script:
     # Test volumes
     - cp ./autogen.sh ../repo
