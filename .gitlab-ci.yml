@@ -6,6 +6,7 @@ before_script:
 
 types:
   - build
+  - deploy
 
 #build_image:
 #  type: build
@@ -69,4 +70,3 @@ job_ubuntu:
     - sh/make_package deb
   only:
     - master
-    
