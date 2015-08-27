@@ -6,7 +6,10 @@ ANSI_NONE="\033[0m"
 
 # Import repository keys to this host
 #echo "Before Import repository keys..."
+echo $ANSI_BROWN"Check host repository keys:"$ANSI_NONE
+echo ""
 str=`gpg --list-keys | grep "repository <repo@ksproject.org>"`;
+echo ""
 if [ -z "$str" ]; then 
   echo $ANSI_BROWN"Add repository keys to this host:"$ANSI_NONE
   echo ""  
