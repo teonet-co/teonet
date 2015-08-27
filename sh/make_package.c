@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     if(!strcmp(argv[1], "deb")) {
         
         // Import repository keys
-        if(system("sh/make_deb_add_keys.sh")) return (EXIT_FAILURE);
+        if(system("sh/make_deb_keys_add.sh")) return (EXIT_FAILURE);
 
         // Execute build repository script
         char cmd[KSN_BUFFER_SM_SIZE];
