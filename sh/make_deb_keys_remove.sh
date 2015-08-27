@@ -1,6 +1,6 @@
 #!/bin/sh
 # 
-# File:   make_deb_remove_keys.sh
+# File:   make_deb_keys_remove.sh
 # Author: Kirill Scherba <kirill@scherba.ru>
 #
 # Remove repository keys from this host

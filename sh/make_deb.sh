@@ -62,6 +62,7 @@ EOF
 
 # Build package
 echo $ANSI_BROWN"Build package:"$ANSI_NONE
+echo ""
 if [ -f "libteonet_$VER_ARCH.deb" ]
 then
     rm libteonet_$VER_ARCH.deb
@@ -77,6 +78,9 @@ set +e
 sudo dpkg -i libteonet_$VER_ARCH.deb
 set -e
 sudo apt-get install -y -f
+echo ""
+echo $ANSI_BROWN"Run application:"$ANSI_NONE
+echo ""
 teovpn -?
 echo ""
 
@@ -177,31 +181,9 @@ echo ""
 reprepro --ask-passphrase -Vb $REPO includedeb teonet *.deb
 echo ""
 
-# Add repository to this host
-#
-# The key registered at: http://pgp.mit.edu/
-# wget -O - http://repo.ksproject.org/ubuntu/key/deb.gpg.key | sudo apt-key add -
-# or
-# sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
-#
-# sudo apt-get install -y software-properties-common
-# sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
-# sudo apt-get update
-#
+# Copy repository to remote host
+# by ftp: 
+sh/make_deb_remote_copy.sh
 
-# Install Teonet library from repository
-# sudo apt-get install -y libteonet
-#
-
-# Run application
-# teovpn -?
-
-# Remove Teonet library from repository
-# sudo apt-get remove -y libteonet
-# sudo apt-get autoremove -y
-#
-
-# TODO: Remove teonet repository & key
-# Edit the sources list (to remove teonet repository)
-# sudo mcedit /etc/apt/sources.list
-
+# Install libteonet from remote repository
+sh/make_deb_remote_install.sh
