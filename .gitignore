@@ -84,7 +84,8 @@
 /lib/confuse/.deps/
 /teonet-*/
 /teonet-*.gz
-/libteonet-*
+/libteonet_*
 /sh/make_package
 /sh/Makefile.in
 /sh/Makefile
+/repo/
