@@ -19,10 +19,10 @@ types:
 job_ubuntu:
   type: build
   image: ubuntu_teonet
-  volumes: /home/kirill/_repo_:/root/repo:rw
+  #volumes: /home/kirill/_repo_:/root/repo:rw
   script:
     # Test volumes
-    - cp ./autogen.sh /root/repo
+    # - cp ./autogen.sh /root/repo
     # Make  
     #- sh/build-ubuntu.sh
     - ./autogen.sh
