@@ -27,10 +27,14 @@ int main(int argc, char** argv) {
     
     printf("Teonet build package ver. %s, %s\n", TBP_VERSION, COPYRIGHT);
     
-    char *CI_BUILD_REF = getenv("CI_BUILD_REF");
-    printf("CI_BUILD_REF=%s\n", CI_BUILD_REF);
+    int rv = EXIT_FAILURE; // Return value
     
-    int rv = EXIT_FAILURE;
+    // Show CI_BUILD_REF
+    {
+        char *CI_BUILD_REF = getenv("CI_BUILD_REF");
+        if(CI_BUILD_REF != NULL)
+            printf("CI_BUILD_REF=%s\n", CI_BUILD_REF);
+    }
     
     // Check for required arguments
     if(argc < 2) {
