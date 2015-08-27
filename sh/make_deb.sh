@@ -13,11 +13,15 @@ VER_ARCH=$VER"_"$ARCH
 PWD=`pwd`
 REPO=../repo
 
+PACKET_NAME="libteonet"
+PACKET_DESCRIPTION="Teonet library version $VER
+ Mesh network library."
+
 ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
 
-echo $ANSI_BROWN"Create debian package libteonet_$VER_ARCH.deb"$ANSI_NONE
-echo CI_BUILD_REF=$CI_BUILD_REF
+echo $ANSI_BROWN"Create debian packet $PACKET_NAME""_$VER_ARCH.deb"$ANSI_NONE
+#echo CI_BUILD_REF=$CI_BUILD_REF
 echo ""
 
 #Update and upgrade build host
@@ -28,9 +32,14 @@ sudo apt-get -y upgrade
 echo ""
 
 # Configure and make
-echo $ANSI_BROWN"Configure:"$ANSI_NONE
+echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
 echo ""
+if [ -f "autogen.sh" ]
+then
+./autogen.sh --prefix=/usr
+else
 ./configure --prefix=/usr
+fi
 echo ""
 echo $ANSI_BROWN"Make:"$ANSI_NONE
 echo ""
@@ -40,7 +49,7 @@ echo ""
 # Install to temporary folder 
 echo $ANSI_BROWN"Make install to temporary folder:"$ANSI_NONE
 echo ""
-make install DESTDIR=$PWD/libteonet_$VER_ARCH
+make install DESTDIR=$PWD/$PACKET_NAME"_"$VER_ARCH
 echo ""
 
 # Create DEBIAN control file
@@ -48,36 +57,35 @@ echo $ANSI_BROWN"Create DEBIAN control file:"$ANSI_NONE
 echo ""
 # Note: Add this to Depends if test will be added to distributive: 
 # libcunit1-dev (>= 2.1-2.dfsg-1)
-mkdir libteonet_$VER_ARCH/DEBIAN
-cat << EOF > libteonet_$VER_ARCH/DEBIAN/control
-Package: libteonet
+mkdir $PACKET_NAME"_"$VER_ARCH/DEBIAN
+cat << EOF > $PACKET_NAME"_"$VER_ARCH/DEBIAN/control
+Package: $PACKET_NAME
 Version: $VER
 Section: libdevel
 Priority: optional
 Architecture: $ARCH
 Depends: libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4)
 Maintainer: Kirill Scherba <kirill@scherba.ru>
-Description: Teonet library version $VER
- Mesh network library.
+Description: $PACKET_DESCRIPTION
 
 EOF
 
 # Build package
 echo $ANSI_BROWN"Build package:"$ANSI_NONE
 echo ""
-if [ -f "libteonet_$VER_ARCH.deb" ]
+if [ -f $PACKET_NAME"_"$VER_ARCH".deb" ]
 then
-    rm libteonet_$VER_ARCH.deb
+    rm $PACKET_NAME"_"$VER_ARCH.deb
 fi
-dpkg-deb --build libteonet_$VER_ARCH
-rm -rf libteonet_$VER_ARCH
+dpkg-deb --build $PACKET_NAME"_"$VER_ARCH
+rm -rf $PACKET_NAME"_"$VER_ARCH
 echo ""
 
 # Install and run application to check created package
 echo $ANSI_BROWN"Install package and run application to check created package:"$ANSI_NONE
 echo ""
 set +e
-sudo dpkg -i libteonet_$VER_ARCH.deb
+sudo dpkg -i $PACKET_NAME"_"$VER_ARCH.deb
 set -e
 sudo apt-get install -y -f
 echo ""
@@ -105,7 +113,7 @@ echo ""
 # Remove package  
 echo $ANSI_BROWN"Remove package:"$ANSI_NONE
 echo ""
-sudo apt-get remove -y libteonet
+sudo apt-get remove -y $PACKET_NAME
 sudo apt-get autoremove -y
 echo ""
 
@@ -190,7 +198,7 @@ if [ ! -z "$CI_BUILD_REF" ]; then
     # by ftp: 
     sh/make_deb_remote_upload.sh
 
-    # Install libteonet from remote repository
+    # Install packet from remote repository
     sh/make_deb_remote_install.sh
 
 fi
