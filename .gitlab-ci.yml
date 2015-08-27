@@ -19,12 +19,13 @@ types:
 job_ubuntu:
   type: build
   image: ubuntu_teonet
-  # volumes: /home/kirill/_repo_:/root/repo:rw
+  #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
   script:
     # Test volumes
-    # - cp ./autogen.sh /root/repo
+    - cp ./autogen.sh ../repo
     # Make  
     #- sh/build-ubuntu.sh
+    - pwd
     - ./autogen.sh
     - make
     - app/teovpn -?
@@ -53,5 +54,4 @@ job_fedora:
     - make
     - app/teovpn -?
   only:
-    - master    
-    
+    - master
