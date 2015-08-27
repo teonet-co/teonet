@@ -6,6 +6,7 @@ before_script:
 
 types:
   - build
+  - deploy
 
 #build_image:
 #  type: build
@@ -61,12 +62,13 @@ job_fedora:
 # Test
 
 # Deploy
-job_ubuntu:
+job_ubuntu_deploy:
   type: deploy
   image: ubuntu_teonet
   script:
     # Build DEB package and upload it to repository
+    - ./autogen.sh
+    - cd sh; make; cd ..
     - sh/make_package deb
   only:
     - master
-    
