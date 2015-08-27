@@ -67,6 +67,8 @@ job_ubuntu_deploy:
   image: ubuntu_teonet
   script:
     # Build DEB package and upload it to repository
+    - ./autogen.sh
+    - sh/make
     - sh/make_package deb
   only:
     - master
