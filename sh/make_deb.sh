@@ -183,9 +183,14 @@ echo ""
 reprepro --ask-passphrase -Vb $REPO includedeb teonet *.deb
 echo ""
 
-# Copy repository to remote host
-# by ftp: 
-sh/make_deb_remote_copy.sh
+# Upload repository to remote host and Test Install and run application
+if [ ! -z "$CI_BUILD_REF" ]; then
+    
+    # Upload repository to remote host
+    # by ftp: 
+    sh/make_deb_remote_upload.sh
 
-# Install libteonet from remote repository
-sh/make_deb_remote_install.sh
+    # Install libteonet from remote repository
+    sh/make_deb_remote_install.sh
+
+fi

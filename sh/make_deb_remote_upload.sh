@@ -8,6 +8,9 @@
 # Created on Aug 27, 2015, 2:08:45 AM
 #
 
+ANSI_BROWN="\033[22;33m"
+ANSI_NONE="\033[0m"
+
 REPO=../repo
 
 # Upload local repository to remote host
