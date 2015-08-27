@@ -53,5 +53,4 @@ job_fedora:
     - make
     - app/teovpn -?
   only:
-    - master    
-    
+    - master
