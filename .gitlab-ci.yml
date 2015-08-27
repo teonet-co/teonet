@@ -12,15 +12,23 @@ types:
 #  script:
 #    - docker build -t ubuntu:14:04
 #    - docker run ubuntu:14:04 apt-get install git
+
+# Image host voulume definition:
+# /path/to/bind/from/host:/path/to/bind/in/container:rw
     
 job_ubuntu:
   type: build
   image: ubuntu_teonet
+  volumes: /home/kirill/_repo_:/root/repo:rw
   script:
+    # Test volumes
+    - cp ./autogen.sh /root/repo
+    # Make  
     #- sh/build-ubuntu.sh
     - ./autogen.sh
     - make
     - app/teovpn -?
+    # Build package
     - sh/make_package deb
   only:
     - master
