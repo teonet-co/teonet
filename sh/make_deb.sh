@@ -14,12 +14,14 @@ PWD=`pwd`
 REPO=../repo
 
 PACKET_NAME="libteonet"
+PACKET_DESCRIPTION="Teonet library version $VER
+ Mesh network library."
 
 ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
 
-echo $ANSI_BROWN"Create debian package $PACKET_NAME""_$VER_ARCH.deb"$ANSI_NONE
-echo CI_BUILD_REF=$CI_BUILD_REF
+echo $ANSI_BROWN"Create debian packet $PACKET_NAME""_$VER_ARCH.deb"$ANSI_NONE
+#echo CI_BUILD_REF=$CI_BUILD_REF
 echo ""
 
 #Update and upgrade build host
@@ -30,9 +32,14 @@ sudo apt-get -y upgrade
 echo ""
 
 # Configure and make
-echo $ANSI_BROWN"Configure:"$ANSI_NONE
+echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
 echo ""
+if [ -f "autogen.sh" ]
+then
+./autogen.sh --prefix=/usr
+else
 ./configure --prefix=/usr
+fi
 echo ""
 echo $ANSI_BROWN"Make:"$ANSI_NONE
 echo ""
@@ -59,8 +66,7 @@ Priority: optional
 Architecture: $ARCH
 Depends: libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4)
 Maintainer: Kirill Scherba <kirill@scherba.ru>
-Description: Teonet library version $VER
- Mesh network library.
+Description: $PACKET_DESCRIPTION
 
 EOF
 
