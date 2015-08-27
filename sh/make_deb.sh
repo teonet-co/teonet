@@ -17,6 +17,7 @@ ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
 
 echo $ANSI_BROWN"Create debian package libteonet_$VER_ARCH.deb"$ANSI_NONE
+echo CI_BUILD_REF=$CI_BUILD_REF
 echo ""
 
 #Update and upgrade build host
