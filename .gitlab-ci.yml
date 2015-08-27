@@ -23,6 +23,7 @@ job_ubuntu:
   script:
     # Test volumes
     - cp ./autogen.sh ../repo
+    - printenv
     # Make  
     #- sh/build-ubuntu.sh
     - pwd
