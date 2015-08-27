@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
         
         if(CI_BUILD_ID != NULL) {
             snprintf(version, KSN_BUFFER_SM_SIZE, "%s-%s", VERSION, CI_BUILD_ID);
-            // TODO: Set version to configure.ac
+            // TODO: Set version to configure.ac 
         }
         else 
             snprintf(version, KSN_BUFFER_SM_SIZE, "%s", VERSION);
