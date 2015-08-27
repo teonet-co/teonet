@@ -62,7 +62,7 @@ job_fedora:
 # Test
 
 # Deploy
-job_ubuntu:
+job_ubuntu_deploy:
   type: deploy
   image: ubuntu_teonet
   script:
