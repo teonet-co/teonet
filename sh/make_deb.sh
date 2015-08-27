@@ -11,6 +11,7 @@ if [ -z "$2" ]
 fi
 VER_ARCH=$VER"_"$ARCH
 PWD=`pwd`
+REPO=../repo
 
 ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
@@ -116,11 +117,11 @@ sudo apt-get install -y reprepro
 echo ""
 
 # Create working directory
-if [ ! -d "repo" ];   then
-    mkdir repo
+if [ ! -d "$REPO" ];   then
+    mkdir $REPO
 fi
 
-REPO="repo/ubuntu"
+REPO="$REPO/ubuntu"
 
 # Create repository and configuration files
 if [ ! -d "$REPO" ]; then     
