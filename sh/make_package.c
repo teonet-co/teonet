@@ -2,7 +2,7 @@
  * File:   make_package.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
- * Crete package
+ * Build package
  *
  * Created on August 24, 2015, 2:22 AM
  */
@@ -14,6 +14,8 @@
 #include "../src/config/conf.h"
 #include "../src/config/config.h"
 
+#define TBP_VERSION "0.0.1"
+
 /**
  * Main application function
  *
@@ -23,18 +25,36 @@
  */
 int main(int argc, char** argv) {
     
+    printf("Teonet build package ver. %s, %s\n", TBP_VERSION, COPYRIGHT);
+    
+    int rv = EXIT_FAILURE;
+    
+    // Check for required arguments
     if(argc < 2) {
         
-        printf("Usage: %s LINUX ARCH\n"
-               "where LINUX: deb - DEBIAN\n"
-               "ARCH - architecture (default: amd64)\n"
+        printf( "\n"
+                "Usage: %s LINUX ARCH\n"
+                "\n"
+                "Where LINUX: deb - DEBIAN\n"
+                "      ARCH: architecture (default: amd64)\n"
+                "\n"
                 , argv[0]);
         return (EXIT_FAILURE);
     }
     
-    char cmd[KSN_BUFFER_SM_SIZE];
-    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s", 
-            argv[1], VERSION, argc >= 3 ? argv[2] : "");
+    // Make DEBIAN repository
+    if(!strcmp(argv[1], "deb")) {
+        
+        // Import repository keys
+        if(system("sh/make_deb_keys_add.sh")) return (EXIT_FAILURE);
+
+        // Execute build repository script
+        char cmd[KSN_BUFFER_SM_SIZE];
+        snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s", 
+                argv[1], VERSION, argc >= 3 ? argv[2] : "");
+        
+        rv = system(cmd);
+    }
     
-    return system(cmd);        
+    return rv;
 }
