@@ -68,7 +68,7 @@ job_ubuntu_deploy:
   script:
     # Build DEB package and upload it to repository
     - ./autogen.sh
-    - sh/make
+    - cd sh; make; cd ..
     - sh/make_package deb
   only:
     - master
