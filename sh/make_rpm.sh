@@ -6,24 +6,57 @@
 # Created on Aug 28, 2015, 1:47:35 AM
 #
 
+# Parameters:
+#
+# @param $1 Version
+# @param $2 Release 
+# @param $3 Architecture
+
+set -e # exit at error
+
+# The first parameter is required
+if [ -z "$1" ]
+  then
+    exit -1
+fi
+
 VER=$1
 if [ -z "$2" ]
   then
+    RELEASE=1
+  else
+    RELEASE=$2
+fi
+if [ -z "$3" ]
+  then
     ARCH="x86_64"
   else
-    ARCH=$2
+    ARCH=$3
 fi
+
 PWD=`pwd`
 REPO=../repo
 VER_ARCH=$VER"_"$ARCH
 RPMBUILD=~/rpmbuild
 PREFIX=/usr
-RELEASE=1
 
 PACKET_NAME="libteonet"
 PACKET_SUMMARY="Teonet library version $VER"
 
-# 1. create your rpm build env for RPM < 4.6,4.7
+ANSI_BROWN="\033[22;33m"
+ANSI_NONE="\033[0m"
+
+echo $ANSI_BROWN"Create RPM packet $PACKET_NAME""_$VER_ARCH"$ANSI_NONE
+echo ""
+
+#Update and upgrade build host
+#echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
+#echo ""
+#sudo apt-get update
+#sudo apt-get -y upgrade
+#echo ""
+
+# 1. create your RPM build environment for RPM
 
 if [ -d "$RPMBUILD" ]; then
     rm -fr $RPMBUILD
@@ -44,10 +77,6 @@ EOF
 # 2. create the tarball of your project
 
 mkdir $PWD/$PACKET_NAME-$VER
-#mkdir -p $PACKET_NAME-$VER/usr/bin
-#mkdir -p $PACKET_NAME-$VER/etc/$PACKET_NAME
-#install -m 755 $PACKET_NAME $PACKET_NAME-$VER/usr/bin
-#install -m 644 $PACKET_NAME.conf $PACKET_NAME-$VER/etc/$PACKET_NAME/
 
 # Configure and make
 echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
@@ -70,11 +99,16 @@ echo ""
 make install DESTDIR=$PWD/$PACKET_NAME"-"$VER
 echo ""
 
+# Create binary tarball
+echo $ANSI_BROWN"Create binary tarball:"$ANSI_NONE
+echo ""
 tar -zcvf $PACKET_NAME-$VER.tar.gz $PACKET_NAME-$VER/
 rm -rf $PACKET_NAME-$VER/
+echo ""
 
-# 3. Copy to the sources dir
-
+# 3. Copy to the sources folder
+echo $ANSI_BROWN"Copy files to the rpmbuild sources folder:"$ANSI_NONE
+echo ""
 mv -f $PACKET_NAME-$VER.tar.gz $RPMBUILD/SOURCES
 
 cat <<EOF > $RPMBUILD/SPECS/$PACKET_NAME.spec
@@ -127,8 +161,40 @@ $PREFIX/*
 #- First Build
 
 EOF
+echo "done"
+echo ""
 
 
-#4. build the source and the binary rpm
-
+# 4. build the source and the binary RPM
+echo $ANSI_BROWN"Build the source and the binary RPM:"$ANSI_NONE
+echo ""
+sudo apt-get install -y rpm
 rpmbuild -ba $RPMBUILD/SPECS/$PACKET_NAME.spec
+echo ""
+
+# 5. Add DEB packages to local repository
+echo $ANSI_BROWN"Add REP package to local repository:"$ANSI_NONE
+echo ""
+if [ ! -d "$REPO/rhel/" ]; then
+mkdir $REPO/rhel/
+fi
+if [ ! -d "$REPO/rhel/$ARCH/" ]; then
+mkdir $REPO/rhel/$ARCH/
+fi
+cp $RPMBUILD/RPMS/$ARCH/* $REPO/rhel/$ARCH/
+cp -r $RPMBUILD/SRPMS/ $REPO/rhel/
+sudo apt-get install -y createrepo
+createrepo $REPO/rhel/$ARCH/
+echo ""
+
+# Upload repository to remote host and Test Install and run application
+if [ ! -z "$CI_BUILD_REF" ]; then
+    
+    # Upload repository to remote host
+    # by ftp: 
+    sh/make_deb_remote_upload.sh
+
+    # Install packet from remote repository
+    # sh/make_rpm_remote_install.sh
+
+fi
