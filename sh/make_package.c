@@ -22,7 +22,9 @@
 enum B_TYPE {
     
     DEB = 1,    ///< Debian
-    RPM         ///< REHL/Centos/Fedore/Suse RPM
+    RPM,        ///< REHL/Centos/Fedora/Suse RPM created under Ubuntu
+    YUM,
+    ZYP
 };
 
 /**
@@ -72,6 +74,8 @@ int main(int argc, char** argv) {
     // Make DEBIAN repository
     if(!strcmp(argv[1], "deb")) b_type = DEB;
     else if(!strcmp(argv[1], "rpm")) b_type = RPM;
+    else if(!strcmp(argv[1], "yum")) b_type = YUM;
+    else if(!strcmp(argv[1], "zyp")) b_type = ZYP;
     
     // Check for build type
     if(!b_type) {
@@ -100,12 +104,13 @@ int main(int argc, char** argv) {
 
     // Execute build packet script 
     char cmd[KSN_BUFFER_SM_SIZE]; 
-    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s %s",  
-            argv[1], 
+    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s %s %s",  
+            b_type == DEB ? argv[1] : "rpm", 
             // Script parameters
-            version, // Version
-            CI_BUILD_ID != NULL ? CI_BUILD_ID : "", // Build
-            argc >= 3 ? argv[2] : "" // Architecture
+            version, // $1 Version
+            CI_BUILD_ID != NULL ? CI_BUILD_ID : "1", // $2 Build
+            argc >= 3 ? argv[2] : b_type == DEB ? "amd64" : "x86_64", // $3 Architecture
+            b_type > DEB ? argv[1] : "" // $4 RPM subtype
     ); 
 
     rv = system(cmd); 
