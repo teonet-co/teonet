@@ -18,7 +18,7 @@ set -e # exit at error
 # The first parameter is required
 if [ -z "$1" ]
   then
-    exit -1
+    exit 1
 fi
 
 VER=$1
@@ -36,17 +36,20 @@ if [ -z "$3" ]
 fi
 if [ -z "$4" ]
   then
-    RPM_SUBTYPE="rpm"
+    RPM_SUBTYPE="deb"
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
   else
+    # Default - Ubuntu
     RPM_SUBTYPE=$4
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
+    # Rehl
     if [ "$RPM_SUBTYPE" = "yum" ]; then
         INST="yum install -y "
         RPM_DEV="rpm-build"
     fi
+    # Suse
     if [ "$RPM_SUBTYPE" = "zyp" ]; then
         INST="zypper install -y "
         RPM_DEV="rpm-devel"
@@ -59,7 +62,7 @@ fi
 #echo "RPM_DEV="$RPM_DEV
 #echo ""
 #
-#exit
+#exit 2
 
 
 PWD=`pwd`
@@ -219,7 +222,7 @@ if [ ! -z "$CI_BUILD_REF" ]; then
     
     # Upload repository to remote host
     # by ftp: 
-    sh/make_deb_remote_upload.sh $ARCH
+    sh/make_remote_upload.sh $RPM_SUBTYPE $INST
 
     # Install packet from remote repository
     # sh/make_rpm_remote_install.sh
