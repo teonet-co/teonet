@@ -53,13 +53,13 @@ if [ -z "$4" ]
     fi
 fi
 
-echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
-echo "RPM_SUBTYPE="$RPM_SUBTYPE
-echo "INST="$INST
-echo "RPM_DEV="$RPM_DEV
-echo ""
-
-exit
+#echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
+#echo "RPM_SUBTYPE="$RPM_SUBTYPE
+#echo "INST="$INST
+#echo "RPM_DEV="$RPM_DEV
+#echo ""
+#
+#exit
 
 PWD=`pwd`
 REPO=../repo
