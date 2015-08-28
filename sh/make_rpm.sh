@@ -11,6 +11,7 @@
 # @param $1 Version
 # @param $2 Release 
 # @param $3 Architecture
+# @param $4 RPM subtype rpm yum zyp
 
 set -e # exit at error
 
@@ -33,6 +34,30 @@ if [ -z "$3" ]
   else
     ARCH=$3
 fi
+if [ ! -z "$4" ]
+  then
+    RPM_SUBTYPE="rpm"
+    INST="sudo apt-get install -y "
+    RPM_DEV="rpm"
+  else
+    RPM_SUBTYPE=$4
+    if [ "$RPM_SUBTYPE" = "yum" ]; then
+        INST="yum install -y "
+        RPM_DEV="rpm-build"
+    fi
+    if [ "$RPM_SUBTYPE" = "zyp" ]; then
+        INST="zypper install -y "
+        RPM_DEV="rpm-devel"
+    fi
+fi
+
+#echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
+#echo "RPM_SUBTYPE="$RPM_SUBTYPE
+#echo "INST="$INST
+#echo "RPM_DEV="$RPM_DEV
+#echo ""
+#
+#exit
 
 PWD=`pwd`
 REPO=../repo
@@ -168,7 +193,7 @@ echo ""
 # 4. build the source and the binary RPM
 echo $ANSI_BROWN"Build the source and the binary RPM:"$ANSI_NONE
 echo ""
-sudo apt-get install -y rpm
+$INST$RPM_DEV
 rpmbuild -ba $RPMBUILD/SPECS/$PACKET_NAME.spec
 echo ""
 
@@ -183,9 +208,8 @@ mkdir $REPO/rhel/$ARCH/
 fi
 cp $RPMBUILD/RPMS/$ARCH/* $REPO/rhel/$ARCH/
 cp -r $RPMBUILD/SRPMS/ $REPO/rhel/
-sudo apt-get install -y createrepo
+$INST"createrepo"
 createrepo $REPO/rhel/$ARCH/
-echo ""
 
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then

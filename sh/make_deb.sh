@@ -6,6 +6,7 @@
 # @param $1 Version
 # @param $2 Release 
 # @param $3 Architecture
+# @param $4 RPM subtype
 
 set -e # exit at error
 
@@ -29,6 +30,7 @@ if [ -z "$3" ]
     ARCH=$3
 fi
 VER=$1-$RELEASE
+
 
 VER_ARCH=$VER"_"$ARCH
 PWD=`pwd`
