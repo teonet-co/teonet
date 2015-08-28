@@ -34,13 +34,15 @@ if [ -z "$3" ]
   else
     ARCH=$3
 fi
-if [ ! -z "$4" ]
+if [ -z "$4" ]
   then
     RPM_SUBTYPE="rpm"
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
   else
     RPM_SUBTYPE=$4
+    INST="sudo apt-get install -y "
+    RPM_DEV="rpm"
     if [ "$RPM_SUBTYPE" = "yum" ]; then
         INST="yum install -y "
         RPM_DEV="rpm-build"
@@ -51,13 +53,13 @@ if [ ! -z "$4" ]
     fi
 fi
 
-#echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
-#echo "RPM_SUBTYPE="$RPM_SUBTYPE
-#echo "INST="$INST
-#echo "RPM_DEV="$RPM_DEV
-#echo ""
-#
-#exit
+echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
+echo "RPM_SUBTYPE="$RPM_SUBTYPE
+echo "INST="$INST
+echo "RPM_DEV="$RPM_DEV
+echo ""
+
+exit
 
 PWD=`pwd`
 REPO=../repo
