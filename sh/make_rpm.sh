@@ -219,7 +219,7 @@ if [ ! -z "$CI_BUILD_REF" ]; then
     
     # Upload repository to remote host
     # by ftp: 
-    sh/make_deb_remote_upload.sh
+    sh/make_deb_remote_upload.sh $ARCH
 
     # Install packet from remote repository
     # sh/make_rpm_remote_install.sh
