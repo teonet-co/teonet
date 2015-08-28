@@ -222,7 +222,7 @@ if [ ! -z "$CI_BUILD_REF" ]; then
     
     # Upload repository to remote host
     # by ftp: 
-    sh/make_remote_upload.sh $RPM_SUBTYPE $INST
+    sh/make_remote_upload.sh $RPM_SUBTYPE "$INST"
 
     # Install packet from remote repository
     # sh/make_rpm_remote_install.sh
