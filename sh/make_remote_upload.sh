@@ -32,7 +32,7 @@ fi
 if [ -z "$2" ];  then
     sudo apt-get install -y lftp
 else
-    $2" lftp"
+    $2"lftp"
 fi
 if [ "$RPM_SUBTYPE" = "deb" ]; then
   SUBFOLDER=ubuntu
