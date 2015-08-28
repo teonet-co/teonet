@@ -20,8 +20,10 @@ sudo apt-get install -y lftp
 lftp -c "
 set ftp:list-options -a;
 open ftp://repo:VV9x5ClC@repo.ksproject.org; 
-lcd $REPO/ubuntu;
-cd /ubuntu;
+#lcd $REPO/ubuntu;
+#cd /ubuntu;
+lcd $REPO;
+cd /;
 mirror --reverse --delete --use-cache --verbose --allow-chown
 "
 echo ""
