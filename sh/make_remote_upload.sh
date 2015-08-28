@@ -30,12 +30,12 @@ fi
 if [ -z "$2" ];  then
     sudo apt-get install -y lftp
 else
-    $2"lftp"
+    $2" lftp"
 fi
 lftp -c "
 set ftp:list-options -a;
 open ftp://repo:VV9x5ClC@repo.ksproject.org; 
-if [ RPM_SUBTYPE = "deb" ]
+if [ "$RPM_SUBTYPE" = "deb" ]
   then
 
     lcd $REPO/ubuntu;
