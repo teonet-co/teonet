@@ -1,14 +1,37 @@
 #!/bin/sh
 # Create DEBIAN package
-set -e
 
-VER=$1
+# Parameters:
+#
+# @param $1 Version
+# @param $2 Release 
+# @param $3 Architecture
+# @param $4 RPM subtype
+
+set -e # exit at error
+
+# The first parameter is required
+if [ -z "$1" ]
+  then
+    exit -1
+fi
+
+VER_ONLY=$1
 if [ -z "$2" ]
+  then
+    RELEASE=1
+  else
+    RELEASE=$2
+fi
+if [ -z "$3" ]
   then
     ARCH="amd64"
   else
-    ARCH=$2
+    ARCH=$3
 fi
+VER=$1-$RELEASE
+
+
 VER_ARCH=$VER"_"$ARCH
 PWD=`pwd`
 REPO=../repo
@@ -21,15 +44,14 @@ ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
 
 echo $ANSI_BROWN"Create debian packet $PACKET_NAME""_$VER_ARCH.deb"$ANSI_NONE
-#echo CI_BUILD_REF=$CI_BUILD_REF
 echo ""
 
 #Update and upgrade build host
-echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
-echo ""
-sudo apt-get update
-sudo apt-get -y upgrade
-echo ""
+#echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
+#echo ""
+#sudo apt-get update
+#sudo apt-get -y upgrade
+#echo ""
 
 # Configure and make
 echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
