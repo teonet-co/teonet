@@ -216,6 +216,7 @@ cp $RPMBUILD/RPMS/$ARCH/* $REPO/rhel/$ARCH/
 cp -r $RPMBUILD/SRPMS/ $REPO/rhel/
 $INST"createrepo"
 createrepo $REPO/rhel/$ARCH/
+echo ""
 
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then
