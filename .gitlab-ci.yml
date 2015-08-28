@@ -72,3 +72,15 @@ job_ubuntu_deploy:
     - sh/make_package deb
   only:
     - master
+    
+job_centos:
+  type: deploy
+  image: centos_teonet
+  script:
+    # Build DEB package and upload it to repository
+    - ./autogen.sh
+    - cd sh; make; cd ..
+    - sh/make_package yum
+  only:
+    - master
+
