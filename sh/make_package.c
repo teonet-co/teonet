@@ -16,6 +16,31 @@
 
 #define TBP_VERSION "0.0.1"
 
+#define system_make(SYSTEM) \
+    { \
+        int rpm = !strcmp(SYSTEM, "rpm"); \
+        /* Create version */ \
+        char version[KSN_BUFFER_SM_SIZE]; \
+        char *CI_BUILD_ID = getenv("CI_BUILD_ID"); \
+        \
+        if(!rpm && CI_BUILD_ID != NULL) { \
+            snprintf(version, KSN_BUFFER_SM_SIZE, "%s-%s", VERSION, CI_BUILD_ID); \
+            /* TODO: Set version to configure.ac */ \
+        } \
+        else snprintf(version, KSN_BUFFER_SM_SIZE, "%s", VERSION); \
+        \
+        /* Execute build repository script */ \
+        char cmd[KSN_BUFFER_SM_SIZE]; \
+        snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s",  \
+                argv[1], \
+                version, \
+                rpm && CI_BUILD_ID != NULL ? CI_BUILD_ID :  \
+                !rpm && argc >= 3 ? argv[2] : "" \
+        ); \
+        \
+        rv = system(cmd); \
+    }
+        
 /**
  * Main application function
  *
@@ -55,23 +80,11 @@ int main(int argc, char** argv) {
         // Import repository keys
         if(system("sh/make_deb_keys_add.sh")) return (EXIT_FAILURE);
         
-        // Create version
-        char version[KSN_BUFFER_SM_SIZE];
-        char *CI_BUILD_ID = getenv("CI_BUILD_ID");
+        system_make(argv[1]);
+    }
+    else if(!strcmp(argv[1], "rpm")) {
         
-        if(CI_BUILD_ID != NULL) {
-            snprintf(version, KSN_BUFFER_SM_SIZE, "%s-%s", VERSION, CI_BUILD_ID);
-            // TODO: Set version to configure.ac 
-        }
-        else 
-            snprintf(version, KSN_BUFFER_SM_SIZE, "%s", VERSION);
-
-        // Execute build repository script
-        char cmd[KSN_BUFFER_SM_SIZE];
-        snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s", 
-                argv[1], version, argc >= 3 ? argv[2] : "");
-        
-        rv = system(cmd);
+        system_make(argv[1]);
     }
     
     return rv;
