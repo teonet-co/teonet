@@ -73,9 +73,9 @@ job_ubuntu_deploy:
   only:
     - master
     
-job_centos_deploy:
+job_fedora_deploy:
   type: deploy
-  image: centos_teonet
+  image: fedora_teonet
   script:
     # Build RPM package and upload it to repository
     - ./autogen.sh
