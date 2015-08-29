@@ -58,7 +58,7 @@ if [ -z "$5" ]; then
 else
     PACKET_NAME=$5
 fi
-if [ -z "$5" ]; then
+if [ -z "$6" ]; then
     PACKET_SUMMARY="Teonet library version $VER"
 else
     PACKET_SUMMARY=$6
