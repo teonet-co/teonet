@@ -217,6 +217,9 @@ echo ""
 reprepro --ask-passphrase -Vb $REPO includedeb teonet *.deb
 echo ""
 
+# Make libtuntap
+sh/make_libtuntap.sh
+
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then
     
