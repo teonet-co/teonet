@@ -221,6 +221,6 @@ if [ ! -z "$CI_BUILD_REF" ]; then
     sh/make_remote_upload.sh
 
     # Install packet from remote repository
-    sh/make_deb_remote_install.sh
+    sh/make_remote_install.sh
 
 fi

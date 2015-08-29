@@ -8,7 +8,7 @@
 # Created on Aug 27, 2015, 2:08:45 AM
 #
 
-set -e # exit at error
+
 
 ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
@@ -21,9 +21,7 @@ REPO=../repo
 # @param $2 Install prefix: default: sudo apt-get install -y 
 #
 
-# Upload local repository to remote host
-echo $ANSI_BROWN"Upload local repository to remote host:"$ANSI_NONE
-echo ""
+# Check parameters
 if [ -z "$1" ];  then
     RPM_SUBTYPE="deb";
 else
@@ -39,6 +37,10 @@ if [ "$RPM_SUBTYPE" = "deb" ]; then
 else
   SUBFOLDER=rhel
 fi
+
+# Upload local repository to remote host
+echo $ANSI_BROWN"Upload local repository to remote host:"$ANSI_NONE
+echo ""
 lftp -c "
 set ftp:list-options -a;
 open ftp://repo:VV9x5ClC@repo.ksproject.org; 
