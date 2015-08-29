@@ -28,16 +28,16 @@ if [ -z "$3" ]; then
     ARCH=$3
 fi
 VER=$1-$RELEASE
-if [ -z "$4" ]; then
+if [ -z "$5" ]; then
     PACKET_NAME="libteonet"
 else
-    PACKET_NAME=$4
+    PACKET_NAME=$5
 fi
-if [ -z "$5" ]; then
+if [ -z "$6" ]; then
     PACKET_DESCRIPTION="Teonet library version $VER
  Mesh network library."
 else
-    PACKET_DESCRIPTION=$5
+    PACKET_DESCRIPTION=$6
 fi
 
 VER_ARCH=$VER"_"$ARCH
