@@ -97,7 +97,7 @@ if [ "$RPM_SUBTYPE" = "deb" ]; then
 else
     if [ "$RPM_SUBTYPE" = "yum" ]; then
         yum remove -y libteonet
-    end
+    fi
 fi
 
 # TODO: Remove teonet repository & key
