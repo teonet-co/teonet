@@ -34,7 +34,8 @@ else
     PACKET_NAME=$4
 fi
 if [ -z "$5" ]; then
-    PACKET_DESCRIPTION="Teonet library version $VER\n Mesh network library."
+    PACKET_DESCRIPTION="Teonet library version $VER
+ Mesh network library."
 else
     PACKET_DESCRIPTION=$5
 fi
