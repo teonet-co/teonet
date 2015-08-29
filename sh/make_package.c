@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
             version, // $1 Version
             CI_BUILD_ID != NULL ? CI_BUILD_ID : "1", // $2 Build
             argc >= 3 ? argv[2] : b_type == DEB ? "amd64" : "x86_64", // $3 Architecture
-            b_type > DEB ? argv[1] : "" // $4 RPM subtype
+            b_type > DEB ? argv[1] : "deb" // $4 RPM subtype
     ); 
 
     rv = system(cmd); 
