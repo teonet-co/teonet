@@ -16,11 +16,11 @@ make
 
 Third party notes:
 
+libev - A full-featured and high-performance event loop
+
+    URL: libev.schmorp.de/
+
+
 PBL - The Program Base Library
 
     URL: http://www.mission-base.com/peter/source/
-
-
-UDT - UDP Based Data Transfer
-
-    URL: http://udt.sourceforge.net/

@@ -29,6 +29,7 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teonet_tst
+#bin_PROGRAMS = teonet_tst
+noinst_PROGRAMS = teonet_tst
 
 teonet_tst_SOURCES = teonet_tst.c
