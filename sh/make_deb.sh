@@ -6,39 +6,42 @@
 # @param $1 Version
 # @param $2 Release 
 # @param $3 Architecture
-# @param $4 RPM subtype
+# @param $4 RPM subtype (not used, reserved)
+# @param $5 PACKET_NAME
+# @param $6 PACKET_DESCRIPTION
 
 set -e # exit at error
 
 # The first parameter is required
-if [ -z "$1" ]
-  then
+if [ -z "$1" ]; then
     exit -1
 fi
-
 VER_ONLY=$1
-if [ -z "$2" ]
-  then
+if [ -z "$2" ]; then
     RELEASE=1
   else
     RELEASE=$2
 fi
-if [ -z "$3" ]
-  then
+if [ -z "$3" ]; then
     ARCH="amd64"
   else
     ARCH=$3
 fi
 VER=$1-$RELEASE
-
+if [ -z "$4" ]; then
+    PACKET_NAME="libteonet"
+else
+    PACKET_NAME=$4
+fi
+if [ -z "$5" ]; then
+    PACKET_DESCRIPTION="Teonet library version $VER\n Mesh network library."
+else
+    PACKET_DESCRIPTION=$5
+fi
 
 VER_ARCH=$VER"_"$ARCH
 PWD=`pwd`
 REPO=../repo
-
-PACKET_NAME="libteonet"
-PACKET_DESCRIPTION="Teonet library version $VER
- Mesh network library."
 
 ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
@@ -216,17 +219,10 @@ echo ""
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then
     
-    # Upload repository to remote host
-    # by ftp: 
+    # Upload repository to remote host by ftp: 
     sh/make_remote_upload.sh
-    if [ ! "$?" = "0" ]; then
-        exit 1
-    fi
 
     # Install packet from remote repository
     sh/make_remote_install.sh
-    if [ ! "$?" = "0" ]; then
-        exit 1
-    fi
 
 fi
