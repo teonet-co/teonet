@@ -12,30 +12,28 @@
 # @param $2 Release 
 # @param $3 Architecture
 # @param $4 RPM subtype rpm yum zyp
+# @param $5 PACKET_NAME
+# @param $6 PACKET_SUMMARY
 
 set -e # exit at error
 
 # The first parameter is required
-if [ -z "$1" ]
-  then
+if [ -z "$1" ]; then
     exit 1
 fi
-
 VER=$1
-if [ -z "$2" ]
-  then
+if [ -z "$2" ]; then
     RELEASE=1
   else
     RELEASE=$2
 fi
-if [ -z "$3" ]
-  then
+if [ -z "$3" ]; then
     ARCH="x86_64"
   else
     ARCH=$3
 fi
-if [ -z "$4" ]
-  then
+if [ -z "$4" ]; then
+    # Default - Ubuntu
     RPM_SUBTYPE="deb"
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
@@ -55,6 +53,16 @@ if [ -z "$4" ]
         RPM_DEV="rpm-devel"
     fi
 fi
+if [ -z "$5" ]; then
+    PACKET_NAME="libteonet"
+else
+    PACKET_NAME=$5
+fi
+if [ -z "$5" ]; then
+    PACKET_SUMMARY="Teonet library version $VER"
+else
+    PACKET_SUMMARY=$6
+fi
 
 #echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
 #echo "RPM_SUBTYPE="$RPM_SUBTYPE
@@ -64,15 +72,11 @@ fi
 #
 #exit 2
 
-
 PWD=`pwd`
 REPO=../repo
 VER_ARCH=$VER"_"$ARCH
 RPMBUILD=~/rpmbuild
 PREFIX=/usr
-
-PACKET_NAME="libteonet"
-PACKET_SUMMARY="Teonet library version $VER"
 
 ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
@@ -138,10 +142,11 @@ rm -rf $PACKET_NAME-$VER/
 echo ""
 
 # 3. Copy to the sources folder
-echo $ANSI_BROWN"Copy files to the rpmbuild sources folder:"$ANSI_NONE
+echo $ANSI_BROWN"Create spec and copy files to the rpmbuild sources folder:"$ANSI_NONE
 echo ""
 mv -f $PACKET_NAME-$VER.tar.gz $RPMBUILD/SOURCES
 
+# 4. Create spec file
 cat <<EOF > $RPMBUILD/SPECS/$PACKET_NAME.spec
 # Don't try fancy stuff like debuginfo, which is useless on binary-only
 # packages. Don't strip binary too
@@ -157,7 +162,7 @@ Release: $RELEASE
 License: GPL+
 Group: Development/Tools
 SOURCE0 : %{name}-%{version}.tar.gz
-URL: http://$PACKET_NAME.company.com/
+URL: http://repo.ksproject.org/
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
@@ -177,10 +182,8 @@ mkdir -p  %{buildroot}
 # in builddir
 cp -a * %{buildroot}
 
-
 %clean
 rm -rf %{buildroot}
-
 
 %files
 %defattr(-,root,root,-)
@@ -195,15 +198,14 @@ EOF
 echo "done"
 echo ""
 
-
-# 4. build the source and the binary RPM
+# 5. build the source and the binary RPM
 echo $ANSI_BROWN"Build the source and the binary RPM:"$ANSI_NONE
 echo ""
 $INST$RPM_DEV
 rpmbuild -ba $RPMBUILD/SPECS/$PACKET_NAME.spec
 echo ""
 
-# 5. Add DEB packages to local repository
+# 6. Add DEB packages to local repository
 echo $ANSI_BROWN"Add REP package to local repository:"$ANSI_NONE
 echo ""
 if [ ! -d "$REPO/rhel/" ]; then
@@ -221,17 +223,10 @@ echo ""
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then
     
-    # Upload repository to remote host
-    # by ftp: 
+    # Upload repository to remote host by ftp: 
     sh/make_remote_upload.sh $RPM_SUBTYPE "$INST"
-    if [ ! "$?" = "0" ]; then
-        exit 1
-    fi
 
     # Install packet from remote repository
     sh/make_remote_install.sh $RPM_SUBTYPE "$INST"
-    if [ ! "$?" = "0" ]; then
-        exit 1
-    fi
 
 fi

@@ -1,6 +1,6 @@
 #!/bin/sh
 # 
-# File:   make_deb_remote_install.sh
+# File:   make_remote_install.sh
 # Author: Kirill Scherba <kirill@scherba.ru>
 #
 # Install libteonet from remote repository
@@ -30,11 +30,6 @@ if [ -z "$2" ];  then
 else
     $2"lftp"
 fi
-#if [ "$RPM_SUBTYPE" = "deb" ]; then
-#  SUBFOLDER=ubuntu
-#else
-#  SUBFOLDER=rhel
-#fi
 
 # Install libteonet from remote repository
 echo $ANSI_BROWN"Install libteonet from remote repository:"$ANSI_NONE
