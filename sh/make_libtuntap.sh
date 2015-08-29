@@ -91,7 +91,6 @@ Version: $VER
 Section: libdevel
 Priority: optional
 Architecture: $ARCH
-Depends: 
 Maintainer: Kirill Scherba <kirill@scherba.ru>
 Description: $PACKET_DESCRIPTION
 
