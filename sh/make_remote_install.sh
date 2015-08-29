@@ -70,7 +70,7 @@ else
         cat <<EOF > /etc/yum.repos.d/teonet.repo
 [libteonet]
 name=Teonet library for RHEL / CentOS
-baseurl=http://repo.ksproject.org/rhel/
+baseurl=http://repo.ksproject.org/rhel/x86_64/
 enabled=1
 gpgcheck=0
 #gpgkey=http://foo.nixcraft.com/RPM-GPG-KEY.txt
