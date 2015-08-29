@@ -219,8 +219,16 @@ if [ ! -z "$CI_BUILD_REF" ]; then
     # Upload repository to remote host
     # by ftp: 
     sh/make_remote_upload.sh
+    if [ "$?" = "0" ]; then
+    else
+        exit 1
+    fi
 
     # Install packet from remote repository
     sh/make_remote_install.sh
+    if [ "$?" = "0" ]; then
+    else
+        exit 1
+    fi
 
 fi
