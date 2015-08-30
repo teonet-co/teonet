@@ -10,140 +10,236 @@
 # @param $5 PACKET_NAME
 # @param $6 PACKET_DESCRIPTION
 
-set -e # exit at error
+# Function ---------------------------------------------------------------------
 
-# The first parameter is required
-if [ -z "$1" ]; then
-    exit -1
-fi
-VER_ONLY=$1
-if [ -z "$2" ]; then
-    RELEASE=1
-  else
-    RELEASE=$2
-fi
-if [ -z "$3" ]; then
-    ARCH="amd64"
-  else
-    ARCH=$3
-fi
-VER=$1-$RELEASE
-if [ -z "$5" ]; then
-    PACKET_NAME="libteonet"
-else
-    PACKET_NAME=$5
-fi
-if [ -z "$6" ]; then
-    PACKET_DESCRIPTION="Teonet library version $VER
- Mesh network library."
-else
-    PACKET_DESCRIPTION=$6
-fi
+# Check parameters
+check_param()
+{
+    # The first parameter is required
+    if [ -z "$1" ]; then
+        echo The first parameter is required
+        exit 1
+    fi
+    VER_ONLY=$1
+    if [ -z "$2" ]; then
+        RELEASE=1
+      else
+        RELEASE=$2
+    fi
+    if [ -z "$3" ]; then
+        ARCH="amd64"
+      else
+        ARCH=$3
+    fi
+    VER=$1-$RELEASE
+    if [ -z "$5" ]; then
+        PACKET_NAME="libteonet"
+    else
+        PACKET_NAME=$5
+    fi
+    if [ -z "$6" ]; then
+        PACKET_DESCRIPTION="Teonet library version $VER
+     Mesh network library."
+    else
+        PACKET_DESCRIPTION=$6
+    fi
+}
 
-VER_ARCH=$VER"_"$ARCH
-PWD=`pwd`
-REPO=../repo
+# Update and upgrade build host
+update_host()
+{
+    #echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
+    #echo ""
+    #sudo apt-get update
+    #sudo apt-get -y upgrade
+    echo ""
+}
 
-ANSI_BROWN="\033[22;33m"
-ANSI_NONE="\033[0m"
+# Configure and make auto configure project
+make_counfigure() {
+    echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
+    echo ""
+    if [ -f "autogen.sh" ]
+    then
+    ./autogen.sh --prefix=/usr
+    else
+    ./configure --prefix=/usr
+    fi
+    echo ""
+    echo $ANSI_BROWN"Make:"$ANSI_NONE
+    echo ""
+    make
+    echo ""
+}
 
-echo $ANSI_BROWN"Create debian packet $PACKET_NAME""_$VER_ARCH.deb"$ANSI_NONE
-echo ""
-
-#Update and upgrade build host
-#echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
-#echo ""
-#sudo apt-get update
-#sudo apt-get -y upgrade
-#echo ""
-
-# Configure and make
-echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
-echo ""
-if [ -f "autogen.sh" ]
-then
-./autogen.sh --prefix=/usr
-else
-./configure --prefix=/usr
-fi
-echo ""
-echo $ANSI_BROWN"Make:"$ANSI_NONE
-echo ""
-make
-echo ""
-
-# Install to temporary folder 
-echo $ANSI_BROWN"Make install to temporary folder:"$ANSI_NONE
-echo ""
-make install DESTDIR=$PWD/$PACKET_NAME"_"$VER_ARCH
-echo ""
+# Make install
+make_install() {
+    # Install to temporary folder 
+    echo $ANSI_BROWN"Make install to temporary folder:"$ANSI_NONE
+    echo ""
+    make install DESTDIR=$PWD/$PACKET_NAME"_"$VER_ARCH
+    echo ""
+}
 
 # Create DEBIAN control file
-echo $ANSI_BROWN"Create DEBIAN control file:"$ANSI_NONE
-echo ""
-# Note: Add this to Depends if test will be added to distributive: 
-# libcunit1-dev (>= 2.1-2.dfsg-1)
-mkdir $PACKET_NAME"_"$VER_ARCH/DEBIAN
-cat << EOF > $PACKET_NAME"_"$VER_ARCH/DEBIAN/control
+create_deb_control()
+{
+    # Create DEBIAN control file
+    echo $ANSI_BROWN"Create DEBIAN control file:"$ANSI_NONE
+    echo ""
+    # Note: Add this to Depends if test will be added to distributive: 
+    # libcunit1-dev (>= 2.1-2.dfsg-1)
+    mkdir $PACKET_NAME"_"$VER_ARCH/DEBIAN
+    cat << EOF > $PACKET_NAME"_"$VER_ARCH/DEBIAN/control
 Package: $PACKET_NAME
 Version: $VER
 Section: libdevel
 Priority: optional
 Architecture: $ARCH
-Depends: libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4)
-Maintainer: Kirill Scherba <kirill@scherba.ru>
+Depends: $DEPENDS
+Maintainer: $MAINTAINER
 Description: $PACKET_DESCRIPTION
 
 EOF
+}
 
 # Build package
-echo $ANSI_BROWN"Build package:"$ANSI_NONE
-echo ""
-if [ -f $PACKET_NAME"_"$VER_ARCH".deb" ]
-then
-    rm $PACKET_NAME"_"$VER_ARCH.deb
-fi
-dpkg-deb --build $PACKET_NAME"_"$VER_ARCH
-rm -rf $PACKET_NAME"_"$VER_ARCH
-echo ""
+build_deb_package()
+{
+    echo $ANSI_BROWN"Build package:"$ANSI_NONE
+    echo ""
+    if [ -f $PACKET_NAME"_"$VER_ARCH".deb" ]
+    then
+        rm $PACKET_NAME"_"$VER_ARCH.deb
+    fi
+    dpkg-deb --build $PACKET_NAME"_"$VER_ARCH
+    rm -rf $PACKET_NAME"_"$VER_ARCH
+    echo ""
+}
 
 # Install and run application to check created package
-echo $ANSI_BROWN"Install package and run application to check created package:"$ANSI_NONE
-echo ""
-set +e
-sudo dpkg -i $PACKET_NAME"_"$VER_ARCH.deb
-set -e
-sudo apt-get install -y -f
-echo ""
-echo $ANSI_BROWN"Run application:"$ANSI_NONE
-echo ""
-teovpn -?
-echo ""
+install_run_deb()
+{
+    echo $ANSI_BROWN"Install package and run application to check created package:"$ANSI_NONE
+    echo ""
+    set +e
+    sudo dpkg -i $PACKET_NAME"_"$VER_ARCH.deb
+    set -e
+    sudo apt-get install -y -f
+    echo ""
+    echo $ANSI_BROWN"Run application:"$ANSI_NONE
+    echo ""
+    teovpn -?
+    echo ""
+}
 
 # Show version of installed depends
-echo $ANSI_BROWN"Show version of installed depends:"$ANSI_NONE
-echo ""
-echo "libssl-dev:"
-dpkg -s libssl-dev | grep Version:
-echo ""
-echo "libev-dev:"
-dpkg -s libev-dev | grep Version:
-echo ""
-echo "libconfuse-dev:"
-dpkg -s libconfuse-dev | grep Version:
-echo ""
-echo "uuid-dev:"
-dpkg -s uuid-dev | grep Version:
-echo ""
+show_teonet_depends()
+{
+    # Show version of installed depends
+    echo $ANSI_BROWN"Show version of installed depends:"$ANSI_NONE
+    echo ""
+    echo "libssl-dev:"
+    dpkg -s libssl-dev | grep Version:
+    echo ""
+    echo "libev-dev:"
+    dpkg -s libev-dev | grep Version:
+    echo ""
+    echo "libconfuse-dev:"
+    dpkg -s libconfuse-dev | grep Version:
+    echo ""
+    echo "uuid-dev:"
+    dpkg -s uuid-dev | grep Version:
+    echo ""
+}
 
 # Remove package  
-echo $ANSI_BROWN"Remove package:"$ANSI_NONE
-echo ""
-sudo apt-get remove -y $PACKET_NAME
-sudo apt-get autoremove -y
+apt_remove()
+{
+    echo $ANSI_BROWN"Remove package:"$ANSI_NONE
+    echo ""
+    sudo apt-get remove -y $PACKET_NAME
+    sudo apt-get autoremove -y
+    echo ""
+}
+
+
+#-------------------------------------------------------------------------------
+
+# Set exit at error
+set -e 
+
+# Check parameters
+#check_param
+    # The first parameter is required
+    if [ -z "$1" ]; then
+        echo The first parameter is required
+        exit 1
+    fi
+    VER_ONLY=$1
+    if [ -z "$2" ]; then
+        RELEASE=1
+      else
+        RELEASE=$2
+    fi
+    if [ -z "$3" ]; then
+        ARCH="amd64"
+      else
+        ARCH=$3
+    fi
+    VER=$1-$RELEASE
+    if [ -z "$5" ]; then
+        PACKET_NAME="libteonet"
+    else
+        PACKET_NAME=$5
+    fi
+    if [ -z "$6" ]; then
+        PACKET_DESCRIPTION="Teonet library version $VER
+     Mesh network library."
+    else
+        PACKET_DESCRIPTION=$6
+    fi
+
+# Set Variables
+DEPENDS="libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4)"
+MAINTAINER="Kirill Scherba <kirill@scherba.ru>"
+VER_ARCH=$VER"_"$ARCH
+PWD=`pwd`
+REPO=../repo
+ANSI_BROWN="\033[22;33m"
+ANSI_NONE="\033[0m"
+
+# Main message
+echo $ANSI_BROWN"Create debian packet $PACKET_NAME""_$VER_ARCH.deb"$ANSI_NONE
 echo ""
 
-# Add packet to repository ----------------------------------------------------
+# Update and upgrade build host
+update_host
+
+# Create deb package -------------------------------------------
+
+# Configure and make auto configure project
+make_counfigure
+
+# Make install
+make_install
+
+# Create DEBIAN control file
+create_deb_control
+
+# Build package
+build_deb_package
+
+# Install and run application to check created package
+install_run_deb
+
+# Show version of installed depends
+show_teonet_depends
+
+# Remove package  
+apt_remove
+
+# Add packet to repository ------------------------------------
 
 # Install reprepro
 echo $ANSI_BROWN"Install reprepro:"$ANSI_NONE
