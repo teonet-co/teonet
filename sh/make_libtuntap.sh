@@ -8,17 +8,23 @@
 # Created on Aug 30, 2015, 12:43:22 AM
 #
 
+# Include make deb functions
+PWD=`pwd`
+#echo "include: $PWD/sh/make_deb_inc.sh"
+. "$PWD/sh/make_deb_inc.sh"
+
 # Parameters
 # @param $1 Architecture
 # @param $2 RPM subtype rpm yum zyp
 
+# Check param
 if [ -z "$2" ]; then
-    # Default - Ubuntu
+    # Default - UBUNTU
     RPM_SUBTYPE="deb"
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
   else
-    # Default - Ubuntu
+    # Default - UBUNTU
     RPM_SUBTYPE=$2
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
@@ -43,30 +49,47 @@ if [ -z "$1" ]; then
     ARCH=$3
 fi
 
+# Main message
+echo $ANSI_BROWN"Create $PACKET_NAME package and add it to local repository"$ANSI_NONE
+echo ""
+
 echo "Parameters:"
 echo "ARCH=$ARCH"
 echo "RPM_SUBTYPE=$RPM_SUBTYPE"
+echo ""
 
 VER=0.3.0
 RELEASE=1
-PACKET_NAME=libtuntap
+PACKET_NAME=libtuntap-dev
+DEPENDS=""
+MAINTAINER="Kirill Scherba <kirill@scherba.ru>"
 PACKET_DESCRIPTION="libtuntap is a library for configuring TUN or TAP devices in a portable manner."
 
 PWD=`pwd`
-REPO_DEB=../../repo/ubuntu
-REPO_RPM=../../repo/rhel
-RPMBUILD=~/rpmbuild
+REPO=../../repo # Repository folder
+REPO_DEB=ubuntu # UBUNTU/DEBIAN sub-folder
+REPO_RPM=rhel # Rehl sub-folder
+RPMBUILD=~/rpmbuild # RPM Build folder 
 
 # Install libtuntap dependence
+echo $ANSI_BROWN"Install libtuntap dependence"$ANSI_NONE
+echo ""
 if [ $RPM_SUBTYPE = "deb" ]; then
     sudo apt-get install -y cmake g++ unzip
     VER_ARCH=$VER"_"$ARCH
     DIV="_"
+    PACKAGE_NAME=$PACKET_NAME$DIV$VER_ARCH
 else
     yum install -y cmake gcc-c++ unzip
     VER_ARCH=$VER"."$ARCH
     DIV="-"
+    PACKAGE_NAME=$PACKET_NAME$DIV$VER
 fi
+echo ""
+
+# Get and build libtuntap
+echo $ANSI_BROWN"Get, make and install libtuntap"$ANSI_NONE
+echo ""
 
 # Get libtuntap
 unzip distr/libtuntap.zip
@@ -75,35 +98,30 @@ cd libtuntap-master
 # Libtuntap build
 cmake ./
 make
-if [ $RPM_SUBTYPE = "deb" ]; then
-    make install DESTDIR=$PWD/$PACKET_NAME$DIV$VER_ARCH
-else
-    make install DESTDIR=$PWD/$PACKET_NAME$DIV$VER
-fi
+make install DESTDIR=$PWD/$PACKAGE_NAME
+echo ""
 
+# Create package
 if [ $RPM_SUBTYPE = "deb" ]; then
+
     # Create DEBIAN control file
-    # Note: Add this to Depends if test will be added to distributive: 
-    mkdir $PACKET_NAME$DIV$VER_ARCH/DEBIAN
-    cat << EOF > $PACKET_NAME$DIV$VER_ARCH/DEBIAN/control
-Package: $PACKET_NAME
-Version: $VER
-Section: libdevel
-Priority: optional
-Architecture: $ARCH
-Maintainer: Kirill Scherba <kirill@scherba.ru>
-Description: $PACKET_DESCRIPTION
+    create_deb_control $PACKAGE_NAME $PACKET_NAME $VER $ARCH $DEPENDS $MAINTAINER $PACKET_DESCRIPTION
 
-EOF
-    dpkg-deb --build $PACKET_NAME$DIV$VER_ARCH
-    rm -rf $PACKET_NAME$DIV$VER_ARCH
-    reprepro --ask-passphrase -Vb $REPO_DEB includedeb teonet $PACKET_NAME$DIV$VER_ARCH.deb
+    # Build package
+    build_deb_package $PACKAGE_NAME
+
+    # Add DEB packages to local repository
+    add_deb_package $REPO/$REPO_DEB teonet $PACKAGE_NAME
+
 else
+
     # Create binary tarball
     tar -zcvf $PACKET_NAME$DIV$VER.tar.gz $PACKET_NAME$DIV$VER/
     rm -rf $PACKET_NAME$DIV$VER/
     mv -f  $PACKET_NAME$DIV$VER.tar.gz $RPMBUILD/SOURCES
+
 fi
 
 cd ..
-#rm -fr libtuntap-master
+rm -fr libtuntap-master
+echo ""
