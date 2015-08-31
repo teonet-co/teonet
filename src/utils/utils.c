@@ -281,20 +281,20 @@ char *DATA_DIR = ksnet_formatMessage(".%s", getprogname());
 #endif
 #endif
 
-#if RELEASE_KSNET
+        if(!strncmp(DATA_DIR, ".lt-", 4)) {
+            memmove(DATA_DIR + 1, DATA_DIR + 4, strlen(DATA_DIR) + 1 - 4);
+        }
+
+//#if RELEASE_KSNET
         char buf[KSN_BUFFER_SIZE];
         strncpy(buf, getenv("HOME"), KSN_BUFFER_SIZE);
-        strncat(buf, "/", KSN_BUFFER_SIZE);
-        strncat(buf, DATA_DIR, KSN_BUFFER_SIZE);
+        strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+        strncat(buf, DATA_DIR, KSN_BUFFER_SIZE - strlen(buf) - 1);
         dataDir = strdup(buf);
-#else
-        dataDir = strdup(DATA_DIR);
-#endif
+//#else
+//        dataDir = strdup(DATA_DIR);
+//#endif
         free(DATA_DIR);
-    }
-
-    if(!strncmp(dataDir, ".lt-", 4)) {
-        memmove(dataDir + 1, dataDir + 4, strlen(dataDir) - 3);
     }
 
     return dataDir;
@@ -407,11 +407,11 @@ const char *ksnet_getSysConfigDir(void) {
 
 #define LOCAL_CONFIG_DIR "src/conf"
 
-#if RELEASE_KSNET
-        sysConfigDir = strdup(KSNET_SYS_CONFIG_DIR);
-#else
-        sysConfigDir = strdup(LOCAL_CONFIG_DIR);
-#endif
+//#if RELEASE_KSNET
+        sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
+//#else
+//        sysConfigDir = strdup(LOCAL_CONFIG_DIR);
+//#endif
     }
 
     return sysConfigDir;

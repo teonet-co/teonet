@@ -1,4 +1,4 @@
-host_name = "teonet"
+host_name = "teovpn"
 port = 9000
 port_inc_f = true
 r_host_addr = "5.63.158.100"
@@ -11,7 +11,8 @@ show_peers_f = false
 hot_keys_f = false
 
 vpn_connect_f = true
-vpn_ip = "172.19.101.54"
+vpn_ip = "172.20.101.254"
 vpn_ip_net = 24
-vpn_dev_name = ""
+vpn_mtu = 0
+vpn_dev_name = "teovpn"
 vpn_dev_hwaddr = ""

@@ -85,8 +85,13 @@ echo ""
 if [ $RPM_SUBTYPE = "deb" ] || [ $RPM_SUBTYPE = "rpm" ]; then
     $INST"cmake g++ unzip"
     VER_ARCH=$VER"_"$ARCH
-    DIV="_"
-    PACKAGE_NAME=$PACKET_NAME$DIV$VER_ARCH
+    if [ $RPM_SUBTYPE = "deb" ]; then
+        DIV="_"
+        PACKAGE_NAME=$PACKET_NAME$DIV$VER_ARCH
+    else
+        DIV="-"
+        PACKAGE_NAME=$PACKET_NAME$DIV$VER
+    fi
 else
     $INST"cmake gcc-c++ unzip"
     VER_ARCH=$VER"."$ARCH
