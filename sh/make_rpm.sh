@@ -15,54 +15,26 @@
 # @param $5 PACKET_NAME
 # @param $6 PACKET_SUMMARY
 
-set -e # exit at error
+# Include make RPM functions
+PWD=`pwd`
+. "$PWD/sh/make_rpm_inc.sh"
 
-# The first parameter is required
-if [ -z "$1" ]; then
-    exit 1
-fi
-VER=$1
-if [ -z "$2" ]; then
-    RELEASE=1
-  else
-    RELEASE=$2
-fi
-if [ -z "$3" ]; then
-    ARCH="x86_64"
-  else
-    ARCH=$3
-fi
-if [ -z "$4" ]; then
-    # Default - Ubuntu
-    RPM_SUBTYPE="deb"
-    INST="sudo apt-get install -y "
-    RPM_DEV="rpm"
-  else
-    # Default - Ubuntu
-    RPM_SUBTYPE=$4
-    INST="sudo apt-get install -y "
-    RPM_DEV="rpm"
-    # Rehl
-    if [ "$RPM_SUBTYPE" = "yum" ]; then
-        INST="yum install -y "
-        RPM_DEV="rpm-build"
-    fi
-    # Suse
-    if [ "$RPM_SUBTYPE" = "zyp" ]; then
-        INST="zypper install -y "
-        RPM_DEV="rpm-devel"
-    fi
-fi
-if [ -z "$5" ]; then
-    PACKET_NAME="libteonet"
-else
-    PACKET_NAME=$5
-fi
-if [ -z "$6" ]; then
-    PACKET_SUMMARY="Teonet library version $VER"
-else
-    PACKET_SUMMARY=$6
-fi
+# Set exit at error
+set -e 
+
+# Check parameters and set defaults
+check_param $1 $2 $3 $4 $5 $6
+# Set global variables:
+# VER=$1
+# RELEASE=$2
+# ARCH=$3
+# INST="yum install -y "
+# RPM_SUBTYPE="yum"
+# RPM_DEV="rpm-build"
+# VER=$1-$RELEASE
+# PACKET_NAME=$5
+# PACKET_DESCRIPTION=$6
+
 
 #echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
 #echo "RPM_SUBTYPE="$RPM_SUBTYPE
@@ -72,153 +44,51 @@ fi
 #
 #exit 2
 
-PWD=`pwd`
 REPO=../repo
 VER_ARCH=$VER"_"$ARCH
 RPMBUILD=~/rpmbuild
-PREFIX=/usr
+PACKAGE_NAME=$PACKET_NAME"-"$VER
 
-ANSI_BROWN="\033[22;33m"
-ANSI_NONE="\033[0m"
+#ANSI_BROWN="\033[22;33m"
+#ANSI_NONE="\033[0m"
 
 echo $ANSI_BROWN"Create RPM packet $PACKET_NAME""_$VER_ARCH"$ANSI_NONE
 echo ""
 
-#Update and upgrade build host
-#echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
-#echo ""
-#sudo apt-get update
-#sudo apt-get -y upgrade
-#echo ""
+# Update and upgrade build host
+update_host
 
-# 1. create your RPM build environment for RPM
+# Create your RPM build environment for RPM
+set_rpmbuild_env $RPMBUILD
 
-if [ -d "$RPMBUILD" ]; then
-    rm -fr $RPMBUILD
-fi
-mkdir $RPMBUILD #/{RPMS,SRPMS,BUILD,SOURCES,SPECS,tmp}
-mkdir $RPMBUILD/RPMS
-mkdir $RPMBUILD/SRPMS
-mkdir $RPMBUILD/BUILD
-mkdir $RPMBUILD/SOURCES
-mkdir $RPMBUILD/SPECS
-mkdir $RPMBUILD/tmp
+# Create temporary folder to install files and build tarball from it
+mkdir $PACKET_NAME-$VER
 
-cat <<EOF >~/.rpmmacros
-%_topdir   %(echo $HOME)/rpmbuild
-%_tmppath  %{_topdir}/tmp
-EOF
+# Configure and make auto configure project (in current folder)
+make_counfigure 
 
-# 2. create the tarball of your project
-
-mkdir $PWD/$PACKET_NAME-$VER
-
-# Configure and make
-echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
-echo ""
-if [ -f "autogen.sh" ]
-then
-./autogen.sh --prefix=$PREFIX
-else
-./configure --prefix=$PREFIX
-fi
-echo ""
-echo $ANSI_BROWN"Make:"$ANSI_NONE
-echo ""
-make
-echo ""
-
-# Install to temporary folder 
-echo $ANSI_BROWN"Make install to temporary folder:"$ANSI_NONE
-echo ""
-make install DESTDIR=$PWD/$PACKET_NAME"-"$VER
-echo ""
+# Make install
+make_install $PWD/$PACKAGE_NAME
 
 # Create binary tarball
-echo $ANSI_BROWN"Create binary tarball:"$ANSI_NONE
-echo ""
-tar -zcvf $PACKET_NAME-$VER.tar.gz $PACKET_NAME-$VER/
-rm -rf $PACKET_NAME-$VER/
-echo ""
+build_rpm_tarball $PACKAGE_NAME
 
-# 3. Copy to the sources folder
-echo $ANSI_BROWN"Create spec and copy files to the rpmbuild sources folder:"$ANSI_NONE
-echo ""
-mv -f $PACKET_NAME-$VER.tar.gz $RPMBUILD/SOURCES
+# Copy tarball to the sources folder and create spec file
+create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}"
 
-# 4. Create spec file
-cat <<EOF > $RPMBUILD/SPECS/$PACKET_NAME.spec
-# Don't try fancy stuff like debuginfo, which is useless on binary-only
-# packages. Don't strip binary too
-# Be sure buildpolicy set to do nothing
-%define        __spec_install_post %{nil}
-%define          debug_package %{nil}
-%define        __os_install_post %{_dbpath}/brp-compress
+# Build the source and the binary RPM
+build_rpm "${INST}$RPM_DEV" $RPMBUILD $PACKET_NAME
 
-Summary: $PACKET_SUMMARY
-Name: $PACKET_NAME
-Version: $VER
-Release: $RELEASE
-License: GPL+
-Group: Development/Tools
-SOURCE0 : %{name}-%{version}.tar.gz
-URL: http://repo.ksproject.org/
+# TODO: Add dependences to the repository
+#if [ $REPO_JUST_CREATED = 1 ]; then
 
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+    # Make and add libtuntap
+    sh/make_libtuntap.sh $RPM_SUBTYPE
 
-%description
-%{summary}
+#fi
 
-%prep
-%setup -q
-
-%build
-# Empty section.
-
-%install
-rm -rf %{buildroot}
-mkdir -p  %{buildroot}
-
-# in builddir
-cp -a * %{buildroot}
-
-%clean
-rm -rf %{buildroot}
-
-%files
-%defattr(-,root,root,-)
-$PREFIX/*
-#%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
-
-%changelog
-#* Thu Apr 24 2009  Elia Pinto <devzero2000@rpm5.org> 1.0-1
-#- First Build
-
-EOF
-echo "done"
-echo ""
-
-# 5. build the source and the binary RPM
-echo $ANSI_BROWN"Build the source and the binary RPM:"$ANSI_NONE
-echo ""
-$INST$RPM_DEV
-rpmbuild -ba $RPMBUILD/SPECS/$PACKET_NAME.spec
-echo ""
-
-# 6. Add DEB packages to local repository
-echo $ANSI_BROWN"Add REP package to local repository:"$ANSI_NONE
-echo ""
-if [ ! -d "$REPO/rhel/" ]; then
-mkdir $REPO/rhel/
-fi
-if [ ! -d "$REPO/rhel/$ARCH/" ]; then
-mkdir $REPO/rhel/$ARCH/
-fi
-cp $RPMBUILD/RPMS/$ARCH/* $REPO/rhel/$ARCH/
-cp -r $RPMBUILD/SRPMS/ $REPO/rhel/
-$INST"createrepo"
-createrepo $REPO/rhel/$ARCH/
-echo ""
+# Create RPM repository and add packages to this repository
+create_rpm_repo $RPMBUILD $REPO/rhel $ARCH "${INST}"
 
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then
