@@ -45,6 +45,8 @@ job_centos:
     - ./autogen.sh
     - make
     - app/teovpn -?
+    # Build package
+    - sh/make_package yum
   only:
     - master    
 
@@ -73,13 +75,13 @@ job_fedora:
 #  only:
 #    - master
     
-job_centos_deploy:
-  type: deploy
-  image: centos_teonet
-  script:
-    # Build RPM package and upload it to repository
-    - ./autogen.sh
-    - cd sh; make; cd ..
-    - sh/make_package yum
-  only:
-    - master
+#job_centos_deploy:
+#  type: deploy
+#  image: centos_teonet
+#  script:
+#    # Build RPM package and upload it to repository
+#    - ./autogen.sh
+#    - cd sh; make; cd ..
+#    - sh/make_package yum
+#  only:
+#    - master
