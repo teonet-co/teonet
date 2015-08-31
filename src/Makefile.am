@@ -130,6 +130,9 @@ libteonet_la_SOURCES = \
     utils/string_arr.c \
     utils/utils.c
 
+teonetconfdir=$(sysconfdir)/teonet
+teonetconf_DATA = config/teonet.conf.default
+
 EXTRA_DIST = config/teonet.conf.default
 
 # Not embed confuse flag

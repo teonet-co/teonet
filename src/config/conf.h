@@ -20,9 +20,9 @@
 #define KSN_MAX_HOST_NAME 31
 #define NUMBER_TRY_PORTS 1000
 
-#ifndef RELEASE_KSNET
+//#ifndef RELEASE_KSNET
 #define DEBUG_KSNET  1
-#endif
+//#endif
 
 #define KSNET_EVENT_MGR_TIMER 0.25  ///< Main event manager timer interval
 #define KSNET_PORT_DEFAULT "9000" ///< Main network port
