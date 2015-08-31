@@ -12,7 +12,6 @@
 
 # Include make deb functions
 PWD=`pwd`
-#echo "include: $PWD/sh/make_deb_inc.sh"
 . "$PWD/sh/make_deb_inc.sh"
 
 # Set exit at error

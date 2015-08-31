@@ -8,18 +8,19 @@
 # Created on Aug 31, 2015, 1:06:27 AM
 #
 
-ANSI_BROWN="\033[22;33m"
-ANSI_NONE="\033[0m"
+# Include make deb functions
+# PWD=`pwd`
+. "$PWD/sh/make_inc.sh"
 
 # Function ---------------------------------------------------------------------
 
-# Check parameters and set defaults (specific for libteonet
+# Check parameters and set defaults (specific for libteonet)
 # Parameters:
 # @param $1 Version (required)
 # @param $2 Release (default 1)
 # @param $3 Architecture (default and64)
 # @param $4 Reserved
-# @param $5 Package name (default libteonet)
+# @param $5 Package name (default libteonet-dev)
 # @param $6 Package description (default ...)
 # Set global variables:
 # VER_ONLY=$1
@@ -67,34 +68,6 @@ update_host()
     #echo ""
     #sudo apt-get update
     #sudo apt-get -y upgrade
-    echo ""
-}
-
-# Configure and make auto configure project (in current folder)
-make_counfigure() {
-    echo $ANSI_BROWN"Configure or autogen:"$ANSI_NONE
-    echo ""
-    if [ -f "autogen.sh" ]
-    then
-    ./autogen.sh --prefix=/usr
-    else
-    ./configure --prefix=/usr
-    fi
-    echo ""
-    echo $ANSI_BROWN"Make:"$ANSI_NONE
-    echo ""
-    make
-    echo ""
-}
-
-# Make install project (in current folder) to folder
-# Parameters:
-# @param $1 Destination folder (should be absolute path)
-make_install() {
-    # Install to temporary folder 
-    echo $ANSI_BROWN"Make install to temporary folder:"$ANSI_NONE
-    echo ""
-    make install DESTDIR=$1
     echo ""
 }
 
