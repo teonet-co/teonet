@@ -182,8 +182,12 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-/usr/
-#%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
+/
+%exclude /usr/bin
+%exclude /usr/doc
+%exclude /usr/lib
+%exclude /usr/include
+##%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 
 %changelog
 #* Thu Apr 24 2009  Elia Pinto <devzero2000@rpm5.org> 1.0-1
