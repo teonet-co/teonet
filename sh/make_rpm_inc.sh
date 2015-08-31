@@ -182,7 +182,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-/usr/*
+/usr/
 #%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 
 %changelog
