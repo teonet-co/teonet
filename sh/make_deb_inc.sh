@@ -113,13 +113,20 @@ create_deb_control()
     echo $ANSI_BROWN"Create DEBIAN control file:"$ANSI_NONE
     echo ""
     mkdir $1/DEBIAN
+    #local DEP
+    if [ -z "$5" ]; then
+        local DEP=""
+    else
+        local DEP="
+Depends: $5"
+    fi
+    DEPENDS=
     cat << EOF > $1/DEBIAN/control
 Package: $2
 Version: $3
 Section: libdevel
 Priority: optional
-Architecture: $4
-Depends: $5
+Architecture: $4$DEP
 Maintainer: $6
 Description: $7
 
