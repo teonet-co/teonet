@@ -8,24 +8,19 @@
 # Created on Aug 30, 2015, 12:43:22 AM
 #
 
-# Include make deb functions
-PWD=`pwd`
-#echo "include: $PWD/sh/make_deb_inc.sh"
-. "$PWD/sh/make_deb_inc.sh"
-
 # Parameters
-# @param $1 Architecture
-# @param $2 RPM subtype rpm yum zyp
+# @param $1 RPM subtype rpm yum zyp
+# @param $2 Architecture
 
 # Check param
-if [ -z "$2" ]; then
+if [ -z "$1" ]; then
     # Default - UBUNTU
     RPM_SUBTYPE="deb"
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
   else
     # Default - UBUNTU
-    RPM_SUBTYPE=$2
+    RPM_SUBTYPE=$1
     INST="sudo apt-get install -y "
     RPM_DEV="rpm"
     # Rehl
@@ -39,14 +34,22 @@ if [ -z "$2" ]; then
         RPM_DEV="rpm-devel"
     fi
 fi
-if [ -z "$1" ]; then
+if [ -z "$2" ]; then
   if [ $RPM_SUBTYPE = "deb" ]; then
     ARCH="amd64"
   else
     ARCH="x86_64"
   fi
   else
-    ARCH=$3
+    ARCH=$2
+fi
+
+# Include make deb or rpm functions
+PWD=`pwd`
+if [ $RPM_SUBTYPE = "deb" ]; then
+. "$PWD/sh/make_deb_inc.sh"
+else
+. "$PWD/sh/make_rpm_inc.sh"
 fi
 
 #echo "Parameters:"
@@ -56,10 +59,15 @@ fi
 
 VER=0.3.0
 RELEASE=1
-PACKET_NAME=libtuntap-dev
+if [ $RPM_SUBTYPE = "deb" ]; then
+    PACKET_NAME=libtuntap-dev
+else
+    PACKET_NAME=libtuntap
+fi
 DEPENDS=""
 MAINTAINER="Kirill Scherba <kirill@scherba.ru>"
 PACKET_DESCRIPTION="libtuntap is a library for configuring TUN or TAP devices in a portable manner."
+PACKET_SUMMARY=$PACKET_DESCRIPTION
 
 PWD=`pwd`
 REPO=../../repo # Repository folder
@@ -74,13 +82,13 @@ echo ""
 # Install libtuntap dependence
 echo $ANSI_BROWN"Install libtuntap dependence"$ANSI_NONE
 echo ""
-if [ $RPM_SUBTYPE = "deb" ]; then
-    sudo apt-get install -y cmake g++ unzip
+if [ $RPM_SUBTYPE = "deb" or $RPM_SUBTYPE = "rpm" ]; then
+    $INST"cmake g++ unzip"
     VER_ARCH=$VER"_"$ARCH
     DIV="_"
     PACKAGE_NAME=$PACKET_NAME$DIV$VER_ARCH
 else
-    yum install -y cmake gcc-c++ unzip
+    $INST"cmake gcc-c++ unzip"
     VER_ARCH=$VER"."$ARCH
     DIV="-"
     PACKAGE_NAME=$PACKET_NAME$DIV$VER
@@ -116,9 +124,13 @@ if [ $RPM_SUBTYPE = "deb" ]; then
 else
 
     # Create binary tarball
-    tar -zcvf $PACKET_NAME$DIV$VER.tar.gz $PACKET_NAME$DIV$VER/
-    rm -rf $PACKET_NAME$DIV$VER/
-    mv -f  $PACKET_NAME$DIV$VER.tar.gz $RPMBUILD/SOURCES
+    build_rpm_tarball $PACKAGE_NAME
+
+    # Copy tarball to the sources folder and create spec file
+    create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}"
+
+    # Build the source and the binary RPM
+    build_rpm "${INST}$RPM_DEV" $RPMBUILD $PACKET_NAME
 
 fi
 
