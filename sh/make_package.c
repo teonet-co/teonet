@@ -115,5 +115,5 @@ int main(int argc, char** argv) {
 
     rv = system(cmd); 
 
-    return rv;
+    return rv != 0;
 }

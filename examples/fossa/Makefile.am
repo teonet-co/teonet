@@ -3,8 +3,8 @@ AM_CFLAGS = \
 	 -Wall \
 	 -g \
 	 -I/opt/local/include \
-	 -DTEONE_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
-	 $(DRELEASE_TEONE) \
+	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
+	 $(DRELEASE_TEONET) \
 	 -I../../src \
 	 -I../../embedded/libpbl/src \
 	 -pthread
@@ -21,7 +21,7 @@ if MINGW
 AM_LDFLAGS += -L../../../libev-4.19 -L../../../confuse-2.7/src -L../../../libtuntap-master
 endif
 
-LIBS = -lteonet -lcrypto
+LIBS = -lteonet -lcrypto 
 
 #bin_PROGRAMS = teofossa
 noinst_PROGRAMS = teofossa

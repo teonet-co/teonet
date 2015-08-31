@@ -184,21 +184,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 $7
-#%{_bindir}/*
-#%{_sbindir}/*
-#%{_includedir}/*
-#%{_libdir}/*
-#%{_mandir}/man1/php*
-#%{_sysconfdir}/*
-#%{_datadir}/*
-#%{_initrddir}/*
-#/
-#%exclude /
-#%exclude /usr/bin
-#%exclude /usr/doc
-#%exclude /usr/lib
-#%exclude /usr/include
-##%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
+#%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 
 %changelog
 #* Thu Apr 24 2009  Elia Pinto <devzero2000@rpm5.org> 1.0-1

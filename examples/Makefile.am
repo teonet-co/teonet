@@ -3,8 +3,8 @@ AM_CFLAGS = \
 	 -Wall \
 	 -g \
 	 -I/opt/local/include \
-	 -DTEONE_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
-	 $(DRELEASE_TEONE) \
+	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
+	 $(DRELEASE_TEONET) \
 	 -I../src \
 	 -I../embedded/libpbl/src
 	
