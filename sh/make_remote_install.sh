@@ -82,6 +82,7 @@ EOF
 
         # Install Teonet library from remote repository
         yum install -y $PACKET_NAME
+        ldconfig
     fi
 fi
 
