@@ -81,6 +81,7 @@ RPM_FILES="/usr/bin/teovpn
    /usr/doc/teonet/INSTALL
    /usr/doc/teonet/NEWS
    /usr/doc/teonet/README
+   /usr/etc/teonet/teonet.conf.default
    /usr/include/teonet/config/conf.h
    /usr/include/teonet/config/config.h
    /usr/include/teonet/config/opt.h
