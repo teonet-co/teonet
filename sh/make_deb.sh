@@ -78,14 +78,14 @@ create_deb_control $PACKAGE_NAME $PACKET_NAME $VER $ARCH "${DEPENDS}" "${MAINTAI
 # Build package
 build_deb_package $PACKAGE_NAME
 
-# Install and run application to check created package
-install_run_deb $PACKAGE_NAME "teovpn -?"
-
-# Show version of installed depends
-show_teonet_depends
-
-# Remove package  
-apt_remove $PACKET_NAME
+## Install and run application to check created package
+#install_run_deb $PACKAGE_NAME "teovpn -?"
+#
+## Show version of installed depends
+#show_teonet_depends
+#
+## Remove package  
+#apt_remove $PACKET_NAME
 
 # Add packet to repository ----------------------------------------------------
 
