@@ -183,6 +183,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 /
+%exclude /
 %exclude /usr/bin
 %exclude /usr/doc
 %exclude /usr/lib
