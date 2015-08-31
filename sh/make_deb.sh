@@ -73,7 +73,7 @@ make_counfigure
 make_install $PWD/$PACKAGE_NAME
 
 # Create DEBIAN control file
-create_deb_control $PACKAGE_NAME $PACKET_NAME $VER $ARCH "$DEPENDS" "$MAINTAINER" "$PACKET_DESCRIPTION"
+create_deb_control $PACKAGE_NAME $PACKET_NAME $VER $ARCH "${DEPENDS}" "${MAINTAINER}" "${PACKET_DESCRIPTION}"
 
 # Build package
 build_deb_package $PACKAGE_NAME
