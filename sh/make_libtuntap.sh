@@ -82,7 +82,7 @@ echo ""
 # Install libtuntap dependence
 echo $ANSI_BROWN"Install libtuntap dependence"$ANSI_NONE
 echo ""
-if [ $RPM_SUBTYPE = "deb" or $RPM_SUBTYPE = "rpm" ]; then
+if [ $RPM_SUBTYPE = "deb" ] || [ $RPM_SUBTYPE = "rpm" ]; then
     $INST"cmake g++ unzip"
     VER_ARCH=$VER"_"$ARCH
     DIV="_"
@@ -127,7 +127,11 @@ else
     build_rpm_tarball $PACKAGE_NAME
 
     # Copy tarball to the sources folder and create spec file
-    create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}"
+    RPM_FILES="/usr/include/tuntap.h
+/usr/lib/libtuntap.a
+/usr/lib/libtuntap.so
+/usr/lib/libtuntap.so.2.1"
+    create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
     # Build the source and the binary RPM
     build_rpm "${INST}$RPM_DEV" $RPMBUILD $PACKET_NAME

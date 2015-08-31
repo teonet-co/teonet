@@ -133,6 +133,7 @@ build_rpm_tarball()
 # @param $4 VER
 # @param $5 RELEASE
 # @param $6 PACKET_SUMMARY
+# @param $7 FILES
 create_rpm_control()
 {
     echo $ANSI_BROWN"Create spec and copy files to the rpmbuild sources folder:"$ANSI_NONE
@@ -182,12 +183,21 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-/
-%exclude /
-%exclude /usr/bin
-%exclude /usr/doc
-%exclude /usr/lib
-%exclude /usr/include
+$7
+#%{_bindir}/*
+#%{_sbindir}/*
+#%{_includedir}/*
+#%{_libdir}/*
+#%{_mandir}/man1/php*
+#%{_sysconfdir}/*
+#%{_datadir}/*
+#%{_initrddir}/*
+#/
+#%exclude /
+#%exclude /usr/bin
+#%exclude /usr/doc
+#%exclude /usr/lib
+#%exclude /usr/include
 ##%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 
 %changelog
