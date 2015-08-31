@@ -49,14 +49,10 @@ if [ -z "$1" ]; then
     ARCH=$3
 fi
 
-# Main message
-echo $ANSI_BROWN"Create $PACKET_NAME package and add it to local repository"$ANSI_NONE
-echo ""
-
-echo "Parameters:"
-echo "ARCH=$ARCH"
-echo "RPM_SUBTYPE=$RPM_SUBTYPE"
-echo ""
+#echo "Parameters:"
+#echo "ARCH=$ARCH"
+#echo "RPM_SUBTYPE=$RPM_SUBTYPE"
+#echo ""
 
 VER=0.3.0
 RELEASE=1
@@ -70,6 +66,10 @@ REPO=../../repo # Repository folder
 REPO_DEB=ubuntu # UBUNTU/DEBIAN sub-folder
 REPO_RPM=rhel # Rehl sub-folder
 RPMBUILD=~/rpmbuild # RPM Build folder 
+
+# Main message
+echo $ANSI_BROWN"Create $PACKET_NAME package and add it to local repository"$ANSI_NONE
+echo ""
 
 # Install libtuntap dependence
 echo $ANSI_BROWN"Install libtuntap dependence"$ANSI_NONE
