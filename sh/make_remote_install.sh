@@ -30,6 +30,15 @@ if [ -z "$2" ];  then
 else
     $2"lftp"
 fi
+if [ -z "$3" ];  then
+    if [ $RPM_SUBTYPE = "deb" ]; then
+        PACKET_NAME="libteonet-dev"
+    else
+        PACKET_NAME="libteonet"
+    fi
+else
+    PACKET_NAME=$3
+fi
 
 # Install libteonet from remote repository
 echo $ANSI_BROWN"Install libteonet from remote repository:"$ANSI_NONE
@@ -56,14 +65,14 @@ if [ "$RPM_SUBTYPE" = "deb" ]; then
     # Install Teonet library from remote repository
     echo $ANSI_BROWN"Install Teonet library from remote repository:"$ANSI_NONE
     echo ""
-    sudo apt-get install -y libteonet
+    sudo apt-get install -y $PACKET_NAME
     echo ""
 else 
     if [ "$RPM_SUBTYPE" = "yum" ]; then
 
         # Add repository
         cat <<EOF > /etc/yum.repos.d/teonet.repo
-[libteonet]
+[teonet]
 name=Teonet library for RHEL / CentOS
 baseurl=http://repo.ksproject.org/rhel/x86_64/
 enabled=1
@@ -72,7 +81,7 @@ gpgcheck=0
 EOF
 
         # Install Teonet library from remote repository
-        yum install -y libteonet
+        yum install -y $PACKET_NAME
     fi
 fi
 
@@ -86,12 +95,12 @@ echo ""
 if [ "$RPM_SUBTYPE" = "deb" ]; then
     echo $ANSI_BROWN"Remove Teonet library from host:"$ANSI_NONE
     echo ""
-    sudo apt-get remove -y libteonet
+    sudo apt-get remove -y $PACKET_NAME
     sudo apt-get autoremove -y
     echo ""
 else
     if [ "$RPM_SUBTYPE" = "yum" ]; then
-        yum remove -y libteonet
+        yum remove -y $PACKET_NAME
     fi
 fi
 
