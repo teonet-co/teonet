@@ -33,7 +33,7 @@ job_ubuntu:
     - make
     - app/teovpn -?
     # Build package
-    #- sh/make_package deb
+    - sh/make_package deb
   only:
     - master
     
@@ -62,16 +62,16 @@ job_fedora:
 # Test
 
 # Deploy
-job_ubuntu_deploy:
-  type: deploy
-  image: ubuntu_teonet
-  script:
-    # Build DEB package and upload it to repository
-    - ./autogen.sh
-    - cd sh; make; cd ..
-    - sh/make_package deb
-  only:
-    - master
+#job_ubuntu_deploy:
+#  type: deploy
+#  image: ubuntu_teonet
+#  script:
+#    # Build DEB package and upload it to repository
+#    - ./autogen.sh
+#    - cd sh; make; cd ..
+#    - sh/make_package deb
+#  only:
+#    - master
     
 job_centos_deploy:
   type: deploy
