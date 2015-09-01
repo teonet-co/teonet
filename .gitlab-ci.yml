@@ -61,6 +61,19 @@ job_fedora:
   only:
     - master
     
+job_opensuse:
+  type: build
+  image: opensuse_teonet
+  script:
+    #- sh/build-opensuse.sh
+    - ./autogen.sh
+    - make
+    - app/teovpn -?
+    # Build package
+    - sh/make_package zyp
+  only:
+    - master     
+    
 # Test
 
 # Deploy

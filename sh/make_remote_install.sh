@@ -68,6 +68,9 @@ if [ "$RPM_SUBTYPE" = "deb" ]; then
     sudo apt-get install -y $PACKET_NAME
     echo ""
 else 
+    if [ "$RPM_SUBTYPE" = "zyp" ]; then
+        zypper ar -f http://repo.ksproject.org/opensuse/x86_64/ teonet
+    fi
     if [ "$RPM_SUBTYPE" = "yum" ]; then
 
         # Add repository
