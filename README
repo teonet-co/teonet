@@ -75,4 +75,4 @@ teovpn -?
 
 
 SUSE --------------------------------------------
-zypper ar -f http://repo.ksproject.org/rhel/x86_64/ teonet
+zypper ar -f http://repo.ksproject.org/opensuse/x86_64/ teonet

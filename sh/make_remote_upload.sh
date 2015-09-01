@@ -34,6 +34,8 @@ else
 fi
 if [ "$RPM_SUBTYPE" = "deb" ]; then
   SUBFOLDER=ubuntu
+else if [ "$RPM_SUBTYPE" = "zyp" ]; then
+  SUBFOLDER=opensuse
 else
   SUBFOLDER=rhel
 fi
