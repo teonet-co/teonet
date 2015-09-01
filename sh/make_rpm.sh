@@ -113,7 +113,7 @@ create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_
 # Build the source and the binary RPM
 build_rpm "${INST}$RPM_DEV" $RPMBUILD $PACKET_NAME
 
-# TODO: Add dependences to the repository
+# Add dependences to the repository
 #if [ $REPO_JUST_CREATED = 1 ]; then
 
     # Make and add libtuntap
@@ -122,7 +122,12 @@ build_rpm "${INST}$RPM_DEV" $RPMBUILD $PACKET_NAME
 #fi
 
 # Create RPM repository and add packages to this repository
-create_rpm_repo $RPMBUILD $REPO/rhel $ARCH "${INST}"
+if [ $RPM_SUBTYPE = 'zyp' ]; then
+    SUBFOLDER="opensuse"
+else
+    SUBFOLDER="rhel"
+fi
+create_rpm_repo $RPMBUILD $REPO/$SUBFOLDER $ARCH "${INST}"
 
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then
