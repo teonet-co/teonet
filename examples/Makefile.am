@@ -30,7 +30,8 @@ LIBS += -pthread
 endif
 
 #bin_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm
-noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm
+noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
+		  teoack teoackm
 
 teolarge_SOURCES = teolarge.c
 teosend_SOURCES = teosend.c
