@@ -5,13 +5,38 @@ yum -y update
 
 # Autoconf dependence
 yum install -y autoconf intltool libtool glib2-devel doxygen make gcc
+
+# Project dependence
+yum install -y openssl-devel libev-devel libuuid-devel
+
+# Install CentOS cUnit project dependence
+yum install -y wget bzip2
+wget http://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2
+tar -xvf CUnit-2.1-3.tar.bz2
+cd CUnit-2.1-3
+
+libtoolize --force
+aclocal
+autoheader
+automake --force-missing --add-missing
+autoconf
+chmod u+x configure
+./configure --prefix=/usr
+make
+make install
+cd ..
+rm -fr CUnit-2.1-3
+rm CUnit-2.1-3.tar.bz2
+
+# Install Fedora cUnit project dependence
+#yum install CUnit-devel
+
+# Install Suse cUnit project dependence
 # $ sudo zypper in cunit-devel
 # for opensuse less than 13.2:
 # $ zypper addrepo -fg http://download.opensuse.org/repositories/home:Strahlex/openSUSE_13.2/home:Strahlex.repo
 # $ zypper refresh 
 
-# Project dependence
-yum install -y openssl-devel libev-devel libuuid-devel
 
 # Install confuse
 cd distr
