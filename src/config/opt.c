@@ -58,6 +58,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
         { "show_connect",   no_argument,       &conf->show_connect_f, 1 },
         { "show_peers",     no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
+        { "show_tr_udp",     no_argument,      &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
         #if M_ENAMBE_VPN
         { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
         { "vpn_ip",         required_argument, 0, 'i' },
@@ -269,6 +270,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     "      --show_connect       Show connection messages\n"
     "      --show_peers         Show peers screen after connection\n"
+    "      --show_tr_udp        Show TR-UDP statistic after connection\n"
     #if M_ENAMBE_VPN
     "      --vpn_start          Start VPN\n"
     "      --vpn_ip             VPN IP\n"

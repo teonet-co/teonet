@@ -118,6 +118,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("show_debug_f", &conf->show_debug_f),
         CFG_SIMPLE_BOOL("show_debug_vv_f", &conf->show_debug_vv_f),
         CFG_SIMPLE_BOOL("show_peers_f", &conf->show_peers_f),
+        CFG_SIMPLE_BOOL("show_tr_udp_f", &conf->show_tr_udp_f),
         CFG_SIMPLE_BOOL("hot_keys_f", &conf->hot_keys_f),
 
         #if M_ENAMBE_VPN

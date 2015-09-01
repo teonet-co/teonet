@@ -1,4 +1,4 @@
-AC_INIT([teonet], [0.0.7], [kirill@scherba.ru])
+AC_INIT([teonet], [0.0.8], [kirill@scherba.ru])
 
 AC_CONFIG_HEADERS([src/config/config.h])
 

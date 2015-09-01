@@ -20,6 +20,15 @@
 
 double ksnetEvMgrGetTime(void *ke);
 
+// Test mode (for tests only)
+static int KSN_TEST_MODE = 0;
+inline void KSN_SET_TEST_MODE(int test_mode) {
+    KSN_TEST_MODE = test_mode;
+}
+inline int KSN_GET_TEST_MODE() {
+    return KSN_TEST_MODE;
+}
+
 /**
  * KSNet printf. @see vprintf
  *
@@ -40,6 +49,9 @@ double ksnetEvMgrGetTime(void *ke);
 int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
     int show_it = 0, ret_val = 0;
+    
+    // Skip execution in tests
+    if(KSN_GET_TEST_MODE()) return ret_val;
 
     switch(type) {
 
@@ -416,6 +428,26 @@ const char *ksnet_getSysConfigDir(void) {
 
     return sysConfigDir;
 }
+
+/**
+ * Check if a value exist in a array
+ * 
+ * @param val Integer value
+ * @param arr Integer array
+ * @param size Array size
+ * 
+ * @return 
+ */
+int inarray(int val, const int *arr, int size) {
+    
+    int i;
+    for (i=0; i < size; i++) {
+        if (arr[i] == val)
+            return 1;
+    }
+    return 0;
+}
+
 
 #include <sys/types.h>
 #ifdef HAVE_MINGW

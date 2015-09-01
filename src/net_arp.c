@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "ev_mgr.h"
+#include "net_tr-udp_.h"
 #include "utils/rlutil.h"
 #include "utils/utils.h"
 
@@ -57,7 +58,7 @@ void ksnetArpDestroy(ksnetArpClass *ka) {
  * Get ARP table data by Peer Name
  *
  * @param name
- * @return
+ * @return Pointer to ARP data or NULL if not found
  */
 ksnet_arp_data * ksnetArpGet(ksnetArpClass *ka, char *name) {
 
@@ -123,11 +124,24 @@ void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
  * Remove Peer from the ARP table
  *
  * @param name
+ * @return Pointer to previously associated value or NULL if not found
  */
-void ksnetArpRemove(ksnetArpClass *ka, char* name) {
+ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
 
     size_t var_len = 0;
-    pblMapRemoveStr(ka->map, name, &var_len);
+    //printf("ARP map remove '%s' ... ", name);
+    ksnet_arp_data *arp = pblMapRemoveStr(ka->map, name, &var_len);
+    if(arp != (void*)-1) {
+        //printf("removed %s:%d\n", arp->addr, arp->port);
+        ksnTRUDPresetAddr( ((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+                arp->port, 1);
+    }
+    //else printf("not found\n");
+    
+    // If not found
+    if(arp == (void*)-1) arp = NULL;
+    
+    return arp;
 }
 
 /**
@@ -138,7 +152,8 @@ void ksnetArpRemove(ksnetArpClass *ka, char* name) {
  * @param data
  */
 int ksnetArpGetAll(ksnetArpClass *ka,
-        int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data),
+        int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
+            ksnet_arp_data *arp_data, void *data), 
         void *data) {
 
     int retval = 0;
@@ -165,6 +180,63 @@ int ksnetArpGetAll(ksnetArpClass *ka,
     }
 
     return retval;
+}
+
+typedef struct find_arp_data {
+    
+  __CONST_SOCKADDR_ARG addr;
+  ksnet_arp_data *arp_data;
+    
+} find_arp_data;
+
+int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name, 
+            ksnet_arp_data *arp_data, void *data) {
+    
+    int retval = 0;
+    find_arp_data *fa = data;
+    
+    if(ntohs(((struct sockaddr_in *) fa->addr)->sin_port) == arp_data->port &&
+       !strcmp(inet_ntoa(((struct sockaddr_in *) fa->addr)->sin_addr), 
+            arp_data->addr)) {
+        
+        fa->arp_data = arp_data;
+        
+        retval = 1;
+    }
+    
+    return retval;
+}
+
+/**
+ * Find ARP data by address
+ * 
+ * @param ka
+ * @param addr
+ * 
+ * @return  Pointer to ARP data
+ */
+ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr) {
+
+    find_arp_data fa;
+    fa.addr = addr;
+    fa.arp_data = NULL;
+    
+    //char key[KSN_BUFFER_SM_SIZE];
+    //ksnTRUDPkeyCreate(NULL, addr, key, KSN_BUFFER_SM_SIZE);
+    
+    if(ka != NULL && ksnetArpGetAll(ka, find_arp_by_addr_cb, (void*) &fa)) {
+        
+        // ARP by address was found
+        //printf("ARP by address %s was found\n", key);
+        
+    } else {
+        
+        // ARP by address %s not found
+        //printf("ARP by address %s not found\n", key);
+        
+    }
+    
+    return fa.arp_data;
 }
 
 /**

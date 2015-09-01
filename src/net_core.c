@@ -22,8 +22,10 @@ typedef int socklen_t;
 
 #include "ev_mgr.h"
 #include "net_split.h"
+#include "net_tr-udp.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
+#include "net_tr-udp_.h"
 
 // Constants
 const char *localhost = "127.0.0.1";
@@ -33,7 +35,6 @@ const char *localhost = "127.0.0.1";
 void host_cb(EV_P_ ev_io *w, int revents);
 int ksnCoreBind(ksnCoreClass *kc);
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, size_t *packet_len);
-int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *recv_data);
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
@@ -44,11 +45,11 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
 #define ksn_bind(fd, addr, addr_len) \
             bind(fd, addr, addr_len)
 
-#define ksn_sendto(fd, data, data_len, flags, remaddr, addrlen) \
-            sendto(fd, data, data_len, flags, remaddr, addrlen)
+#define ksn_sendto(tu, cmd, fd, data, data_len, flags, remaddr, addrlen) \
+            ksnTRUDPsendto(tu, 0, 0, 0, cmd, fd, data, data_len, flags, remaddr, addrlen)
 
-#define ksn_recvfrom(fd, buf, buf_len, flags, remaddr, addrlen) \
-            recvfrom(fd, buf, buf_len, flags, remaddr, addrlen)
+#define ksn_recvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen) \
+            ksnTRUDPrecvfrom(ku, fd, buf, buf_len, flags, remaddr, addrlen)
 
 /**
  * Encrypt packet and sent to
@@ -60,24 +61,24 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
  * @return
  */
 #if KSNET_CRYPT
-#define sendto_encrypt(kc, DATA, D_LEN) \
+#define sendto_encrypt(kc, cmd, DATA, D_LEN) \
     { \
         if(((ksnetEvMgrClass*)kc->ke)->ksn_cfg.crypt_f) { \
             size_t data_len; \
             char *buffer = NULL; /*[KSN_BUFFER_DB_SIZE];*/ \
             void *data = ksnEncryptPackage(kc->kcr, DATA, D_LEN, buffer, &data_len); \
-            retval = ksn_sendto(kc->fd, data, data_len, 0, \
+            retval = ksn_sendto(kc->ku, cmd, kc->fd, data, data_len, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
             free(data); \
         } \
         else { \
-            retval = ksn_sendto(kc->fd, DATA, D_LEN, 0, \
+            retval = ksn_sendto(kc->ku, cmd, kc->fd, DATA, D_LEN, 0, \
                                 (struct sockaddr *)&remaddr, addrlen); \
         } \
     }
 #else
-#define sendto_encrypt(kc, DATA, D_LEN) \
-    retval = ksn_sendto(kc->fd, DATA, D_LEN, 0, \
+#define sendto_encrypt(kc, cmd, DATA, D_LEN) \
+    retval = ksn_sendto(kc->ku, cmd, kc->fd, DATA, D_LEN, 0, \
                         (struct sockaddr *)&remaddr, addrlen);
 #endif
 
@@ -103,6 +104,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     kc->last_check_event = 0;
 
     ((ksnetEvMgrClass*)ke)->kc = kc;
+    kc->ku = ksnTRUDPinit(kc);
     kc->ka = ksnetArpInit(ke);
     kc->kco = ksnCommandInit(kc);
     #if KSNET_CRYPT
@@ -141,18 +143,19 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         ksnetEvMgrClass *ke = kc->ke;
 
         // Send disconnect to all
-        ksnetArpGetAll((kc)->ka, send_cmd_disconnect_cb, NULL);
+        ksnetArpGetAll(kc->ka, send_cmd_disconnect_cb, NULL);
         
         // Stop watcher
         ev_io_stop(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
 
-        close((kc)->fd);
-        free((kc)->name);
-        if((kc)->addr != NULL) free((kc)->addr);
-        ksnetArpDestroy((kc)->ka);
-        ksnCommandDestroy((kc)->kco);
+        close(kc->fd);
+        free(kc->name);
+        if(kc->addr != NULL) free(kc->addr);
+        ksnetArpDestroy(kc->ka);
+        ksnCommandDestroy(kc->kco);
+        ksnTRUDPinit(kc->ku);
         #if KSNET_CRYPT
-        ksnCryptDestroy((kc)->kcr);
+        ksnCryptDestroy(kc->kcr);
         #endif
         free(kc);
         ke->kc = NULL;
@@ -234,28 +237,18 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     #ifdef DEBUG_KSNET
     ksnet_printf( & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg, DEBUG_VV,
-                 "%sNet core:%s ksnCoreSendto %s:%d %d \n", ANSI_GREEN, ANSI_NONE, addr, port, data_len);
+                 "%sNet core:%s >> ksnCoreSendto %s:%d %d \n", 
+                 ANSI_GREEN, ANSI_NONE, addr, port, data_len);
     #endif
 
 
     int retval = 0;
 
     if(data_len <= MAX_PACKET_LEN - MAX_DATA_LEN) {
-    
-        struct sockaddr_in remaddr;         // remote address
-        const socklen_t addrlen = sizeof(remaddr);// length of addresses
 
-        memset((char *) &remaddr, 0, addrlen);
-        remaddr.sin_family = AF_INET;
-        remaddr.sin_port = htons(port);
-        #ifndef HAVE_MINGW
-        if(inet_aton(addr, &remaddr.sin_addr) == 0) {
-                //fprintf(stderr, "inet_aton() failed\n");
-                return(-2);
-        }
-        #else
-        remaddr.sin_addr.s_addr = inet_addr(addr);
-        #endif
+        struct sockaddr_in remaddr;         // remote address
+        socklen_t addrlen = sizeof(remaddr);// length of addresses
+        ksnTRUDPmakeAddr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
         // Split large packet
         int num_subpackets;
@@ -277,7 +270,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
                         &packet_len);
 
                 // Encrypt and send one spitted subpacket
-                sendto_encrypt(kc, packet, packet_len);
+                sendto_encrypt(kc, CMD_SPLIT, packet, packet_len);
 
                 // Free memory
                 free(packet);
@@ -294,7 +287,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
             void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
 
             // Encrypt and send one not spitted packet
-            sendto_encrypt(kc, packet, packet_len);
+            sendto_encrypt(kc, cmd, packet, packet_len);
             
             // Free packet
             free(packet);
@@ -324,7 +317,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
     ksnet_arp_data *arp = ksnetArpGet(kc->ka, to);
 
-    if(arp != NULL) {
+    if(arp != NULL && arp->mode != -1) {
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
@@ -351,10 +344,10 @@ void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
     void *packet = malloc(*packet_len);
 
     // Copy packet data
-    *((uint8_t *)packet) = kc->name_len; ptr += sizeof(uint8_t);
-    memcpy(packet + ptr, kc->name, kc->name_len); ptr += kc->name_len;
-    *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t);
-    memcpy(packet + ptr, data, data_len); ptr += data_len;
+    *((uint8_t *)packet) = kc->name_len; ptr += sizeof(uint8_t); // Name length
+    memcpy(packet + ptr, kc->name, kc->name_len); ptr += kc->name_len; // Name
+    *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t); // Command
+    memcpy(packet + ptr, data, data_len); ptr += data_len; // Data
 
     return packet;
 }
@@ -386,7 +379,7 @@ int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *rd) {
         rd->data_len = packet_len - ptr; // Data length
 
         packed_valid = 1;
-    }
+    } 
 
     return packed_valid;
 }
@@ -454,20 +447,42 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     struct sockaddr_in remaddr;             // remote address
     socklen_t addrlen = sizeof(remaddr);    // length of addresses
     unsigned char buf[KSN_BUFFER_DB_SIZE];  // Message buffer
-    int recvlen;                            // # bytes received
+    size_t recvlen;                         // # bytes received
 
     // Receive data
-    recvlen = ksn_recvfrom(kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 0,
-            (struct sockaddr *)&remaddr, &addrlen);
+    recvlen = ksn_recvfrom(ke->kc->ku, kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
+              0, (struct sockaddr *)&remaddr, &addrlen);
 
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sNet core:%s host_cb receive %d bytes from %s\n", 
-            ANSI_GREEN, ANSI_NONE, recvlen, inet_ntoa(remaddr.sin_addr));
-    #endif
+    // Process package
+    ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);
 
-    // Data received
+    // Set last host event time
+    ksnCoreSetEventTime(kc);
+}
+
+/**
+ * Process ksnet packet
+ * 
+ * @param kc
+ * @param buf
+ * @param recvlen
+ * @param remaddr
+ */
+void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, 
+        __SOCKADDR_ARG remaddr) {
+    
+    ksnCoreClass *kc = vkc; // ksnCoreClass Class object
+    ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
+            
+    // Data received    
     if(recvlen > 0) {
+
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+                "%sNet core:%s << host_cb receive %d bytes from %s\n", 
+                ANSI_GREEN, ANSI_NONE, 
+                recvlen, inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr));
+        #endif
 
         void *data; // Decrypted packet data
         size_t data_len; // Decrypted packet data length
@@ -508,8 +523,8 @@ void host_cb(EV_P_ ev_io *w, int revents) {
         int event = EV_K_RECEIVED, command_processed = 0;
 
         // Remote peer address and peer
-        rd.addr = inet_ntoa(remaddr.sin_addr); // IP to string
-        rd.port = ntohs(remaddr.sin_port); // Port to integer
+        rd.addr = inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr); // IP to string
+        rd.port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
 
         // Parse packet and check if it valid
         if(!ksnCoreParsePacket(data, data_len, &rd)) {
@@ -518,6 +533,13 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
         // Check ARP Table and add peer if not present
         else {
+            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+                "%sNet core:%s << got data %d bytes len, cmd = %d, from %s\n",
+                ANSI_GREEN, ANSI_NONE, 
+                rd.data_len, rd.cmd, rd.from);
+            #endif
 
             // Check new peer connected
             if((rd.arp = ksnetArpGet(kc->ka, rd.from)) == NULL) {
@@ -568,11 +590,11 @@ void host_cb(EV_P_ ev_io *w, int revents) {
         }
     }
 
-    // Socket disconnected
-    else {
-        printf("Disconnected ...\n");
-    }
-
-    // Set last host event time
-    ksnCoreSetEventTime(kc);
+//    // Socket disconnected
+//    else {
+//        #ifdef DEBUG_KSNET
+//        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+//                "TR-UDP protocol data, dropped or disconnected ...\n");
+//        #endif
+//    }
 }

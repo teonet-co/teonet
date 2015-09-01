@@ -104,23 +104,23 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #endif
 
         case CMD_SPLIT:
-            {
-                ksnCorePacketData *rds = ksnSplitCombine(kco->ks, rd);
-                if(rds != NULL) {
-                    processed = ksnCommandCheck(kco, rds);
-                    if(!processed) {
-                        // Send event callback
-                        ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
-                        if(ke->event_cb != NULL)
-                            ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
+        {
+            ksnCorePacketData *rds = ksnSplitCombine(kco->ks, rd);
+            if(rds != NULL) {
+                processed = ksnCommandCheck(kco, rds);
+                if(!processed) {
+                    // Send event callback
+                    ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
+                    if(ke->event_cb != NULL)
+                        ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
 
-                        processed = 1;
-                    }
-                    ksnSplitFreRds(kco->ks, rds);
+                    processed = 1;
                 }
-                else processed = 1;
+                ksnSplitFreRds(kco->ks, rds);
             }
-            break;
+            else processed = 1;
+        }
+        break;
 
         #ifdef M_ENAMBE_TUN
         case CMD_TUN:
@@ -230,14 +230,14 @@ int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Ping answer
     if(!strcmp(rd->data, PING)) {
         // Show command message
-        #ifdef DEBUG_KSNET
-        ksnet_printf(& ke->ksn_cfg, DEBUG,
+//        #ifdef DEBUG_KSNET
+        ksnet_printf(& ke->ksn_cfg, MESSAGE,
             "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             rd->data_len, // command data length
             rd->from,     // from
             triptime
         );
-        #endif
+//        #endif
     }
 
     // Trim time answer
