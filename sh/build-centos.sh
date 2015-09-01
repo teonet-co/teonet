@@ -31,13 +31,6 @@ rm CUnit-2.1-3.tar.bz2
 # Install Fedora cUnit project dependence
 #yum install CUnit-devel
 
-# Install Suse cUnit project dependence
-# $ sudo zypper in cunit-devel
-# for opensuse less than 13.2:
-# $ zypper addrepo -fg http://download.opensuse.org/repositories/home:Strahlex/openSUSE_13.2/home:Strahlex.repo
-# $ zypper refresh 
-
-
 # Install confuse
 cd distr
 #yum install -y wget
