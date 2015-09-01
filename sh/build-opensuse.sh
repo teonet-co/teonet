@@ -10,7 +10,7 @@ zypper install -y autoconf intltool libtool glib2-devel doxygen make gcc patch
 zypper install -y openssl-devel libev-devel libuuid-devel
 
 # Install Suse cUnit project dependence
-sudo zypper in cunit-devel
+zypper in cunit-devel
 # for opensuse less than 13.2:
 # $ zypper addrepo -fg http://download.opensuse.org/repositories/home:Strahlex/openSUSE_13.2/home:Strahlex.repo
 # $ zypper refresh 
