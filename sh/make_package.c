@@ -37,7 +37,7 @@ void show_usage(const char* appname) {
     printf( "\n"
         "Usage: %s LINUX [ARCH]\n"
         "\n"
-        "Where LINUX: deb - DEBIAN, rpm - REHL/Centos/Fedore/Suse\n"
+        "Where LINUX: deb - DEBIAN, rpm - RPM for Ubuntu, yum - REHL/Centos/Fedore, zyp - Suse\n"
         "      ARCH: architecture (default: amd64)\n"
         "\n"
         , appname);
@@ -90,16 +90,11 @@ int main(int argc, char** argv) {
         if(system("sh/make_deb_keys_add.sh")) return (EXIT_FAILURE);
     }    
     
-    // Call build script
-    // Get build ID 
+    // Get build ID from GitLab CI environment variable
     char version[KSN_BUFFER_SM_SIZE]; 
     char *CI_BUILD_ID = getenv("CI_BUILD_ID"); 
-//    if(b_type == DEB && CI_BUILD_ID != NULL) { 
-//        snprintf(version, KSN_BUFFER_SM_SIZE, "%s-%s", VERSION, CI_BUILD_ID); 
-//        // TODO: Set version to configure.ac ??? 
-//    } 
-//    else 
-    // Get version
+
+    // Get version from Teonet configuration header file
     snprintf(version, KSN_BUFFER_SM_SIZE, "%s", VERSION); 
 
     // Execute build packet script 
