@@ -70,6 +70,7 @@ if [ "$RPM_SUBTYPE" = "deb" ]; then
 else 
     if [ "$RPM_SUBTYPE" = "zyp" ]; then
         zypper ar -f http://repo.ksproject.org/opensuse/x86_64/ teonet
+        zypper in -y $PACKET_NAME
     fi
     if [ "$RPM_SUBTYPE" = "yum" ]; then
 
