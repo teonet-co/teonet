@@ -311,6 +311,7 @@ int ksnetEvMgrRunThread(ksnetEvMgrClass *ke) {
  */
 void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval) {
 
+    ke->last_custom_timer = ksnetEvMgrGetTime(ke);
     ke->custom_timer_interval = time_interval;
 }
 
@@ -502,8 +503,12 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     // Idle count startup (first time run)
     if(!kev->idle_count) {
         // TODO:       open_local_port(kev);
-        if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
+        // Set statistic start time
+        if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
+        // Connect to R-Host
         connect_r_host_cb(kev);
+        // Send event to application
+        if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
     }
     // Idle count max value
     else if(kev->idle_count == UINT32_MAX) kev->idle_count = 0;

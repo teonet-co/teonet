@@ -17,6 +17,9 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
+// Number of modules started
+int num_crypt_module = 0;
+
 /**
  * Module initialize
  *
@@ -37,9 +40,12 @@ ksnCryptClass *ksnCryptInit(void *ke) {
     kcr->blocksize = BLOCK_SIZE;
 
     // Initialize the library
-    ERR_load_crypto_strings();
-    OpenSSL_add_all_algorithms();
-    OPENSSL_config(NULL);
+    if(!num_crypt_module) {
+        ERR_load_crypto_strings();
+        OpenSSL_add_all_algorithms();
+        OPENSSL_config(NULL);
+    }
+    num_crypt_module++;
 
     return kcr;
 }
@@ -51,10 +57,12 @@ ksnCryptClass *ksnCryptInit(void *ke) {
  */
 void ksnCryptDestroy(ksnCryptClass *kcr) {
 
-
     // Clean up
-    EVP_cleanup();
-    ERR_free_strings();
+    if(num_crypt_module == 1) {
+        EVP_cleanup();
+        ERR_free_strings();
+    }
+    num_crypt_module--;
 
     free(kcr);
 }
@@ -256,12 +264,23 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     #endif
     *decrypt_len = _decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
+    
+    // Copy decrypted data (if decrypted, or 
+    if(*decrypt_len) { 
 
-    // Add a NULL terminator. We are expecting printable text
-    decrypted[*decrypt_len] = '\0';
+        // Add a NULL terminator. We are expecting printable text
+        decrypted[*decrypt_len] = '\0';
 
-    // Copy and free decrypted buffer
-    memcpy(package + ptr, decrypted, *decrypt_len + 1);
+        // Copy and free decrypted buffer
+        memcpy(package + ptr, decrypted, *decrypt_len + 1);
+    }
+    
+    // If data not decrypted - return input package with package len
+    else {
+        ptr = 0;
+        *decrypt_len = package_len;
+    }
+    
     free(decrypted);
 
     return package + ptr;
@@ -279,5 +298,5 @@ int ksnCheckEncrypted(void *package, size_t package_len) {
     size_t ptr = 0;
     size_t decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);  
     
-    return decrypt_len < package_len && !((package_len - ptr) % BLOCK_SIZE);
+    return decrypt_len  && decrypt_len < package_len && !((package_len - ptr) % BLOCK_SIZE);
 }

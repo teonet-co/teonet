@@ -424,7 +424,7 @@ SOURCE_BROWSER         = YES
 # Setting the INLINE_SOURCES tag to YES will include the body
 # of functions and classes directly in the documentation.
 
-INLINE_SOURCES         = YES
+INLINE_SOURCES         = 
 
 # If the REFERENCED_BY_RELATION tag is set to YES (the default)
 # then for each documented function all documented

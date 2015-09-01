@@ -206,6 +206,22 @@ int cmd_ksnet_set_peers_f(struct cli_def *cli, const char *command, char *argv[]
     return CLI_OK;
 }
 
+int cmd_ksnet_set_tr_udp_f(struct cli_def *cli, const char *command, char *argv[],
+                        int argc) {
+
+    if (argc < 1 || strcmp(argv[0], "?") == 0) {
+        cli_print(cli, 
+        "Specify a value: 0 - don't show; 1 - show ones; 2 - continuously");
+        return CLI_OK;
+    }
+    else {
+        int show_tr_udp_f = atoi(argv[0]);
+        cli->ke->ksn_cfg.show_tr_udp_f = show_tr_udp_f != 0;
+    }
+
+    return CLI_OK;
+}
+
 /**
  * Set ksnet show debug messages flag
  *
@@ -530,6 +546,9 @@ struct cli_def *ksnTermCliInit(ksnTermClass *kter) {
 
             cli_register_command(cli, cc, "debug_vv", cmd_ksnet_set_debug_vv_f, PRIVILEGE_UNPRIVILEGED,
                 MODE_EXEC, "Set show debug_vv messages flag");
+
+            cli_register_command(cli, cc, "tr_udp", cmd_ksnet_set_tr_udp_f, PRIVILEGE_UNPRIVILEGED,
+                MODE_EXEC, "Set show TR-UDP flag");
 
         cli_register_command(cli, c, "send_message", cmd_ksnet_send_message, PRIVILEGE_UNPRIVILEGED,
             MODE_EXEC, "Send message to peer");

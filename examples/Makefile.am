@@ -39,7 +39,10 @@ teomulti_SOURCES = teomulti.c
 teotcp_SOURCES = teotcp.c
 teotun_SOURCES = teotun.c
 teoterm_SOURCES = teoterm.c
+teoack_SOURCES = teoack.c
+teoackm_SOURCES = teoackm.c
 
 teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
+teoackm_LDFLAGS = $(AM_LDFLAGS) -lev
 
 SUBDIRS = fossa

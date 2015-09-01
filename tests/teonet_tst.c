@@ -61,7 +61,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
     }
 }
 
-void test1() {
+void test_2_1() {
     printf("teonet test 1\n");
     //printf("%%TEST_FAILED%% time=0 testname=test1 (teonet) message=error message sample\n");    
 }
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
     printf("%%SUITE_STARTED%%\n");
 
     printf("%%TEST_STARTED%% test1 (teonet)\n");
-    test1();
+    test_2_1();
     printf("%%TEST_FINISHED%% time=0 test1 (teonet) \n");
 
     printf("%%TEST_STARTED%% test2 (teonet)\n");
