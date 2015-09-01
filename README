@@ -31,7 +31,7 @@ DEB / RPM repository:
 
 http://repo.ksproject.org
 
-UBUNTU:
+UBUNTU ---------------------------------------
 
 # Add repository
 
@@ -49,7 +49,7 @@ sudo apt-get install libteonet-dev
 teovpn -?
 
 
-CENTOS:
+CENTOS ---------------------------------------
 
 # Add repository
 
@@ -72,3 +72,7 @@ ldconfig
 # Run
 
 teovpn -?
+
+
+SUSE --------------------------------------------
+zypper ar -f http://repo.ksproject.org/rhel/x86_64/ teonet
