@@ -29,7 +29,7 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teonet_tst test_cque
+noinst_PROGRAMS = teonet_tst test_teonet test_cque
 
 teonet_tst_SOURCES = teonet_tst.c
 test_cque_SOURCES = test_cque.c
