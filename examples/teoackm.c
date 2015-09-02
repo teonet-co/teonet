@@ -2,6 +2,10 @@
  * File:   teoackm.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
+ * \example teoackm.c
+ * 
+ * ## Get multi records ACK event
+ * 
  * This Example shows how to send multi records with TR-UDP and get ACK event 
  * from remote peer
  *
@@ -319,12 +323,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 }        
 
 /**
- * Main application function
+ * Main Teoackm application function
  *
- * @param argc
- * @param argv
+ * @param argc Number of parameters
+ * @param argv Parameters array
  * 
- * @return
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 

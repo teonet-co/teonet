@@ -381,7 +381,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                         char trace_buf[trace_buf_len];
                         memcpy(trace_buf, (void*)TRACE, TRACE_LEN);
                         memcpy(trace_buf + TRACE_LEN, data, data_len);
-                        // TODO: peer_send_cmd_echo(kn, data, (void*)trace_buf, trace_buf_len, 0);
+                        //! \todo: peer_send_cmd_echo(kn, data, (void*)trace_buf, trace_buf_len, 0);
                     }
                     _keys_non_blocking_start(khv); // Switch STDIN to hot key
                     break;
@@ -632,18 +632,19 @@ void ping_timer_cb(EV_P_ ev_timer *w, int revents) {
     memcpy(ping_buf, (void*)PING, PING_LEN);
 
     // Send echo-ping command
-    // TODO: peer_send_cmd_echo(pt->kn, pt->peer_name, (void*)ping_buf, ping_buf_len, 0);
+    //! \todo: peer_send_cmd_echo(pt->kn, pt->peer_name, (void*)ping_buf, ping_buf_len, 0);
     ksnCommandSendCmdEcho(pt->kn->kco, pt->peer_name, (void*)ping_buf, ping_buf_len);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 /**
  * Initialize ping timer
  *
- * @param peer
- * @return
+ * @param kn Pointer to ksnCoreClass
+ * @param peer Peer name
+ * @return Pointer to ping_timer_data. Should be free after use 
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 ping_timer_data *ping_timer_init(ksnCoreClass *kn, char *peer) {
 
     ping_timer_data *pt = malloc(sizeof(ping_timer_data));

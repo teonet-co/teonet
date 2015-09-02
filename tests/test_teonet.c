@@ -1,8 +1,9 @@
-/*
+/**
+ * 
  * File:   test_net_rt_udp.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
- * TR-UDP module test
+ * \test Teonet cUnit test
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */
@@ -25,18 +26,23 @@ CU_pSuite pSuite = NULL;
  * CUnit Test 
  */
 
-int init_suite(void) {    
+/**
+ * Initialize suite
+ */
+int init_suite(void) {
     return 0;
 }
 
+/**
+ */
 int clean_suite(void) {
     return 0;
 }
 
 int main() {
-    
+
     KSN_SET_TEST_MODE(1);
-            
+
     // Initialize the CUnit test registry 
     if (CUE_SUCCESS != CU_initialize_registry())
         return CU_get_error();
@@ -47,8 +53,8 @@ int main() {
         CU_cleanup_registry();
         return CU_get_error();
     }
-    add_suite_1_tests();    
-    
+    add_suite_1_tests();
+
     // Add a suite to the registry 
     pSuite = CU_add_suite("Teonet library TR-UDP module", init_suite, clean_suite);
     if (NULL == pSuite) {

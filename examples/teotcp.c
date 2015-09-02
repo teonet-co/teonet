@@ -1,8 +1,11 @@
 /** 
  * File:   teotcp.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * Author: Kirill Scherba <kirill@scherba.ru>  
  * 
- * Teonet TCP Client / Server example. 
+ * \example teotcp.c
+ * 
+ * ## Teonet TCP Client / Server example
+ * 
  * Simple TCP echo server and client connected to it.
  *
  * Created on July 24, 2015, 2:23 PM
@@ -104,7 +107,7 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
  * TCP server accept callback
  *
  * @param loop
- * @param watcher
+ * @param w
  * @param revents
  * @param fd
  */
@@ -166,11 +169,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 }
 
 /**
- * Main application function
+ * Main Teotcp application function
  *
- * @param argc
- * @param argv
- * @return
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 

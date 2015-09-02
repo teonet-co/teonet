@@ -443,7 +443,7 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
         return;
     }
 
-    // TODO: Read error
+    //! \todo: Read error
     else if(read_len < 0) {
 
         #ifdef DEBUG_KSNET

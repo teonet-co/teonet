@@ -45,7 +45,7 @@ ksnTermClass *ksnTermInit(void *ke) {
     kter->myctx.message = mymessage;
 
     // Check configuration, create TCP server and start Terminal telnet CLI server
-    // TODO: Check configuration
+    //! \todo: Check configuration
     int port_created; // port = CLI_PORT, 
     int port = kev->ksn_cfg.port;
 

@@ -2,24 +2,32 @@
  * File:   teotun.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
- * Teonet TCP Tunnel example. 
+ * \example teotun.c
+ * 
+ * ## Teonet TCP Tunnel example
  * 
  * To execute this example start teotun peer. The example will connect to it. So 
  * start teonet application with teotun name, for example:
  * 
- *    app/teovpn teotun
+ * ~~~~~~~~~~~~~~~{.sh}
+ * app/teovpn teotun
+ * ~~~~~~~~~~~~~~~
  * 
- * The start example/teotun application to create tunnel to port 22 at the 
+ * The start examples/teotun application to create tunnel to port 22 at the 
  * teotun peer. This tunnel will open port 7522 at host where teotun example 
  * started:
  * 
- *    example/teotun teotun_c
+ * ~~~~~~~~~~~~~~~{.sh}  
+ * examples/teotun teotun_c
+ * ~~~~~~~~~~~~~~~
  * 
  * To test created tunnel use ssh and connect to localhost at port 7522:
  * 
- *    ssh user@localhost -p 7722
+ * ~~~~~~~~~~~~~~~{.sh} 
+ * ssh user@localhost -p 7722
+ * ~~~~~~~~~~~~~~~
  * 
- * (replace user with valid user name at remote teotun peer)
+ * (_replace user with valid user name at remote teotun peer_)
  *
  * Created on July 27, 2015, 11:26 AM
  */
@@ -67,11 +75,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 }
 
 /**
- * Main application function
+ * Main Teotun application function
  *
- * @param argc
- * @param argv
- * @return
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 

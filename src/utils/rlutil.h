@@ -433,7 +433,7 @@ static RLUTIL_INLINE void setColor(int c) {
 /// Clears screen and moves cursor home.
 static RLUTIL_INLINE void cls(void) {
 #if defined(_WIN32) && !defined(RLUTIL_USE_ANSI)
-	// TODO: This is cheating...
+	//! \todo: This is cheating...
 	system("cls");
 #else
 	RLUTIL_PRINT("\033[2J\033[H");
@@ -553,7 +553,7 @@ static RLUTIL_INLINE int tcols(void) {
 #endif // _WIN32
 }
 
-// TODO: Allow optional message for anykey()?
+//! \todo: Allow optional message for anykey()?
 
 /// Function: anykey
 /// Waits until a key is pressed.

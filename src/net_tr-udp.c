@@ -116,7 +116,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
         char tru_buf[KSN_BUFFER_DB_SIZE]; // Packet buffer
         ksnTRUDP_header tru_header; // Header buffer
 
-        // TODO: If payload_length more than buffer crop data or drop this packet
+        //! \todo: If payload_length more than buffer crop data or drop this packet
         if (buf_len + tru_ptr > KSN_BUFFER_DB_SIZE) {
             buf_len = KSN_BUFFER_DB_SIZE - tru_ptr;
         }
@@ -474,7 +474,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     
                     // Process RESET command
                     ksnTRUDPreset(tu, addr, 0);
-                    ksnTRUDPstatReset(tu); // TODO: Do we need reset it here?
+                    ksnTRUDPstatReset(tu); //! \todo: Do we need reset it here?
                     ksnTRUDPSendACK(); // Send ACK
                     
                     // Set last activity time
@@ -881,7 +881,7 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __CONST_SOCKADDR_ARG addr) {
     const socklen_t addr_len = sizeof(struct sockaddr_in); // Length of addresses   
     sendto(fd, &tru_header, sizeof(tru_header), 0, addr, addr_len); // Send
     
-    // TODO: Add sent reset to send list
+    //! \todo: Add sent reset to send list
 }
 
 
@@ -995,6 +995,7 @@ inline PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
  * @param data
  * @param data_len Length of data, should be less or equal than KSN_BUFFER_SIZE
  * @param flags
+ * @param attempt
  * @param addr
  * @param addr_len
  * 
@@ -1405,6 +1406,6 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
     }
 }
 
-// TODO: Expand source code documentation
+//! \todo: Expand source code documentation
 
-// TODO:  Describe Reset and Reset with remove in WiKi
+//! \todo:  Describe Reset and Reset with remove in WiKi
