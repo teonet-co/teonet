@@ -96,3 +96,4 @@
 /.teoack/teonet.conf.out
 /examples/teoackm
 /.teoackm/
+/tests/test_cque

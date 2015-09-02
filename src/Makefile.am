@@ -124,6 +124,7 @@ libteonet_la_SOURCES = \
     teonet.c \
     config/conf.c \
     config/opt.c \
+    modules/cque.c \
     modules/net_cli.c \
     modules/net_tcp.c \
     modules/net_term.c \

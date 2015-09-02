@@ -29,6 +29,7 @@
 #define KSNET_CRYPT  1 ///< Crypt packages
 
 // Modules enable
+#define M_ENAMBE_CQUE 1
 #define M_ENAMBE_VPN 1
 #define M_ENAMBE_TCP 1
 #define M_ENAMBE_TUN 1
