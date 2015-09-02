@@ -28,7 +28,7 @@
 #if M_ENAMBE_VPN
 
 // Local functions
-void ksnVpnRunShell(ksnVpnClass *kvpn, char *script);
+int ksnVpnRunShell(ksnVpnClass *kvpn, char *script);
 
 /**
  * MAC address structure
@@ -164,12 +164,14 @@ void ksnVpnDestroy(void *vpn) {
  * @param kvpn Pointer to ksnVpnClass
  * @param script Executable name
  */
-void ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
+int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
 
     char *buffer = ksnet_formatMessage(
         "%s/%s %s", getDataPath(), script, kvpn->tuntap_name);
-    system(buffer);
+    int rv = system(buffer);
     free(buffer);
+    
+    return rv != 0;
 }
 
 /**

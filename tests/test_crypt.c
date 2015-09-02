@@ -1,8 +1,8 @@
-/*
+/**
  * File:   test_crypt.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
- * Crypt module test
+ * \test Crypt module test suite
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */
