@@ -2,6 +2,10 @@
  * File:   teoterm.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
+ * \example teoterm.c
+ * 
+ * ## Teonet terminal custom command
+ * 
  * This examples shows how to add custom command to the Teonet terminal
  *
  * Created on July 27, 2015, 3:56 PM
@@ -68,9 +72,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 /**
  * Main application function
  *
- * @param argc
- * @param argv
- * @return
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 

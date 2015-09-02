@@ -1,8 +1,8 @@
-/*
+/**
  * File:   test_net_rt_udp.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  *
- * TR-UDP module test
+ * \test TR-UDP module cUnit test suite
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */
@@ -16,7 +16,7 @@
 
 extern CU_pSuite pSuite;
 
-// Emulate initialization of ksnCoreClass
+//! Emulate initialization of ksnCoreClass
 #define kc_emul() \
   ksnetEvMgrClass ke; \
   ksnCoreClass kc; \
@@ -155,7 +155,7 @@ void test_2_3() {
     CU_ASSERT_STRING_EQUAL(key, tst_key);
 }
 
-// Test TR-UDP reset functions
+//! Test TR-UDP reset functions
 void test_2_4() {
 
     // Emulate ksnCoreClass
@@ -234,11 +234,11 @@ void test_2_4() {
         ksnTRUDPDestroy(tu);
         CU_PASS("Destroy ksnTRUDPClass done");
 
-        // TODO: ksnTRUDPresetSend: Send reset to peer
+        //! \todo: ksnTRUDPresetSend: Send reset to peer
     }
 }
 
-// Test TR-UDP send list functions
+//! Test TR-UDP send list functions
 void test_2_5() {
 
     // Emulate ksnCoreClass
@@ -327,7 +327,7 @@ void test_2_5() {
     CU_PASS("Destroy ksnTRUDPClass done");
 }
 
-// Callback, this time for a time-out
+//! Callback, this time for a time-out
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
 
     //puts ("timeout");
@@ -335,7 +335,7 @@ static void timeout_cb (EV_P_ ev_timer *w, int revents) {
     ev_break (EV_A_ EVBREAK_ONE);
 }
 
-// Test TR-UDP send list timer functions
+//! Test TR-UDP send list timer functions
 void test_2_6() {
 
     // Emulate ksnCoreClass
@@ -391,7 +391,7 @@ void test_2_6() {
     CU_PASS("Destroy ksnTRUDPClass done");
 }
 
-// Test TR-UDP receive heap functions
+//! Test TR-UDP receive heap functions
 void test_2_7() {
     
     // Emulate ksnCoreClass
@@ -462,7 +462,7 @@ void test_2_7() {
 /**
  * Create and bind UDP socket for client/server
  *
- * @param kc
+ * @param port UDP port number
  * @return
  */
 int bind_udp(int *port) {
@@ -500,7 +500,7 @@ int bind_udp(int *port) {
     return fd;
 }
 
-// Test main TR-UDP function ksnTRUDPsendto
+//! Test main TR-UDP function ksnTRUDPsendto
 void test_2_8() {
     
     // Emulate ksnCoreClass
@@ -634,6 +634,15 @@ void test_2_8() {
 
 uint32_t expected_id = 0;
 
+/**
+ * Process packet
+ * 
+ * @param vkc
+ * @param buf
+ * @param recvlen
+ * @param remaddr
+ * 
+ */
 void process_packet (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG remaddr) {
     
     //ksnCoreClass *kc = vkc; // ksnCoreClass Class object
@@ -645,6 +654,12 @@ void process_packet (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG remadd
     expected_id++;
 }
 
+/**
+ * Random range
+ * 
+ * @param min From 
+ * @param max To 
+ */
 unsigned int randr(unsigned int min, unsigned int max)
 {
        double scaled = (double)rand()/RAND_MAX;
@@ -652,6 +667,9 @@ unsigned int randr(unsigned int min, unsigned int max)
        return (max - min +1)*scaled + min;
 }
 
+/**
+ * Send to for use in tests
+ */
 ssize_t test_sendto(int fd_s, uint32_t id, uint8_t message_type, void *buf, 
         size_t buf_len, __CONST_SOCKADDR_ARG addr_r, size_t addr_len) {
     
@@ -670,7 +688,7 @@ ssize_t test_sendto(int fd_s, uint32_t id, uint8_t message_type, void *buf,
     return sendto(fd_s, buf_send, tru_ptr + buf_len, 0, addr_r, addr_len);
 }
 
-// Test main TR-UDP function ksnTRUDPreceivefrom
+//! Test main TR-UDP function ksnTRUDPreceivefrom
 void test_2_9() {
     
     /**

@@ -1,11 +1,15 @@
 /**
  * File:   teosend.c
- * Author: Kirill Scherba
+ * Author: Kirill Scherba <kirill@scherba.ru>  
  *
  * Created on July 15, 2015, 5:48 PM
+ * 
+ * \example teosend.c
+ *
+ * ## Send and receive teonet messages
  *
  * Test application to send and receive teonet messages.
- *
+ * 
  * How to execute this test:
  * 
  * 1) Start one teonet test application in terminal:
@@ -38,6 +42,7 @@
  * @param event
  * @param data
  * @param data_len
+ * @param user_data
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
@@ -92,11 +97,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 }
 
 /**
- * Main application function
+ * Main Teosend application function
  *
- * @param argc
- * @param argv
- * @return
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 

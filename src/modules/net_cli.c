@@ -1402,8 +1402,8 @@ static int pass_matches(const char *pass, const char *try)
         pass += sizeof(DES_PREFIX)-1;
 
 #ifndef WIN32
-    /*
-     * TODO - find a small crypt(3) function for use on windows
+    /**
+     * \todo - find a small crypt(3) function for use on windows
      */
     if (des || !strncmp(pass, MD5_PREFIX, sizeof(MD5_PREFIX)-1))
         try = crypt(try, pass);
@@ -2427,7 +2427,7 @@ int cli_loop(struct cli_def *cli, int sockfd)
 
             if(cli_loop_check_state(cd)) {
 
-                // TODO: Stop and free watcher
+                //! \todo: Stop and free watcher
 
                 cli_loop_free(cd);
                 break;

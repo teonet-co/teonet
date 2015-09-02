@@ -419,7 +419,7 @@ void open_local_port(ksnetEvMgrClass *ke) {
 
         if(ip_is_private(ips[i])) {
 
-            // TODO: Need to send to real local IP
+            //! \todo: Need to send to real local IP
             uint8_t ip_arr[4];
             ip_to_array(ips[i], ip_arr);
             char *ip_str = ksnet_formatMessage("%d.%d.%d.93", ip_arr[0],
@@ -502,7 +502,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
 
     // Idle count startup (first time run)
     if(!kev->idle_count) {
-        // TODO:       open_local_port(kev);
+        //! \todo:       open_local_port(kev);
         // Set statistic start time
         if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
         // Connect to R-Host
@@ -517,7 +517,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     kev->idle_count++;
 
     // Check host events to send him service information
-    // TODO:    host_cb(EV_A_ (ev_io*)w, revents);
+    //! \todo:    host_cb(EV_A_ (ev_io*)w, revents);
 
     // Send idle Event
     if(kev->event_cb != NULL) {
