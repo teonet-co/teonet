@@ -692,6 +692,11 @@ int modules_init(ksnetEvMgrClass *ke) {
     
     // Hotkeys
     if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
+    
+    // Callback QUEUE
+    #if M_ENAMBE_CQUE
+    ke->kq = ksnCQueInit(ke);
+    #endif
 
     // VPN Module
     #if M_ENAMBE_VPN
@@ -733,6 +738,9 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #endif
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
+    #endif
+    #if M_ENAMBE_CQUE
+    ksnCQueDestroy(ke->kq);
     #endif
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
