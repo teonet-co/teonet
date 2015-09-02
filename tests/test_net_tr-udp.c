@@ -1,8 +1,8 @@
-/*
+/**
  * File:   test_net_rt_udp.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  *
- * TR-UDP module test
+ * \test TR-UDP module test suite
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */

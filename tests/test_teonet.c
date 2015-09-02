@@ -1,8 +1,8 @@
-/*
- * File:   test_net_rt_udp.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+/**
+ * \file   test_teonet.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
- * TR-UDP module test
+ * \test Teonet cUnit test
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */
@@ -16,6 +16,7 @@
 // Modules functions
 int add_suite_1_tests(void);
 int add_suite_2_tests(void);
+int add_suite_4_tests(void);
 
 // Global variables
 CU_pSuite pSuite = NULL;
@@ -56,6 +57,14 @@ int main() {
         return CU_get_error();
     }
     add_suite_2_tests();
+    
+    /* Add a suite to the registry */
+    pSuite = CU_add_suite("Callback QUEUE module functions", init_suite, clean_suite);
+    if (NULL == pSuite) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    add_suite_4_tests();
 
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);
