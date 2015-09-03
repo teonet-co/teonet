@@ -26,7 +26,7 @@ make
 make install
 cd ..
 rm -fr CUnit-2.1-3
-rm CUnit-2.1-3.tar.bz2
+rm -f CUnit-2.1-3.tar.bz2
 
 # Install Fedora cUnit project dependence
 #yum install CUnit-devel
