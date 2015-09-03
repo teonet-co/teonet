@@ -23,7 +23,7 @@ PWD=`pwd`
 set -e 
 
 # Check parameters and set defaults
-check_param $1 $2 $3 $4 $5 $6
+check_param $1 $2 $3 $4 $5 $6 $7 $8
 # Set global variables:
 # VER=$1
 # RELEASE=$2
@@ -34,6 +34,8 @@ check_param $1 $2 $3 $4 $5 $6
 # VER=$1-$RELEASE
 # PACKET_NAME=$5
 # PACKET_DESCRIPTION=$6
+# LIBRARY_HI_VERSION=$7
+# LIBRARY_VERSION=$8
 
 
 #echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
@@ -106,8 +108,8 @@ RPM_FILES="/usr/bin/teovpn
    /usr/lib/libteonet.a
    /usr/lib/libteonet.la
    /usr/lib/libteonet.so
-   /usr/lib/libteonet.so.9
-   /usr/lib/libteonet.so.9.0.0"
+   /usr/lib/libteonet.so.$LIBRARY_HI_VERSION
+   /usr/lib/libteonet.so.$LIBRARY_VERSION"
 create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
 # Build the source and the binary RPM

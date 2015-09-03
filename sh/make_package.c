@@ -99,13 +99,17 @@ int main(int argc, char** argv) {
 
     // Execute build packet script 
     char cmd[KSN_BUFFER_SM_SIZE]; 
-    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s %s %s",  
+    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s %s %s %s %s %s %s",  
             b_type == DEB ? argv[1] : "rpm", 
             // Script parameters
             version, // $1 Version
             CI_BUILD_ID != NULL ? CI_BUILD_ID : "1", // $2 Build
             argc >= 3 ? argv[2] : b_type == DEB ? "amd64" : "x86_64", // $3 Architecture
-            b_type > DEB ? argv[1] : "deb" // $4 RPM subtype
+            b_type > DEB ? argv[1] : "deb", // $4 RPM subtype
+            "", // $5 Package name (default: libteonet)
+            "", // $6 Package description (default: ...)
+            LIBRARY_HI_VERSION, // $7
+            LIBRARY_VERSION // $8
     ); 
 
     rv = system(cmd); 

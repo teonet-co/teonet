@@ -17,6 +17,8 @@
 # @param $4 RPM subtype (default deb)
 # @param $5 Package name (default libteonet)
 # @param $6 Package description (default ...)
+# @param $7 Library HI version
+# @param $8 Library version
 # Set global variables:
 # VER=$1
 # RELEASE=$2
@@ -27,6 +29,10 @@
 # VER=$1-$RELEASE
 # PACKET_NAME=$5
 # PACKET_DESCRIPTION=$6
+# PACKET_NAME=$5
+# PACKET_DESCRIPTION=$6
+# LIBRARY_HI_VERSION=$7
+# LIBRARY_VERSION=$8
 check_param()
 {    
     # The first parameter is required
@@ -75,6 +81,16 @@ check_param()
         PACKET_SUMMARY="Teonet library version $VER"
     else
         PACKET_SUMMARY=$6
+    fi
+    if [ -z "$7" ]; then
+        LIBRARY_HI_VERSION=0
+    else
+        LIBRARY_HI_VERSION=$7
+    fi
+    if [ -z "$8" ]; then
+        LIBRARY_VERSION=0
+    else
+        LIBRARY_VERSION=$8
     fi
 }
 
