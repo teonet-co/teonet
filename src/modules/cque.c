@@ -1,16 +1,24 @@
 /** 
- * File:   cque.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   cque.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
- * Module to manage Callback QUEUE: ksnCQue
+ * ### Manage Callback QUEUE class ksnCQueClass module
  * 
- * Main module functions:
+ * Callback QUEUE used to organize async calls to any functions.
  * 
- *      * Initialize / Destroy module (ksnCQueClass)
- *      * Add callback to QUEUE, get peers TR-UDP (or ARP) TRIP_TIME and start 
- *        timeout timer
- *      * Execute callback when callback event or timeout event occurred and 
- *        Remove record from queue
+ * #### Main module functions:
+ * 
+ * * [Initialize](@ref ksnCQueInit) and [Destroy](@ref ksnCQueDestroy) Callback 
+ *   QUEUE module [class](@ref ksnCQueClass) (it done automatic when event 
+ *   manager initialized or destroyed)
+ * * [Add callback](@ref ksnCQueAdd) to QUEUE, get peers TR-UDP (or ARP) 
+ *   TRIP_TIME and start [timeout timer](@ref cq_timer_cb)
+ * * [Execute callback](@ref ksnCQueExec) when callback event or timeout event 
+ *   occurred and Remove record from queue
+ * 
+ * See example: @ref teocque.c
+ * 
+ * See test: test_cque.c  
  *
  * Created on August 21, 2015, 12:10 PM
  */
@@ -23,9 +31,9 @@
 #include "cque.h"
 
 /**
- * Initialize ksnCQue module class
+ * Initialize ksnCQue module [class](@ref ksnCQueClass)
  * 
- * @param ke Pointer to ksnEvMgrClass
+ * @param ke Pointer to ksnetEvMgrClass
  * 
  * @return Pointer to created ksnCQueClass or NULL if error occurred
  */
@@ -42,7 +50,7 @@ ksnCQueClass *ksnCQueInit(void *ke) {
 }
 
 /**
- * Destroy ksnCQue module class
+ * Destroy ksnCQue module [class](@ref ksnCQueClass)
  * 
  * @param kq Pointer to ksnCQueClass
  */
@@ -60,9 +68,8 @@ void ksnCQueDestroy(ksnCQueClass *kq) {
  * 
  * Get callback queue record and remove it from queue
  * 
- * @param kq Pointer to ksnCQue Class
+ * @param kq Pointer to ksnCQueClass
  * @param id Required ID
- * @param data_length [out] Returned data length
  * 
  * @return return 0: if callback executed OK; !=0 some error occurred
  */
@@ -75,7 +82,13 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     if(cq != NULL) {
         
         // Execute queue callback
-        cq->cb(id, 1, cq->data); // Type 1: successful callback
+        if(cq->cb != NULL)
+            cq->cb(id, 1, cq->data); // Type 1: successful callback
+        
+        //! \todo Send teonet event in addition to callback
+        
+        // Stop watcher
+        ev_timer_stop(((ksnetEvMgrClass*)(kq->ke))->ev_loop, &cq->w);
         
         // Remove record from queue
         if(pblMapRemove(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
@@ -90,9 +103,8 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
 /**
  * Callback Queue timeout timer callback
  * 
- * @param loop
- * @param w
- * @param revents
+ * @param w Event manager loop and watcher
+ * @param revents Reserved (not used)
  */
 void cq_timer_cb(EV_P_ ev_timer *w, int revents) { 
     
@@ -118,10 +130,10 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
 /**
  * Add callback to queue
  * 
- * @param kq Pointer to ksnCQue Class
- * @param callback Callback function
+ * @param kq Pointer to ksnCQueClass
+ * @param cb Callback [function](@ref ksnCQueCallback)
  * @param timeout Callback timeout. If equal to 0 than timeout sets automatically
- * @param data  The user data which should be send to the callback function
+ * @param data The user data which should be send to the Callback function
  * 
  * @return Pointer to added ksnCQueData or NULL if error occurred
  */
