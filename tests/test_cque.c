@@ -1,6 +1,16 @@
-/*
- * File:   test_cque.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+/**
+ * \file   test_cque.c
+ * \author Kirill Scherba <kirill@scherba.ru>
+ * 
+ * Callback QUEUE [module](@ref cque.c) tests suite
+ * 
+ * Test functions:
+ * 
+ * * Initialize/Destroy module class: test_4_1()
+ * * Add callback to QUEUE: test_4_2()
+ * * Execute callback to emulate callback event: test_4_3()
+ * 
+ * cUnit test suite code: \include test_cque.c
  *
  * Created on Aug 22, 2015, 3:35:32 AM
  */
@@ -12,24 +22,17 @@
 #include "ev_mgr.h"
 #include "modules/cque.h"
 
-/*
- * CUnit Test Suite
+extern CU_pSuite pSuite; // Test global variable
+
+/**
+ * Emulate ksnetEvMgrClass
  */
-
-int init_suite(void) {
-    return 0;
-}
-
-int clean_suite(void) {
-    return 0;
-}
-
 #define kc_emul() \
   ksnetEvMgrClass ke_obj; \
   ksnetEvMgrClass *ke = &ke_obj; \
   ke->ev_loop = ev_loop_new (0)
 
-//Initialize/Destroy module class
+//! Initialize and Destroy module class
 void test_4_1() {
     
     // Emulate ksnCoreClass
@@ -48,9 +51,9 @@ void test_4_1() {
 /**
  * Callback, this time for a time-out
  * 
- * @param loop
- * @param w
- * @param revents
+ * @param loop Event manager loop
+ * @param w Watcher
+ * @param revents Reserved (not used)
  */
 static void timeout_cb (EV_P_ ev_timer *w, int revents) {
 
@@ -62,17 +65,18 @@ static void timeout_cb (EV_P_ ev_timer *w, int revents) {
 /**
  * Callback Queue callback
  * 
- * @param id
- * @param type
- * @param data
+ * @param id Calls ID
+ * @param type Type: 0 - timeout callback; 1 - successful callback 
+ * @param data User data
  */
 void kq_cb(uint32_t id, int type, void *data) {
     
     //printf("CQue callback id: %d, type: %d \n", id, type);
 }
 
-// Add callback to QUEUE
+//! Add callback to QUEUE
 void test_4_2() {
+    
     // Emulate ksnCoreClass
     kc_emul();
 
@@ -102,7 +106,7 @@ void test_4_2() {
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
-// Execute callback to emulate callback event
+//! Execute callback to emulate callback event
 void test_4_3() {
     
     // Emulate ksnCoreClass
@@ -134,21 +138,14 @@ void test_4_3() {
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
-int main() {
-    CU_pSuite pSuite = NULL;
-
-    /* Initialize the CUnit test registry */
-    if (CUE_SUCCESS != CU_initialize_registry())
-        return CU_get_error();
-
-    /* Add a suite to the registry */
-    pSuite = CU_add_suite("Callback QUEUE module functions", init_suite, clean_suite);
-    if (NULL == pSuite) {
-        CU_cleanup_registry();
-        return CU_get_error();
-    }
-
-    /* Add the tests to the suite */
+/**
+ * Add Callback QUEUE module tests
+ * 
+ * @return 
+ */
+int add_suite_4_tests(void) {
+    
+    // Add the tests to the suite 
     if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_4_1)) ||
         (NULL == CU_add_test(pSuite, "Add callback to QUEUE", test_4_2)) ||
         (NULL == CU_add_test(pSuite, "Execute callback to emulate callback event", test_4_3))) {
@@ -156,10 +153,6 @@ int main() {
         CU_cleanup_registry();
         return CU_get_error();
     }
-
-    /* Run all tests using the CUnit Basic interface */
-    CU_basic_set_mode(CU_BRM_VERBOSE);
-    CU_basic_run_tests();
-    CU_cleanup_registry();
-    return CU_get_error();
+    
+    return 0;
 }

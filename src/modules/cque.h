@@ -1,4 +1,4 @@
-/** 
+/* 
  * File:   cque.h
  * Author: Kirill Scherba <kirill@scherba.ru>
  *
