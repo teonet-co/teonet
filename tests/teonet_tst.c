@@ -1,7 +1,9 @@
-/**
+/** 
  * File:   teonet.c
  * Author: Kirill Scherba <kirill@scherba.ru>
- *
+ * 
+ * \test Simple C Test Suite
+ * 
  * Created on Jun 30, 2015, 10:31:15 AM
  */
 

@@ -32,7 +32,7 @@ void ksnet_configInit(ksnet_cfg *ksn_cfg, void *ke) {
 
     ksn_cfg->ke = ke;
     set_defaults(ksn_cfg);
-    // TODO: Set port param
+    //! \todo: Set port param
     //int port_param = 0;
     //read_config(ksn_cfg, port_param);
 }
@@ -81,8 +81,9 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
 
 /**
  * Read configuration parameters from file
- *
+ * 
  * @param conf
+ * @param port_param
  */
 void read_config(ksnet_cfg *conf, int port_param) {
 

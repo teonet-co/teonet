@@ -100,4 +100,7 @@ if [ ! -z "$CI_BUILD_REF" ]; then
     # Install packet from remote repository
     sh/make_remote_install.sh
 
+    # Make and upload documentation
+    sh/make_remote_doc_upload.sh
+
 fi
