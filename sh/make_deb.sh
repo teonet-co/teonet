@@ -8,7 +8,7 @@
 # @param $3 Library version
 # @param $4 Release
 # @param $5 Architecture
-# @param $6 RPM subtype (not used, reserved)
+# @param $6 RPM subtype = "deb" (not used, reserved)
 # @param $7 PACKET_NAME
 # @param $8 PACKET_DESCRIPTION
 
