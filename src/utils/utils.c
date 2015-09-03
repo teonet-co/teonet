@@ -36,6 +36,7 @@ inline int KSN_GET_TEST_MODE() {
  * function has type parameter which define type of print. It should be used
  * this function instead of standard printf function.
  *
+ * @param ksn_cfg Pointer to ksnet_cfg
  * @param type MESSAGE -- print always;
  *             CONNECT -- print if connect show flag  connect is set;
  *             DEBUG -- print if debug show flag is set on;
@@ -185,7 +186,7 @@ char *trimlf(char *str) {
 /**
  * Remove trailing or leading space
  *
- * \Description Remove trailing or leading space or tabulation characters in
+ * Remove trailing or leading space or tabulation characters in
  * input null terminated string
  *
  * @param str Null terminated input string to remove trailing and leading
@@ -230,7 +231,6 @@ char *trim(char *str) {
 /**
  * Calculate number of lines in string
  *
- * \Description
  * Calculate number of line with line feed \\n at the end in null
  * input terminated string
  *
@@ -247,9 +247,11 @@ int calculate_lines(char *str) {
 }
 
 /**
- * Create random ksnet host name, should be free after use
+ * Get random host name
+ * 
+ * Create random host name. Should be free after use.
  *
- * @return
+ * @return String with random host name. Should be free after use.
  */
 char *getRandomHostName(void) {
 
@@ -460,12 +462,13 @@ int inarray(int val, const int *arr, int size) {
 #include <string.h>
 
 /**
+ * Get IPs
+ * 
  * Get IP address of this host
  *
- * @param arr String array
- * @return
+ * @return Pointer to ksnet_stringArr
  */
-ksnet_stringArr getIPs(/*ksnet_config *conf*/) {
+ksnet_stringArr getIPs() {
 
     ksnet_stringArr arr = ksnet_stringArrCreate();
 

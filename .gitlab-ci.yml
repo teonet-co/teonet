@@ -32,7 +32,9 @@ job_ubuntu:
     - ./autogen.sh
     - make
     - app/teovpn -?
-    # Build package
+    # Test
+    - make test
+    # Build DEB package and upload it to repository
     - sh/make_package deb
   only:
     - master
@@ -41,11 +43,14 @@ job_centos:
   type: build
   image: centos_teonet
   script:
+    # Make
     #- sh/build-centos.sh
     - ./autogen.sh
     - make
     - app/teovpn -?
-    # Build package
+    # Test
+    - make test
+    # Build RPM package and upload it to repository
     - sh/make_package yum
   only:
     - master    
@@ -54,10 +59,13 @@ job_fedora:
   type: build
   image: fedora_teonet
   script:
+    # Make
     #- sh/build-centos.sh
     - ./autogen.sh
     - make
     - app/teovpn -?
+    # Test
+    - make test
   only:
     - master
     
@@ -65,11 +73,14 @@ job_opensuse:
   type: build
   image: opensuse_teonet
   script:
+    # Make
     #- sh/build-opensuse.sh
     - ./autogen.sh
     - make
     - app/teovpn -?
-    # Build package
+    # Test
+    - make test
+    # Build RPM package and upload it to repository
     - sh/make_package zyp
   only:
     - master     

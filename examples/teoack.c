@@ -1,6 +1,10 @@
-/* 
- * File:   teoack.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+/** 
+ * \file   teoack.c
+ * \author Kirill Scherba <kirill@scherba.ru>
+ * 
+ * \example teoack.c
+ * 
+ * ## Get ACK event
  * 
  * This Example shows how to get ACK event from remote peer
  *
@@ -76,12 +80,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 }            
 
 /**
- * Main application function
+ * Main Teoack application function
  *
- * @param argc
- * @param argv
+ * @param argc Number of parameters
+ * @param argv Parameters array
  * 
- * @return
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 

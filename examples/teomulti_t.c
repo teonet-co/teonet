@@ -1,7 +1,11 @@
 /** 
- * File:   teomulti_t.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teomulti_t.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
+ * \example teomulti_t.c
+ * 
+ * ## Connect to multi networks with one call (with threads)
+ * 
  * Connect to and manage some teo-networks in one time (with using threads). 
  * The networks are divided by the host port number.
  * 
@@ -42,7 +46,7 @@ typedef struct teonet_multi {
 /**
  * Fossa main thread function
  * 
- * @param arg
+ * @param teo
  * @return 
  */
 void* teonet_t(void *teo) {
@@ -70,11 +74,12 @@ void* teonet_t(void *teo) {
 }
 
 /**
- * Main application function
+ * Main Teomulti application function
  *
- * @param argc
- * @param argv
- * @return
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 

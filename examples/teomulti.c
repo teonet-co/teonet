@@ -1,6 +1,13 @@
 /* 
- * File:   teomulti.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teomulti.c
+ * \author Kirill Scherba <kirill@scherba.ru>
+ * 
+ * \example teomulti.c
+ * 
+ * ## Connect to multi networks with one call
+ * 
+ * Connect to and manage some teo-networks in one time (without using threads). 
+ * The networks are divided by the host port number.
  *
  * Created on July 23, 2015, 12:05 PM
  */
@@ -19,9 +26,10 @@ const char *TEONET_NAMES[] = { "TEO-A", "TEO-B", "TEO-C" }; // Hosts names
 /**
  * Main application function
  *
- * @param argc
- * @param argv
- * @return
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 
