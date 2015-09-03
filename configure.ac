@@ -1,5 +1,8 @@
 AC_INIT([teonet], [0.0.9], [kirill@scherba.ru])
 
+AC_DEFINE(LIBRARY_HI_VERSION, ["9"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_VERSION,    ["9.0.0"], [Teonet dynamic library version])
+
 AC_CONFIG_HEADERS([src/config/config.h])
 
 AM_INIT_AUTOMAKE
