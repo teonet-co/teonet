@@ -4,32 +4,36 @@
 # Parameters:
 #
 # @param $1 Version
-# @param $2 Release 
-# @param $3 Architecture
-# @param $4 RPM subtype (not used, reserved)
-# @param $5 PACKET_NAME
-# @param $6 PACKET_DESCRIPTION
+# @param $2 Library HI version
+# @param $3 Library version
+# @param $4 Release
+# @param $5 Architecture
+# @param $6 RPM subtype (not used, reserved)
+# @param $7 PACKET_NAME
+# @param $8 PACKET_DESCRIPTION
 
 # Include make deb functions
 PWD=`pwd`
 . "$PWD/sh/make_deb_inc.sh"
 
 # Set exit at error
-set -e 
+set -e
 
 # Check parameters and set defaults
-check_param $1 $2 $3 $4 $5 $6
+check_param $1 $2 $3 $4 $5 $6 $7 $8
 # Set global variables:
 # VER_ONLY=$1
-# RELEASE=$2
-# ARCH=$3
+# LIBRARY_HI_VERSION=$2
+# LIBRARY_VERSION=$3
+# RELEASE=$4
+# ARCH=$5
 # VER=$1-$RELEASE
-# PACKET_NAME=$5
-# PACKET_DESCRIPTION=$6
+# PACKET_NAME=$7
+# PACKET_DESCRIPTION=$8
 
 # Set Variables
 DEPENDS="libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4), libtuntap-dev"
-    # Note: Add this to Depends if test will be added to distributive: 
+    # Note: Add this to Depends if test will be added to distributive:
     # libcunit1-dev (>= 2.1-2.dfsg-1)
 MAINTAINER="Kirill Scherba <kirill@scherba.ru>"
 VER_ARCH=$VER"_"$ARCH
@@ -66,7 +70,7 @@ fi
 # Create deb package ----------------------------------------------------------
 
 # Configure and make auto configure project (in current folder)
-make_counfigure 
+make_counfigure
 
 # Make install
 make_install $PWD/$PACKAGE_NAME
@@ -83,7 +87,7 @@ build_deb_package $PACKAGE_NAME
 ## Show version of installed depends
 #show_teonet_depends
 #
-## Remove package  
+## Remove package
 #apt_remove $PACKET_NAME
 
 # Add packet to repository ----------------------------------------------------
@@ -93,8 +97,8 @@ add_deb_package $REPO/ubuntu teonet $PACKAGE_NAME
 
 # Upload repository to remote host, test install and run application ----------
 if [ ! -z "$CI_BUILD_REF" ]; then
-    
-    # Upload repository to remote host by ftp: 
+
+    # Upload repository to remote host by ftp:
     sh/make_remote_upload.sh
 
     # Install packet from remote repository
