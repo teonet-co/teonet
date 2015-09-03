@@ -106,8 +106,8 @@ RPM_FILES="/usr/bin/teovpn
    /usr/lib/libteonet.a
    /usr/lib/libteonet.la
    /usr/lib/libteonet.so
-   /usr/lib/libteonet.so.9
-   /usr/lib/libteonet.so.9.0.0"
+   /usr/lib/libteonet.so.7
+   /usr/lib/libteonet.so.7.0.0"
 create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
 # Build the source and the binary RPM
