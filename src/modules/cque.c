@@ -82,7 +82,13 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     if(cq != NULL) {
         
         // Execute queue callback
-        cq->cb(id, 1, cq->data); // Type 1: successful callback
+        if(cq->cb != NULL)
+            cq->cb(id, 1, cq->data); // Type 1: successful callback
+        
+        //! \todo Send teonet event in addition to callback
+        
+        // Stop watcher
+        ev_timer_stop(((ksnetEvMgrClass*)(kq->ke))->ev_loop, &cq->w);
         
         // Remove record from queue
         if(pblMapRemove(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
