@@ -12,53 +12,72 @@
 
 # Parameters:
 # @param $1 Version (required)
-# @param $2 Release (default 1)
-# @param $3 Architecture (default x86_64)
-# @param $4 RPM subtype (default deb)
-# @param $5 Package name (default libteonet)
-# @param $6 Package description (default ...)
-# @param $7 Library HI version
-# @param $8 Library version
+# @param $2 Library HI version
+# @param $3 Library version
+# @param $4 Release (default 1)
+# @param $5 Architecture (default x86_64)
+# @param $6 RPM subtype (default deb)
+# @param $7 Package name (default libteonet)
+# @param $8 Package description (default ...)
 # Set global variables:
 # VER=$1
-# RELEASE=$2
-# ARCH=$3
+# LIBRARY_HI_VERSION=$2
+# LIBRARY_VERSION=$3
+# RELEASE=$4
+# ARCH=$5
 # INST="yum install -y "
-# RPM_SUBTYPE="yum"
+# RPM_SUBTYPE=$6
 # RPM_DEV="rpm-build"
 # VER=$1-$RELEASE
-# PACKET_NAME=$5
-# PACKET_DESCRIPTION=$6
-# PACKET_NAME=$5
-# PACKET_DESCRIPTION=$6
-# LIBRARY_HI_VERSION=$7
-# LIBRARY_VERSION=$8
+# PACKET_NAME=$7
+# PACKET_DESCRIPTION=$8
 check_param()
 {    
     # The first parameter is required
+    # $1
     if [ -z "$1" ]; then    
         echo The first parameter is required
         exit 1
     fi
     VER=$1
+
+    # $2
     if [ -z "$2" ]; then
+        LIBRARY_HI_VERSION=0
+    else
+        LIBRARY_HI_VERSION=$2
+    fi
+
+    # $3
+    if [ -z "$3" ]; then
+        LIBRARY_VERSION=0
+    else
+        LIBRARY_VERSION=$3
+    fi
+
+    # $4
+    if [ -z "$4" ]; then
         RELEASE=1
       else
-        RELEASE=$2
+        RELEASE=$4
     fi
-    if [ -z "$3" ]; then
+
+    # $5
+    if [ -z "$5" ]; then
         ARCH="x86_64"
       else
-        ARCH=$3
+        ARCH=$5
     fi
-    if [ -z "$4" ]; then
+
+    # $6
+    if [ -z "$6" ]; then
         # Default - Ubuntu
         RPM_SUBTYPE="deb"
         INST="sudo apt-get install -y "
         RPM_DEV="rpm"
       else
         # Default - Ubuntu
-        RPM_SUBTYPE=$4
+        RPM_SUBTYPE=$6
         INST="sudo apt-get install -y "
         RPM_DEV="rpm"
         # Rehl
@@ -72,25 +91,19 @@ check_param()
             RPM_DEV="rpm-devel"
         fi
     fi
-    if [ -z "$5" ]; then
+
+    # $7
+    if [ -z "$7" ]; then
         PACKET_NAME="libteonet"
     else
-        PACKET_NAME=$5
+        PACKET_NAME=$7
     fi
-    if [ -z "$6" ]; then
+
+    # $8
+    if [ -z "$8" ]; then
         PACKET_SUMMARY="Teonet library version $VER"
     else
-        PACKET_SUMMARY=$6
-    fi
-    if [ -z "$7" ]; then
-        LIBRARY_HI_VERSION=0
-    else
-        LIBRARY_HI_VERSION=$7
-    fi
-    if [ -z "$8" ]; then
-        LIBRARY_VERSION=0
-    else
-        LIBRARY_VERSION=$8
+        PACKET_SUMMARY=$8
     fi
 }
 
