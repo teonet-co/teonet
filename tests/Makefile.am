@@ -32,9 +32,5 @@ endif
 noinst_PROGRAMS = teonet_tst test_teonet test_cque
 
 teonet_tst_SOURCES = teonet_tst.c
-test_cque_SOURCES = test_cque.c
-#bin_PROGRAMS = teonet_tst
-noinst_PROGRAMS = teonet_tst test_teonet
-
-teonet_tst_SOURCES = teonet_tst.c
 test_teonet_SOURCES = test_teonet.c test_net_tr-udp.c test_crypt.c
+test_cque_SOURCES = test_cque.c
