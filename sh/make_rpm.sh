@@ -1,5 +1,5 @@
 #!/bin/sh
-# 
+#
 # File:   make_rpm.sh
 # Author: Kirill Scherba <kirill@scherba.ru>
 #
@@ -9,18 +9,20 @@
 # Parameters:
 #
 # @param $1 Version
-# @param $2 Release 
-# @param $3 Architecture
-# @param $4 RPM subtype rpm yum zyp
-# @param $5 PACKET_NAME
-# @param $6 PACKET_SUMMARY
+# @param $2 Library HI version
+# @param $3 Library version
+# @param $4 Release
+# @param $5 Architecture
+# @param $6 RPM subtype rpm yum zyp
+# @param $7 PACKET_NAME
+# @param $8 PACKET_SUMMARY
 
 # Include make RPM functions
 PWD=`pwd`
 . "$PWD/sh/make_rpm_inc.sh"
 
 # Set exit at error
-set -e 
+set -e
 
 # Check parameters and set defaults
 check_param $1 $2 $3 $4 $5 $6 $7 $8
@@ -35,7 +37,7 @@ check_param $1 $2 $3 $4 $5 $6 $7 $8
 # RPM_DEV="rpm-build"
 # VER=$1-$RELEASE
 # PACKET_NAME=$7
-# PACKET_DESCRIPTION=$7
+# PACKET_DESCRIPTION=$8
 
 
 #echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"
@@ -67,7 +69,7 @@ set_rpmbuild_env $RPMBUILD
 mkdir $PACKET_NAME-$VER
 
 # Configure and make auto configure project (in current folder)
-make_counfigure 
+make_counfigure
 
 # Make install
 make_install $PWD/$PACKAGE_NAME
@@ -133,8 +135,8 @@ create_rpm_repo $RPMBUILD $REPO/$SUBFOLDER $ARCH "${INST}"
 
 # Upload repository to remote host and Test Install and run application
 if [ ! -z "$CI_BUILD_REF" ]; then
-    
-    # Upload repository to remote host by ftp: 
+
+    # Upload repository to remote host by ftp:
     sh/make_remote_upload.sh $RPM_SUBTYPE "$INST"
 
     # Install packet from remote repository
