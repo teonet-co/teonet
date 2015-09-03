@@ -1,6 +1,6 @@
 /**
- * File:   teosend.c
- * Author: Kirill Scherba <kirill@scherba.ru>  
+ * \file   teosend.c
+ * \author Kirill Scherba <kirill@scherba.ru>  
  *
  * Created on July 15, 2015, 5:48 PM
  * 

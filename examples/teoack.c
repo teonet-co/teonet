@@ -1,6 +1,6 @@
 /** 
- * File:   teoack.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teoack.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * \example teoack.c
  * 

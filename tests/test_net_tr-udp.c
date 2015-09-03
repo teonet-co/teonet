@@ -1,6 +1,6 @@
 /**
- * File:   test_net_rt_udp.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   test_net_rt_udp.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
  * \test TR-UDP module cUnit test suite
  *

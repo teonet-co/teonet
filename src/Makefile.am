@@ -124,6 +124,7 @@ libteonet_la_SOURCES = \
     teonet.c \
     config/conf.c \
     config/opt.c \
+    modules/cque.c \
     modules/net_cli.c \
     modules/net_tcp.c \
     modules/net_term.c \
@@ -146,7 +147,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 7:0:0
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 9:0:0
 
 uninstall-local:
 	-rm -r $(teonetincludedir)

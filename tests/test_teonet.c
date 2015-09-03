@@ -1,7 +1,7 @@
 /**
  * 
- * File:   test_net_rt_udp.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   test_teonet.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * \test Teonet cUnit test
  *

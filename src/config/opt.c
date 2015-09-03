@@ -245,8 +245,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     char app_argv_str[KSN_BUFFER_SIZE], *app_name_cpy = strdup(app_name);
     app_argv_str[0] = 0;
     for(i = 0; i < app_argc; i++) {
-        strncat(app_argv_str, " ", KSN_BUFFER_SIZE);
-        strncat(app_argv_str, app_argv[i], KSN_BUFFER_SIZE);
+        strncat(app_argv_str, " ", KSN_BUFFER_SIZE - strlen(app_argv_str) - 1);
+        strncat(app_argv_str, app_argv[i], KSN_BUFFER_SIZE - strlen(app_argv_str) - 1);
     }
 
     printf("Usage: %s [OPTIONS]%s\n"
