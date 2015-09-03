@@ -27,15 +27,15 @@ check_param $1 $2 $3 $4 $5 $6 $7 $8
 # Set global variables:
 # VER=$1
 # RELEASE=$2
-# ARCH=$3
+# LIBRARY_HI_VERSION=$3
+# LIBRARY_VERSION=$4
+# ARCH=$5
 # INST="yum install -y "
 # RPM_SUBTYPE="yum"
 # RPM_DEV="rpm-build"
 # VER=$1-$RELEASE
-# PACKET_NAME=$5
-# PACKET_DESCRIPTION=$6
-# LIBRARY_HI_VERSION=$7
-# LIBRARY_VERSION=$8
+# PACKET_NAME=$7
+# PACKET_DESCRIPTION=$7
 
 
 #echo "Show params: \n1=$1\n2=$2\n3=$3\n4=$4\n"

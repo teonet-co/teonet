@@ -17,47 +17,74 @@
 # Check parameters and set defaults (specific for libteonet)
 # Parameters:
 # @param $1 Version (required)
-# @param $2 Release (default 1)
-# @param $3 Architecture (default and64)
-# @param $4 Reserved
-# @param $5 Package name (default libteonet-dev)
-# @param $6 Package description (default ...)
+# @param $2 Library HI version (default 0)
+# @param $3 Library version (default 0.0.0)
+# @param $4 Release (default 1)
+# @param $5 Architecture (default and64)
+# @param $6 Reserved
+# @param $7 Package name (default libteonet-dev)
+# @param $8 Package description (default ...)
 # Set global variables:
 # VER_ONLY=$1
-# RELEASE=$2
-# ARCH=$3
+# LIBRARY_HI_VERSION=$2
+# LIBRARY_VERSION=$3
+# RELEASE=$4
+# ARCH=$5
 # VER=$1-$RELEASE
-# PACKET_NAME=$5
-# PACKET_DESCRIPTION=$6
+# PACKET_NAME=$7
+# PACKET_DESCRIPTION=$8
 check_param()
 {
     # The first parameter is required
+    # $1
     if [ -z "$1" ]; then
         echo The first parameter is required
         exit 1
     fi
     VER_ONLY=$1
+
+    # $2
     if [ -z "$2" ]; then
+        LIBRARY_HI_VERSION=0
+    else
+        LIBRARY_HI_VERSION=$2
+    fi
+
+    # $3
+    if [ -z "$3" ]; then
+        LIBRARY_VERSION=0
+    else
+        LIBRARY_VERSION=$3
+    fi
+
+    # $4
+    if [ -z "$4" ]; then
         RELEASE=1
       else
-        RELEASE=$2
+        RELEASE=$4
     fi
-    if [ -z "$3" ]; then
+
+    # $5
+    if [ -z "$5" ]; then
         ARCH="amd64"
       else
-        ARCH=$3
+        ARCH=$5
     fi
     VER=$1-$RELEASE
-    if [ -z "$5" ]; then
+
+    # $6
+    if [ -z "$6" ]; then
         PACKET_NAME="libteonet-dev"
     else
-        PACKET_NAME=$5
+        PACKET_NAME=$6
     fi
-    if [ -z "$6" ]; then
+
+    # $7
+    if [ -z "$7" ]; then
         PACKET_DESCRIPTION="Teonet library version $VER
      Mesh network library."
     else
-        PACKET_DESCRIPTION=$6
+        PACKET_DESCRIPTION=$7
     fi
 }
 
