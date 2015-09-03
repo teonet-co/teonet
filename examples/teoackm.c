@@ -1,6 +1,6 @@
 /* 
- * File:   teoackm.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teoackm.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * \example teoackm.c
  * 

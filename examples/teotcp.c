@@ -1,6 +1,6 @@
 /** 
- * File:   teotcp.c
- * Author: Kirill Scherba <kirill@scherba.ru>  
+ * \file   teotcp.c
+ * \author Kirill Scherba <kirill@scherba.ru>  
  * 
  * \example teotcp.c
  * 

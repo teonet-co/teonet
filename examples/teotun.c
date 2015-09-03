@@ -1,6 +1,6 @@
 /** 
- * File:   teotun.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teotun.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * \example teotun.c
  * 

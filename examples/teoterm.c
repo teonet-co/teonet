@@ -1,6 +1,6 @@
 /* 
- * File:   teoterm.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teoterm.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * \example teoterm.c
  * 

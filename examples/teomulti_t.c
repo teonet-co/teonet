@@ -1,6 +1,6 @@
 /** 
- * File:   teomulti_t.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teomulti_t.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
  * \example teomulti_t.c
  * 

@@ -1,14 +1,12 @@
 #!/bin/sh
 # 
-# File:   make_deb_remote_copy.sh
+# File:   make_remote_upload.sh
 # Author: Kirill Scherba <kirill@scherba.ru>
 #
 # Upload (mirror) local repository to remote host
 #
 # Created on Aug 27, 2015, 2:08:45 AM
 #
-
-
 
 ANSI_BROWN="\033[22;33m"
 ANSI_NONE="\033[0m"
@@ -47,7 +45,7 @@ echo $ANSI_BROWN"Upload local repository to remote host:"$ANSI_NONE
 echo ""
 lftp -c "
 set ftp:list-options -a;
-open ftp://repo:VV9x5ClC@repo.ksproject.org; 
+open ftp://repo:$CI_TEONET_REPO_FTP_PWD@repo.ksproject.org; 
 lcd $REPO/$SUBFOLDER;
 cd /$SUBFOLDER;
 mirror --reverse --delete --use-cache --verbose --allow-chown

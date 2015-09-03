@@ -1,6 +1,6 @@
 /**
- * File:   teolarge.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teolarge.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * \example teolarge.c
  * 
