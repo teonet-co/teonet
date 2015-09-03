@@ -1,5 +1,5 @@
 #!/bin/sh
-# 
+#
 # File:   make_deb_inc.sh
 # Author: Kirill Scherba <kirill@scherba.ru>
 #
@@ -73,18 +73,21 @@ check_param()
     VER=$1-$RELEASE
 
     # $6
-    if [ -z "$6" ]; then
-        PACKET_NAME="libteonet-dev"
-    else
-        PACKET_NAME=$6
-    fi
+    # Reserved
 
     # $7
     if [ -z "$7" ]; then
+        PACKET_NAME="libteonet-dev"
+    else
+        PACKET_NAME=$7
+    fi
+
+    # $8
+    if [ -z "$8" ]; then
         PACKET_DESCRIPTION="Teonet library version $VER
      Mesh network library."
     else
-        PACKET_DESCRIPTION=$7
+        PACKET_DESCRIPTION=$8
     fi
 }
 
@@ -188,7 +191,7 @@ show_teonet_depends()
     echo ""
 }
 
-# Remove package  
+# Remove package
 # Parameters:
 # @param $1 Package name
 apt_remove()
@@ -219,12 +222,12 @@ create_deb_repo()
     local REPO="$1/$2"
 
     # Create repository and configuration files
-    if [ ! -d "$REPO" ]; then     
+    if [ ! -d "$REPO" ]; then
         echo $ANSI_BROWN"Create repository and configuration files:"$ANSI_NONE
         echo ""
 
         mkdir $REPO
-        mkdir $REPO/conf 
+        mkdir $REPO/conf
 
         cat << EOF > $REPO/conf/distributions
 Origin: $3
@@ -249,7 +252,7 @@ EOF
         # Import repository keys to this host
         #echo "Before Import repository keys..."
         str=`gpg --list-keys | grep "repository <repo@ksproject.org>"`
-        if [ -z "$str" ]; then 
+        if [ -z "$str" ]; then
           echo $ANSI_BROWN"Add repository keys to this host:"$ANSI_NONE
           gpg --allow-secret-key-import --import $5/deb-sec.gpg.key
           gpg --import $5/deb.gpg.key
