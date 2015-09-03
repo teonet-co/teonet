@@ -72,7 +72,7 @@ PACKET_SUMMARY=$PACKET_DESCRIPTION
 PWD=`pwd`
 REPO=../../repo # Repository folder
 REPO_DEB=ubuntu # UBUNTU/DEBIAN sub-folder
-REPO_RPM=rhel # Rehl sub-folder
+#REPO_RPM=rhel # Rehl sub-folder
 RPMBUILD=~/rpmbuild # RPM Build folder 
 
 # Main message
