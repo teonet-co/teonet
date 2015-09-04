@@ -140,10 +140,6 @@ libteonet_la_SOURCES = \
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default
 
-# Man files
-#../docs/man/man3/*.3: make doxygen-doc	
-man_MANS = ../docs/man/man3/*.3
-
 # Extra distributive
 EXTRA_DIST = config/teonet.conf.default ../docs/man/man3
 
