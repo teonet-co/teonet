@@ -7,8 +7,9 @@ if DX_COND_man
 # You'd probably want to post-process man pages and installed the patched
 # versions.
 #man3_MANS = @DX_DOCDIR@/man/man3/teonet.c.1
-#$(man3_MANS): doxygen-doc
-#DX_CLEANFILES = -rf @DX_DOCDIR@/*
+man3_MANS = @DX_DOCDIR@/man/man3/*.3
+$(man3_MANS): doxygen-doc
+DX_CLEANFILES = -rf @DX_DOCDIR@/*
 
 endif
 
