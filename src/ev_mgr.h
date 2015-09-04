@@ -43,7 +43,20 @@ typedef enum ksnetEvMgrEvents {
     EV_K_HOTKEY,        ///< Hotkey event
     EV_K_USER,          ///< User press U hotkey
     EV_K_ASYNC,         ///< Async event           
-    EV_K_TERM_STARTED   ///< After terminal started (in place to define commands 
+    EV_K_TERM_STARTED,  ///< After terminal started (in place to define commands 
+    /**
+     * Teonet Callback QUEUE event. 
+     * 
+     * Parameters of Teonet Events callback function:
+     * 
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param event This event
+     * @param data Pointer to ksnCQueData
+     * @param data_len Size of ksnCQueData structure
+     * @param user_data Pointer to integer with type of this event: 
+     *                  1 - success; 0 - timeout
+     */
+    EV_K_CQUE_CALLBACK
 
 } ksnetEvMgrEvents;
 

@@ -30,6 +30,8 @@
 #include "ev_mgr.h"
 #include "cque.h"
 
+#define kev ((ksnetEvMgrClass*)(kq->ke))
+
 /**
  * Initialize ksnCQue module [class](@ref ksnCQueClass)
  * 
@@ -75,6 +77,7 @@ void ksnCQueDestroy(ksnCQueClass *kq) {
  */
 int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     
+    const int type = 1;
     int retval = -1;
     size_t data_len;
     
@@ -83,12 +86,15 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
         
         // Execute queue callback
         if(cq->cb != NULL)
-            cq->cb(id, 1, cq->data); // Type 1: successful callback
+            cq->cb(id, type, cq->data); // Type 1: successful callback
         
-        //! \todo Send teonet event in addition to callback
+        //! \todo Send teonet successful event in addition to callback
+        if(kev->event_cb != NULL) 
+            kev->event_cb(kev, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
+                    (void*)&type);
         
         // Stop watcher
-        ev_timer_stop(((ksnetEvMgrClass*)(kq->ke))->ev_loop, &cq->w);
+        ev_timer_stop(kev->ev_loop, &cq->w);
         
         // Remove record from queue
         if(pblMapRemove(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
@@ -96,7 +102,7 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
             retval = 0;
         }
     }
-            
+
     return retval;
 }
 
@@ -110,11 +116,21 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     
     #define cq ((ksnCQueData*)(w->data))
 
+    const int type = 0;
+
     // Stop this timer watcher
     ev_timer_stop(EV_A_ w);
 
     // Execute queue callback
-    cq->cb(cq->id, 0, cq->data); // Type 0: timeout callback
+    if(cq->cb != NULL)
+        cq->cb(cq->id, type, cq->data); // Type 0: timeout callback
+    
+    //! \todo Send teonet timeout event in addition to callback
+    #define kev2 ((ksnetEvMgrClass*)(cq->kq->ke))
+    if(kev2->event_cb != NULL) 
+        kev2->event_cb(kev2, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
+                (void*)&type);
+    #undef kev2
     
     // Remove record from Callback Queue
     size_t data_len;
@@ -131,7 +147,8 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
  * Add callback to queue
  * 
  * @param kq Pointer to ksnCQueClass
- * @param cb Callback [function](@ref ksnCQueCallback)
+ * @param cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event 
+ *           EV_K_CQUE_CALLBACK should be send at the same time.
  * @param timeout Callback timeout. If equal to 0 than timeout sets automatically
  * @param data The user data which should be send to the Callback function
  * 
@@ -160,9 +177,11 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, vo
             // Initialize, set user data and start the timer
             ev_timer_init(&cq->w, cq_timer_cb, timeout, 0.0);
             cq->w.data = cq; // Watcher data link to the ksnCQueData
-            ev_timer_start(((ksnetEvMgrClass*)(kq->ke))->ev_loop, &cq->w);
+            ev_timer_start(kev->ev_loop, &cq->w);
         }
     }
     
     return cq;
 }
+
+#undef kev            
