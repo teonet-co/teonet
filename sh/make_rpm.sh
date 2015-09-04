@@ -79,38 +79,9 @@ build_rpm_tarball $PACKAGE_NAME
 
 # Copy tarball to the sources folder and create spec file
 RPM_FILES="/usr/bin/teovpn
-   /usr/doc/teonet/AUTHORS
-   /usr/doc/teonet/COPYING
-   /usr/doc/teonet/ChangeLog
-   /usr/doc/teonet/INSTALL
-   /usr/doc/teonet/NEWS
-   /usr/doc/teonet/README
+   /usr/doc/teonet/
    /usr/etc/teonet/teonet.conf.default
-   /usr/include/teonet/config/conf.h
-   /usr/include/teonet/config/config.h
-   /usr/include/teonet/config/opt.h
-   /usr/include/teonet/crypt.h
-   /usr/include/teonet/ev_mgr.h
-   /usr/include/teonet/hotkeys.h
-   /usr/include/teonet/modules/net_cli.h
-   /usr/include/teonet/modules/net_tcp.h
-   /usr/include/teonet/modules/net_term.h
-   /usr/include/teonet/modules/net_tun.h
-   /usr/include/teonet/modules/vpn.h
-   /usr/include/teonet/modules/cque.h
-   /usr/include/teonet/net_tr-udp.h
-   /usr/include/teonet/net_tr-udp_.h
-   /usr/include/teonet/net_tr-udp_stat.h
-   /usr/include/teonet/net_arp.h
-   /usr/include/teonet/net_com.h
-   /usr/include/teonet/net_core.h
-   /usr/include/teonet/net_multi.h
-   /usr/include/teonet/net_split.h
-   /usr/include/teonet/pbl.h
-   /usr/include/teonet/teonet.h
-   /usr/include/teonet/utils/rlutil.h
-   /usr/include/teonet/utils/string_arr.h
-   /usr/include/teonet/utils/utils.h
+   /usr/include/teonet/
    /usr/lib/libteonet.a
    /usr/lib/libteonet.la
    /usr/lib/libteonet.so
