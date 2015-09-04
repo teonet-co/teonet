@@ -97,6 +97,10 @@ RPM_FILES="/usr/bin/teovpn
    /usr/include/teonet/modules/net_term.h
    /usr/include/teonet/modules/net_tun.h
    /usr/include/teonet/modules/vpn.h
+   /usr/include/teonet/modules/cque.h
+   /usr/include/teonet/net_tr-udp.h
+   /usr/include/teonet/net_tr-udp_.h
+   /usr/include/teonet/net_tr-udp_stat.h
    /usr/include/teonet/net_arp.h
    /usr/include/teonet/net_com.h
    /usr/include/teonet/net_core.h
@@ -111,7 +115,10 @@ RPM_FILES="/usr/bin/teovpn
    /usr/lib/libteonet.la
    /usr/lib/libteonet.so
    /usr/lib/libteonet.so.$LIBRARY_HI_VERSION
-   /usr/lib/libteonet.so.$LIBRARY_VERSION"
+   /usr/lib/libteonet.so.$LIBRARY_VERSION
+   /usr/share/doc/teonet/examples/
+   /usr/share/man/man3/
+"
 create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
 # Build the source and the binary RPM
