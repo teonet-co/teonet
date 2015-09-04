@@ -87,6 +87,7 @@ teonetincludedir=$(includedir)/teonet
 #teonetinclude_HEADERS = 
 nobase_teonetinclude_HEADERS = \
     crypt.h \
+    daemon.h \
     ev_mgr.h \
     hotkeys.h \
     net_arp.h \
@@ -97,6 +98,7 @@ nobase_teonetinclude_HEADERS = \
     net_tr-udp.h \
     net_tr-udp_.h \
     net_tr-udp_stat.h \
+    pidfile.h \
     teonet.h \
     config/config.h \
     config/conf.h \
@@ -117,6 +119,7 @@ teonetinclude_HEADERS = \
 
 libteonet_la_SOURCES = \
     crypt.c \
+    daemon.c \
     ev_mgr.c \
     hotkeys.c \
     net_arp.c \
@@ -126,6 +129,7 @@ libteonet_la_SOURCES = \
     net_split.c \
     net_tr-udp.c \
     net_tr-udp_stat.c \
+    pidfile.c \
     teonet.c \
     config/conf.c \
     config/opt.c \

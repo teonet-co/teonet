@@ -1,10 +1,10 @@
 /**
- * File:   conf.c
- * Author: Kirill Scherba
+ * \file   conf.c
+ * \author Kirill Scherba
  *
  * Created on April 11, 2015, 6:10 AM
  *
- * Configuration parameters module
+ * Teonet configuration parameters module
  *
  */
 
@@ -215,12 +215,13 @@ void read_config(ksnet_cfg *conf, int port_param) {
 }
 
 /**
- * Create unique port config file name
+ * Create unique port configuration file name
  *
  * @param buf Buffer to create file name
- * @param type Config file type: 0 - system; 1 - local
- * @param buf_size Buffer size
+ * @param BUF_SIZE Size of buffer
+ * @param type Configuration file type: 0 - system; 1 - local
  * @param port Port number
+ * @param network Network name
  *
  * @return
  */
