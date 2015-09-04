@@ -97,6 +97,10 @@ RPM_FILES="/usr/bin/teovpn
    /usr/include/teonet/modules/net_term.h
    /usr/include/teonet/modules/net_tun.h
    /usr/include/teonet/modules/vpn.h
+   /usr/include/teonet/modules/cque.h
+   /usr/include/teonet/net_tr-udp.h
+   /usr/include/teonet/net_tr-udp_.h
+   /usr/include/teonet/net_tr-udp_stat.h
    /usr/include/teonet/net_arp.h
    /usr/include/teonet/net_com.h
    /usr/include/teonet/net_core.h
