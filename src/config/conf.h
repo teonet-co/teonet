@@ -36,6 +36,9 @@
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
 
+// TRUE & FALSE define
+#define TRUE  1
+#define FALSE 0
 
 typedef struct ksnet_cfg {
 

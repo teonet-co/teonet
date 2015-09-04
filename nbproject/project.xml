@@ -23,8 +23,15 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>argc</word>
+            <word>argv</word>
+            <word>config</word>
             <word>fi</word>
             <word>perror</word>
+            <word>pid</word>
+            <word>pidfile</word>
+            <word>pidfiles</word>
+            <word>syslog</word>
             <word>tarball</word>
         </spellchecker-wordlist>
     </configuration>
