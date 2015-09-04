@@ -94,10 +94,14 @@ nobase_teonetinclude_HEADERS = \
     net_core.h \
     net_multi.h \
     net_split.h \
+    net_tr-udp.h \
+    net_tr-udp_.h \
+    net_tr-udp_stat.h \
     teonet.h \
     config/config.h \
     config/conf.h \
     config/opt.h \
+    modules/cque.h \
     modules/net_cli.h \
     modules/net_tcp.h \
     modules/net_term.h \
@@ -136,7 +140,12 @@ libteonet_la_SOURCES = \
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default
 
-EXTRA_DIST = config/teonet.conf.default
+# Man files
+#../docs/man/man3/*.3: make doxygen-doc	
+man_MANS = ../docs/man/man3/*.3
+
+# Extra distributive
+EXTRA_DIST = config/teonet.conf.default ../docs/man/man3
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -147,7 +156,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 9:0:0
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 9:0:0 
 
 uninstall-local:
 	-rm -r $(teonetincludedir)
