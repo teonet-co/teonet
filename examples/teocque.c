@@ -8,7 +8,8 @@
  * Module: cque.c  
  *   
  * This is example application to register callback and receive timeout or 
- * success call of callback function. 
+ * success call of callback function or(and) in teonet event callback when event 
+ * type equal to EV_K_CQUE_CALLBACK. 
  * 
  * In this example we:
  * 
@@ -38,7 +39,9 @@
 #define TCQUE_VERSION "0.0.1"    
 
 /**
- * Callback Queue callback
+ * Callback Queue callback (the same as callback queue event). 
+ * 
+ * This function calls at timeout or after ksnCQueExec calls
  * 
  * @param id Calls ID
  * @param type Type: 0 - timeout callback; 1 - successful callback 
@@ -109,9 +112,21 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 default: break;
             }
         }
-        break;        
+        break;      
         
-        // Undefined event (an error)
+        // Callback QUEUE event (the same as callback queue callback). This 
+        // event send at timeout or after ksnCQueExec calls
+        case EV_K_CQUE_CALLBACK: 
+        {
+            int type = *(int*)user_data; // Callback type: 1- success; 0 - timeout
+            ksnCQueData *cq = data; // Pointer to Callback QUEUE data
+
+            printf("Got Callback Queue event with id: %d, type: %d => %s\n", 
+            cq->id, type, type ? "success" : "timeout");
+        }    
+        break;
+        
+        // Other events
         default: break;
     }
 }

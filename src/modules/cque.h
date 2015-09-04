@@ -35,7 +35,7 @@ typedef struct ksnCQueData {
     ksnCQueCallback cb; ///< Pointer to callback function
     ksnCQueClass *kq; ///< Pointer to ksnCQueClass
     uint32_t id; ///< Callback ID (equal to key)
-    //char data[]; ///< TODO: Some data 
+    //char data[]; ///< \todo: Some data 
     void *data; ///< User data
     ev_timer w; ///< Timeout watcher
     
