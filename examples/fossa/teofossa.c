@@ -2,7 +2,10 @@
  * File:   teofossa.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  *
- * Check integration teonet with fossa.
+ * \example teofossa.c
+ * 
+ * ## Check integration teonet with fossa
+ * 
  * The Teonet runs in main thread and the fossa runs in separate thread.
  * 
  * How to execute this test:
@@ -47,9 +50,10 @@ pthread_t tid; // Fossa thread id
  * Teonet event handler
  *
  * @param ke
- * @param event
+ * @param ev
  * @param data
  * @param data_len
+ * @param user_data
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents ev, void *data,
               size_t data_len, void *user_data) {
@@ -103,7 +107,8 @@ static void ev_handler(struct ns_connection *nc, int ev, void *ev_data) {
 /**
  * Fossa main thread function
  * 
- * @param arg
+ * @param ke
+ * 
  * @return 
  */
 void* fossa(void *ke) {
@@ -126,10 +131,11 @@ void* fossa(void *ke) {
 }
 
 /**
- * Main application function
+ * Main Teofossa application function
  *
- * @param argc
- * @param argv
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
  * @return
  */
 int main(int argc, char** argv) {

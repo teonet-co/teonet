@@ -535,10 +535,10 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
     if(watcher->ksnet_cb != NULL)
         watcher->ksnet_cb(loop, watcher, revents, client_sd);
 
-    // TODO: Add client to map
+    //! \todo: Add client to map
 //    pblMapAdd(watcher->clients_map, &client_sd, sizeof(client_sd),)
-    w->fd; // Server sd
-    client_sd; // Client sd
+//    w->fd; // Server sd
+//    client_sd; // Client sd
     
     // Add socket FD to the Event manager FD list
     //ksnet_EventMgrAddFd(client_sd);

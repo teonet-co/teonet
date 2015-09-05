@@ -1,6 +1,10 @@
 /* 
- * File:   teoterm.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teoterm.c
+ * \author Kirill Scherba <kirill@scherba.ru>
+ * 
+ * \example teoterm.c
+ * 
+ * ## Teonet terminal custom command
  * 
  * This examples shows how to add custom command to the Teonet terminal
  *
@@ -53,11 +57,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // Tunnel parameters message
             printf("The terminal server command 'user' was added\n");
             
-            cli_register_command(ke->cli, NULL, "user", cmd_user, PRIVILEGE_UNPRIVILEGED,
-                    MODE_EXEC, "Show list of teonet peers");
+            cli_register_command(ke->cli, NULL, "user", cmd_user, 
+                    PRIVILEGE_UNPRIVILEGED, MODE_EXEC, 
+                    "Show list of teonet peers");
           
         }
-            break;
+        break;
         
         default:
             break;
@@ -67,9 +72,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 /**
  * Main application function
  *
- * @param argc
- * @param argv
- * @return
+ * @param argc Number of parameters
+ * @param argv Parameters array
+ * 
+ * @return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
 
@@ -84,4 +90,3 @@ int main(int argc, char** argv) {
     
     return 0;
 }
-

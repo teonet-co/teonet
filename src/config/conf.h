@@ -20,15 +20,16 @@
 #define KSN_MAX_HOST_NAME 31
 #define NUMBER_TRY_PORTS 1000
 
-#ifndef RELEASE_KSNET
+//#ifndef RELEASE_KSNET
 #define DEBUG_KSNET  1
-#endif
+//#endif
 
 #define KSNET_EVENT_MGR_TIMER 0.25  ///< Main event manager timer interval
 #define KSNET_PORT_DEFAULT "9000" ///< Main network port
 #define KSNET_CRYPT  1 ///< Crypt packages
 
 // Modules enable
+#define M_ENAMBE_CQUE 1
 #define M_ENAMBE_PBLKF 1
 #define M_ENAMBE_VPN 1
 #define M_ENAMBE_TCP 1
@@ -47,7 +48,8 @@ typedef struct ksnet_cfg {
         show_peers_f,   ///< Show peers at start up
         hot_keys_f,    ///< Show hotkeys when press h
         crypt_f,      ///< Encrypt/Decrypt packets
-        vpn_connect_f;  ///< Start VPN flag
+        vpn_connect_f,  ///< Start VPN flag
+        show_tr_udp_f; ///< Show TR-UDP statistic at start up    
 
     // Network
     char network[KSN_BUFFER_SM_SIZE/2];     ///< Network
@@ -71,16 +73,16 @@ typedef struct ksnet_cfg {
     long r_port;                            ///< Remote host port
 
     // VPN
-    char vpn_dev_name[KSN_MAX_HOST_NAME];
-    char vpn_dev_hwaddr[KSN_MAX_HOST_NAME];
-    char vpn_ip[KSN_BUFFER_SM_SIZE/2];
-    long vpn_ip_net;
-    long vpn_mtu;
+    char vpn_dev_name[KSN_MAX_HOST_NAME];   ///< VPN Interface device name
+    char vpn_dev_hwaddr[KSN_MAX_HOST_NAME]; ///< VPN Interface MAC address
+    char vpn_ip[KSN_BUFFER_SM_SIZE/2];      ///< VPN Interface IP
+    long vpn_ip_net;                        ///< VPN Interface network mask
+    long vpn_mtu;                           ///< VPN Interface MTU
     
     // Terminal
 //    char t_username[KSN_BUFFER_SM_SIZE/2]; ///< User name to login to terminal
 //    char t_password[KSN_BUFFER_SM_SIZE/2]; ///< Password to login to terminal
-
+    
     // Helpers
     int pp;
     char pn[KSN_BUFFER_SM_SIZE];

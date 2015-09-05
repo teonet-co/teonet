@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <sys/socket.h>
 
 #include <pbl.h>
 
@@ -61,12 +62,12 @@ void ksnetArpDestroy(ksnetArpClass *ka);
 void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data);
 void ksnetArpAddHost(ksnetArpClass *ka, char* name, char *addr, int port);
 void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port);
-ksnet_arp_data * ksnetArpGet(ksnetArpClass *ka, char *name);
-void ksnetArpRemove(ksnetArpClass *ka, char* name);
+ksnet_arp_data *ksnetArpGet(ksnetArpClass *ka, char *name);
+ksnet_arp_data *ksnetArpRemove(ksnetArpClass *ka, char* name);
 int ksnetArpShow(ksnetArpClass *ka);
 char *ksnetArpShowStr(ksnetArpClass *ka);
 int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data);
-
+ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr);
 
 #ifdef	__cplusplus
 }
