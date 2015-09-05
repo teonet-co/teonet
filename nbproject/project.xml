@@ -26,13 +26,19 @@
             <word>argc</word>
             <word>argv</word>
             <word>config</word>
+            <word>Dockerfile</word>
             <word>fi</word>
+            <word>kirill</word>
             <word>perror</word>
             <word>pid</word>
             <word>pidfile</word>
             <word>pidfiles</word>
+            <word>ru</word>
+            <word>scherba</word>
+            <word>sudo</word>
             <word>syslog</word>
             <word>tarball</word>
+            <word>ubuntu</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
