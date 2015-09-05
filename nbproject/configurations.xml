@@ -48,6 +48,7 @@
         <in>teotun.c</in>
       </df>
       <df name="sh">
+        <in>Dockerfile</in>
         <in>make_package.c</in>
       </df>
       <df name="src">
@@ -474,6 +475,8 @@
           </preprocessorList>
         </cTool>
       </folder>
+      <item path="sh/Dockerfile" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
         </cTool>

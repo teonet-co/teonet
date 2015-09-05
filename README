@@ -42,7 +42,7 @@ sudo apt-get update
 
 #### Install
 
-sudo apt-get install libteonet-dev
+sudo apt-get install -y libteonet-dev
 
 #### Run
 
