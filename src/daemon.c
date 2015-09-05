@@ -7,10 +7,12 @@
  * Created on September 4, 2015, 11:20 PM
  */
 
+#include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <syslog.h>
 #include <string.h>
+#include <errno.h>
+#include <signal.h>
+#include <syslog.h>
 
 #include "daemon.h"
 #include "config/config.h"
@@ -48,7 +50,7 @@ void kill_other (int other_pid) {
         }
         else
         {
-            ksnet_printf(MESSAGE, "Application is successfully stopped\n\n");
+//! \todo            ksnet_printf(MESSAGE, "Application is successfully stopped\n\n");
             syslog (LOG_NOTICE, "Successfully stopped [%d]\n", other_pid);
 
         }
