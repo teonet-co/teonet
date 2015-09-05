@@ -17,6 +17,48 @@
 
 #ifndef HAVE_MINGW
 
+void lperror(char* prefix);
+
+/**
+ * Kill other server
+ *
+ * @param other_pid
+ */
+void kill_other (int other_pid) {
+
+    if (other_pid != 0) {
+
+        // Send signal to main server process and all their children
+        if (kill(-other_pid, SIGUSR1) != 0) {
+
+            switch (errno) {
+
+                case ESRCH:
+                    fprintf(stderr, "Application is not running\n\n");
+                    break;
+
+                case EPERM:
+                    fprintf(stderr, "Not enough privileges.\n"
+                                    "Use: sudo ksnet ... -k\n\n");
+                    break;
+
+                default:
+                    fprintf(stderr, "Unknown error\n\n");
+            }
+        }
+        else
+        {
+            ksnet_printf(MESSAGE, "Application is successfully stopped\n\n");
+            syslog (LOG_NOTICE, "Successfully stopped [%d]\n", other_pid);
+
+        }
+    }
+    else
+    {
+        fprintf(stderr, "Application is not running\n\n");
+    }
+}
+
 /**
  * Printing message to syslog
  * 
