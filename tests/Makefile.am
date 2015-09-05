@@ -24,11 +24,15 @@ if MINGW
 AM_LDFLAGS += -L../../../confuse-2.7/src -L../../../libev-4.19 -L../../../libtuntap-master
 endif
 
-LIBS = -lteonet -lcrypto -lcunit 
+LIBS = -lteonet -lcrypto -lcunit -lev
 if TEO_THREAD	
 LIBS += -pthread
 endif
 
+noinst_PROGRAMS = teonet_tst test_teonet
+
+teonet_tst_SOURCES = teonet_tst.c
+test_teonet_SOURCES = test_teonet.c test_net_tr-udp.c test_crypt.c test_cque.c
 bin_PROGRAMS = teonet_tst test_pbl_kf
 
 teonet_tst_SOURCES = teonet_tst.c

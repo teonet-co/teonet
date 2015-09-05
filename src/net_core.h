@@ -23,6 +23,7 @@
 #if KSNET_CRYPT
 #include "crypt.h"
 #endif
+#include "net_tr-udp.h"
 
 // External constants
 extern const char *localhost;
@@ -42,6 +43,7 @@ typedef struct ksnCoreClass {
     double last_check_event; ///< Last time of check host event
     ksnetArpClass *ka;       ///< Arp table class object
     ksnCommandClass *kco;    ///< Command class object
+    ksnTRUDPClass *ku;       ///< TR-UDP class object
     #if KSNET_CRYPT
     ksnCryptClass *kcr;      ///< Crypt class object
     #endif
@@ -63,6 +65,9 @@ void ksnCoreDestroy(ksnCoreClass *kc);
 
 int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd, void *data, size_t data_len);
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len);
+void ksnCoreProcessPacket (void *kc, void *buf, size_t recvlen, 
+        __SOCKADDR_ARG remaddr);
+int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *recv_data);
 #define ksnCoreSetEventTime(kc) kc->last_check_event = ksnetEvMgrGetTime(kc->ke)
 
 #ifdef	__cplusplus

@@ -17,6 +17,7 @@
 
 #include "hotkeys.h"
 #include "modules/vpn.h"
+#include "modules/cque.h"
 #include "modules/pbl_kf.h"
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
@@ -37,10 +38,26 @@ typedef enum ksnetEvMgrEvents {
     EV_K_DISCONNECTED,  ///< A peer was disconnected from host
     EV_K_RECEIVED,      ///< This host Received a data
     EV_K_RECEIVED_WRONG,///< Wrong packet received
+    EV_K_RECEIVED_ACK,  ///< This host Received ACK to sent data
     EV_K_IDLE,          ///< Idle check host events (after 11.5 after last host send or receive data)
     EV_K_TIMER,         ///< Timer event
+    EV_K_HOTKEY,        ///< Hotkey event
+    EV_K_USER,          ///< User press U hotkey
     EV_K_ASYNC,         ///< Async event           
-    EV_K_TERM_STARTED   ///< After terminal started (in place to define commands 
+    EV_K_TERM_STARTED,  ///< After terminal started (in place to define commands 
+    /**
+     * Teonet Callback QUEUE event. 
+     * 
+     * Parameters of Teonet Events callback function:
+     * 
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param event This event
+     * @param data Pointer to ksnCQueData
+     * @param data_len Size of ksnCQueData structure
+     * @param user_data Pointer to integer with type of this event: 
+     *                  1 - success; 0 - timeout
+     */
+    EV_K_CQUE_CALLBACK
 
 } ksnetEvMgrEvents;
 
@@ -67,6 +84,7 @@ typedef struct ksnetEvMgrClass {
     ksnTcpClass *kt; ///< TCP Client/Server class
     ksnTunClass *ktun; ///< Tunnel class
     ksnTermClass *kter; ///< Terminal class
+    ksnCQueClass *kq; ///< Callback QUEUE class
     ksnTDBClass *kf; ///< PBL KeyFile class
 
     ksnet_cfg ksn_cfg; ///< KSNet configuration

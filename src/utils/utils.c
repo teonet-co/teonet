@@ -20,6 +20,15 @@
 
 double ksnetEvMgrGetTime(void *ke);
 
+// Test mode (for tests only)
+static int KSN_TEST_MODE = 0;
+inline void KSN_SET_TEST_MODE(int test_mode) {
+    KSN_TEST_MODE = test_mode;
+}
+inline int KSN_GET_TEST_MODE() {
+    return KSN_TEST_MODE;
+}
+
 /**
  * KSNet printf. @see vprintf
  *
@@ -27,6 +36,7 @@ double ksnetEvMgrGetTime(void *ke);
  * function has type parameter which define type of print. It should be used
  * this function instead of standard printf function.
  *
+ * @param ksn_cfg Pointer to ksnet_cfg
  * @param type MESSAGE -- print always;
  *             CONNECT -- print if connect show flag  connect is set;
  *             DEBUG -- print if debug show flag is set on;
@@ -40,6 +50,9 @@ double ksnetEvMgrGetTime(void *ke);
 int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
     int show_it = 0, ret_val = 0;
+    
+    // Skip execution in tests
+    if(KSN_GET_TEST_MODE()) return ret_val;
 
     switch(type) {
 
@@ -173,7 +186,7 @@ char *trimlf(char *str) {
 /**
  * Remove trailing or leading space
  *
- * \Description Remove trailing or leading space or tabulation characters in
+ * Remove trailing or leading space or tabulation characters in
  * input null terminated string
  *
  * @param str Null terminated input string to remove trailing and leading
@@ -218,7 +231,6 @@ char *trim(char *str) {
 /**
  * Calculate number of lines in string
  *
- * \Description
  * Calculate number of line with line feed \\n at the end in null
  * input terminated string
  *
@@ -235,9 +247,11 @@ int calculate_lines(char *str) {
 }
 
 /**
- * Create random ksnet host name, should be free after use
+ * Get random host name
+ * 
+ * Create random host name. Should be free after use.
  *
- * @return
+ * @return String with random host name. Should be free after use.
  */
 char *getRandomHostName(void) {
 
@@ -281,20 +295,20 @@ char *DATA_DIR = ksnet_formatMessage(".%s", getprogname());
 #endif
 #endif
 
-#if RELEASE_KSNET
+        if(!strncmp(DATA_DIR, ".lt-", 4)) {
+            memmove(DATA_DIR + 1, DATA_DIR + 4, strlen(DATA_DIR) + 1 - 4);
+        }
+
+//#if RELEASE_KSNET
         char buf[KSN_BUFFER_SIZE];
         strncpy(buf, getenv("HOME"), KSN_BUFFER_SIZE);
-        strncat(buf, "/", KSN_BUFFER_SIZE);
-        strncat(buf, DATA_DIR, KSN_BUFFER_SIZE);
+        strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+        strncat(buf, DATA_DIR, KSN_BUFFER_SIZE - strlen(buf) - 1);
         dataDir = strdup(buf);
-#else
-        dataDir = strdup(DATA_DIR);
-#endif
+//#else
+//        dataDir = strdup(DATA_DIR);
+//#endif
         free(DATA_DIR);
-    }
-
-    if(!strncmp(dataDir, ".lt-", 4)) {
-        memmove(dataDir + 1, dataDir + 4, strlen(dataDir) - 3);
     }
 
     return dataDir;
@@ -407,15 +421,35 @@ const char *ksnet_getSysConfigDir(void) {
 
 #define LOCAL_CONFIG_DIR "src/conf"
 
-#if RELEASE_KSNET
-        sysConfigDir = strdup(KSNET_SYS_CONFIG_DIR);
-#else
-        sysConfigDir = strdup(LOCAL_CONFIG_DIR);
-#endif
+//#if RELEASE_KSNET
+        sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
+//#else
+//        sysConfigDir = strdup(LOCAL_CONFIG_DIR);
+//#endif
     }
 
     return sysConfigDir;
 }
+
+/**
+ * Check if a value exist in a array
+ * 
+ * @param val Integer value
+ * @param arr Integer array
+ * @param size Array size
+ * 
+ * @return 
+ */
+int inarray(int val, const int *arr, int size) {
+    
+    int i;
+    for (i=0; i < size; i++) {
+        if (arr[i] == val)
+            return 1;
+    }
+    return 0;
+}
+
 
 #include <sys/types.h>
 #ifdef HAVE_MINGW
@@ -428,12 +462,13 @@ const char *ksnet_getSysConfigDir(void) {
 #include <string.h>
 
 /**
+ * Get IPs
+ * 
  * Get IP address of this host
  *
- * @param arr String array
- * @return
+ * @return Pointer to ksnet_stringArr
  */
-ksnet_stringArr getIPs(/*ksnet_config *conf*/) {
+ksnet_stringArr getIPs() {
 
     ksnet_stringArr arr = ksnet_stringArrCreate();
 

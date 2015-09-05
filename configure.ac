@@ -1,4 +1,7 @@
-AC_INIT([teonet], [0.0.6], [kirill@scherba.ru])
+AC_INIT([teonet], [0.0.9], [kirill@scherba.ru])
+
+AC_DEFINE(LIBRARY_HI_VERSION, ["9"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_VERSION,    ["9.0.0"], [Teonet dynamic library version])
 
 AC_CONFIG_HEADERS([src/config/config.h])
 
@@ -11,7 +14,7 @@ AC_PROG_CXX
 AM_PROG_LEX
 AC_PROG_LIBTOOL
 
-AC_DEFINE(COPYRIGHT, ["(c) 1996-2015"], [Teonet library copyright])
+AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2015"], [Teonet library copyright])
 
 dnl ***************************************************************************
 dnl Debug info
@@ -222,6 +225,8 @@ AC_CONFIG_FILES([
     examples/fossa/Makefile
     tests/Makefile
     app/Makefile
+    sh/Makefile
+    embedded/Makefile
 ])
 AC_PROG_CC
 AC_OUTPUT

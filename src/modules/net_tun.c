@@ -280,8 +280,10 @@ void ksnTunListAdd(ksnTunClass *ktun, int fd, struct ksn_tun_accept_data *tun_d)
  */
 void *ksnTunListRemove(ksnTunClass *ktun, int fd) {
 
+    void *ptr;
     size_t val_len;
-    return pblMapRemove(ktun->list, &fd, sizeof(fd), &val_len);
+    return (ptr = pblMapRemove(ktun->list, &fd, sizeof(fd), &val_len)) != 
+            (void*)-1 ? ptr : NULL;
 }
 
 /**
@@ -441,13 +443,13 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
         return;
     }
 
-    // TODO: Read error
+    //! \todo: Read error
     else if(read_len < 0) {
 
         #ifdef DEBUG_KSNET
         ksnet_printf(
             & ((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke)->ksn_cfg , DEBUG,
-            "TUN %sTUN Server:%s : read error\n", ANSI_BLUE, ANSI_NONE
+            "%sTUN Server:%s : read error\n", ANSI_BLUE, ANSI_NONE
         );
         #endif
 

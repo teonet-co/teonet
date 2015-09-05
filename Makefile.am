@@ -7,12 +7,13 @@ if DX_COND_man
 # You'd probably want to post-process man pages and installed the patched
 # versions.
 #man3_MANS = @DX_DOCDIR@/man/man3/teonet.c.1
-#$(man3_MANS): doxygen-doc
-#DX_CLEANFILES = -rf @DX_DOCDIR@/*
+man3_MANS = @DX_DOCDIR@/man/man3/*.3
+$(man3_MANS): doxygen-doc
+DX_CLEANFILES = -rf @DX_DOCDIR@/*
 
 endif
 
-SUBDIRS = embedded/libpbl/src src po tests examples app  #src/app src/libtuntap src/ksvpn src po dist examples tests ascripts conf
+SUBDIRS = embedded/libpbl/src embedded src po tests examples app sh
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
@@ -31,10 +32,11 @@ INTLTOOL_FILES = intltool-extract.in \
 	intltool-merge.in \
 	intltool-update.in
 
-EXTRA_DIST = $(teonetdoc_DATA) \
+EXTRA_DIST = \
+	$(teonetdoc_DATA) \
 	$(INTLTOOL_FILES) \
-	tests/test-suite.sh \
 	$(DX_CONFIG)
+#	tests/test-suite.sh
 
 DISTCLEANFILES = intltool-extract \
 	intltool-merge \
@@ -54,6 +56,7 @@ run:	src/app/teovpn
 
 build-tests: tests/test_pbl_kf
 	
-test:	tests/teonet_tst
-	sudo tests/teonet_tst test-01 --show_peers
-
+build-tests: tests/test_teonet
+	
+test:	tests/test_teonet
+	tests/test_teonet
