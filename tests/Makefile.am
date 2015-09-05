@@ -29,11 +29,8 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-noinst_PROGRAMS = teonet_tst test_teonet
+noinst_PROGRAMS = teonet_tst test_teonet test_pbl_kf
 
 teonet_tst_SOURCES = teonet_tst.c
 test_teonet_SOURCES = test_teonet.c test_net_tr-udp.c test_crypt.c test_cque.c
-bin_PROGRAMS = teonet_tst test_pbl_kf
-
-teonet_tst_SOURCES = teonet_tst.c
 test_pbl_kf_SOURCES = test_pbl_kf.c
