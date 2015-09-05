@@ -697,6 +697,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     // Callback QUEUE
     #if M_ENAMBE_CQUE
     ke->kq = ksnCQueInit(ke);
+    #endif
     // PBL KeyFile Module
     #if M_ENAMBE_PBLKF
     ke->kf = ksnTDBinit(ke);
