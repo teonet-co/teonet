@@ -1,14 +1,14 @@
 /** 
- * File:   pbl_kf.h
+ * File:   teodb.h
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
- * PBL key file module
+ * Teonet database module based at PBL KeyFile
  *
  * Created on August 20, 2015, 4:33 PM
  */
 
-#ifndef PBL_KF_H
-#define	PBL_KF_H
+#ifndef TEODB_H
+#define	TEODB_H
 
 /**
  * PBL KeyFile data 
@@ -47,4 +47,4 @@ int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const char *key);
 }
 #endif
 
-#endif	/* PBL_KF_H */
+#endif	/* TEODB_H */
