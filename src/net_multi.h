@@ -46,6 +46,8 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md);
 void ksnMultiDestroy(ksnMultiClass *km);
 ksnetEvMgrClass *ksnMultiGet(ksnMultiClass *km, int num);
 char *ksnMultiShowListStr(ksnMultiClass *km);
+ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd, void *data, 
+        size_t data_len);
 
 #ifdef	__cplusplus
 }
