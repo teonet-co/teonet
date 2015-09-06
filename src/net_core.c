@@ -324,14 +324,14 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         
         arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
                 data_len);
-        // ###TODO: Send to peer at other network
+        // \todo: Send to peer at other network
         printf("###TODO: Send to peer at other network\n");
     }
     
     // Send to r-host
     else {
         
-        // ###TODO: Send to r-host
+        // \todo: Send to r-host
         printf("###TODO: Send to r-host\n");
     }
 
