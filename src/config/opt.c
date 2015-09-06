@@ -28,21 +28,21 @@ void opt_usage(char *app_name, int app_argc, char** app_argv);
 /**
  * Read configuration and command line options
  *
- * This function should be called before calling #ksnet_connect to read
- * configuration and command line options
+ * This function should be called to read configuration and command line 
+ * options
  *
  * @param argc Number of command line arguments
  * @param argv String array with command line arguments
- * @param conf Pointer to ksnet_config structure to read configuration and
+ * @param conf Pointer to ksnet_cfg structure to read configuration and
  *             command line parameters to
  * @param app_argc Number of application arguments
  * @param app_argv String array with application argument names
- * @param show_opt
+ * @param show_arg Show arguments 
  *
  * @return Entered application arguments
  */
 char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
-        int app_argc, char **app_argv, int show_opt) {
+        int app_argc, char **app_argv, int show_arg) {
 
     int option_index = 0, opt;
     struct option loptions[] = {
@@ -224,7 +224,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
     strncpy(conf->host_name, argv[optind], KSN_MAX_HOST_NAME);
 
     // Show arguments
-    if(show_opt) {
+    if(show_arg) {
 
         int i;
 
