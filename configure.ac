@@ -1,7 +1,7 @@
-AC_INIT([teonet], [0.0.9], [kirill@scherba.ru])
+AC_INIT([teonet], [0.0.10], [kirill@scherba.ru])
 
-AC_DEFINE(LIBRARY_HI_VERSION, ["9"], [Teonet dynamic library version])
-AC_DEFINE(LIBRARY_VERSION,    ["9.0.0"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_HI_VERSION, ["10"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_VERSION,    ["10.0.0"], [Teonet dynamic library version])
 
 AC_CONFIG_HEADERS([src/config/config.h])
 
@@ -192,7 +192,7 @@ DX_CHI_FEATURE(OFF)
 DX_MAN_FEATURE(ON)
 DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
-DX_PDF_FEATURE(ON)
+DX_PDF_FEATURE(OFF)
 DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN(Teonet, Doxyfile, docs)
 

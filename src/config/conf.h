@@ -30,11 +30,15 @@
 
 // Modules enable
 #define M_ENAMBE_CQUE 1
+#define M_ENAMBE_PBLKF 1
 #define M_ENAMBE_VPN 1
 #define M_ENAMBE_TCP 1
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
 
+// TRUE & FALSE define
+#define TRUE  1
+#define FALSE 0
 
 typedef struct ksnet_cfg {
 

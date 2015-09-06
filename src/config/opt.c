@@ -31,15 +31,18 @@ void opt_usage(char *app_name, int app_argc, char** app_argv);
  * This function should be called before calling #ksnet_connect to read
  * configuration and command line options
  *
- * @param argc First parameter of main function
- * @param argv Second parameter of main function
+ * @param argc Number of command line arguments
+ * @param argv String array with command line arguments
  * @param conf Pointer to ksnet_config structure to read configuration and
  *             command line parameters to
+ * @param app_argc Number of application arguments
+ * @param app_argv String array with application argument names
+ * @param show_opt
  *
- * @return Always return 0.
+ * @return Entered application arguments
  */
 char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
-        int app_argc, char** app_argv, int show_opt) {
+        int app_argc, char **app_argv, int show_opt) {
 
     int option_index = 0, opt;
     struct option loptions[] = {
@@ -276,9 +279,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --vpn_ip             VPN IP\n"
     "      --vpn_mtu            VPN MTU\n"
     #endif
-//    "\n"
-//    "  -d, --daemon             Start this application in daemon mode\n"
-//    "  -k, --kill               Kill previous started application in daemon mode\n"
+    "\n"
+    "  -d, --daemon             Start this application in daemon mode\n"
+    "  -k, --kill               Kill the application running in daemon mode\n"
     "\n",
     basename(app_name_cpy), app_argv_str);
 

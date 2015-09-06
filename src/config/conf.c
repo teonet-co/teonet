@@ -1,10 +1,10 @@
 /**
- * File:   conf.c
- * Author: Kirill Scherba
+ * \file   conf.c
+ * \author Kirill Scherba
  *
  * Created on April 11, 2015, 6:10 AM
  *
- * Configuration parameters module
+ * Teonet configuration parameters module
  *
  */
 
@@ -145,10 +145,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
         if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
         else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
         if(conf->network[0]) {
-            strncat(buf, "/", KSN_BUFFER_SIZE);
-            strncat(buf, conf->network, KSN_BUFFER_SIZE);
+            strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+            strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
         }
-        strncat(buf, "/teonet.conf", KSN_BUFFER_SIZE);
+        strncat(buf, "/teonet.conf", KSN_BUFFER_SIZE - strlen(buf) - 1);
         if(access(buf, F_OK) != -1 ) {
             cfg_parse(cfg, buf);
             save_conf_back();
@@ -158,10 +158,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
         {
             strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
             if(conf->network[0]) {
-                strncat(buf, "/", KSN_BUFFER_SIZE);
-                strncat(buf, conf->network, KSN_BUFFER_SIZE);
+                strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+                strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
             }
-            strncat(buf, "/teonet.conf.out", KSN_BUFFER_SIZE);
+            strncat(buf, "/teonet.conf.out", KSN_BUFFER_SIZE - strlen(buf) - 1);
             char *dir = strdup(buf);
             #if HAVE_MINGW
             mkdir(dirname(dir));
@@ -182,10 +182,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
             if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
             else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
             if(conf->network[0]) {
-                strncat(buf, "/", KSN_BUFFER_SIZE);
-                strncat(buf, conf->network, KSN_BUFFER_SIZE);
+                strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+                strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
             }
-            strncat(buf, uconf, KSN_BUFFER_SIZE);
+            strncat(buf, uconf, KSN_BUFFER_SIZE - strlen(buf) - 1);
             if(access(buf, F_OK) != -1 ) {
                 cfg_parse(cfg, buf);
                 save_conf_back();
@@ -215,12 +215,13 @@ void read_config(ksnet_cfg *conf, int port_param) {
 }
 
 /**
- * Create unique port config file name
+ * Create unique port configuration file name
  *
  * @param buf Buffer to create file name
- * @param type Config file type: 0 - system; 1 - local
- * @param buf_size Buffer size
+ * @param BUF_SIZE Size of buffer
+ * @param type Configuration file type: 0 - system; 1 - local
  * @param port Port number
+ * @param network Network name
  *
  * @return
  */
