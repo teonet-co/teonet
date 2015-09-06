@@ -3,6 +3,7 @@
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
       <df name="app">
+        <in>teodb.c</in>
         <in>teovpn.c</in>
       </df>
       <df name="embedded">
@@ -48,7 +49,6 @@
         <in>teotun.c</in>
       </df>
       <df name="sh">
-        <in>Dockerfile</in>
         <in>make_package.c</in>
       </df>
       <df name="src">
@@ -62,6 +62,7 @@
           <in>net_tcp.c</in>
           <in>net_term.c</in>
           <in>net_tun.c</in>
+          <in>teodb.c</in>
           <in>vpn.c</in>
         </df>
         <df name="utils">
@@ -84,6 +85,7 @@
       </df>
       <df name="tests">
         <in>teonet_tst.c</in>
+        <in>test_teodb.c</in>
       </df>
     </df>
     <logicalFolder name="f1"
@@ -137,6 +139,10 @@
           </cTool>
         </makeTool>
       </makefileType>
+      <item path="app/teodb.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="2">
+        </cTool>
+      </item>
       <item path="app/teovpn.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
@@ -475,8 +481,6 @@
           </preprocessorList>
         </cTool>
       </folder>
-      <item path="sh/Dockerfile" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
         </cTool>
@@ -550,6 +554,10 @@
         </cTool>
       </item>
       <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="4">
+        </cTool>
+      </item>
+      <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="0">
         <cTool flags="4">
         </cTool>
       </item>
@@ -648,16 +656,12 @@
       <item path="src/teonet.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
           <incDir>
-            <pElem>tests</pElem>
+            <pElem>src</pElem>
             <pElem>src/config</pElem>
             <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>TEONE_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="src/utils/string_arr.c" ex="false" tool="0" flavor2="2">
@@ -699,6 +703,10 @@
         </cTool>
       </item>
       <item path="tests/test_net_tr-udp.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="1">
+        </cTool>
+      </item>
+      <item path="tests/test_teodb.c" ex="false" tool="0" flavor2="0">
         <cTool flags="1">
         </cTool>
       </item>
