@@ -1,7 +1,18 @@
 /*
- * File:   test_pbl_kf.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   test_teodb.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
+ * Teonet DB based at PBL KeyFile [module](@ref teodb.c) tests suite
+ * 
+ * Tests Teonet DB functions:
+ * 
+ * * Initialize/Destroy Teonet DB module: test_3_1()
+ * * Set default namespace: test_3_2()
+ * * Set and get data: test_3_3()
+ * * Set and get data without default namespace: test_3_4()
+ * 
+ * cUnit test suite code: \include test_teodb.c
+ * 
  * Created on Aug 20, 2015, 7:14:55 PM
  */
 
@@ -12,23 +23,13 @@
 #include "ev_mgr.h"
 #include "modules/teodb.h"
 
-/*
- * CUnit Test Suite
- */
-
-int init_suite(void) {
-    return 0;
-}
-
-int clean_suite(void) {
-    return 0;
-}
+extern CU_pSuite pSuite; // Test global variable
 
 #define kc_emul() \
   ksnetEvMgrClass ke_obj; \
   ksnetEvMgrClass *ke = &ke_obj
 
-// Initialize/Destroy PBL KeyFile module
+//! Initialize/Destroy Teonet DB module
 void test_3_1() {
 
     // Emulate ksnCoreClass
@@ -45,7 +46,7 @@ void test_3_1() {
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
-// Set default namespace
+//! Set default namespace
 void test_3_2() {
     
     // Emulate ksnCoreClass
@@ -94,7 +95,7 @@ void test_3_2() {
     CU_PASS("Destroy ksnPblKfClass done");       
 }
 
-// Set and get data
+//! Set and get data
 void test_3_3() {
     
     // Emulate ksnCoreClass
@@ -160,7 +161,7 @@ void test_3_3() {
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
-// Set and get data without default namespace
+//! Set and get data without default namespace
 void test_3_4() {
     
     // Emulate ksnCoreClass
@@ -208,7 +209,7 @@ void test_3_4() {
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
-// Test template
+//! Test template
 void test_3_template() {
     
     // Emulate ksnCoreClass
@@ -224,21 +225,14 @@ void test_3_template() {
 }
 
 
-int main() {
-    CU_pSuite pSuite = NULL;
-
-    /* Initialize the CUnit test registry */
-    if (CUE_SUCCESS != CU_initialize_registry())
-        return CU_get_error();
-
-    /* Add a suite to the registry */
-    pSuite = CU_add_suite("PBL KeyFile module functions", init_suite, clean_suite);
-    if (NULL == pSuite) {
-        CU_cleanup_registry();
-        return CU_get_error();
-    }
-
-    /* Add the tests to the suite */
+/**
+ * Add Teonet DB module tests
+ * 
+ * @return 
+ */
+int add_suite_3_tests(void) {
+    
+    // Add the tests to the suite 
     if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_3_1)) ||
         (NULL == CU_add_test(pSuite, "Set default namespace", test_3_2)) ||
         (NULL == CU_add_test(pSuite, "Set and get data with default namespace", test_3_3)) ||
@@ -247,10 +241,6 @@ int main() {
         CU_cleanup_registry();
         return CU_get_error();
     }
-
-    /* Run all tests using the CUnit Basic interface */
-    CU_basic_set_mode(CU_BRM_VERBOSE);
-    CU_basic_run_tests();
-    CU_cleanup_registry();
-    return CU_get_error();
+    
+    return 0;
 }
