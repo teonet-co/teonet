@@ -145,10 +145,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
         if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
         else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
         if(conf->network[0]) {
-            strncat(buf, "/", KSN_BUFFER_SIZE);
-            strncat(buf, conf->network, KSN_BUFFER_SIZE);
+            strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+            strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
         }
-        strncat(buf, "/teonet.conf", KSN_BUFFER_SIZE);
+        strncat(buf, "/teonet.conf", KSN_BUFFER_SIZE - strlen(buf) - 1);
         if(access(buf, F_OK) != -1 ) {
             cfg_parse(cfg, buf);
             save_conf_back();
@@ -158,10 +158,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
         {
             strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
             if(conf->network[0]) {
-                strncat(buf, "/", KSN_BUFFER_SIZE);
-                strncat(buf, conf->network, KSN_BUFFER_SIZE);
+                strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+                strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
             }
-            strncat(buf, "/teonet.conf.out", KSN_BUFFER_SIZE);
+            strncat(buf, "/teonet.conf.out", KSN_BUFFER_SIZE - strlen(buf) - 1);
             char *dir = strdup(buf);
             #if HAVE_MINGW
             mkdir(dirname(dir));
@@ -182,10 +182,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
             if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
             else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
             if(conf->network[0]) {
-                strncat(buf, "/", KSN_BUFFER_SIZE);
-                strncat(buf, conf->network, KSN_BUFFER_SIZE);
+                strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
+                strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
             }
-            strncat(buf, uconf, KSN_BUFFER_SIZE);
+            strncat(buf, uconf, KSN_BUFFER_SIZE - strlen(buf) - 1);
             if(access(buf, F_OK) != -1 ) {
                 cfg_parse(cfg, buf);
                 save_conf_back();
