@@ -80,6 +80,7 @@ inline size_t ksnTRUDPstatSendListRemove(ksnTRUDPClass *tu) {
  * Increment number of send list attempts
  * 
  * @param tu
+ * @param addr
  * @return 
  */
 inline size_t ksnTRUDPstatSendListAttempt(ksnTRUDPClass *tu, 

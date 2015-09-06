@@ -185,7 +185,7 @@ int ksnTDBset(ksnTDBClass *kf, const char *key, void *data,
 /**
  * Delete all records with key
  * 
- * @param Pointer to ksnTDBClass
+ * @param kf Pointer to ksnTDBClass
  * @param key String with key
  * 
  * @return 0: call went OK; != 0 if key not found or some error occurred
@@ -256,7 +256,7 @@ int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const char *key,
 /**
  * Delete all records with key
  * 
- * @param Pointer to ksnTDBClass
+ * @param kf Pointer to ksnTDBClass
  * @param namespace String with namespace
  * @param key String with key
  * 

@@ -214,11 +214,11 @@ char *trim(char *str) {
     return str;
 }
 
-/**
+/*
  * Convert integer to string
  *
- * @param ival
- * @return
+ * param ival
+ * return
  */
 //char* itoa(int ival) {
 //

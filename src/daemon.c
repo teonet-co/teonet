@@ -51,6 +51,7 @@ void kill_other (int other_pid) {
         else
         {
 //! \todo            ksnet_printf(MESSAGE, "Application is successfully stopped\n\n");
+            printf("Application is successfully stopped\n\n");
             syslog (LOG_NOTICE, "Successfully stopped [%d]\n", other_pid);
 
         }
