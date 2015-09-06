@@ -87,6 +87,7 @@ teonetincludedir=$(includedir)/teonet
 #teonetinclude_HEADERS = 
 nobase_teonetinclude_HEADERS = \
     crypt.h \
+    daemon.h \
     ev_mgr.h \
     hotkeys.h \
     net_arp.h \
@@ -97,6 +98,7 @@ nobase_teonetinclude_HEADERS = \
     net_tr-udp.h \
     net_tr-udp_.h \
     net_tr-udp_stat.h \
+    pidfile.h \
     teonet.h \
     config/config.h \
     config/conf.h \
@@ -106,6 +108,7 @@ nobase_teonetinclude_HEADERS = \
     modules/net_tcp.h \
     modules/net_term.h \
     modules/net_tun.h \
+    modules/teodb.h \
     modules/vpn.h \
     utils/string_arr.h \
     utils/utils.h \
@@ -116,6 +119,7 @@ teonetinclude_HEADERS = \
 
 libteonet_la_SOURCES = \
     crypt.c \
+    daemon.c \
     ev_mgr.c \
     hotkeys.c \
     net_arp.c \
@@ -125,6 +129,7 @@ libteonet_la_SOURCES = \
     net_split.c \
     net_tr-udp.c \
     net_tr-udp_stat.c \
+    pidfile.c \
     teonet.c \
     config/conf.c \
     config/opt.c \
@@ -133,6 +138,7 @@ libteonet_la_SOURCES = \
     modules/net_tcp.c \
     modules/net_term.c \
     modules/net_tun.c \
+    modules/teodb.c \
     modules/vpn.c \
     utils/string_arr.c \
     utils/utils.c
@@ -152,7 +158,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 9:0:0 
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 10:0:0 
 
 uninstall-local:
 	-rm -r $(teonetincludedir)

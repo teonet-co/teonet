@@ -164,3 +164,38 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
 
     return str;
 }
+
+/**
+ * Send command by name to peer
+ *
+ * @param km
+ * @param to
+ * @param cmd
+ * @param data
+ * @param data_len
+ * @return
+ */
+ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd, 
+        void *data, size_t data_len) {
+    
+    int i;
+    ksnet_arp_data *arp = NULL;
+    
+    // Find peer in networks
+    for(i = 0; i < km->num; i++) {
+        
+        // Get network and check its arp
+        ksnetEvMgrClass *ke = pblListGet(km->list, i);
+        arp = ksnetArpGet(ke->kc->ka, to);
+        
+        // Send to peer at network
+        if(arp != NULL) {
+            ksnCoreSendto(ke->kc, arp->addr, arp->port, cmd, data, data_len);
+            break;
+        }       
+    }
+        
+    
+    
+    return 0;
+}

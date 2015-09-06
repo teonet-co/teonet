@@ -9,7 +9,6 @@
 /.teotcp/
 /.teotun/
 /.teoterm/
-/nbproject
 /build/
 /distr/udt4/
 /docs/
@@ -98,3 +97,6 @@
 /.teoackm/
 /tests/test_cque
 /examples/teocque
+/nbproject/private/
+/app/teodb
+/.teodb/

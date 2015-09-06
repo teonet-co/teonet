@@ -85,6 +85,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->runEventMgr = 0;
     ke->event_cb = event_cb;
     ke->km = NULL;
+    ke->kf = NULL;
     ke->num_nets = 1;
     ke->n_num = 0;
     ke->n_prev = NULL;
@@ -697,6 +698,10 @@ int modules_init(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_CQUE
     ke->kq = ksnCQueInit(ke);
     #endif
+    // PBL KeyFile Module
+    #if M_ENAMBE_PBLKF
+    ke->kf = ksnTDBinit(ke);
+    #endif
 
     // VPN Module
     #if M_ENAMBE_VPN
@@ -742,6 +747,10 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_CQUE
     ksnCQueDestroy(ke->kq);
     #endif
+    #if M_ENAMBE_PBLKF
+    ksnTDBdestroy(ke->kf);
+    #endif
+
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 }

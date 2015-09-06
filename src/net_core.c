@@ -22,6 +22,7 @@ typedef int socklen_t;
 
 #include "ev_mgr.h"
 #include "net_split.h"
+#include "net_multi.h"
 #include "net_tr-udp.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
@@ -320,6 +321,22 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     if(arp != NULL && arp->mode != -1) {
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
+    }
+    
+    // Send to peer at other network
+    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL) {
+        
+        arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
+                data_len);
+        // \todo: Send to peer at other network
+        printf("###TODO: Send to peer at other network\n");
+    }
+    
+    // Send to r-host
+    else {
+        
+        // \todo: Send to r-host
+        printf("###TODO: Send to r-host\n");
     }
 
     return arp;
