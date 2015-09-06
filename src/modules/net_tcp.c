@@ -162,7 +162,7 @@ int ksnTcpServerCreate(
     int *port_created) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, DEBUG,
+    ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, MESSAGE,
             "%sTCP Server:%s Create TCP server at port %d\n", 
             ANSI_MAGENTA, ANSI_NONE, port);
     #endif
@@ -414,7 +414,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 
     // Server welcome message
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG,
+    ksnet_printf(&kev->ksn_cfg, MESSAGE,
             "%sTCP Server:%s Started at port %d, socket fd %d ...\n", 
             ANSI_MAGENTA, ANSI_NONE, *port, sd);
     #endif

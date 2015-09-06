@@ -98,3 +98,8 @@
 /.teoackm/
 /tests/test_cque
 /examples/teocque
+/app/teodb
+/.teodb/
+/tests/test_pbl_kf
+/.test_pbl_kf/
+/tests/test_teodb
