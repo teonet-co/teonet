@@ -79,6 +79,7 @@ build_rpm_tarball $PACKAGE_NAME
 
 # Copy tarball to the sources folder and create spec file
 RPM_FILES="/usr/bin/teovpn
+   /usr/bin/teodb
    /usr/doc/teonet/
    /usr/etc/teonet/teonet.conf.default
    /usr/include/teonet/
