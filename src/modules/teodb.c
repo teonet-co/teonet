@@ -1,8 +1,8 @@
 /** 
- * File:   pbl_kf.h
+ * File:   teodb.h
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
- * PBL KeyFile module
+ * Teonet database module based at PBL KeyFile
  *
  * Created on August 20, 2015, 4:33 PM
  */
@@ -15,7 +15,7 @@
 
 #include <pbl.h>
 
-#include "pbl_kf.h"
+#include "teodb.h"
 #include "conf.h"
 #include "utils/utils.h"
 

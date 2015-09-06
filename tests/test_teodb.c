@@ -10,7 +10,7 @@
 #include <CUnit/Basic.h>
 
 #include "ev_mgr.h"
-#include "modules/pbl_kf.h"
+#include "modules/teodb.h"
 
 /*
  * CUnit Test Suite

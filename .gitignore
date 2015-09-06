@@ -102,3 +102,4 @@
 /.teodb/
 /tests/test_pbl_kf
 /.test_pbl_kf/
+/tests/test_teodb

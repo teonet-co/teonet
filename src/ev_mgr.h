@@ -18,7 +18,7 @@
 #include "hotkeys.h"
 #include "modules/vpn.h"
 #include "modules/cque.h"
-#include "modules/pbl_kf.h"
+#include "modules/teodb.h"
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
 #include "modules/net_term.h"
