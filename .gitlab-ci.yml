@@ -18,80 +18,80 @@ types:
 # /path/to/bind/from/host:/path/to/bind/in/container:rw
     
 # Build    
-job_ubuntu:
-  type: build
-  image: ubuntu_teonet
-  #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
-  tags:
-    - docker_image_run
-  script:
-    # Test volumes
-    #- cp ./autogen.sh ../repo
-    #- printenv
-    # Make  
-    #- sh/build-ubuntu.sh
-    #- pwd
-    - ./autogen.sh
-    - make
-    - app/teovpn -?
-    # Test
-    - make test
-    # Build DEB package and upload it to repository
-    - sh/make_package deb
-  only:
-    - master
-    
-job_centos:
-  type: build
-  image: centos_teonet
-  tags:
-    - docker_image_run
-  script:
-    # Make
-    #- sh/build-centos.sh
-    - ./autogen.sh
-    - make
-    - app/teovpn -?
-    # Test
-    - make test
-    # Build RPM package and upload it to repository
-    - sh/make_package yum
-  only:
-    - master    
-
-job_fedora:
-  type: build
-  image: fedora_teonet
-  tags:
-    - docker_image_run
-  script:
-    # Make
-    #- sh/build-centos.sh
-    - ./autogen.sh
-    - make
-    - app/teovpn -?
-    # Test
-    - make test
-  only:
-    - master
-    
-job_opensuse:
-  type: build
-  image: opensuse_teonet
-  tags:
-    - docker_image_run
-  script:
-    # Make
-    #- sh/build-opensuse.sh
-    - ./autogen.sh
-    - make
-    - app/teovpn -?
-    # Test
-    - make test
-    # Build RPM package and upload it to repository
-    - sh/make_package zyp
-  only:
-    - master     
+#job_ubuntu:
+#  type: build
+#  image: ubuntu_teonet
+#  #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
+#  tags:
+#    - docker_image_run
+#  script:
+#    # Test volumes
+#    #- cp ./autogen.sh ../repo
+#    #- printenv
+#    # Make  
+#    #- sh/build-ubuntu.sh
+#    #- pwd
+#    - ./autogen.sh
+#    - make
+#    - app/teovpn -?
+#    # Test
+#    - make test
+#    # Build DEB package and upload it to repository
+#    - sh/make_package deb
+#  only:
+#    - master
+#    
+#job_centos:
+#  type: build
+#  image: centos_teonet
+#  tags:
+#    - docker_image_run
+#  script:
+#    # Make
+#    #- sh/build-centos.sh
+#    - ./autogen.sh
+#    - make
+#    - app/teovpn -?
+#    # Test
+#    - make test
+#    # Build RPM package and upload it to repository
+#    - sh/make_package yum
+#  only:
+#    - master    
+#
+#job_fedora:
+#  type: build
+#  image: fedora_teonet
+#  tags:
+#    - docker_image_run
+#  script:
+#    # Make
+#    #- sh/build-centos.sh
+#    - ./autogen.sh
+#    - make
+#    - app/teovpn -?
+#    # Test
+#    - make test
+#  only:
+#    - master
+#    
+#job_opensuse:
+#  type: build
+#  image: opensuse_teonet
+#  tags:
+#    - docker_image_run
+#  script:
+#    # Make
+#    #- sh/build-opensuse.sh
+#    - ./autogen.sh
+#    - make
+#    - app/teovpn -?
+#    # Test
+#    - make test
+#    # Build RPM package and upload it to repository
+#    - sh/make_package zyp
+#  only:
+#    - master     
     
 # Test
 
