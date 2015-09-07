@@ -54,7 +54,7 @@ uninstall-local:
 run:	src/app/teovpn
 	src/app/teovpn just-make --port=9057
 
-build-tests: tests/test_pbl_kf
+build-tests: tests/test_teonet
 	
 build-tests: tests/test_teonet
 	
