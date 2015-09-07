@@ -72,6 +72,7 @@
           <in>net_tcp.c</in>
           <in>net_term.c</in>
           <in>net_tun.c</in>
+          <in>tcp_proxy.c</in>
           <in>teodb.c</in>
           <in>vpn.c</in>
         </df>
@@ -122,7 +123,8 @@
         <element flagsID="1" commonFlags="-fPIC -g -fPIC -g -O2"/>
         <element flagsID="2" commonFlags="-fPIC -g -g -O2"/>
         <element flagsID="3" commonFlags="-g -O2"/>
-        <element flagsID="4" commonFlags="-g -fPIC -O2 -g -O2 -fPIC"/>
+        <element flagsID="4" commonFlags="-g -fPIC -O2 -fPIC"/>
+        <element flagsID="5" commonFlags="-g -fPIC -O2 -g -O2 -fPIC"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -134,7 +136,7 @@
           <executablePath></executablePath>
         </makeTool>
       </makefileType>
-      <item path="app/teodb.c" ex="false" tool="0" flavor2="0">
+      <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
@@ -462,99 +464,103 @@
         </cTool>
       </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/config/opt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/crypt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/daemon.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/ev_mgr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/hotkeys.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/modules/net_tcp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="5">
+        </cTool>
+      </item>
+      <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="0">
         <cTool flags="4">
         </cTool>
       </item>
-      <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="0">
-        <cTool flags="4">
+      <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/net_com.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/net_core.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/net_multi.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/net_split.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/net_tr-udp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/net_tr-udp_stat.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/pidfile.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/utils/string_arr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/utils/utils.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="2">
@@ -573,7 +579,7 @@
         <cTool flags="1">
         </cTool>
       </item>
-      <item path="tests/test_teodb.c" ex="false" tool="0" flavor2="0">
+      <item path="tests/test_teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
       </item>
