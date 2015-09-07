@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>teonet_tr_udp</name>
+            <name>teonet_tcp_proxy</name>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions>h</header-extensions>
@@ -23,9 +23,8 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
-            <word>len</word>
-            <word>param</word>
-            <word>pidfile</word>
+            <word>Hotkeys</word>
+            <word>tcp</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
