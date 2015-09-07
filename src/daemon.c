@@ -23,14 +23,13 @@
 
 #ifndef HAVE_MINGW
 
-void lperror(char* prefix);
-
 /**
  * Kill started application in daemon mode
  *
- * @param other_pid
+ * @param argv Application argv argument
+ * @param other_pid Process ID
  */
-void kill_other (int other_pid) {
+void kill_other (char **argv, int other_pid) {
 
     if (other_pid != 0) {
 
@@ -45,46 +44,21 @@ void kill_other (int other_pid) {
 
                 case EPERM:
                     fprintf(stderr, "Not enough privileges.\n"
-                                    "Use: sudo ksnet ... -k\n\n");
+                                    "Use: sudo %s ... -k\n\n", argv[0]);
                     break;
 
                 default:
                     fprintf(stderr, "Unknown error\n\n");
             }
         }
-        else
-        {
+        
+        else {
+            
             printf("Application is successfully stopped\n\n");
             syslog (LOG_NOTICE, "Successfully stopped [%d]\n", other_pid);
         }
     }
-    else
-    {
-        fprintf(stderr, "Application is not running\n\n");
-    }
-}
-
-/**
- * Initial signals handlers
- */
-void init_signals() {
-
-//    struct sigaction sa;
-}
-
-/**
- * Before application is stopped
- * @param s
- */
-void stopped_handler(int s) {
-
-    signal(s,SIG_IGN);
-    //ksnet_disconnect();
-// \todo    ksnetEvMgrStop(ke);
-    printf("\rApplication has been stopped by signal...\n");
-//    int i = 110;
-// \todo    while(!ksnet_isStoped() && --i) usleep(10000); // \todo: The ksnet_isStoped never return true !!!
-    printf("Bye!");
+    else fprintf(stderr, "Application is not running\n\n");
 }
 
 /**
@@ -94,9 +68,6 @@ void stopped_handler(int s) {
  * @param conf Pointer to ksnet_cfg structure
  */
 void start_stop_daemon(char **argv, ksnet_cfg *conf) {
-
-    // Initial signals
-    init_signals();
 
     if(!(conf->dflag || conf->kflag)) return;
 
@@ -108,9 +79,10 @@ void start_stop_daemon(char **argv, ksnet_cfg *conf) {
     // Kill application in Daemon mode
     if(conf->kflag) {
 
-        printf("Stopping application running at port %d...\n", (int)conf->port);
+        printf("Stopping application running at port %d...\n", 
+                (int)conf->port);
 
-        kill_other(port_pid);
+        kill_other(argv, port_pid);
         remove_pidfile();
         kill_pidfile();
         closelog();
@@ -118,86 +90,73 @@ void start_stop_daemon(char **argv, ksnet_cfg *conf) {
         exit(EXIT_SUCCESS);
     }
 
-    // Start as daemon
+    // Start application as daemon
     if(conf->dflag) {
 
-      if(!check_pid(port_pid)) {
+        // Check pip file exist
+        if(!check_pid(port_pid)) {
 
-          // Try to create pid file
-//          #if RELEASE_KSNET
-          if(write_pidfile() != 0) {
-
-            ksnet_printf(conf, ERROR_M,
-                    "Can't start application in daemon mode: "
-                    "no enough privileges\n"
-                    "Use: sudo %s ... -d\n\n", argv[0]);
-
-            exit(EXIT_SUCCESS);
-          }
-          remove_pidfile();
-//          #endif
-
-          printf("Application started at port %d in daemon mode\n\n", 
-                  (int)conf->port);
-
-//          #if RELEASE_KSNET
-          if(daemon(FALSE, FALSE) == 0)
-//          #else
-//          if(daemon(TRUE, FALSE) == 0)
-//          #endif
-          {
-            openlog(argv[0], LOG_NDELAY | LOG_PID, LOG_DAEMON);
-
+            // Try to create pid file
             if(write_pidfile() != 0) {
 
-              syslog(LOG_ERR,"Error during write the pid file\n");
-              kill_pidfile();
-              closelog();
-              exit(EXIT_SUCCESS);
+                ksnet_printf(conf, ERROR_M,
+                        "Can't start application in daemon mode: "
+                        "no enough privileges\n"
+                        "Use: sudo %s ... -d\n\n", argv[0]);
+
+                exit(EXIT_FAILURE);
+            }
+            remove_pidfile();
+
+            printf("Application started at port %d in daemon mode\n\n", 
+                   (int)conf->port);
+
+            // Start daemon mode
+            if(daemon(FALSE, FALSE) == 0) {
+
+                openlog(argv[0], LOG_NDELAY | LOG_PID, LOG_DAEMON);
+
+                if(write_pidfile() != 0) {
+
+                    ksnet_printf(conf, ERROR_M,
+                            "Can't start application in daemon mode: "
+                            "error during write the pid file\n");
+
+                    syslog(LOG_ERR, "Error during write the pid file\n");
+
+                    kill_pidfile();
+                    closelog();
+                    exit(EXIT_FAILURE);
+                } 
+                else syslog(LOG_NOTICE, "Started at port %d\n", (int)conf->port);           
             }
 
+            // Can't start daemon mode
             else {
 
-              syslog(LOG_NOTICE, "Started at port %d\n", (int)conf->port);
+                ksnet_printf(conf, ERROR_M,
+                          "Can't start application in daemon mode: "
+                          "error during daemon starting\n");
+
+                syslog(LOG_ERR, "Error during daemon starting\n");
+
+                kill_pidfile();
+                closelog();
+                exit(EXIT_FAILURE);
             }
-          }
+        }
 
-          else {
+        // Pid file already exist
+        else {
 
-              fprintf(stderr, "Error during daemon starting\n");
-              kill_pidfile();
-              closelog();
-              exit(EXIT_SUCCESS);
-          }
-      }
+            ksnet_printf(conf, MESSAGE,
+              "Another one daemon is running. Use -k option to kill it.\n\n");
 
-      else {
-
-          ksnet_printf(conf, MESSAGE,
-            "Another one daemon is running. Use -k option to kill it.\n\n");
-
-          kill_pidfile();
-          closelog();
-          exit(EXIT_SUCCESS);
-      }
+            kill_pidfile();
+            closelog();
+            exit(EXIT_FAILURE);
+        }
     }
 }
-
-/**
- * Printing message to syslog
- * 
- * This function like perror but it is printing message to syslog
- *
- * @param prefix Log message prefix
- */
-void lperror(char* prefix)
-{
-    if (prefix != NULL)
-        syslog(LOG_ERR, "%s: %d - %s\n", prefix, errno, strerror (errno));
-    else
-        syslog(LOG_ERR, "%d - %s\n", errno, strerror (errno));
-}
-
-
 
 #endif
