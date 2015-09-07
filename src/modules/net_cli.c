@@ -1534,8 +1534,7 @@ void cli_loop_show_prompt(struct cli_loop_data_def *cd) { //struct cli_def *cli,
 /**
  * Timeout every second
  *
- * @param cli
- * @param sockfd
+ * @param cd Pointer to cli_loop_data_def structure
  * @return
  */
 int cli_loop_idle(struct cli_loop_data_def *cd) {

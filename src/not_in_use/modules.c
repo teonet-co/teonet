@@ -18,8 +18,11 @@ void ksnModulesLAdd(ksnModulesClass *km, ksnModuleElement *elements, int numer_o
 /**
  * Initialize module
  *
- * @param ke
- * @return
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param modules
+ * @param numer_of_modules
+ * 
+ * @return Pointer to ksnModulesClass
  */
 ksnModulesClass *ksnModulesInit(void *ke, ksnModuleElement *modules, int numer_of_modules) {
 
