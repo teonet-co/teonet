@@ -22,6 +22,8 @@ job_ubuntu:
   type: build
   image: ubuntu_teonet
   #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
+  tags:
+    - docker
   script:
     # Test volumes
     #- cp ./autogen.sh ../repo
@@ -42,6 +44,8 @@ job_ubuntu:
 job_centos:
   type: build
   image: centos_teonet
+  tags:
+    - docker
   script:
     # Make
     #- sh/build-centos.sh
@@ -58,6 +62,8 @@ job_centos:
 job_fedora:
   type: build
   image: fedora_teonet
+  tags:
+    - docker
   script:
     # Make
     #- sh/build-centos.sh
@@ -72,6 +78,8 @@ job_fedora:
 job_opensuse:
   type: build
   image: opensuse_teonet
+  tags:
+    - docker
   script:
     # Make
     #- sh/build-opensuse.sh
@@ -91,6 +99,8 @@ job_opensuse:
 #job_ubuntu_deploy:
 #  type: deploy
 #  image: ubuntu_teonet
+#  tags:
+#    - docker
 #  script:
 #    # Build DEB package and upload it to repository
 #    - ./autogen.sh
@@ -102,6 +112,8 @@ job_opensuse:
 #job_centos_deploy:
 #  type: deploy
 #  image: centos_teonet
+#  tags:
+#    - docker
 #  script:
 #    # Build RPM package and upload it to repository
 #    - ./autogen.sh
@@ -113,9 +125,8 @@ job_opensuse:
 # Build teonet docker image and upload it to Docker HUB
 build_teonet_image:
   type: deploy
-  #image: ubuntu_host
   tags:
-      - build_teonet_image
+      - shell
   script:
     - cd sh  
     #- ls -all
