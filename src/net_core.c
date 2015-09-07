@@ -216,7 +216,10 @@ int ksnCoreBind(ksnCoreClass *kc) {
         else break;
     }
 
-    ksnet_printf(ksn_cfg, MESSAGE, "Start listen at port %d\n", kc->port);
+    ksnet_printf(ksn_cfg, MESSAGE, 
+            "%sNet core:%s Start listen at port %d\n", 
+            ANSI_GREEN, ANSI_NONE,
+            kc->port);
 
     return 0;
 }
@@ -260,17 +263,18 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
             int i;
 
-            // Encrypt and send subpackets
+            // Encrypt and send sub-packets
             for(i = 0; i < num_subpackets; i++) {
 
                 // Create packet
                 size_t packet_len;
                 size_t data_len = *(uint16_t*)(packets[i]);
                 void *packet = ksnCoreCreatePacket(kc, CMD_SPLIT, 
-                        packets[i] + sizeof(uint16_t), data_len + sizeof(uint16_t)*2, 
+                        packets[i] + sizeof(uint16_t), 
+                        data_len + sizeof(uint16_t)*2, 
                         &packet_len);
 
-                // Encrypt and send one spitted subpacket
+                // Encrypt and send one spitted sub-packet
                 sendto_encrypt(kc, CMD_SPLIT, packet, packet_len);
 
                 // Free memory
@@ -285,7 +289,8 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
             // Create packet
             size_t packet_len;
-            void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, &packet_len);
+            void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, 
+                    &packet_len);
 
             // Encrypt and send one not spitted packet
             sendto_encrypt(kc, cmd, packet, packet_len);

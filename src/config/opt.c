@@ -21,6 +21,7 @@
 #include "config/config.h"
 #include "utils/utils.h"
 #include "config/conf.h"
+#include "daemon.h"
 #include "ev_mgr.h"
 
 void opt_usage(char *app_name, int app_argc, char** app_argv);
@@ -61,12 +62,14 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
         { "show_connect",   no_argument,       &conf->show_connect_f, 1 },
         { "show_peers",     no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
-        { "show_tr_udp",     no_argument,      &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
+        { "show_tr_udp",    no_argument,       &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
         #if M_ENAMBE_VPN
         { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
         { "vpn_ip",         required_argument, 0, 'i' },
         { "vpn_mtu",        required_argument, 0, 'm' },
         #endif
+        { "daemon",         no_argument,       &conf->dflag, 1 },
+        { "kill",           no_argument,       &conf->kflag, 1 },
 
         { 0, 0, 0, 0 }
     };
@@ -189,6 +192,16 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         case 'n':
           strncpy((char*)conf->network, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
+          
+        case 'd':
+          // Start this application in Daemon mode
+          conf->dflag = 1;
+          break;
+
+        case 'k':
+          // Kill application started in Daemon mode
+          conf->kflag = 1;
+          break;
       }
     }
 
@@ -227,12 +240,23 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
     if(show_arg) {
 
         int i;
-
         for(i = 0; i < app_argc; i++) {
             printf("%s: %s\n", app_argv[i], argv[optind+i]);
         }
         printf("\n");
-    }
+    }      
+
+    #ifndef HAVE_MINGW
+    // Start or stop application in daemon mode
+    start_stop_daemon(argv, conf);
+    #endif
+
+    // Change configuration for daemon mode
+    if(conf->dflag) {
+        conf->show_connect_f = 0;
+        conf->show_debug_f = 0;
+        conf->hot_keys_f = 0;
+    }    
 
     return &argv[optind];
 }

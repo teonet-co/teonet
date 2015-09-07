@@ -153,7 +153,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
     //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: started ...\n");
-    printf("%sEvent manager:%s started ...\n", ANSI_CYAN, ANSI_NONE);
+    ksnet_printf(&ke->ksn_cfg, MESSAGE, "%sEvent manager:%s Started ...\n", 
+            ANSI_CYAN, ANSI_NONE);
     #endif
 
     ke->timer_val = 0;
