@@ -113,7 +113,9 @@ job_opensuse:
 # Build teonet docker image and upload it to Docker HUB
 build_teonet_image:
   type: deploy
-  image: ubuntu_host
+  #image: ubuntu_host
+  tags:
+      - build_teonet_image
   script:
     - cd sh  
     #- ls -all
