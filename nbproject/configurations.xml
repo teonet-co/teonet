@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="95">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="f1"
+                   displayName="Teonet cUnit test"
+                   projectFiles="true"
+                   kind="TEST"
+                   root="tests">
+      <itemPath>tests/test_cque.c</itemPath>
+      <itemPath>tests/test_crypt.c</itemPath>
+      <itemPath>tests/test_net_tr-udp.c</itemPath>
+      <itemPath>tests/test_teonet.c</itemPath>
+    </logicalFolder>
     <df root="." name="0">
       <df name="app">
         <in>teodb.c</in>
@@ -88,16 +98,6 @@
         <in>test_teodb.c</in>
       </df>
     </df>
-    <logicalFolder name="f1"
-                   displayName="Teonet cUnit test"
-                   projectFiles="true"
-                   kind="TEST"
-                   root="tests">
-      <itemPath>tests/test_cque.c</itemPath>
-      <itemPath>tests/test_crypt.c</itemPath>
-      <itemPath>tests/test_net_tr-udp.c</itemPath>
-      <itemPath>tests/test_teonet.c</itemPath>
-    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"

@@ -330,8 +330,11 @@ char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
 
 /**
  * Async call to Event manager
- *
- * @param w_accept
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param data Pointer to data
+ * @param data_len Data length
+ * @param user_data Pointer to user data
  */
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data) {
 
@@ -485,8 +488,8 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
  * first EV_K_STARTED sent at startup (when application started)
  * and second EV_K_IDLE sent every tick.
  *
- * @param loop
- * @param w
+ * param loop
+ * @param w Pointer to watcher
  * @param revents
  */
 void idle_cb (EV_P_ ev_idle *w, int revents) {
@@ -535,7 +538,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
 /**
  * Timer callback (runs every KSNET_EVENT_MGR_TIMER = 0.5 sec)
  *
- * @param loop
+ * param loop
  * @param w
  * @param revents
  */
@@ -608,7 +611,7 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 /**
  * Async Event callback (Signal)
  *
- * @param loop
+ * param loop
  * @param w
  * @param revents
  */
@@ -644,7 +647,7 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
  *
  * Start(restart) connection to R-Host and check connections to all peers.
  *
- * @param loop
+ * param loop
  * @param w
  * @param revents
  */
