@@ -236,7 +236,7 @@ void ksnTcpServerStop(ksnTcpClass *kt, int sd) {
         ev_ksnet_io_stop (kev->ev_loop, &((*w_accept)->io));
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, DEBUG,
+        ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, MESSAGE,
                 "%sTCP Server:%s Server fd %d was stopped\n", 
                 ANSI_MAGENTA, ANSI_NONE, (*w_accept)->fd);
         #endif      

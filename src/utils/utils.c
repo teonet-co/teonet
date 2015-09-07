@@ -41,7 +41,7 @@ inline int KSN_GET_TEST_MODE() {
  *             CONNECT -- print if connect show flag  connect is set;
  *             DEBUG -- print if debug show flag is set on;
  *             DEBUG_VV -- print if debug extra show flag is set on;
- *             ERROR -- print always.
+ *             ERROR_M -- print always.
  * @param format Format like in standard printf function
  * @param ... Parameters
  *
@@ -79,8 +79,9 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
     if(show_it) {
 
-        if(type != MESSAGE)
-            printf("%s%f:%s ", ANSI_DARKGREY, ksnetEvMgrGetTime(ksn_cfg->ke), ANSI_NONE);
+        double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
+        if(type != MESSAGE && ct != 0.00)
+            printf("%s%f:%s ", ANSI_DARKGREY, ct, ANSI_NONE);
 
         va_list args;
         va_start(args, format);
@@ -214,11 +215,11 @@ char *trim(char *str) {
     return str;
 }
 
-/**
+/*
  * Convert integer to string
  *
- * @param ival
- * @return
+ * param ival
+ * return
  */
 //char* itoa(int ival) {
 //
