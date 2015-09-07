@@ -57,7 +57,8 @@ void ksnetArpDestroy(ksnetArpClass *ka) {
 /**
  * Get ARP table data by Peer Name
  *
- * @param name
+ * @param ka Pointer to ksnetArpClass
+ * @param name Peer name
  * @return Pointer to ARP data or NULL if not found
  */
 ksnet_arp_data * ksnetArpGet(ksnetArpClass *ka, char *name) {
@@ -84,8 +85,11 @@ void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data) {
 
 /**
  * Add (or update) this host to ARP table
- *
+ * 
+ * @param ka
  * @param name
+ * @param addr
+ * @param port
  */
 void ksnetArpAddHost(ksnetArpClass *ka, char* name, char *addr, int port) {
 
@@ -123,6 +127,7 @@ void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
 /**
  * Remove Peer from the ARP table
  *
+ * @param ka
  * @param name
  * @return Pointer to previously associated value or NULL if not found
  */

@@ -34,7 +34,7 @@ void kill_other (char **argv, int other_pid) {
     if (other_pid != 0) {
 
         // Send signal to main server process and all their children
-        if (kill(-other_pid, SIGUSR1) != 0) {
+        if (kill(-other_pid, SIGINT) != 0) {
 
             switch (errno) {
 

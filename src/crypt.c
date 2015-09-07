@@ -289,8 +289,8 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
 /**
  * Simple check if the packet is encrypted
  * 
- * @param data
- * @param package_len
+ * @param package Pointer to package
+ * @param package_len Package length
  * @return 
  */
 int ksnCheckEncrypted(void *package, size_t package_len) {

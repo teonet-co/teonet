@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>teonet</name>
+            <name>teonet_tr_udp</name>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions>h</header-extensions>
@@ -23,28 +23,9 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
-            <word>arg</word>
-            <word>argc</word>
-            <word>argv</word>
-            <word>cfg</word>
-            <word>config</word>
-            <word>Dockerfile</word>
-            <word>fi</word>
-            <word>Hotkeys</word>
-            <word>kirill</word>
             <word>len</word>
-            <word>namespace</word>
             <word>param</word>
-            <word>perror</word>
-            <word>pid</word>
             <word>pidfile</word>
-            <word>pidfiles</word>
-            <word>ru</word>
-            <word>scherba</word>
-            <word>sudo</word>
-            <word>syslog</word>
-            <word>tarball</word>
-            <word>ubuntu</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
