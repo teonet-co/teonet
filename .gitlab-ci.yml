@@ -20,6 +20,7 @@ build_teonet_image:
     - cd sh  
     #- ls -all
     - docker build -t kscherba/teonet .
+    - docker login --username=kscherba --password=kirsft-docker
     - docker push kscherba/teonet
   only:
     - master
