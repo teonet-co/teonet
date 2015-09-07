@@ -1,4 +1,4 @@
-# version 0.0.1
+# version 0.0.2
 
 # Run before each script
 before_script:
@@ -109,3 +109,17 @@ job_opensuse:
 #    - sh/make_package yum
 #  only:
 #    - master
+
+# Build teonet docker image and upload it to Docker HUB
+build_teonet_image:
+  type: deploy
+  image: ubuntu_host
+  script:
+    - cd sh  
+    #- ls -all
+    - docker build -t kscherba/teonet .
+    - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
+    - docker push kscherba/teonet
+  only:
+    - master
+    
