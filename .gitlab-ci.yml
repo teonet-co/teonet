@@ -14,13 +14,15 @@ types:
 #    - docker build -t ubuntu:14:04
 #    - docker run ubuntu:14:04 apt-get install git
 
-build_image:
-  type: build
+build_teonet_image:
+  type: deploy
   script:
     - cd sh  
-    - ls -all
+    #- ls -all
     - docker build -t kscherba/teonet .
-#    - docker run ubuntu:14:04 apt-get install git
+    - docker push kscherba/teonet
+  only:
+    - master
 
 # Image host voulume definition:
 # /path/to/bind/from/host:/path/to/bind/in/container:rw
