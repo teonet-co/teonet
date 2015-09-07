@@ -14,6 +14,7 @@ types:
 #    - docker build -t ubuntu:14:04
 #    - docker run ubuntu:14:04 apt-get install git
 
+# Build teonet docker image and upload it to Docker HUN
 build_teonet_image:
   type: deploy
   image: ubuntu_host
