@@ -23,7 +23,7 @@ job_ubuntu:
   image: ubuntu_teonet
   #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
   tags:
-    - docker
+    - docker_image_run
   script:
     # Test volumes
     #- cp ./autogen.sh ../repo
@@ -45,7 +45,7 @@ job_centos:
   type: build
   image: centos_teonet
   tags:
-    - docker
+    - docker_image_run
   script:
     # Make
     #- sh/build-centos.sh
@@ -63,7 +63,7 @@ job_fedora:
   type: build
   image: fedora_teonet
   tags:
-    - docker
+    - docker_image_run
   script:
     # Make
     #- sh/build-centos.sh
@@ -79,7 +79,7 @@ job_opensuse:
   type: build
   image: opensuse_teonet
   tags:
-    - docker
+    - docker_image_run
   script:
     # Make
     #- sh/build-opensuse.sh
@@ -100,7 +100,7 @@ job_opensuse:
 #  type: deploy
 #  image: ubuntu_teonet
 #  tags:
-#    - docker
+#    - docker_image_run
 #  script:
 #    # Build DEB package and upload it to repository
 #    - ./autogen.sh
@@ -113,7 +113,7 @@ job_opensuse:
 #  type: deploy
 #  image: centos_teonet
 #  tags:
-#    - docker
+#    - docker_image_run
 #  script:
 #    # Build RPM package and upload it to repository
 #    - ./autogen.sh
@@ -126,10 +126,11 @@ job_opensuse:
 build_teonet_image:
   type: deploy
   tags:
-      - shell
+      - docker_image_build
   script:
     - cd sh  
     #- ls -all
+    #- sudo apt-get -y update
     - docker build -t kscherba/teonet .
     - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
     - docker push kscherba/teonet
