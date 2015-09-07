@@ -18,6 +18,7 @@ build_image:
   type: build
   script:
     - cd sh  
+    - ls -all
     - docker build -t kscherba/teonet .
 #    - docker run ubuntu:14:04 apt-get install git
 
