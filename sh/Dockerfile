@@ -11,4 +11,4 @@ RUN sudo printf "\ndeb http://repo.ksproject.org/ubuntu/ teonet main\n" >> /etc/
 RUN sudo apt-get update && sudo apt-get install -y \
     libteonet-dev \
     && sudo ldconfig \
-    && echo $CI_BUILD_ID
+    && echo $(uuidgen)
