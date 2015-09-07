@@ -1,5 +1,5 @@
 /* -*- Mode: C; indent-tabs-mode: t; c-basic-offset: 4; tab-width: 4 -*- */
-/*
+/**
  * \file pidfile.c
  * \copyright Copyright (C) Kirill Scherba 2011-2015 <kirill@scherba.ru>
  *
@@ -27,8 +27,6 @@
 #include <errno.h>
 #include <signal.h>
 
-//#include <ksnet/ksnet.h>
-
 #include "pidfile.h"
 #include "utils/utils.h"
 
@@ -53,7 +51,7 @@ static char* pidfilename_port = NULL;
 /**
  * Create the pid file name
  *
- * @param port
+ * @param port Port number
  */
 void init_pidfile(int port) {
 
@@ -87,7 +85,7 @@ void kill_pidfile() {
 /**
  * Write current pid to the specified pidfile
  *
- * @param pidfilename
+ * @param pidfilename Pid file name
  * @return
  */
 int _write_pidfile (char* pidfilename) {
@@ -130,7 +128,7 @@ int write_pidfile () {
 /**
  * Read current pid from the specified pidfile
  *
- * @param pidfilename
+ * @param pidfilename Pid file name
  * @return
  */
 int _read_pidfile (char* pidfilename) {
