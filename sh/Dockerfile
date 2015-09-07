@@ -10,3 +10,4 @@ RUN sudo apt-get update
 
 # Install teonet
 RUN sudo apt-get install -y libteonet-dev
+RUN sudo ldconfig
