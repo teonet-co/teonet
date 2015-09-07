@@ -130,7 +130,7 @@ build_teonet_image:
   script:
     - cd sh  
     #- ls -all
-    - sudo apt-get -y update
+    #- sudo apt-get -y update
     - docker build -t kscherba/teonet .
     - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
     - docker push kscherba/teonet
