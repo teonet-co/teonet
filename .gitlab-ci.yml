@@ -16,6 +16,7 @@ types:
 
 build_teonet_image:
   type: deploy
+  image: ubuntu_host
   script:
     - cd sh  
     #- ls -all
