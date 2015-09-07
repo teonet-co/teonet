@@ -8,12 +8,13 @@
 #ifndef DAEMON_H
 #define	DAEMON_H
 
+#include "config/conf.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-
-
+void start_stop_daemon(char **argv, ksnet_cfg *conf);
 
 #ifdef	__cplusplus
 }

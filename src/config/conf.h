@@ -52,7 +52,11 @@ typedef struct ksnet_cfg {
         hot_keys_f,    ///< Show hotkeys when press h
         crypt_f,      ///< Encrypt/Decrypt packets
         vpn_connect_f,  ///< Start VPN flag
-        show_tr_udp_f; ///< Show TR-UDP statistic at start up    
+        show_tr_udp_f; ///< Show TR-UDP statistic at start up   
+    
+    // Daemon mode flags
+    int dflag,  ///< Start application in Daemon mode
+        kflag;  ///< Kill application in Daemon mode
 
     // Network
     char network[KSN_BUFFER_SM_SIZE/2];     ///< Network
