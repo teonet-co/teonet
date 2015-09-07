@@ -9,7 +9,5 @@ RUN sudo printf "\ndeb http://repo.ksproject.org/ubuntu/ teonet main\n" >> /etc/
 
 # Install teonet
 RUN sudo apt-get update && sudo apt-get install -y \
-    uuid-runtime \
     libteonet-dev \
-    && sudo ldconfig \
-    && echo $(uuidgen)
+    && sudo ldconfig
