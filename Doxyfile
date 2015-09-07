@@ -257,6 +257,7 @@ GENERATE_DEPRECATEDLIST= YES
 # You can put \n's in the value part of an alias to insert newlines.
 
 ALIASES                =
+ALIASES += "license=@par License:\n"
 
 # The ENABLED_SECTIONS tag can be used to enable conditional
 # documentation sections, marked by \if sectionname ... \endif.

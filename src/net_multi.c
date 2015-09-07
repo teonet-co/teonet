@@ -16,7 +16,7 @@
 /**
  * Initialize ksnMultiClass object
  * 
- * @param km
+ * @param md Pointer to ksnMultiData
  */
 ksnMultiClass *ksnMultiInit(ksnMultiData *md) {
     
