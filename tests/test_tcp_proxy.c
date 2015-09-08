@@ -8,6 +8,8 @@
  * 
  * * Initialize/Destroy TCP Proxy module: test_5_1()
  * 
+ * cUnit test suite code: \include test_tcp_proxy.c
+ * 
  * Created on Sep 8, 2015, 11:10:22 AM
  */
 
