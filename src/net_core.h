@@ -70,6 +70,8 @@ void ksnCoreProcessPacket (void *kc, void *buf, size_t recvlen,
 int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *recv_data);
 #define ksnCoreSetEventTime(kc) kc->last_check_event = ksnetEvMgrGetTime(kc->ke)
 
+int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port);
+
 #ifdef	__cplusplus
 }
 #endif

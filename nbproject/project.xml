@@ -23,12 +23,31 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>arg</word>
+            <word>argc</word>
+            <word>argv</word>
+            <word>cfg</word>
             <word>config</word>
-            <word>fd</word>
+            <word>Dockerfile</word>
+            <word>fi</word>
+            <word>Hotkeys</word>
+            <word>kirill</word>
+            <word>ksn</word>
+            <word>len</word>
+            <word>namespace</word>
+            <word>param</word>
+            <word>perror</word>
+            <word>pid</word>
+            <word>pidfile</word>
+            <word>pidfiles</word>
+            <word>ru</word>
+            <word>scherba</word>
+            <word>sudo</word>
+            <word>syslog</word>
+            <word>tarball</word>
             <word>tcp</word>
-            <word>teonet</word>
-            <word>teotproxy</word>
             <word>todo</word>
+            <word>ubuntu</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
