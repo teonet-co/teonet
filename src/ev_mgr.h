@@ -22,7 +22,7 @@
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
 #include "modules/net_term.h"
-
+#include "modules/tcp_proxy.h"
 
 extern const char *null_str;
 #define NULL_STR (void*) null_str
@@ -82,6 +82,7 @@ typedef struct ksnetEvMgrClass {
     ksnetHotkeysClass *kh; ///< Hotkeys class
     ksnVpnClass *kvpn; ///< VPN class
     ksnTcpClass *kt; ///< TCP Client/Server class
+    ksnTCPProxyClass *tp; ///< TCP Proxy class
     ksnTunClass *ktun; ///< Tunnel class
     ksnTermClass *kter; ///< Terminal class
     ksnCQueClass *kq; ///< Callback QUEUE class
