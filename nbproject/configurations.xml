@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="95">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <logicalFolder name="f1"
-                   displayName="Teonet cUnit test"
-                   projectFiles="true"
-                   kind="TEST"
-                   root="tests">
-      <itemPath>tests/test_cque.c</itemPath>
-      <itemPath>tests/test_crypt.c</itemPath>
-      <itemPath>tests/test_net_tr-udp.c</itemPath>
-      <itemPath>tests/test_teonet.c</itemPath>
-    </logicalFolder>
     <df root="." name="0">
       <df name="app">
         <in>teodb.c</in>
@@ -96,9 +86,25 @@
       </df>
       <df name="tests">
         <in>teonet_tst.c</in>
-        <in>test_teodb.c</in>
       </df>
     </df>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+      <logicalFolder name="test_teonet"
+                     displayName="Teonet cUnit test"
+                     projectFiles="true"
+                     kind="TEST"
+                     root="tests">
+        <itemPath>tests/test_cque.c</itemPath>
+        <itemPath>tests/test_crypt.c</itemPath>
+        <itemPath>tests/test_net_tr-udp.c</itemPath>
+        <itemPath>tests/test_tcp_proxy.c</itemPath>
+        <itemPath>tests/test_teodb.c</itemPath>
+        <itemPath>tests/test_teonet.c</itemPath>
+      </logicalFolder>
+    </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false"
@@ -134,6 +140,19 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath></executablePath>
+          <cTool>
+            <incDir>
+              <pElem>tests</pElem>
+              <pElem>src/config</pElem>
+              <pElem>/opt/local/include</pElem>
+              <pElem>src</pElem>
+              <pElem>embedded/libpbl/src</pElem>
+            </incDir>
+            <preprocessorList>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            </preprocessorList>
+          </cTool>
         </makeTool>
       </makefileType>
       <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
@@ -440,22 +459,7 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONE_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
-      </folder>
-      <folder path="f1">
-        <cTool>
-          <incDir>
-            <pElem>tests</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONE_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -578,6 +582,8 @@
       <item path="tests/test_net_tr-udp.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
+      </item>
+      <item path="tests/test_tcp_proxy.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="tests/test_teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
