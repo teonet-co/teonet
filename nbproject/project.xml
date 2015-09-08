@@ -23,8 +23,11 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>config</word>
             <word>tcp</word>
+            <word>teonet</word>
             <word>teotproxy</word>
+            <word>todo</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
