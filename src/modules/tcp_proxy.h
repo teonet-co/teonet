@@ -15,7 +15,8 @@
  */
 typedef struct ksnTCPProxyClass {
     
-    void *ke;       ///< Pointer to ksnetEvMgrClass
+    void *ke;   ///< Pointer to ksnetEvMgrClass
+    int fd;     ///< TCP Server fd or 0 if not started
     
 } ksnTCPProxyClass;
 

@@ -57,6 +57,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "r_port",         required_argument, 0, 'r' },
         { "r_address",      required_argument, 0, 'a' },
         { "network",        required_argument, 0, 'n' },
+        { "tcp_allow",      no_argument,       &conf->tcp_allow_f, 1 },
+        { "tcp_port",       required_argument, 0, 'o' },
         { "hot_keys",       no_argument,       &conf->hot_keys_f, 1 },
         { "show_debug",     no_argument,       &conf->show_debug_f, 1 },
         { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
@@ -193,6 +195,11 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           strncpy((char*)conf->network, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
           
+        case 'o':
+          conf->tcp_port = atoi(optarg);
+          break;
+
+          
         case 'd':
           // Start this application in Daemon mode
           conf->dflag = 1;
@@ -290,6 +297,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --port_increment     Increment port if busy\n"
     "  -a, --r_address=value    Set remote server address (default localhost)\n"
     "  -r, --r_port=value       Set remote server port number (default "KSNET_PORT_DEFAULT")\n"
+    "      --tcp_allow          Allow TCP Proxy connection to this server\n"
+    "  -o, --tcp_port=value     TCP Proxy port number (default "KSNET_PORT_DEFAULT")\n"
     "      --hot_keys           Switch on the hot keys monitor\n"
     #ifdef DEBUG_KSNET
     "      --show_debug         Show debug messages\n"
