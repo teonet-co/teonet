@@ -100,8 +100,13 @@ int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
 void ksn_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *watcher,
                        int revents, int fd) {
     
-    // \todo
-    printf("TCP Proxy client connected\n");
+    ksnetEvMgrClass* ke = watcher->io.data;
+    ksnet_printf(&ke->ksn_cfg, CONNECT, 
+            "%sTCP Proxy:%s TCP Proxy client fd %d connected\n", 
+            ANSI_YELLOW, ANSI_NONE, fd);
+
+    // \todo Register client, create UDP Proxy client/server, create event 
+    //       watchers and callback
 }
 
 /**
