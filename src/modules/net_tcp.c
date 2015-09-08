@@ -147,6 +147,7 @@ void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_flg, int remov
 /**
  * Create TCP server and add it to Event manager
  *
+ * @param kt [in] Pointer to ksnTcpClass
  * @param port [in] Servers port
  * @param ksnet_accept_cb Server Accept callback, calls when client is connected
  * @param data Some user data

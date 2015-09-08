@@ -17,6 +17,12 @@
 #include <stdlib.h>
 
 #include "tcp_proxy.h"
+#include "ev_mgr.h"
+#include "utils/rlutil.h"
+
+int ksnTCPProxyServerStart(ksnTCPProxyClass *tp);
+
+#define kev ((ksnetEvMgrClass*)tp->ke)
 
 // Initialize / Destroy functions ---------------------------------------------
 
@@ -30,6 +36,9 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
     
     ksnTCPProxyClass *tp = malloc(sizeof(ksnTCPProxyClass));
     tp->ke = ke;
+    tp->fd = 0;  
+    
+    ksnTCPProxyServerStart(tp);
     
     return tp;
 }
@@ -81,16 +90,48 @@ int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
 //!     * Start TCP Proxy server
 
 /**
+ * TCP Proxy server accept callback
+ * 
+ * @param loop Event manager loop
+ * @param watcher Pointer to watcher
+ * @param revents Events
+ * @param fd File description of created client connection
+ */
+void ksn_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *watcher,
+                       int revents, int fd) {
+    
+    // \todo
+    printf("TCP Proxy client connected\n");
+}
+
+/**
  * Start TCP Proxy server
  * 
- * @param tp
- * @return 
+ * Create and start TCP Proxy server
+ * 
+ * @param tp Pointer to ksnTCPProxyClass
+ * @return If return value > 0 than server was created successfully
  */
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
     
-    // \todo
+    // Create TCP server at port, which will wait client connections
+    int fd = 0, port_created;
+    if(kev->ksn_cfg.tcp_allow_f && (fd = ksnTcpServerCreate(
+                kev->kt, 
+                kev->ksn_cfg.tcp_port,
+                ksn_tcpp_accept_cb, 
+                NULL, 
+                &port_created)) > 0) {
+        
+        ksnet_printf(&kev->ksn_cfg, MESSAGE, 
+                "%sTCP Proxy:%s TCP Proxy server fd %d started at port %d\n", 
+                ANSI_YELLOW, ANSI_NONE,
+                fd, port_created);
+        kev->ksn_cfg.tcp_port = port_created;
+        tp->fd = fd;
+    }
     
-    return 0;
+    return fd;
 }
 
 //! \file   tcp_proxy.c
@@ -101,3 +142,4 @@ int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
 //!         * Start UDP port Proxy
 //!         * Resend datagrams between TCP Server and UDP port Proxy 
 
+#undef kev
