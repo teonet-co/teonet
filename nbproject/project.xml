@@ -24,6 +24,7 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>tcp</word>
+            <word>teotproxy</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

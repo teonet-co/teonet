@@ -3,6 +3,10 @@
  * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * Teonet TCP Proxy module
+ * 
+ * See example: @ref teotproxy.c
+ * 
+ * See test: test_tcp_proxy.c
  *
  * Created on September 8, 2015, 1:59 AM
  */
@@ -10,6 +14,8 @@
 #include <stdlib.h>
 
 #include "tcp_proxy.h"
+
+// Initialize / Destroy functions ---------------------------------------------
 
 /**
  * Initialize TCP Proxy module 
@@ -37,3 +43,9 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
         free(tp);
     }
 }
+
+// Common functions -----------------------------------------------------------
+
+// Client functions -----------------------------------------------------------
+
+// Server functions -----------------------------------------------------------
