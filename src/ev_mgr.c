@@ -17,6 +17,7 @@
 #include "ev_mgr.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
+#include "modules/tcp_proxy.h"
 
 // Constants
 #define CHECK_EVENTS_AFTER 11.5
@@ -717,11 +718,16 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kt = ksnTcpInit(ke);
     #endif
 
+    // TCP Proxy module
+    #ifdef M_ENAMBE_TCP_P
+    ke->tp = ksnTCPProxyInit(ke);
+    #endif
+    
     // TCP Tunnel module  
     #ifdef M_ENAMBE_TUN
     ke->ktun = ksnTunInit(ke);
     #endif
-    
+
     #ifdef M_ENAMBE_TERM
     ke->kter = ksnTermInit(ke);
     #endif
@@ -741,6 +747,9 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #endif
     #ifdef M_ENAMBE_TUN
     ksnTunDestroy(ke->ktun);
+    #endif
+    #if M_ENAMBE_TCP_P
+    ksnTCPProxyDestroy(ke->tp);
     #endif
     #if M_ENAMBE_TCP
     ksnTcpDestroy(ke->kt);

@@ -33,6 +33,7 @@
 #define M_ENAMBE_PBLKF 1
 #define M_ENAMBE_VPN 1
 #define M_ENAMBE_TCP 1
+#define M_ENAMBE_TCP_P 1
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
 
