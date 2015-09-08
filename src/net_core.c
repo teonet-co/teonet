@@ -169,45 +169,36 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
 
 /**
  * Create and bind UDP socket for client/server
- *
- * @param kc
- * @return
+ * 
+ * @param[in] ksn_cfg Pointer to teonet configuration: ksnet_cfg
+ * @param[out] port Pointer to Port number
+ * @return File descriptor or error if return value < 0
  */
-int ksnCoreBind(ksnCoreClass *kc) {
-
-    int i;
+int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
+    
+    int i, fd;
     struct sockaddr_in addr;	// Our address 
-    ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg; // Pointer to configure
-
-    #ifdef HAVE_MINGW
-    // Request Winsock version 2.2
-    int retval;
-    if ((retval = WSAStartup(0x202, &kc->wsaData)) != 0) {
-        fprintf(stderr,"Server: WSAStartup() failed with error %d\n", retval);
-        WSACleanup();
-        return -1;
-    }
-    #endif
-
+    
     // Create a UDP socket
-    if((kc->fd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    if((fd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("cannot create socket\n");
         return -1;
     }
 
-    // Bind the socket to any valid IP address and a specific port, increment 
+    memset((char *)&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        // Bind the socket to any valid IP address and a specific port, increment 
     // port if busy 
     for(i=0;;) {
         
-        memset((char *)&addr, 0, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = htonl(INADDR_ANY);
-        addr.sin_port = htons(kc->port);
+        addr.sin_port = htons(*port);
 
-        if(ksn_bind(kc->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        if(ksn_bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
             #ifdef DEBUG_KSNET
-            ksnet_printf(ksn_cfg, MESSAGE, "Try port %d ...\n", kc->port++);
+            ksnet_printf(ksn_cfg, MESSAGE, "Try port %d ...\n", (*port)++);
             #endif
             perror("bind failed");
             if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
@@ -215,13 +206,31 @@ int ksnCoreBind(ksnCoreClass *kc) {
         }
         else break;
     }
+    
+    return fd;
+}
 
-    ksnet_printf(ksn_cfg, MESSAGE, 
-            "%sNet core:%s Start listen at port %d\n", 
-            ANSI_GREEN, ANSI_NONE,
-            kc->port);
+/**
+ * Create and bind UDP socket for client/server
+ *
+ * @param kc Pointer to ksnCoreClass
+ * @return 0 if successfully created and bind
+ */
+int ksnCoreBind(ksnCoreClass *kc) {
 
-    return 0;
+    int fd;
+    ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
+    
+    if((fd = ksnCoreBindRaw(ksn_cfg, &kc->port)) > 0) {
+
+        kc->fd = fd;
+        ksnet_printf(ksn_cfg, MESSAGE, 
+                "%sNet core:%s Start listen at port %d\n", 
+                ANSI_GREEN, ANSI_NONE,
+                kc->port);
+    }
+
+    return !(fd > 0);
 }
 
 /**
@@ -485,10 +494,10 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 /**
  * Process ksnet packet
  * 
- * @param kc
- * @param buf
- * @param recvlen
- * @param remaddr
+ * @param vkc Pointer to ksnCoreClass
+ * @param buf Buffer with packet
+ * @param recvlen Packet length
+ * @param remaddrAddress
  */
 void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, 
         __SOCKADDR_ARG remaddr) {

@@ -18,6 +18,7 @@
 
 #include "tcp_proxy.h"
 #include "ev_mgr.h"
+#include "net_core.h"
 #include "utils/rlutil.h"
 
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp);
@@ -107,6 +108,11 @@ void ksn_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *watcher,
 
     // \todo Register client, create UDP Proxy client/server, create event 
     //       watchers and callback
+    
+    int udp_proxy_port = 0;
+    
+    ksnCoreBindRaw(&ke->ksn_cfg, &udp_proxy_port);
+    printf("UDP client/server Proxy created at port %d\n", udp_proxy_port);
 }
 
 /**
