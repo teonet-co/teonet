@@ -245,9 +245,9 @@ inline void ksnTRUDPstatAddrReset(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) 
 
 void ksnTRUDPstatAddrResetAll(ksnTRUDPClass *tu) {
     
-    PblIterator *it = pblMapIteratorNew(tu->ip_map);
+    PblIterator *it = pblMapIteratorReverseNew(tu->ip_map);
     if (it != NULL) {
-        while (pblIteratorHasPrevious(it)) {
+        while (pblIteratorHasPrevious(it) > 0) {
             void *entry = pblIteratorPrevious(it);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
             _ksnTRUDPstatAddrInit(ip_map_d);

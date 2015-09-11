@@ -1064,7 +1064,7 @@ void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
     );
     #endif
 
-    PblIterator *it = pblMapIteratorNew(send_list);
+    PblIterator *it = pblMapIteratorReverseNew(send_list);
     if (it != NULL) {
         while (pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
@@ -1092,7 +1092,7 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
     );
     #endif
 
-    PblIterator *it = pblMapIteratorNew(tu->ip_map);
+    PblIterator *it = pblMapIteratorReverseNew(tu->ip_map);
     if (it != NULL) {
         while (pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
@@ -1391,7 +1391,7 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
     );
     #endif
 
-    PblIterator *it = pblMapIteratorNew(tu->ip_map);
+    PblIterator *it = pblMapIteratorReverseNew(tu->ip_map);
     if (it != NULL) {
         while (pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
