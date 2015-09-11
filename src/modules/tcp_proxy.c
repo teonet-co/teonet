@@ -25,7 +25,7 @@
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerStop(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd);
-void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd);
+void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, int remove_f);
 
 #define kev ((ksnetEvMgrClass*)tp->ke)
 
@@ -57,7 +57,6 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
 void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
     
     if(tp != NULL) {
-
         ksnTCPProxyServerStop(tp); // Stop TCP Proxy server
         pblMapFree(tp->map); // Free clients map
         free(tp); // Free class memory
@@ -118,9 +117,8 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     // Disconnect client:
     // Close UDP and TCP connections and Remove data from TCP Proxy Clients map
-    if(!received) {
-        
-        ksnTCPProxyServerClientDisconnect(tp, w->fd);
+    if(!received) {        
+        ksnTCPProxyServerClientDisconnect(tp, w->fd, 1);
     }
 }
 
@@ -188,18 +186,19 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
     // If server started
     if(kev->ksn_cfg.tcp_allow_f && tp->fd) {
         
-        // \todo Test it - did nit show messages in ksnTCPProxyServerClientDisconnect
-        printf("ksnTCPProxyServerStop\n");
         // Disconnect all clients
-        PblIterator *it = pblMapIteratorNew(tp->map);
+        PblIterator *it = pblMapIteratorReverseNew(tp->map);
         if(it != NULL) {
-
-            while(pblIteratorHasPrevious(it)) {
+            while(pblIteratorHasPrevious(it) > 0) {
                 void *entry = pblIteratorPrevious(it);
                 int *fd = (int *) pblMapEntryKey(entry);
-                ksnTCPProxyServerClientDisconnect(tp, *fd);
+                ksnTCPProxyServerClientDisconnect(tp, *fd, 0);
             }
+            pblIteratorFree(it);
         }
+        
+        // Clear map
+        pblMapClear(tp->map);
         
         // Stop the server
     }
@@ -265,8 +264,9 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
  * 
  * @param tp Pointer to ksnTCPProxyClass
  * @param fd TCP client connection file descriptor
+ * @param remove_f If true than remove  disconnected record from map
  */
-void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd) {
+void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, int remove_f) {
     
         size_t valueLength;
         
@@ -276,7 +276,8 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd) {
         if(tpd != NULL) {
             ev_io_stop (kev->ev_loop, &tpd->w); // Stop TCP Proxy client watcher
             close(tpd->udp_proxy_fd); // Close UDP Proxy connection          
-            pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength); // Remove data from map
+            if(remove_f) 
+                pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength); // Remove data from map
         }
         
         // Close TCP Proxy client        
