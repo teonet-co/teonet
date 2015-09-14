@@ -205,11 +205,16 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         #endif
     }
     
-    // \todo Success read. Resend packet to UDP proxy
+    // Success read. Process package and resend it to UDP proxy when ready
     else {
         
-        // \todo Parse TCP packet
-        if(!ksnTCPProxyPackageProcess(tp, data, data_len)) {
+        int rv;
+        
+        // Parse TCP packet
+        rv = ksnTCPProxyPackageProcess(tp, data, data_len);
+        
+        // Send package to peer by UDP proxy connection
+        if(!rv) {
         
             // Address
             const char *addr = tp->buffer + sizeof(ksnTCPProxyMessage_header);
@@ -222,7 +227,17 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             // Checksum
             const uint8_t checksum = ((ksnTCPProxyMessage_header *) tp->buffer)->checksum;
 
-            // \todo Send packet to Peer by UDP proxy
+            // \todo Send packet to Peer by UDP proxy connection
+        } 
+        
+        // Wrong package
+        else if(rv < 0) {
+            // \todo Show error message
+        }
+        
+        // Not all package read - continue receiving
+        else {
+            // Do nothing
         }
     }
 }
@@ -451,8 +466,12 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, size_t data_len)
             
             ksnTCPProxyMessage_header *th = (ksnTCPProxyMessage_header *) tp->buffer;
             size_t pkg_len = sizeof(ksnTCPProxyMessage_header) + th->package_len + th->addr_len;
+            
+            // \todo check checksum
+            
             if(tp->ptr > pkg_len) {
-                memmove(tp->buffer, tp->buffer + pkg_len, tp->ptr - pkg_len);
+                tp->ptr = tp->ptr - pkg_len;
+                memmove(tp->buffer, tp->buffer + pkg_len, tp->ptr);
                 tp->stage = WAIT_FOR_END;
             }
             else tp->stage = WAIT_FOR_BEGAN;
