@@ -13,6 +13,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -313,9 +314,13 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
     int nread = read(w->fd, buffer, sizeof(buffer));
 
     if(nread < 0) {
-        perror("Reading from interface");
-        close(w->fd);
-        //exit(1);
+        
+        if( errno != EINTR ) {
+            perror("Reading from interface");
+            close(w->fd);        
+            //exit(1);
+        }
+    
         return;
     }
 

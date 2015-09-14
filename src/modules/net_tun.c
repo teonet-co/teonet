@@ -446,10 +446,14 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
     //! \todo: Read error
     else if(read_len < 0) {
 
+//        if( errno == EINTR ) {
+//            // OK, just skip it
+//        }
+    
         #ifdef DEBUG_KSNET
         ksnet_printf(
             & ((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke)->ksn_cfg , DEBUG,
-            "%sTUN Server:%s : read error\n", ANSI_BLUE, ANSI_NONE
+            "%sTUN Server:%s Read error\n", ANSI_BLUE, ANSI_NONE
         );
         #endif
 
