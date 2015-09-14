@@ -25,6 +25,7 @@
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>config</word>
             <word>fd</word>
+            <word>Hotkeys</word>
             <word>tcp</word>
             <word>teonet</word>
             <word>teotproxy</word>
