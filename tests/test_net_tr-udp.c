@@ -1,10 +1,10 @@
 /**
- * \file   test_net_rt_udp.c
+ * \file   test_net_tr-udp.c
  * \author Kirill Scherba <kirill@scherba.ru>
  *
  * TR-UDP module cUnit test suite
  * 
- * cUnit test suite code: \include test_net_rt_udp.c
+ * cUnit test suite code: \include test_net_tr-udp.c
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */

@@ -312,7 +312,6 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
  * 
  * @param tu
  * @param addr
- * @param tru_header
  */
 inline void ksnTRUDPsetDATAsendTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
     
@@ -325,7 +324,6 @@ inline void ksnTRUDPsetDATAsendTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr
  * 
  * @param tu
  * @param addr
- * @param tru_header
  */
 inline void ksnTRUDPsetDATAreceiveTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
     

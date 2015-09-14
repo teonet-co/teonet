@@ -1273,10 +1273,14 @@ int ksnTRUDPreceiveHeapCompare(const void* prev, const void* next) {
 /**
  * Add record to the Receive Heap
  * 
+ * @param tu
  * @param receive_heap
  * @param id
  * @param data
  * @param data_len
+ * @param addr
+ * @param addr_len
+ * 
  * @return 
  */
 int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap, 
@@ -1340,6 +1344,7 @@ int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d) {
 /**
  * Remove first element from Receive Heap (with lowest ID) 
  * 
+ * @param tu
  * @param receive_heap
  * 
  * @return 1 if element removed or 0 heap was empty
@@ -1355,6 +1360,7 @@ inline int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu, PblHeap *receive_he
 /**
  * Remove all elements from Receive Heap
  * 
+ * @param tu
  * @param receive_heap
  */
 void ksnTRUDPreceiveHeapRemoveAll(ksnTRUDPClass *tu, PblHeap *receive_heap) {
