@@ -15,6 +15,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "tcp_proxy.h"
 #include "ev_mgr.h"
@@ -25,9 +26,13 @@
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerStop(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd);
-void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, int remove_f);
+void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, 
+        int remove_f);
+int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, size_t data_len);
 
 #define kev ((ksnetEvMgrClass*)tp->ke)
+
+#define TCP_PROXY_VERSION 0
 
 // Initialize / Destroy functions ---------------------------------------------
 
@@ -35,6 +40,7 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, int remove_
  * Initialize TCP Proxy module 
  * 
  * @param ke Pointer to the 
+ * 
  * @return Pointer to ksnTCPProxyClass
  */
 ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
@@ -43,6 +49,8 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
     tp->map = pblMapNewHashMap();
     tp->ke = ke;
     tp->fd = 0;  
+    tp->ptr = 0;
+    tp->stage = WAIT_FOR_BEGAN;
     
     ksnTCPProxyServerStart(tp);
     
@@ -53,6 +61,7 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
  * Destroy TCP Proxy module
  * 
  * @param tp
+ * 
  */
 void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
     
@@ -65,6 +74,17 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
 
 // Common functions -----------------------------------------------------------
 
+uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_len) {
+    
+    int i;
+    uint8_t checksum = 0;
+    for(i = 1; i < data_len; i++) {
+        checksum += *((uint8_t*) data + i);
+    }
+    
+    return checksum;
+}
+
 //! \file   tcp_proxy.c
 //! * Client functions: 
 
@@ -75,6 +95,7 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
  * Connect to TCP Proxy server
  * 
  * @param tp Pointer to ksnTCPProxyClass
+ * 
  * @return 0 - Successfully connected
  */
 int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
@@ -90,6 +111,43 @@ int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
     return 0;
 }
 
+/**
+ * Create TCP Proxy package
+ * 
+ * Create TCP Proxy package from peers UDP address and port, data buffer and 
+ * its length
+ * 
+ * @param tp Pointer to ksnTCPProxyClass
+ * @param addr String with peer UDP address
+ * @param port UDP port number
+ * @param data Package data
+ * @param data_len Package data length
+ * 
+ * @return Size of sent package or 0 if error
+ */
+size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, const char *addr, 
+        int port, void *data, size_t data_len) { 
+    
+    size_t buffer_len = KSN_BUFFER_DB_SIZE; // Buffer length
+    char buffer[buffer_len]; // Buffer
+    
+    // \todo check buffer length
+    
+    ksnTCPProxyMessage_header *th = (ksnTCPProxyMessage_header*)buffer;
+    
+    th->version = TCP_PROXY_VERSION; // TCP Proxy protocol version 
+    th->addr_len = strlen(addr) + 1; // Address string length
+    th->port = port; // UDP port number
+    th->package_len = data_len; // Package data length   
+    memcpy(buffer + sizeof(ksnTCPProxyMessage_header), addr, th->addr_len); // Address string
+    memcpy(buffer + sizeof(ksnTCPProxyMessage_header) + th->addr_len, data, data_len); // Package data        
+    th->checksum = ksnTCPProxyChecksumCalculate(data, data_len); // Package data length
+    
+    size_t tcp_package_length = sizeof(ksnTCPProxyMessage_header) + th->addr_len + data_len;
+    
+    return tcp_package_length;
+}
+
 //! \file   tcp_proxy.c
 //! * Server functions: 
 
@@ -101,6 +159,7 @@ int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
  * @param loop Event manager loop
  * @param w Pointer to watcher
  * @param revents Events
+ * 
  */
 void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
@@ -129,6 +188,42 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         #endif
         
         ksnTCPProxyServerClientDisconnect(tp, w->fd, 1);
+    } 
+    
+    // \todo Process error
+    else if (received < 0) {  
+        
+        //        if( errno == EINTR ) {
+        //            // OK, just skip it
+        //        }
+    
+        #ifdef DEBUG_KSNET
+        ksnet_printf(
+            &kev->ksn_cfg, DEBUG,
+            "%sTCP Proxy:%s Read error\n", ANSI_YELLOW, ANSI_NONE
+        );
+        #endif
+    }
+    
+    // \todo Success read. Resend packet to UDP proxy
+    else {
+        
+        // \todo Parse TCP packet
+        if(!ksnTCPProxyPackageProcess(tp, data, data_len)) {
+        
+            // Address
+            const char *addr = tp->buffer + sizeof(ksnTCPProxyMessage_header);
+            // Port
+            int port = ((ksnTCPProxyMessage_header *) tp->buffer)->port;
+            // Packet        
+            const char *packet =  tp->buffer + sizeof(ksnTCPProxyMessage_header) + ((ksnTCPProxyMessage_header *) tp->buffer)->addr_len;
+            // Packet length
+            const size_t packet_len = ((ksnTCPProxyMessage_header *) tp->buffer)->package_len;
+            // Checksum
+            const uint8_t checksum = ((ksnTCPProxyMessage_header *) tp->buffer)->checksum;
+
+            // \todo Send packet to Peer by UDP proxy
+        }
     }
 }
 
@@ -142,6 +237,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * @param w Pointer to watcher
  * @param revents Events
  * @param fd File description of created client connection
+ * 
  */
 inline void cmd_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
                        int revents, int fd) {
@@ -157,6 +253,7 @@ inline void cmd_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
  * Create and start TCP Proxy server
  * 
  * @param tp Pointer to ksnTCPProxyClass
+ * 
  * @return If return value > 0 than server was created successfully
  */
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
@@ -190,6 +287,7 @@ int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
  * Disconnect all connected clients and and stop TCP Proxy server
  * 
  * @param tp Pointer to ksnTCPProxyClass
+ * 
  */
 void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
     
@@ -279,8 +377,10 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
  * @param tp Pointer to ksnTCPProxyClass
  * @param fd TCP client connection file descriptor
  * @param remove_f If true than remove  disconnected record from map
+ * 
  */
-void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, int remove_f) {
+void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, 
+        int remove_f) {
     
         size_t valueLength;
         
@@ -301,6 +401,73 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, int remove_
         ksnet_printf(&kev->ksn_cfg, CONNECT, 
             "%sTCP Proxy:%s TCP Proxy client fd %d disconnected\n", 
             ANSI_YELLOW, ANSI_NONE, fd);
+}
+
+/**
+ * Process TCP proxy package
+ * 
+ * Read tcp data from socket until end of tcp proxy package, check checksum,
+ * take UDP address, port number and UDP package data.
+ * 
+ * @param tp Pointer to ksnTCPProxyClass
+ * @param data Pointer to TCP data received
+ * @param data_len TCP data length
+ * 
+ * @return 0 - done, resend this package; -1 - an error; 1 - reading current package
+ */
+int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, size_t data_len) {
+    
+    int rv = 1;
+    
+    switch(tp->stage) {
+        
+        // Wait for package began
+        case WAIT_FOR_BEGAN:
+            tp->ptr = 0;
+            tp->stage = WAIT_FOR_END;
+            rv = ksnTCPProxyPackageProcess(tp, data, data_len);
+            break;
+            
+        // Wait for package end
+        case WAIT_FOR_END: {
+            
+            // \todo check buffer length
+            memcpy(tp->buffer + tp->ptr, data, data_len);  
+            tp->ptr += data_len;
+            if(tp->ptr >= sizeof(ksnTCPProxyMessage_header)) {
+                
+                ksnTCPProxyMessage_header *th = (ksnTCPProxyMessage_header *) tp->buffer;
+                size_t pkg_len = sizeof(ksnTCPProxyMessage_header) + th->package_len + th->addr_len;
+                if(tp->ptr >= pkg_len) {
+                    tp->stage = PROCESS_PACKET;
+                    rv = ksnTCPProxyPackageProcess(tp, NULL, 0);
+                }
+            }            
+        } 
+        break;
+            
+        // Read process body
+        case PROCESS_PACKET: {
+            
+            ksnTCPProxyMessage_header *th = (ksnTCPProxyMessage_header *) tp->buffer;
+            size_t pkg_len = sizeof(ksnTCPProxyMessage_header) + th->package_len + th->addr_len;
+            if(tp->ptr > pkg_len) {
+                memmove(tp->buffer, tp->buffer + pkg_len, tp->ptr - pkg_len);
+                tp->stage = WAIT_FOR_END;
+            }
+            else tp->stage = WAIT_FOR_BEGAN;
+            
+            rv = 0;
+        }
+        break;
+            
+        // Some wrong stage
+        default:
+            rv = -1;
+            break;
+    }
+            
+    return rv;
 }
 
 #undef kev
