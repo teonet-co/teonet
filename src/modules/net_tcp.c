@@ -164,7 +164,7 @@ int ksnTcpServerCreate(
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass*)kt->ke)->ksn_cfg, MESSAGE,
-            "%sTCP Server:%s Create TCP server at port %d\n", 
+            "%sTCP Server:%s Create TCP server at port %d ...\n", 
             ANSI_MAGENTA, ANSI_NONE, port);
     #endif
 
@@ -394,8 +394,8 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
         // Bind socket to address
         if (bind(sd, (struct sockaddr*) &addr, sizeof(addr)) != 0) {
             ksnet_printf(&kev->ksn_cfg, ERROR_M,
-                    "%sTCP Server:%s bind on port %d error\n", 
-                    ANSI_MAGENTA, ANSI_NONE, *port);
+                    "%sTCP Server:%s Can't bind on port %d, try next port number ...%s\n", 
+                    ANSI_MAGENTA, ANSI_GREY, *port, ANSI_NONE);
             close(sd);
             if(try_port) (*port)++;
         }
@@ -405,7 +405,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
     // Start listing on the socket
     if (listen(sd, 2) < 0) {
         ksnet_printf(&kev->ksn_cfg, ERROR_M,
-                "%sTCP Server:%s listen on port %d error\n", 
+                "%sTCP Server:%s Listen on port %d error\n", 
                 ANSI_MAGENTA, ANSI_NONE, *port);
         return -1;
     }
@@ -416,7 +416,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
     // Server welcome message
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, MESSAGE,
-            "%sTCP Server:%s Started at port %d, socket fd %d ...\n", 
+            "%sTCP Server:%s Started at port %d, socket fd %d\n", 
             ANSI_MAGENTA, ANSI_NONE, *port, sd);
     #endif
 
