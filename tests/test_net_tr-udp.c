@@ -191,6 +191,7 @@ void test_2_4() {
         const size_t sl_d_len = sizeof(sl_data) + 12;
         char sl_d_buf[sl_d_len];
         sl_data *sl_d = (void*) sl_d_buf;
+        sl_d->w.data = NULL;
         strcpy(sl_d->data_buf, "Some data 1");
         sl_d->data_len = 12;
         pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
@@ -199,6 +200,7 @@ void test_2_4() {
         id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
         CU_ASSERT(id == 1);
         // Add 2 message to Send List
+        sl_d->w.data = NULL;
         strcpy(sl_d->data_buf, "Some data 2");
         sl_d->data_len = 12;
         pblMapAdd(sl, &id, sizeof (id), (void*) sl_d, sl_d_len);
@@ -319,7 +321,7 @@ void test_2_5() {
     sl_timer_stop(ke.ev_loop, &sl_d_get->w);
     CU_ASSERT_PTR_NULL(sl_d_get->w.data);
     CU_PASS("Send list timer was stopped");
-    
+
     // 7 ksnTRUDPSendListDestroyAll: Free all elements and free all Sent message lists
     ksnTRUDPsendListDestroyAll(tu);
     CU_PASS("Destroy all sent message lists done");
@@ -489,20 +491,26 @@ int bind_udp(int *port) {
 
         if(bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
-            printf(" try port %d ...", (*port)++);
-            perror("  bind failed ...");
+            // Show message. Use perror to show this message in the test output
+            char *err_msg = ksnet_formatMessage(
+                "        " 
+                "Bind at port %d failed ...", 
+                *port
+            );
+            perror(err_msg); 
+            free(err_msg);
+            (*port)++;
             if(i++ < NUMBER_TRY_PORTS) continue;
             else return -2;
-        }
+            
+        } 
         else break;
     }
-
-    //printf(" start UDP at %d, fd = %d ...", *port, fd);
 
     return fd;
 }
 
-//! Test main TR-UDP function ksnTRUDPsendto
+//! TR-UDP sendto function
 void test_2_8() {
     
     // Emulate ksnCoreClass

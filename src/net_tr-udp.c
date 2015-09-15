@@ -1097,9 +1097,11 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
         while (pblIteratorHasPrevious(it)) {
             void *entry = pblIteratorPrevious(it);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
-            ksnTRUDPsendListRemoveAll(tu, ip_map_d->send_list);
-            pblMapFree(ip_map_d->send_list);
-            ip_map_d->send_list = NULL;
+            if(ip_map_d->send_list != NULL) {
+                ksnTRUDPsendListRemoveAll(tu, ip_map_d->send_list);
+                pblMapFree(ip_map_d->send_list);
+                ip_map_d->send_list = NULL;
+            }
         }
         pblIteratorFree(it);
     }
