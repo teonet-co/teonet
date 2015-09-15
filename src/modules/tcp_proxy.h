@@ -38,6 +38,7 @@ typedef struct ksnTCPProxyMessage_header {
     unsigned int addr_len : 4; ///< UDP peers address string length included trailing zero  
     uint16_t port; ///< UDP peers port number
     uint16_t package_len; ///< UDP package length
+    uint16_t reserved; ///< Reserved for funure use
     
 } ksnTCPProxyMessage_header;
 
