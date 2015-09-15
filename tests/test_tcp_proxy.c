@@ -7,6 +7,7 @@
  * Tests TCP Proxy functions:
  * 
  * * Initialize/Destroy TCP Proxy module: test_5_1()
+ * * Create and Process Package functions: test_5_2()
  * 
  * cUnit test suite code: \include test_tcp_proxy.c
  * 
@@ -41,8 +42,23 @@ void test_5_1() {
     CU_PASS("Destroy ksnTCPProxyClass done");
 }
 
+//! Create and Process Package functions
 void test_5_2() {
-    CU_ASSERT(2 * 2 == 5);
+    
+    // Emulate ksnCoreClass
+    ke_emul();
+
+    // Initialize ksnTRUDPClass
+    ksnTCPProxyClass *tp; 
+    CU_ASSERT_PTR_NOT_NULL_FATAL((tp = ksnTCPProxyInit(ke)));
+    
+    // 1) \todo Create package 
+    
+    // 2) \todo Process package
+    
+    // Destroy ksnTRUDPClass
+    ksnTCPProxyDestroy(tp); 
+    CU_PASS("Destroy ksnTCPProxyClass done");
 }
 
 /**
@@ -54,7 +70,7 @@ int add_suite_5_tests(void) {
 
     // Add the tests to the suite
     if ((NULL == CU_add_test(pSuite, "Initialize/Destroy TCP Proxy module", test_5_1))
-//        || (NULL == CU_add_test(pSuite, "TCP Proxy .... functions", test_5_2))
+     || (NULL == CU_add_test(pSuite, "Create and Process Package functions", test_5_2))
             ) {
         CU_cleanup_registry();
         return CU_get_error();
