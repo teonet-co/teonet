@@ -394,7 +394,8 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
         // Bind socket to address
         if (bind(sd, (struct sockaddr*) &addr, sizeof(addr)) != 0) {
             ksnet_printf(&kev->ksn_cfg, ERROR_M,
-                    "%sTCP Server:%s Can't bind on port %d, try next port number ...%s\n", 
+                    "%sTCP Server:%s Can't bind on port %d, "
+                    "try next port number ...%s\n", 
                     ANSI_MAGENTA, ANSI_GREY, *port, ANSI_NONE);
             close(sd);
             if(try_port) (*port)++;
@@ -416,7 +417,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
     // Server welcome message
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, MESSAGE,
-            "%sTCP Server:%s Started at port %d, socket fd %d\n", 
+            "%sTCP Server:%s Start listen at port %d, socket fd %d\n", 
             ANSI_MAGENTA, ANSI_NONE, *port, sd);
     #endif
 

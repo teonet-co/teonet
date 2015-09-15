@@ -106,7 +106,7 @@ int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
     
     // Register connection (in ARP ?)
     
-    // \todo
+    // \todo ksnTCPProxyConnetc
     
     return 0;
 }
@@ -190,7 +190,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         ksnTCPProxyServerClientDisconnect(tp, w->fd, 1);
     } 
     
-    // \todo Process error
+    // \todo Process reading error
     else if (received < 0) {  
         
         //        if( errno == EINTR ) {

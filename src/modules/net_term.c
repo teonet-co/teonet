@@ -55,9 +55,9 @@ ksnTermClass *ksnTermInit(void *ke) {
         &port_created)) > 0) {
     
         ksnet_printf(&kev->ksn_cfg, MESSAGE, 
-                "%sTerminal server:%s Terminal server fd %d started at port %d\n", 
-                ANSI_LIGHTBLUE, ANSI_NONE,
-                fd, port_created);
+                "%sTerminal server:%s "
+                "Terminal server started at port %d, socket fd %d\n", 
+                ANSI_LIGHTBLUE, ANSI_NONE, port_created, fd);
     }
     
     return kter;

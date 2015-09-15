@@ -189,7 +189,7 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-        // Bind the socket to any valid IP address and a specific port, increment 
+    // Bind the socket to any valid IP address and a specific port, increment 
     // port if busy 
     for(i=0;;) {
         
@@ -197,10 +197,13 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
 
         if(ksn_bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
-            #ifdef DEBUG_KSNET
-            ksnet_printf(ksn_cfg, MESSAGE, "Try port %d ...\n", (*port)++);
-            #endif
-            perror("bind failed");
+            ksnet_printf(ksn_cfg, MESSAGE, 
+                    "%sNet core:%s Can't bind on port %d, "
+                    "try next port number ...%s\n", 
+                    ANSI_GREEN, ANSI_GREY,
+                    *port, 
+                    ANSI_NONE);
+            (*port)++;
             if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
             else return -2;
         }
@@ -221,13 +224,20 @@ int ksnCoreBind(ksnCoreClass *kc) {
     int fd;
     ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
     
+    #ifdef DEBUG_KSNET
+    ksnet_printf(ksn_cfg, MESSAGE, 
+                    "%sNet core:%s Create UDP client/server at port %d ...\n", 
+                    ANSI_GREEN, ANSI_NONE, kc->port);
+    #endif
+    
     if((fd = ksnCoreBindRaw(ksn_cfg, &kc->port)) > 0) {
 
         kc->fd = fd;
+        #ifdef DEBUG_KSNET
         ksnet_printf(ksn_cfg, MESSAGE, 
-                "%sNet core:%s Start listen at port %d\n", 
-                ANSI_GREEN, ANSI_NONE,
-                kc->port);
+                "%sNet core:%s Start listen at port %d, socket fd %d\n", 
+                ANSI_GREEN, ANSI_NONE, kc->port, kc->fd);
+        #endif
     }
 
     return !(fd > 0);
