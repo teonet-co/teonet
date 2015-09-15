@@ -74,12 +74,23 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
 
 // Common functions -----------------------------------------------------------
 
+/**
+ * Calculate checksum
+ * 
+ * Calculate byte checksum in data buffer
+ * 
+ * @param data Data buffer
+ * @param data_len Length of the data buffer
+ * 
+ * @return Byte checksum of buffer
+ */
 uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_len) {
     
     int i;
-    uint8_t checksum = 0;
+    uint8_t *ch, checksum = 0;
     for(i = 1; i < data_len; i++) {
-        checksum += *((uint8_t*) data + i);
+        ch = (uint8_t*)(data + i);
+        checksum += *ch;
     }
     
     return checksum;
@@ -118,32 +129,43 @@ int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
  * its length
  * 
  * @param tp Pointer to ksnTCPProxyClass
+ * @param buffer The buffer to create package in
+ * @param buffer_length Package data length
  * @param addr String with peer UDP address
  * @param port UDP port number
  * @param data Package data
- * @param data_len Package data length
+ * @param data_length Package data length
  * 
- * @return Size of sent package or 0 if error
+ * @return > 0 - Size of created package; 
+ *         -1 - error: The output buffer less than packet header;
+ *         -2 - error: The output buffer less than packet header + data
  */
-size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, const char *addr, 
-        int port, void *data, size_t data_len) { 
+size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, void *buffer, 
+        size_t buffer_length, const char *addr, int port, const void *data, 
+        size_t data_length) { 
     
-    size_t buffer_len = KSN_BUFFER_DB_SIZE; // Buffer length
-    char buffer[buffer_len]; // Buffer
+    size_t tcp_package_length;
     
-    // \todo check buffer length
-    
-    ksnTCPProxyMessage_header *th = (ksnTCPProxyMessage_header*)buffer;
-    
-    th->version = TCP_PROXY_VERSION; // TCP Proxy protocol version 
-    th->addr_len = strlen(addr) + 1; // Address string length
-    th->port = port; // UDP port number
-    th->package_len = data_len; // Package data length   
-    memcpy(buffer + sizeof(ksnTCPProxyMessage_header), addr, th->addr_len); // Address string
-    memcpy(buffer + sizeof(ksnTCPProxyMessage_header) + th->addr_len, data, data_len); // Package data        
-    th->checksum = ksnTCPProxyChecksumCalculate(data, data_len); // Package data length
-    
-    size_t tcp_package_length = sizeof(ksnTCPProxyMessage_header) + th->addr_len + data_len;
+    if(buffer_length >= sizeof(ksnTCPProxyMessage_header)) {
+        
+        ksnTCPProxyMessage_header *th = (ksnTCPProxyMessage_header*)buffer;
+
+        th->version = TCP_PROXY_VERSION; // TCP Proxy protocol version 
+        th->addr_len = strlen(addr) + 1; // Address string length
+        th->port = port; // UDP port number
+        th->package_len = data_length; // Package data length   
+        size_t p_length = sizeof(ksnTCPProxyMessage_header) + th->addr_len + data_length;
+        
+        if(buffer_length >= p_length) {
+            
+            tcp_package_length = p_length;
+            memcpy(buffer + sizeof(ksnTCPProxyMessage_header), addr, th->addr_len); // Address string
+            memcpy(buffer + sizeof(ksnTCPProxyMessage_header) + th->addr_len, data, data_length); // Package data        
+            th->checksum = ksnTCPProxyChecksumCalculate(buffer, tcp_package_length); // Package data length
+        } 
+        else tcp_package_length = -2; // Error code: The output buffer less than packet data + header
+    }
+    else tcp_package_length = -1; // Error code: The output buffer less than packet header
     
     return tcp_package_length;
 }
@@ -217,13 +239,17 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         if(!rv) {
         
             // Address
-            const char *addr = tp->buffer + sizeof(ksnTCPProxyMessage_header);
+            const char *addr = (const char *) (tp->buffer + sizeof(ksnTCPProxyMessage_header));
+            
             // Port
             int port = ((ksnTCPProxyMessage_header *) tp->buffer)->port;
+            
             // Packet        
-            const char *packet =  tp->buffer + sizeof(ksnTCPProxyMessage_header) + ((ksnTCPProxyMessage_header *) tp->buffer)->addr_len;
+            const char *packet =  (const char *) (tp->buffer + sizeof(ksnTCPProxyMessage_header) + ((ksnTCPProxyMessage_header *) tp->buffer)->addr_len);
+            
             // Packet length
             const size_t packet_len = ((ksnTCPProxyMessage_header *) tp->buffer)->package_len;
+            
             // Checksum
             const uint8_t checksum = ((ksnTCPProxyMessage_header *) tp->buffer)->checksum;
 
