@@ -22,8 +22,8 @@
  */
 typedef enum {
     
-    WAIT_FOR_BEGAN, ///< Wait for packet beginning
-    WAIT_FOR_END, ///< Wait for end of packet
+    WAIT_FOR_START, ///< Wait for begibbibg of the packet
+    WAIT_FOR_END, ///< Wait for end of the packet
     PROCESS_PACKET ///< Process the packet in buffer
     
 } ksnTCPProxyBufferStage;
@@ -31,30 +31,16 @@ typedef enum {
 /**
  * TCP Proxy packet(message) header structure
  */
-typedef struct ksnTCPProxyMessage_header {
+typedef struct ksnTCPProxyHeader {
     
     uint8_t checksum; ///< Checksum
     unsigned int version : 4; ///< Protocol version number    
-    unsigned int addr_len : 4; ///< UDP peers address string length included trailing zero  
+    unsigned int addr_length : 4; ///< UDP peers address string length included trailing zero  
     uint16_t port; ///< UDP peers port number
-    uint16_t package_len; ///< UDP package length
+    uint16_t packet_length; ///< UDP packet length
     uint16_t reserved; ///< Reserved for funure use
     
-} ksnTCPProxyMessage_header;
-
-/**
- * TCP Proxy class data
- */
-typedef struct ksnTCPProxyClass {
-    
-    void *ke;    ///< Pointer to ksnetEvMgrClass
-    int fd;      ///< TCP Server fd or 0 if not started
-    PblMap* map; ///< Hash Map to store tcp proxy client connections
-    char *buffer[KSN_BUFFER_DB_SIZE]; ///< TCP Proxy packet buffer
-    size_t ptr;  ///< TCP Proxy packet buffer
-    int stage;   ///< TCP Proxy packet buffer
-    
-} ksnTCPProxyClass;
+} ksnTCPProxyHeader;
 
 /**
  * ksnTCPProxyClass map data
@@ -66,6 +52,28 @@ typedef struct ksnTCPProxyData {
     ev_io w;            ///< TCP Client watcher
     
 } ksnTCPProxyData;
+
+/**
+ * TCP Proxy class data
+ */
+typedef struct ksnTCPProxyClass {
+    
+    void *ke;    ///< Pointer to ksnetEvMgrClass
+    int fd;      ///< TCP Server fd or 0 if not started
+    PblMap* map; ///< Hash Map to store tcp proxy client connections
+    
+    // Packet buffer:
+    struct {
+        
+        char buffer[KSN_BUFFER_DB_SIZE]; ///< Packet buffer
+        ksnTCPProxyHeader* header; ///< Packet header
+        size_t length; ///< Received package length
+        size_t ptr;  ///< Pointer to data end in packet buffer
+        int stage;   ///< Packet buffer receiving stage
+    
+    } packet;
+    
+} ksnTCPProxyClass;
 
 #ifdef	__cplusplus
 extern "C" {
