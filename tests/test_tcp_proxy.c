@@ -1,4 +1,4 @@
-/*
+/**
  * \file   test_tcp_proxy.c
  * \author Kirill Scherba <kirill@scherba.ru>
  *

@@ -30,16 +30,20 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
         int remove_f);
 int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, size_t data_len);
 
+/**
+ * Pointer to ksnetEvMgrClass
+ * 
+ */
 #define kev ((ksnetEvMgrClass*)tp->ke)
 
-#define TCP_PROXY_VERSION 0
+#define TCP_PROXY_VERSION 0 //! TCP Proxy version
 
 // Initialize / Destroy functions ---------------------------------------------
 
 /**
  * Initialize TCP Proxy module 
  * 
- * @param ke Pointer to the 
+ * @param ke Pointer to the ksnTCPProxyClass
  * 
  * @return Pointer to ksnTCPProxyClass
  */
@@ -63,7 +67,7 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
 /**
  * Destroy TCP Proxy module
  * 
- * @param tp
+ * @param tp Pointer to ksnTCPProxyClass
  * 
  */
 void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
@@ -83,15 +87,15 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
  * Calculate byte checksum in data buffer
  * 
  * @param data Data buffer
- * @param data_len Length of the data buffer
+ * @param data_length Length of the data buffer
  * 
- * @return Byte checksum of buffer
+ * @return Byte checksum of the input buffer
  */
-uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_len) {
+uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_length) {
     
     int i;
     uint8_t *ch, checksum = 0;
-    for(i = 1; i < data_len; i++) {
+    for(i = 1; i < data_length; i++) {
         ch = (uint8_t*)(data + i);
         checksum += *ch;
     }
@@ -139,9 +143,11 @@ int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
  * @param data Package data
  * @param data_length Package data length
  * 
- * @return > 0 - Size of created package; 
- *         -1 - error: The output buffer less than packet header;
- *         -2 - error: The output buffer less than packet header + data
+ * @return Return size of created package or error
+ *  
+ * @retval > 0 - size of created package
+ * @retval -1 - error: The output buffer less than packet header
+ * @retval -2 - error: The output buffer less than packet header + data
  */
 size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, void *buffer, 
         size_t buffer_length, const char *addr, int port, const void *data, 
@@ -454,10 +460,17 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
  * check checksum, take UDP address, port number and UDP package data.
  * 
  * @param tp Pointer to ksnTCPProxyClass
- * @param data Pointer to TCP data received
+ * @param data Pointer to received TCP data
  * @param data_length TCP data length
  * 
- * @return Length of received packet, zero or error code
+ * @return Length of received packet, zero or error code. The TCP packets may 
+ *         be received combined to one big buffer. If packet processed and this 
+ *         function return value grate than 0 and less than input buffer size 
+ *         we need run this function again with data_length = 0 to process next 
+ *         part of input buffer. \n
+ *         (see the "5) Check receiving" code of the test_5_2() function of the 
+ *         test_tcp_proxy.c test)
+ * 
  * @retval >0 - receiving done, the return value contain length of packet, 
  *              the packet saved to ksnTCPProxyClass::buffer
  * @retval 0 - continue reading current packet 
