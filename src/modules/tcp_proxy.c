@@ -245,7 +245,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         rv = ksnTCPProxyPackageProcess(tp, data, data_len);
         
         // Send package to peer by UDP proxy connection
-        if(!rv) {
+        if(rv > 0) {
         
             // Address
 //            const char *addr = (const char *) (tp->packet.buffer + sizeof(ksnTCPProxyHeader));
@@ -382,17 +382,20 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     int udp_proxy_fd, udp_proxy_port = kev->ksn_cfg.port;
     
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s TCP Proxy client fd %d connected\n", 
+            "%sTCP Proxy:%s "
+            "TCP Proxy client fd %d connected\n", 
             ANSI_YELLOW, ANSI_NONE, fd);
    
     // Open UDP Proxy client/server
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s Create UDP client/server Proxy at port %d ...\n", 
+            "%sTCP Proxy:%s "
+            "Create UDP client/server Proxy at port %d ...\n", 
             ANSI_YELLOW, ANSI_NONE,
             udp_proxy_port);
     udp_proxy_fd = ksnCoreBindRaw(&kev->ksn_cfg, &udp_proxy_port);
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s UDP client/server Proxy created at port %d\n", 
+            "%sTCP Proxy:%s "
+            "UDP client/server Proxy created at port %d\n", 
             ANSI_YELLOW, ANSI_NONE,
             udp_proxy_port);
             
@@ -487,7 +490,8 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data,
         case WAIT_FOR_START:
             if(tp->packet.ptr != 0) {
                 tp->packet.ptr = tp->packet.ptr - tp->packet.length;
-                memmove(tp->packet.buffer, tp->packet.buffer + tp->packet.length, tp->packet.ptr);
+                memmove(tp->packet.buffer, tp->packet.buffer+tp->packet.length, 
+                        tp->packet.ptr);
             }
             tp->packet.length = 0;
             tp->packet.stage = WAIT_FOR_END;
@@ -498,9 +502,13 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data,
         case WAIT_FOR_END: {
             
             // \todo check buffer length
-            memcpy(tp->packet.buffer + tp->packet.ptr, data, data_length);  
-            tp->packet.ptr += data_length;
+            if(data_length > 0) {
+                memcpy(tp->packet.buffer + tp->packet.ptr, data, data_length);  
+                tp->packet.ptr += data_length;
+            }
             if(tp->packet.ptr >= sizeof(ksnTCPProxyHeader)) {
+                
+                // Check packet header
                 
                 size_t pkg_len = sizeof(ksnTCPProxyHeader) + 
                         tp->packet.header->packet_length + 
