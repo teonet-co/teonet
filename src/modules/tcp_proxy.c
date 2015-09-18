@@ -186,6 +186,82 @@ size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, void *buffer,
 //! * Server functions: 
 
 /**
+ * UDP client/server Proxy callback
+ * 
+ * Get packet from UDP Proxy client connection and resend it to TCP Proxy
+ * 
+ * @param loop Event manager loop
+ * @param w Pointer to watcher
+ * @param revents Events
+ * 
+ */
+void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
+    
+    struct sockaddr_in remaddr; // Remote address
+    socklen_t addrlen = sizeof(remaddr); // Length of addresses
+    size_t data_len = KSN_BUFFER_DB_SIZE; // Buffer length
+    ksnTCPProxyClass *tp = w->data; // Pointer to ksnTCPProxyClass
+    char data[data_len]; // Buffer
+    const int flags = 0; // Flags
+
+    // Get UDP data
+    ssize_t received = recvfrom(w->fd, data, data_len, flags, 
+            (struct sockaddr *)&remaddr, &addrlen);
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG, // \todo Change type to DEBUG_VV after debugging
+            "%sTCP Proxy:%s "
+            "Got something from UDP fd %d w->events = %d, received = %d ...\n", 
+            ANSI_YELLOW, ANSI_NONE, w->fd, w->events, (int)received);
+    #endif
+  
+    // \todo Resend UDP packet to TCP Proxy
+    if(received > 0) {
+        
+        size_t data_send_len = received + sizeof(ksnTCPProxyHeader);
+        char data_send[data_send_len];
+        
+        // Create TCP package
+        size_t pl = ksnTCPProxyPackageCreate(tp, data_send, data_send_len, 
+                inet_ntoa(((struct sockaddr_in *) &remaddr)->sin_addr), 
+                ntohs(((struct sockaddr_in *) &remaddr)->sin_port), 
+                data, data_len);
+        
+        // Get TCP fd from tcp proxy map
+        size_t valueLength;
+        ksnTCPProxyData* tpd = pblMapGet(tp->map, &w->fd, sizeof(w->fd), &valueLength);
+        if(tpd != NULL) {   
+        
+            // Send TCP package
+            ssize_t rv = write(tpd->tcp_proxy_fd, data_send, pl);
+            
+            // Check write to TCP Proxy client error
+            if(rv != pl) {
+                
+                // Show write to TCP Proxy client error
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG,
+                    "%sTCP Proxy:%s "
+                    "Send to TCP client error, rv: %d %s\n", 
+                    ANSI_YELLOW, ANSI_RED, pl, ANSI_NONE);
+                #endif
+            } 
+            
+            // Show successfully write message
+            else {
+                
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG, // \todo Change type to DEBUG_VV after debugging
+                    "%sTCP Proxy:%s "
+                    "Resent UDP packet to TCP client, packet size: %d bytes\n", 
+                    ANSI_YELLOW, ANSI_NONE, pl);
+                #endif
+            }
+        }
+    }    
+}
+
+/**
  * TCP Proxy server client callback
  * 
  * Get packet from TCP Proxy client connection and resend it to UDP Proxy
@@ -203,11 +279,13 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     // Read TCP data
     ssize_t received = read(w->fd, data, data_len);
+    #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG, // \todo Change type to DEBUG_VV after debugging
             "%sTCP Proxy:%s "
             "Got something from fd %d w->events = %d, received = %d ...\n", 
             ANSI_YELLOW, ANSI_NONE, w->fd, w->events, (int)received);
-    
+    #endif
+
     // Disconnect client:
     // Close UDP and TCP connections and Remove data from TCP Proxy Clients map
     if(!received) {        
@@ -271,7 +349,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 switch(tp->packet.header->command) {
 
                     case CMD_TCPP_PROXY:
-                        // \todo Resend packet to Peer by UDP proxy connection
+                        // \todo Resend TCP packet to Peer by UDP proxy connection
                         break;
 
                     default:
@@ -325,6 +403,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
             // A part of packet received - continue receiving next parts of package
             else {
+                
                 // Do nothing
                 #ifdef DEBUG_KSNET
                 ksnet_printf(&kev->ksn_cfg, DEBUG, 
@@ -420,7 +499,7 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
         // Clear map
         pblMapClear(tp->map);
         
-        // Stop the server
+        // \todo Stop the server
     }
 }
 
@@ -463,21 +542,38 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
             
     // Register client in tcp proxy map 
     ksnTCPProxyData data;
+    data.tcp_proxy_fd = fd;
     data.udp_proxy_fd = udp_proxy_fd;
     data.udp_proxy_port = udp_proxy_port;
     pblMapAdd(tp->map, &fd, sizeof(fd), &data, sizeof(ksnTCPProxyData));
+    pblMapAdd(tp->map, &udp_proxy_port, sizeof(udp_proxy_port), &data, sizeof(ksnTCPProxyData));
     
-    // Create and start watcher (start client processing)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
+    // Create and start TCP and UDP watchers (start client processing)
     size_t valueLength;
     ksnTCPProxyData* tpd = pblMapGet(tp->map, &fd, sizeof(fd), &valueLength);
-    if(tpd != NULL) {        
+    if(tpd != NULL) {   
+        
+        // Create and start TCP watcher (start TCP client processing)
         ev_init (&tpd->w, cmd_tcpp_read_cb);
         ev_io_set (&tpd->w, fd, EV_READ);
         tpd->w.data = tp;
         ev_io_start (kev->ev_loop, &tpd->w);
+        
+        // Create and start UDP watcher (start UDP client processing)
+        ev_init (&tpd->w_udp, cmd_udpp_read_cb);
+        ev_io_set (&tpd->w_udp, udp_proxy_fd, EV_READ);
+        tpd->w_udp.data = tp;
+        ev_io_start (kev->ev_loop, &tpd->w_udp);
     }
+    
+    // Error: can't register TCP fd in tcp proxy map
+    else {
+        // \todo process error: can't register TCP fd in tcp proxy map
+    }
+
     #pragma GCC diagnostic pop
 }
 
@@ -503,10 +599,19 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
         // connection and remove this data record from map
         ksnTCPProxyData* tpd = pblMapGet(tp->map, &fd, sizeof(fd), &valueLength); 
         if(tpd != NULL) {
-            ev_io_stop (kev->ev_loop, &tpd->w); // Stop TCP Proxy client watcher
-            close(tpd->udp_proxy_fd); // Close UDP Proxy connection          
-            if(remove_f) 
-                pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength); // Remove data from map
+            
+            // Stop TCP Proxy client watcher
+            ev_io_stop (kev->ev_loop, &tpd->w);
+            
+            // Stop UDP client/server Proxy watcher and Close UDP Proxy connection 
+            ev_io_stop (kev->ev_loop, &tpd->w_udp);
+            close(tpd->udp_proxy_fd); 
+            
+            // Remove data from map
+            if(remove_f) {
+                pblMapRemove(tp->map, &tpd->udp_proxy_fd, sizeof(tpd->udp_proxy_fd), &valueLength);
+                pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength);
+            }
         }
         
         // Close TCP Proxy client        

@@ -74,7 +74,7 @@ void test_5_2() {
     // Check result
     ksnTCPProxyHeader *th = (ksnTCPProxyHeader*) buffer;
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
-    CU_ASSERT_EQUAL(th->checksum, ksnTCPProxyChecksumCalculate((void*)buffer, pl)); // Check checksum
+    CU_ASSERT_EQUAL(th->checksum, ksnTCPProxyChecksumCalculate((void*)buffer + 1, pl - 1)); // Check checksum
     CU_ASSERT_EQUAL(th->addr_length, strlen(addr) + 1); // Check address string length
     CU_ASSERT_EQUAL(th->port, port); // Check port number
     CU_ASSERT_STRING_EQUAL(buffer + sizeof(ksnTCPProxyHeader), addr); // Check address
@@ -99,7 +99,7 @@ void test_5_2() {
     // Check saved buffer header parameters
     CU_ASSERT(rv > 0); // Packet process successfully
     //CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
-    CU_ASSERT_EQUAL(tp->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tp->packet.buffer, pl)); // Check checksum
+    CU_ASSERT_EQUAL(tp->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tp->packet.buffer + 1, pl - 1)); // Check checksum
     CU_ASSERT_EQUAL(tp->packet.header->addr_length, strlen(addr) + 1); // Check address string length
     CU_ASSERT_EQUAL(tp->packet.header->port, port); // Check port number
     CU_ASSERT_STRING_EQUAL(tp->packet.buffer + sizeof(ksnTCPProxyHeader), addr); // Check address
@@ -143,7 +143,7 @@ void test_5_2() {
             CU_ASSERT(rv >= 0);
             if(rv > 0) {                
 //                printf(", processed = %d, ptr = %d", rv, tp->packet.ptr);            
-                CU_ASSERT_EQUAL(tp->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tp->packet.buffer, rv)); // Check checksum
+                CU_ASSERT_EQUAL(tp->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tp->packet.buffer + 1, rv - 1)); // Check checksum
                 CU_ASSERT_EQUAL(tp->packet.header->addr_length, strlen(addr) + 1); // Check address string length
                 CU_ASSERT_EQUAL(tp->packet.header->port, port); // Check port number
                 CU_ASSERT_STRING_EQUAL(tp->packet.buffer + sizeof(ksnTCPProxyHeader), addr); // Check address

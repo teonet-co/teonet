@@ -57,9 +57,11 @@ typedef struct ksnTCPProxyHeader {
  */
 typedef struct ksnTCPProxyData {
     
+    int tcp_proxy_fd;   ///< TCP Proxy file descriptor
     int udp_proxy_port; ///< UDP Proxy port number
     int udp_proxy_fd;   ///< UDP Proxy file descriptor
     ev_io w;            ///< TCP Client watcher
+    ev_io w_udp;        ///< UDP Client watcher
     
 } ksnTCPProxyData;
 
