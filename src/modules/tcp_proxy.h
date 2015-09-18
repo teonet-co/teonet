@@ -29,16 +29,26 @@ typedef enum {
 } ksnTCPProxyBufferStage;
 
 /**
+ * TCP Proxy protocol command
+ */
+typedef enum {
+    
+    CMD_TCPP_PROXY  ///< Resend packet to UDP Proxy client/server
+    
+} ksnTCPProxyCommand;
+
+/**
  * TCP Proxy packet(message) header structure
  */
 typedef struct ksnTCPProxyHeader {
     
-    uint8_t checksum; ///< Checksum
+    uint8_t checksum; ///< Whole checksum
     unsigned int version : 4; ///< Protocol version number    
-    unsigned int addr_length : 4; ///< UDP peers address string length included trailing zero  
+    unsigned int command : 4; ///< Protocol command
     uint16_t port; ///< UDP peers port number
     uint16_t packet_length; ///< UDP packet length
-    uint16_t reserved; ///< Reserved for funure use
+    uint8_t addr_length; ///< UDP peers address string length included trailing zero  
+    uint8_t packet_checksum; ///< Header checksum
     
 } ksnTCPProxyHeader;
 

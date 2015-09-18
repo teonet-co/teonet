@@ -36,7 +36,7 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, size_t data_len)
  */
 #define kev ((ksnetEvMgrClass*)tp->ke)
 
-#define TCP_PROXY_VERSION 0 //! TCP Proxy version
+#define TCP_PROXY_VERSION 0 ///< TCP Proxy version
 
 // Initialize / Destroy functions ---------------------------------------------
 
@@ -160,11 +160,14 @@ size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, void *buffer,
         ksnTCPProxyHeader *th = (ksnTCPProxyHeader*)buffer;
 
         th->version = TCP_PROXY_VERSION; // TCP Proxy protocol version 
+        th->command = CMD_TCPP_PROXY; // TCP Proxy protocol command
         th->addr_length = strlen(addr) + 1; // Address string length
         th->port = port; // UDP port number
         th->packet_length = data_length; // Package data length   
-        size_t p_length = sizeof(ksnTCPProxyHeader) + th->addr_length + data_length;
+        th->packet_checksum = ksnTCPProxyChecksumCalculate((void*)th + 1, 
+                sizeof(ksnTCPProxyHeader) - 2);
         
+        size_t p_length = sizeof(ksnTCPProxyHeader) + th->addr_length + data_length;        
         if(buffer_length >= p_length) {
             
             tcp_package_length = p_length;
@@ -231,7 +234,8 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         #ifdef DEBUG_KSNET
         ksnet_printf(
             &kev->ksn_cfg, DEBUG,
-            "%sTCP Proxy:%s Read error\n", ANSI_YELLOW, ANSI_NONE
+            "%sTCP Proxy:%s Read error ...%s\n", 
+            ANSI_YELLOW, ANSI_RED, ANSI_NONE
         );
         #endif
     }
@@ -239,40 +243,88 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     // Success read. Process package and resend it to UDP proxy when ready
     else {
         
-        int rv;
-        
-        // Parse TCP packet
-        rv = ksnTCPProxyPackageProcess(tp, data, data_len);
-        
-        // Send package to peer by UDP proxy connection
-        if(rv > 0) {
-        
-            // Address
-//            const char *addr = (const char *) (tp->packet.buffer + sizeof(ksnTCPProxyHeader));
+        // Process received buffer
+        for(;;) {
             
-            // Port
-//            int port = tp->packet.header->port;
-            
-            // Packet        
-//            const char *packet =  (const char *) (tp->packet.buffer + sizeof(ksnTCPProxyHeader) + tp->packet.header->addr_length);
-            
-            // Packet length
-//            const size_t packet_len = tp->packet.header->packet_length;
-            
-            // Checksum
-//            const uint8_t checksum = tp->packet.header->checksum;
+            // Parse TCP packet        
+            int rv = ksnTCPProxyPackageProcess(tp, data, received);
 
-            // \todo Send packet to Peer by UDP proxy connection
-        } 
-        
-        // Wrong package
-        else if(rv < 0) {
-            // \todo Show error message
-        }
-        
-        // Not all package read - continue receiving
-        else {
-            // Do nothing
+            // Send package to peer by UDP proxy connection
+            if(rv > 0) {
+
+                // Address
+    //            const char *addr = (const char *) (tp->packet.buffer + sizeof(ksnTCPProxyHeader));
+
+                // Port
+    //            int port = tp->packet.header->port;
+
+                // Packet        
+    //            const char *packet =  (const char *) (tp->packet.buffer + sizeof(ksnTCPProxyHeader) + tp->packet.header->addr_length);
+
+                // Packet length
+    //            const size_t packet_len = tp->packet.header->packet_length;
+
+                // Checksum
+    //            const uint8_t checksum = tp->packet.header->checksum;
+
+                // \todo Check and execute TCP Proxy packet command
+                switch(tp->packet.header->command) {
+
+                    case CMD_TCPP_PROXY:
+                        // \todo Resend packet to Peer by UDP proxy connection
+                        break;
+
+                    default:
+                        break;
+                }
+
+                // Process next part of received buffer
+                if(!tp->packet.ptr == 0) {
+
+                    received = 0;
+                    continue; // Continue receiving buffer loop
+                }
+            } 
+
+            // Process packed errors
+            else if(rv < 0) {
+
+                // Wrong process package stage error
+                if(rv == -1) { 
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                        "%sTCP Proxy:%s "
+                        "Wrong process package stage ...%s\n", 
+                        ANSI_YELLOW, ANSI_RED, ANSI_NONE);
+                    #endif
+                }
+
+                // Wrong packet received error
+                else if(rv == -2) {
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                        "%sTCP Proxy:%s "
+                        "Wrong packet received ...%s\n", 
+                        ANSI_YELLOW, ANSI_RED, ANSI_NONE);
+                    #endif
+                }
+
+                // Close TCP Proxy client
+                ksnTCPProxyServerClientDisconnect(tp, w->fd, 1);
+            }
+
+            // A part of packet received - continue receiving next parts of package
+            else {
+                // Do nothing
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                    "%sTCP Proxy:%s "
+                    "Part of packet received. Wait for next part ...%s\n", 
+                    ANSI_YELLOW, ANSI_GREY, ANSI_NONE);
+                #endif                
+            }
+            
+            break; // Exit from process received buffer loop
         }
     }
 }
@@ -477,7 +529,8 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
  * @retval >0 - receiving done, the return value contain length of packet, 
  *              the packet saved to ksnTCPProxyClass::buffer
  * @retval 0 - continue reading current packet 
- * @retval -1 - an error
+ * @retval -1 - wrong process package stage 
+ * @retval -2 - wrong packet header checksum
  */
 int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, 
         size_t data_length) {
@@ -508,7 +561,23 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data,
             }
             if(tp->packet.ptr >= sizeof(ksnTCPProxyHeader)) {
                 
-                // Check packet header
+                // Check packet header 
+                uint8_t packet_checksum = 
+                        ksnTCPProxyChecksumCalculate(
+                            (void*)tp->packet.header + 1, 
+                            sizeof(ksnTCPProxyHeader) - 2
+                        );
+                
+                // If packet checksum not equal - skip this packet
+                if(!(tp->packet.header->addr_length 
+                     && tp->packet.header->port     
+                     && tp->packet.header->packet_checksum == packet_checksum)) {  
+                    
+                    rv = -2;
+                    tp->packet.stage = WAIT_FOR_START;
+                    tp->packet.ptr = 0;
+                    break;
+                }
                 
                 size_t pkg_len = sizeof(ksnTCPProxyHeader) + 
                         tp->packet.header->packet_length + 
