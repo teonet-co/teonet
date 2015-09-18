@@ -265,9 +265,6 @@
             <pElem>src</pElem>
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teoack.c" ex="false" tool="0" flavor2="2">
@@ -390,7 +387,7 @@
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -457,16 +454,6 @@
             <pElem>embedded/libpbl/src</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/src/utils">
-        <cTool>
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/tests">
