@@ -86,8 +86,8 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
  * 
  * Calculate byte checksum in data buffer
  * 
- * @param data Data buffer
- * @param data_length Length of the data buffer
+ * @param data Pointer to data buffer
+ * @param data_length Length of the data buffer to calculate checksum
  * 
  * @return Byte checksum of the input buffer
  */
@@ -95,7 +95,7 @@ uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_length) {
     
     int i;
     uint8_t *ch, checksum = 0;
-    for(i = 1; i < data_length; i++) {
+    for(i = 0; i < data_length; i++) {
         ch = (uint8_t*)(data + i);
         checksum += *ch;
     }
@@ -173,7 +173,7 @@ size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, void *buffer,
             tcp_package_length = p_length;
             memcpy(buffer + sizeof(ksnTCPProxyHeader), addr, th->addr_length); // Address string
             memcpy(buffer + sizeof(ksnTCPProxyHeader) + th->addr_length, data, data_length); // Package data        
-            th->checksum = ksnTCPProxyChecksumCalculate(buffer, tcp_package_length); // Package data length
+            th->checksum = ksnTCPProxyChecksumCalculate(buffer + 1, tcp_package_length - 1); // Package data length
         } 
         else tcp_package_length = -2; // Error code: The output buffer less than packet data + header
     }
@@ -309,6 +309,16 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     #endif
                 }
 
+                // Wrong packet body received error
+                else if(rv == -3) {
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                        "%sTCP Proxy:%s "
+                        "Wrong packet checksum ...%s\n", 
+                        ANSI_YELLOW, ANSI_RED, ANSI_NONE);
+                    #endif
+                }
+                
                 // Close TCP Proxy client
                 ksnTCPProxyServerClientDisconnect(tp, w->fd, 1);
             }
@@ -531,6 +541,7 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
  * @retval 0 - continue reading current packet 
  * @retval -1 - wrong process package stage 
  * @retval -2 - wrong packet header checksum
+ * @retval -3 - wrong packet checksum
  */
 int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, 
         size_t data_length) {
@@ -599,17 +610,29 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data,
                     tp->packet.header->packet_length + 
                     tp->packet.header->addr_length;
             
-            // \todo Check checksum
-                      
+            // Get packet checksum 
+            uint8_t checksum = 
+                    ksnTCPProxyChecksumCalculate(
+                        (void*)tp->packet.buffer + 1, 
+                        tp->packet.length - 1
+                    );
+            
             tp->packet.stage = WAIT_FOR_START;
             if(!(tp->packet.ptr > tp->packet.length)) 
                 tp->packet.ptr = 0;
             
-            rv = tp->packet.length;
+            // Packet is processed
+            if(tp->packet.header->checksum == checksum) {
+                      
+                rv = tp->packet.length;
+            }
+            
+            // Wrong packet checksum error
+            else rv = -3;
         }
         break;
             
-        // Some wrong stage
+        // Some wrong package processing stage
         default:
             rv = -1;
             break;
