@@ -63,6 +63,10 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
     tp->packet.stage = WAIT_FOR_START; // Stage of receiving packet
     tp->packet.header = (ksnTCPProxyHeader*) tp->packet.buffer; // Pointer to packet header
     
+    // \todo Start TCP proxy client
+    ksnTCPProxyClientConnetc(tp);
+    
+    // Start TCP proxy server
     ksnTCPProxyServerStart(tp);
     
     return tp;
@@ -139,7 +143,7 @@ void cmd_tcppc_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * 
  * @return 0 - Successfully connected
  */
-int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
+int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
    
     // Get address and port from teonet config
     if(kev->ksn_cfg.r_tcp_f) {
@@ -506,22 +510,27 @@ inline void cmd_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
  */
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
     
-    // Create TCP server at port, which will wait client connections
-    int fd = 0, port_created;
-    if(kev->ksn_cfg.tcp_allow_f && (fd = ksnTcpServerCreate(
-                kev->kt, 
-                kev->ksn_cfg.tcp_port,
-                cmd_tcpp_accept_cb, 
-                tp, 
-                &port_created)) > 0) {
+    int fd = 0;
+    
+    if(kev->ksn_cfg.tcp_allow_f) {
         
-        ksnet_printf(&kev->ksn_cfg, MESSAGE, 
-                "%sTCP Proxy:%s TCP Proxy server fd %d started at port %d\n", 
-                ANSI_YELLOW, ANSI_NONE,
-                fd, port_created);
-        
-        kev->ksn_cfg.tcp_port = port_created;
-        tp->fd = fd;
+        // Create TCP server at port, which will wait client connections
+        int port_created;
+        if((fd = ksnTcpServerCreate(
+                    kev->kt, 
+                    kev->ksn_cfg.tcp_port,
+                    cmd_tcpp_accept_cb, 
+                    tp, 
+                    &port_created)) > 0) {
+
+            ksnet_printf(&kev->ksn_cfg, MESSAGE, 
+                    "%sTCP Proxy:%s TCP Proxy server fd %d started at port %d\n", 
+                    ANSI_YELLOW, ANSI_NONE,
+                    fd, port_created);
+
+            kev->ksn_cfg.tcp_port = port_created;
+            tp->fd = fd;
+        }
     }
     
     return fd;

@@ -53,6 +53,19 @@ typedef struct ksnTCPProxyHeader {
 } ksnTCPProxyHeader;
 
 /**
+ * TCP Proxy buffer structure
+ */
+typedef struct ksnTCPProxyPacketBuffer {
+    
+    char buffer[KSN_BUFFER_DB_SIZE]; ///< Packet buffer
+    ksnTCPProxyHeader* header; ///< Packet header
+    size_t length; ///< Received package length
+    size_t ptr;  ///< Pointer to data end in packet buffer
+    int stage;   ///< Packet buffer receiving stage    
+    
+} ksnTCPProxyPacketBuffer;
+
+/**
  * ksnTCPProxyClass map data
  */
 typedef struct ksnTCPProxyData {
@@ -72,21 +85,17 @@ typedef struct ksnTCPProxyClass {
     
     void *ke;       ///< Pointer to ksnetEvMgrClass
     
+    // Client
     int fd_client;  ///< TCP Client fd or 0 if not started (or not connected)
     ev_io w_client; ///< TCP Client watcher
+    
+    // Server
     int fd;         ///< TCP Server fd or 0 if not started
-    PblMap* map;    ///< Hash Map to store tcp proxy client connections
+    PblMap* map;    ///< Hash Map to store tcp proxy client connections       
     
-    // Packet buffer:
-    struct {
-        
-        char buffer[KSN_BUFFER_DB_SIZE]; ///< Packet buffer
-        ksnTCPProxyHeader* header; ///< Packet header
-        size_t length; ///< Received package length
-        size_t ptr;  ///< Pointer to data end in packet buffer
-        int stage;   ///< Packet buffer receiving stage
-    
-    } packet;
+    // \todo Move the ksnTCPProxyPacketBuffer to the ksnTCPProxyData structure
+    // \todo Create ksnTCPProxyPacketBuffer for TCP Proxy client
+    ksnTCPProxyPacketBuffer packet; ///< Packet buffer
     
 } ksnTCPProxyClass;
 
