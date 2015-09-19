@@ -70,9 +70,12 @@ typedef struct ksnTCPProxyData {
  */
 typedef struct ksnTCPProxyClass {
     
-    void *ke;    ///< Pointer to ksnetEvMgrClass
-    int fd;      ///< TCP Server fd or 0 if not started
-    PblMap* map; ///< Hash Map to store tcp proxy client connections
+    void *ke;       ///< Pointer to ksnetEvMgrClass
+    
+    int fd_client;  ///< TCP Client fd or 0 if not started (or not connected)
+    ev_io w_client; ///< TCP Client watcher
+    int fd;         ///< TCP Server fd or 0 if not started
+    PblMap* map;    ///< Hash Map to store tcp proxy client connections
     
     // Packet buffer:
     struct {

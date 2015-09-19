@@ -55,7 +55,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "port",           required_argument, 0, 'p' },
         { "port_increment", no_argument,       &conf->port_inc_f, 1 },
         { "r_port",         required_argument, 0, 'r' },
+        { "r_tcp_port",     required_argument, 0, 't' },
         { "r_address",      required_argument, 0, 'a' },
+        { "r_tcp",          no_argument,       &conf->r_tcp_f, 1 },
         { "network",        required_argument, 0, 'n' },
         { "tcp_allow",      no_argument,       &conf->tcp_allow_f, 1 },
         { "tcp_port",       required_argument, 0, 'o' },
@@ -178,6 +180,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         case 'r':
           conf->r_port = atoi(optarg);
           break;
+          
+        case 't':
+          conf->r_tcp_port = atoi(optarg);
+          break;
 
         case 'a':
           strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
@@ -297,6 +303,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --port_increment     Increment port if busy\n"
     "  -a, --r_address=value    Set remote server address (default localhost)\n"
     "  -r, --r_port=value       Set remote server port number (default "KSNET_PORT_DEFAULT")\n"
+    "      --r_tcp              Connect to remote TCP Proxy port\n"            
+    "  -t, --r_tcp_port=value   Set remote server TCP port number (default "KSNET_PORT_DEFAULT")\n"
     "      --tcp_allow          Allow TCP Proxy connection to this server\n"
     "  -o, --tcp_port=value     TCP Proxy port number (default "KSNET_PORT_DEFAULT")\n"
     "      --hot_keys           Switch on the hot keys monitor\n"
