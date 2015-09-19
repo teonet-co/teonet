@@ -83,6 +83,8 @@ typedef struct ksnet_cfg {
     // R-Host
     char r_host_addr[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address
     long r_port;                            ///< Remote host port
+    long r_tcp_port;                        ///< Remote host tcp port
+    int r_tcp_f;            ///< Connect to TCP Proxy R-Host port 
 
     // VPN
     char vpn_dev_name[KSN_MAX_HOST_NAME];   ///< VPN Interface device name

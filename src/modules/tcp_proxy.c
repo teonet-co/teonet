@@ -55,6 +55,8 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
     tp->map = pblMapNewHashMap();
     tp->ke = ke;
     tp->fd = 0;  
+    tp->fd_client = 0; 
+    
     // Initialize input packet buffer parameters
     tp->packet.ptr = 0; // Pointer to data end in packet buffer
     tp->packet.length = 0; // Length of received packet
@@ -112,7 +114,26 @@ uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_length) {
 //!     * Connect to TCP Proxy server: ksnTCPProxyConnetc()
 
 /**
+ * TCP Proxy client callback
+ * 
+ * Get packet from TCP Proxy server connection and resend it to read host callback
+ * 
+ * @param loop Event manager loop
+ * @param w Pointer to watcher
+ * @param revents Events
+ * 
+ */
+void cmd_tcppc_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
+    
+    // \todo TCP Proxy client callback
+    
+}
+
+/**
  * Connect to TCP Proxy server
+ * 
+ * Get address and port from teonet configuration and connect to R-Host TCP 
+ * Server 
  * 
  * @param tp Pointer to ksnTCPProxyClass
  * 
@@ -121,12 +142,28 @@ uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_length) {
 int ksnTCPProxyConnetc(ksnTCPProxyClass *tp) {
    
     // Get address and port from teonet config
+    if(kev->ksn_cfg.r_tcp_f) {
     
-    // Connect to R-Host TCP Server
-    
-    // Register connection (in ARP ?)
-    
-    // \todo ksnTCPProxyConnetc
+        // Connect to R-Host TCP Server
+        int fd_client = ksnTcpClientCreate(kev->kt, 
+                kev->ksn_cfg.r_tcp_port, // Remote host TCP port number
+                kev->ksn_cfg.r_host_addr // Remote host internet address
+        );
+        
+        if(fd_client > 0) {
+
+            // Register connection
+            tp->fd_client = fd_client;
+
+            // \todo TCP Proxy protocol connect
+            
+            // Create and start TCP Proxy client watcher
+            ev_init (&tp->w_client, cmd_tcppc_read_cb);
+            ev_io_set (&tp->w_client, fd_client, EV_READ);
+            tp->w_client.data = tp;
+            ev_io_start (kev->ev_loop, &tp->w_client);
+        }
+    }
     
     return 0;
 }
@@ -266,7 +303,7 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 /**
  * TCP Proxy server client callback
  * 
- * Get packet from TCP Proxy client connection and resend it to UDP Proxy
+ * Get packet from TCP Proxy server client connection and resend it to UDP Proxy
  * 
  * @param loop Event manager loop
  * @param w Pointer to watcher
@@ -305,7 +342,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     } 
     
     // \todo Process reading error
-    else if (received < 0) {  
+    else if (received < 0) {
         
         //        if( errno == EINTR ) {
         //            // OK, just skip it
