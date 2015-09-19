@@ -18,8 +18,10 @@
 #include <string.h>
 
 #include "tcp_proxy.h"
+
 #include "ev_mgr.h"
 #include "net_core.h"
+#include "net_tr-udp_.h"
 #include "utils/rlutil.h"
 
 // Local function definition
@@ -330,30 +332,48 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             // Send package to peer by UDP proxy connection
             if(rv > 0) {
 
-                // Address
-    //            const char *addr = (const char *) (tp->packet.buffer + sizeof(ksnTCPProxyHeader));
+                // Address string
+                const char *addr = (const char *) (tp->packet.buffer + 
+                    sizeof(ksnTCPProxyHeader));
 
-                // Port
-    //            int port = tp->packet.header->port;
+                // Port number
+                const int port = tp->packet.header->port;
 
-                // Packet        
-    //            const char *packet =  (const char *) (tp->packet.buffer + sizeof(ksnTCPProxyHeader) + tp->packet.header->addr_length);
+                // Pointer to packet        
+                const char *packet = (const char *) (tp->packet.buffer + 
+                    sizeof(ksnTCPProxyHeader) + tp->packet.header->addr_length);
 
                 // Packet length
-    //            const size_t packet_len = tp->packet.header->packet_length;
+                const size_t packet_len = tp->packet.header->packet_length;
 
-                // Checksum
-    //            const uint8_t checksum = tp->packet.header->checksum;
+                // Make address from string
+                struct sockaddr_in remaddr; // remote address
+                socklen_t addrlen = sizeof(remaddr); // length of addresses 
+                if(!ksnTRUDPmakeAddr(addr, port, (__SOCKADDR_ARG) &remaddr, 
+                        &addrlen)) {
 
-                // \todo Check and execute TCP Proxy packet command
-                switch(tp->packet.header->command) {
+                    // \todo Check and execute TCP Proxy packet command
+                    switch(tp->packet.header->command) {
 
-                    case CMD_TCPP_PROXY:
-                        // \todo Resend TCP packet to Peer by UDP proxy connection
-                        break;
+                        // Resend TCP packet to Peer by UDP proxy connection
+                        case CMD_TCPP_PROXY: {
 
-                    default:
-                        break;
+                            // Get TCP fd from tcp proxy map
+                            size_t valueLength;
+                            ksnTCPProxyData* tpd = pblMapGet(tp->map, &w->fd, 
+                                    sizeof(w->fd), &valueLength);
+                            
+                            // Send TCP package
+                            if(tpd != NULL) {   
+                                sendto(tpd->udp_proxy_fd, packet, packet_len, 0, 
+                                    (__CONST_SOCKADDR_ARG) &remaddr, addrlen); 
+                            }
+
+                        } break;
+
+                        default:
+                            break;
+                    }                
                 }
 
                 // Process next part of received buffer
