@@ -93,6 +93,19 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
     }
 }
 
+/**
+ * Receive packet from UDP or TCP Proxy buffer
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param fd
+ * @param buffer
+ * @param buffer_len
+ * @param flags
+ * @param addr
+ * @param addr_len
+ * 
+ * @return 
+ */
 ssize_t teo_recvfrom (ksnetEvMgrClass* ke, 
             int fd, void *buffer, size_t buffer_len, int flags,
             __SOCKADDR_ARG addr, socklen_t *__restrict addr_len) {
@@ -108,6 +121,19 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     return recvlen;
 }
 
+/**
+ * Send UDP packet by UDP or TCP Proxy
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param fd
+ * @param buffer
+ * @param buffer_len
+ * @param flags
+ * @param addr
+ * @param addr_len
+ * 
+ * @return 
+ */
 ssize_t teo_sendto (ksnetEvMgrClass* ke,
             int fd, const void *buffer, size_t buffer_len, int flags, 
             __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
@@ -116,7 +142,7 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     
     if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
         
-        // \todo Read data from TCP Proxy buffer
+        // \todo Sent data to TCP Proxy
     }
     else sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
     
@@ -340,7 +366,7 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyData *tpd, void *data,
  */
 void cmd_tcppc_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
-    // \todo TCP Proxy client callback
+    // TCP Proxy client callback
     _cmd_tcpp_read_cb(loop, w, revents, CLIENT);
 }
 
@@ -441,7 +467,7 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             ANSI_YELLOW, ANSI_NONE, w->fd, w->events, (int)received);
     #endif
   
-    // \todo Resend UDP packet to TCP Proxy
+    // Resend UDP packet to TCP Proxy
     if(received > 0) {
         
         size_t data_send_len = received + sizeof(ksnTCPProxyHeader);
@@ -591,7 +617,7 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int c
                 if(!ksnTRUDPmakeAddr(addr, port, (__SOCKADDR_ARG) &remaddr, 
                         &addrlen)) {
 
-                    // \todo Check and execute TCP Proxy packet command
+                    // Execute TCP Proxy packet command
                     switch(packet->header->command) {
 
                         // Resend TCP packet to Peer by UDP proxy connection
