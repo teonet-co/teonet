@@ -75,6 +75,7 @@ typedef struct ksnTCPProxyData {
     int udp_proxy_fd;   ///< UDP Proxy file descriptor
     ev_io w;            ///< TCP Client watcher
     ev_io w_udp;        ///< UDP Client watcher
+    ksnTCPProxyPacketBuffer packet; ///< Packet buffer
     
 } ksnTCPProxyData;
 
@@ -88,14 +89,12 @@ typedef struct ksnTCPProxyClass {
     // Client
     int fd_client;  ///< TCP Client fd or 0 if not started (or not connected)
     ev_io w_client; ///< TCP Client watcher
+    // \todo Create ksnTCPProxyPacketBuffer for TCP Proxy client
+//    ksnTCPProxyPacketBuffer packet; ///< TCP Client Packet buffer
     
-    // Server
+    // ServerTCP Client 
     int fd;         ///< TCP Server fd or 0 if not started
     PblMap* map;    ///< Hash Map to store tcp proxy client connections       
-    
-    // \todo Move the ksnTCPProxyPacketBuffer to the ksnTCPProxyData structure
-    // \todo Create ksnTCPProxyPacketBuffer for TCP Proxy client
-    ksnTCPProxyPacketBuffer packet; ///< Packet buffer
     
 } ksnTCPProxyClass;
 

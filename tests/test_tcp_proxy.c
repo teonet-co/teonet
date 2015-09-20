@@ -23,11 +23,10 @@
 
 extern CU_pSuite pSuite;
 
-size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, void *buffer, 
-        size_t buffer_len, const char *addr, int port, const void *data, 
-        size_t data_len);
+size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_len, 
+        const char *addr, int port, const void *data, size_t data_len);
 uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_len);
-int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, 
+int ksnTCPProxyPackageProcess(ksnTCPProxyData *tp, void *data, 
         size_t data_length);
 
 /**
@@ -61,6 +60,14 @@ void test_5_2() {
     ksnTCPProxyClass *tp; 
     CU_ASSERT_PTR_NOT_NULL_FATAL((tp = ksnTCPProxyInit(ke)));
     
+    ksnTCPProxyData _tpd;
+    ksnTCPProxyData *tpd = &_tpd;
+    // Initialize input packet buffer parameters
+    tpd->packet.ptr = 0; // Pointer to data end in packet buffer
+    tpd->packet.length = 0; // Length of received packet
+    tpd->packet.stage = WAIT_FOR_START; // Stage of receiving packet
+    tpd->packet.header = (ksnTCPProxyHeader*) tpd->packet.buffer; // Pointer to packet header
+    
     // 1) Create package function check
     const int port = 9090;
     const char *addr = "127.0.0.1";
@@ -71,7 +78,7 @@ void test_5_2() {
     size_t buffer_len = KSN_BUFFER_DB_SIZE;
     char buffer[buffer_len];
     // Create package
-    size_t pl = ksnTCPProxyPackageCreate(tp, buffer, buffer_len, addr, port, data, data_len);
+    size_t pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
     // Check result
     ksnTCPProxyHeader *th = (ksnTCPProxyHeader*) buffer;
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
@@ -85,39 +92,39 @@ void test_5_2() {
     
     // 2) Check Create package function buffer size errors
     // Create package with buffer less than header size
-    size_t pl_err = ksnTCPProxyPackageCreate(tp, buffer, sizeof(ksnTCPProxyHeader) - 1, addr, port, data, data_len);
+    size_t pl_err = ksnTCPProxyPackageCreate(buffer, sizeof(ksnTCPProxyHeader) - 1, addr, port, data, data_len);
     CU_ASSERT_EQUAL(pl_err, -1);
     // Create package with buffer less than package size
-    pl_err = ksnTCPProxyPackageCreate(tp, buffer, pl - 1, addr, port, data, data_len);
+    pl_err = ksnTCPProxyPackageCreate(buffer, pl - 1, addr, port, data, data_len);
     CU_ASSERT_EQUAL(pl_err, -2);
            
     // 3) Process package function
     // Create regular package
-    pl = ksnTCPProxyPackageCreate(tp, buffer, buffer_len, addr, port, data, data_len);
+    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
     // Process package
-    int rv = ksnTCPProxyPackageProcess(tp, buffer, pl);
+    int rv = ksnTCPProxyPackageProcess(tpd, buffer, pl);
     // Check saved buffer header parameters
     CU_ASSERT(rv > 0); // Packet process successfully
     //CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
-    CU_ASSERT_EQUAL(tp->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tp->packet.buffer + 1, pl - 1)); // Check checksum
-    CU_ASSERT_EQUAL(tp->packet.header->addr_length, strlen(addr) + 1); // Check address string length
-    CU_ASSERT_EQUAL(tp->packet.header->port, port); // Check port number
-    CU_ASSERT_STRING_EQUAL(tp->packet.buffer + sizeof(ksnTCPProxyHeader), addr); // Check address
-    CU_ASSERT_EQUAL(tp->packet.header->packet_length, data_len); // Check package length
-    CU_ASSERT_STRING_EQUAL(tp->packet.buffer + sizeof(ksnTCPProxyHeader) + tp->packet.header->addr_length, data); // Check package
+    CU_ASSERT_EQUAL(tpd->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tpd->packet.buffer + 1, pl - 1)); // Check checksum
+    CU_ASSERT_EQUAL(tpd->packet.header->addr_length, strlen(addr) + 1); // Check address string length
+    CU_ASSERT_EQUAL(tpd->packet.header->port, port); // Check port number
+    CU_ASSERT_STRING_EQUAL(tpd->packet.buffer + sizeof(ksnTCPProxyHeader), addr); // Check address
+    CU_ASSERT_EQUAL(tpd->packet.header->packet_length, data_len); // Check package length
+    CU_ASSERT_STRING_EQUAL(tpd->packet.buffer + sizeof(ksnTCPProxyHeader) + tpd->packet.header->addr_length, data); // Check package
     CU_ASSERT_EQUAL(rv, pl); // Check package length
     
     // 4) Check receiving two packets which was combined into one buffer by small parts
     // Create buffer with two packet
     size_t pl_comb = 0; // Combined packet size
     int num_pack = 0; // Number of packets
-    pl = ksnTCPProxyPackageCreate(tp, buffer, buffer_len, addr, port, data, data_len);
+    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );
     pl_comb += pl;
     num_pack++;
-    pl = ksnTCPProxyPackageCreate(tp, buffer + pl, buffer_len - pl, addr, port, data2, data2_len);
+    pl = ksnTCPProxyPackageCreate(buffer + pl, buffer_len - pl, addr, port, data2, data2_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );    
     pl_comb += pl;
@@ -140,14 +147,14 @@ void test_5_2() {
         }
   
         if(len > 0) {
-            rv = ksnTCPProxyPackageProcess(tp, buffer + ptr, len);
+            rv = ksnTCPProxyPackageProcess(tpd, buffer + ptr, len);
             CU_ASSERT(rv >= 0);
             if(rv > 0) {                
 //                printf(", processed = %d, ptr = %d", rv, tp->packet.ptr);            
-                CU_ASSERT_EQUAL(tp->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tp->packet.buffer + 1, rv - 1)); // Check checksum
-                CU_ASSERT_EQUAL(tp->packet.header->addr_length, strlen(addr) + 1); // Check address string length
-                CU_ASSERT_EQUAL(tp->packet.header->port, port); // Check port number
-                CU_ASSERT_STRING_EQUAL(tp->packet.buffer + sizeof(ksnTCPProxyHeader), addr); // Check address
+                CU_ASSERT_EQUAL(tpd->packet.header->checksum, ksnTCPProxyChecksumCalculate((void*)tpd->packet.buffer + 1, rv - 1)); // Check checksum
+                CU_ASSERT_EQUAL(tpd->packet.header->addr_length, strlen(addr) + 1); // Check address string length
+                CU_ASSERT_EQUAL(tpd->packet.header->port, port); // Check port number
+                CU_ASSERT_STRING_EQUAL(tpd->packet.buffer + sizeof(ksnTCPProxyHeader), addr); // Check address
                 num_processed++;
             }
             ptr += len;
@@ -161,19 +168,19 @@ void test_5_2() {
     pl_comb = 0; // Combined packet size
     num_pack = 0; // Number of packets
     num_processed = 0; // Number of processed packets
-    pl = ksnTCPProxyPackageCreate(tp, buffer, buffer_len, addr, port, data, data_len);
+    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );
     pl_comb += pl;
     num_pack++;
-    pl = ksnTCPProxyPackageCreate(tp, buffer + pl, buffer_len - pl, addr, port, data2, data2_len);
+    pl = ksnTCPProxyPackageCreate(buffer + pl, buffer_len - pl, addr, port, data2, data2_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );    
     pl_comb += pl;
     num_pack++;
     
     // Process first packet in combined buffer
-    rv = ksnTCPProxyPackageProcess(tp, buffer, pl_comb);
+    rv = ksnTCPProxyPackageProcess(tpd, buffer, pl_comb);
     CU_ASSERT(rv >= 0);
     if(rv > 0) {
         
@@ -185,7 +192,7 @@ void test_5_2() {
         while((pl_comb - rv) > 0) {
 
             pl_comb -= rv;
-            rv = ksnTCPProxyPackageProcess(tp, buffer, 0);
+            rv = ksnTCPProxyPackageProcess(tpd, buffer, 0);
             CU_ASSERT(rv >= 0);
             if(rv > 0) {
 //                printf(" processed = %d, ptr = %d", rv, tp->packet.ptr); 
