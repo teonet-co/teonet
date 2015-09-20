@@ -17,6 +17,14 @@
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 
+// Teonet TCP proxy functions
+ssize_t teo_recvfrom (ksnetEvMgrClass* ke, 
+            int fd, void *buffer, size_t buffer_len, int flags,
+            __SOCKADDR_ARG addr, socklen_t *__restrict addr_len);
+ssize_t teo_sendto (ksnetEvMgrClass* ke,
+            int fd, const void *buffer, size_t buffer_len, int flags, 
+            __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+
 //#define VERSION_MAJOR 0
 //#define VERSION_MINOR 0
 
@@ -175,7 +183,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
         #endif
     }
 
-    return buf_len > 0 ? sendto(fd, buf, buf_len, flags, addr, addr_len) : 
+    return buf_len > 0 ? teo_sendto(kev, fd, buf, buf_len, flags, addr, addr_len) : 
                          buf_len;
 }
 
@@ -198,17 +206,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr, 
                          socklen_t *addr_len) {
     
-    /**
+    /*
      * Send ACK to sender subroutine  
      * 
-     * @param tu
-     * @param fd
-     * @param buf
-     * @param buf_len
-     * @param flags
-     * @param addr
-     * @param addr_len
-     * @return 
      */
     #define ksnTRUDPSendACK() { \
         \
@@ -218,14 +218,13 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
         tru_send_header.message_type = TRU_ACK; \
         tru_send_header.checksum = ksnTRUDPchecksumCalculate(&tru_send_header); \
         const socklen_t addr_len = sizeof(struct sockaddr_in); \
-        sendto(fd, &tru_send_header, tru_ptr, 0, addr, addr_len); \
+        teo_sendto(kev, fd, &tru_send_header, tru_ptr, 0, addr, addr_len); \
     }    
 
     const size_t tru_ptr = sizeof (ksnTRUDP_header); // Header size
 
     // Get data 
-    // \todo create function or define to Read from UDP or TCP Proxy
-    ssize_t recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);    
+    ssize_t recvlen = teo_recvfrom(kev, fd, buffer, buffer_len, flags, addr, addr_len);    
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -651,7 +650,7 @@ ip_map_data *ksnTRUDPipMapDataTry(ksnTRUDPClass *tu,
  * @param tu Pointer ksnTRUDPClass
  * @param addr Peer address (created in sockaddr_in structure)
  * @param key [out] Buffer to copy created from addr key. Don't copy if NULL
- * @param key_out_len Length of buffer to copy created key
+ * @param key_len Length of buffer to copy created key
  * 
  * @return Created key length
  */
@@ -670,7 +669,7 @@ size_t ksnTRUDPkeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
  * @param addr String with address (ip)
  * @param port Port number
  * @param key [out] Buffer to copy created from addr key. Don't copy if NULL
- * @param key_out_len Length of buffer to copy created key
+ * @param key_len Length of buffer to copy created key
  * 
  * @return Created key length 
  */
@@ -750,7 +749,7 @@ int ksnTRUDPmakeAddr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen
  * Set last activity time
  * 
  * @param tu
- * @param from
+ * @param addr
  * @return 
  */
 void ksnTRUDPsetActivity(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr) {
@@ -880,7 +879,7 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __CONST_SOCKADDR_ARG addr) {
     ksnTRUDP_header tru_header; // Header buffer
     MakeHeader(tru_header, ksnTRUDPsendListNewID(tu, addr), TRU_RESET, 0); // Make TR-UDP Header
     const socklen_t addr_len = sizeof(struct sockaddr_in); // Length of addresses   
-    sendto(fd, &tru_header, sizeof(tru_header), 0, addr, addr_len); // Send
+    teo_sendto(kev, fd, &tru_header, sizeof(tru_header), 0, addr, addr_len); // Send
     
     //! \todo: Add sent reset to send list
 }
@@ -898,7 +897,6 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __CONST_SOCKADDR_ARG addr) {
  * @param tu
  * @param id
  * @param addr
- * @param addr_len
  * @return 1 - removed; 0 - record does not exist
  * 
  */
@@ -948,7 +946,6 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
  * @param tu
  * @param id
  * @param addr
- * @param addr_len
  * @return 
  */
 sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
@@ -974,6 +971,7 @@ sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
  * @param tu
  * @param addr
  * @param key_out
+ * @param key_out_len
  * 
  * @return 
  */
@@ -1042,7 +1040,6 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
  * 
  * @param tu
  * @param addr
- * @param addr_len
  * @return 
  */
 inline uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu,
@@ -1054,6 +1051,7 @@ inline uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu,
 /**
  * Remove all elements from Send List
  * 
+ * @param tu
  * @param send_list
  */
 void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
@@ -1118,8 +1116,9 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
 /**
  * Start list timer watcher
  * 
+ * @param w
+ * @param w_data
  * @param tu
- * @param sl
  * @param id
  * @param fd
  * @param cmd
@@ -1168,7 +1167,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
 /**
  * Stop list timer watcher
  * 
- * @param loop
+ * param loop
  * @param w
  * @return 
  */
@@ -1197,9 +1196,9 @@ inline void sl_timer_stop(EV_P_ ev_timer *w) {
  * The timer event appears if timer was not stopped during timeout. I means that 
  * packet was not received by peer and we need resend this packet.
  * 
- * @param loop Event loop 
+ * param loop Event loop 
  * @param w Watcher
- * @param revents Revents (not used, reserved)
+ * @param revents Events (not used, reserved)
  */
 void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 

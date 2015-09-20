@@ -25,7 +25,6 @@
 #include "utils/rlutil.h"
 
 // Local function definition
-//int ksnTCPProxyPackageProcess(ksnTCPProxyData *tpd, void *data, size_t data_len);
 void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int cli_ser);
 //
 int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp);
@@ -92,6 +91,36 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
         pblMapFree(tp->map); // Free clients map
         free(tp); // Free class memory
     }
+}
+
+ssize_t teo_recvfrom (ksnetEvMgrClass* ke, 
+            int fd, void *buffer, size_t buffer_len, int flags,
+            __SOCKADDR_ARG addr, socklen_t *__restrict addr_len) {
+    
+    ssize_t recvlen = 0; 
+    
+    if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
+        
+        // \todo Read data from TCP Proxy buffer
+    } 
+    else recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
+    
+    return recvlen;
+}
+
+ssize_t teo_sendto (ksnetEvMgrClass* ke,
+            int fd, const void *buffer, size_t buffer_len, int flags, 
+            __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
+    
+    ssize_t sendlen = 0;
+    
+    if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
+        
+        // \todo Read data from TCP Proxy buffer
+    }
+    else sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
+    
+    return sendlen;
 }
 
 // Common functions -----------------------------------------------------------
