@@ -25,12 +25,13 @@
 #include "utils/rlutil.h"
 
 // Local function definition
+int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp);
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerStop(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd);
 void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, 
         int remove_f);
-int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, size_t data_len);
+int ksnTCPProxyPackageProcess(ksnTCPProxyData *tpd, void *data, size_t data_len);
 
 /**
  * Pointer to ksnetEvMgrClass
@@ -58,10 +59,10 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
     tp->fd_client = 0; 
     
     // Initialize input packet buffer parameters
-    tp->packet.ptr = 0; // Pointer to data end in packet buffer
-    tp->packet.length = 0; // Length of received packet
-    tp->packet.stage = WAIT_FOR_START; // Stage of receiving packet
-    tp->packet.header = (ksnTCPProxyHeader*) tp->packet.buffer; // Pointer to packet header
+//    tp->packet.ptr = 0; // Pointer to data end in packet buffer
+//    tp->packet.length = 0; // Length of received packet
+//    tp->packet.stage = WAIT_FOR_START; // Stage of receiving packet
+//    tp->packet.header = (ksnTCPProxyHeader*) tp->packet.buffer; // Pointer to packet header
     
     // \todo Start TCP proxy client
     ksnTCPProxyClientConnetc(tp);
@@ -178,7 +179,6 @@ int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
  * Create TCP Proxy package from peers UDP address and port, data buffer and 
  * its length
  * 
- * @param tp Pointer to ksnTCPProxyClass
  * @param buffer The buffer to create package in
  * @param buffer_length Package data length
  * @param addr String with peer UDP address
@@ -192,9 +192,9 @@ int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
  * @retval -1 - error: The output buffer less than packet header
  * @retval -2 - error: The output buffer less than packet header + data
  */
-size_t ksnTCPProxyPackageCreate(ksnTCPProxyClass *tp, void *buffer, 
-        size_t buffer_length, const char *addr, int port, const void *data, 
-        size_t data_length) { 
+size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length, 
+        const char *addr, int port, 
+        const void *data, size_t data_length) { 
     
     size_t tcp_package_length;
     
@@ -265,7 +265,7 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         char data_send[data_send_len];
         
         // Create TCP package
-        size_t pl = ksnTCPProxyPackageCreate(tp, data_send, data_send_len, 
+        size_t pl = ksnTCPProxyPackageCreate(data_send, data_send_len, 
                 inet_ntoa(((struct sockaddr_in *) &remaddr)->sin_addr), 
                 ntohs(((struct sockaddr_in *) &remaddr)->sin_port), 
                 data, data_len);
@@ -364,28 +364,33 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     // Success read. Process package and resend it to UDP proxy when ready
     else {
         
+        // Get TCP fd from tcp proxy map
+        size_t valueLength;
+        ksnTCPProxyData* tpd = pblMapGet(tp->map, &w->fd, sizeof(w->fd), 
+                &valueLength);
+                            
         // Process received buffer
         for(;;) {
             
             // Parse TCP packet        
-            int rv = ksnTCPProxyPackageProcess(tp, data, received);
+            int rv = ksnTCPProxyPackageProcess(tpd, data, received);
 
             // Send package to peer by UDP proxy connection
             if(rv > 0) {
 
                 // Address string
-                const char *addr = (const char *) (tp->packet.buffer + 
+                const char *addr = (const char *) (tpd->packet.buffer + 
                     sizeof(ksnTCPProxyHeader));
 
                 // Port number
-                const int port = tp->packet.header->port;
+                const int port = tpd->packet.header->port;
 
                 // Pointer to packet        
-                const char *packet = (const char *) (tp->packet.buffer + 
-                    sizeof(ksnTCPProxyHeader) + tp->packet.header->addr_length);
+                const char *packet = (const char *) (tpd->packet.buffer + 
+                    sizeof(ksnTCPProxyHeader) + tpd->packet.header->addr_length);
 
                 // Packet length
-                const size_t packet_len = tp->packet.header->packet_length;
+                const size_t packet_len = tpd->packet.header->packet_length;
 
                 // Make address from string
                 struct sockaddr_in remaddr; // remote address
@@ -394,16 +399,11 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         &addrlen)) {
 
                     // \todo Check and execute TCP Proxy packet command
-                    switch(tp->packet.header->command) {
+                    switch(tpd->packet.header->command) {
 
                         // Resend TCP packet to Peer by UDP proxy connection
                         case CMD_TCPP_PROXY: {
 
-                            // Get TCP fd from tcp proxy map
-                            size_t valueLength;
-                            ksnTCPProxyData* tpd = pblMapGet(tp->map, &w->fd, 
-                                    sizeof(w->fd), &valueLength);
-                            
                             // Send TCP package
                             if(tpd != NULL) {   
                                 sendto(tpd->udp_proxy_fd, packet, packet_len, 0, 
@@ -418,7 +418,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 }
 
                 // Process next part of received buffer
-                if(!tp->packet.ptr == 0) {
+                if(!tpd->packet.ptr == 0) {
 
                     received = 0;
                     continue; // Continue receiving buffer loop
@@ -622,6 +622,12 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     ksnTCPProxyData* tpd = pblMapGet(tp->map, &fd, sizeof(fd), &valueLength);
     if(tpd != NULL) {   
         
+        // Initialize input packet buffer parameters
+        tpd->packet.ptr = 0; // Pointer to data end in packet buffer
+        tpd->packet.length = 0; // Length of received packet
+        tpd->packet.stage = WAIT_FOR_START; // Stage of receiving packet
+        tpd->packet.header = (ksnTCPProxyHeader*) tpd->packet.buffer; // Pointer to packet header
+        
         // Create and start TCP watcher (start TCP client processing)
         ev_init (&tpd->w, cmd_tcpp_read_cb);
         ev_io_set (&tpd->w, fd, EV_READ);
@@ -695,7 +701,7 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
  * Read tcp data from input buffer to tp->buffer until end of tcp proxy package, 
  * check checksum, take UDP address, port number and UDP package data.
  * 
- * @param tp Pointer to ksnTCPProxyClass
+ * @param tpd Pointer to ksnTCPProxyData
  * @param data Pointer to received TCP data
  * @param data_length TCP data length
  * 
@@ -714,23 +720,23 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
  * @retval -2 - wrong packet header checksum
  * @retval -3 - wrong packet checksum
  */
-int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data, 
+int ksnTCPProxyPackageProcess(ksnTCPProxyData *tpd, void *data, 
         size_t data_length) {
     
     int rv = 0;
     
-    switch(tp->packet.stage) {
+    switch(tpd->packet.stage) {
         
         // Wait for package began
         case WAIT_FOR_START:
-            if(tp->packet.ptr != 0) {
-                tp->packet.ptr = tp->packet.ptr - tp->packet.length;
-                memmove(tp->packet.buffer, tp->packet.buffer+tp->packet.length, 
-                        tp->packet.ptr);
+            if(tpd->packet.ptr != 0) {
+                tpd->packet.ptr = tpd->packet.ptr - tpd->packet.length;
+                memmove(tpd->packet.buffer, tpd->packet.buffer+tpd->packet.length, 
+                        tpd->packet.ptr);
             }
-            tp->packet.length = 0;
-            tp->packet.stage = WAIT_FOR_END;
-            rv = ksnTCPProxyPackageProcess(tp, data, data_length);
+            tpd->packet.length = 0;
+            tpd->packet.stage = WAIT_FOR_END;
+            rv = ksnTCPProxyPackageProcess(tpd, data, data_length);
             break;
             
         // Wait for package end
@@ -738,36 +744,36 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data,
             
             // \todo check buffer length
             if(data_length > 0) {
-                memcpy(tp->packet.buffer + tp->packet.ptr, data, data_length);  
-                tp->packet.ptr += data_length;
+                memcpy(tpd->packet.buffer + tpd->packet.ptr, data, data_length);  
+                tpd->packet.ptr += data_length;
             }
-            if(tp->packet.ptr >= sizeof(ksnTCPProxyHeader)) {
+            if(tpd->packet.ptr >= sizeof(ksnTCPProxyHeader)) {
                 
                 // Check packet header 
                 uint8_t packet_checksum = 
                         ksnTCPProxyChecksumCalculate(
-                            (void*)tp->packet.header + 1, 
+                            (void*)tpd->packet.header + 1, 
                             sizeof(ksnTCPProxyHeader) - 2
                         );
                 
                 // If packet checksum not equal - skip this packet
-                if(!(tp->packet.header->addr_length 
-                     && tp->packet.header->port     
-                     && tp->packet.header->packet_checksum == packet_checksum)) {  
+                if(!(tpd->packet.header->addr_length 
+                     && tpd->packet.header->port     
+                     && tpd->packet.header->packet_checksum == packet_checksum)) {  
                     
                     rv = -2;
-                    tp->packet.stage = WAIT_FOR_START;
-                    tp->packet.ptr = 0;
+                    tpd->packet.stage = WAIT_FOR_START;
+                    tpd->packet.ptr = 0;
                     break;
                 }
                 
                 size_t pkg_len = sizeof(ksnTCPProxyHeader) + 
-                        tp->packet.header->packet_length + 
-                        tp->packet.header->addr_length;
+                        tpd->packet.header->packet_length + 
+                        tpd->packet.header->addr_length;
                 
-                if(tp->packet.ptr >= pkg_len) {
-                    tp->packet.stage = PROCESS_PACKET;
-                    rv = ksnTCPProxyPackageProcess(tp, NULL, 0);
+                if(tpd->packet.ptr >= pkg_len) {
+                    tpd->packet.stage = PROCESS_PACKET;
+                    rv = ksnTCPProxyPackageProcess(tpd, NULL, 0);
                 }
             }
         }
@@ -776,26 +782,26 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyClass *tp, void *data,
         // Read process body
         case PROCESS_PACKET: {
             
-            tp->packet.length = 
+            tpd->packet.length = 
                     sizeof(ksnTCPProxyHeader) + 
-                    tp->packet.header->packet_length + 
-                    tp->packet.header->addr_length;
+                    tpd->packet.header->packet_length + 
+                    tpd->packet.header->addr_length;
             
             // Get packet checksum 
             uint8_t checksum = 
                     ksnTCPProxyChecksumCalculate(
-                        (void*)tp->packet.buffer + 1, 
-                        tp->packet.length - 1
+                        (void*)tpd->packet.buffer + 1, 
+                        tpd->packet.length - 1
                     );
             
-            tp->packet.stage = WAIT_FOR_START;
-            if(!(tp->packet.ptr > tp->packet.length)) 
-                tp->packet.ptr = 0;
+            tpd->packet.stage = WAIT_FOR_START;
+            if(!(tpd->packet.ptr > tpd->packet.length)) 
+                tpd->packet.ptr = 0;
             
             // Packet is processed
-            if(tp->packet.header->checksum == checksum) {
+            if(tpd->packet.header->checksum == checksum) {
                       
-                rv = tp->packet.length;
+                rv = tpd->packet.length;
             }
             
             // Wrong packet checksum error
