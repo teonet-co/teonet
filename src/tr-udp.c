@@ -1,5 +1,5 @@
 /** 
- * File:   net_tr-udp.c
+ * File:   tr-udp.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Teonet Real time communications over UDP protocol (TR-UDP)
@@ -11,8 +11,8 @@
 #include <string.h>
 
 #include "ev_mgr.h"
-#include "net_tr-udp.h"
-#include "net_tr-udp_stat.h"
+#include "tr-udp.h"
+#include "tr-udp_stat.h"
 #include "config/conf.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
@@ -22,7 +22,7 @@
 
 #define kev ((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke))
 
-#include "net_tr-udp_.h"
+#include "tr-udp_.h"
 
 
 /*****************************************************************************
@@ -223,8 +223,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
     const size_t tru_ptr = sizeof (ksnTRUDP_header); // Header size
 
-    // Get data
-    ssize_t recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
+    // Get data 
+    // \todo create function or define to Read from UDP or TCP Proxy
+    ssize_t recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);    
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG_VV,

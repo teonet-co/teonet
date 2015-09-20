@@ -23,7 +23,7 @@
 #if KSNET_CRYPT
 #include "crypt.h"
 #endif
-#include "net_tr-udp.h"
+#include "tr-udp.h"
 
 // External constants
 extern const char *localhost;
