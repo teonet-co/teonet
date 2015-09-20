@@ -474,7 +474,7 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
 }
 
 /**
- * ENet host fd read event callback
+ * Teonet host fd read event callback
  *
  * param loop
  * @param w

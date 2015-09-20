@@ -89,10 +89,9 @@ typedef struct ksnTCPProxyClass {
     // Client
     int fd_client;  ///< TCP Client fd or 0 if not started (or not connected)
     ev_io w_client; ///< TCP Client watcher
-    // \todo Create ksnTCPProxyPacketBuffer for TCP Proxy client
-//    ksnTCPProxyPacketBuffer packet; ///< TCP Client Packet buffer
+    ksnTCPProxyPacketBuffer packet; ///< TCP Client Packet buffer
     
-    // ServerTCP Client 
+    // Server
     int fd;         ///< TCP Server fd or 0 if not started
     PblMap* map;    ///< Hash Map to store tcp proxy client connections       
     
