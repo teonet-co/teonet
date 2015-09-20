@@ -1,5 +1,5 @@
 /** 
- * File:   net_tr-udp.h
+ * File:   tr-udp.h
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Teonet Real time communications over UDP protocol (TR-UDP)

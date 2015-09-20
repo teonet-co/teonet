@@ -23,10 +23,10 @@ typedef int socklen_t;
 #include "ev_mgr.h"
 #include "net_split.h"
 #include "net_multi.h"
-#include "net_tr-udp.h"
+#include "tr-udp.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
-#include "net_tr-udp_.h"
+#include "tr-udp_.h"
 
 // Constants
 const char *localhost = "127.0.0.1";

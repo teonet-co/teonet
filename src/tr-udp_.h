@@ -1,5 +1,5 @@
 /** 
- * File:   net_tr-udp_.h
+ * File:   tr-udp_.h
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Private module structures and function definition

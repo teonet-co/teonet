@@ -1,5 +1,5 @@
 /** 
- * File:   net_tr-udp_stat.c
+ * File:   tr-udp_stat.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * TR-UDP statistic
@@ -10,8 +10,8 @@
 #include <string.h>
 
 #include "ev_mgr.h"
-#include "net_tr-udp_.h"
-#include "net_tr-udp_stat.h"
+#include "tr-udp_.h"
+#include "tr-udp_stat.h"
 #include "utils/utils.h"
 #include "net_core.h"
 

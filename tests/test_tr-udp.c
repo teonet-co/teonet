@@ -1,10 +1,10 @@
 /**
- * \file   test_net_tr-udp.c
+ * \file   test_tr-udp.c
  * \author Kirill Scherba <kirill@scherba.ru>
  *
  * TR-UDP module cUnit test suite
  * 
- * cUnit test suite code: \include test_net_tr-udp.c
+ * cUnit test suite code: \include test_tr-udp.c
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */
@@ -14,7 +14,7 @@
 #include <CUnit/Basic.h>
 
 #include "ev_mgr.h"
-#include "net_tr-udp_.h"
+#include "tr-udp_.h"
 
 extern CU_pSuite pSuite;
 
