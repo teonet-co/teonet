@@ -30,6 +30,10 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int c
 int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp);
 void ksnTCPProxyClientStop(ksnTCPProxyClass *tp);
 //
+size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length, 
+        const char *addr, int port, 
+        const void *data, size_t data_length);
+//
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerStop(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd);
@@ -167,10 +171,24 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     
     ssize_t sendlen = 0;
     
+    // Sent data to TCP Proxy
     if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
         
-        // \todo Sent data to TCP Proxy
+        // Create TCP package
+        const size_t tcp_buffer_len = KSN_BUFFER_DB_SIZE;
+        char tcp_buffer[tcp_buffer_len];
+        size_t pl = ksnTCPProxyPackageCreate(
+            tcp_buffer, tcp_buffer_len, 
+            inet_ntoa(((struct sockaddr_in*)addr)->sin_addr),
+            ntohs(((struct sockaddr_in*)addr)->sin_port),
+            buffer, buffer_len
+        );
+        
+        // Send TCP package
+        sendlen = write(ke->tp->fd_client, tcp_buffer, pl);
     }
+    
+    // Sent data to UDP
     else sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
     
     return sendlen;
