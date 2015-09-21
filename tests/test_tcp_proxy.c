@@ -103,7 +103,7 @@ void test_5_2() {
     pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
     // Process package
-    int rv = ksnTCPProxyPackageProcess(tpd, buffer, pl);
+    int rv = ksnTCPProxyPackageProcess(&tpd->packet, buffer, pl);
     // Check saved buffer header parameters
     CU_ASSERT(rv > 0); // Packet process successfully
     //CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
@@ -147,7 +147,7 @@ void test_5_2() {
         }
   
         if(len > 0) {
-            rv = ksnTCPProxyPackageProcess(tpd, buffer + ptr, len);
+            rv = ksnTCPProxyPackageProcess(&tpd->packet, buffer + ptr, len);
             CU_ASSERT(rv >= 0);
             if(rv > 0) {                
 //                printf(", processed = %d, ptr = %d", rv, tp->packet.ptr);            
@@ -180,7 +180,7 @@ void test_5_2() {
     num_pack++;
     
     // Process first packet in combined buffer
-    rv = ksnTCPProxyPackageProcess(tpd, buffer, pl_comb);
+    rv = ksnTCPProxyPackageProcess(&tpd->packet, buffer, pl_comb);
     CU_ASSERT(rv >= 0);
     if(rv > 0) {
         
@@ -192,7 +192,7 @@ void test_5_2() {
         while((pl_comb - rv) > 0) {
 
             pl_comb -= rv;
-            rv = ksnTCPProxyPackageProcess(tpd, buffer, 0);
+            rv = ksnTCPProxyPackageProcess(&tpd->packet, buffer, 0);
             CU_ASSERT(rv >= 0);
             if(rv > 0) {
 //                printf(" processed = %d, ptr = %d", rv, tp->packet.ptr); 
