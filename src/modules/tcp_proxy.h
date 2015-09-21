@@ -53,9 +53,9 @@ typedef struct ksnTCPProxyHeader {
 } ksnTCPProxyHeader;
 
 /**
- * TCP Proxy buffer structure
+ * TCP Proxy packet data structure
  */
-typedef struct ksnTCPProxyPacketBuffer {
+typedef struct ksnTCPProxyPacketData {
     
     char buffer[KSN_BUFFER_DB_SIZE]; ///< Packet buffer
     ksnTCPProxyHeader* header; ///< Packet header
@@ -63,7 +63,7 @@ typedef struct ksnTCPProxyPacketBuffer {
     size_t ptr;  ///< Pointer to data end in packet buffer
     int stage;   ///< Packet buffer receiving stage    
     
-} ksnTCPProxyPacketBuffer;
+} ksnTCPProxyPacketData;
 
 /**
  * ksnTCPProxyClass map data
@@ -75,7 +75,7 @@ typedef struct ksnTCPProxyData {
     int udp_proxy_fd;   ///< UDP Proxy file descriptor
     ev_io w;            ///< TCP Client watcher
     ev_io w_udp;        ///< UDP Client watcher
-    ksnTCPProxyPacketBuffer packet; ///< Packet buffer
+    ksnTCPProxyPacketData packet; ///< Packet buffer
     
 } ksnTCPProxyData;
 
@@ -89,7 +89,7 @@ typedef struct ksnTCPProxyClass {
     // Client
     int fd_client;  ///< TCP Client fd or 0 if not started (or not connected)
     ev_io w_client; ///< TCP Client watcher
-    ksnTCPProxyPacketBuffer packet; ///< TCP Client Packet buffer
+    ksnTCPProxyPacketData packet; ///< TCP Client Packet buffer
     
     // Server
     int fd;         ///< TCP Server fd or 0 if not started
