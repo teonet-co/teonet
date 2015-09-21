@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <netinet/tcp.h>
 
 #include "tcp_proxy.h"
 
@@ -99,6 +100,8 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
         free(tp); // Free class memory
     }
 }
+
+// Common functions -----------------------------------------------------------
 
 /**
  * Receive packet from UDP or TCP Proxy buffer
@@ -204,7 +207,34 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     return sendlen;
 }
 
-// Common functions -----------------------------------------------------------
+/**
+ * Set TCP socket NODELAY option
+ * 
+ * @param ke Pointer toksnetEvMgrClass
+ * @param fd TCP socket descriptor
+ * 
+ * @return Result of setting. Success if >= 0.
+ */
+int set_tcp_nodelay(ksnetEvMgrClass* ke, int fd) {
+
+    int flag = 1;
+    int result = setsockopt(fd,           // socket affected
+                         IPPROTO_TCP,     // set option at TCP level
+                         TCP_NODELAY,     // name of option
+                         (char *) &flag,  // the cast is historical cruft
+                         sizeof(int));    // length of option value
+    if (result < 0) {
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sTCP Proxy:%s "
+            "Set TCP_NODELAY of fd %d error %s\n", 
+            ANSI_YELLOW, ANSI_RED, fd, ANSI_NONE);
+        #endif
+    }
+    
+    return result;
+}
 
 /**
  * Calculate checksum
@@ -452,6 +482,9 @@ int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
         );
         
         if(fd_client > 0) {
+            
+            // Set TCP_NODELAY option
+            set_tcp_nodelay(kev, fd_client);
 
             // Register connection
             tp->fd_client = fd_client;
@@ -909,6 +942,9 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
  */
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     
+    // Set TCP_NODELAY option
+    set_tcp_nodelay(kev, fd);
+
     int udp_proxy_fd, udp_proxy_port = kev->ksn_cfg.port;
     
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
