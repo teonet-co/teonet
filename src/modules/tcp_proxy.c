@@ -105,6 +105,9 @@ void ksnTCPProxyDestroy(ksnTCPProxyClass *tp) {
  * @param addr_len
  * 
  * @return 
+ * @retval >0 - Success
+ * @retval -2 - Buffer too small error
+ * @retval -3 - Wrong address error
  */
 ssize_t teo_recvfrom (ksnetEvMgrClass* ke, 
             int fd, void *buffer, size_t buffer_len, int flags,
@@ -112,10 +115,34 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     
     ssize_t recvlen = 0; 
     
+    // Get data from TCP Proxy buffer 
     if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
-        
-        // \todo Read data from TCP Proxy buffer
+                
+        if(buffer_len >= ke->tp->packet.header->packet_length) {
+            
+            // Copy data to buffer      
+            memcpy(
+                buffer, 
+                ke->tp->packet.buffer + 
+                    sizeof(ksnTCPProxyHeader) + 
+                    ke->tp->packet.header->addr_length, 
+                ke->tp->packet.header->packet_length
+            );
+            
+            // Make address from string
+            if(!ksnTRUDPmakeAddr(
+                    ke->tp->packet.buffer + sizeof(ksnTCPProxyHeader), 
+                    ke->tp->packet.header->port, 
+                    addr, addr_len)) {
+
+                recvlen = ke->tp->packet.header->packet_length;
+            }
+            else recvlen = -3; // Wrong address error
+        }
+        else recvlen = -2; // Buffer too small error
     } 
+    
+    // Get data from UDP 
     else recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
     
     return recvlen;
