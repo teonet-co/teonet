@@ -24,6 +24,9 @@
 #include "tr-udp_.h"
 #include "utils/rlutil.h"
 
+// Core module functions
+void host_cb(EV_P_ ev_io *w, int revents);
+
 // Local function definition
 void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int cli_ser);
 //
@@ -679,7 +682,11 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int c
                             // Call host callback
                             else {
                                 
-                                // \todo Process received TCP packet
+                                // Process received TCP packet
+                                void *data = w->data;
+                                w->data = kev->kc;
+                                host_cb(loop, w, revents);
+                                w->data = data;
                             }
 
                         } break;
