@@ -23,7 +23,23 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>app</word>
+            <word>config</word>
+            <word>fd</word>
+            <word>Hotkeys</word>
+            <word>internet</word>
+            <word>ip</word>
+            <word>len</word>
+            <word>localhost</word>
+            <word>mtu</word>
+            <word>perror</word>
             <word>tcp</word>
+            <word>teonet</word>
+            <word>teotproxy</word>
+            <word>todo</word>
+            <word>udp</word>
+            <word>uuid</word>
+            <word>vpn</word>
         </spellchecker-wordlist>
     </configuration>
 </project>

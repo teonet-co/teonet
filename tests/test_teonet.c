@@ -3,7 +3,9 @@
  * \file   test_teonet.c
  * \author Kirill Scherba <kirill@scherba.ru>
  * 
- * \test Teonet cUnit test
+ * Teonet cUnit test (main test module)
+ * 
+ * cUnit test main module code:  \include test_teonet.c
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */
@@ -42,6 +44,7 @@ int clean_suite(void) {
     return 0;
 }
 
+//! cUnit test main function
 int main() {
 
     KSN_SET_TEST_MODE(1);

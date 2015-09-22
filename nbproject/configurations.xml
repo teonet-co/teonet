@@ -79,31 +79,26 @@
         <in>net_core.c</in>
         <in>net_multi.c</in>
         <in>net_split.c</in>
-        <in>net_tr-udp.c</in>
-        <in>net_tr-udp_stat.c</in>
         <in>pidfile.c</in>
         <in>teonet.c</in>
+        <in>tr-udp.c</in>
+        <in>tr-udp_stat.c</in>
       </df>
       <df name="tests">
         <in>teonet_tst.c</in>
       </df>
     </df>
-    <logicalFolder name="TestFiles"
-                   displayName="Test Files"
-                   projectFiles="false"
-                   kind="TEST_LOGICAL_FOLDER">
-      <logicalFolder name="test_teonet"
-                     displayName="Teonet cUnit test"
-                     projectFiles="true"
-                     kind="TEST"
-                     root="tests">
-        <itemPath>tests/test_cque.c</itemPath>
-        <itemPath>tests/test_crypt.c</itemPath>
-        <itemPath>tests/test_net_tr-udp.c</itemPath>
-        <itemPath>tests/test_tcp_proxy.c</itemPath>
-        <itemPath>tests/test_teodb.c</itemPath>
-        <itemPath>tests/test_teonet.c</itemPath>
-      </logicalFolder>
+    <logicalFolder name="test_teonet"
+                   displayName="Teonet cUnit test"
+                   projectFiles="true"
+                   kind="TEST"
+                   root="tests">
+      <itemPath>tests/test_cque.c</itemPath>
+      <itemPath>tests/test_crypt.c</itemPath>
+      <itemPath>tests/test_tcp_proxy.c</itemPath>
+      <itemPath>tests/test_teodb.c</itemPath>
+      <itemPath>tests/test_teonet.c</itemPath>
+      <itemPath>tests/test_tr-udp.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -129,8 +124,7 @@
         <element flagsID="1" commonFlags="-fPIC -g -fPIC -g -O2"/>
         <element flagsID="2" commonFlags="-fPIC -g -g -O2"/>
         <element flagsID="3" commonFlags="-g -O2"/>
-        <element flagsID="4" commonFlags="-g -fPIC -O2 -fPIC"/>
-        <element flagsID="5" commonFlags="-g -fPIC -O2 -g -O2 -fPIC"/>
+        <element flagsID="4" commonFlags="-g -fPIC -O2 -g -O2 -fPIC"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -140,11 +134,6 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath></executablePath>
-          <cTool>
-            <preprocessorList>
-              <Elem>HAVE_CONFIG_H</Elem>
-            </preprocessorList>
-          </cTool>
         </makeTool>
       </makefileType>
       <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
@@ -249,28 +238,10 @@
       </item>
       <item path="examples/fossa/fossa.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
-          <incDir>
-            <pElem>tests</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>examples/fossa</pElem>
-          </incDir>
         </cTool>
       </item>
       <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
-          <incDir>
-            <pElem>examples/fossa</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teoack.c" ex="false" tool="0" flavor2="2">
@@ -393,6 +364,7 @@
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
           <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
@@ -400,30 +372,30 @@
       <folder path="0/embedded">
         <cTool>
           <incDir>
-            <pElem>tests</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PBLTEST</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/examples">
         <cTool>
           <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/examples/fossa">
         <cTool>
-          <preprocessorList>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
+          <incDir>
+            <pElem>examples/fossa</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+          </incDir>
         </cTool>
       </folder>
       <folder path="0/sh">
@@ -432,21 +404,12 @@
             <pElem>sh</pElem>
             <pElem>src/config</pElem>
           </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/src">
-        <cTool>
           <preprocessorList>
-            <Elem>LOCALEDIR="/usr/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
           </preprocessorList>
         </cTool>
       </folder>
-      <folder path="0/src/config">
+      <folder path="0/src">
         <cTool>
           <incDir>
             <pElem>src</pElem>
@@ -455,15 +418,14 @@
             <pElem>embedded/libpbl/src</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/src/utils">
-        <cTool>
           <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>LOCALEDIR="/usr/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -477,11 +439,12 @@
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
           <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
             <Elem>TEONE_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
-      <folder path="TestFiles/test_teonet">
+      <folder path="test_teonet">
         <cTool>
           <incDir>
             <pElem>tests</pElem>
@@ -491,6 +454,7 @@
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
           <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
             <Elem>TEONE_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
@@ -500,292 +464,103 @@
         </cTool>
       </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/config/opt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/crypt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/daemon.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/ev_mgr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/hotkeys.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/modules/net_tcp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
-          <incDir>
-            <pElem>tests</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>tests</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/net_com.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/net_core.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/net_multi.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/net_split.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/net_tr-udp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/net_tr-udp_stat.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/pidfile.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>tests</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
+        <cTool flags="4">
+        </cTool>
+      </item>
+      <item path="src/tr-udp.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="4">
+        </cTool>
+      </item>
+      <item path="src/tr-udp_stat.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/utils/string_arr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>tests</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="src/utils/utils.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
-          </preprocessorList>
+        <cTool flags="4">
         </cTool>
       </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="2">
@@ -800,11 +575,7 @@
         <cTool flags="1">
         </cTool>
       </item>
-      <item path="tests/test_net_tr-udp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
-        </cTool>
-      </item>
-      <item path="tests/test_tcp_proxy.c" ex="false" tool="0" flavor2="0">
+      <item path="tests/test_tcp_proxy.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
       </item>
@@ -813,6 +584,10 @@
         </cTool>
       </item>
       <item path="tests/test_teonet.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="1">
+        </cTool>
+      </item>
+      <item path="tests/test_tr-udp.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
       </item>

@@ -1,5 +1,5 @@
 /** 
- * File:   net_tr-udp_stat.c
+ * File:   tr-udp_stat.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * TR-UDP statistic
@@ -10,8 +10,8 @@
 #include <string.h>
 
 #include "ev_mgr.h"
-#include "net_tr-udp_.h"
-#include "net_tr-udp_stat.h"
+#include "tr-udp_.h"
+#include "tr-udp_stat.h"
 #include "utils/utils.h"
 #include "net_core.h"
 
@@ -245,9 +245,9 @@ inline void ksnTRUDPstatAddrReset(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) 
 
 void ksnTRUDPstatAddrResetAll(ksnTRUDPClass *tu) {
     
-    PblIterator *it = pblMapIteratorNew(tu->ip_map);
+    PblIterator *it = pblMapIteratorReverseNew(tu->ip_map);
     if (it != NULL) {
-        while (pblIteratorHasPrevious(it)) {
+        while (pblIteratorHasPrevious(it) > 0) {
             void *entry = pblIteratorPrevious(it);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
             _ksnTRUDPstatAddrInit(ip_map_d);
@@ -312,7 +312,6 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
  * 
  * @param tu
  * @param addr
- * @param tru_header
  */
 inline void ksnTRUDPsetDATAsendTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
     
@@ -325,7 +324,6 @@ inline void ksnTRUDPsetDATAsendTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr
  * 
  * @param tu
  * @param addr
- * @param tru_header
  */
 inline void ksnTRUDPsetDATAreceiveTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
     

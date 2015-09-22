@@ -1,5 +1,5 @@
 /** 
- * File:   net_tr-udp_.h
+ * File:   tr-udp_.h
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Private module structures and function definition
@@ -93,7 +93,7 @@ typedef struct sl_data {
  */
 typedef struct ksnTRUDP_header {
     
-    uint8_t checksum;
+    uint8_t checksum; ///< Checksum
     unsigned int version : 4; ///< Protocol version number
     /**
      * Message type could be of type DATA(0x0), ACK(0x1) and RESET(0x2).

@@ -95,9 +95,9 @@ nobase_teonetinclude_HEADERS = \
     net_core.h \
     net_multi.h \
     net_split.h \
-    net_tr-udp.h \
-    net_tr-udp_.h \
-    net_tr-udp_stat.h \
+    tr-udp.h \
+    tr-udp_.h \
+    tr-udp_stat.h \
     pidfile.h \
     teonet.h \
     config/config.h \
@@ -128,8 +128,8 @@ libteonet_la_SOURCES = \
     net_core.c \
     net_multi.c \
     net_split.c \
-    net_tr-udp.c \
-    net_tr-udp_stat.c \
+    tr-udp.c \
+    tr-udp_stat.c \
     pidfile.c \
     teonet.c \
     config/conf.c \
@@ -160,7 +160,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 11:0:0 
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 12:0:0 
 
 uninstall-local:
 	-rm -r $(teonetincludedir)

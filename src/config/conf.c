@@ -59,11 +59,17 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     char *name = getRandomHostName();
     strncpy(ksn_cfg->host_name, name, KSN_MAX_HOST_NAME);
     free(name);
-
+    
+    // TCP Proxy
+    ksn_cfg->tcp_allow_f = 0;
+    ksn_cfg->tcp_port = ksn_cfg->port;
+            
     // Remote host default
     ksn_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
     ksn_cfg->r_host_name[0] = '\0';
     ksn_cfg->r_host_addr[0] = '\0';
+    ksn_cfg->r_tcp_f = 0;
+    ksn_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
 
     // VPN
     ksn_cfg->vpn_dev_name[0] = '\0';
@@ -107,9 +113,15 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_STR("host_name", &host_name),
         CFG_SIMPLE_INT("port", &conf->port),
         CFG_SIMPLE_BOOL("port_inc_f", &conf->port_inc_f),
+        
+        CFG_SIMPLE_INT("tcp_port", &conf->tcp_port),
+        CFG_SIMPLE_BOOL("tcp_allow_f", &conf->tcp_allow_f),
 
         CFG_SIMPLE_STR("r_host_addr", &r_host_addr),
         CFG_SIMPLE_INT("r_port", &conf->r_port),
+        
+        CFG_SIMPLE_BOOL("r_tcp_f", &conf->r_tcp_f),
+        CFG_SIMPLE_INT("r_tcp_port", &conf->r_tcp_port),        
 
         #if KSNET_CRYPT
         CFG_SIMPLE_BOOL("crypt_f", &conf->crypt_f),

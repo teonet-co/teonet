@@ -42,7 +42,7 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
     printf("Server received %d bytes data: %s\n", read_len, buffer); 
     
     // Process received data
-    if(read_len) {
+    if(read_len > 0) {
         
         // Create temporary buffer
         char *d = strdup(buffer); // Copy buffer
