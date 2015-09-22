@@ -918,7 +918,7 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
             }
             pblIteratorFree(it);
         }
-        
+                
         // Clear map
         pblMapClear(tp->map);
         
@@ -1033,6 +1033,9 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
     ksnTCPProxyData* tpd = pblMapGet(tp->map, &fd, sizeof(fd), &valueLength); 
     if(tpd != NULL) {
 
+        // Skip UDP Proxy fd record
+        if(fd == tpd->udp_proxy_fd) return;
+        
         // Stop TCP Proxy client watcher
         ev_io_stop (kev->ev_loop, &tpd->w);
         close(fd); 
