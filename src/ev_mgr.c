@@ -748,12 +748,12 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #ifdef M_ENAMBE_TUN
     ksnTunDestroy(ke->ktun);
     #endif
-    #if M_ENAMBE_TCP_P
-    ksnTCPProxyDestroy(ke->tp);
-    #endif
-    #if M_ENAMBE_TCP
-    ksnTcpDestroy(ke->kt);
-    #endif
+//    #if M_ENAMBE_TCP_P
+//    ksnTCPProxyDestroy(ke->tp);
+//    #endif
+//    #if M_ENAMBE_TCP
+//    ksnTcpDestroy(ke->kt);
+//    #endif
     #if M_ENAMBE_VPN
     ksnVpnDestroy(ke->kvpn);
     #endif
@@ -766,4 +766,11 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
+    
+    #if M_ENAMBE_TCP_P
+    ksnTCPProxyDestroy(ke->tp);
+    #endif
+    #if M_ENAMBE_TCP
+    ksnTcpDestroy(ke->kt);
+    #endif   
 }
