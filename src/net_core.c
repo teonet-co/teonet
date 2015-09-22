@@ -154,7 +154,7 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        ksnTRUDPinit(kc->ku);
+        ksnTRUDPDestroy(kc->ku);
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif

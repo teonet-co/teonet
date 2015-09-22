@@ -526,7 +526,11 @@ void ksnTCPProxyClientStop(ksnTCPProxyClass *tp) {
             close(tp->fd_client);
             tp->fd_client = 0;
             
-            // \todo Remove from ARP table
+            // \todo Remove ALL records from ARP table
+            if(kev->kc != NULL) {
+                ksnetArpDestroy(kev->kc->ka);
+                kev->kc->ka = ksnetArpInit(kev);
+            }
         }
     }
 }
@@ -1060,10 +1064,10 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
             pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength);
         }
         
-        // \todo Remove from ARP table
-//            ksnCorePacketData rd;
-//            rd.from = peer_name;
-//            cmd_disconnected_cb(kev->kc->kco, &rd);
+        // \todo Remove this client connection from ARP table !!! Don't need because it removed without it
+//        ksnCorePacketData rd;
+//        rd.from = peer_name;
+//        cmd_disconnected_cb(kev->kc->kco, &rd);
     }        
 }
 
