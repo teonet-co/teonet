@@ -832,6 +832,7 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int c
  */
 void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
+    // TCP Proxy server callback
     _cmd_tcpp_read_cb(loop, w, revents, SERVER);
 }
 
@@ -847,7 +848,7 @@ void cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * @param fd File description of created client connection
  * 
  */
-inline void cmd_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
+void cmd_tcpp_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
                        int revents, int fd) {
     
     ksnTCPProxyServerClientConnect(w->data, fd);    
