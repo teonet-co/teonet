@@ -16,6 +16,7 @@
 
 #include "ev_mgr.h"
 #include "net_cli.h"
+#include "utils/rlutil.h"
 
 #ifdef M_ENAMBE_TERM
 
@@ -46,13 +47,19 @@ ksnTermClass *ksnTermInit(void *ke) {
 
     // Check configuration, create TCP server and start Terminal telnet CLI server
     //! \todo: Check configuration
-    int port_created; // port = CLI_PORT, 
-    int port = kev->ksn_cfg.port;
+    int fd, port_created, // port = CLI_PORT, 
+        port = kev->ksn_cfg.port;
 
-   // Start TCP server
-    ksnTcpServerCreate(((ksnetEvMgrClass*)ke)->kt, port, ksnet_accept_cb, kter,
-        &port_created);
-
+    // Start TCP server
+    if((fd = ksnTcpServerCreate(((ksnetEvMgrClass*)ke)->kt, port, ksnet_accept_cb, kter,
+        &port_created)) > 0) {
+    
+        ksnet_printf(&kev->ksn_cfg, MESSAGE, 
+                "%sTerminal server:%s "
+                "Terminal server started at port %d, socket fd %d\n", 
+                ANSI_LIGHTBLUE, ANSI_NONE, port_created, fd);
+    }
+    
     return kter;
 }
 

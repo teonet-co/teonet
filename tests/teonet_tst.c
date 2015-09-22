@@ -1,8 +1,10 @@
 /** 
- * File:   teonet.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   teonet_tst.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
- * \test Simple C Test Suite
+ * Simple C Test Suite
+ * 
+ * Simple C test code: \include teonet_tst.c
  * 
  * Created on Jun 30, 2015, 10:31:15 AM
  */

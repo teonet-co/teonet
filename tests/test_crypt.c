@@ -1,8 +1,10 @@
 /**
- * File:   test_crypt.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   test_crypt.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
- * \test Crypt module test suite
+ * Crypt module test suite
+ * 
+ * cUnit test suite code: \include test_crypt.c
  *
  * Created on Aug 7, 2015, 9:31:12 PM
  */
