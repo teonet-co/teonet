@@ -60,10 +60,11 @@ extern "C" {
 ksnetArpClass *ksnetArpInit(void *ke);
 void ksnetArpDestroy(ksnetArpClass *ka);
 void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data);
-void ksnetArpAddHost(ksnetArpClass *ka, char* name, char *addr, int port);
+void ksnetArpAddHost(ksnetArpClass *ka); 
 void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port);
 ksnet_arp_data *ksnetArpGet(ksnetArpClass *ka, char *name);
 ksnet_arp_data *ksnetArpRemove(ksnetArpClass *ka, char* name);
+void ksnetArpRemoveAll(ksnetArpClass *ka);
 int ksnetArpShow(ksnetArpClass *ka);
 char *ksnetArpShowStr(ksnetArpClass *ka);
 int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data);
