@@ -481,7 +481,7 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
  * @param revents
  */
 void host_cb(EV_P_ ev_io *w, int revents) {
-
+    
     ksnCoreClass *kc = w->data;             // ksnCore Class object
     ksnetEvMgrClass *ke = kc->ke;           // ksnetEvMgr Class object
 
@@ -491,8 +491,9 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     size_t recvlen;                         // # bytes received
 
     // Receive data
-    recvlen = ksn_recvfrom(ke->kc->ku, kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
-              0, (struct sockaddr *)&remaddr, &addrlen);
+    recvlen = ksn_recvfrom(ke->kc->ku, 
+                revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
+                0, (struct sockaddr *)&remaddr, &addrlen);
 
     // Process package
     ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);

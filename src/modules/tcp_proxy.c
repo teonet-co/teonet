@@ -126,10 +126,10 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     ssize_t recvlen = 0; 
     
     // Get data from TCP Proxy buffer 
-    if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
-                
+    if(!fd && ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
+        
         if(buffer_len >= ke->tp->packet.header->packet_length) {
-            
+
             // Copy data to buffer      
             memcpy(
                 buffer, 
@@ -138,7 +138,7 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
                     ke->tp->packet.header->addr_length, 
                 ke->tp->packet.header->packet_length
             );
-            
+
             // Make address from string
             if(!ksnTRUDPmakeAddr(
                     ke->tp->packet.buffer + sizeof(ksnTCPProxyHeader), 
@@ -153,7 +153,10 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     } 
     
     // Get data from UDP 
-    else recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
+    else if(fd) {  
+        
+        recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
+    }
     
     return recvlen;
 }
@@ -749,7 +752,7 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int c
                                 // Process received TCP packet
                                 void *data = w->data;
                                 w->data = kev->kc;
-                                host_cb(loop, w, revents);
+                                host_cb(loop, w, EV_NONE);
                                 w->data = data;
                             }
 
