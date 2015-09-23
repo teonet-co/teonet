@@ -33,12 +33,7 @@ ksnetArpClass *ksnetArpInit(void *ke) {
     ka->map = pblMapNewHashMap();
     ka->ke = ke;
     
-    ksnetArpAddHost(
-        ka,
-        kev->ksn_cfg.host_name,
-        "0.0.0.0",        
-        kev->kc->port
-    );
+    ksnetArpAddHost(ka);
 
     return ka;
     
@@ -87,13 +82,15 @@ void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data) {
  * Add (or update) this host to ARP table
  * 
  * @param ka
- * @param name
- * @param addr
- * @param port
  */
-void ksnetArpAddHost(ksnetArpClass *ka, char* name, char *addr, int port) {
+void ksnetArpAddHost(ksnetArpClass *ka) { 
 
     ksnet_arp_data arp;
+    ksnetEvMgrClass *ke = ka->ke;
+    
+    char* name = ke->ksn_cfg.host_name;
+    char *addr = "0.0.0.0";
+    int port = ke->kc->port;
     
     memset(&arp, 0, sizeof(arp));
     arp.mode = -1;
@@ -147,6 +144,20 @@ ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
     if(arp == (void*)-1) arp = NULL;
     
     return arp;
+}
+
+/**
+ * Remove all records instead host from ARP table
+ * 
+ * Free ARP Hash map, create new and add this host to created ARP Hash map
+ * 
+ * @param ka
+ */
+void ksnetArpRemoveAll(ksnetArpClass *ka) {
+    
+    pblMapFree(ka->map);
+    ka->map = pblMapNewHashMap();    
+    ksnetArpAddHost(ka);
 }
 
 /**

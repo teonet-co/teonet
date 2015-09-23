@@ -526,11 +526,8 @@ void ksnTCPProxyClientStop(ksnTCPProxyClass *tp) {
             close(tp->fd_client);
             tp->fd_client = 0;
             
-            // \todo Remove ALL records from ARP table
-            if(kev->kc != NULL) {
-                ksnetArpDestroy(kev->kc->ka);
-                kev->kc->ka = ksnetArpInit(kev);
-            }
+            // Remove ALL records from ARP table
+            if(kev->kc != NULL) ksnetArpRemoveAll(kev->kc->ka);
         }
     }
 }
