@@ -87,6 +87,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->event_cb = event_cb;
     ke->km = NULL;
     ke->kf = NULL;
+    ke->tp = NULL;
     ke->num_nets = 1;
     ke->n_num = 0;
     ke->n_prev = NULL;
@@ -380,6 +381,12 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
 
     if(ke->ksn_cfg.r_host_addr[0] && !ke->ksn_cfg.r_host_name[0]) {
+        
+        // Start TCP Proxy client connection if it is allowed and is not connected
+        if(ke->tp != NULL && ke->ksn_cfg.r_tcp_f && !(ke->tp->fd_client > 0)) {
+        
+            ksnTCPProxyClientConnetc(ke->tp);  // Start TCP proxy client
+        }
 
         // Create data with list of local IPs and port
         ksnet_stringArr ips = getIPs(); // IPs array
@@ -508,7 +515,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
 
     // Idle count startup (first time run)
     if(!kev->idle_count) {
-        //! \todo:       open_local_port(kev);
+        //! \todo: open_local_port(kev);
         // Set statistic start time
         if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
         // Connect to R-Host

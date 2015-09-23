@@ -29,9 +29,9 @@
 void host_cb(EV_P_ ev_io *w, int revents);
 
 // Local function definition
-void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int cli_ser);
+void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, 
+        int cli_ser);
 //
-int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp);
 void ksnTCPProxyClientStop(ksnTCPProxyClass *tp);
 //
 size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length, 
@@ -476,9 +476,10 @@ int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
         tp->packet.header = (ksnTCPProxyHeader*) tp->packet.buffer; // Pointer to packet header
                 
         // Connect to R-Host TCP Server
-        int fd_client = ksnTcpClientCreate(kev->kt, 
+        int fd_client = ksnTcpClientCreate(
+                kev->kt, // Pointer to ksnTcpClass
                 kev->ksn_cfg.r_tcp_port, // Remote host TCP port number
-                kev->ksn_cfg.r_host_addr // Remote host internet address
+                kev->ksn_cfg.r_host_addr // Remote host net address
         );
         
         if(fd_client > 0) {
