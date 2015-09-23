@@ -154,8 +154,9 @@ ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
  * @param ka
  */
 void ksnetArpRemoveAll(ksnetArpClass *ka) {
-    
+        
     pblMapFree(ka->map);
+    ((ksnetEvMgrClass *)ka->ke)->ksn_cfg.r_host_name[0] = '\0';
     ka->map = pblMapNewHashMap();    
     ksnetArpAddHost(ka);
 }
