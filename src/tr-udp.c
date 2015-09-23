@@ -74,6 +74,21 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
     }
 }
 
+/**
+ * Remove all records in IP map (include all send lists and receive heaps)
+ * 
+ * @param tu Pointer to ksnTRUDPClass object
+ */
+void ksnTRUDPremoveAll(ksnTRUDPClass *tu) {
+
+    if (tu != NULL) {
+
+        ksnTRUDPsendListDestroyAll(tu); // Destroy all send lists
+        ksnTRUDPreceiveHeapDestroyAll(tu); // Destroy all receive heap       
+        pblMapClear(tu->ip_map); // Clear IP map
+    }
+}
+
 // Make TR-UDP Header
 #define MakeHeader(tru_header, packet_id, type, buf_len) \
     tru_header.version = TR_UDP_PROTOCOL_VERSION; \
