@@ -15,7 +15,7 @@
 
 
 #define TR_UDP_PROTOCOL_VERSION 1
-#define MAX_ACK_WAIT 0.100  // 100 MS
+#define MAX_ACK_WAIT 0.500  // 500 MS
 
 /**
  * IP map records data

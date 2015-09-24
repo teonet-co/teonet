@@ -1159,9 +1159,9 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     double max_ack_wait = ip_map_d->stat.triptime_last10_max / 1000000.0;
     if(max_ack_wait > 0) {
         max_ack_wait += max_ack_wait * 
-            (ip_map_d->stat.packets_attempt < 10 ? 0.05 : 0.1);
+            (ip_map_d->stat.packets_attempt < 10 ? 0.25 : 0.5);
     }
-    else max_ack_wait = MAX_ACK_WAIT;
+    else max_ack_wait = MAX_ACK_WAIT; // Default value
     
     // Initialize, set user data and start the timer
     ev_timer_init(w, sl_timer_cb, max_ack_wait, 0.0);

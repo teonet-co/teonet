@@ -280,7 +280,7 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
     int i;
     ip_map_data *ip_map_d = ksnTRUDPipMapDataTry(tu, addr, NULL, 0);
     
-    if(ip_map_d) {
+    if(ip_map_d != NULL) {
         
         ip_map_d->stat.triptime_last = ksnTRUDPtimestamp() - tru_header->timestamp;
         ip_map_d->stat.triptime_avg = 
