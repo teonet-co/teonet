@@ -32,7 +32,7 @@ typedef struct ip_map_data {
     struct {
         uint32_t triptime_last; ///< Last trip time
         uint32_t triptime_max; ///< Max trip time
-        uint32_t triptime_last10_max; ///< Max trip time in last 10 packets
+        uint32_t triptime_last_max; ///< Max trip time in last 10 packets
         uint32_t triptime_min; ///< Min trip time
         uint32_t triptime_avg; ///< Avr trip time
         uint32_t packets_send; ///< Number of data or reset packets sent
@@ -40,7 +40,7 @@ typedef struct ip_map_data {
         uint32_t packets_receive; ///< Number of data or reset packets receive
         uint32_t packets_receive_dropped; ///< Number of dropped received package
         uint32_t ack_receive; ///< Number of ACK packets received
-        uint32_t triptime_last10[LAST10_SIZE]; ///< Last 10 trip time
+        uint32_t triptime_last_ar[LAST10_SIZE]; ///< Last 10 trip time
         size_t   idx;
     } stat;
     
