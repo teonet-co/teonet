@@ -33,7 +33,9 @@ typedef enum {
  */
 typedef enum {
     
-    CMD_TCPP_PROXY  ///< Resend packet to UDP Proxy client/server
+    CMD_TCPP_PROXY,     ///< Resend packet to UDP Proxy client/server
+    CMD_TCPP_GET_IPS,   ///< Get host IPs list
+    CMD_TCPP_GET_PORT   ///< Get host UDP proxy port
     
 } ksnTCPProxyCommand;
 
