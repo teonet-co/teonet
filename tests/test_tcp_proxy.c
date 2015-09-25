@@ -24,7 +24,7 @@
 extern CU_pSuite pSuite;
 
 size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_len, 
-        const char *addr, int port, const void *data, size_t data_len);
+        const char *addr, int port, int cmd, const void *data, size_t data_len);
 uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_len);
 int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data, 
         size_t data_length);
@@ -78,7 +78,7 @@ void test_5_2() {
     size_t buffer_len = KSN_BUFFER_DB_SIZE;
     char buffer[buffer_len];
     // Create package
-    size_t pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
+    size_t pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, CMD_TCPP_PROXY, data, data_len);
     // Check result
     ksnTCPProxyHeader *th = (ksnTCPProxyHeader*) buffer;
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
@@ -92,15 +92,15 @@ void test_5_2() {
     
     // 2) Check Create package function buffer size errors
     // Create package with buffer less than header size
-    size_t pl_err = ksnTCPProxyPackageCreate(buffer, sizeof(ksnTCPProxyHeader) - 1, addr, port, data, data_len);
+    size_t pl_err = ksnTCPProxyPackageCreate(buffer, sizeof(ksnTCPProxyHeader) - 1, addr, port, CMD_TCPP_PROXY, data, data_len);
     CU_ASSERT_EQUAL(pl_err, -1);
     // Create package with buffer less than package size
-    pl_err = ksnTCPProxyPackageCreate(buffer, pl - 1, addr, port, data, data_len);
+    pl_err = ksnTCPProxyPackageCreate(buffer, pl - 1, addr, port, CMD_TCPP_PROXY, data, data_len);
     CU_ASSERT_EQUAL(pl_err, -2);
            
     // 3) Process package function
     // Create regular package
-    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
+    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, CMD_TCPP_PROXY, data, data_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
     // Process package
     int rv = ksnTCPProxyPackageProcess(&tpd->packet, buffer, pl);
@@ -119,12 +119,12 @@ void test_5_2() {
     // Create buffer with two packet
     size_t pl_comb = 0; // Combined packet size
     int num_pack = 0; // Number of packets
-    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
+    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, CMD_TCPP_PROXY, data, data_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );
     pl_comb += pl;
     num_pack++;
-    pl = ksnTCPProxyPackageCreate(buffer + pl, buffer_len - pl, addr, port, data2, data2_len);
+    pl = ksnTCPProxyPackageCreate(buffer + pl, buffer_len - pl, addr, port, CMD_TCPP_PROXY, data2, data2_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );    
     pl_comb += pl;
@@ -168,12 +168,12 @@ void test_5_2() {
     pl_comb = 0; // Combined packet size
     num_pack = 0; // Number of packets
     num_processed = 0; // Number of processed packets
-    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, data, data_len);
+    pl = ksnTCPProxyPackageCreate(buffer, buffer_len, addr, port, CMD_TCPP_PROXY, data, data_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );
     pl_comb += pl;
     num_pack++;
-    pl = ksnTCPProxyPackageCreate(buffer + pl, buffer_len - pl, addr, port, data2, data2_len);
+    pl = ksnTCPProxyPackageCreate(buffer + pl, buffer_len - pl, addr, port, CMD_TCPP_PROXY, data2, data2_len);
     CU_ASSERT(pl > 0); // Packet created (the buffer has enough size)
 //    printf(" pl = %d,", (int) pl );    
     pl_comb += pl;

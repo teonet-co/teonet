@@ -439,8 +439,8 @@ void open_local_port(ksnetEvMgrClass *ke) {
                                                ip_arr[1], ip_arr[2]);
 
             // Send to IP to open port
-            ksnCoreSendto(ke->kc, ip_str, ke->ksn_cfg.r_port,
-                      CMD_NONE, NULL_STR, 1);
+            ksnCoreSendto(ke->kc, ip_str, ke->ksn_cfg.r_port, CMD_NONE,  
+                    NULL_STR, 1);
 
             printf("Send to: %s:%d\n", ip_str, (int)ke->ksn_cfg.r_port);
 
