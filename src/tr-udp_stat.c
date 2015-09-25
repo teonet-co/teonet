@@ -294,15 +294,15 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
             ip_map_d->stat.triptime_max = ip_map_d->stat.triptime_last;
 
         // Add to last 10 array
-        ip_map_d->stat.triptime_last10[ip_map_d->stat.idx] = ip_map_d->stat.triptime_last;
+        ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx] = ip_map_d->stat.triptime_last;
         if(ip_map_d->stat.idx >= LAST10_SIZE) ip_map_d->stat.idx = 0;
         else ip_map_d->stat.idx++;
 
         // Calculate max in last 10 packet
-        ip_map_d->stat.triptime_last10_max = 0;
-        for(i = 0; i < LAST10_SIZE; i++) {        
-            if(ip_map_d->stat.triptime_last10[i] > ip_map_d->stat.triptime_last10_max)
-                ip_map_d->stat.triptime_last10_max = ip_map_d->stat.triptime_last10[i];
+        ip_map_d->stat.triptime_last_max = 0;
+        for(i = 0; i < LAST10_SIZE; i++) {
+            if(ip_map_d->stat.triptime_last_ar[i] > ip_map_d->stat.triptime_last_max)
+                ip_map_d->stat.triptime_last_max = ip_map_d->stat.triptime_last_ar[i];
         }
     }
 }

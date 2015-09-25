@@ -302,16 +302,16 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
             
             // Last trip time
             char *tcp_last_triptime = ip_map_d != NULL ? 
-                    ksnet_formatMessage("%7.3f / ", ip_map_d->stat.triptime_last/1000.0) :
-                    strdup(null_str);
+                ksnet_formatMessage("%7.3f / ", 
+                    ip_map_d->stat.triptime_last/1000.0) : strdup(null_str);
             
             // Last 10 max trip time
             char *tcp_triptime_last10_max = ip_map_d != NULL ? 
-                    ksnet_formatMessage("%.3f ms", ip_map_d->stat.triptime_last10_max/1000.0) :
-                    strdup(null_str);
+                ksnet_formatMessage("%.3f ms", 
+                    ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
                         
             str = ksnet_sformatMessage(str, "%s"
-                "%3d %s%s%s\t %3d   %-15s  %5d   %7s %s %s%s%s\n",
+                "%3d %s%s%s\t %3d   %-15s  %5d   %7s %s  %s%s%s\n",
                 str,
 
                 // Number
