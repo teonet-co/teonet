@@ -38,6 +38,7 @@ int ksnCoreBind(ksnCoreClass *kc);
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, size_t *packet_len);
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
+int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
 // UDP / UDT functions
 #define ksn_socket(domain, type, protocol) \
@@ -146,6 +147,9 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
 
         ksnetEvMgrClass *ke = kc->ke;
 
+        // Send disconnect from peer connected to TCP Proxy command to all
+        ksnetArpGetAll(kc->ka, send_cmd_disconnect_peer_cb, NULL);
+        
         // Send disconnect to all
         ksnetArpGetAll(kc->ka, send_cmd_disconnect_cb, NULL);
         
@@ -474,10 +478,27 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
             arp_data->addr,
             arp_data->port, 
             CMD_DISCONNECTED, 
-            NULL, 0
-            //data, data != NULL ? strlen(data)+1 : 0
+            data, data != NULL ? strlen(data)+1 : 0
     );
 
+    return 0;
+}
+
+/**
+ * Send command to peer to disconnect peer
+ *
+ * @param ka
+ * @param name
+ * @param arp_data
+ * @param data
+ */
+int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name,
+                            ksnet_arp_data *arp_data, void *data) {
+    
+    if(arp_data->mode == 2) {
+        ksnetArpGetAll(ka, send_cmd_disconnect_cb, name);
+    }
+            
     return 0;
 }
 
@@ -516,7 +537,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
  * @param vkc Pointer to ksnCoreClass
  * @param buf Buffer with packet
  * @param recvlen Packet length
- * @param remaddrAddress
+ * @param remaddr Address
  */
 void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, 
         __SOCKADDR_ARG remaddr) {

@@ -1107,15 +1107,6 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
             pblMapRemove(tp->map, &tpd->udp_proxy_fd, sizeof(tpd->udp_proxy_fd), &valueLength);
             pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength);
         }
-        
-        // \todo Send disconnect command to all peers
-//        char *peer_name = "teovpn-c4";
-//        ksnetArpGetAll(kev->kc->ka, send_cmd_disconnect_cb, peer_name);
-        
-        // \todo Remove this client connection from ARP table !!! Don't need because it removed without it
-//        ksnCorePacketData rd;
-//        rd.from = peer_name;
-//        cmd_disconnected_cb(kev->kc->kco, &rd);
     }        
 }
 

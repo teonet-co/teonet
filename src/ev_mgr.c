@@ -495,6 +495,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
         ksnCorePacketData rd;
         rd.from = peer_name;
+        rd.data = NULL;
         cmd_disconnected_cb(kev->kc->kco, &rd);
 
         retval = 1;

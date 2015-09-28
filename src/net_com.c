@@ -112,7 +112,8 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
                     // Send event callback
                     ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
                     if(ke->event_cb != NULL)
-                        ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
+                        ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), 
+                                NULL);
 
                     processed = 1;
                 }
@@ -293,7 +294,7 @@ int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
                         ksnet_arp_data *arp_data, void *data) {
 
     #define rd ((ksnCorePacketData*)data)
-    printf("peer_name: %s\n", peer_name);
+
     if(strcmp(peer_name, rd->from)) {
         ksnCommandSendCmdConnect( ((ksnetEvMgrClass*) ka->ke)->kc->kco,
                 peer_name, rd->from, rd->addr, rd->port);
@@ -345,8 +346,6 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     // For TCP proxy connection resend this host IPs to child
     else {
-        
-//        printf("rd->arp->port = %d, rd->arp->addr = %s\n", rd->arp->port, rd->arp->addr);
         
         rd->arp->mode = 2;
         lrd.port = rd->arp->port;
@@ -420,8 +419,10 @@ int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
-
-//    if(rd->data != NULL) rd->from = rd->data;
+    
+    // Name of peer to disconnect
+    char *peer_name = rd->from;
+    if(rd->data != NULL && ((char*)rd->data)[0]) peer_name = rd->data;
     
     // Check r-host disconnected
     if(kev->ksn_cfg.r_host_name[0] && !strcmp(kev->ksn_cfg.r_host_name,
@@ -431,7 +432,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     }
 
     // Remove from ARP Table
-    ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, rd->from);
+    ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
 
     // Send event callback
     if(kev->event_cb != NULL)
