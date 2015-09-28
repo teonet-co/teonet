@@ -470,8 +470,12 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *child_peer,
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data) {
 
-    ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc, arp_data->addr,
-                  arp_data->port, CMD_DISCONNECTED, NULL, 0);
+    ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc, 
+            arp_data->addr,
+            arp_data->port, 
+            CMD_DISCONNECTED, 
+            data, data != NULL ? strlen(data)+1 : 0
+    );
 
     return 0;
 }
