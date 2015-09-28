@@ -382,32 +382,47 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
 
     if(ke->ksn_cfg.r_host_addr[0] && !ke->ksn_cfg.r_host_name[0]) {
         
+        size_t ptr = 0;
+        void *data = NULL;
+        ksnet_stringArr ips = NULL;
+        
         // Start TCP Proxy client connection if it is allowed and is not connected
         if(ke->tp != NULL && ke->ksn_cfg.r_tcp_f && !(ke->tp->fd_client > 0)) {
         
             ksnTCPProxyClientConnetc(ke->tp);  // Start TCP proxy client
+            
+            data = malloc(sizeof(uint8_t));
+            uint8_t *num = (uint8_t *) data; // Pointer to number of IPs
+            ptr = sizeof(uint8_t); // Pointer (to first IP)
+            *num = 0; // Number of IPs
         }
 
-        // Create data with list of local IPs and port
-        ksnet_stringArr ips = getIPs(); // IPs array
-        uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
-        void *data = malloc(len*16 + sizeof(uint8_t) + sizeof(uint32_t)); // Data
-        size_t ptr = sizeof(uint8_t); // Pointer (to first IP)
-        uint8_t *num = (uint8_t *) data; // Real number of IPs
-        *num = 0;
-        // Fill data with IPs and Port
-        int i, ip_len;
-        for(i=0; i < len; i++) {
+        // Create data for UDP connection
+        else {            
+            
+            // Create data with list of local IPs and port
+            ips = getIPs(); // IPs array
+            uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
+            const size_t MAX_IP_STR_LEN = 16; // Max IPs string length
+            data = malloc(len * MAX_IP_STR_LEN + sizeof(uint8_t) + sizeof(uint32_t)); // Data
+            ptr = sizeof(uint8_t); // Pointer (to first IP)
+            uint8_t *num = (uint8_t *) data; // Pointer to number of IPs
+            *num = 0; // Number of IPs
+            
+            // Fill data with IPs and Port
+            int i, ip_len;
+            for(i=0; i < len; i++) {
 
-            if(ip_is_private(ips[i])) {
+                if(ip_is_private(ips[i])) {
 
-                ip_len =  strlen(ips[i]) + 1;
-                memcpy(data + ptr, ips[i], ip_len); ptr += ip_len;
-                (*num)++;
+                    ip_len =  strlen(ips[i]) + 1;
+                    memcpy(data + ptr, ips[i], ip_len); ptr += ip_len;
+                    (*num)++;
+                }
             }
+            *((uint32_t *)(data + ptr)) = ke->kc->port; ptr += sizeof(uint32_t); // Port
         }
-        *((uint32_t *)(data + ptr)) = ke->kc->port; ptr += sizeof(uint32_t); // Port
-
+        
         // Send data to r-host
         ksnCoreSendto(ke->kc, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port,
                       CMD_CONNECT_R, data, ptr);

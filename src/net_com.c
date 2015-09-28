@@ -322,17 +322,24 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     size_t i, ptr = 0;
     ksnCorePacketData lrd;
     uint8_t *num_ip = rd->data; ptr += sizeof(uint8_t); // Number of IPs
-    lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t))); // Port number
-    lrd.from = rd->from;
-    for(i = 0; i <= *num_ip; i++ ) {
+    // For UDP connection
+    if(*num_ip) {
+        lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t))); // Port number
+        lrd.from = rd->from;
+        for(i = 0; i <= *num_ip; i++ ) {
 
-        if(!i) lrd.addr = (char*)localhost;
-        else {
-            lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
+            if(!i) lrd.addr = (char*)localhost;
+            else {
+                lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
+            }
+
+            // Send local IP address and port to child
+            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, &lrd);
         }
-
-        // Send local IP address and port to child
-        ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, &lrd);
+    }
+    // For TCP proxy connection
+    else {
+        
     }
 
     // Send peer address to child
