@@ -23,7 +23,7 @@
  */
 typedef struct ksnet_arp_data {
 
-    int mode;       ///< Peers mode; -1 - This host, -2 undefined host, 0 - peer , 1 - r-host
+    int mode;       ///< Peers mode; -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
     char addr[40];  ///< Peer IP address
     int port;       ///< Peer port
 
