@@ -336,7 +336,8 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             }
 
             // Send local IP address and port to child
-            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, &lrd);
+            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
+                    &lrd);
         }
         
         // Send peer address to child
@@ -347,6 +348,7 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // For TCP proxy connection resend this host IPs to child
     else {
         
+        rd->arp->mode = 2;
         lrd.port = rd->arp->port;
         lrd.from = rd->from;
         
@@ -361,13 +363,15 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             else continue;
             
             // Send local addresses for child            
-            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, &lrd);
+            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
+                    &lrd);
         }                                
         ksnet_stringArrFree(&ips);
         
         // Send main peer address to child
         lrd.addr = rd->arp->addr;
-        ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, &lrd);
+        ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
+                &lrd);
     }
 
     return 1;
