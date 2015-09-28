@@ -1109,8 +1109,8 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
         }
         
         // \todo Send disconnect command to all peers
-        char *peer_name = "teovpn-c4";
-        ksnetArpGetAll(kev->kc->ka, send_cmd_disconnect_cb, peer_name);
+//        char *peer_name = "teovpn-c4";
+//        ksnetArpGetAll(kev->kc->ka, send_cmd_disconnect_cb, peer_name);
         
         // \todo Remove this client connection from ARP table !!! Don't need because it removed without it
 //        ksnCorePacketData rd;
