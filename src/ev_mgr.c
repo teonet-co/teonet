@@ -387,10 +387,13 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         ksnet_stringArr ips = NULL;
         
         // Start TCP Proxy client connection if it is allowed and is not connected
-        if(ke->tp != NULL && ke->ksn_cfg.r_tcp_f && !(ke->tp->fd_client > 0)) {
+        if(ke->tp != NULL && ke->ksn_cfg.r_tcp_f) { 
         
-            ksnTCPProxyClientConnetc(ke->tp);  // Start TCP proxy client
+            // Start TCP proxy client
+            if(!(ke->tp->fd_client > 0))
+                ksnTCPProxyClientConnetc(ke->tp);  
             
+            // Create data with empty list of local IPs and port
             data = malloc(sizeof(uint8_t));
             uint8_t *num = (uint8_t *) data; // Pointer to number of IPs
             ptr = sizeof(uint8_t); // Pointer (to first IP)
