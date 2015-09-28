@@ -295,7 +295,7 @@ int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
                         ksnet_arp_data *arp_data, void *data) {
 
     #define rd ((ksnCorePacketData*)data)
-
+    printf("peer_name: %s\n", peer_name);
     if(strcmp(peer_name, rd->from)) {
         ksnCommandSendCmdConnect( ((ksnetEvMgrClass*) ka->ke)->kc->kco,
                 peer_name, rd->from, rd->addr, rd->port);
