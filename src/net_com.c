@@ -352,21 +352,21 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         lrd.port = rd->arp->port;
         lrd.from = rd->from;
         
-        // Get this server IPs array
-        ksnet_stringArr ips = getIPs(); 
-        uint8_t ips_len = ksnet_stringArrLength(ips); // Number of IPs
-        int i;
-        for(i = 0; i <= ips_len; i++) {
-
-            if(!i) lrd.addr = (char*)localhost;
-            else if(ip_is_private(ips[i-1])) lrd.addr = ips[i-1];
-            else continue;
-            
-            // Send local addresses for child            
-            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
-                    &lrd);
-        }                                
-        ksnet_stringArrFree(&ips);
+//        // Get this server IPs array
+//        ksnet_stringArr ips = getIPs(); 
+//        uint8_t ips_len = ksnet_stringArrLength(ips); // Number of IPs
+//        int i;
+//        for(i = 0; i <= ips_len; i++) {
+//
+//            if(!i) lrd.addr = (char*)localhost;
+//            else if(ip_is_private(ips[i-1])) lrd.addr = ips[i-1];
+//            else continue;
+//            
+//            // Send local addresses for child            
+//            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
+//                    &lrd);
+//        }                                
+//        ksnet_stringArrFree(&ips);
         
         // Send main peer address to child
         lrd.addr = rd->arp->addr;
