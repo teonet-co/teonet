@@ -474,7 +474,8 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
             arp_data->addr,
             arp_data->port, 
             CMD_DISCONNECTED, 
-            data, data != NULL ? strlen(data)+1 : 0
+            NULL, 0
+            //data, data != NULL ? strlen(data)+1 : 0
     );
 
     return 0;
