@@ -421,7 +421,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
 
-    if(rd->data != NULL) rd->from = rd->data;
+//    if(rd->data != NULL) rd->from = rd->data;
     
     // Check r-host disconnected
     if(kev->ksn_cfg.r_host_name[0] && !strcmp(kev->ksn_cfg.r_host_name,
