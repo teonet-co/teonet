@@ -350,7 +350,6 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 //        printf("rd->arp->port: %d, rd->arp->addr: %s\n", rd->arp->port, rd->arp->addr);
         
         lrd.port = rd->arp->port;
-//        lrd.addr = rd->arp->addr;
         lrd.from = rd->from;
         
 //        // Get this server IPs array
