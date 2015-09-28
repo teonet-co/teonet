@@ -790,15 +790,15 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
 
                         } break;
                         
-                        // Get host IPs list
-                        case CMD_TCPP_GET_IPS: {
-                            printf("\"Get host IPs list\" TCP Proxy command\n");
-                        } break;
-
-                        // Get host UDP proxy port
-                        case CMD_TCPP_GET_PORT: {
-                            printf("\"Get host UDP proxy port\" TCP Proxy command\n");
-                        } break;
+//                        // Get host IPs list
+//                        case CMD_TCPP_GET_IPS: {
+//                            printf("\"Get host IPs list\" TCP Proxy command\n");
+//                        } break;
+//
+//                        // Get host UDP proxy port
+//                        case CMD_TCPP_GET_PORT: {
+//                            printf("\"Get host UDP proxy port\" TCP Proxy command\n");
+//                        } break;
 
                         default:
                             break;
