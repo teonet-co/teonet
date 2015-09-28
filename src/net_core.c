@@ -609,6 +609,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
                 rd.arp->port = rd.port;
                 rd.arp->mode = mode;
                 ksnetArpAdd(kc->ka, rd.from, rd.arp);
+                rd.arp = ksnetArpGet(kc->ka, rd.from);
 
                 // Send child to new peer and new peer to child
                 ksnetArpGetAll(kc->ka, send_cmd_connected_cb, &rd);
