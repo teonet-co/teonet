@@ -1106,6 +1106,9 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
             pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength);
         }
         
+        // \todo Send disconnect command to all peers
+        //ksnetArpGetAll(kc->ka, send_cmd_disconnect_cb, );
+        
         // \todo Remove this client connection from ARP table !!! Don't need because it removed without it
 //        ksnCorePacketData rd;
 //        rd.from = peer_name;
