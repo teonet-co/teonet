@@ -122,12 +122,15 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
 
     // Add host socket to the event manager
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
-    ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
-    kc->host_w.data = kc;
-    ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
-    #pragma GCC diagnostic pop
+    if(((ksnetEvMgrClass*)ke)->ksn_cfg.r_tcp_f) {
+        
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+        ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
+        kc->host_w.data = kc;
+        ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
+        #pragma GCC diagnostic pop
+    }
 
     return kc;
 }

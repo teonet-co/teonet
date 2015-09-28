@@ -269,7 +269,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
 
     char *str;
     const char *div = "-------------------------------------------------------"
-                      "------------------------\n";
+                      "--------------------------\n";
 
     str = ksnet_formatMessage(div);
 
