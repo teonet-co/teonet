@@ -339,7 +339,7 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     }
     // For TCP proxy connection
     else {
-        
+        printf("rd->port: %d, rd->addr: %s\n", rd->port, rd->addr);
     }
 
     // Send peer address to child
