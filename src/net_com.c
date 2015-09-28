@@ -348,7 +348,7 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // For TCP proxy connection resend this host IPs to child
     else {
         
-        printf("rd->arp->port = %d, rd->from = %s\n", rd->arp->port, rd->from);
+        printf("rd->arp->port = %d, rd->arp->addr = %s\n", rd->arp->port, rd->arp->addr);
         
         rd->arp->mode = 2;
         lrd.port = rd->arp->port;
