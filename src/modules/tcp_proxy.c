@@ -27,6 +27,8 @@
 
 // Core module functions
 void host_cb(EV_P_ ev_io *w, int revents);
+int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
+                            ksnet_arp_data *arp_data, void *data);
 
 // Local function definition
 void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, 
@@ -1107,7 +1109,8 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
         }
         
         // \todo Send disconnect command to all peers
-        //ksnetArpGetAll(kc->ka, send_cmd_disconnect_cb, );
+        char *peer_name = "teovpn-c4";
+        ksnetArpGetAll(kev->kc->ka, send_cmd_disconnect_cb, peer_name);
         
         // \todo Remove this client connection from ARP table !!! Don't need because it removed without it
 //        ksnCorePacketData rd;
