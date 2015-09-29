@@ -112,7 +112,8 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
                     // Send event callback
                     ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
                     if(ke->event_cb != NULL)
-                        ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
+                        ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), 
+                                NULL);
 
                     processed = 1;
                 }
@@ -191,10 +192,9 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
 /**
  * Process CMD_ECHO
  *
- * @param from
- * @param data
- * @param data_length
- * @return
+ * @param kco
+ * @param rd
+ * @return 
  */
 int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
@@ -208,9 +208,8 @@ int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 /**
  * Process CMD_ECHO_ANSWER
  *
- * @param from
- * @param data
- * @param data_length
+ * @param kco
+ * @param rd
  * @return
  */
 int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
@@ -322,21 +321,57 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     size_t i, ptr = 0;
     ksnCorePacketData lrd;
     uint8_t *num_ip = rd->data; ptr += sizeof(uint8_t); // Number of IPs
-    lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t))); // Port number
-    lrd.from = rd->from;
-    for(i = 0; i <= *num_ip; i++ ) {
+    
+    // For UDP connection resend received IPs to child
+    if(*num_ip) {
+        
+        lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t))); // Port number
+        lrd.from = rd->from;
+        for(i = 0; i <= *num_ip; i++ ) {
 
-        if(!i) lrd.addr = (char*)localhost;
-        else {
-            lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
+            if(!i) lrd.addr = (char*)localhost;
+            else {
+                lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
+            }
+
+            // Send local IP address and port to child
+            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
+                    &lrd);
         }
+        
+        // Send peer address to child
+        ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, rd);
 
-        // Send local IP address and port to child
-        ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, &lrd);
     }
+    
+    // For TCP proxy connection resend this host IPs to child
+    else {
+        
+        rd->arp->mode = 2;
+        lrd.port = rd->arp->port;
+        lrd.from = rd->from;
+        
+        // Get this server IPs array
+        ksnet_stringArr ips = getIPs(); 
+        uint8_t ips_len = ksnet_stringArrLength(ips); // Number of IPs
+        int i;
+        for(i = 0; i <= ips_len; i++) {
 
-    // Send peer address to child
-    ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, rd);
+            if(!i) lrd.addr = (char*)localhost;
+            else if(ip_is_private(ips[i-1])) lrd.addr = ips[i-1];
+            else continue;
+            
+            // Send local addresses for child            
+            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
+                    &lrd);
+        }                                
+        ksnet_stringArrFree(&ips);
+        
+        // Send main peer address to child
+        lrd.addr = rd->arp->addr;
+        ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, 
+                &lrd);
+    }
 
     return 1;
 }
@@ -384,7 +419,11 @@ int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
-
+    
+    // Name of peer to disconnect
+    char *peer_name = rd->from;
+    if(rd->data != NULL && ((char*)rd->data)[0]) peer_name = rd->data;
+    
     // Check r-host disconnected
     if(kev->ksn_cfg.r_host_name[0] && !strcmp(kev->ksn_cfg.r_host_name,
                                               rd->from)) {
@@ -393,7 +432,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     }
 
     // Remove from ARP Table
-    ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, rd->from);
+    ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
 
     // Send event callback
     if(kev->event_cb != NULL)

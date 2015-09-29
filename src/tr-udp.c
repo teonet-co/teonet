@@ -74,6 +74,21 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
     }
 }
 
+/**
+ * Remove all records in IP map (include all send lists and receive heaps)
+ * 
+ * @param tu Pointer to ksnTRUDPClass object
+ */
+void ksnTRUDPremoveAll(ksnTRUDPClass *tu) {
+
+    if (tu != NULL) {
+
+        ksnTRUDPsendListDestroyAll(tu); // Destroy all send lists
+        ksnTRUDPreceiveHeapDestroyAll(tu); // Destroy all receive heap       
+        pblMapClear(tu->ip_map); // Clear IP map
+    }
+}
+
 // Make TR-UDP Header
 #define MakeHeader(tru_header, packet_id, type, buf_len) \
     tru_header.version = TR_UDP_PROTOCOL_VERSION; \
@@ -1141,12 +1156,12 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
 
     // Timer value 
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
-    double max_ack_wait = ip_map_d->stat.triptime_last10_max / 1000000.0;
+    double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000000.0;
     if(max_ack_wait > 0) {
         max_ack_wait += max_ack_wait * 
-            (ip_map_d->stat.packets_attempt < 10 ? 0.05 : 0.1);
+            (ip_map_d->stat.packets_attempt < 10 ? 0.25 : 0.5);
     }
-    else max_ack_wait = MAX_ACK_WAIT;
+    else max_ack_wait = MAX_ACK_WAIT; // Default value
     
     // Initialize, set user data and start the timer
     ev_timer_init(w, sl_timer_cb, max_ack_wait, 0.0);

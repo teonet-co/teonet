@@ -491,7 +491,7 @@ ksnet_stringArr getIPs() {
             tmpAddrPtr = &((struct sockaddr_in *) ifa->ifa_addr)->sin_addr;
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-            //            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+//            printf("%s IP Address: %s\n", ifa->ifa_name, addressBuffer);
 
             // Skip VPN IP
 //            if(!strcmp(addressBuffer, conf->vpn_ip)) continue;

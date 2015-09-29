@@ -38,6 +38,7 @@ int ksnCoreBind(ksnCoreClass *kc);
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, size_t *packet_len);
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
+int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
 // UDP / UDT functions
 #define ksn_socket(domain, type, protocol) \
@@ -122,12 +123,15 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
 
     // Add host socket to the event manager
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
-    ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
-    kc->host_w.data = kc;
-    ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
-    #pragma GCC diagnostic pop
+    if(!((ksnetEvMgrClass*)ke)->ksn_cfg.r_tcp_f) {
+        
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+        ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
+        kc->host_w.data = kc;
+        ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
+        #pragma GCC diagnostic pop
+    }
 
     return kc;
 }
@@ -143,6 +147,9 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
 
         ksnetEvMgrClass *ke = kc->ke;
 
+        // Send disconnect from peer connected to TCP Proxy command to all
+        ksnetArpGetAll(kc->ka, send_cmd_disconnect_peer_cb, NULL);
+        
         // Send disconnect to all
         ksnetArpGetAll(kc->ka, send_cmd_disconnect_cb, NULL);
         
@@ -154,7 +161,7 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        ksnTRUDPinit(kc->ku);
+        ksnTRUDPDestroy(kc->ku);
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif
@@ -467,9 +474,31 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *child_peer,
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data) {
 
-    ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc, arp_data->addr,
-                  arp_data->port, CMD_DISCONNECTED, NULL, 0);
+    ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc, 
+            arp_data->addr,
+            arp_data->port, 
+            CMD_DISCONNECTED, 
+            data, data != NULL ? strlen(data)+1 : 0
+    );
 
+    return 0;
+}
+
+/**
+ * Send command to peer to disconnect peer
+ *
+ * @param ka
+ * @param name
+ * @param arp_data
+ * @param data
+ */
+int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name,
+                            ksnet_arp_data *arp_data, void *data) {
+    
+    if(arp_data->mode == 2) {
+        ksnetArpGetAll(ka, send_cmd_disconnect_cb, name);
+    }
+            
     return 0;
 }
 
@@ -481,7 +510,7 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
  * @param revents
  */
 void host_cb(EV_P_ ev_io *w, int revents) {
-
+    
     ksnCoreClass *kc = w->data;             // ksnCore Class object
     ksnetEvMgrClass *ke = kc->ke;           // ksnetEvMgr Class object
 
@@ -491,8 +520,9 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     size_t recvlen;                         // # bytes received
 
     // Receive data
-    recvlen = ksn_recvfrom(ke->kc->ku, kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
-              0, (struct sockaddr *)&remaddr, &addrlen);
+    recvlen = ksn_recvfrom(ke->kc->ku, 
+                revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
+                0, (struct sockaddr *)&remaddr, &addrlen);
 
     // Process package
     ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);
@@ -507,7 +537,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
  * @param vkc Pointer to ksnCoreClass
  * @param buf Buffer with packet
  * @param recvlen Packet length
- * @param remaddrAddress
+ * @param remaddr Address
  */
 void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, 
         __SOCKADDR_ARG remaddr) {
@@ -605,6 +635,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
                 rd.arp->port = rd.port;
                 rd.arp->mode = mode;
                 ksnetArpAdd(kc->ka, rd.from, rd.arp);
+                rd.arp = ksnetArpGet(kc->ka, rd.from);
 
                 // Send child to new peer and new peer to child
                 ksnetArpGetAll(kc->ka, send_cmd_connected_cb, &rd);

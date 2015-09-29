@@ -27,15 +27,17 @@
 
 // Core module functions
 void host_cb(EV_P_ ev_io *w, int revents);
+int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
+                            ksnet_arp_data *arp_data, void *data);
 
 // Local function definition
-void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int cli_ser);
+void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, 
+        int cli_ser);
 //
-int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp);
 void ksnTCPProxyClientStop(ksnTCPProxyClass *tp);
 //
 size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length, 
-        const char *addr, int port, 
+        const char *addr, int port, int cmd, 
         const void *data, size_t data_length);
 //
 int ksnTCPProxyServerStart(ksnTCPProxyClass *tp);
@@ -43,6 +45,9 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp);
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd);
 void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd, 
         int remove_f);
+//
+ssize_t ksnTCPProxySendTo(ksnetEvMgrClass* ke, int cmd, const void *buffer, 
+        size_t buffer_len, __CONST_SOCKADDR_ARG addr);
 
 /**
  * Pointer to ksnetEvMgrClass
@@ -126,10 +131,10 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     ssize_t recvlen = 0; 
     
     // Get data from TCP Proxy buffer 
-    if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
-                
+    if(!fd && ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
+        
         if(buffer_len >= ke->tp->packet.header->packet_length) {
-            
+
             // Copy data to buffer      
             memcpy(
                 buffer, 
@@ -138,7 +143,7 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
                     ke->tp->packet.header->addr_length, 
                 ke->tp->packet.header->packet_length
             );
-            
+
             // Make address from string
             if(!ksnTRUDPmakeAddr(
                     ke->tp->packet.buffer + sizeof(ksnTCPProxyHeader), 
@@ -153,7 +158,10 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     } 
     
     // Get data from UDP 
-    else recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
+    else if(fd) {  
+        
+        recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
+    }
     
     return recvlen;
 }
@@ -180,30 +188,54 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     // Sent data to TCP Proxy
     if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
         
-        // Create TCP package
-        const size_t tcp_buffer_len = KSN_BUFFER_DB_SIZE;
-        char tcp_buffer[tcp_buffer_len];
-        size_t pl = ksnTCPProxyPackageCreate(
-            tcp_buffer, tcp_buffer_len, 
-            inet_ntoa(((struct sockaddr_in*)addr)->sin_addr),
-            ntohs(((struct sockaddr_in*)addr)->sin_port),
-            buffer, buffer_len
-        );
-        
         #ifdef DEBUG_KSNET
         ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-                "%sTCP Proxy:%s "
-                "Send %d bytes to TCP Proxy server, fd %d\n", 
-                ANSI_YELLOW, ANSI_NONE, pl, ke->tp->fd_client);
+            "%sTCP Proxy:%s "
+            "Send %d bytes to TCP Proxy server, fd %d\n", 
+            ANSI_YELLOW, ANSI_NONE, buffer_len, ke->tp->fd_client);
         #endif            
         
         // Send TCP package
-        sendlen = write(ke->tp->fd_client, tcp_buffer, pl);
+        sendlen = ksnTCPProxySendTo(ke, CMD_TCPP_PROXY, buffer, buffer_len, addr);
     }
     
     // Sent data to UDP
     else sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
     
+    return sendlen;
+}
+
+/**
+ * Send command to TCP Proxy
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param cmd TCP Proxy command
+ * @param buffer
+ * @param buffer_len
+ * @param addr
+ * 
+ * @return 
+ */
+ssize_t ksnTCPProxySendTo(ksnetEvMgrClass* ke,
+            int cmd, const void *buffer, size_t buffer_len,  
+            __CONST_SOCKADDR_ARG addr) {
+    
+    ssize_t sendlen = 0;
+    
+    // Create TCP package
+    const size_t tcp_buffer_len = KSN_BUFFER_DB_SIZE;
+    char tcp_buffer[tcp_buffer_len];
+    size_t pl = ksnTCPProxyPackageCreate(
+        tcp_buffer, tcp_buffer_len, 
+        inet_ntoa(((struct sockaddr_in*)addr)->sin_addr),
+        ntohs(((struct sockaddr_in*)addr)->sin_port),
+        cmd,
+        buffer, buffer_len
+    );
+
+    // Send TCP package
+    sendlen = write(ke->tp->fd_client, tcp_buffer, pl);
+        
     return sendlen;
 }
 
@@ -268,6 +300,7 @@ uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_length) {
  * @param buffer_length Package data length
  * @param addr String with peer UDP address
  * @param port UDP port number
+ * @param cmd TCP Proxy protocol command
  * @param data Package data
  * @param data_length Package data length
  * 
@@ -278,8 +311,8 @@ uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_length) {
  * @retval -2 - error: The output buffer less than packet header + data
  */
 size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length, 
-        const char *addr, int port, 
-        const void *data, size_t data_length) { 
+        const char *addr, int port, int cmd, 
+        const void *data, size_t data_length) {
     
     size_t tcp_package_length;
     
@@ -288,7 +321,7 @@ size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length,
         ksnTCPProxyHeader *th = (ksnTCPProxyHeader*)buffer;
 
         th->version = TCP_PROXY_VERSION; // TCP Proxy protocol version 
-        th->command = CMD_TCPP_PROXY; // TCP Proxy protocol command
+        th->command = cmd; // CMD_TCPP_PROXY; // TCP Proxy protocol command
         th->addr_length = strlen(addr) + 1; // Address string length
         th->port = port; // UDP port number
         th->packet_length = data_length; // Package data length   
@@ -476,9 +509,10 @@ int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
         tp->packet.header = (ksnTCPProxyHeader*) tp->packet.buffer; // Pointer to packet header
                 
         // Connect to R-Host TCP Server
-        int fd_client = ksnTcpClientCreate(kev->kt, 
+        int fd_client = ksnTcpClientCreate(
+                kev->kt, // Pointer to ksnTcpClass
                 kev->ksn_cfg.r_tcp_port, // Remote host TCP port number
-                kev->ksn_cfg.r_host_addr // Remote host internet address
+                kev->ksn_cfg.r_host_addr // Remote host net address
         );
         
         if(fd_client > 0) {
@@ -499,10 +533,10 @@ int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
             
             #ifdef DEBUG_KSNET
             ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                    "%sTCP Proxy:%s "
-                    "TCP Proxy client fd %d started at port %d\n", 
-                    ANSI_YELLOW, ANSI_NONE, fd_client, kev->ksn_cfg.r_tcp_port);
-            #endif            
+                "%sTCP Proxy:%s "
+                "TCP Proxy client fd %d started at port %d\n", 
+                ANSI_YELLOW, ANSI_NONE, fd_client, kev->ksn_cfg.r_tcp_port);
+            #endif
         }
     }
     
@@ -526,7 +560,8 @@ void ksnTCPProxyClientStop(ksnTCPProxyClass *tp) {
             close(tp->fd_client);
             tp->fd_client = 0;
             
-            // \todo Remove from ARP table
+            // Remove ALL records from ARP table
+            if(kev->kc != NULL) ksnetArpRemoveAll(kev->kc->ka);
         }
     }
 }
@@ -568,18 +603,21 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     // Resend UDP packet to TCP Proxy
     if(received > 0) {
         
-        size_t data_send_len = KSN_BUFFER_DB_SIZE; //received + sizeof(ksnTCPProxyHeader);
+        size_t data_send_len = KSN_BUFFER_DB_SIZE; 
         char data_send[data_send_len];
         
         // Create TCP package
         size_t pl = ksnTCPProxyPackageCreate(data_send, data_send_len, 
                 inet_ntoa(((struct sockaddr_in *) &remaddr)->sin_addr), 
                 ntohs(((struct sockaddr_in *) &remaddr)->sin_port), 
-                data, received);
+                CMD_TCPP_PROXY, 
+                data, received
+        );
         
         // Get TCP fd from tcp proxy map
         size_t valueLength;
-        ksnTCPProxyData* tpd = pblMapGet(tp->map, &w->fd, sizeof(w->fd), &valueLength);
+        ksnTCPProxyData* tpd = pblMapGet(tp->map, &w->fd, sizeof(w->fd), 
+                &valueLength);
         if(tpd != NULL) {   
         
             // Send TCP package
@@ -631,7 +669,8 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * @param cli_ser
  * 
  */
-void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int cli_ser) {
+void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, 
+        int cli_ser) {
 
     size_t data_len = KSN_BUFFER_SIZE; // Buffer length
     ksnTCPProxyClass *tp = w->data; // Pointer to ksnTCPProxyClass
@@ -747,11 +786,21 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int c
                                 // Process received TCP packet
                                 void *data = w->data;
                                 w->data = kev->kc;
-                                host_cb(loop, w, revents);
+                                host_cb(loop, w, EV_NONE);
                                 w->data = data;
                             }
 
                         } break;
+                        
+//                        // Get host IPs list
+//                        case CMD_TCPP_GET_IPS: {
+//                            printf("\"Get host IPs list\" TCP Proxy command\n");
+//                        } break;
+//
+//                        // Get host UDP proxy port
+//                        case CMD_TCPP_GET_PORT: {
+//                            printf("\"Get host UDP proxy port\" TCP Proxy command\n");
+//                        } break;
 
                         default:
                             break;
@@ -804,8 +853,7 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, int c
             }
 
             // A part of packet received - continue receiving next parts of package
-            else {
-                
+            else {                
                 // Do nothing
                 #ifdef DEBUG_KSNET
                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
@@ -918,7 +966,7 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
             }
             pblIteratorFree(it);
         }
-        
+                
         // Clear map
         pblMapClear(tp->map);
         
@@ -1033,6 +1081,9 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
     ksnTCPProxyData* tpd = pblMapGet(tp->map, &fd, sizeof(fd), &valueLength); 
     if(tpd != NULL) {
 
+        // Skip UDP Proxy fd record
+        if(fd == tpd->udp_proxy_fd) return;
+        
         // Stop TCP Proxy client watcher
         ev_io_stop (kev->ev_loop, &tpd->w);
         close(fd); 
@@ -1056,11 +1107,6 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
             pblMapRemove(tp->map, &tpd->udp_proxy_fd, sizeof(tpd->udp_proxy_fd), &valueLength);
             pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength);
         }
-        
-        // \todo Remove from ARP table
-//            ksnCorePacketData rd;
-//            rd.from = peer_name;
-//            cmd_disconnected_cb(kev->kc->kco, &rd);
     }        
 }
 
