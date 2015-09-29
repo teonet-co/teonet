@@ -242,9 +242,6 @@
       </item>
       <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
-          <preprocessorList>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teoack.c" ex="false" tool="0" flavor2="2">
@@ -368,7 +365,7 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -386,7 +383,7 @@
         <cTool>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -399,9 +396,6 @@
             <pElem>src</pElem>
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/sh">
@@ -426,21 +420,11 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
-      </folder>
-      <folder path="0/src/utils">
-        <cTool>
-          <preprocessorList>
             <Elem>LOCALEDIR="/usr/share/locale"</Elem>
             <Elem>PACKAGE_DATA_DIR="/usr/share/teonet"</Elem>
             <Elem>PACKAGE_LOCALE_DIR="/usr/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
@@ -456,7 +440,7 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONE_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>TEONE_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -471,7 +455,7 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONE_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>TEONE_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -529,6 +513,12 @@
       </item>
       <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
+          <preprocessorList>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="2">
@@ -561,12 +551,6 @@
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="src/tr-udp.c" ex="false" tool="0" flavor2="2">
@@ -583,12 +567,6 @@
       </item>
       <item path="src/utils/utils.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="2">
