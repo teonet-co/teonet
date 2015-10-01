@@ -144,6 +144,21 @@
         <cTool flags="2">
         </cTool>
       </item>
+      <item path="app/teoweb.c" ex="false" tool="0" flavor2="2">
+        <cTool>
+          <incDir>
+            <pElem>app</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
       <item path="embedded/libpbl/src/pbl.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
         </cTool>
@@ -513,12 +528,6 @@
       </item>
       <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="2">

@@ -29,8 +29,8 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teovpn teodb
+bin_PROGRAMS = teovpn teodb teoweb
 
 teovpn_SOURCES = teovpn.c
 teodb_SOURCES = teodb.c
-
+teoweb_SOURCES = teoweb.c
