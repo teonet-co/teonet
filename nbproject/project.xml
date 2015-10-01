@@ -24,14 +24,15 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>app</word>
+            <word>Cesanta</word>
             <word>config</word>
             <word>fd</word>
             <word>Hotkeys</word>
-            <word>ms</word>
             <word>internet</word>
             <word>ip</word>
             <word>len</word>
             <word>localhost</word>
+            <word>ms</word>
             <word>mtu</word>
             <word>perror</word>
             <word>tcp</word>
@@ -41,6 +42,7 @@
             <word>ttl</word>
             <word>udp</word>
             <word>uuid</word>
+            <word>ver</word>
             <word>vpn</word>
         </spellchecker-wordlist>
     </configuration>
