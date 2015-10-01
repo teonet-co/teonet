@@ -25,6 +25,7 @@
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>app</word>
             <word>Cesanta</word>
+            <word>cmd</word>
             <word>config</word>
             <word>fd</word>
             <word>Hotkeys</word>
@@ -44,6 +45,7 @@
             <word>uuid</word>
             <word>ver</word>
             <word>vpn</word>
+            <word>websocket</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
