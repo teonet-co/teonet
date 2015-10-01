@@ -136,6 +136,21 @@
           <executablePath></executablePath>
         </makeTool>
       </makefileType>
+      <item path="app/embedded/mongoose/mongoose.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="2">
+          <incDir>
+            <pElem>app</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/etc/teonet"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
       <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
