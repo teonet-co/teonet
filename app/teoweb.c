@@ -44,6 +44,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         case WS_CONNECTED:
                             printf("Async event was received from %p, "
                                 "connected\n", nc);
+                            mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, "Hello!", 6);
                             break;
                             
                         case WS_DISCONNECTED:
@@ -56,6 +57,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                    "%d bytes: '%.*s'\n", 
                                    nc, (int)data_len, (int)td->data_len, 
                                    (char*) td->data);
+                            mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
                             break;
                     }
                 }                
@@ -82,7 +84,7 @@ int main(int argc, char** argv) {
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
     
     // Start HTTP server
-    ksnHTTPClass *kh = ksnHTTPInit(ke);
+    ksnHTTPClass *kh = ksnHTTPInit(ke, 8000, ".");
     
     // Start teonet
     ksnetEvMgrRun(ke);
