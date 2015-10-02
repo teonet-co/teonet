@@ -52,7 +52,7 @@ struct teoweb_data {
 extern "C" {
 #endif
 
-ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke);
+ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root);
 void ksnHTTPDestroy(ksnHTTPClass *kh);
 
 #ifdef	__cplusplus

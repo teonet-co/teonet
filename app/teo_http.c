@@ -54,7 +54,7 @@ void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data,
     td->cmd = cmd; 
     td->data_len = data_len;
     if(data_len) memcpy(td->data, data, data_len);
-    ksnetEvMgrAsync(((ksnHTTPClass *)nc->mgr->user_data)->ke, td, td_size, nc); // Send event to teonet
+    ksnetEvMgrAsync(((ksnHTTPClass *)nc->mgr->user_data)->ke, td, td_size, nc);
     free(td);
 }
 
@@ -128,7 +128,7 @@ void* http_thread(void *kh) {
         ((ksnHTTPClass *)kh)->s_http_port);
     
     for (;;) {
-      mg_mgr_poll(&mgr, 1000);
+      mg_mgr_poll(&mgr, 10);
       if(((ksnHTTPClass *)kh)->stop) break;
     }
     mg_mgr_free(&mgr);
@@ -145,18 +145,21 @@ void* http_thread(void *kh) {
  * Initialize teonet HTTP module
  * 
  * @param ke Pointer to ksnetEvMgrClass
+ * @param port HTTP server port
  * 
  * @return 
  */
-ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke) {
+ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
     
     ksnHTTPClass *kh = malloc(sizeof(ksnHTTPClass));
     kh->ke = ke;
     
     kh->stop = 0;
     kh->stopped = 0;
-    kh->s_http_port = "8000";
-    kh->s_http_server_opts.document_root = ".";  // Serve current directory
+    char buffer[KSN_BUFFER_SIZE];
+    snprintf(buffer, KSN_BUFFER_SIZE, "%d", port);
+    kh->s_http_port = strdup(buffer); 
+    kh->s_http_server_opts.document_root = document_root;  // Serve current directory
     kh->s_http_server_opts.enable_directory_listing = "yes";
     
     // Start mongoose thread
@@ -175,5 +178,6 @@ void ksnHTTPDestroy(ksnHTTPClass *kh) {
     
     kh->stop = 1;
     while(!kh->stopped) usleep(1000);
+    free(kh->s_http_port);
     free(kh);
 }
