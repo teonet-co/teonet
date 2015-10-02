@@ -128,7 +128,7 @@ void* http_thread(void *kh) {
         ((ksnHTTPClass *)kh)->s_http_port);
     
     for (;;) {
-      mg_mgr_poll(&mgr, 10);
+      mg_mgr_poll(&mgr, 50);
       if(((ksnHTTPClass *)kh)->stop) break;
     }
     mg_mgr_free(&mgr);
@@ -161,6 +161,7 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
     kh->s_http_port = strdup(buffer); 
     kh->s_http_server_opts.document_root = document_root;  // Serve current directory
     kh->s_http_server_opts.enable_directory_listing = "yes";
+    kh->s_http_server_opts.index_files = "index.html";
     
     // Start mongoose thread
     int err = pthread_create(&kh->tid, NULL, &http_thread, kh);
