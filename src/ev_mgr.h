@@ -19,6 +19,7 @@
 #include "modules/vpn.h"
 #include "modules/cque.h"
 #include "modules/teodb.h"
+#include "modules/stream.h"
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
 #include "modules/net_term.h"
@@ -87,6 +88,7 @@ typedef struct ksnetEvMgrClass {
     ksnTermClass *kter; ///< Terminal class
     ksnCQueClass *kq; ///< Callback QUEUE class
     ksnTDBClass *kf; ///< PBL KeyFile class
+    ksnStreamClass *ks; ///< Stream class
 
     ksnet_cfg ksn_cfg; ///< KSNet configuration
 

@@ -88,6 +88,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->km = NULL;
     ke->kf = NULL;
     ke->tp = NULL;
+    ke->ks = NULL;
     ke->num_nets = 1;
     ke->n_num = 0;
     ke->n_prev = NULL;
@@ -732,6 +733,12 @@ int modules_init(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_CQUE
     ke->kq = ksnCQueInit(ke);
     #endif
+
+    // Stream module
+    #if M_ENAMBE_STREAM
+    ke->ks = ksnStreamInit(ke);
+    #endif
+
     // PBL KeyFile Module
     #if M_ENAMBE_PBLKF
     ke->kf = ksnTDBinit(ke);
@@ -757,6 +764,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->ktun = ksnTunInit(ke);
     #endif
 
+    // Terminal module
     #ifdef M_ENAMBE_TERM
     ke->kter = ksnTermInit(ke);
     #endif
@@ -791,6 +799,9 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #endif
     #if M_ENAMBE_PBLKF
     ksnTDBdestroy(ke->kf);
+    #endif
+    #if M_ENAMBE_STREAM
+    ksnStreamDestroy(ke->ks);
     #endif
 
     ksnetHotkeysDestroy(ke->kh);
