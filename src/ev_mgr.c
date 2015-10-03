@@ -347,11 +347,12 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
 
     // Add something to queue and send async signal to event loop
     void* element = NULL;
+    if(data == NULL) data_len = 0;
+    element = malloc(data_len + sizeof(uint16_t) + sizeof(void*));
+    size_t ptr = 0;
+    *(void**)element = user_data; ptr += sizeof(void**);
+    *(uint16_t*)(element + ptr) = (uint16_t)data_len; ptr += sizeof(uint16_t);
     if(data != NULL) {
-        element = malloc(data_len + sizeof(uint16_t) + sizeof(void*));
-        size_t ptr = 0;
-        *(void**)element = user_data; ptr += sizeof(void**);
-        *(uint16_t*)(element + ptr) = (uint16_t)data_len; ptr += sizeof(uint16_t);
         memcpy(element + ptr, data, data_len);
     }
     pthread_mutex_lock (&ke->async_mutex);
@@ -656,10 +657,13 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
     while(!pblListIsEmpty(kev->async_queue)) {    
         size_t ptr = 0;
         void *data = pblListPoll(kev->async_queue);
-        void *user_data = *(void**)data; ptr += sizeof(void**);
-        uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
-        kev->event_cb(kev, EV_K_ASYNC , data + ptr, data_len, user_data);
-        free(data);
+        if(data != NULL) {
+            void *user_data = *(void**)data; ptr += sizeof(void**);
+            uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
+            kev->event_cb(kev, EV_K_ASYNC , data + ptr, data_len, user_data);
+            free(data);
+        }
+        else  kev->event_cb(kev, EV_K_ASYNC , NULL, 0, NULL);
     }
     pthread_mutex_unlock (&kev->async_mutex);
     
