@@ -146,6 +146,7 @@ void* http_thread(void *kh) {
  * 
  * @param ke Pointer to ksnetEvMgrClass
  * @param port HTTP server port
+ * @param document_root HTTP Document root folder
  * 
  * @return 
  */
