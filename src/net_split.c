@@ -18,7 +18,7 @@
 /**
  * Initialize split module
  *
- * @param kc
+ * @param kco
  * @return
  */
 ksnSplitClass *ksnSplitInit(ksnCommandClass *kco) {
@@ -49,6 +49,7 @@ void ksnSplitDestroy(ksnSplitClass *ks) {
  * Split large packet to array of small
  *
  * @param ks
+ * @param cmd
  * @param packet
  * @param packet_len
  * @param num_subpackets

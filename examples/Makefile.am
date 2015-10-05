@@ -30,7 +30,7 @@ LIBS += -pthread
 endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
-		  teoack teoackm teocque
+		  teoack teoackm teocque teostream
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
@@ -42,6 +42,7 @@ teosend_SOURCES = teosend.c
 teotcp_SOURCES = teotcp.c
 teoterm_SOURCES = teoterm.c
 teotun_SOURCES = teotun.c
+teostream_SOURCES = teostream.c
 
 exampledir = $(datarootdir)/doc/@PACKAGE@/examples
 example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \
