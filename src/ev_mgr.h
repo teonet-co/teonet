@@ -58,7 +58,9 @@ typedef enum ksnetEvMgrEvents {
      * @param user_data Pointer to integer with type of this event: 
      *                  1 - success; 0 - timeout
      */
-    EV_K_CQUE_CALLBACK
+    EV_K_CQUE_CALLBACK,
+            
+    EV_K_STREAM_CONNECTED ///< After stream connected
 
 } ksnetEvMgrEvents;
 

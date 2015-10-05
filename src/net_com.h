@@ -29,6 +29,7 @@ enum ksnCMD {
     CMD_ECHO_ANSWER,        ///< Answer to auto replay message command
     CMD_TUN,                ///< Tunnel command
     CMD_SPLIT,              ///< Group of packets (Splited packets)
+    CMD_STREAM,             ///< Stream command
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use

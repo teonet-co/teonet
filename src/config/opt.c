@@ -282,7 +282,17 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     int i;
 
     // Create arguments string
-    char app_argv_str[KSN_BUFFER_SIZE], *app_name_cpy = strdup(app_name);
+    char app_argv_str[KSN_BUFFER_SIZE], 
+         *app_name_cpy = strdup(app_name);
+    
+    // Remove "lt-" from application name
+    char *ptr;
+    if( (ptr = strstr(app_name_cpy,"lt-")) != NULL) {
+        
+        int len = strlen(app_name_cpy) + 1;
+        memmove(ptr, ptr + 3, len - ((void*)ptr - (void*)app_name_cpy));
+    }
+    
     app_argv_str[0] = 0;
     for(i = 0; i < app_argc; i++) {
         strncat(app_argv_str, " ", KSN_BUFFER_SIZE - strlen(app_argv_str) - 1);
