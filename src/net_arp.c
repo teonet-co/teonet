@@ -124,24 +124,33 @@ void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
 /**
  * Remove Peer from the ARP table
  *
- * @param ka
- * @param name
+ * @param ka Pointer to ksnetArpClass
+ * @param name Peer name to remove
  * @return Pointer to previously associated value or NULL if not found
  */
 ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
 
     size_t var_len = 0;
-    //printf("ARP map remove '%s' ... ", name);
+    char* peer_name = strdup(name);
+    
+    // Remove from ARP table
     ksnet_arp_data *arp = pblMapRemoveStr(ka->map, name, &var_len);
+    
+    // If removed successfully
     if(arp != (void*)-1) {
-        //printf("removed %s:%d\n", arp->addr, arp->port);
+        
+        // Remove peer from TR-UDP module
         ksnTRUDPresetAddr( ((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 1);
-    }
-    //else printf("not found\n");
+        
+        // Remove from Stream module
+        ksnStreamClosePeer(((ksnetEvMgrClass*) ka->ke)->ks, peer_name);
+    }    
     
     // If not found
     if(arp == (void*)-1) arp = NULL;
+    
+    free(peer_name);
     
     return arp;
 }

@@ -15,7 +15,6 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
-// \todo Close streams connected to peer if this peer was disconnected
 // \todo Change type of some ksnet_printf messages to DEBUG_VV
 
 // Local functions
@@ -275,6 +274,33 @@ int ksnStreamCloseAll(ksnStreamClass *ks) {
         pblIteratorFree(it);
     }
     pblMapClear(ks->map);
+    
+    return 0;
+}
+
+/**
+ * Close all streams connected to selected peer
+ * 
+ * @param ks
+ * @return 
+ */
+int ksnStreamClosePeer(ksnStreamClass *ks, const char *peer_name) {
+    
+    PblIterator *it =  pblMapIteratorNew(ks->map);
+    if(it != NULL) {
+
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *key = pblMapEntryKey(entry);
+            if(!strcmp(key, peer_name)) {
+                ksnStreamClose(ks, key, key + strlen(key) + 1, CMD_ST_CLOSE_GOT);
+                ksnStreamClosePeer(ks, peer_name);
+                break;
+            }
+        }
+        pblIteratorFree(it);
+    }
     
     return 0;
 }
