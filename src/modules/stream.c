@@ -15,6 +15,14 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
+// \todo Close streams connected to peer if this peer was disconnected
+// \todo Change type of some ksnet_printf messages to DEBUG_VV
+
+// Local functions
+void connect_watchers(ksnStreamClass *ks, ksnStreamMapData *data, 
+        void *key_buf, size_t key_buf_len);
+int ksnStreamCloseAll(ksnStreamClass *ks);
+
 #define kev ((ksnetEvMgrClass*)ks->ke)
 
 /**
@@ -40,6 +48,7 @@ ksnStreamClass *ksnStreamInit(void *ke) {
 void ksnStreamDestroy(ksnStreamClass *ks) {
     
     if(ks != NULL) {
+        ksnStreamCloseAll(ks);
         pblMapFree(ks->map);
         free(ks);    
     }
@@ -57,7 +66,7 @@ void ksnStreamDestroy(ksnStreamClass *ks) {
  * 
  * @return 
  */
-int ksnStreamSendTo(ksnStreamClass *ks, char *to_peer, char *stream_name, 
+int ksnStreamSendTo(ksnStreamClass *ks, const char *to_peer, const char *stream_name, 
         uint8_t cmd, void *data, size_t data_len) {
     
     size_t stream_name_len = strlen(stream_name) + 1;
@@ -70,7 +79,7 @@ int ksnStreamSendTo(ksnStreamClass *ks, char *to_peer, char *stream_name,
     memcpy(sp->data, stream_name, sp->stream_name_len);
     if(data_len > 0) memcpy(sp->data + stream_name_len, data, data_len);
         
-    ksnCoreSendCmdto(kev->kc, to_peer, CMD_STREAM, sp, sp_len);
+    ksnCoreSendCmdto(kev->kc, (char*)to_peer, CMD_STREAM, sp, sp_len);
     free(sp);
     
     return 0;
@@ -95,16 +104,19 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
     size_t to_peer_len = strlen(to_peer) + 1;
     size_t stream_name_len = strlen(stream_name) + 1;
     size_t key_buf_len = to_peer_len + stream_name_len;
-    char key_buf[key_buf_len];
-    
+    char key_buf[key_buf_len];    
     memcpy(key_buf, to_peer, to_peer_len);
     memcpy(key_buf + to_peer_len, stream_name, stream_name_len);
     
     // Send create or created command
     if(send_f == CMD_ST_CREATE || send_f == CMD_ST_CREATE_GOT) {
         
-        struct sream_data data;
+        ksnStreamMapData data;
+        data.key = malloc(key_buf_len);
+        memcpy(data.key, key_buf, key_buf_len);
+        data.key_len = key_buf_len;
         data.created = 0;
+        data.ke = kev;
         int rc;
 
         if(pipe(data.pipe_in) == -1) return -1; // Can't create pipe
@@ -114,45 +126,54 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
         if((rc = pblMapAdd(ks->map, (void*)key_buf, key_buf_len, &data, 
                 sizeof(data))) >= 0) {
         
-            // Send command CREATE to streams peer
-            if(send_f == CMD_ST_CREATE) {
-                
-                #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+            size_t valueLen;
+            ksnStreamMapData *data;        
+            if((data = pblMapGet(ks->map, (void*)key_buf, key_buf_len, &valueLen))
+                != NULL) {
+            
+                // Send command CREATE to streams peer
+                if(send_f == CMD_ST_CREATE) {
+
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
                         "%sStream:%s " 
                         "Send CREATE stream name \"%s\" to peer \"%s\" ...\n", 
                         ANSI_BLUE, ANSI_NONE,
                         stream_name, to_peer);
-                #endif
+                    #endif
 
-                ksnStreamSendTo(ks, to_peer, stream_name, CMD_ST_CREATE, 
-                        NULL, 0);
-            }
-            else {
-                
-                #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                    "%sStream:%s "
-                    "Got CREATE stream name \"%s\" request from peer \"%s\" ...\n", 
-                    ANSI_BLUE, ANSI_NONE,
-                    stream_name, to_peer);
-                #endif
+                    ksnStreamSendTo(ks, to_peer, stream_name, CMD_ST_CREATE, 
+                            NULL, 0);
+                }
 
-                // \todo Connect FDs
-                
-                ksnStreamSendTo(ks, to_peer, stream_name, CMD_ST_CREATED, 
-                        NULL, 0);                
+                // Create stream watchers, connect it to pipes and send CREATED 
+                // signal to input stream (to stream initiator)
+                else {
+
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                        "%sStream:%s "
+                        "Got CREATE stream name \"%s\" request from peer \"%s\" ...\n", 
+                        ANSI_BLUE, ANSI_NONE,
+                        stream_name, to_peer);
+                    #endif
+
+                    // Create watchers and connect it to pipe FDs
+                    connect_watchers(ks, data, key_buf, key_buf_len);
+
+                    ksnStreamSendTo(ks, to_peer, stream_name, CMD_ST_CREATED, 
+                            NULL, 0);                
+                }
             }
         }
-        else if(rc == 0) return -2; // This stream already exist
-        
+        else if(rc == 0) return -2; // This stream already exist        
     } 
     
     // Got created command
     else if(send_f == CMD_ST_CREATED) {
         
         size_t valueLen;
-        struct sream_data *data;        
+        ksnStreamMapData *data;        
         if((data = pblMapGet(ks->map, (void*)key_buf, key_buf_len, &valueLen))
                 != NULL) {        
             
@@ -163,20 +184,216 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
                 ANSI_BLUE, ANSI_NONE,
                 stream_name, to_peer);
             #endif
-            
-            data->created = 1;
-            
-            // \todo Connect FDs
-            
-            // Send created event to application
-            if(kev->event_cb != NULL)
-                    kev->event_cb(kev, EV_K_STREAM_CONNECTED, (void*)key_buf, 
-                            key_buf_len, NULL);
+                        
+            // Connect FDs
+            connect_watchers(ks, data, key_buf, key_buf_len);            
         }
         else return -3; // This stream was not requested
     }
     
     return 0;
+}
+
+/**
+ * Close named stream with selected peer
+ * 
+ * @param ks
+ * @param to_peer
+ * @param stream_name
+ * @param send_f
+ * @return 
+ */
+int ksnStreamClose(ksnStreamClass *ks, char *to_peer, char *stream_name, 
+        int send_f) {
+    
+    size_t to_peer_len = strlen(to_peer) + 1;
+    size_t stream_name_len = strlen(stream_name) + 1;
+    size_t key_buf_len = to_peer_len + stream_name_len;
+    char key_buf[key_buf_len];    
+    memcpy(key_buf, to_peer, to_peer_len);
+    memcpy(key_buf + to_peer_len, stream_name, stream_name_len);
+    
+    size_t valueLen;
+    ksnStreamMapData *smd;        
+    if((smd = pblMapGet(ks->map, (void*)key_buf, key_buf_len, &valueLen))
+        != NULL) {
+                
+        // Close stream
+        if(smd->created) {
+            
+            // Stop watchers
+            ev_io_stop(kev->ev_loop, &smd->w_in);
+            ev_io_stop(kev->ev_loop, &smd->w_out);
+            
+            // Send close request to peer
+            if(send_f != CMD_ST_CLOSE_GOT) {
+
+                ksnStreamSendTo(ks, to_peer, stream_name, CMD_ST_CLOSE, NULL, 0);   
+            }
+            
+            // Send disconnected event to application
+            if(kev->event_cb != NULL)
+                kev->event_cb(kev, EV_K_STREAM_DISCONNECTED, key_buf, 
+                        key_buf_len, NULL);
+            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                "%sStream:%s "
+                "Stream with name \"%s\" was disconnected from peer \"%s\" ...\n", 
+                ANSI_BLUE, ANSI_NONE,
+                stream_name, to_peer);
+            #endif
+            
+        }
+        
+        // Free stream map data record
+        free(smd->key);
+        if(send_f != CMD_ST_CLOSE_NOTREMOVE)
+            pblMapRemove(ks->map, (void*)key_buf, key_buf_len, &valueLen);
+    }
+    
+    return 0;
+}
+
+/**
+ * Close all streams
+ * 
+ * @param ks
+ * @return 
+ */
+int ksnStreamCloseAll(ksnStreamClass *ks) {
+    
+    PblIterator *it =  pblMapIteratorNew(ks->map);
+    if(it != NULL) {
+
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *key = pblMapEntryKey(entry);
+            ksnStreamClose(ks, key, key + strlen(key) + 1, CMD_ST_CLOSE_NOTREMOVE);
+        }
+        pblIteratorFree(it);
+    }
+    pblMapClear(ks->map);
+    
+    return 0;
+}
+
+/**
+ * Get stream map data by key
+ * 
+ * @param ks
+ * @param key
+ * @param key_len
+ * 
+ * @return Pointer to ksnStreamMapData or NULL if not found
+ */
+ksnStreamMapData *ksnStreamGetMapData(ksnStreamClass *ks, void *key, 
+        size_t key_len) {
+    
+    ksnStreamMapData *data;      
+    size_t valueLen;
+    
+    if((data = pblMapGet(ks->map, (void*)key, key_len, &valueLen)) != NULL) {
+        
+    }
+    
+    return data;
+}
+
+/**
+ * Get stream data
+ * 
+ * @param sd Pointer to ksnStreamData
+ * @param smd Pointer to ksnStreamMapData
+ * @return 
+ */
+ksnStreamData *ksnStreamGetDataFromMap(ksnStreamData *sd, ksnStreamMapData *smd) {
+    
+    sd->stream_name = (char*)smd->key + strlen(smd->key) + 1; // Stream name
+    sd->peer_name = (char*)smd->key; // Peer name
+    sd->fd_out = smd->pipe_out[1]; // Output stream FD
+    sd->fd_in = smd->pipe_in[0]; // Input stream FD
+    
+    return sd;
+}    
+
+/**
+ * Input stream (has data) callback
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void stream_in_cb (struct ev_loop *loop, /*EV_P_*/ ev_io *w, int revents) {
+    
+    ksnStreamMapData *data = w->data;
+    ksnetEvMgrClass *ke = data->ke;
+    
+    // Send DATA event to application
+    if(ke->event_cb != NULL)
+        ke->event_cb(ke, EV_K_STREAM_DATA, data, sizeof(ksnStreamMapData), 
+                NULL);
+}
+
+/**
+ * Output stream (has data) callback
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void stream_out_cb (struct ev_loop *loop, /*EV_P_*/ ev_io *w, int revents) {
+    
+    ksnStreamMapData *data = w->data;
+    ksnetEvMgrClass *ke = data->ke;
+    
+    const size_t buf_len = KSN_BUFFER_SM_SIZE;
+    char buf[buf_len];
+    ssize_t rc = read(data->pipe_out[0], buf, buf_len);
+    if(rc >= 0) {
+        const char *to_peer = data->key;
+        const char *stream_name = data->key + strlen(data->key) + 1;
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sStream:%s "
+            "Sent %d byte DATA to stream name \"%s\" to peer \"%s\" ...\n", 
+            ANSI_BLUE, ANSI_NONE,
+            (int) rc,
+            stream_name, to_peer);
+        #endif
+        ksnStreamSendTo(ke->ks, to_peer, stream_name, CMD_ST_DATA, buf, rc);    
+    }
+}
+
+/**
+ * Connect watchers to pipes fd
+ * 
+ * @param ks
+ * @param data
+ * @param key_buf
+ * @param key_buf_len
+ */
+void connect_watchers(ksnStreamClass *ks, ksnStreamMapData *data, 
+        void *key_buf, size_t key_buf_len) {
+    
+    // Pipe IN
+    ev_init (&data->w_in, stream_in_cb);
+    ev_io_set (&data->w_in, data->pipe_in[0], EV_READ);
+    data->w_in.data = data;
+    ev_io_start (kev->ev_loop, &data->w_in);
+
+    // Pipe OUT
+    ev_init (&data->w_out, stream_out_cb);
+    ev_io_set (&data->w_out, data->pipe_out[0], EV_READ);
+    data->w_out.data = data;
+    ev_io_start (kev->ev_loop, &data->w_out);
+    
+    data->created = 1;
+    
+    // Send created event to application
+    if(kev->event_cb != NULL)
+        kev->event_cb(kev, EV_K_STREAM_CONNECTED, key_buf, key_buf_len, NULL);    
 }
 
 /**
@@ -193,13 +410,50 @@ int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd) {
     
     switch(data->cmd) {
         
+        // CREATE request
         case CMD_ST_CREATE:
             ksnStreamCreate(kev->ks, rd->from, data->data,  CMD_ST_CREATE_GOT);
             break;
             
+        // CREATED response
         case CMD_ST_CREATED:
             ksnStreamCreate(kev->ks, rd->from, data->data,  CMD_ST_CREATED);
             break;
+            
+        // CLOSE request
+        case CMD_ST_CLOSE:
+            ksnStreamClose(kev->ks, rd->from, data->data, CMD_ST_CLOSE_GOT);
+            break;
+            
+        // Got a data
+        case CMD_ST_DATA:
+        {
+            size_t valueLen;
+            ksnStreamMapData *sd;
+            size_t peer_name_len = strlen(rd->from) + 1;
+            size_t stream_name_len = strlen(data->data) + 1;
+            size_t key_buf_len = peer_name_len + stream_name_len;
+            
+            char key_buf[key_buf_len];
+            memcpy(key_buf, rd->from, peer_name_len);
+            memcpy(key_buf + peer_name_len, data->data, stream_name_len);            
+            if((sd = pblMapGet(ks->map, (void*)key_buf, key_buf_len, &valueLen))
+                != NULL) { 
+                
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                    "%sStream:%s "
+                    "Got %d byte DATA to stream name \"%s\" from peer \"%s\" ...\n", 
+                    ANSI_BLUE, ANSI_NONE,
+                    data->data_len,
+                    data->data, rd->from);
+                #endif
+
+                // Write stream data to Input(read) pipe
+                if(write(sd->pipe_in[1], data->data + data->stream_name_len, 
+                        data->data_len) >= 0);
+            }
+        } break;
             
         default:
             retval = 0;
