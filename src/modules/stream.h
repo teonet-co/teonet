@@ -89,6 +89,7 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
         int send_f);
 int ksnStreamClose(ksnStreamClass *ks, char *to_peer, char *stream_name, 
         int send_f);
+int ksnStreamClosePeer(ksnStreamClass *ks, const char *peer_name);
 ksnStreamData *ksnStreamGetDataFromMap(ksnStreamData *sd, ksnStreamMapData *smd);
 ksnStreamMapData *ksnStreamGetMapData(ksnStreamClass *ks, void *key, size_t key_len);
 /*
