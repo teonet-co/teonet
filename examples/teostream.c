@@ -6,11 +6,18 @@
  *
  * Teonet stream example
  * 
+ * Start stream server:
+ *   ```examples/teostream teo-str NULL NULL -p 9000 -r 9099 -a 127.0.0.1```
+ * 
+ * Start stream client:
+ *   ```examples/teostream teostream teo-str str -r 9000 -a 127.0.0.1```
+ * 
  * Created on October 5, 2015, 5:06 PM
  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 
 #include "ev_mgr.h"
@@ -35,7 +42,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
             break;
         
-        // Send when new peer connected to this host (and to the mesh)
+        // This event send when new peer connected to this host (and to the mesh)
         case EV_K_CONNECTED:            
             if(data != NULL) {
                 
@@ -46,6 +53,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     printf("Create stream name \"%s\" with peer \"%s\" ...\n",  
                         ke->ksn_cfg.app_argv[2], ke->ksn_cfg.app_argv[1]); 
 
+                    // Send create stream request
                     ksnStreamCreate(ke->ks, ke->ksn_cfg.app_argv[1], 
                         ke->ksn_cfg.app_argv[2],  CMD_ST_CREATE);
                 }
@@ -53,11 +61,42 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             }
             break;
             
-        // Send when stream is connected to this host 
-        case EV_K_STREAM_CONNECTED:            
+        // This event send when stream is connected to this host 
+        // WRITE to stream
+        case EV_K_STREAM_CONNECTED:    
+        {    
+            // Get stream parameters from event data (Stream Key)
+            ksnStreamData sd;
+            ksnStreamMapData *smd = ksnStreamGetMapData(ke->ks, data, data_len);
+            ksnStreamGetDataFromMap(&sd, (ksnStreamMapData *)smd);
+            
             printf("Stream name \"%s\" is connected to peer \"%s\" ...\n",  
-                        (char*)data + strlen(data) + 1, (char*)data); 
-            break;
+                        sd.stream_name, sd.peer_name); 
+            
+            // Write data to output FD
+            if(write(sd.fd_out, "Hello stream!", 14) >= 0);
+            
+        } break;
+            
+        // Got data from connected stream
+        // READ from stream
+        case EV_K_STREAM_DATA:
+        {
+            // Get stream parameters from event data (Stream Map Data)
+            ksnStreamData sd;
+            ksnStreamGetDataFromMap(&sd, (ksnStreamMapData *)data);
+            
+            // Read data to buffer
+            size_t rc;
+            char read_buf[KSN_BUFFER_SM_SIZE];
+            if((rc = read(sd.fd_in, read_buf, KSN_BUFFER_SM_SIZE)) >= 0) {
+                
+                printf("Read %d bytes from stream name \"%s\" of peer \"%s\": "
+                       "\"%s\"\n", 
+                       (int) rc, sd.stream_name, sd.peer_name, read_buf);
+            }
+
+        } break;
 
         // Undefined event (an error)
         default:

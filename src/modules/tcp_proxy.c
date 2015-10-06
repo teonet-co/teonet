@@ -82,7 +82,7 @@ ksnTCPProxyClass *ksnTCPProxyInit(void *ke) {
     tp->fd_client = 0; 
     
     // Start TCP proxy client
-    ksnTCPProxyClientConnetc(tp);
+    ksnTCPProxyClientConnect(tp);
     
     // Start TCP proxy server
     ksnTCPProxyServerStart(tp);
@@ -498,7 +498,7 @@ void cmd_tcppc_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * 
  * @return 0 - Successfully connected
  */
-int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp) {
+int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
    
     if(kev->ksn_cfg.r_tcp_f) {
         
