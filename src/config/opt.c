@@ -248,9 +248,12 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
     // Set Host name
     strncpy(conf->host_name, argv[optind], KSN_MAX_HOST_NAME);
-
+    
     // Show arguments
     if(show_arg) {
+
+        // Show network
+        printf("network: %s\n", conf->network);
 
         int i;
         for(i = 0; i < app_argc; i++) {

@@ -45,7 +45,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Encrypt/Decrypt packets
     ksn_cfg->crypt_f = KSNET_CRYPT;
 
-    ksn_cfg->network[0] = '\0';
+    strncpy(ksn_cfg->network, "local", KSN_BUFFER_SM_SIZE/2);
 
     // Show info at console flags
     ksn_cfg->show_connect_f = 1;
