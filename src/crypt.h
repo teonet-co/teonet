@@ -9,6 +9,7 @@
 #define	CRYPT_H
 
 #define BLOCK_SIZE 16
+#define KEY_SIZE 32
 
 /**
  * ksnetCrypt Class data
