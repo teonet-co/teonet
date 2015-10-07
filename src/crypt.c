@@ -35,8 +35,9 @@ ksnCryptClass *ksnCryptInit(void *ke) {
     strncpy((char*)kcr->iv, iv, BLOCK_SIZE);
 
     static const char *key = "01234567890123456789012345678901";
-    kcr->key = (unsigned char*) key;
-    kcr->key_len = strlen(key); // 32 - 256 bits
+    kcr->key = (unsigned char *)strdup((char*)key); 
+    strncpy((char*)kcr->key, ((ksnetEvMgrClass*)ke)->ksn_cfg.network, KEY_SIZE);            
+    kcr->key_len = strlen((char*)kcr->key); // 32 - 256 bits
     kcr->blocksize = BLOCK_SIZE;
 
     // Initialize the library
@@ -51,7 +52,7 @@ ksnCryptClass *ksnCryptInit(void *ke) {
 }
 
 /**
- * Module initialize
+ * Module destroy
  *
  * @param kcr
  */
@@ -64,6 +65,7 @@ void ksnCryptDestroy(ksnCryptClass *kcr) {
     }
     num_crypt_module--;
 
+    free(kcr->key);
     free(kcr);
 }
 
@@ -82,13 +84,13 @@ size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
 
   int ciphertext_len;
 
-  /* Create and initialise the context */
+  /* Create and initialize the context */
   if(!(ctx = EVP_CIPHER_CTX_new())) {
       handleErrors();
       return 0;
   }
 
-  /* Initialise the encryption operation. IMPORTANT - ensure you use a key
+  /* Initialize the encryption operation. IMPORTANT - ensure you use a key
    * and IV size appropriate for your cipher
    * In this example we are using 256 bit AES (i.e. a 256 bit key). The
    * IV size for *most* modes is the same as the block size. For AES this
@@ -109,7 +111,7 @@ size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
   }
   ciphertext_len = len;
 
-  /* Finalise the encryption. Further ciphertext bytes may be written at
+  /* Finalize the encryption. Further ciphertext bytes may be written at
    * this stage.
    */
   if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) {
@@ -128,6 +130,7 @@ size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
 /**
  * Decrypt buffer
  *
+ * @param kcr Pointer to ksnCryptClass
  * @param ciphertext Encrypted data
  * @param ciphertext_len Encrypted data length
  * @param key Key
@@ -136,7 +139,7 @@ size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
  *
  * @return Decrypted data length
  */
-int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
+int _decrypt(ksnCryptClass *kcr, unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
     unsigned char *iv, unsigned char *plaintext) {
 
   EVP_CIPHER_CTX *ctx;
@@ -145,14 +148,14 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
 
   int plaintext_len;
 
-  /* Create and initialise the context */
+  /* Create and initialize the context */
   if(!(ctx = EVP_CIPHER_CTX_new())) {
       
       handleErrors();
       return 0;
   }
 
-  /* Initialise the decryption operation. IMPORTANT - ensure you use a key
+  /* Initialize the decryption operation. IMPORTANT - ensure you use a key
    * and IV size appropriate for your cipher
    * In this example we are using 256 bit AES (i.e. a 256 bit key). The
    * IV size for *most* modes is the same as the block size. For AES this
@@ -173,13 +176,18 @@ int _decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key,
   }
   plaintext_len = len;
 
-  /* Finalise the decryption. Further plaintext bytes may be written at
+  /* Finalize the decryption. Further plaintext bytes may be written at
    * this stage.
    */
   if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) {
       
-      handleErrors();
-      return 0;
+        #ifdef DEBUG_KSNET
+        ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG,
+                    "%sEncrypt:%s Can't decrypt %d bytes package ...\n",
+                    ANSI_BROWN, ANSI_NONE, plaintext_len);
+        #endif
+        //handleErrors();
+        return 0;
   }
   plaintext_len += len;
 
@@ -262,7 +270,7 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
                 "%sDecrypt:%s %d bytes from %d bytes package ...\n",
                 ANSI_BROWN, ANSI_NONE, *decrypt_len, package_len - ptr);
     #endif
-    *decrypt_len = _decrypt(package + ptr, package_len - ptr, kcr->key, kcr->iv,
+    *decrypt_len = _decrypt(kcr, package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
     
     // Copy decrypted data (if decrypted, or 
