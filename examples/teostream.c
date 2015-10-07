@@ -43,12 +43,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             break;
         
         // This event send when new peer connected to this host (and to the mesh)
-        case EV_K_CONNECTED:            
+        case EV_K_CONNECTED:   
+        {
             if(data != NULL) {
                 
                 if(!strcmp(((ksnCorePacketData*)data)->from, ke->ksn_cfg.app_argv[1])) {
                     
-                    printf("Peer '%s' was connected\n", ((ksnCorePacketData*)data)->from);
+                    printf("Peer \"%s\" was connected\n", ((ksnCorePacketData*)data)->from);
 
                     printf("Create stream name \"%s\" with peer \"%s\" ...\n",  
                         ke->ksn_cfg.app_argv[2], ke->ksn_cfg.app_argv[1]); 
@@ -59,7 +60,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 }
             
             }
-            break;
+        } break;
             
         // This event send when stream is connected to this host 
         // WRITE to stream
@@ -75,6 +76,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             
             // Write data to output FD
             if(write(sd.fd_out, "Hello stream!", 14) >= 0);
+            
+        } break;
+        
+        // Stream connection timeout
+        case EV_K_STREAM_CONNECT_TIMEOUT:
+        {    
+            // Get stream parameters from event data (Stream Map Data)
+            ksnStreamData sd;
+            ksnStreamGetDataFromMap(&sd, (ksnStreamMapData *)data);
+            
+            // Do something ...
+            printf("Can't connect \"%s\" stream to peer \"%s\" during timeout\n",
+                    sd.stream_name, sd.peer_name);
             
         } break;
             

@@ -15,6 +15,8 @@
 #include <pbl.h>
 #include <ev.h>
 
+#include "modules/cque.h"
+
 /**
  * Stream map data structure
  */
@@ -28,6 +30,7 @@ typedef struct ksnStreamMapData {
     void *ke;           ///< Pointer to ksnetEvMgrClass (to use in watchers)
     void *key;          ///< This key (copy)
     size_t key_len;     ///< Key length
+    ksnCQueData *cq;    ///< Pointer to CQUEUE Data
     
 } ksnStreamMapData;
 

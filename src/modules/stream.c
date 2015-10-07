@@ -15,14 +15,14 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
-// \todo Change type of some ksnet_printf messages to DEBUG_VV
-
 // Local functions
 void connect_watchers(ksnStreamClass *ks, ksnStreamMapData *data, 
         void *key_buf, size_t key_buf_len);
 int ksnStreamCloseAll(ksnStreamClass *ks);
 
 #define kev ((ksnetEvMgrClass*)ks->ke)
+
+#define KSN_STREAM_CONNECT_TIMEOUT 5.000
 
 /**
  * Initialize Stream module
@@ -85,6 +85,42 @@ int ksnStreamSendTo(ksnStreamClass *ks, const char *to_peer, const char *stream_
 }
 
 /**
+ * Callback Queue callback (the same as callback queue event). 
+ * 
+ * This function calls at timeout or after ksnCQueExec calls
+ * 
+ * @param id Calls ID
+ * @param type Type: 0 - timeout callback; 1 - successful callback 
+ * @param data Pointer to ksnStreamMapData
+ */
+void kq_connect_cb(uint32_t id, int type, void *data) {
+    
+    ksnStreamMapData *smd = data;
+    ksnetEvMgrClass *ke = smd->ke;
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+        "%sStream:%s " 
+        "Got connect CQueue callback with id: %d, type: %d => %s\n", 
+        ANSI_BLUE, ANSI_NONE,
+        id, type, type ? "success" : "timeout");
+    #endif
+
+    // Remove Stream if timeout occurred
+    if(!type) {
+        
+        // Send timeout created event to application
+        if(ke->event_cb != NULL)
+            ke->event_cb(ke, EV_K_STREAM_CONNECT_TIMEOUT, smd, 
+                    sizeof(ksnStreamMapData), NULL); 
+        
+        // Remove this stream
+        ksnStreamClose(ke->ks, smd->key, smd->key + strlen(smd->key) + 1, 
+                CMD_ST_CLOSE_GOT);
+    }
+}
+
+/**
  * Create new named stream with selected peer
  * 
  * @param ks
@@ -116,6 +152,7 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
         data.key_len = key_buf_len;
         data.created = 0;
         data.ke = kev;
+        data.cq = NULL;
         int rc;
 
         if(pipe(data.pipe_in) == -1) return -1; // Can't create pipe
@@ -134,15 +171,20 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
                 if(send_f == CMD_ST_CREATE) {
 
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                         "%sStream:%s " 
                         "Send CREATE stream name \"%s\" to peer \"%s\" ...\n", 
                         ANSI_BLUE, ANSI_NONE,
                         stream_name, to_peer);
                     #endif
 
+                    // Sen CREATE request to remote peer
                     ksnStreamSendTo(ks, to_peer, stream_name, CMD_ST_CREATE, 
                             NULL, 0);
+                    
+                    // Add callback to Teonet queue with 5 sec timeout
+                    data->cq = ksnCQueAdd(kev->kq, kq_connect_cb, 
+                            KSN_STREAM_CONNECT_TIMEOUT, data);
                 }
 
                 // Create stream watchers, connect it to pipes and send CREATED 
@@ -150,7 +192,7 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
                 else {
 
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                         "%sStream:%s "
                         "Got CREATE stream name \"%s\" request from peer \"%s\" ...\n", 
                         ANSI_BLUE, ANSI_NONE,
@@ -168,7 +210,7 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
         else if(rc == 0) return -2; // This stream already exist        
     } 
     
-    // Got created command
+    // Got created response
     else if(send_f == CMD_ST_CREATED) {
         
         size_t valueLen;
@@ -177,7 +219,7 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
                 != NULL) {        
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG, 
+            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                 "%sStream:%s "
                 "Got CREATED stream name \"%s\" from peer \"%s\" ...\n", 
                 ANSI_BLUE, ANSI_NONE,
@@ -185,7 +227,10 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
             #endif
                         
             // Connect FDs
-            connect_watchers(ks, data, key_buf, key_buf_len);            
+            connect_watchers(ks, data, key_buf, key_buf_len);    
+            
+            // Send success to CQUEUE
+            ksnCQueExec(kev->kq, data->cq->id);
         }
         else return -3; // This stream was not requested
     }
@@ -236,7 +281,7 @@ int ksnStreamClose(ksnStreamClass *ks, char *to_peer, char *stream_name,
                         key_buf_len, NULL);
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG, 
+            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                 "%sStream:%s "
                 "Stream with name \"%s\" was disconnected from peer \"%s\" ...\n", 
                 ANSI_BLUE, ANSI_NONE,
@@ -282,6 +327,7 @@ int ksnStreamCloseAll(ksnStreamClass *ks) {
  * Close all streams connected to selected peer
  * 
  * @param ks
+ * @param peer_name
  * @return 
  */
 int ksnStreamClosePeer(ksnStreamClass *ks, const char *peer_name) {
@@ -381,7 +427,7 @@ void stream_out_cb (struct ev_loop *loop, /*EV_P_*/ ev_io *w, int revents) {
         const char *to_peer = data->key;
         const char *stream_name = data->key + strlen(data->key) + 1;
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
             "%sStream:%s "
             "Sent %d byte DATA to stream name \"%s\" to peer \"%s\" ...\n", 
             ANSI_BLUE, ANSI_NONE,
@@ -467,7 +513,7 @@ int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd) {
                 != NULL) { 
                 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                     "%sStream:%s "
                     "Got %d byte DATA to stream name \"%s\" from peer \"%s\" ...\n", 
                     ANSI_BLUE, ANSI_NONE,
