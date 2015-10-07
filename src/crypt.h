@@ -16,8 +16,6 @@
  */
 typedef struct ksnCryptClass {
 
-//  MCRYPT td;
-
   unsigned char iv[BLOCK_SIZE+1];
   unsigned char *key;
   int key_len;

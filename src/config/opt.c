@@ -59,6 +59,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "r_address",      required_argument, 0, 'a' },
         { "r_tcp",          no_argument,       &conf->r_tcp_f, 1 },
         { "network",        required_argument, 0, 'n' },
+        { "key",            required_argument, 0, 'e' },
         { "tcp_allow",      no_argument,       &conf->tcp_allow_f, 1 },
         { "tcp_port",       required_argument, 0, 'o' },
         { "hot_keys",       no_argument,       &conf->hot_keys_f, 1 },
@@ -201,6 +202,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           strncpy((char*)conf->network, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
           
+        case 'e':
+          strncpy((char*)conf->net_key, optarg, KSN_BUFFER_SM_SIZE/2);
+          break;
+          
         case 'o':
           conf->tcp_port = atoi(optarg);
           break;
@@ -311,7 +316,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --uuid               Generate new uuid\n"
     "      --app_name           Show this application name\n"
     "      --app_description    Show this application description\n"
-    "  -n, --network=value      Set network name to connect to\n"
+    "  -n, --network=value      Set network name\n"
+    "      --key=value          Set network key\n"            
     "  -p, --port=value         Set port number (default "KSNET_PORT_DEFAULT")\n"
     "      --port_increment     Increment port if busy\n"
     "  -a, --r_address=value    Set remote server address (default localhost)\n"
