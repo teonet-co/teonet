@@ -27,16 +27,26 @@ int num_crypt_module = 0;
  */
 ksnCryptClass *ksnCryptInit(void *ke) {
 
+    #define kev ((ksnetEvMgrClass*)ke)
+    
     ksnCryptClass *kcr = malloc(sizeof(ksnCryptClass));
     kcr->ke = ke;
 
     // A 128 bit IV
     const char *iv = "0123456789012345";
-    strncpy((char*)kcr->iv, iv, BLOCK_SIZE);
-
     static const char *key = "01234567890123456789012345678901";
+    // Network key example: c7931346-add1-4945-b229-b52468f5d1d3
+    
+    // Create unique network IV
+    strncpy((char*)kcr->iv, iv, BLOCK_SIZE);    
+    if(kev->ksn_cfg.net_key[0]) 
+        strncpy((char*)kcr->iv, kev->ksn_cfg.net_key, BLOCK_SIZE);
+    
+    // Create unique network key
     kcr->key = (unsigned char *)strdup((char*)key); 
-    strncpy((char*)kcr->key, ((ksnetEvMgrClass*)ke)->ksn_cfg.network, KEY_SIZE);            
+    if(kev->ksn_cfg.net_key[0]) 
+        strncpy((char*)kcr->key, kev->ksn_cfg.net_key, KEY_SIZE);
+    strncpy((char*)kcr->key, kev->ksn_cfg.network, KEY_SIZE);            
     kcr->key_len = strlen((char*)kcr->key); // 32 - 256 bits
     kcr->blocksize = BLOCK_SIZE;
 
@@ -49,6 +59,8 @@ ksnCryptClass *ksnCryptInit(void *ke) {
     num_crypt_module++;
 
     return kcr;
+    
+    #undef kev
 }
 
 /**
