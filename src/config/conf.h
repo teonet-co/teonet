@@ -30,6 +30,7 @@
 
 // Modules enable
 #define M_ENAMBE_CQUE 1
+#define M_ENAMBE_STREAM 1
 #define M_ENAMBE_PBLKF 1
 #define M_ENAMBE_VPN 1
 #define M_ENAMBE_TCP 1

@@ -29,6 +29,7 @@ int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 
 /**
  * Initialize ksnet command class
@@ -127,6 +128,15 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         case CMD_TUN:
             processed = cmd_tun_cb(
                 ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ktun,
+                rd
+            );
+            break;
+        #endif
+
+        #ifdef M_ENAMBE_STREAM
+        case CMD_STREAM:
+            processed = cmd_stream_cb(
+                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ks,
                 rd
             );
             break;

@@ -19,6 +19,7 @@
 #include "modules/vpn.h"
 #include "modules/cque.h"
 #include "modules/teodb.h"
+#include "modules/stream.h"
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
 #include "modules/net_term.h"
@@ -57,7 +58,12 @@ typedef enum ksnetEvMgrEvents {
      * @param user_data Pointer to integer with type of this event: 
      *                  1 - success; 0 - timeout
      */
-    EV_K_CQUE_CALLBACK
+    EV_K_CQUE_CALLBACK,
+            
+    EV_K_STREAM_CONNECTED,          ///< After stream connected
+    EV_K_STREAM_CONNECT_TIMEOUT,    ///< Connection timeout
+    EV_K_STREAM_DISCONNECTED,       ///< After stream disconnected
+    EV_K_STREAM_DATA                ///< Input stream has a data
 
 } ksnetEvMgrEvents;
 
@@ -87,6 +93,7 @@ typedef struct ksnetEvMgrClass {
     ksnTermClass *kter; ///< Terminal class
     ksnCQueClass *kq; ///< Callback QUEUE class
     ksnTDBClass *kf; ///< PBL KeyFile class
+    ksnStreamClass *ks; ///< Stream class
 
     ksnet_cfg ksn_cfg; ///< KSNet configuration
 

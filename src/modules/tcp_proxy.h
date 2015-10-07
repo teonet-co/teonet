@@ -106,7 +106,7 @@ extern "C" {
 ksnTCPProxyClass *ksnTCPProxyInit(void *ke);
 void ksnTCPProxyDestroy(ksnTCPProxyClass *tp);
 
-int ksnTCPProxyClientConnetc(ksnTCPProxyClass *tp);
+int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp);
 
 #ifdef	__cplusplus
 }

@@ -27,6 +27,7 @@
             <word>Cesanta</word>
             <word>cmd</word>
             <word>config</word>
+            <word>cque</word>
             <word>fd</word>
             <word>Hotkeys</word>
             <word>internet</word>
@@ -36,8 +37,11 @@
             <word>ms</word>
             <word>mtu</word>
             <word>perror</word>
+            <word>str</word>
             <word>tcp</word>
+            <word>teo</word>
             <word>teonet</word>
+            <word>teostream</word>
             <word>teotproxy</word>
             <word>teoweb</word>
             <word>todo</word>

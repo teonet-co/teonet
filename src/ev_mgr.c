@@ -88,6 +88,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->km = NULL;
     ke->kf = NULL;
     ke->tp = NULL;
+    ke->ks = NULL;
     ke->num_nets = 1;
     ke->n_num = 0;
     ke->n_prev = NULL;
@@ -100,7 +101,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     // KSNet parameters
     const int app_argc = options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1 ? ((ksnetEvMgrAppParam*)user_data)->app_argc : 1; // number of application arguments
     char *app_argv[app_argc];           // array for argument names
-    app_argv[0] = (char*)"peer_name";   // peer name argument name
+    app_argv[0] = (char*)"host_name";   // host name argument name
     //app_argv[1] = (char*)"file_name";   // file name argument name
     if(options&APP_PARAM && user_data != NULL) {
         if(((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
@@ -391,7 +392,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         
             // Start TCP proxy client
             if(!(ke->tp->fd_client > 0))
-                ksnTCPProxyClientConnetc(ke->tp);  
+                ksnTCPProxyClientConnect(ke->tp);  
             
             // Create data with empty list of local IPs and port
             data = malloc(sizeof(uint8_t));
@@ -732,6 +733,12 @@ int modules_init(ksnetEvMgrClass *ke) {
     #if M_ENAMBE_CQUE
     ke->kq = ksnCQueInit(ke);
     #endif
+
+    // Stream module
+    #if M_ENAMBE_STREAM
+    ke->ks = ksnStreamInit(ke);
+    #endif
+
     // PBL KeyFile Module
     #if M_ENAMBE_PBLKF
     ke->kf = ksnTDBinit(ke);
@@ -757,6 +764,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->ktun = ksnTunInit(ke);
     #endif
 
+    // Terminal module
     #ifdef M_ENAMBE_TERM
     ke->kter = ksnTermInit(ke);
     #endif
@@ -791,6 +799,9 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #endif
     #if M_ENAMBE_PBLKF
     ksnTDBdestroy(ke->kf);
+    #endif
+    #if M_ENAMBE_STREAM
+    ksnStreamDestroy(ke->ks);
     #endif
 
     ksnetHotkeysDestroy(ke->kh);
