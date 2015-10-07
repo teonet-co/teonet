@@ -111,6 +111,18 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             }
 
         } break;
+        
+        case EV_K_STREAM_DISCONNECTED:
+        {
+            // Get stream parameters from event data (Stream Key)
+            ksnStreamData sd;
+            ksnStreamMapData *smd = ksnStreamGetMapData(ke->ks, data, data_len);
+            ksnStreamGetDataFromMap(&sd, (ksnStreamMapData *)smd);
+            
+            printf("Stream name \"%s\" was disconnected from peer \"%s\" ...\n",  
+                        sd.stream_name, sd.peer_name); 
+            
+        } break;
 
         // Undefined event (an error)
         default:
