@@ -9,13 +9,12 @@
 #define	CRYPT_H
 
 #define BLOCK_SIZE 16
+#define KEY_SIZE 32
 
 /**
  * ksnetCrypt Class data
  */
 typedef struct ksnCryptClass {
-
-//  MCRYPT td;
 
   unsigned char iv[BLOCK_SIZE+1];
   unsigned char *key;
