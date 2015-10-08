@@ -104,6 +104,7 @@ nobase_teonetinclude_HEADERS = \
     config/conf.h \
     config/opt.h \
     modules/cque.h \
+    modules/l0-server.h \
     modules/net_cli.h \
     modules/net_tcp.h \
     modules/net_term.h \
@@ -136,6 +137,7 @@ libteonet_la_SOURCES = \
     config/conf.c \
     config/opt.c \
     modules/cque.c \
+    modules/l0-server.c \
     modules/net_cli.c \
     modules/net_tcp.c \
     modules/net_term.c \
