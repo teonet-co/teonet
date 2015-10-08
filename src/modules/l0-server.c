@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "ev_mgr.h"
 #include "l0-server.h"
 
 /**
@@ -22,10 +23,15 @@
  */
 ksnL0sClass *ksnL0sInit(void *ke) {
     
-    ksnL0sClass *kl = malloc(sizeof(ksnL0sClass));
-    if(kl != NULL)  {
-        kl->ke = ke; // Pointer event manager class
-        kl->arp = pblMapNewHashMap(); // Create a new hash map
+    ksnL0sClass *kl = NULL;
+    
+    if(((ksnetEvMgrClass*)ke)->ksn_cfg.l0_allow_f) {
+        
+        kl = malloc(sizeof(ksnL0sClass));
+        if(kl != NULL)  {
+            kl->ke = ke; // Pointer event manager class
+            kl->arp = pblMapNewHashMap(); // Create a new hash map
+        }
     }
     
     return kl;
@@ -43,3 +49,5 @@ void ksnL0sDestroy(ksnL0sClass *kl) {
         free(kl);
     }
 }
+
+// \todo: Start TCP server to connect L0 Clients

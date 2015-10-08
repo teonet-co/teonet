@@ -82,6 +82,10 @@ typedef struct ksnet_cfg {
     // TCP Proxy
     int  tcp_allow_f;       ///< Allow TCP Proxy connections to this host
     long tcp_port;          ///< TCP Proxy port number
+    
+    // L0 Server
+    int  l0_allow_f;        ///< Allow L0 Server and l0 client connections to this host
+    long l0_tcp_port;       ///< L0 Server TCP port number
 
     // R-Host
     char r_host_addr[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address
