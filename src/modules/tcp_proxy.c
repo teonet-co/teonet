@@ -16,7 +16,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <netinet/tcp.h>
 
 #include "tcp_proxy.h"
 
@@ -237,35 +236,6 @@ ssize_t ksnTCPProxySendTo(ksnetEvMgrClass* ke,
     sendlen = write(ke->tp->fd_client, tcp_buffer, pl);
         
     return sendlen;
-}
-
-/**
- * Set TCP socket NODELAY option
- * 
- * @param ke Pointer toksnetEvMgrClass
- * @param fd TCP socket descriptor
- * 
- * @return Result of setting. Success if >= 0.
- */
-int set_tcp_nodelay(ksnetEvMgrClass* ke, int fd) {
-
-    int flag = 1;
-    int result = setsockopt(fd,           // socket affected
-                         IPPROTO_TCP,     // set option at TCP level
-                         TCP_NODELAY,     // name of option
-                         (char *) &flag,  // the cast is historical cruft
-                         sizeof(int));    // length of option value
-    if (result < 0) {
-        
-        #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG, 
-            "%sTCP Proxy:%s "
-            "Set TCP_NODELAY of fd %d error %s\n", 
-            ANSI_YELLOW, ANSI_RED, fd, ANSI_NONE);
-        #endif
-    }
-    
-    return result;
 }
 
 /**
@@ -970,7 +940,8 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
         // Clear map
         pblMapClear(tp->map);
         
-        // \todo Stop the server
+        // Stop the server
+        ksnTcpServerStop(kev->kt, tp->fd);
     }
 }
 

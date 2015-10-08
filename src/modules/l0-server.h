@@ -11,12 +11,23 @@
 #include <pbl.h>
 
 /**
+ * L0 Server map data structure
+ */
+typedef struct ksnL0sData {
+    
+    ev_io w;            ///< TCP Client watcher
+    char *name;         ///< Clients name
+    size_t name_length; ///< Clients name length
+    
+} ksnL0sData;    
+                   
+/**
  * ksnCksnL0 Class structure definition
  */
 typedef struct  ksnL0sClass {
     
     void *ke;       ///< Pointer to ksnEvMgrClass
-    PblMap *arp;    ///< Pointer to the L0 clients map
+    PblMap *map;    ///< Pointer to the L0 clients map (by fd))
     int fd;         ///< L0 TCP Server FD
     
 } ksnL0sClass;
