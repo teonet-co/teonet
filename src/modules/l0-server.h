@@ -32,6 +32,33 @@ typedef struct  ksnL0sClass {
     
 } ksnL0sClass;
 
+/**
+ * L0 Server received from client packet data structure
+ * 
+ */        
+typedef struct ksnL0sCPacket {
+
+    uint8_t cmd; ///< Command
+    uint8_t to_length; ///< To peer name length (include leading zero)
+    uint16_t data_length; ///< Packet data length
+    char to[]; ///< To peer name (include leading zero) + packet data
+
+} ksnL0sCPacket;
+
+/**
+ * L0 Server resend to peer packet data structure
+ * 
+ */        
+typedef struct ksnL0sSPacket {
+
+    uint8_t cmd; ///< Command
+    uint8_t from_length; ///< From client name length (include leading zero)
+    uint16_t data_length; ///< Packet data length
+    char from[]; ///< From client name (include leading zero) + packet data
+
+} ksnL0sSPacket;
+
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
