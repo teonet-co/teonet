@@ -17,6 +17,7 @@ typedef struct  ksnL0sClass {
     
     void *ke;       ///< Pointer to ksnEvMgrClass
     PblMap *arp;    ///< Pointer to the L0 clients map
+    int fd;         ///< L0 TCP Server FD
     
 } ksnL0sClass;
 
