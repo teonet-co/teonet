@@ -28,3 +28,6 @@ noinst_PROGRAMS = teofossa
 
 teofossa_SOURCES = teofossa.c fossa.c fossa.h
 #EXTRA_DIST = fossa.h
+
+exampledir = $(datarootdir)/doc/@PACKAGE@/examples/fossa
+example_DATA = fossa.c fossa.h teofossa.c

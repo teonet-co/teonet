@@ -30,6 +30,7 @@ int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
+int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 
 /**
  * Initialize ksnet command class
@@ -61,6 +62,8 @@ void ksnCommandDestroy(ksnCommandClass *kco) {
  * @return True if command processed
  */
 int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
+
+    #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
 
     int processed = 0;
 
@@ -96,7 +99,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #if M_ENAMBE_VPN
         case CMD_VPN:
             processed = cmd_vpn_cb(
-                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->kvpn,
+                kev->kvpn,
                 rd->from,
                 rd->data,
                 rd->data_len
@@ -110,10 +113,9 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             if(rds != NULL) {
                 processed = ksnCommandCheck(kco, rds);
                 if(!processed) {
-                    // Send event callback
-                    ksnetEvMgrClass *ke = ((ksnCoreClass*)kco->kc)->ke;
-                    if(ke->event_cb != NULL)
-                        ke->event_cb(ke, EV_K_RECEIVED, (void*)rds, sizeof(rds), 
+                    // Send event callback                    
+                    if(kev->event_cb != NULL)
+                       kev->event_cb(kev, EV_K_RECEIVED, (void*)rds, sizeof(rds), 
                                 NULL);
 
                     processed = 1;
@@ -126,19 +128,19 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         #ifdef M_ENAMBE_TUN
         case CMD_TUN:
-            processed = cmd_tun_cb(
-                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ktun,
-                rd
-            );
+            processed = cmd_tun_cb(kev->ktun, rd);
             break;
         #endif
 
         #ifdef M_ENAMBE_STREAM
         case CMD_STREAM:
-            processed = cmd_stream_cb(
-                ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ks,
-                rd
-            );
+            processed = cmd_stream_cb(kev->ks, rd);
+            break;
+        #endif
+
+        #ifdef M_ENAMBE_L0s
+        case CMD_L0:
+            processed = cmd_l0_cb(kev, rd);
             break;
         #endif
 
@@ -147,6 +149,8 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
     }
 
     return processed;
+    
+    #undef kev
 }
 
 /**

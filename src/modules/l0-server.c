@@ -126,43 +126,19 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     // Success read. Process package and resend it to teonet
     else {
-                
-        /**
-         * L0 Server received from client packet data structure
-         * 
-         */        
-        typedef struct ksnL0sCPacket {
-
-            uint8_t cmd; ///< Command
-            uint8_t to_length; ///< To peer name length (include leading zero)
-            uint16_t data_length; ///< Packet data length
-            char to[]; ///< To peer name (include leading zero) + packet data
-
-        } ksnL0sCPacket;
-
-        /**
-         * L0 Server resend to peer packet data structure
-         * 
-         */        
-        typedef struct ksnL0sSPacket {
-
-            uint8_t cmd; ///< Command
-            uint8_t from_length; ///< From client name length (include leading zero)
-            uint16_t data_length; ///< Packet data length
-            char from[]; ///< From client name (include leading zero) + packet data
-
-        } ksnL0sSPacket;
-        
+                        
         ksnL0sCPacket *packet = (ksnL0sCPacket *)data;
+        size_t len, ptr = 0;
 
-        // Check received packet
-        if(received == sizeof(ksnL0sCPacket) + packet->to_length + 
-                packet->data_length) {
-                    
-            size_t valueLength;
-            ksnL0sData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), &valueLength);
+        size_t valueLength;
+        ksnL0sData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), 
+                &valueLength);
             
-                if(kld != NULL) {
+        // Check received packet
+        while(received - ptr >= (len = sizeof(ksnL0sCPacket) + 
+                packet->to_length + packet->data_length)) {
+            
+            if(kld != NULL) {
                     
                 // Check initialize packet: 
                 // cmd = 0, to_length = 1, data_length = 1 + data_len, 
@@ -173,6 +149,13 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     
                     kld->name = strdup(packet->to + 1);
                     kld->name_length = strlen(kld->name) + 1;
+                    
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                        "%sl0 Server:%s "
+                        "Connection initialized, client name: %s ...\n", 
+                        ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
+                    #endif
                 }
                 // Resend data to teonet
                 else {
@@ -189,18 +172,30 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         packet->to + packet->to_length, spacket->data_length);
 
                     // Send teonet L0 packet
-                    ksnCoreSendCmdto(kev->kc, (char*)packet->to, CMD_L0, spacket, 
-                            sizeof(ksnL0sSPacket) + spacket->from_length + 
-                            spacket->data_length);
+                    ksnCoreSendCmdto(kev->kc, (char*)packet->to, CMD_L0, 
+                            spacket, sizeof(ksnL0sSPacket) + 
+                            spacket->from_length + spacket->data_length);
+                    
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                        "%sl0 Server:%s "
+                        "Resend command to: %s ...\n", 
+                        ANSI_LIGHTCYAN, ANSI_NONE, packet->to);
+                    #endif
                 }
             }
+            
+            ptr += len;            
+            packet = (void*)packet + len;
         } 
-        else {
+        
+        if(received - ptr > 0) {
+            
             #ifdef DEBUG_KSNET
             ksnet_printf(&kev->ksn_cfg, DEBUG, 
                 "%sl0 Server:%s "
-                "Wrong package ...%s\n", 
-                ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE);
+                "Wrong package, %d bytes ...%s\n", 
+                ANSI_LIGHTCYAN, ANSI_RED, received - ptr, ANSI_NONE);
             #endif
         }
     }
@@ -384,6 +379,34 @@ void ksnL0sStop(ksnL0sClass *kl) {
         // Stop the server
         ksnTcpServerStop(kev->kt, kl->fd);
     }
+}
+
+/**
+ * Process CMD_L0 teonet command
+ *
+ * @param kl
+ * @param rd
+ * @return
+ */
+int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
+    
+    int retval = 1;
+    ksnL0sSPacket *data = rd->data;
+    
+    // Execute L0 client command
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        "%sl0 Server:%s "
+        "Got command No %d from %s client with %d bytes data\n", 
+        ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
+    #endif
+
+    // \todo Process command
+//    int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd);   
+//    retval = ksnCommandCheck(ke->kc->kco, ksnCorePacketData *rd)
+    
+    return retval;
 }
 
 #undef kev
