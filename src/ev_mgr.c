@@ -17,7 +17,7 @@
 #include "ev_mgr.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
-#include "modules/tcp_proxy.h"
+//#include "modules/tcp_proxy.h"
 
 // Constants
 #define CHECK_EVENTS_AFTER 11.5
@@ -85,10 +85,12 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->last_custom_timer = 0.0;
     ke->runEventMgr = 0;
     ke->event_cb = event_cb;
+    ke->kt = NULL;
     ke->km = NULL;
     ke->kf = NULL;
     ke->tp = NULL;
     ke->ks = NULL;
+    ke->kl = NULL;
     ke->num_nets = 1;
     ke->n_num = 0;
     ke->n_prev = NULL;
@@ -754,6 +756,11 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kt = ksnTcpInit(ke);
     #endif
 
+    // L0 Server
+    #if M_ENAMBE_L0s
+    ke->kl = ksnL0sInit(ke);
+    #endif
+
     // TCP Proxy module
     #ifdef M_ENAMBE_TCP_P
     ke->tp = ksnTCPProxyInit(ke);
@@ -802,6 +809,9 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     #endif
     #if M_ENAMBE_STREAM
     ksnStreamDestroy(ke->ks);
+    #endif
+    #if M_ENAMBE_L0s
+    ksnL0sDestroy(ke->kl);
     #endif
 
     ksnetHotkeysDestroy(ke->kh);

@@ -66,6 +66,7 @@
         </df>
         <df name="modules">
           <in>cque.c</in>
+          <in>l0-server.c</in>
           <in>net_cli.c</in>
           <in>net_tcp.c</in>
           <in>net_term.c</in>
@@ -393,7 +394,7 @@
           </incDir>
         </cTool>
       </item>
-      <item path="examples/teostream.c" ex="false" tool="0" flavor2="0">
+      <item path="examples/teostream.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
@@ -621,6 +622,10 @@
         </cTool>
       </item>
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="4">
+        </cTool>
+      </item>
+      <item path="src/modules/l0-server.c" ex="false" tool="0" flavor2="0">
         <cTool flags="4">
         </cTool>
       </item>
