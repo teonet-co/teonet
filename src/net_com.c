@@ -32,6 +32,7 @@ int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
+int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 
 /**
  * Initialize ksnet command class
@@ -145,6 +146,12 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             break;
         #endif
 
+        #ifdef M_ENAMBE_L0s
+        case CMD_L0TO:
+            processed = cmd_l0to_cb(kev, rd);
+            break;
+        #endif
+
         default:
             break;
     }
@@ -216,10 +223,11 @@ int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Send echo answer command
      
     // \todo Send ECHO to L0 user
-//    if(rd->l0_f)
-//        ksnCoreSendCmdto(kco->kc, rd->from, CMD_ECHO_ANSWER, rd->data, 
-//                rd->data_len);
-//    else
+    if(rd->l0_f)
+        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                rd->addr, rd->port, rd->from, rd->from_len, CMD_ECHO_ANSWER, 
+                rd->data, rd->data_len);
+    else
         ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_ECHO_ANSWER,
                 rd->data, rd->data_len);
 

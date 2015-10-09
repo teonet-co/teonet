@@ -17,10 +17,10 @@
 #include "utils/rlutil.h"
 
 // Local functions
-int ksnL0sStart(ksnL0sClass *kl);
-void ksnL0sStop(ksnL0sClass *kl);
-void ksnL0sClientDisconnect(ksnL0sClass *kl, int fd, int remove_f);
-ksnet_arp_data *ksnL0sSendFromL0(ksnL0sClass *kl, ksnL0sCPacket *packet, 
+int ksnLNullStart(ksnLNullClass *kl);
+void ksnLNullStop(ksnLNullClass *kl);
+void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
+ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, ksnLNullCPacket *packet, 
         char *cname, size_t cname_length);
 
 /**
@@ -31,23 +31,24 @@ ksnet_arp_data *ksnL0sSendFromL0(ksnL0sClass *kl, ksnL0sCPacket *packet,
 #define L0_VERSION 0 ///< L0 Server version
 
 /**
- * Initialize ksnL0s module [class](@ref ksnL0sClass)
+ * Initialize ksnLNull module [class](@ref ksnLNullClass)
  * 
  * @param ke Pointer to ksnetEvMgrClass
  * 
- * @return Pointer to created ksnL0Class or NULL if error occurred
+ * @return Pointer to created ksnLNullClass or NULL if error occurred
  */
-ksnL0sClass *ksnL0sInit(void *ke) {
+ksnLNullClass *ksnLNullInit(void *ke) {
     
-    ksnL0sClass *kl = NULL;
+    ksnLNullClass *kl = NULL;
     
     if(((ksnetEvMgrClass*)ke)->ksn_cfg.l0_allow_f) {
         
-        kl = malloc(sizeof(ksnL0sClass));
+        kl = malloc(sizeof(ksnLNullClass));
         if(kl != NULL)  {
             kl->ke = ke; // Pointer event manager class
-            kl->map = pblMapNewHashMap(); // Create a new hash map            
-            ksnL0sStart(kl); // Start L0 Server
+            kl->map = pblMapNewHashMap(); // Create a new hash map      
+            kl->map_n = pblMapNewHashMap(); // Create a new hash map     
+            ksnLNullStart(kl); // Start L0 Server
         }
     }
     
@@ -55,14 +56,15 @@ ksnL0sClass *ksnL0sInit(void *ke) {
 }
 
 /**
- * Destroy ksnL0s module [class](@ref ksnL0sClass)
+ * Destroy ksnLNull module [class](@ref ksnLNullClass)
  * 
- * @param kl Pointer to ksnL0sClass
+ * @param kl Pointer to ksnLNullClass
  */
-void ksnL0sDestroy(ksnL0sClass *kl) {
+void ksnLNullDestroy(ksnLNullClass *kl) {
     
     if(kl != NULL) {
-        ksnL0sStop(kl);
+        ksnLNullStop(kl);
+        free(kl->map_n);
         free(kl->map);
         free(kl);
     }
@@ -81,7 +83,7 @@ void ksnL0sDestroy(ksnL0sClass *kl) {
 void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     size_t data_len = KSN_BUFFER_DB_SIZE; // Buffer length
-    ksnL0sClass *kl = w->data; // Pointer to ksnL0sClass
+    ksnLNullClass *kl = w->data; // Pointer to ksnLNullClass
     char data[data_len]; // Buffer
     
     // Read TCP data
@@ -106,7 +108,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         );
         #endif
         
-        ksnL0sClientDisconnect(kl, w->fd, 1);
+        ksnLNullClientDisconnect(kl, w->fd, 1);
     } 
     
     // \todo Process reading error
@@ -116,59 +118,64 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         //            // OK, just skip it
         //        }
     
-        #ifdef DEBUG_KSNET
-        ksnet_printf(
-            &kev->ksn_cfg, DEBUG,
-            "%sl0 Server:%s "
-            "Read error ...%s\n", 
-            ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE
-        );
-        #endif
+//        #ifdef DEBUG_KSNET
+//        ksnet_printf(
+//            &kev->ksn_cfg, DEBUG,
+//            "%sl0 Server:%s "
+//            "Read error ...%s\n", 
+//            ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE
+//        );
+//        #endif
     }
     
     // Success read. Process package and resend it to teonet
     else {
                         
-        ksnL0sCPacket *packet = (ksnL0sCPacket *)data;
+        ksnLNullCPacket *packet = (ksnLNullCPacket *)data;
         size_t len, ptr = 0;
 
         size_t valueLength;
-        ksnL0sData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), 
+        ksnLNullData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), 
                 &valueLength);
             
-        // Check received packet
-        while(received - ptr >= (len = sizeof(ksnL0sCPacket) + 
-                packet->to_length + packet->data_length)) {
-            
-            if(kld != NULL) {
+        if(kld != NULL) {
                     
-                // Check initialize packet: 
-                // cmd = 0, to_length = 1, data_length = 1 + data_len, 
-                // data = client_name
-                //
-                if(packet->cmd == 0 && packet->to_length == 1 && 
-                        !packet->to[0] && packet->data_length) {
-                    
-                    kld->name = strdup(packet->to + 1);
-                    kld->name_length = strlen(kld->name) + 1;
-                    
-                    #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                        "%sl0 Server:%s "
-                        "Connection initialized, client name: %s ...\n", 
-                        ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
-                    #endif
-                }
-                // Resend data to teonet
-                else {
-                    
-                    ksnL0sSendFromL0(kl, packet, kld->name, kld->name_length);
-                }
-            }
-            
-            ptr += len;            
-            packet = (void*)packet + len;
-        } 
+            // Check received packet
+            while(received - ptr >= (len = sizeof(ksnLNullCPacket) + 
+                    packet->to_length + packet->data_length)) {
+
+                    // Check initialize packet: 
+                    // cmd = 0, to_length = 1, data_length = 1 + data_len, 
+                    // data = client_name
+                    //
+                    if(packet->cmd == 0 && packet->to_length == 1 && 
+                            !packet->to[0] && packet->data_length) {
+
+                        kld->name = strdup(packet->to + 1);
+                        kld->name_length = strlen(kld->name) + 1;
+                        
+                        pblMapAdd(kl->map_n, kld->name, kld->name_length, 
+                                &w->fd, sizeof(w->fd));
+                        
+                        // \todo Remove kl->map_n records when connection closed
+
+                        #ifdef DEBUG_KSNET
+                        ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                            "%sl0 Server:%s "
+                            "Connection initialized, client name: %s ...\n", 
+                            ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
+                        #endif
+                    }
+                    // Resend data to teonet
+                    else {
+
+                        ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+                    }
+
+                ptr += len;            
+                packet = (void*)packet + len;
+            } 
+        }
         
         if(received - ptr > 0) {
             
@@ -189,39 +196,86 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * 
  * @param kl
  * @param packet L0 packet received from L0 client
- * @param cname L0 client name
- * @param cname_length Length of L0 client name
+ * @param cname L0 client name (include trailing zero)
+ * @param cname_length Length of the L0 client name
  * @return Pointer to ksnet_arp_data or NULL if to peer is absent
  */
-ksnet_arp_data *ksnL0sSendFromL0(ksnL0sClass *kl, ksnL0sCPacket *packet, 
+ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, ksnLNullCPacket *packet, 
         char *cname, size_t cname_length) {
     
-    size_t data_len = sizeof(ksnL0sSPacket) + cname_length + packet->data_length;            
-    char out_data[data_len]; // Buffer
-    ksnL0sSPacket *spacket = (ksnL0sSPacket*) out_data;
+    size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + packet->data_length;            
+    //char out_data[data_len]; // Buffer
+    char *out_data = malloc(out_data_len);
+    ksnLNullSPacket *spacket = (ksnLNullSPacket*) out_data;
 
     // Create teonet L0 packet
     spacket->cmd = packet->cmd;
     spacket->from_length = cname_length;
-    memcpy(spacket->from, cname, spacket->from_length); 
+    memcpy(spacket->from, cname, cname_length); 
     spacket->data_length = packet->data_length;
     memcpy(spacket->from + spacket->from_length, 
         packet->to + packet->to_length, spacket->data_length);
 
     // Send teonet L0 packet
-    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->to, CMD_L0, spacket, data_len);
+    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->to, CMD_L0, 
+            spacket, out_data_len);
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
-        "Send command to: %s ...\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, packet->to);
+        "Send command from L0 %s client to %s peer ...\n", 
+        ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->to);
     #endif
+
+    free(out_data);
 
     return arp;
 }
 
-// ksnL0sSendToL0();
+/**
+ * Send data to L0 client. Usually it is an answer to request from L0 client
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param addr IP address of remote peer
+ * @param port Port of remote peer
+ * @param cname L0 client name (include trailing zero)
+ * @param cname_length Length of the L0 client name
+ * @param cmd Command
+ * @param data Data
+ * @param data_len Data length
+ * 
+ * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+ */
+int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname, 
+        size_t cname_length, uint8_t cmd, void *data, size_t data_len) {
+    
+    // Create L0 packet
+    size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + data_len;    
+    //char out_data[out_data_len]; // Buffer
+    char *out_data = malloc(out_data_len);
+    ksnLNullSPacket *spacket = (ksnLNullSPacket*)out_data;
+    
+    // Create teonet L0 packet
+    spacket->cmd = cmd;
+    spacket->from_length = cname_length;
+    memcpy(spacket->from, cname, cname_length);
+    spacket->data_length = data_len;
+    memcpy(spacket->from + spacket->from_length, data, data_len);
+    
+    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO, 
+            spacket, out_data_len);    
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG, 
+        "%sl0 Server:%s "
+        "Send command to L0 client %s ...\n", 
+        ANSI_LIGHTCYAN, ANSI_NONE, spacket->from);
+    #endif
+
+    free(out_data);
+    
+    return rv;
+}
 
 /**
  * Connect l0 Server client
@@ -229,32 +283,32 @@ ksnet_arp_data *ksnL0sSendFromL0(ksnL0sClass *kl, ksnL0sCPacket *packet,
  * Called when tcp client connected to TCP l0 Server. Register this client in 
  * map
  * 
- * @param kl Pointer to ksnL0sClass
+ * @param kl Pointer to ksnLNullClass
  * @param fd TCP client connection file descriptor
  * 
  */
-void ksnL0sClientConnect(ksnL0sClass *kl, int fd) {
+void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
     
     // Set TCP_NODELAY option
     set_tcp_nodelay(kev, fd);
 
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
             "%sl0 Server:%s "
-            "TCP Proxy client fd %d connected\n", 
+            "L0 client with fd %d connected\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, fd);
     
     // Register client in tcp proxy map 
-    ksnL0sData data;
+    ksnLNullData data;
     data.name = NULL;
     data.name_length = 0;
-    pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnL0sData));
+    pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));
     
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
     // Create and start TCP watcher (start client processing)
     size_t valueLength;
-    ksnL0sData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength);
+    ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength);
     if(kld != NULL) {   
         
         // Create and start TCP watcher (start TCP client processing)
@@ -278,28 +332,28 @@ void ksnL0sClientConnect(ksnL0sClass *kl, int fd) {
  * Called when client disconnected or when the L0 Server closing. Close TCP 
  * connections and remove data from L0 Server clients map.
  * 
- * @param kl Pointer to ksnL0sClass
+ * @param kl Pointer to ksnLNullClass
  * @param fd TCP client connection file descriptor
  * @param remove_f If true than remove disconnected record from map
  * 
  */
-void ksnL0sClientDisconnect(ksnL0sClass *kl, int fd, int remove_f) {
+void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
 
     size_t valueLength;
 
-    // Get data from TCP Proxy Clients map, close TCP watcher and remove this 
+    // Get data from L0 Clients map, close TCP watcher and remove this 
     // data record from map
-    ksnL0sData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength); 
+    ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength); 
     if(kld != NULL) {
 
-        // Stop TCP Proxy client watcher
+        // Stop L0 client watcher
         ev_io_stop(kev->ev_loop, &kld->w);
         close(fd); 
 
         // Show disconnect message
         ksnet_printf(&kev->ksn_cfg, CONNECT, 
             "%sl0 Server:%s "
-            "TCP Proxy client fd %d disconnected\n", 
+            "L0 client with fd %d disconnected\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, fd);
         
         // Free name
@@ -330,7 +384,7 @@ void ksnL0sClientDisconnect(ksnL0sClass *kl, int fd, int remove_f) {
 void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
                        int revents, int fd) {
     
-    ksnL0sClientConnect(w->data, fd);    
+    ksnLNullClientConnect(w->data, fd);    
 }
 
 /**
@@ -338,11 +392,11 @@ void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
  * 
  * Create and start l0 Server
  * 
- * @param kl Pointer to ksnL0sClass
+ * @param kl Pointer to ksnLNullClass
  * 
  * @return If return value > 0 than server was created successfully
  */
-int ksnL0sStart(ksnL0sClass *kl) {
+int ksnLNullStart(ksnLNullClass *kl) {
     
     int fd = 0;
     
@@ -376,10 +430,10 @@ int ksnL0sStart(ksnL0sClass *kl) {
  * 
  * Disconnect all connected clients and stop l0 server
  * 
- * @param kl Pointer to ksnL0sClass
+ * @param kl Pointer to ksnLNullClass
  * 
  */
-void ksnL0sStop(ksnL0sClass *kl) {
+void ksnLNullStop(ksnLNullClass *kl) {
     
     // If server started
     if(kev->ksn_cfg.l0_allow_f && kl->fd) {
@@ -390,7 +444,7 @@ void ksnL0sStop(ksnL0sClass *kl) {
             while(pblIteratorHasPrevious(it) > 0) {
                 void *entry = pblIteratorPrevious(it);
                 int *fd = (int *) pblMapEntryKey(entry);
-                ksnL0sClientDisconnect(kl, *fd, 0);
+                ksnLNullClientDisconnect(kl, *fd, 0);
             }
             pblIteratorFree(it);
         }
@@ -413,10 +467,8 @@ void ksnL0sStop(ksnL0sClass *kl) {
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     
     int retval = 1;
-    ksnL0sSPacket *data = rd->data;
-    
-    // Execute L0 client command
-    
+    ksnLNullSPacket *data = rd->data;
+        
     #ifdef DEBUG_KSNET
     ksnet_printf(&ke->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
@@ -432,10 +484,39 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     rd->data_len = data->data_length;
     rd->l0_f = 1;
     
+    // Execute L0 client command
     retval = ksnCommandCheck(ke->kc->kco, rd);
     
     printf("ksnCommandCheck => %s, command No %d, data: %s\n", (retval ? "processed" : "not processed"), rd->cmd, (char*)rd->data);
     
+    return retval;
+}
+
+/**
+ * Process CMD_L0TO teonet command
+ *
+ * @param ke
+ * @param rd
+ * @return
+ */
+int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
+    
+    int retval = 1;
+    ksnLNullSPacket *data = rd->data;
+        
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        "%sl0 Server:%s "
+        "Got command No %d to %s L0 client from peer %s with %d bytes data\n", 
+        ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, rd->from, data->data_length);
+    #endif
+
+    // Send command to L0 client
+    int *fd;
+    size_t valueLength;
+    fd = pblMapGet(ke->kl->map_n, data->from, data->from_length, &valueLength);
+    if(write(*fd, rd->data, rd->data_len) >= 0);
+
     return retval;
 }
 

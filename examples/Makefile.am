@@ -51,5 +51,6 @@ example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \
 
 teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
 teoackm_LDFLAGS = $(AM_LDFLAGS) -lev
+teol0cli_LDFLAGS = $(AM_LDFLAGS) -lev
 
 SUBDIRS = fossa
