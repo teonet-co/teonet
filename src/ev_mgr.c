@@ -758,7 +758,7 @@ int modules_init(ksnetEvMgrClass *ke) {
 
     // L0 Server
     #if M_ENAMBE_L0s
-    ke->kl = ksnL0sInit(ke);
+    ke->kl = ksnLNullInit(ke);
     #endif
 
     // TCP Proxy module
@@ -811,7 +811,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     ksnStreamDestroy(ke->ks);
     #endif
     #if M_ENAMBE_L0s
-    ksnL0sDestroy(ke->kl);
+    ksnLNullDestroy(ke->kl);
     #endif
 
     ksnetHotkeysDestroy(ke->kh);

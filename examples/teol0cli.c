@@ -13,13 +13,33 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <ev.h>
 
 #include "ev_mgr.h"
 
 #define TL0C_VERSION "0.0.1"  
 
 int fd;
+ev_io w;
 
+/**
+ * TCP client callback
+ * 
+ * Get packet from L0 Server 
+ * 
+ * @param loop Event manager loop
+ * @param w Pointer to watcher
+ * @param revents Events
+ * 
+ */
+void tcp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
+        
+    char buf[KSN_BUFFER_DB_SIZE];
+    size_t rc = read(w->fd, buf, KSN_BUFFER_DB_SIZE);
+    printf("Got %d bytes data from L0 server\n", (int)rc);
+    // \todo Process received data
+}
+        
 /**
  * Teonet Events callback
  *
@@ -45,9 +65,15 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 
                 // Set TCP_NODELAY option
                 set_tcp_nodelay(ke, fd);
+                
+                // Create and start TCP watcher (start TCP client processing)
+                ev_init (&w, tcp_read_cb);
+                ev_io_set (&w, fd, EV_READ);
+                w.data = ke;
+                ev_io_start (ke->ev_loop, &w);                
 
                 char packet[KSN_BUFFER_SIZE];
-                ksnL0sCPacket *pkg = (ksnL0sCPacket*) packet;
+                ksnLNullCPacket *pkg = (ksnLNullCPacket*) packet;
 
                 // Initialize L0 connection
                 char *host_name = ksnetEvMgrGetHostName(ke);
@@ -56,7 +82,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 memcpy(pkg->to, "", pkg->to_length);
                 pkg->data_length = strlen(host_name) + 1;
                 memcpy(pkg->to + pkg->to_length, host_name, pkg->data_length);
-                if(write(fd, pkg, sizeof(ksnL0sCPacket) + pkg->to_length + 
+                if(write(fd, pkg, sizeof(ksnLNullCPacket) + pkg->to_length + 
                         pkg->data_length) >= 0);
                 
                 // Send message to peer
@@ -67,7 +93,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 memcpy(pkg->to, peer_name, pkg->to_length);
                 pkg->data_length = strlen(msg) + 1;
                 memcpy(pkg->to + pkg->to_length, msg, pkg->data_length);
-                if(write(fd, pkg, sizeof(ksnL0sCPacket) + pkg->to_length + 
+                if(write(fd, pkg, sizeof(ksnLNullCPacket) + pkg->to_length + 
                         pkg->data_length) >= 0);
             }
             

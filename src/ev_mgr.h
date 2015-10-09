@@ -89,7 +89,7 @@ typedef struct ksnetEvMgrClass {
     ksnetHotkeysClass *kh; ///< Hotkeys class
     ksnVpnClass *kvpn; ///< VPN class
     ksnTcpClass *kt; ///< TCP Client/Server class
-    ksnL0sClass *kl; ///< L0 Server class
+    ksnLNullClass *kl; ///< L0 Server class
     ksnTCPProxyClass *tp; ///< TCP Proxy class
     ksnTunClass *ktun; ///< Tunnel class
     ksnTermClass *kter; ///< Terminal class

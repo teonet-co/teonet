@@ -31,6 +31,7 @@ enum ksnCMD {
     CMD_SPLIT,              ///< Group of packets (Splited packets)
     CMD_STREAM,             ///< Stream command
     CMD_L0,                 ///< Command from L0 Client
+    CMD_L0TO,              ///< Command to L0 Client
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
