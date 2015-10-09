@@ -73,6 +73,8 @@ typedef struct ksnCorePacketData {
     size_t raw_data_len;    ///< Received packet length
 
     ksnet_arp_data *arp;    ///< Pointer to ARP Table data
+    
+    int l0_f;               ///< L0 command flag (from set to l0 client name)
 
 } ksnCorePacketData;
 

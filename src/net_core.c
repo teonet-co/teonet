@@ -342,7 +342,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
  * @param cmd
  * @param data
  * @param data_len
- * @return
+ * @return Pointer to ksnet_arp_data or NULL if to is absent
  */
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                                  void *data, size_t data_len) {

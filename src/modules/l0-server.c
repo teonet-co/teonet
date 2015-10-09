@@ -20,6 +20,8 @@
 int ksnL0sStart(ksnL0sClass *kl);
 void ksnL0sStop(ksnL0sClass *kl);
 void ksnL0sClientDisconnect(ksnL0sClass *kl, int fd, int remove_f);
+ksnet_arp_data *ksnL0sSendFromL0(ksnL0sClass *kl, ksnL0sCPacket *packet, 
+        char *cname, size_t cname_length);
 
 /**
  * Pointer to ksnetEvMgrClass
@@ -159,29 +161,8 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 }
                 // Resend data to teonet
                 else {
-
-                    char out_data[data_len]; // Buffer
-                    ksnL0sSPacket *spacket = (ksnL0sSPacket*) out_data;
-
-                    // Create teonet L0 packet
-                    spacket->cmd = packet->cmd;
-                    spacket->from_length = kld->name_length;
-                    memcpy(spacket->from, kld->name, spacket->from_length); 
-                    spacket->data_length = packet->data_length;
-                    memcpy(spacket->from + spacket->from_length, 
-                        packet->to + packet->to_length, spacket->data_length);
-
-                    // Send teonet L0 packet
-                    ksnCoreSendCmdto(kev->kc, (char*)packet->to, CMD_L0, 
-                            spacket, sizeof(ksnL0sSPacket) + 
-                            spacket->from_length + spacket->data_length);
                     
-                    #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                        "%sl0 Server:%s "
-                        "Resend command to: %s ...\n", 
-                        ANSI_LIGHTCYAN, ANSI_NONE, packet->to);
-                    #endif
+                    ksnL0sSendFromL0(kl, packet, kld->name, kld->name_length);
                 }
             }
             
@@ -200,6 +181,47 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         }
     }
 }
+
+//Pointer to ksnet_arp_data or NULL if to is absent
+
+/**
+ * Send data received from L0 client to teonet peer
+ * 
+ * @param kl
+ * @param packet L0 packet received from L0 client
+ * @param cname L0 client name
+ * @param cname_length Length of L0 client name
+ * @return Pointer to ksnet_arp_data or NULL if to peer is absent
+ */
+ksnet_arp_data *ksnL0sSendFromL0(ksnL0sClass *kl, ksnL0sCPacket *packet, 
+        char *cname, size_t cname_length) {
+    
+    size_t data_len = sizeof(ksnL0sSPacket) + cname_length + packet->data_length;            
+    char out_data[data_len]; // Buffer
+    ksnL0sSPacket *spacket = (ksnL0sSPacket*) out_data;
+
+    // Create teonet L0 packet
+    spacket->cmd = packet->cmd;
+    spacket->from_length = cname_length;
+    memcpy(spacket->from, cname, spacket->from_length); 
+    spacket->data_length = packet->data_length;
+    memcpy(spacket->from + spacket->from_length, 
+        packet->to + packet->to_length, spacket->data_length);
+
+    // Send teonet L0 packet
+    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->to, CMD_L0, spacket, data_len);
+
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+        "%sl0 Server:%s "
+        "Send command to: %s ...\n", 
+        ANSI_LIGHTCYAN, ANSI_NONE, packet->to);
+    #endif
+
+    return arp;
+}
+
+// ksnL0sSendToL0();
 
 /**
  * Connect l0 Server client
@@ -384,7 +406,7 @@ void ksnL0sStop(ksnL0sClass *kl) {
 /**
  * Process CMD_L0 teonet command
  *
- * @param kl
+ * @param ke
  * @param rd
  * @return
  */
@@ -402,9 +424,17 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
     #endif
 
-    // \todo Process command
-//    int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd);   
-//    retval = ksnCommandCheck(ke->kc->kco, ksnCorePacketData *rd)
+    // Process command
+    rd->cmd = data->cmd;
+    rd->from = data->from;
+    rd->from_len = data->from_length;
+    rd->data = data->from + data->from_length;
+    rd->data_len = data->data_length;
+    rd->l0_f = 1;
+    
+    retval = ksnCommandCheck(ke->kc->kco, rd);
+    
+    printf("ksnCommandCheck => %s, command No %d, data: %s\n", (retval ? "processed" : "not processed"), rd->cmd, (char*)rd->data);
     
     return retval;
 }
