@@ -12,6 +12,7 @@
 
 #include "ev_mgr.h"
 #include "net_split.h"
+#include "utils/rlutil.h"
 
 /**
  * KSNet CMD_PEER command data
@@ -213,8 +214,15 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
 int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Send echo answer command
-    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_ECHO_ANSWER,
-                  rd->data, rd->data_len);
+     
+    // \todo Send ECHO to L0 user
+//    if(rd->l0_f)
+//        ksnCoreSendCmdto(kco->kc, rd->from, CMD_ECHO_ANSWER, rd->data, 
+//                rd->data_len);
+//    else
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_ECHO_ANSWER,
+                rd->data, rd->data_len);
+
 
     return 1; // Command processed
 }
@@ -281,8 +289,9 @@ int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         // Show command message
         #ifdef DEBUG_KSNET
         ksnet_printf(& ke->ksn_cfg, DEBUG,
-            "Net command module: "
+            "%sNet command:%s "
             "received Echo answer command => from '%s': %d byte data: %s, %.3f ms\n",
+            ANSI_LIGHTBLUE, ANSI_NONE,
             rd->from,        // from
             rd->data_len,    // command data length
             rd->data,        // commands data
