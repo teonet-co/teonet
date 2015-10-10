@@ -36,8 +36,18 @@ void tcp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         
     char buf[KSN_BUFFER_DB_SIZE];
     size_t rc = read(w->fd, buf, KSN_BUFFER_DB_SIZE);
-    printf("Got %d bytes data from L0 server\n", (int)rc);
+    ksnetEvMgrClass *ke = w->data;
+    
     // \todo Process received data
+    if(rc > 0) {
+        
+        ksnLNullCPacket *sp = (ksnLNullCPacket*)buf;
+        char *data = sp->peer_name + sp->peer_name_length;
+        
+        ksnet_printf(&ke->ksn_cfg, DEBUG,
+            "Receive %d bytes: %d bytes data from L0 server, from peer %s, data: %s\n", 
+            (int)rc, sp->data_length, sp->peer_name, data);
+    }
 }
         
 /**
@@ -63,6 +73,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
             if(fd > 0) {
                 
+                printf("Start teonet L0 Client example\n");
+                
                 // Set TCP_NODELAY option
                 set_tcp_nodelay(ke, fd);
                 
@@ -77,24 +89,30 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                 // Initialize L0 connection
                 char *host_name = ksnetEvMgrGetHostName(ke);
+                size_t snd;
                 pkg->cmd = 0;
-                pkg->to_length = 1;
-                memcpy(pkg->to, "", pkg->to_length);
+                pkg->peer_name_length = 1;
+                memcpy(pkg->peer_name, "", pkg->peer_name_length);
                 pkg->data_length = strlen(host_name) + 1;
-                memcpy(pkg->to + pkg->to_length, host_name, pkg->data_length);
-                if(write(fd, pkg, sizeof(ksnLNullCPacket) + pkg->to_length + 
-                        pkg->data_length) >= 0);
+                memcpy(pkg->peer_name + pkg->peer_name_length, host_name, pkg->data_length);
+                if((snd = write(fd, pkg, sizeof(ksnLNullCPacket) + pkg->peer_name_length + 
+                        pkg->data_length)) >= 0);
+                ksnet_printf(&ke->ksn_cfg, DEBUG,
+                    "Send %d bytes initialize packet to L0 server\n", (int)snd);
                 
                 // Send message to peer
                 char *peer_name = "teostream";
                 char *msg = "Hello";
                 pkg->cmd = CMD_ECHO;
-                pkg->to_length = strlen(peer_name) + 1;
-                memcpy(pkg->to, peer_name, pkg->to_length);
+                pkg->peer_name_length = strlen(peer_name) + 1;
+                memcpy(pkg->peer_name, peer_name, pkg->peer_name_length);
                 pkg->data_length = strlen(msg) + 1;
-                memcpy(pkg->to + pkg->to_length, msg, pkg->data_length);
-                if(write(fd, pkg, sizeof(ksnLNullCPacket) + pkg->to_length + 
-                        pkg->data_length) >= 0);
+                memcpy(pkg->peer_name + pkg->peer_name_length, msg, pkg->data_length);
+                if((snd = write(fd, pkg, sizeof(ksnLNullCPacket) + pkg->peer_name_length + 
+                        pkg->data_length)) >= 0);
+                ksnet_printf(&ke->ksn_cfg, DEBUG,
+                    "Send %d bytes packet to L0 server to peer %s, data: %s\n", 
+                    (int)snd, peer_name, msg);
             }
             
         } break;

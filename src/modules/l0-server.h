@@ -12,6 +12,7 @@
 
 /**
  * L0 Server map data structure
+ * 
  */
 typedef struct ksnLNullData {
     
@@ -19,7 +20,7 @@ typedef struct ksnLNullData {
     char *name;         ///< Clients name
     size_t name_length; ///< Clients name length
     
-} ksnLNullData;    
+} ksnLNullData;  
                    
 /**
  * ksnLNull Class structure definition
@@ -34,15 +35,19 @@ typedef struct  ksnLNullClass {
 } ksnLNullClass;
 
 /**
- * L0 Server received from client packet data structure
+ * L0 client packet data structure
  * 
  */        
 typedef struct ksnLNullCPacket {
 
     uint8_t cmd; ///< Command
-    uint8_t to_length; ///< To peer name length (include leading zero)
+    uint8_t peer_name_length; ///< To peer name length (include leading zero)
     uint16_t data_length; ///< Packet data length
-    char to[]; ///< To peer name (include leading zero) + packet data
+    uint8_t reserved_1; ///< Reserved 1
+    uint8_t reserved_2; ///< Reserved 2
+    uint8_t checksum; ///< Whole checksum
+    uint8_t header_checksum; ///< Header checksum
+    char peer_name[]; ///< To/From peer name (include leading zero) + packet data
 
 } ksnLNullCPacket;
 
