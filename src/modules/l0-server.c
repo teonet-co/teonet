@@ -142,16 +142,16 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     
             // Check received packet
             while(received - ptr >= (len = sizeof(ksnLNullCPacket) + 
-                    packet->to_length + packet->data_length)) {
+                    packet->peer_name_length + packet->data_length)) {
 
                     // Check initialize packet: 
                     // cmd = 0, to_length = 1, data_length = 1 + data_len, 
                     // data = client_name
                     //
-                    if(packet->cmd == 0 && packet->to_length == 1 && 
-                            !packet->to[0] && packet->data_length) {
+                    if(packet->cmd == 0 && packet->peer_name_length == 1 && 
+                            !packet->peer_name[0] && packet->data_length) {
 
-                        kld->name = strdup(packet->to + 1);
+                        kld->name = strdup(packet->peer_name + 1);
                         kld->name_length = strlen(kld->name) + 1;
                         
                         pblMapAdd(kl->map_n, kld->name, kld->name_length, 
@@ -206,6 +206,7 @@ ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, ksnLNullCPacket *packet,
     size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + packet->data_length;            
     //char out_data[data_len]; // Buffer
     char *out_data = malloc(out_data_len);
+    memset(out_data, 0, out_data_len);
     ksnLNullSPacket *spacket = (ksnLNullSPacket*) out_data;
 
     // Create teonet L0 packet
@@ -214,17 +215,17 @@ ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, ksnLNullCPacket *packet,
     memcpy(spacket->from, cname, cname_length); 
     spacket->data_length = packet->data_length;
     memcpy(spacket->from + spacket->from_length, 
-        packet->to + packet->to_length, spacket->data_length);
+        packet->peer_name + packet->peer_name_length, spacket->data_length);
 
     // Send teonet L0 packet
-    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->to, CMD_L0, 
+    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->peer_name, CMD_L0, 
             spacket, out_data_len);
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
         "Send command from L0 %s client to %s peer ...\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->to);
+        ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->peer_name);
     #endif
 
     free(out_data);
@@ -253,6 +254,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + data_len;    
     //char out_data[out_data_len]; // Buffer
     char *out_data = malloc(out_data_len);
+    memset(out_data, 0, out_data_len);
     ksnLNullSPacket *spacket = (ksnLNullSPacket*)out_data;
     
     // Create teonet L0 packet
@@ -263,7 +265,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     memcpy(spacket->from + spacket->from_length, data, data_len);
     
     int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO, 
-            spacket, out_data_len);    
+            out_data, out_data_len);    
     
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG, 
@@ -487,7 +489,7 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     // Execute L0 client command
     retval = ksnCommandCheck(ke->kc->kco, rd);
     
-    printf("ksnCommandCheck => %s, command No %d, data: %s\n", (retval ? "processed" : "not processed"), rd->cmd, (char*)rd->data);
+    //printf("ksnCommandCheck => %s, command No %d, data: %s\n", (retval ? "processed" : "not processed"), rd->cmd, (char*)rd->data);
     
     return retval;
 }
@@ -507,16 +509,43 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     #ifdef DEBUG_KSNET
     ksnet_printf(&ke->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
-        "Got command No %d to %s L0 client from peer %s with %d bytes data\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, rd->from, data->data_length);
+        "Got command No %d to \"%s\" L0 client from peer \"%s\" with %d bytes data\n", 
+        ANSI_LIGHTCYAN, ANSI_NONE, 
+        data->cmd, data->from, rd->from, data->data_length);
     #endif
-
+    
+    // Create L0 packet
+    size_t out_data_len = sizeof(ksnLNullCPacket) + rd->from_len + data->data_length;
+    char *out_data = malloc(out_data_len);
+    memset(out_data, 0, out_data_len);
+    ksnLNullCPacket *packet = (ksnLNullCPacket*)out_data;
+    packet->cmd = data->cmd;
+    packet->peer_name_length = rd->from_len;
+    packet->data_length = data->data_length;
+    memcpy(packet->peer_name, rd->from, rd->from_len);
+    memcpy(packet->peer_name + rd->from_len, data->from + data->from_length, 
+            data->data_length);
+    
     // Send command to L0 client
     int *fd;
+    size_t snd;
     size_t valueLength;
     fd = pblMapGet(ke->kl->map_n, data->from, data->from_length, &valueLength);
-    if(write(*fd, rd->data, rd->data_len) >= 0);
+    if((snd = write(*fd, out_data, out_data_len)) >= 0);
+    
+    #ifdef DEBUG_KSNET
+    void *packet_data = packet->peer_name + packet->peer_name_length;
+    ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        "%sl0 Server:%s "
+        "Send %d bytes to \"%s\" L0 client: %d bytes data, from peer \"%s\": %s\n", 
+        ANSI_LIGHTCYAN, ANSI_NONE, 
+        (int)snd, data->from, 
+        packet->data_length, packet->peer_name, 
+        packet_data);
+    #endif
 
+    free(out_data);
+    
     return retval;
 }
 
