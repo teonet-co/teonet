@@ -157,8 +157,6 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         pblMapAdd(kl->map_n, kld->name, kld->name_length, 
                                 &w->fd, sizeof(w->fd));
                         
-                        // \todo Remove kl->map_n records when connection closed
-
                         #ifdef DEBUG_KSNET
                         ksnet_printf(&kev->ksn_cfg, DEBUG, 
                             "%sl0 Server:%s "
@@ -361,6 +359,10 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         // Free name
         if(kld->name != NULL) {
             
+            if(remove_f) 
+                pblMapRemove(kl->map_n, kld->name, kld->name_length, 
+                        &valueLength);
+            
             free(kld->name);
             kld->name = NULL;
             kld->name_length = 0;
@@ -451,7 +453,8 @@ void ksnLNullStop(ksnLNullClass *kl) {
             pblIteratorFree(it);
         }
                 
-        // Clear map
+        // Clear maps
+        pblMapClear(kl->map_n);
         pblMapClear(kl->map);
         
         // Stop the server
