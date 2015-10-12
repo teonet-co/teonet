@@ -137,7 +137,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         size_t valueLength;
         ksnLNullData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), 
                 &valueLength);
-            
+        
         if(kld != NULL) {
                     
             // Check received packet
@@ -191,17 +191,17 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 ptr += len;            
                 packet = (void*)packet + len;
             } 
-        }
-        
-        if(received - ptr > 0) {
             
-            #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                "%sl0 Server:%s "
-                "Wrong package, %d bytes ...%s\n", 
-                ANSI_LIGHTCYAN, ANSI_RED, received - ptr, ANSI_NONE);
-            #endif
-        }
+            if(received - ptr > 0) {
+
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                    "%sl0 Server:%s "
+                    "Wrong package, %d bytes ...%s\n", 
+                    ANSI_LIGHTCYAN, ANSI_RED, received - ptr, ANSI_NONE);
+                #endif
+            }
+        }        
     }
 }
 
