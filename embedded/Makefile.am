@@ -1,1 +1,1 @@
-EXTRA_DIST = libpbl
+EXTRA_DIST = libpbl libteol0
