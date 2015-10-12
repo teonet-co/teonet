@@ -117,6 +117,7 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>configure.ac</itemPath>
     </logicalFolder>
+    <itemPath>embedded/libteol0/teonet_l0_client.make.sh</itemPath>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
@@ -261,6 +262,16 @@
         <cTool flags="0">
         </cTool>
       </item>
+      <item path="embedded/libteol0/teonet_l0_client.i"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="embedded/libteol0/teonet_l0_client.make.sh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="examples/fossa/fossa.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
@@ -312,6 +323,8 @@
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="examples/teol0cli.py" ex="false" tool="3" flavor2="0">
       </item>
       <item path="examples/teolarge.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">

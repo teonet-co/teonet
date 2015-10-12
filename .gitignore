@@ -105,3 +105,5 @@
 /embedded/libteol0/Makefile.in
 /embedded/libteol0/Makefile
 /embedded/libteol0/.libs/
+/embedded/libteol0/teonet_l0_client_wrap.c
+/embedded/libteol0/teonet_l0_client.py
