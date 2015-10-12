@@ -43,7 +43,8 @@ teotcp_SOURCES = teotcp.c
 teoterm_SOURCES = teoterm.c
 teotun_SOURCES = teotun.c
 teostream_SOURCES = teostream.c
-teol0cli_SOURCER = teol0cli.c
+teol0cli_SOURCES = teol0cli.c 
+#../embedded/libteol0/teonet_l0_client.c
 
 exampledir = $(datarootdir)/doc/@PACKAGE@/examples
 example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \
@@ -51,6 +52,6 @@ example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \
 
 teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
 teoackm_LDFLAGS = $(AM_LDFLAGS) -lev
-teol0cli_LDFLAGS = $(AM_LDFLAGS) -lev
+teol0cli_LDFLAGS = $(AM_LDFLAGS) -lev 
 
 SUBDIRS = fossa

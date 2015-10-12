@@ -20,7 +20,7 @@
 int ksnLNullStart(ksnLNullClass *kl);
 void ksnLNullStop(ksnLNullClass *kl);
 void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
-ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, ksnLNullCPacket *packet, 
+ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
         char *cname, size_t cname_length);
 
 /**
@@ -131,7 +131,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     // Success read. Process package and resend it to teonet
     else {
                         
-        ksnLNullCPacket *packet = (ksnLNullCPacket *)data;
+        teoLNullCPacket *packet = (teoLNullCPacket *)data;
         size_t len, ptr = 0;
 
         size_t valueLength;
@@ -141,33 +141,51 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         if(kld != NULL) {
                     
             // Check received packet
-            while(received - ptr >= (len = sizeof(ksnLNullCPacket) + 
+            while(received - ptr >= (len = sizeof(teoLNullCPacket) + 
                     packet->peer_name_length + packet->data_length)) {
+                
+                    // Check checksum
+                    uint8_t header_checksum = teoByteChecksum(packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
+                    uint8_t checksum = teoByteChecksum(packet->peer_name, packet->peer_name_length + packet->data_length);
+                    if(packet->header_checksum == header_checksum &&
+                       packet->checksum == checksum) {
 
-                    // Check initialize packet: 
-                    // cmd = 0, to_length = 1, data_length = 1 + data_len, 
-                    // data = client_name
-                    //
-                    if(packet->cmd == 0 && packet->peer_name_length == 1 && 
-                            !packet->peer_name[0] && packet->data_length) {
+                        // Check initialize packet: 
+                        // cmd = 0, to_length = 1, data_length = 1 + data_len, 
+                        // data = client_name
+                        //
+                        if(packet->cmd == 0 && packet->peer_name_length == 1 && 
+                                !packet->peer_name[0] && packet->data_length) {
 
-                        kld->name = strdup(packet->peer_name + 1);
-                        kld->name_length = strlen(kld->name) + 1;
+                            kld->name = strdup(packet->peer_name + 1);
+                            kld->name_length = strlen(kld->name) + 1;
+
+                            pblMapAdd(kl->map_n, kld->name, kld->name_length, 
+                                    &w->fd, sizeof(w->fd));
+
+                            #ifdef DEBUG_KSNET
+                            ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                                "%sl0 Server:%s "
+                                "Connection initialized, client name: %s ...\n", 
+                                ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
+                            #endif
+                        }
                         
-                        pblMapAdd(kl->map_n, kld->name, kld->name_length, 
-                                &w->fd, sizeof(w->fd));
-                        
+                        // Resend data to teonet
+                        else {
+
+                            ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+                        }
+                    }
+                    
+                    // Wrong checksum - drop this packet
+                    else {
                         #ifdef DEBUG_KSNET
                         ksnet_printf(&kev->ksn_cfg, DEBUG, 
                             "%sl0 Server:%s "
-                            "Connection initialized, client name: %s ...\n", 
-                            ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
+                            "Wrong packet %d bytes length; dropped ...%s\n", 
+                            ANSI_LIGHTCYAN, ANSI_RED, len, ANSI_NONE);
                         #endif
-                    }
-                    // Resend data to teonet
-                    else {
-
-                        ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
                     }
 
                 ptr += len;            
@@ -198,7 +216,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * @param cname_length Length of the L0 client name
  * @return Pointer to ksnet_arp_data or NULL if to peer is absent
  */
-ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, ksnLNullCPacket *packet, 
+ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
         char *cname, size_t cname_length) {
     
     size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + packet->data_length;            
@@ -518,17 +536,13 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     #endif
     
     // Create L0 packet
-    size_t out_data_len = sizeof(ksnLNullCPacket) + rd->from_len + data->data_length;
+    size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + data->data_length;
     char *out_data = malloc(out_data_len);
     memset(out_data, 0, out_data_len);
-    ksnLNullCPacket *packet = (ksnLNullCPacket*)out_data;
-    packet->cmd = data->cmd;
-    packet->peer_name_length = rd->from_len;
-    packet->data_length = data->data_length;
-    memcpy(packet->peer_name, rd->from, rd->from_len);
-    memcpy(packet->peer_name + rd->from_len, data->from + data->from_length, 
+    teoLNullCPacket *packet = teoLNullPacketCreate(out_data, out_data_len, 
+            data->cmd, rd->from, data->from + data->from_length, 
             data->data_length);
-    
+        
     // Send command to L0 client
     int *fd;
     size_t snd;

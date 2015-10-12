@@ -239,28 +239,6 @@ ssize_t ksnTCPProxySendTo(ksnetEvMgrClass* ke,
 }
 
 /**
- * Calculate checksum
- * 
- * Calculate byte checksum in data buffer
- * 
- * @param data Pointer to data buffer
- * @param data_length Length of the data buffer to calculate checksum
- * 
- * @return Byte checksum of the input buffer
- */
-uint8_t ksnTCPProxyChecksumCalculate(void *data, size_t data_length) {
-    
-    int i;
-    uint8_t *ch, checksum = 0;
-    for(i = 0; i < data_length; i++) {
-        ch = (uint8_t*)(data + i);
-        checksum += *ch;
-    }
-    
-    return checksum;
-}
-
-/**
  * Create TCP Proxy package
  * 
  * Create TCP Proxy package from peers UDP address and port, data buffer and 
@@ -295,7 +273,7 @@ size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length,
         th->addr_length = strlen(addr) + 1; // Address string length
         th->port = port; // UDP port number
         th->packet_length = data_length; // Package data length   
-        th->packet_checksum = ksnTCPProxyChecksumCalculate((void*)th + 1, 
+        th->packet_checksum = teoByteChecksum((void*)th + 1, 
                 sizeof(ksnTCPProxyHeader) - 2);
         
         size_t p_length = sizeof(ksnTCPProxyHeader) + th->addr_length + data_length;        
@@ -304,7 +282,7 @@ size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length,
             tcp_package_length = p_length;
             memcpy(buffer + sizeof(ksnTCPProxyHeader), addr, th->addr_length); // Address string
             memcpy(buffer + sizeof(ksnTCPProxyHeader) + th->addr_length, data, data_length); // Package data        
-            th->checksum = ksnTCPProxyChecksumCalculate(buffer + 1, tcp_package_length - 1); // Package data length
+            th->checksum = teoByteChecksum(buffer + 1, tcp_package_length - 1); // Package data length
         } 
         else tcp_package_length = -2; // Error code: The output buffer less than packet data + header
     }
@@ -369,7 +347,7 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data,
                 
                 // Check packet header 
                 uint8_t packet_checksum = 
-                        ksnTCPProxyChecksumCalculate(
+                        teoByteChecksum(
                             (void*)packet->header + 1, 
                             sizeof(ksnTCPProxyHeader) - 2
                         );
@@ -407,7 +385,7 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data,
             
             // Get packet checksum 
             uint8_t checksum = 
-                    ksnTCPProxyChecksumCalculate(
+                    teoByteChecksum(
                         (void*)packet->buffer + 1, 
                         packet->length - 1
                     );
