@@ -102,3 +102,6 @@
 /app/teoweb
 /examples/teostream
 /examples/teol0cli
+/embedded/libteol0/Makefile.in
+/embedded/libteol0/Makefile
+/embedded/libteol0/.libs/
