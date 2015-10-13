@@ -31,10 +31,8 @@ extern "C" {
 #endif
 
 uint8_t teoByteChecksum(void *data, size_t data_length);
-
 size_t teoLNullPacketCreate(char* buffer, size_t buffer_length, uint8_t command, 
         char * peer, void* data, size_t data_length);
-
 size_t teoLNullInit(char* buffer, size_t buffer_length, char* host_name);
 
 #ifdef	__cplusplus
