@@ -34,8 +34,10 @@ size_t teoLNullPacketCreate(char* buffer, size_t buffer_length,
     pkg->peer_name_length = strlen(peer) + 1;
     memcpy(pkg->peer_name, peer, pkg->peer_name_length);
     memcpy(pkg->peer_name + pkg->peer_name_length, data, pkg->data_length);
-    pkg->checksum = teoByteChecksum(pkg->peer_name, pkg->peer_name_length + pkg->data_length);
-    pkg->header_checksum = teoByteChecksum(pkg, sizeof(teoLNullCPacket) - sizeof(pkg->header_checksum));
+    pkg->checksum = teoByteChecksum(pkg->peer_name, pkg->peer_name_length + 
+            pkg->data_length);
+    pkg->header_checksum = teoByteChecksum(pkg, sizeof(teoLNullCPacket) - 
+            sizeof(pkg->header_checksum));
     
     return sizeof(teoLNullCPacket) + pkg->peer_name_length + pkg->data_length;
 }
