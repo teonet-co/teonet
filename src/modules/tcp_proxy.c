@@ -466,7 +466,7 @@ int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
         if(fd_client > 0) {
             
             // Set TCP_NODELAY option
-            set_tcp_nodelay(kev, fd_client);
+            set_tcp_nodelay(fd_client);
 
             // Register connection
             tp->fd_client = fd_client;
@@ -941,7 +941,7 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     
     // Set TCP_NODELAY option
-    set_tcp_nodelay(kev, fd);
+    set_tcp_nodelay(fd);
 
     int udp_proxy_fd, udp_proxy_port = kev->ksn_cfg.port;
     

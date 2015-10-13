@@ -51,6 +51,7 @@
         <in>teoackm.c</in>
         <in>teocque.c</in>
         <in>teol0cli.c</in>
+        <in>teol0cli_n.c</in>
         <in>teolarge.c</in>
         <in>teomulti.c</in>
         <in>teomulti_t.c</in>
@@ -150,7 +151,7 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath></executablePath>
-          <cTool flags="4">
+          <cTool flags="1">
           </cTool>
         </makeTool>
       </makefileType>
@@ -269,7 +270,7 @@
       <item path="embedded/libteol0/teonet_l0_client.c"
             ex="false"
             tool="0"
-            flavor2="0">
+            flavor2="2">
         <cTool flags="4">
         </cTool>
       </item>
@@ -325,7 +326,7 @@
           </incDir>
         </cTool>
       </item>
-      <item path="examples/teol0cli_n.c" ex="false" tool="0" flavor2="0">
+      <item path="examples/teol0cli_n.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
@@ -334,10 +335,6 @@
             <pElem>src</pElem>
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teolarge.c" ex="false" tool="0" flavor2="2">
@@ -448,6 +445,10 @@
           <incDir>
             <pElem>embedded/libpbl/src</pElem>
           </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/embedded/libpbl">
+        <cTool>
           <preprocessorList>
             <Elem>PBLTEST</Elem>
           </preprocessorList>

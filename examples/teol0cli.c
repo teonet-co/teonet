@@ -38,14 +38,15 @@ void tcp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     size_t rc = read(w->fd, buf, KSN_BUFFER_DB_SIZE);
     ksnetEvMgrClass *ke = w->data;
     
-    // \todo Process received data
+    // Process received data
     if(rc > 0) {
         
         teoLNullCPacket *sp = (teoLNullCPacket*)buf;
         char *data = sp->peer_name + sp->peer_name_length;
         
         ksnet_printf(&ke->ksn_cfg, DEBUG,
-            "Receive %d bytes: %d bytes data from L0 server, from peer %s, data: %s\n", 
+            "Receive %d bytes: %d bytes data from L0 server, "
+            "from peer %s, data: %s\n", 
             (int)rc, sp->data_length, sp->peer_name, data);
     }
 }
@@ -76,7 +77,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 printf("Start teonet L0 Client example\n");
                 
                 // Set TCP_NODELAY option
-                set_tcp_nodelay(ke, fd);
+                set_tcp_nodelay(fd);
                 
                 // Create and start TCP watcher (start TCP client processing)
                 ev_init (&w, tcp_read_cb);
@@ -90,7 +91,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // Initialize L0 connection
                 size_t snd;
                 char *host_name = ksnetEvMgrGetHostName(ke);
-                size_t pkg_length = teoLNullInit(packet, KSN_BUFFER_SIZE, host_name);
+                size_t pkg_length = teoLNullInit(packet, KSN_BUFFER_SIZE, 
+                        host_name);
                 if((snd = write(fd, pkg, pkg_length)) >= 0);                
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
                     "Send %d bytes initialize packet to L0 server\n", (int)snd);
@@ -98,7 +100,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // Send message to peer
                 char *peer_name = "teostream";
                 char *msg = "Hello";
-                pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, CMD_ECHO, peer_name, msg, strlen(msg) + 1);
+                pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, 
+                        CMD_ECHO, peer_name, msg, strlen(msg) + 1);
                 if((snd = write(fd, pkg, pkg_length)) >= 0);
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
                     "Send %d bytes packet to L0 server to peer %s, data: %s\n", 
