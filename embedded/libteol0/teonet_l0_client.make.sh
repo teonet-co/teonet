@@ -9,4 +9,6 @@ gcc -c teonet_l0_client.c teonet_l0_client_wrap.c \
 
 ld -shared teonet_l0_client.o teonet_l0_client_wrap.o -o _teonet_l0_client.so
 
+# gcc -dynamiclib teonet_l0_client.o teonet_l0_client_wrap.o -o _teonet_l0_client.dylib
+
 cp _teonet_l0_client.so ../../examples
