@@ -8,6 +8,8 @@
 #ifndef TEONET_L0_CLIENT_H
 #define	TEONET_L0_CLIENT_H
 
+#include <stdint.h>
+
 /**
  * L0 client packet data structure
  * 
