@@ -334,7 +334,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
     
     // Set TCP_NODELAY option
-    set_tcp_nodelay(kev, fd);
+    set_tcp_nodelay(fd);
 
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
             "%sl0 Server:%s "
