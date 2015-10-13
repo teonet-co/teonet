@@ -90,18 +90,16 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // Initialize L0 connection
                 size_t snd;
                 char *host_name = ksnetEvMgrGetHostName(ke);
-                pkg = teoLNullInit(packet, KSN_BUFFER_SIZE);
-                if((snd = write(fd, pkg, sizeof(teoLNullCPacket) + pkg->peer_name_length + 
-                        pkg->data_length)) >= 0);                
+                size_t pkg_length = teoLNullInit(packet, KSN_BUFFER_SIZE, host_name);
+                if((snd = write(fd, pkg, pkg_length)) >= 0);                
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
                     "Send %d bytes initialize packet to L0 server\n", (int)snd);
                 
                 // Send message to peer
                 char *peer_name = "teostream";
                 char *msg = "Hello";
-                pkg = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, CMD_ECHO, peer_name, msg, strlen(msg) + 1);
-                if((snd = write(fd, pkg, sizeof(teoLNullCPacket) + pkg->peer_name_length + 
-                        pkg->data_length)) >= 0);
+                pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, CMD_ECHO, peer_name, msg, strlen(msg) + 1);
+                if((snd = write(fd, pkg, pkg_length)) >= 0);
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
                     "Send %d bytes packet to L0 server to peer %s, data: %s\n", 
                     (int)snd, peer_name, msg);

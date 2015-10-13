@@ -17,9 +17,13 @@
  */
 typedef struct ksnLNullData {
     
-    ev_io w;            ///< TCP Client watcher
-    char *name;         ///< Clients name
-    size_t name_length; ///< Clients name length
+    ev_io w;                ///< TCP Client watcher
+    char *name;             ///< Clients name
+    size_t name_length;     ///< Clients name length
+    void *read_buffer;      ///< Pointer to saved buffer
+    size_t read_buffer_ptr; ///< Pointer in read buffer
+    size_t read_buffer_size;///< Read buffer size
+
     
 } ksnLNullData;  
                    

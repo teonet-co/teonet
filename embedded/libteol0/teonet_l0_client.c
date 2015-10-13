@@ -20,10 +20,12 @@
  * @param data Command data
  * @param data_length Command data length
  * 
- * @return Pointer to teoLNullCPacket
+ * @return Length of packet
  */
-teoLNullCPacket* teoLNullPacketCreate(char* buffer, size_t buffer_length, 
+size_t teoLNullPacketCreate(char* buffer, size_t buffer_length, 
         uint8_t command, char * peer, void* data, size_t data_length) {
+    
+    // \todo Check buffer length
     
     teoLNullCPacket* pkg = (teoLNullCPacket*) buffer;
     
@@ -35,7 +37,22 @@ teoLNullCPacket* teoLNullPacketCreate(char* buffer, size_t buffer_length,
     pkg->checksum = teoByteChecksum(pkg->peer_name, pkg->peer_name_length + pkg->data_length);
     pkg->header_checksum = teoByteChecksum(pkg, sizeof(teoLNullCPacket) - sizeof(pkg->header_checksum));
     
-    return pkg;
+    return sizeof(teoLNullCPacket) + pkg->peer_name_length + pkg->data_length;
+}
+
+/**
+ * Create initialize L0 client packet
+ * 
+ * @param buffer Buffer to create packet in
+ * @param buffer_length Buffer length
+ * @param host_name Name of this L0 client
+ * 
+ * @return Pointer to teoLNullCPacket
+ */
+size_t teoLNullInit(char* buffer, size_t buffer_length, char* host_name) {
+    
+    return teoLNullPacketCreate(buffer, buffer_length, 0, "", host_name, 
+            strlen(host_name) + 1);
 }
 
 /**
