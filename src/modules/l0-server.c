@@ -236,7 +236,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 /**
  * Send data received from L0 client to teonet peer
  * 
- * @param kl
+ * @param kl Pointer to ksnLNullClass
  * @param packet L0 packet received from L0 client
  * @param cname L0 client name (include trailing zero)
  * @param cname_length Length of the L0 client name
@@ -245,8 +245,8 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
         char *cname, size_t cname_length) {
     
-    size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + packet->data_length;            
-    //char out_data[data_len]; // Buffer
+    size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + 
+            packet->data_length;            
     char *out_data = malloc(out_data_len);
     memset(out_data, 0, out_data_len);
     ksnLNullSPacket *spacket = (ksnLNullSPacket*) out_data;
@@ -260,8 +260,8 @@ ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
         packet->peer_name + packet->peer_name_length, spacket->data_length);
 
     // Send teonet L0 packet
-    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->peer_name, CMD_L0, 
-            spacket, out_data_len);
+    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->peer_name, 
+            CMD_L0, spacket, out_data_len);
 
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG, 
@@ -520,9 +520,9 @@ void ksnLNullStop(ksnLNullClass *kl) {
 /**
  * Process CMD_L0 teonet command
  *
- * @param ke
- * @param rd
- * @return
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param rd Pointer to ksnCorePacketData data
+ * @return If true - than command was processed by this function
  */
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     
@@ -547,17 +547,15 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     // Execute L0 client command
     retval = ksnCommandCheck(ke->kc->kco, rd);
     
-    //printf("ksnCommandCheck => %s, command No %d, data: %s\n", (retval ? "processed" : "not processed"), rd->cmd, (char*)rd->data);
-    
     return retval;
 }
 
 /**
  * Process CMD_L0TO teonet command
  *
- * @param ke
- * @param rd
- * @return
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param rd Pointer to ksnCorePacketData data
+ * @return If true - than command was processed by this function
  */
 int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     
@@ -567,13 +565,15 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     #ifdef DEBUG_KSNET
     ksnet_printf(&ke->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
-        "Got command No %d to \"%s\" L0 client from peer \"%s\" with %d bytes data\n", 
+        "Got command No %d to \"%s\" L0 client from peer \"%s\" "
+        "with %d bytes data\n", 
         ANSI_LIGHTCYAN, ANSI_NONE, 
         data->cmd, data->from, rd->from, data->data_length);
     #endif
     
     // Create L0 packet
-    size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + data->data_length;
+    size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + 
+            data->data_length;
     char *out_data = malloc(out_data_len);
     teoLNullCPacket *packet = out_data;
     memset(out_data, 0, out_data_len);
@@ -592,7 +592,8 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     void *packet_data = packet->peer_name + packet->peer_name_length;
     ksnet_printf(&ke->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
-        "Send %d bytes to \"%s\" L0 client: %d bytes data, from peer \"%s\": %s\n", 
+        "Send %d bytes to \"%s\" L0 client: %d bytes data, "
+        "from peer \"%s\": %s\n", 
         ANSI_LIGHTCYAN, ANSI_NONE, 
         (int)snd, data->from, 
         packet->data_length, packet->peer_name, 
