@@ -325,6 +325,21 @@
           </incDir>
         </cTool>
       </item>
+      <item path="examples/teol0cli_n.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="1">
+          <incDir>
+            <pElem>examples</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
       <item path="examples/teolarge.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
           <incDir>
