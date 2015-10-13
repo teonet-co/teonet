@@ -32,22 +32,10 @@ extern "C" {
 
 uint8_t teoByteChecksum(void *data, size_t data_length);
 
-teoLNullCPacket* teoLNullPacketCreate(char* buffer, size_t buffer_length, 
-        uint8_t command, char * peer, void* data, size_t data_length);
+size_t teoLNullPacketCreate(char* buffer, size_t buffer_length, uint8_t command, 
+        char * peer, void* data, size_t data_length);
 
-/**
- * Create initialize L0 client packet
- * 
- * @param buffer Buffer to create packet in
- * @param buffer_length Buffer length
- * 
- * @return Pointer to teoLNullCPacket
- */
-#define teoLNullInit(buffer, buffer_length) \
-({ \
-    char *host_name = ksnetEvMgrGetHostName(ke); \
-    teoLNullPacketCreate(buffer, buffer_length, 0, "", host_name, strlen(host_name) + 1); \
-})
+size_t teoLNullInit(char* buffer, size_t buffer_length, char* host_name);
 
 #ifdef	__cplusplus
 }

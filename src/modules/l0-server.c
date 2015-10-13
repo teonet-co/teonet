@@ -130,18 +130,39 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     // Success read. Process package and resend it to teonet
     else {
-                        
-        teoLNullCPacket *packet = (teoLNullCPacket *)data;
-        size_t len, ptr = 0;
-
-        size_t valueLength;
-        ksnLNullData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), 
-                &valueLength);
         
+        size_t vl;
+        ksnLNullData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), &vl);
         if(kld != NULL) {
                     
-            // Check received packet
-            while(received - ptr >= (len = sizeof(teoLNullCPacket) + 
+            // \todo Add received data to the read buffer
+            if(received > kld->read_buffer_size - kld->read_buffer_ptr) {
+                                
+                // Increase read buffer size
+                kld->read_buffer_size += data_len; //received;
+                if(kld->read_buffer != NULL) 
+                    kld->read_buffer = realloc(kld->read_buffer, kld->read_buffer_size);
+                else 
+                    kld->read_buffer = malloc(kld->read_buffer_size);     
+                
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                    "%sl0 Server:%s "
+                    "Increase read buffer to new size: %d bytes ...%s\n", 
+                    ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_size, 
+                    ANSI_NONE);
+                #endif
+            }
+            memmove(kld->read_buffer + kld->read_buffer_ptr, data, received);
+            kld->read_buffer_ptr += received;
+
+            teoLNullCPacket *packet = (teoLNullCPacket *)kld->read_buffer;
+            size_t len, ptr = 0;
+        
+            // \todo Check packet
+
+            // Process read buffer
+            while(kld->read_buffer_ptr - ptr >= (len = sizeof(teoLNullCPacket) + 
                     packet->peer_name_length + packet->data_length)) {
                 
                     // Check checksum
@@ -186,26 +207,31 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                             "Wrong packet %d bytes length; dropped ...%s\n", 
                             ANSI_LIGHTCYAN, ANSI_RED, len, ANSI_NONE);
                         #endif
+
+                        kld->read_buffer_ptr = 0;
                     }
 
                 ptr += len;            
                 packet = (void*)packet + len;
             } 
             
-            if(received - ptr > 0) {
+            // Check end of buffer
+            if(kld->read_buffer_ptr - ptr > 0) {
 
                 #ifdef DEBUG_KSNET
                 ksnet_printf(&kev->ksn_cfg, DEBUG, 
                     "%sl0 Server:%s "
-                    "Wrong package, %d bytes ...%s\n", 
-                    ANSI_LIGHTCYAN, ANSI_RED, received - ptr, ANSI_NONE);
+                    "Wait next part of packet, now it has %d bytes ...%s\n", 
+                    ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_ptr - ptr, ANSI_NONE);
                 #endif
+
+                kld->read_buffer_ptr = kld->read_buffer_ptr - ptr;
+                memmove(kld->read_buffer, kld->read_buffer + ptr, kld->read_buffer_ptr);
             }
+            else kld->read_buffer_ptr = 0;
         }        
     }
 }
-
-//Pointer to ksnet_arp_data or NULL if to is absent
 
 /**
  * Send data received from L0 client to teonet peer
@@ -319,6 +345,9 @@ void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
     ksnLNullData data;
     data.name = NULL;
     data.name_length = 0;
+    data.read_buffer = NULL;
+    data.read_buffer_ptr = 0;
+    data.read_buffer_size = 0;
     pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));
     
     #pragma GCC diagnostic push
@@ -384,6 +413,14 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             free(kld->name);
             kld->name = NULL;
             kld->name_length = 0;
+        }
+        
+        // Free buffer
+        if(kld->read_buffer != NULL) {
+            
+            free(kld->read_buffer);
+            kld->read_buffer_ptr = 0;
+            kld->read_buffer_size = 0;
         }
 
         // Remove data from map
@@ -538,8 +575,9 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     // Create L0 packet
     size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + data->data_length;
     char *out_data = malloc(out_data_len);
+    teoLNullCPacket *packet = out_data;
     memset(out_data, 0, out_data_len);
-    teoLNullCPacket *packet = teoLNullPacketCreate(out_data, out_data_len, 
+    size_t packet_length = teoLNullPacketCreate(out_data, out_data_len, 
             data->cmd, rd->from, data->from + data->from_length, 
             data->data_length);
         
