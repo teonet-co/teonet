@@ -28,7 +28,7 @@
  */
 int main(int argc, char** argv) {
     
-    printf("Teol0cli_n example ver " TL0CN_VERSION " (native client)\n");
+    printf("Teol0cli_n example ver " TL0CN_VERSION " (native client)\n\n");
     
     // Teonet L0 server parameters
     const char *peer_name = "teostream";
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
         size_t snd;
         size_t pkg_length = teoLNullInit(packet, BUFFER_SIZE, host_name);
         if((snd = write(fd, pkg, pkg_length)) >= 0);                
-        printf("Send %d bytes initialize packet to L0 server\n", (int)snd);
+        printf("\nSend %d bytes initialize packet to L0 server\n", (int)snd);
 
         // Send command message
         const char *msg = "Hello";
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
             char *data = cp->peer_name + cp->peer_name_length;
 
             printf("Receive %d bytes: %d bytes data from L0 server, "
-                    "from peer %s, data: %s\n", 
+                    "from peer %s, data: %s\n\n", 
                     (int)rc, cp->data_length, cp->peer_name, data);
         }
 
