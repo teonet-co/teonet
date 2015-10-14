@@ -104,6 +104,7 @@ nobase_teonetinclude_HEADERS = \
     config/conf.h \
     config/opt.h \
     modules/cque.h \
+    modules/l0-server.h \
     modules/net_cli.h \
     modules/net_tcp.h \
     modules/net_term.h \
@@ -136,6 +137,7 @@ libteonet_la_SOURCES = \
     config/conf.c \
     config/opt.c \
     modules/cque.c \
+    modules/l0-server.c \
     modules/net_cli.c \
     modules/net_tcp.c \
     modules/net_term.c \
@@ -145,7 +147,8 @@ libteonet_la_SOURCES = \
     modules/teodb.c \
     modules/vpn.c \
     utils/string_arr.c \
-    utils/utils.c
+    utils/utils.c \
+    ../embedded/libteol0/teonet_l0_client.c
 
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default
@@ -162,7 +165,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 17:0:0 
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 18:0:0 
 
 uninstall-local:
 	-rm -r $(teonetincludedir)

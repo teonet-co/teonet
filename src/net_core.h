@@ -18,6 +18,12 @@
 #include <winsock2.h>
 #endif
 
+#ifdef HAVE_DARWIN
+#include <netinet/in.h>
+#define __CONST_SOCKADDR_ARG const struct sockaddr_in *
+#define __SOCKADDR_ARG struct sockaddr_in *
+#endif
+
 #include "net_arp.h"
 #include "net_com.h"
 #if KSNET_CRYPT
@@ -65,7 +71,7 @@ void ksnCoreDestroy(ksnCoreClass *kc);
 
 int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd, void *data, size_t data_len);
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len);
-void ksnCoreProcessPacket (void *kc, void *buf, size_t recvlen, 
+void ksnCoreProcessPacket (void *kc, void *buf, size_t recvlen,
         __SOCKADDR_ARG remaddr);
 int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *recv_data);
 #define ksnCoreSetEventTime(kc) kc->last_check_event = ksnetEvMgrGetTime(kc->ke)

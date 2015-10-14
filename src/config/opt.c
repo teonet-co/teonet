@@ -62,12 +62,14 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "key",            required_argument, 0, 'e' },
         { "tcp_allow",      no_argument,       &conf->tcp_allow_f, 1 },
         { "tcp_port",       required_argument, 0, 'o' },
+        { "l0_allow",       no_argument,       &conf->l0_allow_f, 1 },
+        { "l0_tcp_port",    required_argument, 0, 'l' },
         { "hot_keys",       no_argument,       &conf->hot_keys_f, 1 },
         { "show_debug",     no_argument,       &conf->show_debug_f, 1 },
         { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
         { "show_connect",   no_argument,       &conf->show_connect_f, 1 },
         { "show_peers",     no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
-        { "show_tr_udp",    no_argument,       &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
+        { "show_TR-UDP",    no_argument,       &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
         #if M_ENAMBE_VPN
         { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
         { "vpn_ip",         required_argument, 0, 'i' },
@@ -210,6 +212,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           conf->tcp_port = atoi(optarg);
           break;
 
+        case 'l':
+          conf->l0_tcp_port = atoi(optarg);
+          break;
           
         case 'd':
           // Start this application in Daemon mode
@@ -326,6 +331,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "  -t, --r_tcp_port=value   Set remote server TCP port number (default "KSNET_PORT_DEFAULT")\n"
     "      --tcp_allow          Allow TCP Proxy connection to this server\n"
     "  -o, --tcp_port=value     TCP Proxy port number (default "KSNET_PORT_DEFAULT")\n"
+    "      --l0_allow           Allow L0 Server and l0 clients connection\n"
+    "  -l, --l0_tcp_port=value  L0 Server TCP port number (default "KSNET_PORT_DEFAULT")\n"
     "      --hot_keys           Switch on the hot keys monitor\n"
     #ifdef DEBUG_KSNET
     "      --show_debug         Show debug messages\n"
@@ -333,7 +340,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     "      --show_connect       Show connection messages\n"
     "      --show_peers         Show peers screen after connection\n"
-    "      --show_tr_udp        Show TR-UDP statistic after connection\n"
+    "      --show_TR-UDP        Show TR-UDP statistic after connection\n"
     #if M_ENAMBE_VPN
     "      --vpn_start          Start VPN\n"
     "      --vpn_ip             VPN IP\n"
