@@ -26,7 +26,8 @@ extern CU_pSuite pSuite;
   kc.ka = NULL; \
   ke.kc = &kc; \
   ke.event_cb = NULL; \
-  ke.ev_loop = ev_loop_new (0)
+  ke.ev_loop = ev_loop_new (0); \
+  memset(&ke.ksn_cfg, 0 , sizeof(ke.ksn_cfg))
 
 /**
  * Test pblHeap functions
