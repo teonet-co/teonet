@@ -479,6 +479,14 @@ int bind_udp(int *port) {
         perror(" cannot create socket ...");
         return -1;
     }
+    
+    // Set server socket options
+    int yes = 1;
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+        // error handling
+        perror(" can't set socket options\n");
+        return -3;
+    }
 
     // Bind the socket to any valid IP address and a specific port, increment 
     // port if busy 
@@ -506,16 +514,16 @@ int bind_udp(int *port) {
         } 
         else break;
     }
+    
+    // Set non block mode
+    set_nonblock(fd);
 
     return fd;
 }
 
 //! TR-UDP sendto function
 void test_2_8() {
-    
-    // \todo Fix error in this function ...
-    return;
-    
+      
     // Emulate ksnCoreClass
     kc_emul();
 
@@ -527,11 +535,11 @@ void test_2_8() {
 
     // Start test UDP sender
     fd_s = bind_udp(&port_s);
-    CU_ASSERT(fd_s > 0);
+    CU_ASSERT_FATAL(fd_s > 0);
     
     // Start test UDP receiver
     fd_r = bind_udp(&port_r);
-    CU_ASSERT(fd_r > 0);
+    CU_ASSERT_FATAL(fd_r > 0);
     
     // Fill sender address 
     if(inet_aton(addr_str, &addr_s.sin_addr) == 0) CU_ASSERT(1 == 0);
@@ -559,7 +567,7 @@ void test_2_8() {
     // a) Send one message receiver
     ssize_t sent = ksnTRUDPsendto(tu, 0, 0, 0, CMD_TUN, fd_s, buf1, buf_len, 0, 
         (__CONST_SOCKADDR_ARG) &addr_r, addr_len); // TR-UDP sendto
-    if(sent < 0) printf(" sent to %d = %d: %s ...", port_r, (int)sent, strerror(errno));
+    if(sent < 0) printf(" sent to %d = %d, fd = %d: %s ...", port_r, (int)sent, fd_s, strerror(errno));
     // Check sent result
     CU_ASSERT_FATAL(sent > 0);
     CU_ASSERT(sent == buf_len + tru_ptr);
@@ -728,11 +736,13 @@ void test_2_9() {
     
     // Start test UDP sender
     fd_s = bind_udp(&port_s);
-    CU_ASSERT(fd_s > 0);
+    CU_ASSERT_FATAL(fd_s > 0);
+    printf("bind s OK ...\n");
     
     // Start test UDP receiver
     fd_r = bind_udp(&port_r);
-    CU_ASSERT(fd_r > 0);
+    CU_ASSERT_FATAL(fd_r > 0);
+    printf("bind r OK ...\n");
     
     // Fill sender address 
     if(inet_aton(addr_str, &addr_s.sin_addr) == 0) CU_ASSERT(1 == 0);
