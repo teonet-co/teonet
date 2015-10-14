@@ -153,6 +153,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
 
         // Create new rds
         rds = malloc(sizeof(ksnCorePacketData));
+        memset(rds, 0, sizeof(ksnCorePacketData));
 
         // Get subpackets from map and add it to combined block
         int i;

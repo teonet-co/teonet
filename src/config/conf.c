@@ -64,6 +64,10 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // TCP Proxy
     ksn_cfg->tcp_allow_f = 0;
     ksn_cfg->tcp_port = ksn_cfg->port;
+    
+    // L0 Server
+    ksn_cfg->l0_allow_f = 0;
+    ksn_cfg->l0_tcp_port = ksn_cfg->port;
             
     // Remote host default
     ksn_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
@@ -121,6 +125,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
         
         CFG_SIMPLE_INT("tcp_port", &conf->tcp_port),
         CFG_SIMPLE_BOOL("tcp_allow_f", &conf->tcp_allow_f),
+
+        CFG_SIMPLE_INT("l0_tcp_port", &conf->l0_tcp_port),
+        CFG_SIMPLE_BOOL("l0_allow_f", &conf->l0_allow_f),
 
         CFG_SIMPLE_STR("r_host_addr", &r_host_addr),
         CFG_SIMPLE_INT("r_port", &conf->r_port),

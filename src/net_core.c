@@ -342,7 +342,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
  * @param cmd
  * @param data
  * @param data_len
- * @return
+ * @return Pointer to ksnet_arp_data or NULL if to is absent
  */
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                                  void *data, size_t data_len) {
@@ -360,14 +360,14 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
                 data_len);
         // \todo: Send to peer at other network
-        printf("###TODO: Send to peer at other network\n");
+        printf("###TODO: Send to peer %s at other network\n", to);
     }
     
     // Send to r-host
     else {
         
         // \todo: Send to r-host
-        printf("###TODO: Send to r-host\n");
+        printf("###TODO: Send to r-host, peer = %s\n", to);
     }
 
     return arp;

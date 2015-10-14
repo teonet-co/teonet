@@ -17,6 +17,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 #include "ev_mgr.h"
 #include "net_tcp.h"
@@ -40,6 +41,35 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents);
 #define ev_ksnet_io_stop(loop, watcher) \
     ev_io_stop (loop, watcher)
 
+// Moved to teonet_l0_client.c
+///**
+// * Set TCP NODELAY option
+// * 
+// * @param ke Pointer toksnetEvMgrClass
+// * @param fd TCP socket descriptor
+// * 
+// * @return Result of setting. Success if >= 0.
+// */
+//int set_tcp_nodelay(void* ke, int fd) {
+//
+//    int flag = 1;
+//    int result = setsockopt(fd,           // socket affected
+//                         IPPROTO_TCP,     // set option at TCP level
+//                         TCP_NODELAY,     // name of option
+//                         (char *) &flag,  // the cast is historical cruft
+//                         sizeof(int));    // length of option value
+//    if (result < 0) {
+//        
+//        #ifdef DEBUG_KSNET
+//        ksnet_printf(& ((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG, 
+//            "%sTCP Server:%s "
+//            "Set TCP_NODELAY of fd %d error %s\n", 
+//            ANSI_MAGENTA, ANSI_NONE, ANSI_RED, fd, ANSI_NONE);
+//        #endif
+//    }
+//    
+//    return result;
+//}
 
 /******************************************************************************/
 /* TCP Client/Server module methods                                           */

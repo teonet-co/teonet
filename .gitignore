@@ -80,7 +80,6 @@
 /tests/Makefile
 /tests/Makefile.in
 /tests/teonet_tst
-/lib/confuse/.deps/
 /teonet-*/
 /teonet-*.gz
 /libteonet_*
@@ -102,3 +101,10 @@
 /.teodb/
 /app/teoweb
 /examples/teostream
+/examples/teol0cli
+/embedded/libteol0/Makefile.in
+/embedded/libteol0/Makefile
+/embedded/libteol0/.libs/
+/embedded/libteol0/teonet_l0_client_wrap.c
+/embedded/libteol0/teonet_l0_client.py
+/examples/teol0cli_n

@@ -4,7 +4,7 @@
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
             <name>teonet</name>
-            <c-extensions>c</c-extensions>
+            <c-extensions>c,i</c-extensions>
             <cpp-extensions/>
             <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
@@ -33,10 +33,16 @@
             <word>internet</word>
             <word>ip</word>
             <word>len</word>
+            <word>libteol</word>
+            <word>libteonet</word>
             <word>localhost</word>
             <word>ms</word>
             <word>mtu</word>
+            <word>pc</word>
             <word>perror</word>
+            <word>po</word>
+            <word>sh</word>
+            <word>src</word>
             <word>str</word>
             <word>tcp</word>
             <word>teo</word>

@@ -31,6 +31,6 @@ endif
 
 noinst_PROGRAMS = teonet_tst test_teonet
 
-teonet_tst_SOURCES = teonet_tst.c
+teonet_tst_SOURCES  = teonet_tst.c
 test_teonet_SOURCES = test_teonet.c test_tr-udp.c test_crypt.c test_cque.c \
 		      test_teodb.c test_tcp_proxy.c
