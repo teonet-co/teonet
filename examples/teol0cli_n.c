@@ -60,9 +60,6 @@ int main(int argc, char** argv) {
         printf("Send %d bytes packet to L0 server to peer %s, data: %s\n", 
                (int)snd, peer_name, msg);
 
-        // \todo If uncomment return below the peer_name peer break with Segmentation fault
-        // return (EXIT_SUCCESS);
-        
         // Receive answer from server
         char buf[BUFFER_SIZE];
         size_t rc;
