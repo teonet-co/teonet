@@ -260,15 +260,23 @@ ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
         packet->peer_name + packet->peer_name_length, spacket->data_length);
 
     // Send teonet L0 packet
-    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->peer_name, 
-            CMD_L0, spacket, out_data_len);
-
     #ifdef DEBUG_KSNET
     ksnet_printf(&kev->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
-        "Send command from L0 %s client to %s peer ...\n", 
+        "Send command from L0 \"%s\" client to \"%s\" peer ...\n", 
         ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->peer_name);
     #endif
+    ksnet_arp_data *arp = NULL;
+    // Send to peer
+    if(strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
+        arp = ksnCoreSendCmdto(kev->kc, (char*)packet->peer_name, CMD_L0, 
+                spacket, out_data_len);
+    }
+    // \todo Send to this host
+    else {
+        printf("Send to L0 server\n");
+        // ksnCoreProcessPacket(kev->kc, )
+    }
 
     free(out_data);
 
@@ -306,16 +314,16 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     spacket->data_length = data_len;
     memcpy(spacket->from + spacket->from_length, data, data_len);
     
-    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO, 
-            out_data, out_data_len);    
-    
+    // Send command to client of L0 server
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
-        "Send command to L0 client %s ...\n", 
+        "Send command to L0 server for client \"%s\" ...\n", 
         ANSI_LIGHTCYAN, ANSI_NONE, spacket->from);
     #endif
-
+    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO, 
+            out_data, out_data_len);    
+    
     free(out_data);
     
     return rv;
