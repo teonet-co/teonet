@@ -245,6 +245,9 @@ int ksnCoreBind(ksnCoreClass *kc) {
                 "%sNet core:%s Start listen at port %d, socket fd %d\n", 
                 ANSI_GREEN, ANSI_NONE, kc->port, kc->fd);
         #endif
+
+        // Set non block mode
+        // \todo test with "Set non block" set_nonblock(fd);
     }
 
     return !(fd > 0);
