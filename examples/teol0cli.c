@@ -34,6 +34,8 @@ ev_io w;
  */
 void tcp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         
+    // \todo Create L0 client function to combine and split receive buffer
+    
     char buf[KSN_BUFFER_DB_SIZE];
     size_t rc = read(w->fd, buf, KSN_BUFFER_DB_SIZE);
     ksnetEvMgrClass *ke = w->data;
@@ -98,7 +100,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     "Send %d bytes initialize packet to L0 server\n", (int)snd);
                 
                 // Send message to peer
-                char *peer_name = "teostream";
+                char *peer_name = ke->ksn_cfg.app_argv[1]; 
                 char *msg = "Hello";
                 pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, 
                         CMD_ECHO, peer_name, msg, strlen(msg) + 1);
@@ -128,9 +130,19 @@ int main(int argc, char** argv) {
     printf("Teol0cli example ver " TL0C_VERSION ", "
            "based on teonet ver. " VERSION "\n");
     
+    // Application parameters
+    char *app_argv[] = { "", "peer_to"}; 
+    ksnetEvMgrAppParam app_param;
+    app_param.app_argc = 2;
+    app_param.app_argv = app_argv;
+    
     // Initialize teonet event manager and Read configuration
-    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb,
-            READ_OPTIONS|READ_CONFIGURATION);
+    ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb,
+            READ_OPTIONS|READ_CONFIGURATION|APP_PARAM, 0, &app_param);
+    
+//    // Initialize teonet event manager and Read configuration
+//    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb,
+//            READ_OPTIONS|READ_CONFIGURATION);
     
     // Start teonet
     ksnetEvMgrRun(ke);
