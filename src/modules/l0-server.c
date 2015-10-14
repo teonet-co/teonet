@@ -135,7 +135,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         ksnLNullData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), &vl);
         if(kld != NULL) {
                     
-            // \todo Add received data to the read buffer
+            // Add received data to the read buffer
             if(received > kld->read_buffer_size - kld->read_buffer_ptr) {
                                 
                 // Increase read buffer size
@@ -575,30 +575,46 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + 
             data->data_length;
     char *out_data = malloc(out_data_len);
-    teoLNullCPacket *packet = out_data;
+    teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
     memset(out_data, 0, out_data_len);
     size_t packet_length = teoLNullPacketCreate(out_data, out_data_len, 
             data->cmd, rd->from, data->from + data->from_length, 
             data->data_length);
-        
+    
     // Send command to L0 client
     int *fd;
     size_t snd;
     size_t valueLength;
     fd = pblMapGet(ke->kl->map_n, data->from, data->from_length, &valueLength);
-    if((snd = write(*fd, out_data, out_data_len)) >= 0);
+    if(fd != NULL) {
+        
+        if((snd = write(*fd, out_data, packet_length)) >= 0);
+
+        #ifdef DEBUG_KSNET
+        void *packet_data = packet->peer_name + packet->peer_name_length;
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "Send %d bytes to \"%s\" L0 client: %d bytes data, "
+            "from peer \"%s\": %s\n", 
+            ANSI_LIGHTCYAN, ANSI_NONE, 
+            (int)snd, data->from, 
+            packet->data_length, packet->peer_name, 
+            packet_data);
+        #endif
+    } 
     
-    #ifdef DEBUG_KSNET
-    void *packet_data = packet->peer_name + packet->peer_name_length;
-    ksnet_printf(&ke->ksn_cfg, DEBUG, 
-        "%sl0 Server:%s "
-        "Send %d bytes to \"%s\" L0 client: %d bytes data, "
-        "from peer \"%s\": %s\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, 
-        (int)snd, data->from, 
-        packet->data_length, packet->peer_name, 
-        packet_data);
-    #endif
+    // The L0 client was disconnected
+    else {
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "The \"%s\" L0 client has not connected to the server%s\n", 
+            ANSI_LIGHTCYAN, ANSI_RED, 
+            data->from,
+            ANSI_NONE);
+        #endif
+    }
 
     free(out_data);
     
