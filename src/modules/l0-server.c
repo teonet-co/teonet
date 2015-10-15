@@ -572,23 +572,42 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     int retval = 1;
     ksnLNullSPacket *data = rd->data;
         
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, 
-        "%sl0 Server:%s "
-        "Got command No %d from %s client with %d bytes data\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
-    #endif
-
     // Process command
-    rd->cmd = data->cmd;
-    rd->from = data->from;
-    rd->from_len = data->from_length;
-    rd->data = data->from + data->from_length;
-    rd->data_len = data->data_length;
-    rd->l0_f = 1;
-    
-    // Execute L0 client command
-    retval = ksnCommandCheck(ke->kc->kco, rd);
+    if(data->cmd == CMD_ECHO || data->cmd == CMD_PEERS || 
+       (data->cmd >= CMD_USER && data->cmd < CMD_192_RESERVED) ||
+       (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {
+
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "Got valid command No %d from %s client with %d bytes data ...\n", 
+            ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
+        #endif
+
+        // Process command
+        rd->cmd = data->cmd;
+        rd->from = data->from;
+        rd->from_len = data->from_length;
+        rd->data = data->from + data->from_length;
+        rd->data_len = data->data_length;
+        rd->l0_f = 1;
+
+        // Execute L0 client command
+        retval = ksnCommandCheck(ke->kc->kco, rd);
+    }
+    // Wrong command
+    else {
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "Got wrong command No %d from %s client with %d bytes data, "
+            "the command skipped ...%s\n", 
+            ANSI_LIGHTCYAN, ANSI_RED, 
+            data->cmd, data->from, data->data_length, 
+            ANSI_NONE);
+        #endif
+    }
     
     return retval;
 }
