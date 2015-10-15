@@ -23,9 +23,9 @@
  */
 typedef struct ksnet_arp_data {
 
-    int mode;       ///< Peers mode; -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
-    char addr[40];  ///< Peer IP address
-    int port;       ///< Peer port
+    int16_t mode;       ///< Peers mode: -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
+    char addr[40];      ///< Peer IP address
+    int16_t port;       ///< Peer port
 
     double last_acrivity;           ///< Last time receved data from peer
     double last_triptime_send;      ///< Last time when triptime request send
@@ -37,6 +37,21 @@ typedef struct ksnet_arp_data {
     double monitor_time;            ///< Monitor ping time
 
 } ksnet_arp_data;
+
+/**
+ * KSNet ARP table whole data array
+ */
+typedef struct ksnet_arp_data_ar {
+    
+    uint32_t length;
+    struct _arp_data {
+        
+        char name[40];
+        ksnet_arp_data data;
+        
+    } arp_data[];
+    
+} ksnet_arp_data_ar;
 
 /**
  * KSNet ARP functions data
@@ -69,6 +84,10 @@ int ksnetArpShow(ksnetArpClass *ka);
 char *ksnetArpShowStr(ksnetArpClass *ka);
 int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data);
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr);
+ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka);
+size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);
+char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data);
+char *ksnetArpShowHeader(int header_f);
 
 #ifdef	__cplusplus
 }
