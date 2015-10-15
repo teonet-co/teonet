@@ -742,7 +742,7 @@ uint32_t ksnTRUDPtimestamp() {
 }
 
 // Make address from string
-int ksnTRUDPmakeAddr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *addr_len) {
+int make_addr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *addr_len) {
     
     if(*addr_len < sizeof(struct sockaddr_in)) return -3;
     *addr_len = sizeof(struct sockaddr_in); // length of addresses
