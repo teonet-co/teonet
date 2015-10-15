@@ -23,6 +23,14 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
 ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
         char *cname, size_t cname_length);
 
+// Other modules not declared functions
+void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, 
+        size_t data_len, size_t *packet_len);
+#include "tr-udp_.h"  // ksnTRUDPmakeAddr
+
+// External consants
+extern const char *localhost;
+
 /**
  * Pointer to ksnetEvMgrClass
  * 
@@ -141,7 +149,8 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 // Increase read buffer size
                 kld->read_buffer_size += data_len; //received;
                 if(kld->read_buffer != NULL) 
-                    kld->read_buffer = realloc(kld->read_buffer, kld->read_buffer_size);
+                    kld->read_buffer = realloc(kld->read_buffer, 
+                            kld->read_buffer_size);
                 else 
                     kld->read_buffer = malloc(kld->read_buffer_size);     
                 
@@ -166,8 +175,11 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     packet->peer_name_length + packet->data_length)) {
                 
                     // Check checksum
-                    uint8_t header_checksum = teoByteChecksum(packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
-                    uint8_t checksum = teoByteChecksum(packet->peer_name, packet->peer_name_length + packet->data_length);
+                    uint8_t header_checksum = teoByteChecksum(packet, 
+                            sizeof(teoLNullCPacket) - 
+                            sizeof(packet->header_checksum));
+                    uint8_t checksum = teoByteChecksum(packet->peer_name, 
+                            packet->peer_name_length + packet->data_length);
                     if(packet->header_checksum == header_checksum &&
                        packet->checksum == checksum) {
 
@@ -195,7 +207,8 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         // Resend data to teonet
                         else {
 
-                            ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+                            ksnLNullSendFromL0(kl, packet, kld->name, 
+                                    kld->name_length);
                         }
                     }
                     
@@ -222,11 +235,13 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 ksnet_printf(&kev->ksn_cfg, DEBUG, 
                     "%sl0 Server:%s "
                     "Wait next part of packet, now it has %d bytes ...%s\n", 
-                    ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_ptr - ptr, ANSI_NONE);
+                    ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_ptr - ptr, 
+                    ANSI_NONE);
                 #endif
 
                 kld->read_buffer_ptr = kld->read_buffer_ptr - ptr;
-                memmove(kld->read_buffer, kld->read_buffer + ptr, kld->read_buffer_ptr);
+                memmove(kld->read_buffer, kld->read_buffer + ptr, 
+                        kld->read_buffer_ptr);
             }
             else kld->read_buffer_ptr = 0;
         }        
@@ -260,15 +275,43 @@ ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
         packet->peer_name + packet->peer_name_length, spacket->data_length);
 
     // Send teonet L0 packet
-    ksnet_arp_data *arp = ksnCoreSendCmdto(kev->kc, (char*)packet->peer_name, 
-            CMD_L0, spacket, out_data_len);
+    ksnet_arp_data *arp = NULL;
+    // Send to peer
+    if(strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&kev->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "Send command from L0 \"%s\" client to \"%s\" peer ...\n", 
+            ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->peer_name);
+        #endif
 
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG, 
-        "%sl0 Server:%s "
-        "Send command from L0 %s client to %s peer ...\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->peer_name);
-    #endif
+        arp = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0, 
+                spacket, out_data_len);
+    }
+    // Send to this host
+    else {
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&kev->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "Send command to L0 server peer \"%s\" from L0 client \"%s\" ...\n", 
+            ANSI_LIGHTCYAN, ANSI_NONE, packet->peer_name, spacket->from);
+        #endif
+        
+        // Create packet
+        size_t pkg_len;
+        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len, 
+                    &pkg_len);
+        struct sockaddr_in addr;             // address structure
+        socklen_t addrlen = sizeof(addr);    // address structure length
+        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr, 
+                &addrlen)) {
+            
+            ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
+            arp = ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
+        }
+        free(pkg);
+    }
 
     free(out_data);
 
@@ -306,16 +349,16 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     spacket->data_length = data_len;
     memcpy(spacket->from + spacket->from_length, data, data_len);
     
-    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO, 
-            out_data, out_data_len);    
-    
+    // Send command to client of L0 server
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG, 
         "%sl0 Server:%s "
-        "Send command to L0 client %s ...\n", 
+        "Send command to L0 server for client \"%s\" ...\n", 
         ANSI_LIGHTCYAN, ANSI_NONE, spacket->from);
     #endif
-
+    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO, 
+            out_data, out_data_len);    
+    
     free(out_data);
     
     return rv;
@@ -529,23 +572,42 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     int retval = 1;
     ksnLNullSPacket *data = rd->data;
         
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, 
-        "%sl0 Server:%s "
-        "Got command No %d from %s client with %d bytes data\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
-    #endif
-
     // Process command
-    rd->cmd = data->cmd;
-    rd->from = data->from;
-    rd->from_len = data->from_length;
-    rd->data = data->from + data->from_length;
-    rd->data_len = data->data_length;
-    rd->l0_f = 1;
-    
-    // Execute L0 client command
-    retval = ksnCommandCheck(ke->kc->kco, rd);
+    if(data->cmd == CMD_ECHO || data->cmd == CMD_PEERS || 
+       (data->cmd >= CMD_USER && data->cmd < CMD_192_RESERVED) ||
+       (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {
+
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "Got valid command No %d from %s client with %d bytes data ...\n", 
+            ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
+        #endif
+
+        // Process command
+        rd->cmd = data->cmd;
+        rd->from = data->from;
+        rd->from_len = data->from_length;
+        rd->data = data->from + data->from_length;
+        rd->data_len = data->data_length;
+        rd->l0_f = 1;
+
+        // Execute L0 client command
+        retval = ksnCommandCheck(ke->kc->kco, rd);
+    }
+    // Wrong command
+    else {
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+            "%sl0 Server:%s "
+            "Got wrong command No %d from %s client with %d bytes data, "
+            "the command skipped ...%s\n", 
+            ANSI_LIGHTCYAN, ANSI_RED, 
+            data->cmd, data->from, data->data_length, 
+            ANSI_NONE);
+        #endif
+    }
     
     return retval;
 }

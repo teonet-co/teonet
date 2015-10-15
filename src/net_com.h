@@ -31,15 +31,17 @@ enum ksnCMD {
     CMD_SPLIT,              ///< Group of packets (Splited packets)
     CMD_STREAM,             ///< Stream command
     CMD_L0,                 ///< Command from L0 Client
-    CMD_L0TO,              ///< Command to L0 Client
+    CMD_L0TO,               ///< Command to L0 Client
+    CMD_PEERS,              ///< Get peers
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
     CMD_USER,               ///< User command
             
-    // Application level not TR-UDP mode: 192...255
+    // Application level not TR-UDP mode: 192...254
     CMD_192_RESERVED = 192, ///< #192 Reserver for future use
-    CMD_USER_NR             ///< User command
+    CMD_USER_NR,            ///< User command
+    CMD_LAST = 255          ///< Last command Reserved for future use
 };
 
 #define CMD_TRUDP_CHECK(CMD) (CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED)

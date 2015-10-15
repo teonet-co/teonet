@@ -145,7 +145,7 @@ ip_map_data *ksnTRUDPipMapDataTry(ksnTRUDPClass *tu,
 size_t ksnTRUDPkeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
         char* key, size_t key_len);
 uint32_t ksnTRUDPtimestamp();
-int ksnTRUDPmakeAddr(const char *addr, int port, __SOCKADDR_ARG remaddr, 
+int make_addr(const char *addr, int port, __SOCKADDR_ARG remaddr, 
         socklen_t *addr_len);
 void ksnTRUDPsetActivity(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr);
 //
