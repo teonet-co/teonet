@@ -33,6 +33,7 @@ enum ksnCMD {
     CMD_L0,                 ///< Command from L0 Client
     CMD_L0TO,               ///< Command to L0 Client
     CMD_PEERS,              ///< Get peers
+    CMD_PEERS_ANSWER,       ///< Get peers answer
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
