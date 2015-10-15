@@ -33,6 +33,7 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
+int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 /**
  * Initialize ksnet command class
@@ -152,6 +153,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             break;
         #endif
 
+        case CMD_PEERS:
+            processed = cmd_peers_cb(kco, rd);
+            break;
+
         default:
             break;
     }
@@ -219,19 +224,46 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
  * @return 
  */
 int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
-
-    // Send echo answer command
-     
-    // \todo Send ECHO to L0 user
+         
+    // Send ECHO to L0 user
     if(rd->l0_f)
         ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
                 rd->addr, rd->port, rd->from, rd->from_len, CMD_ECHO_ANSWER, 
                 rd->data, rd->data_len);
+    
+    // Send echo answer command to peer
     else
         ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_ECHO_ANSWER,
                 rd->data, rd->data_len);
 
 
+    return 1; // Command processed
+}
+
+/**
+ * Process CMD_PEERS
+ *
+ * @param kco
+ * @param rd
+ * @return 
+ */
+int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+        
+    // Get peers data
+    ksnet_arp_data_ar *peers_data = ksnetArpShowData(((ksnCoreClass*)kco->kc)->ka);
+    size_t peers_data_length = ksnetArpShowDataLength(peers_data);
+    
+    // Send PEERS_ANSWER to L0 user
+    if(rd->l0_f)
+        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                rd->addr, rd->port, rd->from, rd->from_len, CMD_PEERS_ANSWER, 
+                peers_data, peers_data_length);
+    
+    // Send PEERS_ANSWER to peer
+    else
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_PEERS_ANSWER,
+                peers_data, peers_data_length);
+    
     return 1; // Command processed
 }
 

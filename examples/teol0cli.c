@@ -44,12 +44,48 @@ void tcp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     if(rc > 0) {
         
         teoLNullCPacket *sp = (teoLNullCPacket*)buf;
-        char *data = sp->peer_name + sp->peer_name_length;
-        
-        ksnet_printf(&ke->ksn_cfg, DEBUG,
-            "Receive %d bytes: %d bytes data from L0 server, "
-            "from peer %s, data: %s\n", 
-            (int)rc, sp->data_length, sp->peer_name, data);
+        switch(sp->cmd) {
+            
+            // Show CMD_ECHO_ANSWER data
+            case CMD_ECHO_ANSWER:
+            {    
+                char *data = sp->peer_name + sp->peer_name_length;
+                ksnet_printf(&ke->ksn_cfg, DEBUG,
+                    "Receive %d bytes CMD_ECHO_ANSWER: %d bytes data from L0 server, "
+                    "from peer %s, data: %s\n", 
+                    (int)rc, sp->data_length, sp->peer_name, data);
+            } break;
+            
+            // Show CMD_PEERS_ANSWER data
+            case CMD_PEERS_ANSWER:
+            {    
+                ksnet_arp_data_ar *data_ar = (void*) (sp->peer_name + sp->peer_name_length);
+                ksnet_printf(&ke->ksn_cfg, DEBUG,
+                    "Receive %d bytes CMD_PEERS_ANSWER: %d bytes data from L0 server, "
+                    "from peer %s, data rows: %d\n", 
+                    (int)rc, sp->data_length, sp->peer_name, data_ar->length);
+                char *header = ksnetArpShowHeader(1);
+                char *footer = ksnetArpShowHeader(0);
+                printf("%s", header);
+                int i = 0;
+                for(i = 0; i < data_ar->length; i++) {
+                    char *str = ksnetArpShowLine(i+1, data_ar->arp_data[i].name, 
+                            &data_ar->arp_data[i].data);
+                    printf("%s", str);
+                    free(str);
+                }
+                printf("%s", footer);
+                free(header);
+                free(footer);
+            } break;
+            
+            default:
+                ksnet_printf(&ke->ksn_cfg, DEBUG,
+                    "Receive %d bytes UNKNOWN_COMMAND %d: %d bytes data from L0 server, "
+                    "from peer %s\n", 
+                    (int)rc, sp->cmd, sp->data_length, sp->peer_name);
+                break;
+        }
         
         printf("Press Ctrl+C to exit\n");
     }
@@ -74,7 +110,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
         {
             // Connect to L0 Server
-            fd = ksnTcpClientCreate(ke->kt, 9000, "127.0.0.1");
+            fd = ksnTcpClientCreate(ke->kt, atoi(ke->ksn_cfg.app_argv[2]), 
+                    ke->ksn_cfg.app_argv[1]);
 
             if(fd > 0) {
                 
@@ -101,15 +138,24 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
                     "Send %d bytes initialize packet to L0 server\n", (int)snd);
                 
-                // Send message to peer
-                char *peer_name = ke->ksn_cfg.app_argv[1]; 
-                char *msg = ke->ksn_cfg.app_argv[2]; //"Hello";
+                // Send get peers request to peer
+                char *peer_name = ke->ksn_cfg.app_argv[3]; // Peer name 
+                pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, 
+                        CMD_PEERS, peer_name, NULL, 0);
+                if((snd = write(fd, pkg, pkg_length)) >= 0);
+                ksnet_printf(&ke->ksn_cfg, DEBUG,
+                    "Send %d bytes packet to L0 server to peer %s, cmd = %d\n", 
+                    (int)snd, peer_name, CMD_PEERS);
+                
+                // Send echo request to peer
+                peer_name = ke->ksn_cfg.app_argv[3];    // Peer name 
+                char *msg = ke->ksn_cfg.app_argv[4];    // Message
                 pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, 
                         CMD_ECHO, peer_name, msg, strlen(msg) + 1);
                 if((snd = write(fd, pkg, pkg_length)) >= 0);
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
-                    "Send %d bytes packet to L0 server to peer %s, data: %s\n", 
-                    (int)snd, peer_name, msg);
+                    "Send %d bytes packet to L0 server to peer %s, cmd = %d, data: %s\n", 
+                    (int)snd, peer_name, CMD_ECHO, msg);
             }
             
         } break;
@@ -133,9 +179,9 @@ int main(int argc, char** argv) {
            "based on teonet ver. " VERSION "\n");
     
     // Application parameters
-    char *app_argv[] = { "", "peer_to", "message"}; 
+    char *app_argv[] = { "", "l0_server", "port", "peer_to", "message"}; 
     ksnetEvMgrAppParam app_param;
-    app_param.app_argc = 3;
+    app_param.app_argc = 5;
     app_param.app_argv = app_argv;
     
     // Initialize teonet event manager and Read configuration
