@@ -156,7 +156,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 //                            #else
 //                            remaddr.sin_addr.s_addr = inet_addr(addr);
 //                            #endif
-                            if(!ksnTRUDPmakeAddr(arp->addr, arp->port, 
+                            if(!make_addr(arp->addr, arp->port, 
                                     (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
                                 ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, 
@@ -181,7 +181,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
                             const socklen_t addrlen = sizeof(remaddr); // length of addresses
-                            if(!ksnTRUDPmakeAddr(arp->addr, arp->port, 
+                            if(!make_addr(arp->addr, arp->port, 
                                     (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
                                 //Make command string

@@ -50,6 +50,8 @@ void tcp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             "Receive %d bytes: %d bytes data from L0 server, "
             "from peer %s, data: %s\n", 
             (int)rc, sp->data_length, sp->peer_name, data);
+        
+        printf("Press Ctrl+C to exit\n");
     }
 }
         
@@ -101,7 +103,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 
                 // Send message to peer
                 char *peer_name = ke->ksn_cfg.app_argv[1]; 
-                char *msg = "Hello";
+                char *msg = ke->ksn_cfg.app_argv[2]; //"Hello";
                 pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, 
                         CMD_ECHO, peer_name, msg, strlen(msg) + 1);
                 if((snd = write(fd, pkg, pkg_length)) >= 0);
@@ -131,18 +133,14 @@ int main(int argc, char** argv) {
            "based on teonet ver. " VERSION "\n");
     
     // Application parameters
-    char *app_argv[] = { "", "peer_to"}; 
+    char *app_argv[] = { "", "peer_to", "message"}; 
     ksnetEvMgrAppParam app_param;
-    app_param.app_argc = 2;
+    app_param.app_argc = 3;
     app_param.app_argv = app_argv;
     
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb,
             READ_OPTIONS|READ_CONFIGURATION|APP_PARAM, 0, &app_param);
-    
-//    // Initialize teonet event manager and Read configuration
-//    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb,
-//            READ_OPTIONS|READ_CONFIGURATION);
     
     // Start teonet
     ksnetEvMgrRun(ke);

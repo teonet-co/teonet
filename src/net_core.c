@@ -56,10 +56,10 @@ int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *a
 /**
  * Encrypt packet and sent to
  *
- * @param ke
- * @param name
- * @param port
- * @param addr
+ * @param kc
+ * @param cmd
+ * @param DATA
+ * @param D_LEN
  * @return
  */
 #if KSNET_CRYPT
@@ -87,6 +87,7 @@ int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *a
 /**
  * Initialize ksnet core. Create socket FD and Bind ksnet UDP client/server
  *
+ * @param ke Pointer to ksnetEvMgrClass
  * @param name Host name
  * @param port Host port. 0 - create system dependent port number
  * @param addr Host IP. NULL - listen at all IPs
@@ -281,7 +282,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
         struct sockaddr_in remaddr;         // remote address
         socklen_t addrlen = sizeof(remaddr);// length of addresses
-        ksnTRUDPmakeAddr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
+        make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
         // Split large packet
         int num_subpackets;
