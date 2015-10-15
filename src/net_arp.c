@@ -269,10 +269,128 @@ ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr)
 }
 
 /**
+ * Return ARP table in digital format
+ * 
+ * @param ka Pointer to the ksnetArpClass
+ * @return Return pointer to the ksnet_arp_data_ar data with ARP table data. 
+ * Should be free after use.
+ */
+ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
+    
+    uint32_t length = pblMapSize(ka->map);
+    ksnet_arp_data_ar *data_ar = malloc(sizeof(ksnet_arp_data_ar) + length * sizeof(data_ar->arp_data[0]));
+    data_ar->length = length;
+    
+    PblIterator *it = pblMapIteratorNew(ka->map);
+    int i = 0;
+    if(it != NULL) {
+
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *name = pblMapEntryKey(entry);
+            ksnet_arp_data *data = pblMapEntryValue(entry);
+            strncpy(data_ar->arp_data[i].name, name, sizeof(data_ar->arp_data[i].name));
+            memcpy(&data_ar->arp_data[i].data, data, sizeof(data_ar->arp_data[i].data));
+            i++;
+        }
+    }
+    
+    return data_ar;
+}
+
+/**
+ * Return size of ksnet_arp_data_ar data
+ * 
+ * @param peers_data
+ * @return Size of ksnet_arp_data_ar data
+ */
+inline size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data) {
+    
+    return peers_data != NULL ?
+        sizeof(ksnet_arp_data_ar) + peers_data->length * sizeof(peers_data->arp_data[0])
+            : 0;
+}
+
+
+/**
+ * Show (return string) with KSNet ARP table header
+ * 
+ * @param header_f Header flag. If 1 - return Header, if 0 - return Footer
+ * @return 
+ */
+char *ksnetArpShowHeader(int header_f) {
+
+    char *str;
+    const char *div = "-------------------------------------------------------"
+                      "-----\n";
+
+    str = ksnet_formatMessage(div);
+
+    // Header part
+    if(header_f) {
+        
+        str = ksnet_sformatMessage(str, "%s"
+            "  # Peer \t Mod | IP \t\t| Port | Trip time\n", 
+            str);
+
+        str = ksnet_sformatMessage(str, "%s%s", str, div);
+    }
+
+    return str;
+}
+
+/**
+ * Show (return string) one record of KSNet ARP table
+ * 
+ * @param num Record number
+ * @param name Peer name
+ * @param data Pointer to ksnet_arp_data structure
+ * @return String with formated ARP table line. Should be free after use
+ */
+char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data) {
+    
+    // Format last trip time
+    char *last_triptime = ksnet_formatMessage("%7.3f", data->last_triptime);
+    
+    char *str = ksnet_formatMessage(
+        "%3d %s%s%s\t %3d   %-15s  %5d   %7s %s\n",
+
+        // Number
+        num,
+
+        // Peer name
+        getANSIColor(LIGHTGREEN), name, getANSIColor(NONE),
+
+        // Index
+        data->mode,
+
+        // IP
+        data->addr,
+
+        // Port
+        data->port,
+
+        // Trip time
+        data->mode < 0 ? "" : last_triptime,
+
+        // ARP Trip time type (ms)
+        data->mode < 0 ? "" : "ms",
+
+        // TCP Proxy last trip time type (ms)
+        ""
+    );
+    
+    free(last_triptime);
+            
+    return str;
+}
+
+/**
  * Show (return string) KSNet ARP table
  *
  * @param ka
- * @return
+ * @return String with formated ARP table. Should be free after use
  */
 char *ksnetArpShowStr(ksnetArpClass *ka) {
 
