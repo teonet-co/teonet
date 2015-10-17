@@ -131,10 +131,10 @@ build_teonet_image:
     - cd sh  
     #- ls -all
     #- sudo apt-get -y update
-    - docker build --no-cache .
-    - docker build -t kscherba/teonet .
-    - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
-    - docker push kscherba/teonet
+    - sudo docker build --no-cache .
+    - sudo docker build -t kscherba/teonet .
+    - sudo docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
+    - sudo docker push kscherba/teonet
   only:
     - master
     
