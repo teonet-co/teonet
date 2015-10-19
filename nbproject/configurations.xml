@@ -62,6 +62,9 @@
         <in>teotun.c</in>
       </df>
       <df name="sh">
+        <df name="docker_registry">
+          <in>README.md</in>
+        </df>
         <in>make_package.c</in>
       </df>
       <df name="src">
@@ -580,6 +583,8 @@
           </preprocessorList>
         </cTool>
       </folder>
+      <item path="sh/docker_registry/README.md" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
         </cTool>
