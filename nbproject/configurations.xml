@@ -106,10 +106,6 @@
         <in>teonet_tst.c</in>
       </df>
     </df>
-    <df root="." name="1">
-    </df>
-    <df root="." name="2">
-    </df>
     <logicalFolder name="test_teonet"
                    displayName="Teonet cUnit test"
                    projectFiles="true"
@@ -128,7 +124,6 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>configure.ac</itemPath>
     </logicalFolder>
-    <itemPath>embedded/libteol0/teonet_l0_client.make.sh</itemPath>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
