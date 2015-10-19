@@ -589,6 +589,8 @@
         <cTool flags="3">
         </cTool>
       </item>
+      <item path="sh/repo_ssl/README.md" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="2">
         <cTool flags="5">
         </cTool>
