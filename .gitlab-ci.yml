@@ -3,7 +3,7 @@
 # Run before each script
 before_script:
 #  - docker info
-  - export GIT_SSL_NO_VERIFY=1
+#  - export GIT_SSL_NO_VERIFY=1
 
 types:
   - build
@@ -26,7 +26,7 @@ job_ubuntu:
   tags:
     - docker_image_run
   script:
-    - git submodule update --init
+    # - git submodule update --init
     # Test volumes
     #- cp ./autogen.sh ../repo
     #- printenv
