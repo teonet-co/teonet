@@ -1,3 +1,3 @@
 [submodule "embedded/teocli"]
 	path = embedded/teocli
-	url = https://gitlab.ksproject.org/teonet/teocli.git
+	url = git@gitlab.ksproject.org:teonet/teocli.git
