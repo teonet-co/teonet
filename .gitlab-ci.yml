@@ -26,6 +26,8 @@ job_ubuntu:
   tags:
     - docker_image_run
   script:
+    - echo ~/
+    - ls -all ~/.ssh
     - git submodule init
     - git submodule update
     # Test volumes
