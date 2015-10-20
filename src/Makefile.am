@@ -148,7 +148,7 @@ libteonet_la_SOURCES = \
     modules/vpn.c \
     utils/string_arr.c \
     utils/utils.c \
-    ../embedded/libteol0/teonet_l0_client.c
+    ../embedded/teocli/libteol0/teonet_l0_client.c
 
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default

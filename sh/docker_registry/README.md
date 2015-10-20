@@ -5,7 +5,7 @@ Docker registry at: gitlab.ksproject.org:5000
 The SSL certificate made it startssl: https://www.startssl.com/  
   
 Folder files description:
-
+```  
 Kirill_Scherba -- browser certificate to login to startssl
 README.md -- this file
 ca.pem -- startssl CA certificate
@@ -17,6 +17,6 @@ ssl.crt -- domain startssl certificate
 ssl.key -- domain startssl key
 ssl.key.passwd -- domain startssl key password
 sub.class1.server.ca.pem -- intermediate startssl certificate
-  
+```   
 To create the docker registry copy this folder to docker host (the docker should 
 be set before) and start the ./create-registry.sh script
