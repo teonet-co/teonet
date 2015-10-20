@@ -25,6 +25,7 @@ job_ubuntu:
   tags:
     - docker_image_run
   script:
+    git submodule update --init
     # Test volumes
     #- cp ./autogen.sh ../repo
     #- printenv
