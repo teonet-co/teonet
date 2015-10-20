@@ -226,8 +226,7 @@ AC_CONFIG_FILES([
     tests/Makefile
     app/Makefile
     sh/Makefile
-    embedded/Makefile
-    embedded/libteol0/Makefile
+    embedded/Makefile 
 ])
 AC_PROG_CC
 AC_OUTPUT

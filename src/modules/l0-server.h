@@ -9,7 +9,7 @@
 #define	L0_SERVER_H
 
 #include <pbl.h>
-#include "../embedded/libteol0/teonet_l0_client.h"
+#include "../embedded/teocli/libteol0/teonet_l0_client.h"
 
 /**
  * L0 Server map data structure
