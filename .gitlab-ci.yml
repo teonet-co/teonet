@@ -3,7 +3,7 @@
 # Run before each script
 before_script:
 #  - docker info
-#  - export GIT_SSL_NO_VERIFY=1
+ - export GIT_SSL_NO_VERIFY=1
 
 types:
   - build
