@@ -14,7 +14,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "../embedded/libteol0/teonet_l0_client.h"
+#include "../embedded/teocli/libteol0/teonet_l0_client.h"
 
 #define TL0CN_VERSION "0.0.1"  
 
