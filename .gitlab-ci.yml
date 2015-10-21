@@ -3,10 +3,11 @@
 # Run before each script
 before_script:
 #  - docker info
-# - export GIT_SSL_NO_VERIFY=1
-  - echo ~/
-  - ls -all ~/.ssh
+#  - echo ~/
+#  - ls -all ~/.ssh
 #  - git submodule init
+
+# Update project submodules
   - git submodule update --init
 
 types:
@@ -140,5 +141,7 @@ build_teonet_image:
     - docker build -t kscherba/teonet .
     - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
     - docker push kscherba/teonet
+    - docker tag -f kscherba/teonet gitlab.ksproject.org:5000/teonet/teonet
+    - docker push gitlab.ksproject.org:5000/teonet/teonet
   only:
     - master
