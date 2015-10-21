@@ -91,12 +91,6 @@ RPM_FILES="/usr/bin/teovpn
    /usr/lib/libteonet.so.$LIBRARY_VERSION
    /usr/share/doc/teonet/examples/
    /usr/share/man/man3/
-   /usr/include/teol0/teonet_l0_client.h
-   /usr/lib/libteol0.a
-   /usr/lib/libteol0.la
-   /usr/lib/libteol0.so
-   /usr/lib/libteol0.so.1
-   /usr/lib/libteol0.so.1.0.0  
 "
 create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
