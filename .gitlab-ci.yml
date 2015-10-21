@@ -25,7 +25,7 @@ types:
 # Build    
 job_ubuntu:
   type: build
-  image: ubuntu_teonet
+  image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
   #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
   tags:
     - docker_image_run
@@ -48,7 +48,7 @@ job_ubuntu:
     
 job_centos:
   type: build
-  image: centos_teonet
+  image: gitlab.ksproject.org:5000/ci/centos_teonet
   tags:
     - docker_image_run
   script:
@@ -66,7 +66,7 @@ job_centos:
 
 job_fedora:
   type: build
-  image: fedora_teonet
+  image: gitlab.ksproject.org:5000/ci/fedora_teonet
   tags:
     - docker_image_run
   script:
@@ -82,7 +82,7 @@ job_fedora:
     
 job_opensuse:
   type: build
-  image: opensuse_teonet
+  image: gitlab.ksproject.org:5000/ci/opensuse_teonet
   tags:
     - docker_image_run
   script:
