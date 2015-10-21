@@ -1,12 +1,17 @@
 ## Build from source notes: 
 
-### First time got sources from subversion repository
+## Clone git repository  to get code
+
+git clone git@gitlab.ksproject.org:teonet/teonet.git
+git submodule update --init
+
+## First time got sources from subversion repository
 
 ./autogen.sh
 make
  
 
-#### At errors try running:
+## At errors try running:
 
 autoreconf --force --install
 ./configure
