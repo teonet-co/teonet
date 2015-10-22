@@ -227,6 +227,7 @@ AC_CONFIG_FILES([
     app/Makefile
     sh/Makefile
     embedded/Makefile 
+    embedded/teocli/linux/Makefile
 ])
 AC_PROG_CC
 AC_OUTPUT

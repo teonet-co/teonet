@@ -37,6 +37,7 @@
             <word>len</word>
             <word>libteol</word>
             <word>libteonet</word>
+            <word>linux</word>
             <word>localhost</word>
             <word>ms</word>
             <word>mtu</word>
@@ -48,6 +49,7 @@
             <word>str</word>
             <word>tcp</word>
             <word>teo</word>
+            <word>teocli</word>
             <word>teonet</word>
             <word>teostream</word>
             <word>teotproxy</word>
