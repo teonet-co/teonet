@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Set project dependence to make Teonet project from sources at empty host
+
 # Upgrade Ubuntu
 sudo apt-get update
 sudo apt-get -y upgrade

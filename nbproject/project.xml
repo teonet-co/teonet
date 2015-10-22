@@ -24,6 +24,7 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>app</word>
+            <word>Autoconf</word>
             <word>Cesanta</word>
             <word>cmd</word>
             <word>config</word>
@@ -54,6 +55,7 @@
             <word>teoweb</word>
             <word>todo</word>
             <word>ttl</word>
+            <word>Ubuntu</word>
             <word>udp</word>
             <word>uuid</word>
             <word>ver</word>
