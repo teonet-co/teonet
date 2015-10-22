@@ -282,8 +282,6 @@
       </item>
       <item path="embedded/libpbl/src/testhash.c" ex="false" tool="0" flavor2="2">
       </item>
-      <item path="embedded/teocli/libteol0/teocli" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="embedded/teocli/libteol0/teonet_l0_client.c"
             ex="false"
             tool="0"

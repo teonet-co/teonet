@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Set project dependence to make Teonet project from sources at empty host
+
 # Update Centos
 yum -y update
 
@@ -28,12 +30,8 @@ cd ..
 rm -fr CUnit-2.1-3
 rm -f CUnit-2.1-3.tar.bz2
 
-# Install Fedora cUnit project dependence
-#yum install CUnit-devel
-
 # Install confuse
 cd distr
-#yum install -y wget
 #wget http://savannah.nongnu.org/download/confuse/confuse-2.7.tar.gz
 tar -xzvf confuse-2.7.tar.gz
 cd confuse-2.7
@@ -58,7 +56,11 @@ cd libtuntap-master
 cmake ./
 make
 make install
-cd ../..
+
+# Remove libtuntap source
+cd ..
+rm -fr libtuntap-master
+cd ..
 
 # Update system dynamic libraries configuration
 ldconfig
