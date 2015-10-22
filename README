@@ -3,6 +3,7 @@
 ## Clone git repository  to get code
 
 git clone git@gitlab.ksproject.org:teonet/teonet.git
+cd teonet
 git submodule update --init
 
 ## First time got sources from subversion repository
