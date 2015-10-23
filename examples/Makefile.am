@@ -29,7 +29,7 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
+	noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
 		  teoack teoackm teocque teostream teol0cli teol0cli_n
 
 teoack_SOURCES = teoack.c
@@ -44,12 +44,12 @@ teoterm_SOURCES = teoterm.c
 teotun_SOURCES = teotun.c
 teostream_SOURCES = teostream.c
 teol0cli_SOURCES = teol0cli.c 
-teol0cli_n_SOURCES = teol0cli_n.c
+teol0cli_n_SOURCES = ../embedded/teocli/main.c
 
 exampledir = $(datarootdir)/doc/@PACKAGE@/examples
 example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \
 	       teosend.c teotcp.c teoterm.c teotun.c teostream.c teol0cli.c \
-	       teol0cli.py teol0cli_n.c
+	       teol0cli.py
 
 teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
 teoackm_LDFLAGS = $(AM_LDFLAGS) -lev

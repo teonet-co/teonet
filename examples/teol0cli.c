@@ -132,7 +132,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // Initialize L0 connection
                 size_t snd;
                 char *host_name = ksnetEvMgrGetHostName(ke);
-                size_t pkg_length = teoLNullInit(packet, KSN_BUFFER_SIZE, 
+                size_t pkg_length = teoLNullClientLogin(packet, KSN_BUFFER_SIZE, 
                         host_name);
                 if((snd = write(fd, pkg, pkg_length)) >= 0);                
                 ksnet_printf(&ke->ksn_cfg, DEBUG,

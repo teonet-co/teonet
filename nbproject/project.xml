@@ -5,13 +5,11 @@
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
             <name>teonet</name>
             <c-extensions>c,i</c-extensions>
-            <cpp-extensions/>
+            <cpp-extensions>cc</cpp-extensions>
             <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>.</sourceRootElem>
-                <sourceRootElem>.</sourceRootElem>
                 <sourceRootElem>.</sourceRootElem>
             </sourceRootList>
             <confList>
@@ -26,6 +24,7 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>app</word>
+            <word>Autoconf</word>
             <word>Cesanta</word>
             <word>cmd</word>
             <word>config</word>
@@ -37,6 +36,7 @@
             <word>len</word>
             <word>libteol</word>
             <word>libteonet</word>
+            <word>linux</word>
             <word>localhost</word>
             <word>ms</word>
             <word>mtu</word>
@@ -48,12 +48,14 @@
             <word>str</word>
             <word>tcp</word>
             <word>teo</word>
+            <word>teocli</word>
             <word>teonet</word>
             <word>teostream</word>
             <word>teotproxy</word>
             <word>teoweb</word>
             <word>todo</word>
             <word>ttl</word>
+            <word>Ubuntu</word>
             <word>udp</word>
             <word>uuid</word>
             <word>ver</word>
