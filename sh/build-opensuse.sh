@@ -1,6 +1,8 @@
 #!/bin/sh
 
-# Update Centos
+# Set project dependence to make Teonet project from sources at empty host
+
+# Update OpenSuse
 zypper -y update
 
 # Autoconf dependence
@@ -10,14 +12,15 @@ zypper install -y autoconf intltool libtool glib2-devel doxygen make gcc patch
 zypper install -y openssl-devel libev-devel libuuid-devel
 
 # Install Suse cUnit project dependence
-zypper in cunit-devel
+zypper install cunit-devel
 # for opensuse less than 13.2:
-# $ zypper addrepo -fg http://download.opensuse.org/repositories/home:Strahlex/openSUSE_13.2/home:Strahlex.repo
-# $ zypper refresh 
+#zypper addrepo -fg http://download.opensuse.org/repositories/home:Strahlex/openSUSE_13.2/home:Strahlex.repo
+#zypper refresh 
+#zypper install cunit-devel
 
 # Install confuse
 cd distr
-#yum install -y wget
+#zypper install -y wget
 #wget http://savannah.nongnu.org/download/confuse/confuse-2.7.tar.gz
 tar -xzvf confuse-2.7.tar.gz
 cd confuse-2.7
@@ -42,7 +45,11 @@ cd libtuntap-master
 cmake ./
 make
 make install
-cd ../..
+
+# Remove libtuntap source
+cd ..
+rm -fr libtuntap-master
+cd ..
 
 # Update system dynamic libraries configuration
 ldconfig

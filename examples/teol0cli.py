@@ -9,12 +9,12 @@
 #
 # Execute next commands to build teonet_l0_client module:
 #
-# cd /teonet/embedded/libteol0
-# ./teonet_l0_client.make.sh
+# cd /teonet/embedded/teocli/python
+# ./make_python.sh
 #
  
 import socket
-import _teonet_l0_client
+import _teocli
 
 # Teonet L0 server parameters
 #
@@ -46,8 +46,7 @@ s.connect((TCP_IP, TCP_PORT))
 # Send a packet with cmd = 0, peer_name = "", message = This host name, massage_length = message length + 1
 #
 print "Send", 8 + 1 + len(host_name) + 1, "bytes initialize packet to L0 server"
-#packet_len = _teonet_l0_client.teoLNullPacketCreate(packet, BUFFER_SIZE, 0, "", host_name, len(host_name)+1)
-packet_len = _teonet_l0_client.teoLNullInit(packet, BUFFER_SIZE, host_name)
+packet_len = _teocli.teoLNullInit(packet, BUFFER_SIZE, host_name)
 for i in range(0, packet_len):
   s.send(packet[i])
 
@@ -55,7 +54,7 @@ for i in range(0, packet_len):
 # Send a packet with cmd = CMD_ECHO, peer_name = Peer name, message = Any message, massage_length = message length + 1
 #
 print "Send", 8 + len(peer_name) + 1 + len(message) + 1, "bytes packet to L0 server to peer", peer_name, ", data:", message
-packet_len = _teonet_l0_client.teoLNullPacketCreate(packet, BUFFER_SIZE, CMD_ECHO, peer_name, message, len(message) + 1)
+packet_len = _teocli.teoLNullPacketCreate(packet, BUFFER_SIZE, CMD_ECHO, peer_name, message, len(message) + 1)
 for i in range(0, packet_len):
   s.send(packet[i])
 
