@@ -29,8 +29,8 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-	noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
-		  teoack teoackm teocque teostream teol0cli teol0cli_n
+noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
+	  teoack teoackm teocque teostream teol0cli teol0cli_n
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
