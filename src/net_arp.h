@@ -17,41 +17,42 @@
 #include <pbl.h>
 
 #include "net_core.h"
+#include "teonet_l0_client.h"
 
-/**
- * KSNet ARP table data structure
- */
-typedef struct ksnet_arp_data {
-
-    int16_t mode;       ///< Peers mode: -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
-    char addr[40];      ///< Peer IP address
-    int16_t port;       ///< Peer port
-
-    double last_acrivity;           ///< Last time receved data from peer
-    double last_triptime_send;      ///< Last time when triptime request send
-    double last_triptime_got;       ///< Last time when triptime received
-
-    double last_triptime;           ///< Last triptime
-    double triptime;                ///< Middle triptime
-
-    double monitor_time;            ///< Monitor ping time
-
-} ksnet_arp_data;
-
-/**
- * KSNet ARP table whole data array
- */
-typedef struct ksnet_arp_data_ar {
-    
-    uint32_t length;
-    struct _arp_data {
-        
-        char name[40];
-        ksnet_arp_data data;
-        
-    } arp_data[];
-    
-} ksnet_arp_data_ar;
+///**
+// * KSNet ARP table data structure
+// */
+//typedef struct ksnet_arp_data {
+//
+//    int16_t mode;       ///< Peers mode: -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
+//    char addr[40];      ///< Peer IP address
+//    int16_t port;       ///< Peer port
+//
+//    double last_acrivity;           ///< Last time receved data from peer
+//    double last_triptime_send;      ///< Last time when triptime request send
+//    double last_triptime_got;       ///< Last time when triptime received
+//
+//    double last_triptime;           ///< Last triptime
+//    double triptime;                ///< Middle triptime
+//
+//    double monitor_time;            ///< Monitor ping time
+//
+//} ksnet_arp_data;
+//
+///**
+// * KSNet ARP table whole data array
+// */
+//typedef struct ksnet_arp_data_ar {
+//    
+//    uint32_t length;
+//    struct _arp_data {
+//        
+//        char name[40];
+//        ksnet_arp_data data;
+//        
+//    } arp_data[];
+//    
+//} ksnet_arp_data_ar;
 
 /**
  * KSNet ARP functions data

@@ -31,7 +31,8 @@ AM_CFLAGS = \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
-	 -I../embedded/libpbl/src/
+	 -I../embedded/libpbl/src \
+	 -I../embedded/teocli/libteol0 
 
 if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD
@@ -118,7 +119,8 @@ nobase_teonetinclude_HEADERS = \
     utils/rlutil.h
 
 teonetinclude_HEADERS = \
-    ../embedded/libpbl/src/pbl.h
+    ../embedded/libpbl/src/pbl.h \
+    ../embedded/teocli/libteol0/teonet_l0_client.h
 
 libteonet_la_SOURCES = \
     crypt.c \
