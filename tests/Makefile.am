@@ -6,7 +6,8 @@ AM_CFLAGS = \
 	 -DTEONE_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONE) \
 	 -I../src \
-	 -I../embedded/libpbl/src
+	 -I../embedded/libpbl/src \
+	 -I../embedded/teocli/libteol0
 	
 if TEO_THREAD	
 AM_CFLAGS += -DTEO_THREAD
