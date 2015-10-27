@@ -7,6 +7,7 @@ AM_CFLAGS = \
 	 $(DRELEASE_TEONET) \
 	 -I../../src \
 	 -I../../embedded/libpbl/src \
+	 -I../../embedded/teocli/libteol0 \
 	 -pthread
 
 if MINGW
