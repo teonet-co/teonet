@@ -19,8 +19,8 @@ import _teocli
 # Teonet L0 server parameters
 #
 host_name = "C2"
-TCP_IP = "127.0.0.1"
-TCP_PORT = 9000
+TCP_IP = "gt1.kekalan.net"
+TCP_PORT = 9010
 
 # Packet buffer
 #
@@ -30,7 +30,7 @@ packet = "\0"*(BUFFER_SIZE)
 # Command parameters
 #
 CMD_ECHO = 65
-peer_name = "teostream"
+peer_name = "ps-server"
 message = "Hello world from python Teonet L0 client sample!"
 
 # Welcome message
@@ -46,7 +46,7 @@ s.connect((TCP_IP, TCP_PORT))
 # Send a packet with cmd = 0, peer_name = "", message = This host name, massage_length = message length + 1
 #
 print "Send", 8 + 1 + len(host_name) + 1, "bytes initialize packet to L0 server"
-packet_len = _teocli.teoLNullInit(packet, BUFFER_SIZE, host_name)
+packet_len = _teocli.teoLNullPacketCreateLogin(packet, BUFFER_SIZE, host_name)
 for i in range(0, packet_len):
   s.send(packet[i])
 
