@@ -273,7 +273,7 @@ size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length,
         th->addr_length = strlen(addr) + 1; // Address string length
         th->port = port; // UDP port number
         th->packet_length = data_length; // Package data length   
-        th->packet_checksum = teoByteChecksum((void*)th + 1, 
+        th->packet_checksum = get_byte_checksum((void*)th + 1, 
                 sizeof(ksnTCPProxyHeader) - 2);
         
         size_t p_length = sizeof(ksnTCPProxyHeader) + th->addr_length + data_length;        
@@ -282,7 +282,7 @@ size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_length,
             tcp_package_length = p_length;
             memcpy(buffer + sizeof(ksnTCPProxyHeader), addr, th->addr_length); // Address string
             memcpy(buffer + sizeof(ksnTCPProxyHeader) + th->addr_length, data, data_length); // Package data        
-            th->checksum = teoByteChecksum(buffer + 1, tcp_package_length - 1); // Package data length
+            th->checksum = get_byte_checksum(buffer + 1, tcp_package_length - 1); // Package data length
         } 
         else tcp_package_length = -2; // Error code: The output buffer less than packet data + header
     }
@@ -347,7 +347,7 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data,
                 
                 // Check packet header 
                 uint8_t packet_checksum = 
-                        teoByteChecksum(
+                        get_byte_checksum(
                             (void*)packet->header + 1, 
                             sizeof(ksnTCPProxyHeader) - 2
                         );
@@ -385,7 +385,7 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data,
             
             // Get packet checksum 
             uint8_t checksum = 
-                    teoByteChecksum(
+                    get_byte_checksum(
                         (void*)packet->buffer + 1, 
                         packet->length - 1
                     );
