@@ -175,10 +175,10 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     packet->peer_name_length + packet->data_length)) {
                 
                     // Check checksum
-                    uint8_t header_checksum = teoByteChecksum(packet, 
+                    uint8_t header_checksum = get_byte_checksum(packet, 
                             sizeof(teoLNullCPacket) - 
                             sizeof(packet->header_checksum));
-                    uint8_t checksum = teoByteChecksum(packet->peer_name, 
+                    uint8_t checksum = get_byte_checksum(packet->peer_name, 
                             packet->peer_name_length + packet->data_length);
                     if(packet->header_checksum == header_checksum &&
                        packet->checksum == checksum) {
