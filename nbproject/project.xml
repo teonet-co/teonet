@@ -29,10 +29,13 @@
             <word>cmd</word>
             <word>config</word>
             <word>cque</word>
+            <word>Ctrl</word>
             <word>fd</word>
+            <word>gethostbyname</word>
             <word>Hotkeys</word>
             <word>internet</word>
             <word>ip</word>
+            <word>ksnet</word>
             <word>len</word>
             <word>libteol</word>
             <word>libteonet</word>
@@ -40,6 +43,7 @@
             <word>localhost</word>
             <word>ms</word>
             <word>mtu</word>
+            <word>mutex</word>
             <word>pc</word>
             <word>perror</word>
             <word>po</word>

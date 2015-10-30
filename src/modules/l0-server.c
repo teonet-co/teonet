@@ -28,7 +28,7 @@ void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
         size_t data_len, size_t *packet_len);
 #include "tr-udp_.h"  // ksnTRUDPmakeAddr
 
-// External consants
+// External constants
 extern const char *localhost;
 
 /**
@@ -175,10 +175,10 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     packet->peer_name_length + packet->data_length)) {
                 
                     // Check checksum
-                    uint8_t header_checksum = teoByteChecksum(packet, 
+                    uint8_t header_checksum = get_byte_checksum(packet, 
                             sizeof(teoLNullCPacket) - 
                             sizeof(packet->header_checksum));
-                    uint8_t checksum = teoByteChecksum(packet->peer_name, 
+                    uint8_t checksum = get_byte_checksum(packet->peer_name, 
                             packet->peer_name_length + packet->data_length);
                     if(packet->header_checksum == header_checksum &&
                        packet->checksum == checksum) {
@@ -610,6 +610,23 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     }
     
     return retval;
+}
+
+/**
+ * Check if L0 client is connected and return it FD
+ * 
+ * @param kl Pointer to ksnLNullClass
+ * @param client_name Client name
+ * 
+ * @return 
+ */
+int *ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name) {
+    
+    size_t valueLength;
+    int *fd = pblMapGet(kl->map_n, client_name, strlen(client_name) + 1, 
+            &valueLength);
+    
+    return fd;
 }
 
 /**

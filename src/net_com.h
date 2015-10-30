@@ -18,31 +18,31 @@ enum ksnCMD {
     CMD_1_RESERVED,         ///< #1 Reserver for future use
     CMD_2_RESERVED,         ///< #2 Reserver for future use
     CMD_3_RESERVED,         ///< #3 Reserver for future use
-    CMD_CONNECT_R,          ///< A Peer want connect to r-host
-    CMD_CONNECT,            ///< Inform peer about connected peer
-    CMD_DISCONNECTED,       ///< Inform peer about disconnected peer
-    CMD_VPN,                ///< VPN command
+    CMD_CONNECT_R,          ///< #4 A Peer want connect to r-host
+    CMD_CONNECT,            ///< #5 Inform peer about connected peer
+    CMD_DISCONNECTED,       ///< #6 Inform peer about disconnected peer
+    CMD_VPN,                ///< #7 VPN command
     
     // Core level TR-UDP mode: 64...127
     CMD_64_RESERVED = 64,   ///< #64 Reserver for future use
-    CMD_ECHO,               ///< Echo test message: auto replay test message command
-    CMD_ECHO_ANSWER,        ///< Answer to auto replay message command
-    CMD_TUN,                ///< Tunnel command
-    CMD_SPLIT,              ///< Group of packets (Splited packets)
-    CMD_STREAM,             ///< Stream command
-    CMD_L0,                 ///< Command from L0 Client
-    CMD_L0TO,               ///< Command to L0 Client
-    CMD_PEERS,              ///< Get peers
-    CMD_PEERS_ANSWER,       ///< Get peers answer
+    CMD_ECHO,               ///< #65 Echo test message: auto replay test message command
+    CMD_ECHO_ANSWER,        ///< #66 Answer to auto replay message command
+    CMD_TUN,                ///< #67 Tunnel command
+    CMD_SPLIT,              ///< #68 Group of packets (Splited packets)
+    CMD_STREAM,             ///< #69 Stream command
+    CMD_L0,                 ///< #70 Command from L0 Client
+    CMD_L0TO,               ///< #71 Command to L0 Client
+    CMD_PEERS,              ///< #72 Get peers
+    CMD_PEERS_ANSWER,       ///< #73 Get peers answer
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
-    CMD_USER,               ///< User command
+    CMD_USER,               ///< #129 User command
             
     // Application level not TR-UDP mode: 192...254
     CMD_192_RESERVED = 192, ///< #192 Reserver for future use
-    CMD_USER_NR,            ///< User command
-    CMD_LAST = 255          ///< Last command Reserved for future use
+    CMD_USER_NR,            ///< #193 User command
+    CMD_LAST = 255          ///< #255 Last command Reserved for future use
 };
 
 #define CMD_TRUDP_CHECK(CMD) (CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED)
