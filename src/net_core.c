@@ -363,6 +363,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         
         arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
                 data_len);
+        
         // \todo: Send to peer at other network
         printf("###TODO: Send to peer %s at other network\n", to);
     }
@@ -370,8 +371,34 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     // Send to r-host
     else {
         
+        // Send this message to L0 clients
+        if(cmd == CMD_L0 && ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f) {
+            
+            int *fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, to);
+            if(fd != NULL) {
+                
+                ssize_t snd;                
+                ksnLNullSPacket *cmd_l0_data = data;
+                
+                size_t peer_length = cmd_l0_data->from_length; 
+                const size_t buf_length = teoLNullBufferSize(peer_length, cmd_l0_data->data_length);
+                char *buf = malloc(buf_length);
+                teoLNullPacketCreate(buf, buf_length, 
+                        cmd_l0_data->cmd, 
+                        cmd_l0_data->from, 
+                        cmd_l0_data->from + cmd_l0_data->from_length, 
+                        cmd_l0_data->data_length);
+
+                if((snd = write(*fd, buf, buf_length)) >= 0);
+                
+                free(buf);
+            }
+        }
+        
         // \todo: Send to r-host
-        printf("###TODO: Send to r-host, peer = %s\n", to);
+        else {            
+            printf("###TODO: Send to r-host, peer = %s\n", to);
+        }
     }
 
     return arp;

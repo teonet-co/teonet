@@ -61,6 +61,7 @@ ksnLNullClass *ksnLNullInit(void *ke);
 void ksnLNullDestroy(ksnLNullClass *kl);
 int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname, 
         size_t cname_length, uint8_t cmd, void *data, size_t data_len);
+int *ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name);
 
 #ifdef	__cplusplus
 }
