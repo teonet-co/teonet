@@ -168,12 +168,13 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
 /**
  * Send command by name to peer
  *
- * @param km
- * @param to
- * @param cmd
- * @param data
- * @param data_len
- * @return
+ * @param km Pointer to ksnMultiClass
+ * @param to Recipient peer name
+ * @param cmd Command 
+ * @param data Command data
+ * @param data_len Data length
+ * 
+ * @return Pointer to ksnet_arp_data or NULL if not found
  */
 ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd, 
         void *data, size_t data_len) {
@@ -194,8 +195,6 @@ ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd,
             break;
         }       
     }
-        
-    
-    
-    return 0;
+                
+    return arp;
 }
