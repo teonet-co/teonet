@@ -351,27 +351,54 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                                  void *data, size_t data_len) {
 
-    ksnet_arp_data *arp = ksnetArpGet(kc->ka, to);
+    int *fd;
+    ksnet_arp_data *arp;
 
-    if(arp != NULL && arp->mode != -1) {
+    // Send to peer in this network
+    if((arp = ksnetArpGet(kc->ka, to)) != NULL && arp->mode != -1) {
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
     
     // Send to peer at other network
-    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL) {
-        
-        arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
-                data_len);
-        // \todo: Send to peer at other network
-        printf("###TODO: Send to peer %s at other network\n", to);
+    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL && 
+        (arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
+                data_len))) {
+               
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG, 
+                "%sNet core:%s Send to peer %s at other network\n", 
+                ANSI_GREEN, ANSI_NONE, to);
+        #endif
     }
     
-    // Send to r-host
-    else {
+    // Send this message to L0 clients
+    else if(cmd == CMD_L0 && 
+            ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&            
+            (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, 
+                    to)) != NULL) {
+                
+            ssize_t snd;                
+            ksnLNullSPacket *cmd_l0_data = data;
+
+            const size_t buf_length = teoLNullBufferSize(
+                    cmd_l0_data->from_length, 
+                    cmd_l0_data->data_length
+            );
+            
+            char *buf = malloc(buf_length);
+            teoLNullPacketCreate(buf, buf_length, 
+                    cmd_l0_data->cmd, 
+                    cmd_l0_data->from, 
+                    cmd_l0_data->from + cmd_l0_data->from_length, 
+                    cmd_l0_data->data_length);
+            if((snd = write(*fd, buf, buf_length)) >= 0);
+            free(buf);
+    }
         
-        // \todo: Send to r-host
-        printf("###TODO: Send to r-host, peer = %s\n", to);
+    // \todo: Send to r-host
+    else {            
+            printf("###TODO: Send to r-host, peer = %s\n", to);
     }
 
     return arp;
