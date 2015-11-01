@@ -399,8 +399,12 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     }
         
     // \todo: Send to r-host
-    else {            
-            printf("###TODO: Send to r-host, peer = %s\n", to);
+    else {
+            printf("###TODO: Resend command to peer \"%s\" to r-host\n", to);            
+            
+            // Create resend command buffer
+            
+            // Send command to r-host            
     }
 
     return arp;
