@@ -485,8 +485,8 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
     #define kev ((ksnetEvMgrClass*)(ka->ke))
 
-    int retval = 0;
-    double ct = ksnetEvMgrGetTime(kev);
+    int retval = 0; // Return value
+    double ct = ksnetEvMgrGetTime(kev); //Current time
 
     // Send trip time request
     if(ct - arp_data->last_triptime_send > CHECK_EVENTS_AFTER) {

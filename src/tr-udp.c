@@ -250,6 +250,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
     );
     #endif
 
+    // Set last activity time
+    ksnTRUDPsetActivity(tu, addr);                    
+
     // Data received
     if (recvlen > 0) {
 
@@ -386,9 +389,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         #endif
 
                         ksnTRUDPsetDATAreceiveDropped(tu, addr);
-                        
-                        // Set last activity time
-                        ksnTRUDPsetActivity(tu, addr);
                     }   
                     
                     // Save to Received message Heap
@@ -406,9 +406,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
                                 tru_header->id, buffer + tru_ptr,
                                 tru_header->payload_length, addr, *addr_len);
-                        
-                        // Set last activity time
-                        ksnTRUDPsetActivity(tu, addr);
                     }
                 }
                 
@@ -469,9 +466,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     
                     // Remove message from SendList and stop timer watcher
                     ksnTRUDPsendListRemove(tu, tru_header->id, addr);   
-                    
-                    // Set last activity time
-                    ksnTRUDPsetActivity(tu, addr);
                 }
                 recvlen = 0; // The received message is processed
                 break;
@@ -492,9 +486,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     ksnTRUDPstatReset(tu); //! \todo: Do we need reset it here?
                     ksnTRUDPSendACK(); // Send ACK
                     
-                    // Set last activity time
-                    ksnTRUDPsetActivity(tu, addr);
-                    
                     recvlen = 0; // The received message is processed
                     break;
 
@@ -502,8 +493,10 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     // Return this message without any changes.    
                 default:
                     break;
-            }
-        } else {
+            }            
+        } 
+        
+        else {
 
             #ifdef DEBUG_KSNET
             ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
@@ -769,7 +762,6 @@ int make_addr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *add
  */
 void ksnTRUDPsetActivity(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr) {
     
-    //ksnetArpGetAll
     ip_map_data *ip_map_d = ksnTRUDPipMapDataTry(tu, addr, NULL, 0);
     
     if(ip_map_d != NULL) {
