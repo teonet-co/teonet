@@ -488,14 +488,16 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(rd->data != NULL && ((char*)rd->data)[0]) peer_name = rd->data;
     
     // Check r-host disconnected
-    if(kev->ksn_cfg.r_host_name[0] && !strcmp(kev->ksn_cfg.r_host_name,
-                                              rd->from)) {
-
-        kev->ksn_cfg.r_host_name[0] = '\0';
-    }
+    int is_rhost = kev->ksn_cfg.r_host_name[0] && 
+                   !strcmp(kev->ksn_cfg.r_host_name,rd->from);
+    if(is_rhost) kev->ksn_cfg.r_host_name[0] = '\0';
 
     // Remove from ARP Table
     ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
+    
+    // Try to reconnect - send command through r-host 
+    if(!is_rhost) 
+        ksnCommandSendCmdEcho(kco, peer_name, (void*) TRIPTIME, TRIPTIME_LEN);
 
     // Send event callback
     if(kev->event_cb != NULL)
