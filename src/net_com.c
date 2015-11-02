@@ -288,7 +288,7 @@ int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Parse CMD_RESEND data
     size_t ptr = 0;
     char *to = rd->data + ptr; ptr += strlen(rd->data) + 1;
-    uint8_t cmd = *(uint8_t*)(rd->data + ptr); ptr += sizeof(uint8_t);
+    uint8_t cmd = *((uint8_t*)(rd->data + ptr)); ptr += sizeof(uint8_t);
     void *data = rd->data + ptr;
     const size_t data_len = rd->data_len - ptr;
             
