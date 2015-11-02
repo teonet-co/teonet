@@ -89,7 +89,7 @@ void ksnetArpAddHost(ksnetArpClass *ka) {
     ksnetEvMgrClass *ke = ka->ke;
     
     char* name = ke->ksn_cfg.host_name;
-    char *addr = "0.0.0.0";
+    char *addr = (char*)localhost; //"0.0.0.0";
     int port = ke->kc->port;
     
     memset(&arp, 0, sizeof(arp));
