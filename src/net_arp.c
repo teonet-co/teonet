@@ -294,16 +294,16 @@ ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr)
     if(ka != NULL && ksnetArpGetAllH(ka, find_arp_by_addr_cb, (void*) &fa)) {
         
         // ARP by address was found
-        printf("ARP by address %s:%d was found\n", 
-                    inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-                    ntohs(((struct sockaddr_in *) addr)->sin_port));
+        //printf("ARP by address %s:%d was found\n", 
+        //            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+        //            ntohs(((struct sockaddr_in *) addr)->sin_port));
         
     } else {
         
         // ARP by address %s not found
-        printf("ARP by address %s:%d not found\n", 
-                    inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-                    ntohs(((struct sockaddr_in *) addr)->sin_port));
+        //printf("ARP by address %s:%d not found\n", 
+        //            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+        //            ntohs(((struct sockaddr_in *) addr)->sin_port));
         
     }
     
