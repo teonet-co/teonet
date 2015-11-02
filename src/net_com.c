@@ -34,6 +34,7 @@ int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 /**
  * Initialize ksnet command class
@@ -156,6 +157,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         case CMD_PEERS:
             processed = cmd_peers_cb(kco, rd);
             break;
+            
+        case CMD_RESEND:
+            processed = cmd_resend_cb(kco, rd);
+            break;
 
         default:
             break;
@@ -263,6 +268,28 @@ int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     else
         ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_PEERS_ANSWER,
                 peers_data, peers_data_length);
+    
+    return 1; // Command processed
+}
+
+/**
+ * Process CMD_RESEND
+ *
+ * @param kco
+ * @param rd
+ * @return 
+ */
+int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    // Parse CMD_RESEND data
+    size_t ptr = 0;
+    char *to = rd->data + ptr; ptr += strlen(rd->data) + 1;
+    uint8_t cmd = *(uint8_t*)(rd->data + ptr); ptr += sizeof(uint8_t);
+    void *data = rd->data + ptr;
+    const size_t data_len = rd->data_len - ptr;
+            
+    // Send command to
+    ksnCoreSendCmdto(kco->kc, to, cmd, data, data_len);
     
     return 1; // Command processed
 }

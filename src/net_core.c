@@ -374,37 +374,63 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         #endif
     }
     
-    // Send this message to L0 clients
+    // Send this message to L0 client
     else if(cmd == CMD_L0 && 
             ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&            
             (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, 
                     to)) != NULL) {
-                
-            ssize_t snd;                
-            ksnLNullSPacket *cmd_l0_data = data;
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG_VV, 
+                "%sNet core:%s Send command to L0 client \"%s\" to r-host\n", 
+                ANSI_GREEN, ANSI_NONE, 
+                to);
+        #endif                
 
-            const size_t buf_length = teoLNullBufferSize(
-                    cmd_l0_data->from_length, 
-                    cmd_l0_data->data_length
-            );
-            
-            char *buf = malloc(buf_length);
-            teoLNullPacketCreate(buf, buf_length, 
-                    cmd_l0_data->cmd, 
-                    cmd_l0_data->from, 
-                    cmd_l0_data->from + cmd_l0_data->from_length, 
-                    cmd_l0_data->data_length);
-            if((snd = write(*fd, buf, buf_length)) >= 0);
-            free(buf);
+        ssize_t snd;                
+        ksnLNullSPacket *cmd_l0_data = data;
+
+        const size_t buf_length = teoLNullBufferSize(
+                cmd_l0_data->from_length, 
+                cmd_l0_data->data_length
+        );
+
+        char *buf = malloc(buf_length);
+        teoLNullPacketCreate(buf, buf_length, 
+                cmd_l0_data->cmd, 
+                cmd_l0_data->from, 
+                cmd_l0_data->from + cmd_l0_data->from_length, 
+                cmd_l0_data->data_length);
+        if((snd = write(*fd, buf, buf_length)) >= 0);
+        free(buf);
     }
         
-    // \todo: Send to r-host
+    // Send to r-host
     else {
-            printf("###TODO: Resend command to peer \"%s\" to r-host\n", to);            
+        
+        // If connected to r-host
+        char *r_host = ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.r_host_name;
+        if(r_host[0] && (arp = ksnetArpGet(kc->ka, r_host)) != NULL) {
             
-            // Create resend command buffer
-            
-            // Send command to r-host            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG_VV, 
+                    "%sNet core:%s Resend command to peer \"%s\" to r-host\n", 
+                    ANSI_GREEN, ANSI_NONE, 
+                    to);
+            #endif
+
+            // Create resend command buffer and Send command to r-host 
+            // Command data format: to, cmd, data, data_len
+            size_t ptr = 0;
+            const size_t to_len = strlen(to) + 1;
+            const size_t buf_len = to_len + sizeof(cmd) + data_len;
+            char *buf = malloc(buf_len);
+            memcpy(buf + ptr, to, to_len); ptr += to_len;
+            memcpy(buf + ptr, &cmd, sizeof(uint8_t)); ptr += sizeof(uint8_t);
+            memcpy(buf + ptr, data, data_len); ptr += data_len;
+            ksnCoreSendto(kc, arp->addr, arp->port, CMD_RESEND, buf, buf_len);
+            free(buf);                                           
+        }
     }
 
     return arp;
