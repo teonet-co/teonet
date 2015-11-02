@@ -250,250 +250,270 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
     );
     #endif
 
-    // Set last activity time
-    ksnTRUDPsetActivity(tu, addr);                    
-
     // Data received
     if (recvlen > 0) {
 
         ksnTRUDP_header *tru_header = buffer;
-
+        
         // Check for TR-UDP header and its checksum
-        if (recvlen - tru_ptr == tru_header->payload_length && 
-                ksnTRUDPchecksumCheck(tru_header)) {
+        if (/*arp != NULL &&*/
+            recvlen - tru_ptr == tru_header->payload_length && 
+            ksnTRUDPchecksumCheck(tru_header)) {
+            
+            // Check for new peer
+            ip_map_data *ipm;
+            ksnet_arp_data *arp = NULL;
+            if((ipm = ksnTRUDPipMapDataTry(tu, addr, NULL, 0)) != NULL) {
+                if((arp = ipm->arp) == NULL)
+                    arp = ksnetArpFindByAddr(kev->kc->ka, addr);
+            }
+            if(arp == NULL) { // Ignore TR-UDP request if peer not connected yet 
+                
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                    "%sTR-UDP:%s Ignore message: The remote peer has not registered in this host yet\n",
+                    ANSI_LIGHTGREEN, ANSI_NONE                    
+                );
+                #endif
 
-            #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                "%sTR-UDP:%s process %d bytes message of type %d, id %d, "
-                "with %d bytes data payload\n",
-                ANSI_LIGHTGREEN, ANSI_NONE,
-                (int)recvlen, tru_header->message_type, tru_header->id, 
-                tru_header->payload_length
-            );
-            #endif
+            } else  { 
+            
+                #ifdef DEBUG_KSNET
+                ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                    "%sTR-UDP:%s process %d bytes message of type %d, id %d, "
+                    "with %d bytes data payload\n",
+                    ANSI_LIGHTGREEN, ANSI_NONE,
+                    (int)recvlen, tru_header->message_type, tru_header->id, 
+                    tru_header->payload_length
+                );
+                #endif
 
-            switch (tru_header->message_type) {
+                // Set last activity time
+                ksnTRUDPsetActivity(tu, addr);                    
 
-                // The DATA messages are carrying payload. (has payload)
-                // Process this message.
-                // Return message with payload if there is expected message or 
-                // zero len message if this message was push to queue.
-                case TRU_DATA:
-                {
-                    // Send ACK to sender
-                    ksnTRUDPSendACK();
+                switch (tru_header->message_type) {
 
-                    // If Message ID Equals to Expected ID send message to core
-                    // or save to message Heap sorted by ID
-                    // ksnTRUDPReceiveHeapAdd();    
-                    
-                    // Calculate times statistic
-                    ksnTRUDPsetDATAreceiveTime(tu, addr);                    
+                    // The DATA messages are carrying payload. (has payload)
+                    // Process this message.
+                    // Return message with payload if there is expected message or 
+                    // zero len message if this message was push to queue.
+                    case TRU_DATA:
+                    {
+                        // Send ACK to sender
+                        ksnTRUDPSendACK();
 
-                    // Read IP Map
-                    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
+                        // If Message ID Equals to Expected ID send message to core
+                        // or save to message Heap sorted by ID
+                        // ksnTRUDPReceiveHeapAdd();    
 
-                    // Send to core if ID Equals to Expected ID
-                    if (tru_header->id == ip_map_d->expected_id) {
+                        // Calculate times statistic
+                        ksnTRUDPsetDATAreceiveTime(tu, addr);                    
 
-                        // Change Expected ID
-                        ip_map_d->expected_id++;
+                        // Read IP Map
+                        ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
 
-                        #ifdef DEBUG_KSNET
-                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                            "%sTR-UDP:%s recvfrom: Processed id %d from %s:%d\n", 
-                            ANSI_LIGHTGREEN, ANSI_NONE,    
-                            tru_header->id,
-                            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-                            ntohs(((struct sockaddr_in *) addr)->sin_port)
-                        );
-                        #endif
+                        // Send to core if ID Equals to Expected ID
+                        if (tru_header->id == ip_map_d->expected_id) {
 
-                        // Process packet
-                        tu->process_packet(kev->kc, buffer + tru_ptr, 
-                                tru_header->payload_length, addr);
-                        
-                        // Check Received message Heap and send saved 
-                        // messages to core if first records ID Equals to 
-                        // Expected ID
-                        int num;
-                        while ((num = pblHeapSize(ip_map_d->receive_heap))) {
-
-                            rh_data *rh_d = ksnTRUDPreceiveHeapGetFirst(
-                                    ip_map_d->receive_heap);
+                            // Change Expected ID
+                            ip_map_d->expected_id++;
 
                             #ifdef DEBUG_KSNET
                             ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                    "%sTR-UDP:%s recvfrom: Check Receive Heap,"
-                                    " len = %d, id = %d ... ",
-                                    ANSI_LIGHTGREEN, ANSI_NONE,
-                                    num, rh_d->id
+                                "%sTR-UDP:%s recvfrom: Processed id %d from %s:%d\n", 
+                                ANSI_LIGHTGREEN, ANSI_NONE,    
+                                tru_header->id,
+                                inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                                ntohs(((struct sockaddr_in *) addr)->sin_port)
                             );
                             #endif
 
-                            // Process this message
-                            if (rh_d->id == ip_map_d->expected_id) {
+                            // Process packet
+                            tu->process_packet(kev->kc, buffer + tru_ptr, 
+                                    tru_header->payload_length, addr);
 
-                                #ifdef DEBUG_KSNET
-                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                    "Processed\n");
-                                #endif
+                            // Check Received message Heap and send saved 
+                            // messages to core if first records ID Equals to 
+                            // Expected ID
+                            int num;
+                            while ((num = pblHeapSize(ip_map_d->receive_heap))) {
 
-                                // Process packet
-                                tu->process_packet(kev->kc, rh_d->data, 
-                                        rh_d->data_len, &rh_d->addr);
-
-                                // Remove first record
-                                ksnTRUDPreceiveHeapRemoveFirst(tu, 
+                                rh_data *rh_d = ksnTRUDPreceiveHeapGetFirst(
                                         ip_map_d->receive_heap);
 
-                                // Change Expected ID
-                                ip_map_d->expected_id++;
-                            }
-                            
-                            // Remove already processed
-                            else if (rh_d->id < ip_map_d->expected_id) {
-                                
                                 #ifdef DEBUG_KSNET
                                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                    "Removed\n");
+                                        "%sTR-UDP:%s recvfrom: Check Receive Heap,"
+                                        " len = %d, id = %d ... ",
+                                        ANSI_LIGHTGREEN, ANSI_NONE,
+                                        num, rh_d->id
+                                );
                                 #endif
-                                
-                                // Remove first record
-                                ksnTRUDPreceiveHeapRemoveFirst(tu, 
-                                        ip_map_d->receive_heap);
-                            }
-                            
-                            // Drop saved message
-                            else {
-                                
-                                #ifdef DEBUG_KSNET
-                                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                    "Skipped\n");
-                                #endif
-                                
-                                break; // while
-                            }
-                        }
-                    }
-                    
-                    // Drop old (repeated) message 
-                    else if (tru_header->id < ip_map_d->expected_id) {
-                        
-                        #ifdef DEBUG_KSNET
-                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                            "%sTR-UDP:%s recvfrom: Drop old (repeated) message "
-                            "with id %d\n",
-                            ANSI_LIGHTGREEN, ANSI_NONE,
-                            tru_header->id);
-                        #endif
 
-                        ksnTRUDPsetDATAreceiveDropped(tu, addr);
-                    }   
-                    
-                    // Save to Received message Heap
-                    else {
-                        
-                        #ifdef DEBUG_KSNET
-                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                            "%sTR-UDP:%s recvfrom: Add to receive heap, "
-                            "id = %d, len = %d, expected id = %d\n",
-                            ANSI_LIGHTGREEN, ANSI_NONE,
-                            tru_header->id, tru_header->payload_length,
-                            ip_map_d->expected_id);
-                        #endif
+                                // Process this message
+                                if (rh_d->id == ip_map_d->expected_id) {
 
-                        ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
-                                tru_header->id, buffer + tru_ptr,
-                                tru_header->payload_length, addr, *addr_len);
-                    }
-                }
-                
-                recvlen = 0; // The received message is processed
-                break;
+                                    #ifdef DEBUG_KSNET
+                                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                        "Processed\n");
+                                    #endif
 
-                // The ACK messages are used to acknowledge the arrival of the 
-                // DATA and RESET messages. (has not payload)
-                // Return zero length of this message.    
-                case TRU_ACK:
-                {
+                                    // Process packet
+                                    tu->process_packet(kev->kc, rh_d->data, 
+                                            rh_d->data_len, &rh_d->addr);
 
-                    #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                            "%sTR-UDP:%s +++ got ACK to message ID %d\n",
-                            ANSI_LIGHTGREEN, ANSI_NONE,
-                            tru_header->id
-                    );
-                    #endif
+                                    // Remove first record
+                                    ksnTRUDPreceiveHeapRemoveFirst(tu, 
+                                            ip_map_d->receive_heap);
 
-                    // Calculate times statistic
-                    ksnTRUDPsetACKtime(tu, addr, tru_header);
-                    
-                    // Send event to application
-                    if(kev->event_cb != NULL) {
-                        
-                        sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
-                        if(sl_d != NULL) {
-                            
-                            char *data = sl_d->data_buf; 
-                            size_t data_len = sl_d->data_len; 
-                            #if KSNET_CRYPT
-                            if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
-                                data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
-                            }
-                            #endif
-                            ksnCorePacketData rd;
-                            memset(&rd, 0, sizeof(rd));
+                                    // Change Expected ID
+                                    ip_map_d->expected_id++;
+                                }
 
-                            // Remote peer address and peer
-                            rd.addr = inet_ntoa(((struct sockaddr_in*)addr)->sin_addr); // IP to string
-                            rd.port = ntohs(((struct sockaddr_in*)addr)->sin_port); // Port to integer
+                                // Remove already processed
+                                else if (rh_d->id < ip_map_d->expected_id) {
 
-                            // Parse packet and check if it valid
-                            if(ksnCoreParsePacket(data, data_len, &rd)) {
-                                
-                                // Send event for CMD for Application level TR-UDP mode: 128...191
-                                if(rd.cmd >= 128 && rd.cmd < 192) {
+                                    #ifdef DEBUG_KSNET
+                                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                        "Removed\n");
+                                    #endif
 
-                                    kev->event_cb(kev, EV_K_RECEIVED_ACK, 
-                                            (void*)&rd, // Pointer to ksnCorePacketData
-                                            sizeof(rd), // Length of ksnCorePacketData
-                                            &tru_header->id); // Pointer to packet ID
+                                    // Remove first record
+                                    ksnTRUDPreceiveHeapRemoveFirst(tu, 
+                                            ip_map_d->receive_heap);
+                                }
+
+                                // Drop saved message
+                                else {
+
+                                    #ifdef DEBUG_KSNET
+                                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                        "Skipped\n");
+                                    #endif
+
+                                    break; // while
                                 }
                             }
                         }
+
+                        // Drop old (repeated) message 
+                        else if (tru_header->id < ip_map_d->expected_id) {
+
+                            #ifdef DEBUG_KSNET
+                            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                "%sTR-UDP:%s recvfrom: Drop old (repeated) message "
+                                "with id %d\n",
+                                ANSI_LIGHTGREEN, ANSI_NONE,
+                                tru_header->id);
+                            #endif
+
+                            ksnTRUDPsetDATAreceiveDropped(tu, addr);
+                        }   
+
+                        // Save to Received message Heap
+                        else {
+
+                            #ifdef DEBUG_KSNET
+                            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+                                "%sTR-UDP:%s recvfrom: Add to receive heap, "
+                                "id = %d, len = %d, expected id = %d\n",
+                                ANSI_LIGHTGREEN, ANSI_NONE,
+                                tru_header->id, tru_header->payload_length,
+                                ip_map_d->expected_id);
+                            #endif
+
+                            ksnTRUDPreceiveHeapAdd(tu, ip_map_d->receive_heap,
+                                    tru_header->id, buffer + tru_ptr,
+                                    tru_header->payload_length, addr, *addr_len);
+                        }
                     }
-                    
-                    // Remove message from SendList and stop timer watcher
-                    ksnTRUDPsendListRemove(tu, tru_header->id, addr);   
-                }
-                recvlen = 0; // The received message is processed
-                break;
 
-                // The RESET messages reset messages counter. (has not payload)  
-                // Return zero length of this message.    
-                case TRU_RESET:
-
-                    #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                            "%sTR-UDP:%s +++ got RESET command\n",
-                            ANSI_LIGHTGREEN, ANSI_NONE
-                    );
-                    #endif
-                    
-                    // Process RESET command
-                    ksnTRUDPreset(tu, addr, 0);
-                    ksnTRUDPstatReset(tu); //! \todo: Do we need reset it here?
-                    ksnTRUDPSendACK(); // Send ACK
-                    
                     recvlen = 0; // The received message is processed
                     break;
 
-                    // Some error or undefined message. Don't process this message.
-                    // Return this message without any changes.    
-                default:
+                    // The ACK messages are used to acknowledge the arrival of the 
+                    // DATA and RESET messages. (has not payload)
+                    // Return zero length of this message.    
+                    case TRU_ACK:
+                    {
+
+                        #ifdef DEBUG_KSNET
+                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                                "%sTR-UDP:%s +++ got ACK to message ID %d\n",
+                                ANSI_LIGHTGREEN, ANSI_NONE,
+                                tru_header->id
+                        );
+                        #endif
+
+                        // Calculate times statistic
+                        ksnTRUDPsetACKtime(tu, addr, tru_header);
+
+                        // Send event to application
+                        if(kev->event_cb != NULL) {
+
+                            sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
+                            if(sl_d != NULL) {
+
+                                char *data = sl_d->data_buf; 
+                                size_t data_len = sl_d->data_len; 
+                                #if KSNET_CRYPT
+                                if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
+                                    data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
+                                }
+                                #endif
+                                ksnCorePacketData rd;
+                                memset(&rd, 0, sizeof(rd));
+
+                                // Remote peer address and peer
+                                rd.addr = inet_ntoa(((struct sockaddr_in*)addr)->sin_addr); // IP to string
+                                rd.port = ntohs(((struct sockaddr_in*)addr)->sin_port); // Port to integer
+
+                                // Parse packet and check if it valid
+                                if(ksnCoreParsePacket(data, data_len, &rd)) {
+
+                                    // Send event for CMD for Application level TR-UDP mode: 128...191
+                                    if(rd.cmd >= 128 && rd.cmd < 192) {
+
+                                        kev->event_cb(kev, EV_K_RECEIVED_ACK, 
+                                            (void*)&rd, // Pointer to ksnCorePacketData
+                                            sizeof(rd), // Length of ksnCorePacketData
+                                            &tru_header->id); // Pointer to packet ID
+                                    }
+                                }
+                            }
+                        }
+
+                        // Remove message from SendList and stop timer watcher
+                        ksnTRUDPsendListRemove(tu, tru_header->id, addr);   
+                    }
+                    recvlen = 0; // The received message is processed
                     break;
-            }            
+
+                    // The RESET messages reset messages counter. (has not payload)  
+                    // Return zero length of this message.    
+                    case TRU_RESET:
+
+                        #ifdef DEBUG_KSNET
+                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                                "%sTR-UDP:%s +++ got RESET command\n",
+                                ANSI_LIGHTGREEN, ANSI_NONE
+                        );
+                        #endif
+
+                        // Process RESET command
+                        ksnTRUDPreset(tu, addr, 0);
+                        ksnTRUDPstatReset(tu); //! \todo: Do we need reset it here?
+                        ksnTRUDPSendACK(); // Send ACK
+
+                        recvlen = 0; // The received message is processed
+                        break;
+
+                        // Some error or undefined message. Don't process this message.
+                        // Return this message without any changes.    
+                    default:
+                        break;
+                }
+            }
         } 
         
         else {

@@ -216,7 +216,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
  * @param ks
  * @param rd
  */
-void ksnSplitFreRds(ksnSplitClass *ks, ksnCorePacketData *rd) {
+void ksnSplitFreeRds(ksnSplitClass *ks, ksnCorePacketData *rd) {
 
     if(rd != NULL) {
 
