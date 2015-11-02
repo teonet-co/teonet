@@ -276,6 +276,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                 );
                 #endif
 
+                recvlen = 0; // The received message is processed
+
             } else  { 
             
                 #ifdef DEBUG_KSNET
