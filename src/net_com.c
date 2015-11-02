@@ -274,6 +274,10 @@ int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
 /**
  * Process CMD_RESEND
+ * 
+ * The RESEND command sent by sender to peer if sender does not connected to 
+ * peer. This function resend command to peer and send CONNECT command to sender 
+ * and peer to connect it direct.
  *
  * @param kco
  * @param rd
@@ -288,8 +292,20 @@ int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     void *data = rd->data + ptr;
     const size_t data_len = rd->data_len - ptr;
             
-    // Send command to
+    // Resend command to peer
     ksnCoreSendCmdto(kco->kc, to, cmd, data, data_len);
+    
+    // If we resend command from sender, than sender don't know about the peer, 
+    // try send connect command to peer to direct connect sender with peer
+    ksnet_arp_data *arp;
+    if((arp = ksnetArpGet(kco->kc, to)) != NULL) {
+        
+        // Send connect command request to peer
+        ksnCommandSendCmdConnect(kco, to, rd->from, rd->addr, rd->port);
+        
+        // Send connect command request to sender
+        ksnCommandSendCmdConnect(kco, rd->from, to, arp->addr, arp->port);
+    }
     
     return 1; // Command processed
 }
@@ -522,7 +538,12 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Remove from ARP Table
     ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
     
-    // Try to reconnect - send command through r-host 
+    // Try to reconnect and resend Echo command through r-host:
+    //
+    // Send Echo command to disconnected peer. This command will be resend to 
+    // r-host. R-Host will try to resend this command to peer. If peer has 
+    // connected to r-host, r-host will send Connect commands to peer and this 
+    // host
     if(!is_rhost) 
         ksnCommandSendCmdEcho(kco, peer_name, (void*) TRIPTIME, TRIPTIME_LEN);
 
