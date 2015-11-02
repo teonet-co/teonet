@@ -285,7 +285,6 @@ int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
-    printf("0\n");
     // Parse CMD_RESEND data
     size_t ptr = 0;
     char *to = rd->data + ptr; ptr += strlen(rd->data) + 1;
@@ -293,21 +292,17 @@ int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     void *data = rd->data + ptr;
     const size_t data_len = rd->data_len - ptr;
     
-    printf("1\n");
     // Resend command to peer
     ksnCoreSendCmdto(kco->kc, to, cmd, data, data_len);
     
-    printf("2\n");
     // If we resend command from sender, than sender don't know about the peer, 
     // try send connect command to peer to direct connect sender with peer
     ksnet_arp_data *arp;
     if((arp = ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, to)) != NULL) {
         
-        printf("3\n");
         // Send connect command request to peer
         ksnCommandSendCmdConnect(kco, to, rd->from, rd->addr, rd->port);
         
-        printf("4\n");
         // Send connect command request to sender
         ksnCommandSendCmdConnect(kco, rd->from, to, arp->addr, arp->port);
     }
