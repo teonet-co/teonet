@@ -256,12 +256,12 @@ ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr)
     if(ka != NULL && ksnetArpGetAll(ka, find_arp_by_addr_cb, (void*) &fa)) {
         
         // ARP by address was found
-        //printf("ARP by address %s was found\n", key);
+        printf("ARP by address %s was found\n", key);
         
     } else {
         
         // ARP by address %s not found
-        //printf("ARP by address %s not found\n", key);
+        printf("ARP by address %s not found\n", key);
         
     }
     
