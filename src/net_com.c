@@ -509,7 +509,10 @@ int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Check ARP
 //    if(ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, pd.name) == NULL) {
 
-        ksnCoreSendto(kco->kc, pd.addr, pd.port, CMD_NONE, NULL_STR, 1);
+    if(ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, pd.name) != NULL) {
+        ksnTRUDPresetAddr(((ksnCoreClass*)kco->kc)->ku, pd.addr, pd.port, 0);
+    }
+    ksnCoreSendto(kco->kc, pd.addr, pd.port, CMD_NONE, NULL_STR, 1);
 //    }
 
     return 1;
