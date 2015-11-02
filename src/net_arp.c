@@ -174,7 +174,7 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
 }
 
 /**
- * Get all known peer. Send it too fnd_peer_cb callback
+ * Get all known peer without current host. Send it too fnd_peer_cb callback
  *
  * @param ka
  * @param peer_callback int peer_callback(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data)
@@ -204,6 +204,44 @@ int ksnetArpGetAll(ksnetArpClass *ka,
                     break;
                 }
             }
+        }
+        pblIteratorFree(it);
+    }
+
+    return retval;
+}
+
+/**
+ * Get all known peer without current host. Send it too fnd_peer_cb callback
+ *
+ * @param ka
+ * @param peer_callback int peer_callback(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data)
+ * @param data
+ */
+int ksnetArpGetAllH(ksnetArpClass *ka,
+        int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
+            ksnet_arp_data *arp_data, void *data), 
+        void *data) {
+
+    int retval = 0;
+
+    PblIterator *it =  pblMapIteratorNew(ka->map);
+    if(it != NULL) {
+
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *name = pblMapEntryKey(entry);
+            ksnet_arp_data *arp_data = pblMapEntryValue(entry);
+
+            //if(arp_data->mode >= 0) { // && (!child_only || !data->direct_con)) {
+
+            if(peer_callback(ka, name, arp_data, data)) {
+
+                retval = 1;
+                break;
+            }
+            //}
         }
         pblIteratorFree(it);
     }
@@ -253,7 +291,7 @@ ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr)
     //char key[KSN_BUFFER_SM_SIZE];
     //ksnTRUDPkeyCreate(NULL, addr, key, KSN_BUFFER_SM_SIZE);
     
-    if(ka != NULL && ksnetArpGetAll(ka, find_arp_by_addr_cb, (void*) &fa)) {
+    if(ka != NULL && ksnetArpGetAllH(ka, find_arp_by_addr_cb, (void*) &fa)) {
         
         // ARP by address was found
         printf("ARP by address %s:%d was found\n", 
