@@ -709,7 +709,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
             }
 
             // Set last activity time
-            rd.arp->last_acrivity = ksnetEvMgrGetTime(ke);
+            rd.arp->last_activity = ksnetEvMgrGetTime(ke);
 
             // Check & process command
             command_processed = ksnCommandCheck(kc->kco, &rd);

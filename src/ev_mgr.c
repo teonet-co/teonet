@@ -495,7 +495,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     }
 
     // Disconnect dead peer
-    else if(ct - arp_data->last_acrivity > CHECK_EVENTS_AFTER * 1.5) {
+    else if(ct - arp_data->last_activity > CHECK_EVENTS_AFTER * 1.5) {
 
         ksnCorePacketData rd;
         rd.from = peer_name;

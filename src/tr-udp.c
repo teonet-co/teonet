@@ -766,7 +766,7 @@ void ksnTRUDPsetActivity(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr) {
     
     if(ip_map_d != NULL) {
         if(ip_map_d->arp != NULL) 
-            ip_map_d->arp->last_acrivity = ksnetEvMgrGetTime(kev);
+            ip_map_d->arp->last_activity = ksnetEvMgrGetTime(kev);
     }
 }
 
