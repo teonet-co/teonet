@@ -270,7 +270,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
             if(arp == NULL) { // Ignore TR-UDP request if peer not connected yet 
                 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+                ksnet_printf(&kev->ksn_cfg, MESSAGE, /* DEBUG_VV, */
                     "%sTR-UDP:%s Ignore message: %s:%d has not registered in "
                     "this host yet\n",
                     ANSI_LIGHTGREEN, ANSI_NONE,
