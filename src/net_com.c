@@ -124,7 +124,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
                     processed = 1;
                 }
-                ksnSplitFreRds(kco->ks, rds);
+                ksnSplitFreeRds(kco->ks, rds);
             }
             else processed = 1;
         }
