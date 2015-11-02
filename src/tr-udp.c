@@ -267,6 +267,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                 if((arp = ipm->arp) == NULL)
                     arp = ksnetArpFindByAddr(kev->kc->ka, addr);
             }
+            else {
+                arp = ksnetArpFindByAddr(kev->kc->ka, addr);
+            }
             if(arp == NULL) { // Ignore TR-UDP request if peer not connected yet 
                 
                 #ifdef DEBUG_KSNET
