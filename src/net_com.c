@@ -510,7 +510,7 @@ int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 //    if(ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, pd.name) == NULL) {
 
     if(ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, pd.name) != NULL) {
-        ksnTRUDPresetAddr(((ksnCoreClass*)kco->kc)->ku, pd.addr, pd.port, 0);
+        ksnTRUDPresetAddr(((ksnCoreClass*)kco->kc)->ku, pd.addr, pd.port, 1);
     }
     ksnCoreSendto(kco->kc, pd.addr, pd.port, CMD_NONE, NULL_STR, 1);
 //    }
