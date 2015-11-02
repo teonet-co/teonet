@@ -407,7 +407,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         else {            
             
             // Create data with list of local IPs and port
-            ips = getIPs(); // IPs array
+            ips = getIPs(&ke->ksn_cfg); // IPs array
             uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
             const size_t MAX_IP_STR_LEN = 16; // Max IPs string length
             data = malloc(len * MAX_IP_STR_LEN + sizeof(uint8_t) + sizeof(uint32_t)); // Data
@@ -444,7 +444,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
 void open_local_port(ksnetEvMgrClass *ke) {
 
     // Create data with list of local IPs and port
-    ksnet_stringArr ips = getIPs(); // IPs array
+    ksnet_stringArr ips = getIPs(&ke->ksn_cfg); // IPs array
     uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
 
     // Send to local IPs and Port
