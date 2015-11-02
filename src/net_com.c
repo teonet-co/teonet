@@ -458,7 +458,8 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         lrd.from = rd->from;
         
         // Get this server IPs array
-        ksnet_stringArr ips = getIPs(); 
+        ksnet_stringArr ips = getIPs(
+                &((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->ksn_cfg ); 
         uint8_t ips_len = ksnet_stringArrLength(ips); // Number of IPs
         int i;
         for(i = 0; i <= ips_len; i++) {

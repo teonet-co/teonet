@@ -50,7 +50,7 @@ void set_nonblock(int fd);
 const char* getDataPath(void);
 const char *ksnet_getSysConfigDir(void);
 
-ksnet_stringArr getIPs(/*ksnet_config *conf*/);
+ksnet_stringArr getIPs(ksnet_cfg *conf);
 int ip_is_private(char *ip);
 int ip_to_array(char* ip, uint8_t *arr);
 
