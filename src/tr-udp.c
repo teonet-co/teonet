@@ -271,8 +271,11 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                 
                 #ifdef DEBUG_KSNET
                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                    "%sTR-UDP:%s Ignore message: The remote peer has not registered in this host yet\n",
-                    ANSI_LIGHTGREEN, ANSI_NONE                    
+                    "%sTR-UDP:%s Ignore message: %s:%d has not registered in "
+                    "this host yet\n",
+                    ANSI_LIGHTGREEN, ANSI_NONE,
+                    inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                    ntohs(((struct sockaddr_in *) addr)->sin_port)
                 );
                 #endif
 
@@ -703,8 +706,8 @@ size_t ksnTRUDPkeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr,
  * 
  * @return Created key length 
  */
-inline size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, int port, char* key,
-        size_t key_len) {
+inline size_t ksnTRUDPkeyCreateAddr(ksnTRUDPClass* tu, const char *addr, 
+        int port, char* key, size_t key_len) {
 
     return snprintf(key, key_len, "%s:%d", addr, port);
 }
