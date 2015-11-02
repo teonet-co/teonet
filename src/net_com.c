@@ -301,7 +301,7 @@ int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // If we resend command from sender, than sender don't know about the peer, 
     // try send connect command to peer to direct connect sender with peer
     ksnet_arp_data *arp;
-    if((arp = ksnetArpGet(kco->kc, to)) != NULL) {
+    if((arp = ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, to)) != NULL) {
         
         printf("3\n");
         // Send connect command request to peer
