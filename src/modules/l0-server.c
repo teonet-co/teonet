@@ -97,7 +97,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     // Read TCP data
     ssize_t received = read(w->fd, data, data_len);
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG, 
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "Got something from fd %d w->events = %d, received = %d ...\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, w->fd, w->events, (int)received);
@@ -109,7 +109,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         
         #ifdef DEBUG_KSNET
         ksnet_printf(
-            &kev->ksn_cfg , DEBUG,
+            &kev->ksn_cfg , DEBUG_VV,
             "%sl0 Server:%s "
             "Connection closed. Stop listening fd %d ...\n",
             ANSI_LIGHTCYAN, ANSI_NONE, w->fd
@@ -155,7 +155,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     kld->read_buffer = malloc(kld->read_buffer_size);     
                 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                     "%sl0 Server:%s "
                     "Increase read buffer to new size: %d bytes ...%s\n", 
                     ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_size, 
@@ -197,7 +197,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                                     &w->fd, sizeof(w->fd));
 
                             #ifdef DEBUG_KSNET
-                            ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                                 "%sl0 Server:%s "
                                 "Connection initialized, client name: %s ...\n", 
                                 ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
@@ -215,7 +215,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     // Wrong checksum - drop this packet
                     else {
                         #ifdef DEBUG_KSNET
-                        ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                             "%sl0 Server:%s "
                             "Wrong packet %d bytes length; dropped ...%s\n", 
                             ANSI_LIGHTCYAN, ANSI_RED, len, ANSI_NONE);
@@ -232,7 +232,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             if(kld->read_buffer_ptr - ptr > 0) {
 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG, 
+                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
                     "%sl0 Server:%s "
                     "Wait next part of packet, now it has %d bytes ...%s\n", 
                     ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_ptr - ptr, 
@@ -280,7 +280,7 @@ ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
     if(strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG, 
+        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "Send command from L0 \"%s\" client to \"%s\" peer ...\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->peer_name);
@@ -292,7 +292,7 @@ ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
     // Send to this host
     else {
         #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG, 
+        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "Send command to L0 server peer \"%s\" from L0 client \"%s\" ...\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, packet->peer_name, spacket->from);
@@ -351,7 +351,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     
     // Send command to client of L0 server
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG, 
+    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV, 
         "%sl0 Server:%s "
         "Send command to L0 server for client \"%s\" ...\n", 
         ANSI_LIGHTCYAN, ANSI_NONE, spacket->from);
@@ -578,7 +578,7 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
        (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "Got valid command No %d from %s client with %d bytes data ...\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
@@ -599,7 +599,7 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     else {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "Got wrong command No %d from %s client with %d bytes data, "
             "the command skipped ...%s\n", 
@@ -642,7 +642,7 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksnLNullSPacket *data = rd->data;
         
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG, 
+    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
         "%sl0 Server:%s "
         "Got command No %d to \"%s\" L0 client from peer \"%s\" "
         "with %d bytes data\n", 
@@ -671,7 +671,7 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
         #ifdef DEBUG_KSNET
         void *packet_data = packet->peer_name + packet->peer_name_length;
-        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "Send %d bytes to \"%s\" L0 client: %d bytes data, "
             "from peer \"%s\": %s\n", 
@@ -686,7 +686,7 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     else {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG, 
+        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "The \"%s\" L0 client has not connected to the server%s\n", 
             ANSI_LIGHTCYAN, ANSI_RED, 
