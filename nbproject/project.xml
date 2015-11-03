@@ -44,9 +44,11 @@
             <word>ms</word>
             <word>mtu</word>
             <word>mutex</word>
+            <word>nonblock</word>
             <word>pc</word>
             <word>perror</word>
             <word>po</word>
+            <word>recvfrom</word>
             <word>sh</word>
             <word>src</word>
             <word>str</word>
@@ -58,6 +60,7 @@
             <word>teotproxy</word>
             <word>teoweb</word>
             <word>todo</word>
+            <word>triptime</word>
             <word>ttl</word>
             <word>Ubuntu</word>
             <word>udp</word>

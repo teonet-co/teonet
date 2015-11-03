@@ -248,7 +248,9 @@ int ksnCoreBind(ksnCoreClass *kc) {
         #endif
 
         // Set non block mode
-        // \todo test with "Set non block" set_nonblock(fd);
+        // \todo Test with "Set non block on" 
+        //       and set the set_nonblock if it work correct
+        // set_nonblock(fd);
     }
 
     return !(fd > 0);
@@ -372,33 +374,63 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         #endif
     }
     
-    // Send this message to L0 clients
+    // Send this message to L0 client
     else if(cmd == CMD_L0 && 
             ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&            
             (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, 
                     to)) != NULL) {
-                
-            ssize_t snd;                
-            ksnLNullSPacket *cmd_l0_data = data;
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG_VV, 
+                "%sNet core:%s Send command to L0 client \"%s\" to r-host\n", 
+                ANSI_GREEN, ANSI_NONE, 
+                to);
+        #endif                
 
-            const size_t buf_length = teoLNullBufferSize(
-                    cmd_l0_data->from_length, 
-                    cmd_l0_data->data_length
-            );
-            
-            char *buf = malloc(buf_length);
-            teoLNullPacketCreate(buf, buf_length, 
-                    cmd_l0_data->cmd, 
-                    cmd_l0_data->from, 
-                    cmd_l0_data->from + cmd_l0_data->from_length, 
-                    cmd_l0_data->data_length);
-            if((snd = write(*fd, buf, buf_length)) >= 0);
-            free(buf);
+        ssize_t snd;                
+        ksnLNullSPacket *cmd_l0_data = data;
+
+        const size_t buf_length = teoLNullBufferSize(
+                cmd_l0_data->from_length, 
+                cmd_l0_data->data_length
+        );
+
+        char *buf = malloc(buf_length);
+        teoLNullPacketCreate(buf, buf_length, 
+                cmd_l0_data->cmd, 
+                cmd_l0_data->from, 
+                cmd_l0_data->from + cmd_l0_data->from_length, 
+                cmd_l0_data->data_length);
+        if((snd = write(*fd, buf, buf_length)) >= 0);
+        free(buf);
     }
         
-    // \todo: Send to r-host
-    else {            
-            printf("###TODO: Send to r-host, peer = %s\n", to);
+    // Send to r-host
+    else {
+        
+        // If connected to r-host
+        char *r_host = ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.r_host_name;
+        if(r_host[0] && (arp = ksnetArpGet(kc->ka, r_host)) != NULL) {
+            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG_VV, 
+                    "%sNet core:%s Resend command to peer \"%s\" to r-host\n", 
+                    ANSI_GREEN, ANSI_NONE, 
+                    to);
+            #endif
+
+            // Create resend command buffer and Send command to r-host 
+            // Command data format: to, cmd, data, data_len
+            size_t ptr = 0;
+            const size_t to_len = strlen(to) + 1;
+            const size_t buf_len = to_len + sizeof(cmd) + data_len;
+            char *buf = malloc(buf_len);
+            memcpy(buf + ptr, to, to_len); ptr += to_len;
+            memcpy(buf + ptr, &cmd, sizeof(uint8_t)); ptr += sizeof(uint8_t);
+            memcpy(buf + ptr, data, data_len); ptr += data_len;
+            ksnCoreSendto(kc, arp->addr, arp->port, CMD_RESEND, buf, buf_len);
+            free(buf);                                           
+        }
     }
 
     return arp;
@@ -563,6 +595,53 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 }
 
 /**
+ * Check new peer
+ * 
+ * @param kc
+ * @param rd
+ * @return 
+ */
+void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
+    
+    ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
+     
+    // Check new peer connected
+    if((rd->arp = ksnetArpGet(kc->ka, rd->from)) == NULL) {
+
+        ksnet_arp_data arp;
+    
+        rd->arp = &arp;
+        int mode = 0;
+
+        // Check r-host connected
+        if(!ke->ksn_cfg.r_host_name[0] &&
+           !strcmp(ke->ksn_cfg.r_host_addr, rd->addr) &&
+           ke->ksn_cfg.r_port == rd->port) {
+
+            strncpy(ke->ksn_cfg.r_host_name, rd->from,
+                    sizeof(ke->ksn_cfg.r_host_name));
+
+            mode = 1;
+        }
+
+        // Add peer to ARP Table
+        memset(rd->arp, 0, sizeof(*rd->arp));
+        strncpy(rd->arp->addr, rd->addr, sizeof(rd->arp->addr));
+        rd->arp->port = rd->port;
+        rd->arp->mode = mode;
+        ksnetArpAdd(kc->ka, rd->from, rd->arp);
+        rd->arp = ksnetArpGet(kc->ka, rd->from);
+
+        // Send child to new peer and new peer to child
+        ksnetArpGetAll(kc->ka, send_cmd_connected_cb, rd);
+
+        // Send event callback
+        if(ke->event_cb != NULL)
+            ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
+    }
+}
+
+/**
  * Process ksnet packet
  * 
  * @param vkc Pointer to ksnCoreClass
@@ -578,12 +657,17 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
             
     // Data received    
     if(recvlen > 0) {
+        
+        char *addr = inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr); // IP to string
+        int port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
 
         #ifdef DEBUG_KSNET
         ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-                "%sNet core:%s << host_cb receive %d bytes from %s\n", 
+                "%sNet core:%s << host_cb receive %d bytes from %s:%d\n", 
                 ANSI_GREEN, ANSI_NONE, 
-                recvlen, inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr));
+                recvlen, 
+                addr,
+                port);
         #endif
 
         void *data; // Decrypted packet data
@@ -619,14 +703,14 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         //
 
         // Parse ksnet packet and Fill ksnet receive data structure
-        ksnet_arp_data arp;
+//        ksnet_arp_data arp;
         ksnCorePacketData rd;
         memset(&rd, 0, sizeof(rd));
         int event = EV_K_RECEIVED, command_processed = 0;
 
         // Remote peer address and peer
-        rd.addr = inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr); // IP to string
-        rd.port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
+        rd.addr = addr; // IP to string
+        rd.port = port; // Port to integer
 
         // Parse packet and check if it valid
         if(!ksnCoreParsePacket(data, data_len, &rd)) {
@@ -642,42 +726,12 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
                 ANSI_GREEN, ANSI_NONE, 
                 rd.data_len, rd.cmd, rd.from);
             #endif
-
+         
             // Check new peer connected
-            if((rd.arp = ksnetArpGet(kc->ka, rd.from)) == NULL) {
-
-                rd.arp = &arp;
-                int mode = 0;
-
-                // Check r-host connected
-                if(!ke->ksn_cfg.r_host_name[0] &&
-                   !strcmp(ke->ksn_cfg.r_host_addr, rd.addr) &&
-                   ke->ksn_cfg.r_port == rd.port) {
-
-                    strncpy(ke->ksn_cfg.r_host_name, rd.from,
-                            sizeof(ke->ksn_cfg.r_host_name));
-
-                    mode = 1;
-                }
-
-                // Add peer to ARP Table
-                memset(rd.arp, 0, sizeof(*rd.arp));
-                strncpy(rd.arp->addr, rd.addr, sizeof(rd.arp->addr));
-                rd.arp->port = rd.port;
-                rd.arp->mode = mode;
-                ksnetArpAdd(kc->ka, rd.from, rd.arp);
-                rd.arp = ksnetArpGet(kc->ka, rd.from);
-
-                // Send child to new peer and new peer to child
-                ksnetArpGetAll(kc->ka, send_cmd_connected_cb, &rd);
-
-                // Send event callback
-                if(ke->event_cb != NULL)
-                    ke->event_cb(ke, EV_K_CONNECTED, (void*)&rd, sizeof(rd), NULL);
-            }
+            ksnCoreCheckNewPeer(kc, &rd);
 
             // Set last activity time
-            rd.arp->last_acrivity = ksnetEvMgrGetTime(ke);
+            rd.arp->last_activity = ksnetEvMgrGetTime(ke);
 
             // Check & process command
             command_processed = ksnCommandCheck(kc->kco, &rd);
@@ -701,3 +755,5 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
 //        #endif
 //    }
 }
+
+
