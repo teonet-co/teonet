@@ -470,7 +470,7 @@ int inarray(int val, const int *arr, int size) {
  *
  * @return Pointer to ksnet_stringArr
  */
-ksnet_stringArr getIPs() {
+ksnet_stringArr getIPs(ksnet_cfg *conf) {
 
     ksnet_stringArr arr = ksnet_stringArrCreate();
 
@@ -495,7 +495,7 @@ ksnet_stringArr getIPs() {
 //            printf("%s IP Address: %s\n", ifa->ifa_name, addressBuffer);
 
             // Skip VPN IP
-//            if(!strcmp(addressBuffer, conf->vpn_ip)) continue;
+            if(!strcmp(addressBuffer, conf->vpn_ip)) continue;
 
             ksnet_stringArrAdd(&arr, addressBuffer);
         }

@@ -38,7 +38,7 @@ void ksnSplitDestroy(ksnSplitClass *ks);
 
 void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packet_len, int *num_subpackets);
 ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd);
-void ksnSplitFreRds(ksnSplitClass *ks, ksnCorePacketData *rd);
+void ksnSplitFreeRds(ksnSplitClass *ks, ksnCorePacketData *rd);
 
 #ifdef	__cplusplus
 }
