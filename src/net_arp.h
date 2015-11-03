@@ -83,6 +83,7 @@ ksnet_arp_data *ksnetArpRemove(ksnetArpClass *ka, char* name);
 void ksnetArpRemoveAll(ksnetArpClass *ka);
 int ksnetArpShow(ksnetArpClass *ka);
 char *ksnetArpShowStr(ksnetArpClass *ka);
+int ksnetArpGetAll_(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data, int flag);
 int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data);
 int ksnetArpGetAllH(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data);
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr);

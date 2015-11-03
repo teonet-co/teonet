@@ -179,11 +179,12 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
  * @param ka
  * @param peer_callback int peer_callback(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data)
  * @param data
+ * @param flag Include this host if true
  */
-int ksnetArpGetAll(ksnetArpClass *ka,
+int ksnetArpGetAll_(ksnetArpClass *ka,
         int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
             ksnet_arp_data *arp_data, void *data), 
-        void *data) {
+        void *data, int flag) {
 
     int retval = 0;
 
@@ -196,7 +197,7 @@ int ksnetArpGetAll(ksnetArpClass *ka,
             char *name = pblMapEntryKey(entry);
             ksnet_arp_data *arp_data = pblMapEntryValue(entry);
 
-            if(arp_data->mode >= 0) { // && (!child_only || !data->direct_con)) {
+            if(flag || arp_data->mode >= 0) { 
 
                 if(peer_callback(ka, name, arp_data, data)) {
 
@@ -218,35 +219,27 @@ int ksnetArpGetAll(ksnetArpClass *ka,
  * @param peer_callback int peer_callback(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data)
  * @param data
  */
-int ksnetArpGetAllH(ksnetArpClass *ka,
+inline int ksnetArpGetAll(ksnetArpClass *ka,
         int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
             ksnet_arp_data *arp_data, void *data), 
         void *data) {
+       
+    return ksnetArpGetAll_(ka, peer_callback, data, 0);
+}
 
-    int retval = 0;
-
-    PblIterator *it =  pblMapIteratorNew(ka->map);
-    if(it != NULL) {
-
-        while(pblIteratorHasNext(it)) {
-
-            void *entry = pblIteratorNext(it);
-            char *name = pblMapEntryKey(entry);
-            ksnet_arp_data *arp_data = pblMapEntryValue(entry);
-
-            //if(arp_data->mode >= 0) { // && (!child_only || !data->direct_con)) {
-
-            if(peer_callback(ka, name, arp_data, data)) {
-
-                retval = 1;
-                break;
-            }
-            //}
-        }
-        pblIteratorFree(it);
-    }
-
-    return retval;
+/**
+ * Get all known peer without current host. Send it too fnd_peer_cb callback
+ *
+ * @param ka
+ * @param peer_callback int peer_callback(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data)
+ * @param data
+ */
+inline int ksnetArpGetAllH(ksnetArpClass *ka,
+        int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
+            ksnet_arp_data *arp_data, void *data), 
+        void *data) {
+    
+    return ksnetArpGetAll_(ka, peer_callback, data, 1);
 }
 
 typedef struct find_arp_data {
