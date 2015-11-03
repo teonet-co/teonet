@@ -251,16 +251,16 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
     #endif
 
     // Data received
-    if (recvlen > 0) {
+    if(recvlen > 0) {
 
         ksnTRUDP_header *tru_header = buffer;
         
         // Check for TR-UDP header and its checksum
-        if (/*arp != NULL &&*/
+        if(/*arp != NULL &&*/
             recvlen - tru_ptr == tru_header->payload_length && 
             ksnTRUDPchecksumCheck(tru_header)) {
             
-            // Check for new peer
+            // Check if the sender peer is new one
             ip_map_data *ipm;
             ksnet_arp_data *arp = NULL;
             if((ipm = ksnTRUDPipMapDataTry(tu, addr, NULL, 0)) != NULL) {
@@ -270,7 +270,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
             else {
                 arp = ksnetArpFindByAddr(kev->kc->ka, addr);
             }
-            if(arp == NULL) { // Ignore TR-UDP request if peer not connected yet 
+            // Ignore TR-UDP request if application is not in test mode and 
+            // peer has not connected yet 
+            if(!KSN_GET_TEST_MODE() && arp == NULL) { 
                 
                 #ifdef DEBUG_KSNET
                 ksnet_printf(&kev->ksn_cfg, MESSAGE, /* DEBUG_VV, */
@@ -284,7 +286,9 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                 recvlen = 0; // The received message is processed
 
-            } else  { 
+            } 
+            // Process TR-UDP request
+            else  { 
             
                 #ifdef DEBUG_KSNET
                 ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
