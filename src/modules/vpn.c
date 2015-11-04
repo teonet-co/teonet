@@ -178,6 +178,10 @@ void ksnVpnDestroy(void *vpn) {
 /**
  * Execute system shell script (or application)
  *
+ * Execute system shell script with name script, placed at
+ * HOME/.app_name/network/ path, with parameters:
+ * TUNTAP interface name, IP address, IP network
+ *
  * @param kvpn Pointer to ksnVpnClass
  * @param script Executable name
  * @return True on success
@@ -187,12 +191,14 @@ int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
     ksnet_cfg *conf = &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg;
 
     char *buffer = ksnet_formatMessage(
-        "%s%s%s/%s %s",
+        "%s%s%s/%s %s %s %s",
         getDataPath(),
         conf->network[0] ? "/" : "",
         conf->network[0] ? conf->network : "",
         script,
-        kvpn->tuntap_name
+        kvpn->tuntap_name,
+        conf->vpn_ip,
+        conf->vpn_ip_net
     );
     int rv = system(buffer);
     free(buffer);
