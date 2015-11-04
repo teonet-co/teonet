@@ -32,16 +32,16 @@
  * MAC address structure
  */
 typedef struct mac_addr {
-    
+
     unsigned char d[6];
-    
+
 } mac_addr;
 
 /**
  * The Beginning of Ethernet packet structure
  */
 struct ether_head {
-    
+
     //unsigned char preamble[8];
     //unsigned char delimiter;
     mac_addr destination;
@@ -52,10 +52,10 @@ struct ether_head {
  * VPN List data structure
  */
 typedef struct vpn_list_data {
-    
+
     const char *name;
     mac_addr mac;
-    
+
 } vpn_list_data;
 
 /**
@@ -100,7 +100,7 @@ void send_to_all(ksnVpnClass *kvpn, void *data, size_t data_len);
 
 /**
  * Initialize VPN module
- * 
+ *
  * @param ke Pointer to ksnetEvMgrClass
  * @return Pointer to ksnVpnClass
  */
@@ -123,7 +123,7 @@ void* ksnVpnInit(void *ke) {
     kvpn->ksnet_vpn_map = pblMapNewHashMap();
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV, 
+    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV,
         "VPN module have been initialized\n");
     #endif
 
@@ -136,17 +136,17 @@ void* ksnVpnInit(void *ke) {
 
 /**
  * De-initialize Event manager module
- * 
+ *
  * @param vpn Pointer to ksnVpnClass
  */
 void ksnVpnDestroy(void *vpn) {
 
     ksnVpnClass *kvpn = vpn;
-    
+
     if(kvpn != NULL) {
 
         ksnetEvMgrClass *ke = kvpn->ke;
-        
+
         // Stop watcher
         if(kvpn->tuntap_io != NULL) {
             ev_io_stop (ke->ev_loop, kvpn->tuntap_io);
@@ -154,22 +154,22 @@ void ksnVpnDestroy(void *vpn) {
         }
         // Destroy tuntap interface
         if(kvpn->ksn_tap_dev != NULL) {
-            
+
             // Execute if-down.sh script
             ksnVpnRunShell(kvpn, "if-down.sh");
-            
+
             // Destroy tuntap
             tuntap_destroy(kvpn->ksn_tap_dev);
             kvpn->ksn_tap_dev = NULL;
         }
-        
+
         // Free map and class
         pblMapFree(kvpn->ksnet_vpn_map);
         free(kvpn);
         ke->kvpn = NULL;
-        
+
         #ifdef DEBUG_KSNET
-        ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV, 
+        ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV,
             "VPN module have been de-initialized\n");
         #endif
     }
@@ -177,18 +177,26 @@ void ksnVpnDestroy(void *vpn) {
 
 /**
  * Execute system shell script (or application)
- * 
+ *
  * @param kvpn Pointer to ksnVpnClass
  * @param script Executable name
  * @return True on success
  */
 int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
 
+    ksnet_cfg *conf = &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg;
+
     char *buffer = ksnet_formatMessage(
-        "%s/%s %s", getDataPath(), script, kvpn->tuntap_name);
+        "%s%s%s/%s %s",
+        getDataPath(),
+        conf->network[0] ? "/" : "",
+        conf->network[0] ? conf->network : "",
+        script,
+        kvpn->tuntap_name
+    );
     int rv = system(buffer);
     free(buffer);
-    
+
     return rv != 0;
 }
 
@@ -230,10 +238,10 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
     // Check source MAC address in VPN List and add it if absent
     if( (map_find_by_mac(kvpn, &eth->source)) == NULL ) {
 
-        
-// \todo Issue #121: Teonet VPN interface can't connect with other Ethernet 
-//                   interface through bridge       
-//        
+
+// \todo Issue #121: Teonet VPN interface can't connect with other Ethernet
+//                   interface through bridge
+//
 //        // Check name in VPN List and remove if already present (MAC Changed)
 //        mac_addr *mac;
 //        if((mac = map_find_by_name(kvpn, from)) != NULL) {
@@ -328,13 +336,13 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
     int nread = read(w->fd, buffer, sizeof(buffer));
 
     if(nread < 0) {
-        
+
         if( errno != EINTR ) {
             perror("Reading from interface");
-            close(w->fd);        
+            close(w->fd);
             //exit(1);
         }
-    
+
         return;
     }
 
@@ -392,9 +400,9 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
 
 /**
  * Open TAP interface, set IP to ifconfig and connect interface to ksnet VPN
- * 
+ *
  * @param kvpn Pointer to ksnVpnClass
- * @return 
+ * @return
  */
 int ksnVpnStart(ksnVpnClass *kvpn) {
 
@@ -436,7 +444,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         } else {
             ksnet_addHWAddrConfig(&ke->ksn_cfg, tuntap_haddr);
         }
-        
+
         // Set MTU
         if(ke->ksn_cfg.vpn_mtu) {
             tuntap_set_mtu(kvpn->ksn_tap_dev, ke->ksn_cfg.vpn_mtu);
@@ -445,8 +453,8 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         // Show success message
         ksnet_printf(&ke->ksn_cfg, MESSAGE,
                      "Interface %s (addr: %s, mtu: %d) opened ...\n",
-                     kvpn->tuntap_name, 
-                     tuntap_haddr, 
+                     kvpn->tuntap_name,
+                     tuntap_haddr,
                      ke->ksn_cfg.vpn_mtu ? ke->ksn_cfg.vpn_mtu : 1500);
 
         // Interface Up
@@ -483,7 +491,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
 }
 
 /**
- * Convert MAC address array to c string 
+ * Convert MAC address array to c string
  *
  * @param mac MAC address array
  * @return Null terminated string with MAC address, should be free
@@ -565,7 +573,7 @@ int mac_cmp(mac_addr *dst, mac_addr *src) {
 
 /**
  * Show VPN list
- * 
+ *
  * @param kvpn Pointer to ksnVpnClass
  */
 void ksnVpnListShow(ksnVpnClass *kvpn) {
@@ -578,12 +586,12 @@ void ksnVpnListShow(ksnVpnClass *kvpn) {
     PblIterator *it =  pblMapIteratorNew(kvpn->ksnet_vpn_map);
     printf("Number of peers in VPN: %d\n", pblMapSize(kvpn->ksnet_vpn_map));
     if(it != NULL) {
-        
+
         while(pblIteratorHasNext(it)) {
-            
+
             void *entry = pblIteratorNext(it);
             const char *mac_str = mac_to_str(pblMapEntryKey(entry));
-            printf("name: %s, mac: %s\n", (char*) pblMapEntryValue(entry), 
+            printf("name: %s, mac: %s\n", (char*) pblMapEntryValue(entry),
                     mac_str);
             free((void*) mac_str);
         }
