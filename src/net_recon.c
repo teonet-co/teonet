@@ -57,6 +57,9 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_dat
  */
 void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
     
+    #define karp ((ksnCoreClass*)((ksnCommandClass*) \
+                    map_data->kr->kco)->kc)->ka
+                        
     reconnect_map_data *map_data = (reconnect_map_data *) data;
     size_t valueLen, peer_len = strlen(map_data->peer) + 1;
     map_data = pblMapRemove(map_data->kr->map, (void*)map_data->peer, 
@@ -72,16 +75,13 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
             
             // If connected
             ksnet_arp_data *arp;
-            if((arp = ksnetArpGet(((ksnCoreClass*)((ksnCommandClass*)
-                ((ksnReconnectClass*)map_data->kr)->kco)->kc)->ka, 
-                    map_data->peer)) != NULL) {
+            if((arp = ksnetArpGet(karp, map_data->peer)) != NULL) {
                 
                 // ... do nothing ...
             }
             
             // If not connected send Reconnect command
-            else ((ksnReconnectClass*)map_data->kr)->send(
-                        ((ksnReconnectClass*)map_data->kr), map_data->peer);
+            else map_data->kr->send(map_data->kr, map_data->peer);
         }
 
         // Got the CMD_RECONNECT_ANSWER from r-host, the peer has not connected 
@@ -94,6 +94,8 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
         free(map_data->peer);
         free(map_data);
     }    
+    
+    #undef karp
 }
 
 /**
@@ -258,7 +260,7 @@ int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
             &valueLen)) != NULL) {
     
         // Execute callback queue (with type success)
-        map_data->peer = rd->data;
+        //map_data->peer = rd->data;
         ksnCQueExec(((ksnetEvMgrClass*)
             ((ksnCoreClass*)((ksnCommandClass*)this->kco)->kc)->ke)->kq, 
                 map_data->cq->id /*success_id*/);
