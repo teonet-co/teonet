@@ -84,17 +84,17 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
     if(cq != NULL) {
         
+        // Stop watcher
+        ev_timer_stop(kev->ev_loop, &cq->w);
+        
         // Execute queue callback
         if(cq->cb != NULL)
             cq->cb(id, type, cq->data); // Type 1: successful callback
         
-        //! \todo Send teonet successful event in addition to callback
+        // Send teonet successful event in addition to callback
         if(kev->event_cb != NULL) 
             kev->event_cb(kev, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
                     (void*)&type);
-        
-        // Stop watcher
-        ev_timer_stop(kev->ev_loop, &cq->w);
         
         // Remove record from queue
         if(pblMapRemove(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
@@ -125,7 +125,7 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     if(cq->cb != NULL)
         cq->cb(cq->id, type, cq->data); // Type 0: timeout callback
     
-    //! \todo Send teonet timeout event in addition to callback
+    // Send teonet timeout event in addition to callback
     #define kev2 ((ksnetEvMgrClass*)(cq->kq->ke))
     if(kev2->event_cb != NULL) 
         kev2->event_cb(kev2, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
@@ -154,7 +154,8 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
  * 
  * @return Pointer to added ksnCQueData or NULL if error occurred
  */
-ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, void *data) {
+ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
+        void *data) {
     
     ksnCQueData data_new, *cq = NULL; // Create CQue data buffer
     uint32_t id = kq->id++; // Get new ID

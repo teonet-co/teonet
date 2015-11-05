@@ -12,6 +12,7 @@
 
 #include "ev_mgr.h"
 #include "net_split.h"
+#include "net_recon.h"
 #include "utils/rlutil.h"
 
 // Local functions
@@ -24,6 +25,8 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 /**
@@ -36,6 +39,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
     ksnCommandClass *kco = malloc(sizeof(ksnCommandClass));
     kco->kc = kc;
     kco->ks = ksnSplitInit(kco);
+    kco->kr = ksnReconnectInit(kco);
 
     return kco;
 }
@@ -46,7 +50,8 @@ ksnCommandClass *ksnCommandInit(void *kc) {
  */
 void ksnCommandDestroy(ksnCommandClass *kco) {
 
-    ksnSplitDestroy(kco->ks);
+    ksnSplitDestroy(kco->ks); // Destroy split class
+    ((ksnReconnectClass*)kco->kr)->destroy(kco->kr); // Destroy reconnect class
     free(kco);
 }
 
@@ -127,6 +132,14 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             
         case CMD_RESEND:
             processed = cmd_resend_cb(kco, rd);
+            break;
+            
+        case CMD_RECONNECT:
+            processed = cmd_reconnect_cb(kco, rd);
+            break;
+
+        case CMD_RECONNECT_ANSWER:
+            processed = cmd_reconnect_answer_cb(kco, rd);
             break;
 
         default:
@@ -275,6 +288,31 @@ int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     }
     
     return 1; // Command processed
+}
+
+
+/**
+ * Process CMD_RECONNECT command
+ * 
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+inline int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    return ((ksnReconnectClass*)kco->kr)->process(kco->kr, rd); // Process reconnect command
+}
+
+/**
+ * Process CMD_RECONNECT_ANSWER command
+ * 
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+inline int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    return ((ksnReconnectClass*)kco->kr)->processAnswer(kco->kr, rd); // Process reconnect answer command
 }
 
 /**
