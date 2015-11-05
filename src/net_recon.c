@@ -44,8 +44,8 @@ int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer,
 int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd);
 int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd);
 void ksnReconnectCQueCallback(uint32_t id, int type, void *data);
-
-// \todo insert call to send CMD_RECONNECT somewhere in teonet code
+//
+int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
 /**
  * CallbackQueue callback
@@ -208,18 +208,33 @@ int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer,
  */
 int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
     
+    #define kcom ((ksnCommandClass*)this->kco)
+    #define karp ((ksnCoreClass*)kcom->kc)->ka
+
+    ksnet_arp_data *arp;
+            
     // Send reconnect answer command if requested peer is disconnected    
-    if(ksnetArpGet(((ksnCoreClass*)((ksnCommandClass*)this->kco)->kc)->ka, 
-        rd->data) == NULL)  
+    if((arp = ksnetArpGet(karp, rd->data)) == NULL)  
         
             this->sendAnswer(this, rd->from, rd->data);
 
-    // \todo Reconnect sender (rd->from) with requested peer (rd->data)
+    // Reconnect sender (rd->from) with requested peer (rd->data)
     else {
         
+//        // Send connect command request to peer
+//        ksnCommandSendCmdConnect(kcom, rd->data, rd->from, rd->addr, rd->port);
+//        
+//        // Send connect command request to sender
+//        ksnCommandSendCmdConnect(kcom, rd->from, rd->data, arp->addr, arp->port);   
+        
+        // Send connect command request to peers
+        send_cmd_connected_cb(karp, rd->data, arp, rd);
     }
     
     return 1;
+    
+    #undef karp
+    #undef kcom
 }
 
 /**
