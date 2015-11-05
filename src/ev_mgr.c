@@ -20,8 +20,6 @@
 //#include "modules/tcp_proxy.h"
 
 // Constants
-#define CHECK_EVENTS_AFTER 11.5
-
 const char *null_str = "";
 
 // Local functions
@@ -577,7 +575,7 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
     #ifdef DEBUG_KSNET
     const int show_interval = 5 / KSNET_EVENT_MGR_TIMER /* 10 */;
     #endif
-    const int activity_interval = 11.5 / KSNET_EVENT_MGR_TIMER /* 23 */;
+    const int activity_interval = CHECK_EVENTS_AFTER / KSNET_EVENT_MGR_TIMER /* 23 */;
     ksnetEvMgrClass *ke = w->data;
     double t = ksnetEvMgrGetTime(ke);
 

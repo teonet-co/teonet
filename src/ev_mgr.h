@@ -29,6 +29,8 @@
 extern const char *null_str;
 #define NULL_STR (void*) null_str
 
+#define CHECK_EVENTS_AFTER 11.5
+
 /**
  * KSNet event manager events
  */
