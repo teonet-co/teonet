@@ -97,7 +97,7 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
                     (void*)&type);
         
         // Remove record from queue
-        if(pblMapRemove(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
+        if(pblMapRemoveFree(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
             
             retval = 0;
         }
@@ -134,7 +134,7 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     
     // Remove record from Callback Queue
     size_t data_len;
-    if(pblMapRemove(cq->kq->cque_map, &cq->id, sizeof(cq->id), 
+    if(pblMapRemoveFree(cq->kq->cque_map, &cq->id, sizeof(cq->id), 
             &data_len) != (void*)-1) {
             
         // Do something in success 
@@ -183,6 +183,30 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout,
     }
     
     return cq;
+}
+
+/**
+ * Removes the mapping for this key from this map if it is present.
+ * 
+ * @param map
+ * @param key
+ * @param keyLength
+ * @param valueLengthPtr
+ * @return 
+ * @retval != NULL && != (void*)-1: successfully removed
+ * @retval == NULL: there was no mapping for key
+ * @retval == (void*)-1: An error, see pbl_errno: 
+ *                       <BR>PBL_ERROR_OUT_OF_MEMORY - Out of memory.
+ */
+void *pblMapRemoveFree(PblMap * map, void * key, size_t keyLength, 
+        size_t * valueLengthPtr ) {
+    
+    void *rv = pblMapRemove(map, key, keyLength, valueLengthPtr);
+    if(rv != NULL && rv != (void*)-1) {
+        free(rv);
+    }
+    
+    return rv;
 }
 
 #undef kev            

@@ -57,6 +57,8 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id);
 ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
         void *data);
 
+void *pblMapRemoveFree(PblMap * map, void * key, size_t keyLength, 
+        size_t * valueLengthPtr );
 
 #ifdef	__cplusplus
 }

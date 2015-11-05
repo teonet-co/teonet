@@ -226,7 +226,7 @@ char *ksnTunMapGet(ksnTunClass *ktun, uint16_t fd, uint16_t *to_fd) {
 void ksnTunMapRemove(ksnTunClass * ktun, uint16_t fd) {
 
     size_t val_len;
-    pblMapRemove(ktun->map, &fd, sizeof(fd), &val_len);
+    pblMapRemoveFree(ktun->map, &fd, sizeof(fd), &val_len);
 }
 
 /**
@@ -282,7 +282,7 @@ void *ksnTunListRemove(ksnTunClass *ktun, int fd) {
 
     void *ptr;
     size_t val_len;
-    return (ptr = pblMapRemove(ktun->list, &fd, sizeof(fd), &val_len)) != 
+    return (ptr = pblMapRemoveFree(ktun->list, &fd, sizeof(fd), &val_len)) != 
             (void*)-1 ? ptr : NULL;
 }
 
