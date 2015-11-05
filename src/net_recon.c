@@ -139,8 +139,7 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
                 
                 retval = -1; 
                 size_t vl;
-                void *rm = pblMapRemove(this->map, (void*)peer, peer_len, &vl);
-                if(rm != NULL && rm != (void*)-1) free(rm);
+                pblMapRemoveFree(this->map, (void*)peer, peer_len, &vl);
             }
 
             // Add to queue and map if Send successfully
