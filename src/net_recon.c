@@ -79,8 +79,9 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
             #ifdef DEBUG_KSNET
             ksnet_printf(conf, DEBUG,
                     "%sReconnect:%s "
-                    "callback: Got timeout\n",
-                    ANSI_GREEN, ANSI_NONE);
+                    "callback: Got timeout for peer \"%s\"\n",
+                    ANSI_GREEN, ANSI_NONE,
+                    map_data->peer);
             #endif
             
             // If connected
@@ -117,8 +118,9 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
             #ifdef DEBUG_KSNET
             ksnet_printf(conf, DEBUG,
                 "%sReconnect:%s "
-                "callback: Got the CMD_RECONNECT_ANSWER - stop\n",
-                ANSI_GREEN, ANSI_NONE);
+                "callback: Got the CMD_RECONNECT_ANSWER for peer - stop\n",
+                ANSI_GREEN, ANSI_NONE,
+                map_data->peer);
             #endif
         }
         
@@ -170,8 +172,10 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
             #ifdef DEBUG_KSNET
             ksnet_printf(conf, DEBUG, 
                     "%sReconnect:%s "
-                    "Send reconnect request (and save it to queue)\n", 
-                    ANSI_GREEN, ANSI_NONE);
+                    "send reconnect request with peer \"%s\" "
+                    "(and save it to queue)\n",                     
+                    ANSI_GREEN, ANSI_NONE,
+                    peer);
             #endif
             
             // Send command reconnect to r-host
@@ -213,7 +217,7 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
             #ifdef DEBUG_KSNET
             ksnet_printf(conf, DEBUG,
                 "%sReconnect:%s "
-                "Send skipped - reconnect request already running\n", 
+                "send skipped - reconnect request already running\n", 
                 ANSI_GREEN, ANSI_NONE);
             #endif
             
@@ -226,7 +230,7 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
             #ifdef DEBUG_KSNET
             ksnet_printf(conf, DEBUG,
                 "%sReconnect:%s "
-                "Send skipped - PBL error\n", 
+                "send skipped - PBL error\n", 
                 ANSI_GREEN, ANSI_NONE);
             #endif
 
@@ -333,8 +337,9 @@ int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
     #ifdef DEBUG_KSNET
     ksnet_printf(conf, DEBUG,
         "%sReconnect:%s "
-        "process reconnect answer command\n", 
-        ANSI_GREEN, ANSI_NONE);
+        "process reconnect answer command with peer \"%s\"\n", 
+        ANSI_GREEN, ANSI_NONE,
+        rd->data);
     #endif
     
     int retval = 1;
