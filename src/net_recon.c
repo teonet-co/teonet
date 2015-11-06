@@ -256,8 +256,10 @@ int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer,
     #ifdef DEBUG_KSNET
     ksnet_printf(conf, DEBUG,
         "%sReconnect:%s "
-        "send answer\n", 
-        ANSI_GREEN, ANSI_NONE);
+        "send answer to \"%s\"\n", 
+        ANSI_GREEN, ANSI_NONE,
+        peer
+    );
     #endif
     
     // Send command reconnect answer to peer
@@ -285,8 +287,10 @@ int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
     #ifdef DEBUG_KSNET
     ksnet_printf(conf, DEBUG,
         "%sReconnect:%s "
-        "process reconnect command\n", 
-        ANSI_GREEN, ANSI_NONE);
+        "process reconnect command from peer \"%s\" with \"%s\"\n", 
+        ANSI_GREEN, ANSI_NONE,        
+        rd->from, rd->data
+    );
     #endif
     
     ksnet_arp_data *arp;
@@ -401,7 +405,7 @@ void ksnReconnectDestroy(ksnReconnectClass *this) {
         #ifdef DEBUG_KSNET
         ksnet_printf(conf, DEBUG,
             "%sReconnect:%s "
-            "Initialize ksnReconnectClass\n", 
+            "Destroy ksnReconnectClass\n", 
             ANSI_GREEN, ANSI_NONE);
         #endif
     
