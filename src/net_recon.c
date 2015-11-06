@@ -60,7 +60,8 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
     #define karp ((ksnCoreClass*)((ksnCommandClass*) \
                     map_data->kr->kco)->kc)->ka
 
-    printf("reconnect callback 1: Begin\n");
+    static int cb_num = 0;
+    printf("reconnect callback 1: Begin #%d\n", ++cb_num);
                         
     reconnect_map_data *map_data = (reconnect_map_data *) data;
     size_t valueLen, peer_len = strlen(map_data->peer) + 1;
@@ -203,12 +204,13 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
 int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer, 
         const char* peer_to_reconnect) {
     
-    // Send command reconnect answer to peer
-    ksnet_arp_data *arp = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, 
-        (char*)peer, CMD_RECONNECT_ANSWER, 
-        (void*)peer_to_reconnect, strlen(peer_to_reconnect) + 1);
-            
-    return arp == NULL ? -1 : 0;
+//    // Send command reconnect answer to peer
+//    ksnet_arp_data *arp = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, 
+//        (char*)peer, CMD_RECONNECT_ANSWER, 
+//        (void*)peer_to_reconnect, strlen(peer_to_reconnect) + 1);
+//            
+//    return arp == NULL ? -1 : 0;
+    return 0;
 }
 
 /**
@@ -262,7 +264,7 @@ int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
  */
 int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
     
-    printf("process reconnect answer 1");
+    printf("process reconnect answer 1\n");
     
     int retval = 1;
     
