@@ -59,11 +59,15 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
     
     #define karp ((ksnCoreClass*)((ksnCommandClass*) \
                     map_data->kr->kco)->kc)->ka
+
+    printf("reconnect callback 1: Begin\n");
                         
     reconnect_map_data *map_data = (reconnect_map_data *) data;
     size_t valueLen, peer_len = strlen(map_data->peer) + 1;
     map_data = pblMapRemove(map_data->kr->map, (void*)map_data->peer, 
             peer_len, &valueLen);
+    
+    printf("reconnect callback 2: After pblMapRemove\n");
 
     // If map record successfully remover
     if(map_data != NULL && map_data != (void*)-1) {
@@ -72,27 +76,36 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
         if(type == 0) {
 
             // Check peer is connected and resend CMD_RECONNECT if not
-            
+            printf("reconnect callback 3: Got timeout\n");
             // If connected
             ksnet_arp_data *arp;
             if((arp = ksnetArpGet(karp, map_data->peer)) != NULL) {
                 
                 // ... do nothing ...
+                printf("reconnect callback 4: Has already connected - stop\n");
             }
             
             // If not connected send Reconnect command
-            else map_data->kr->send(map_data->kr, map_data->peer);
+            else { 
+                printf("reconnect callback 5: Has not connected yet - reconnect\n");
+                map_data->kr->send(map_data->kr, map_data->peer);
+            }
         }
 
         // Got the CMD_RECONNECT_ANSWER from r-host, the peer has not connected 
         // to r-host, stop connecting
         else {
             // ... do nothing ...
+            printf("reconnect callback 6: Got the CMD_RECONNECT_ANSWER - stop\n");
         }
+        
+        printf("reconnect callback 7: Before free map\n");
         
         // Free map data
         free(map_data->peer);
         free(map_data);
+        
+        printf("reconnect callback 8: After free map\n\n");
     }    
     
     #undef karp
@@ -192,7 +205,7 @@ int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer,
     
     // Send command reconnect answer to peer
     ksnet_arp_data *arp = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, 
-        (char*)peer, CMD_RECONNECT, 
+        (char*)peer, CMD_RECONNECT_ANSWER, 
         (void*)peer_to_reconnect, strlen(peer_to_reconnect) + 1);
             
     return arp == NULL ? -1 : 0;
@@ -248,6 +261,8 @@ int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
  * @return 
  */
 int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
+    
+    printf("process reconnect answer 1");
     
     int retval = 1;
     
