@@ -24,6 +24,7 @@
 
 #include "ev_mgr.h"
 #include "net_recon.h"
+#include "utils/rlutil.h"
 
 /**
  * Reconnect command map data structure
@@ -47,6 +48,8 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data);
 //
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
+#define conf (& ((ksnetEvMgrClass*)kcor->ke)->ksn_cfg)
+    
 /**
  * CallbackQueue callback
  * 
@@ -57,19 +60,15 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_dat
  */
 void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
     
-    #define karp ((ksnCoreClass*)((ksnCommandClass*) \
-                    map_data->kr->kco)->kc)->ka
+    #define kcor ((ksnCoreClass*)((ksnCommandClass*) \
+                    map_data->kr->kco)->kc)
+    #define karp kcor->ka
 
-    static int cb_num = 0;
-    printf("reconnect callback 1: Begin #%d\n", ++cb_num);
-                        
     reconnect_map_data *map_data = (reconnect_map_data *) data;
     size_t valueLen, peer_len = strlen(map_data->peer) + 1;
     map_data = pblMapRemove(map_data->kr->map, (void*)map_data->peer, 
             peer_len, &valueLen);
     
-    printf("reconnect callback 2: After pblMapRemove\n");
-
     // If map record successfully remover
     if(map_data != NULL && map_data != (void*)-1) {
     
@@ -77,18 +76,36 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
         if(type == 0) {
 
             // Check peer is connected and resend CMD_RECONNECT if not
-            printf("reconnect callback 3: Got timeout\n");
+            #ifdef DEBUG_KSNET
+            ksnet_printf(conf, DEBUG,
+                    "%sReconnect:%s "
+                    "callback: Got timeout\n",
+                    ANSI_GREEN, ANSI_NONE);
+            #endif
+            
             // If connected
             ksnet_arp_data *arp;
             if((arp = ksnetArpGet(karp, map_data->peer)) != NULL) {
                 
                 // ... do nothing ...
-                printf("reconnect callback 4: Has already connected - stop\n");
+                #ifdef DEBUG_KSNET
+                ksnet_printf(conf, DEBUG,
+                    "%sReconnect:%s "
+                    "callback: Has already connected - stop\n",
+                    ANSI_GREEN, ANSI_NONE);
+                #endif
             }
             
             // If not connected send Reconnect command
             else { 
-                printf("reconnect callback 5: Has not connected yet - reconnect\n");
+                
+                #ifdef DEBUG_KSNET
+                ksnet_printf(conf, DEBUG,
+                    "%sReconnect:%s "
+                    "callback: Has not connected yet - reconnect\n",
+                    ANSI_GREEN, ANSI_NONE);
+                #endif
+
                 map_data->kr->send(map_data->kr, map_data->peer);
             }
         }
@@ -97,20 +114,25 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
         // to r-host, stop connecting
         else {
             // ... do nothing ...
-            printf("reconnect callback 6: Got the CMD_RECONNECT_ANSWER - stop\n");
+            #ifdef DEBUG_KSNET
+            ksnet_printf(conf, DEBUG,
+                "%sReconnect:%s "
+                "callback: Got the CMD_RECONNECT_ANSWER - stop\n",
+                ANSI_GREEN, ANSI_NONE);
+            #endif
         }
-        
-        printf("reconnect callback 7: Before free map\n");
         
         // Free map data
         free(map_data->peer);
         free(map_data);
         
-        printf("reconnect callback 8: After free map\n\n");
     }    
     
     #undef karp
+    #undef kcor
 }
+
+#define kcor ((ksnCoreClass*)(((ksnCommandClass*)this->kco)->kc))
 
 /**
  * Send CMD_RECONNECT command to r-host
@@ -127,23 +149,31 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
     
     int retval = 0;
     
-    ksnCoreClass *kc = ((ksnCoreClass*)(((ksnCommandClass*)this->kco)->kc));
-    ksnet_cfg *conf = &((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
     char *r_host = conf->r_host_name;
     ksnet_arp_data *arp;
 
     // If connected to r-host
-    if(r_host[0] && (arp = ksnetArpGet(kc->ka, r_host)) != NULL) {
+    if(r_host[0] && (arp = ksnetArpGet(kcor->ka, r_host)) != NULL) {
 
-        int rc;
+        int rc = 0;
         reconnect_map_data md;
+        size_t valueLen, peer_len = strlen(peer) + 1;
+        
         memset(&md, 0, sizeof(md));
-        size_t peer_len = strlen(peer) + 1;
         md.kr = this;
 
-        if((rc = pblMapAdd(this->map, (void*)peer, peer_len, &md, sizeof(md))) 
-                >= 0) {
+        // Check exists and add new reconnect request
+        if(pblMapGet(this->map, (void*)peer, peer_len, &valueLen) == NULL && 
+           (rc = pblMapAdd(this->map, (void*)peer, peer_len, &md, 
+                sizeof(md))) >= 0) {
 
+            #ifdef DEBUG_KSNET
+            ksnet_printf(conf, DEBUG, 
+                    "%sReconnect:%s "
+                    "Send reconnect request (and save it to queue)\n", 
+                    ANSI_GREEN, ANSI_NONE);
+            #endif
+            
             // Send command reconnect to r-host
             arp = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, r_host, 
                     CMD_RECONNECT, (void*)peer, peer_len);
@@ -160,8 +190,7 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
             else {
 
                 // Add to class map and set it as ksnCQueAdd data
-                size_t valueLen;     
-                reconnect_map_data *map_data = NULL;
+                reconnect_map_data *map_data;
                 if((map_data = pblMapGet(this->map, (void*)peer, peer_len, 
                         &valueLen)) != NULL) {
 
@@ -169,8 +198,8 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
                     map_data->peer = strdup(peer);
                     
                     // Add callback to queue and wait timeout after ~5 sec ...
-                    map_data->cq = ksnCQueAdd(((ksnetEvMgrClass*)kc->ke)->kq, 
-                            this->callback, CHECK_EVENTS_AFTER / 2, map_data);
+                    map_data->cq = ksnCQueAdd(((ksnetEvMgrClass*)kcor->ke)->kq, 
+                            this->callback, CHECK_EVENTS_AFTER / 2.0, map_data);
                 }
                 
                 // PBL error
@@ -179,10 +208,30 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
         }
         
         // This request already exist
-        else if(rc == 0) retval = 1;
+        else if(rc == 0) {
+            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(conf, DEBUG,
+                "%sReconnect:%s "
+                "Send skipped - reconnect request already running\n", 
+                ANSI_GREEN, ANSI_NONE);
+            #endif
+            
+            retval = 1;
+        }
         
         // PBL error
-        else retval = -2;        
+        else {
+            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(conf, DEBUG,
+                "%sReconnect:%s "
+                "Send skipped - PBL error\n", 
+                ANSI_GREEN, ANSI_NONE);
+            #endif
+
+            retval = -2;        
+        }
     }
 
     // Has not connected to r-host
@@ -204,13 +253,19 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
 int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer, 
         const char* peer_to_reconnect) {
     
-//    // Send command reconnect answer to peer
-//    ksnet_arp_data *arp = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, 
-//        (char*)peer, CMD_RECONNECT_ANSWER, 
-//        (void*)peer_to_reconnect, strlen(peer_to_reconnect) + 1);
-//            
-//    return arp == NULL ? -1 : 0;
-    return 0;
+    #ifdef DEBUG_KSNET
+    ksnet_printf(conf, DEBUG,
+        "%sReconnect:%s "
+        "send answer\n", 
+        ANSI_GREEN, ANSI_NONE);
+    #endif
+    
+    // Send command reconnect answer to peer
+    ksnet_arp_data *arp = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, 
+        (char*)peer, CMD_RECONNECT_ANSWER, 
+        (void*)peer_to_reconnect, strlen(peer_to_reconnect) + 1);
+            
+    return arp == NULL ? -1 : 0;
 }
 
 /**
@@ -227,6 +282,13 @@ int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
     #define kcom ((ksnCommandClass*)this->kco)
     #define karp ((ksnCoreClass*)kcom->kc)->ka
 
+    #ifdef DEBUG_KSNET
+    ksnet_printf(conf, DEBUG,
+        "%sReconnect:%s "
+        "process reconnect command\n", 
+        ANSI_GREEN, ANSI_NONE);
+    #endif
+    
     ksnet_arp_data *arp;
             
     // Send reconnect answer command if requested peer is disconnected    
@@ -264,7 +326,12 @@ int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
  */
 int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
     
-    printf("process reconnect answer 1\n");
+    #ifdef DEBUG_KSNET
+    ksnet_printf(conf, DEBUG,
+        "%sReconnect:%s "
+        "process reconnect answer command\n", 
+        ANSI_GREEN, ANSI_NONE);
+    #endif
     
     int retval = 1;
     
@@ -294,6 +361,18 @@ int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
  */
 ksnReconnectClass *ksnReconnectInit(void *kco) {
     
+    #define conf_ (&((ksnetEvMgrClass*)((ksnCoreClass*) \
+                        (((ksnCommandClass*)kco)->kc))->ke)->ksn_cfg)
+          
+    #ifdef DEBUG_KSNET
+    ksnet_printf(conf_, DEBUG,
+        "%sReconnect:%s "
+        "Initialize ksnReconnectClass\n", 
+        ANSI_GREEN, ANSI_NONE);
+    #endif
+
+    #undef conf_
+    
     ksnReconnectClass *this = malloc(sizeof(ksnReconnectClass));
     
     this->map = pblMapNewHashMap();
@@ -319,6 +398,13 @@ void ksnReconnectDestroy(ksnReconnectClass *this) {
     
     if(this != NULL) {
         
+        #ifdef DEBUG_KSNET
+        ksnet_printf(conf, DEBUG,
+            "%sReconnect:%s "
+            "Initialize ksnReconnectClass\n", 
+            ANSI_GREEN, ANSI_NONE);
+        #endif
+    
         pblMapFree(this->map);
         free(this);
     }
