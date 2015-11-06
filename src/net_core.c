@@ -343,12 +343,12 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 /**
  * Send command by name to peer
  *
- * @param kc
- * @param to
- * @param cmd
- * @param data
- * @param data_len
- * @return Pointer to ksnet_arp_data or NULL if to is absent
+ * @param kc Pointer to ksnCoreClass
+ * @param to Peer name to send to
+ * @param cmd Command
+ * @param data Commands data
+ * @param data_len Commands data length
+ * @return Pointer to ksnet_arp_data or NULL if to peer is absent
  */
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                                  void *data, size_t data_len) {

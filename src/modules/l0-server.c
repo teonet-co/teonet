@@ -450,7 +450,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         if(kld->name != NULL) {
             
             if(remove_f) 
-                pblMapRemove(kl->map_n, kld->name, kld->name_length, 
+                pblMapRemoveFree(kl->map_n, kld->name, kld->name_length, 
                         &valueLength);
             
             free(kld->name);
@@ -468,7 +468,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
 
         // Remove data from map
         if(remove_f) 
-            pblMapRemove(kl->map, &fd, sizeof(fd), &valueLength);
+            pblMapRemoveFree(kl->map, &fd, sizeof(fd), &valueLength);
     }        
 }
 

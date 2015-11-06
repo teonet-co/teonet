@@ -184,7 +184,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             data_len += data_s_len;
 
             // Remove subpacket from map
-            pblMapRemove(ks->map, key, key_len, &data_s_len);
+            pblMapRemoveFree(ks->map, key, key_len, &data_s_len);
             free(key);
        }
 

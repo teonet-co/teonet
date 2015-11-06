@@ -1053,8 +1053,8 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
 
         // Remove data from map
         if(remove_f) {
-            pblMapRemove(tp->map, &tpd->udp_proxy_fd, sizeof(tpd->udp_proxy_fd), &valueLength);
-            pblMapRemove(tp->map, &fd, sizeof(fd), &valueLength);
+            pblMapRemoveFree(tp->map, &tpd->udp_proxy_fd, sizeof(tpd->udp_proxy_fd), &valueLength);
+            pblMapRemoveFree(tp->map, &fd, sizeof(fd), &valueLength);
         }
     }        
 }

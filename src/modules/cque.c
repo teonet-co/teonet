@@ -84,20 +84,20 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
     if(cq != NULL) {
         
+        // Stop watcher
+        ev_timer_stop(kev->ev_loop, &cq->w);
+        
         // Execute queue callback
         if(cq->cb != NULL)
             cq->cb(id, type, cq->data); // Type 1: successful callback
         
-        //! \todo Send teonet successful event in addition to callback
+        // Send teonet successful event in addition to callback
         if(kev->event_cb != NULL) 
             kev->event_cb(kev, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
                     (void*)&type);
         
-        // Stop watcher
-        ev_timer_stop(kev->ev_loop, &cq->w);
-        
         // Remove record from queue
-        if(pblMapRemove(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
+        if(pblMapRemoveFree(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
             
             retval = 0;
         }
@@ -125,7 +125,7 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     if(cq->cb != NULL)
         cq->cb(cq->id, type, cq->data); // Type 0: timeout callback
     
-    //! \todo Send teonet timeout event in addition to callback
+    // Send teonet timeout event in addition to callback
     #define kev2 ((ksnetEvMgrClass*)(cq->kq->ke))
     if(kev2->event_cb != NULL) 
         kev2->event_cb(kev2, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
@@ -134,7 +134,7 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     
     // Remove record from Callback Queue
     size_t data_len;
-    if(pblMapRemove(cq->kq->cque_map, &cq->id, sizeof(cq->id), 
+    if(pblMapRemoveFree(cq->kq->cque_map, &cq->id, sizeof(cq->id), 
             &data_len) != (void*)-1) {
             
         // Do something in success 
@@ -154,7 +154,8 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
  * 
  * @return Pointer to added ksnCQueData or NULL if error occurred
  */
-ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, void *data) {
+ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
+        void *data) {
     
     ksnCQueData data_new, *cq = NULL; // Create CQue data buffer
     uint32_t id = kq->id++; // Get new ID
@@ -182,6 +183,30 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, vo
     }
     
     return cq;
+}
+
+/**
+ * Removes the mapping for this key from this map if it is present.
+ * 
+ * @param map
+ * @param key
+ * @param keyLength
+ * @param valueLengthPtr
+ * @return 
+ * @retval != NULL && != (void*)-1: successfully removed
+ * @retval == NULL: there was no mapping for key
+ * @retval == (void*)-1: An error, see pbl_errno: 
+ *                       <BR>PBL_ERROR_OUT_OF_MEMORY - Out of memory.
+ */
+void *pblMapRemoveFree(PblMap * map, void * key, size_t keyLength, 
+        size_t * valueLengthPtr ) {
+    
+    void *rv = pblMapRemove(map, key, keyLength, valueLengthPtr);
+    if(rv != NULL && rv != (void*)-1) {
+        free(rv);
+    }
+    
+    return rv;
 }
 
 #undef kev            

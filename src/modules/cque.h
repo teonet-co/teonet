@@ -24,6 +24,10 @@ typedef struct ksnCQueClass {
 
 /**
  * ksnCQue callback function definition 
+ * 
+ * @param id Calls ID
+ * @param type Type: 0 - timeout callback; 1 - successful callback 
+ * @param data User data selected in \ksnCQueAdd function
  */
 typedef void (*ksnCQueCallback) (uint32_t id, int type, void *data);
 
@@ -53,6 +57,8 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id);
 ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
         void *data);
 
+void *pblMapRemoveFree(PblMap * map, void * key, size_t keyLength, 
+        size_t * valueLengthPtr );
 
 #ifdef	__cplusplus
 }

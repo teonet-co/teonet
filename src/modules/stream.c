@@ -293,7 +293,7 @@ int ksnStreamClose(ksnStreamClass *ks, char *to_peer, char *stream_name,
         // Free stream map data record
         free(smd->key);
         if(send_f != CMD_ST_CLOSE_NOTREMOVE)
-            pblMapRemove(ks->map, (void*)key_buf, key_buf_len, &valueLen);
+            pblMapRemoveFree(ks->map, (void*)key_buf, key_buf_len, &valueLen);
     }
     
     return 0;
