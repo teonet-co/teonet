@@ -7,7 +7,7 @@
  * Created on October 2, 2015, 12:04 AM
  */
 
-#include "teo_http.h"
+#include "teo_web.h"
 
 /**
  * Mongoose websocket send broadcast
@@ -160,6 +160,7 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
     char buffer[KSN_BUFFER_SIZE];
     snprintf(buffer, KSN_BUFFER_SIZE, "%d", port);
     kh->s_http_port = strdup(buffer); 
+    memset(&kh->s_http_server_opts, 0, sizeof(kh->s_http_server_opts));
     kh->s_http_server_opts.document_root = document_root;  // Serve current directory
     kh->s_http_server_opts.enable_directory_listing = "yes";
     kh->s_http_server_opts.index_files = "index.html";

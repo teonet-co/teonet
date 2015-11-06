@@ -34,8 +34,8 @@ bin_PROGRAMS = teovpn teodb teoweb
 
 teovpn_SOURCES = teovpn.c
 teodb_SOURCES = teodb.c
-teoweb_SOURCES = teoweb.c teo_http.c embedded/mongoose/mongoose.c
+teoweb_SOURCES = teoweb.c teo_web/teo_web.c embedded/mongoose/mongoose.c
 
 teoweb_LDFLAGS = $(AM_LDFLAGS) -pthread
 
-EXTRA_DIST = teo_http.h embedded/mongoose/mongoose.h
+EXTRA_DIST = teo_web/teo_web.h embedded/mongoose/mongoose.h
