@@ -52,6 +52,8 @@
             <word>sh</word>
             <word>src</word>
             <word>str</word>
+            <word>subpacket</word>
+            <word>subpackets</word>
             <word>tcp</word>
             <word>teo</word>
             <word>teocli</word>
@@ -62,6 +64,7 @@
             <word>todo</word>
             <word>triptime</word>
             <word>ttl</word>
+            <word>tuntap</word>
             <word>Ubuntu</word>
             <word>udp</word>
             <word>uuid</word>

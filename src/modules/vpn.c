@@ -28,20 +28,20 @@
 
 #if M_ENAMBE_VPN
 
-// Local functions
-int ksnVpnRunShell(ksnVpnClass *kvpn, char *script);
-
 /**
  * MAC address structure
  */
 typedef struct mac_addr {
+
     unsigned char d[6];
+
 } mac_addr;
 
 /**
  * The Beginning of Ethernet packet structure
  */
 struct ether_head {
+
     //unsigned char preamble[8];
     //unsigned char delimiter;
     mac_addr destination;
@@ -52,12 +52,23 @@ struct ether_head {
  * VPN List data structure
  */
 typedef struct vpn_list_data {
+
     const char *name;
     mac_addr mac;
+
 } vpn_list_data;
 
+/**
+ * Broadcast data structure
+ */
+struct packet_data {
+
+    void *data;
+    size_t data_len;
+};
 
 // Local functions
+int ksnVpnRunShell(ksnVpnClass *kvpn, char *script);
 int ksnVpnStart(ksnVpnClass *kvpn);
 // List
 void* map_find_by_name(ksnVpnClass *kvpn, const char* name);
@@ -77,19 +88,22 @@ mac_addr *mac_copy (mac_addr *dst, mac_addr *src);
  * @return Always return 0
  */
 #define send_to_peer(kvpn, peer_name,data,data_len) \
-    ksnCoreSendCmdto(((ksnetEvMgrClass*)(kvpn->ke))->kc, peer_name, CMD_VPN, data, data_len)
+    ksnCoreSendCmdto(((ksnetEvMgrClass*)(kvpn->ke))->kc, peer_name, CMD_VPN, \
+        data, data_len)
 void send_to_all(ksnVpnClass *kvpn, void *data, size_t data_len);
 
-#define KSNET_VPN_DEFAULT_ALLOW 1
+// Constants
+//#define KSNET_VPN_DEFAULT_ALLOW 1
 #define DEBUG_THIS DEBUG //MESSAGE  // Debug type
-#define SHOW_DEBUG 0    // Show debug in critical sections
+#define SHOW_VPN_DEBUG 0 // Show module debug messages in critical sections
 #define KSN_VPN_USE_HASH_MAP
-
 
 /**
  * Initialize VPN module
+ *
+ * @param ke Pointer to ksnetEvMgrClass
+ * @return Pointer to ksnVpnClass
  */
-//ksnVpnClass 
 void* ksnVpnInit(void *ke) {
 
     if(!((ksnetEvMgrClass*)ke)->ksn_cfg.vpn_connect_f) return NULL;
@@ -109,7 +123,7 @@ void* ksnVpnInit(void *ke) {
     kvpn->ksnet_vpn_map = pblMapNewHashMap();
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV, 
+    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV,
         "VPN module have been initialized\n");
     #endif
 
@@ -122,15 +136,17 @@ void* ksnVpnInit(void *ke) {
 
 /**
  * De-initialize Event manager module
+ *
+ * @param vpn Pointer to ksnVpnClass
  */
 void ksnVpnDestroy(void *vpn) {
 
     ksnVpnClass *kvpn = vpn;
-    
+
     if(kvpn != NULL) {
 
         ksnetEvMgrClass *ke = kvpn->ke;
-        
+
         // Stop watcher
         if(kvpn->tuntap_io != NULL) {
             ev_io_stop (ke->ev_loop, kvpn->tuntap_io);
@@ -138,22 +154,22 @@ void ksnVpnDestroy(void *vpn) {
         }
         // Destroy tuntap interface
         if(kvpn->ksn_tap_dev != NULL) {
-            
+
             // Execute if-down.sh script
             ksnVpnRunShell(kvpn, "if-down.sh");
-            
+
             // Destroy tuntap
             tuntap_destroy(kvpn->ksn_tap_dev);
             kvpn->ksn_tap_dev = NULL;
         }
-        
+
         // Free map and class
         pblMapFree(kvpn->ksnet_vpn_map);
         free(kvpn);
         ke->kvpn = NULL;
-        
+
         #ifdef DEBUG_KSNET
-        ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV, 
+        ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV,
             "VPN module have been de-initialized\n");
         #endif
     }
@@ -161,17 +177,32 @@ void ksnVpnDestroy(void *vpn) {
 
 /**
  * Execute system shell script (or application)
- * 
+ *
+ * Execute system shell script with name script, placed at
+ * HOME/.app_name/network/ path, with parameters:
+ * TUNTAP interface name, IP address, IP network
+ *
  * @param kvpn Pointer to ksnVpnClass
  * @param script Executable name
+ * @return True on success
  */
 int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
 
+    ksnet_cfg *conf = &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg;
+
     char *buffer = ksnet_formatMessage(
-        "%s/%s %s", getDataPath(), script, kvpn->tuntap_name);
+        "%s%s%s/%s %s %s %d",
+        getDataPath(),
+        conf->network[0] ? "/" : "",
+        conf->network[0] ? conf->network : "",
+        script,
+        kvpn->tuntap_name,
+        conf->vpn_ip,
+        conf->vpn_ip_net
+    );
     int rv = system(buffer);
     free(buffer);
-    
+
     return rv != 0;
 }
 
@@ -179,10 +210,10 @@ int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
  * Get VPN commands from peers and process it (resend to TUNTAP interface
  *
  * @param kvpn Pointer to ksnVpnClass
- * @param from From cstring
+ * @param from From c string
  * @param data Pointer to data
  * @param data_len Size of data
- * @return 
+ * @return Always return 1
  */
 int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
 
@@ -191,13 +222,13 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
     // Ethernet packet header
     struct ether_head *eth = data;
 
-    #if SHOW_DEBUG
+    #if SHOW_VPN_DEBUG
     char *destination = mac_to_str(&eth->destination);
     char *source = mac_to_str(&eth->source);
     #endif
 
     // Show VPN Command info
-    #if SHOW_DEBUG
+    #if SHOW_VPN_DEBUG
     #ifdef DEBUG_KSNET
     ksnet_printf(
         &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
@@ -209,18 +240,23 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
     #endif
 
     int retval = 1;
-    mac_addr *mac;
+
     // Check source MAC address in VPN List and add it if absent
     if( (map_find_by_mac(kvpn, &eth->source)) == NULL ) {
 
-        // Check name in VPN List and remove if already present (MAC Changed)
-        if((mac = map_find_by_name(kvpn, from)) != NULL) {
-            size_t val_len;
-            pblMapRemove(kvpn->ksnet_vpn_map, mac, sizeof(mac_addr), &val_len);
-        }
+
+// \todo Issue #121: Teonet VPN interface can't connect with other Ethernet
+//                   interface through bridge
+//
+//        // Check name in VPN List and remove if already present (MAC Changed)
+//        mac_addr *mac;
+//        if((mac = map_find_by_name(kvpn, from)) != NULL) {
+//            size_t val_len;
+//            pblMapRemove(kvpn->ksnet_vpn_map, mac, sizeof(mac_addr), &val_len);
+//        }
 
         // Insert name and MAC to list
-        #if SHOW_DEBUG
+        #if SHOW_VPN_DEBUG
         #ifdef DEBUG_KSNET
         ksnet_printf(
                 &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
@@ -230,7 +266,7 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
 
         pblMapAdd(kvpn->ksnet_vpn_map,
                   &eth->source, sizeof(mac_addr),   // MAC Address
-                  from, strlen(from) + 1  // Peer name
+                  from, strlen(from) + 1            // Peer name
                 );
 
         #ifdef DEBUG_KSNET
@@ -240,10 +276,10 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
     }
 
     // Send packet to interface
-    write(kvpn->tuntap_fd, data, data_len);
+    if(write(kvpn->tuntap_fd, data, data_len) >= 0);
 
     // Free memory
-    #if SHOW_DEBUG
+    #if SHOW_VPN_DEBUG
     free(destination);
     free(source);
     #endif
@@ -252,23 +288,14 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
 }
 
 /**
- * Broadcast data structure
- */
-struct packet_data {
-
-    void *data;
-    size_t data_len;
-};
-
-/**
  * Send to one peer of broadcast request
  *
- * @param ka
- * @param peer_name
- * @param arp
- * @param pd
+ * @param ka Pointer to ksnetArpClass
+ * @param peer_name Peer name
+ * @param arp Pointer to ksnet_arp_data
+ * @param pd Pointer to packet_data
  *
- * @return
+ * @return Always return 0
  */
 int send_to_one_cb(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp,
                    void *pd) {
@@ -284,22 +311,23 @@ int send_to_one_cb(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp,
 /**
  * Send broadcast packet to all ksnet peers
  *
- * @param data
- * @param data_len
+ * @param kvpn Pointer to ksnVpnClass
+ * @param data Pointer to data
+ * @param data_length Data length
  */
-void send_to_all(ksnVpnClass *kvpn, void *data, size_t data_len) {
+void send_to_all(ksnVpnClass *kvpn, void *data, size_t data_length) {
 
     struct packet_data pd;
     pd.data = data;
-    pd.data_len = data_len;
+    pd.data_len = data_length;
     ksnetArpGetAll(((ksnetEvMgrClass*)kvpn->ke)->kc->ka, send_to_one_cb, &pd);
 }
 
 /**
  * TUNTAP IO Callback
  *
- * @param loop
- * @param w
+ * param loop Pointer to event loop
+ * @param w Pointer to atcher
  * @param revents
  */
 static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
@@ -314,25 +342,25 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
     int nread = read(w->fd, buffer, sizeof(buffer));
 
     if(nread < 0) {
-        
+
         if( errno != EINTR ) {
             perror("Reading from interface");
-            close(w->fd);        
+            close(w->fd);
             //exit(1);
         }
-    
+
         return;
     }
 
     void *name;
     struct ether_head *eth = (struct ether_head *) buffer;
-    #if SHOW_DEBUG
+    #if SHOW_VPN_DEBUG
     char *destination = mac_to_str(&eth->destination);
     char *source = mac_to_str(&eth->source);
     #endif
 
     // Show statistic message
-    #if SHOW_DEBUG
+    #if SHOW_VPN_DEBUG
     #ifdef DEBUG_KSNET
     ksnet_printf(
             &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
@@ -344,7 +372,7 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
 
     // If destination MAC address is Broadcast then send packet to all ksnet peers
     if(mac_is_broadcast(&eth->destination)) {
-        #if SHOW_DEBUG
+        #if SHOW_VPN_DEBUG
         #ifdef DEBUG_KSNET
         ksnet_printf(
                 &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
@@ -360,7 +388,7 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
 
     // Not defined MAC (or special command)
     else {
-        #if SHOW_DEBUG
+        #if SHOW_VPN_DEBUG
         #ifdef DEBUG_KSNET
         ksnet_printf(
                 &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
@@ -370,7 +398,7 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
     }
 
     // Free memory
-    #if SHOW_DEBUG
+    #if SHOW_VPN_DEBUG
     free(destination);
     free(source);
     #endif
@@ -378,6 +406,9 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
 
 /**
  * Open TAP interface, set IP to ifconfig and connect interface to ksnet VPN
+ *
+ * @param kvpn Pointer to ksnVpnClass
+ * @return
  */
 int ksnVpnStart(ksnVpnClass *kvpn) {
 
@@ -419,7 +450,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         } else {
             ksnet_addHWAddrConfig(&ke->ksn_cfg, tuntap_haddr);
         }
-        
+
         // Set MTU
         if(ke->ksn_cfg.vpn_mtu) {
             tuntap_set_mtu(kvpn->ksn_tap_dev, ke->ksn_cfg.vpn_mtu);
@@ -428,8 +459,8 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         // Show success message
         ksnet_printf(&ke->ksn_cfg, MESSAGE,
                      "Interface %s (addr: %s, mtu: %d) opened ...\n",
-                     kvpn->tuntap_name, 
-                     tuntap_haddr, 
+                     kvpn->tuntap_name,
+                     tuntap_haddr,
                      ke->ksn_cfg.vpn_mtu ? ke->ksn_cfg.vpn_mtu : 1500);
 
         // Interface Up
@@ -466,28 +497,28 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
 }
 
 /**
- * Mac address structure to c string convert
+ * Convert MAC address array to c string
  *
- * @param mac_addr Null terminated string with MAC address, should be free
+ * @param mac MAC address array
+ * @return Null terminated string with MAC address, should be free
  *                 after use
- * @return
  */
-char* mac_to_str (mac_addr *mac_addr) {
+char* mac_to_str (mac_addr *mac) {
 
     return ksnet_formatMessage("%02x:%02x:%02x:%02x:%02x:%02x",
-            mac_addr->d[0],
-            mac_addr->d[1],
-            mac_addr->d[2],
-            mac_addr->d[3],
-            mac_addr->d[4],
-            mac_addr->d[5] );
+            mac->d[0],
+            mac->d[1],
+            mac->d[2],
+            mac->d[3],
+            mac->d[4],
+            mac->d[5] );
 }
 
 /**
  * Copy MAC Address
  *
- * @param dst
- * @param src
+ * @param dst Distance MAC address array
+ * @param src Source MAC address array
  * @return
  */
 mac_addr* mac_copy(mac_addr *dst, mac_addr *src) {
@@ -500,7 +531,7 @@ mac_addr* mac_copy(mac_addr *dst, mac_addr *src) {
 /**
  * Check if MAC address is Broadcast or Multicast
  *
- * @param mac
+ * @param mac MAC address array
  * @return Return true if MAC address is broadcast
  */
 int mac_is_broadcast(mac_addr *mac) {
@@ -526,10 +557,10 @@ int mac_is_broadcast(mac_addr *mac) {
 /**
  * Compare two MAC address
  *
- * @param dst
- * @param src
+ * @param dst Distance MAC address array
+ * @param src Source MAC address array
  *
- * @return Return true if MAC address is quale
+ * @return Return true if MAC address is equal
  */
 int mac_cmp(mac_addr *dst, mac_addr *src) {
 
@@ -548,6 +579,8 @@ int mac_cmp(mac_addr *dst, mac_addr *src) {
 
 /**
  * Show VPN list
+ *
+ * @param kvpn Pointer to ksnVpnClass
  */
 void ksnVpnListShow(ksnVpnClass *kvpn) {
 
@@ -559,10 +592,13 @@ void ksnVpnListShow(ksnVpnClass *kvpn) {
     PblIterator *it =  pblMapIteratorNew(kvpn->ksnet_vpn_map);
     printf("Number of peers in VPN: %d\n", pblMapSize(kvpn->ksnet_vpn_map));
     if(it != NULL) {
+
         while(pblIteratorHasNext(it)) {
+
             void *entry = pblIteratorNext(it);
             const char *mac_str = mac_to_str(pblMapEntryKey(entry));
-            printf("name: %s, mac: %s\n", (char*) pblMapEntryValue(entry), mac_str);
+            printf("name: %s, mac: %s\n", (char*) pblMapEntryValue(entry),
+                    mac_str);
             free((void*) mac_str);
         }
         pblIteratorFree(it);
@@ -595,7 +631,8 @@ void* map_find_by_name(ksnVpnClass *kvpn, const char* name) {
 /**
  * Find name by MAC Address
  *
- * @param mac MAC Address
+ * @param kvpn Pointer to ksnVpnClass
+ * @param mac MAC Address array
  * @return Return pointer to name or NULL if MAC Address not found in map
  */
 void *map_find_by_mac(ksnVpnClass *kvpn, mac_addr *mac) {

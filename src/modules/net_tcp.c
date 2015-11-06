@@ -156,7 +156,7 @@ void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_flg, int remov
         if(fd) {
             size_t valueLength;
             ev_ksnet_io **w = pblMapGet(((ksnetEvMgrClass*)watcher->data)->kt->map, &fd, sizeof(fd), &valueLength);        
-            pblMapRemove((*w)->clients_map, &watcher->fd, sizeof(watcher->fd), &valueLength);
+            pblMapRemoveFree((*w)->clients_map, &watcher->fd, sizeof(watcher->fd), &valueLength);
         }
     }
     
@@ -273,7 +273,7 @@ void ksnTcpServerStop(ksnTcpClass *kt, int sd) {
         #endif      
         
         free(*w_accept);
-        pblMapRemove(kt->map, &sd, sizeof(sd), &valueLength);
+        pblMapRemoveFree(kt->map, &sd, sizeof(sd), &valueLength);
     }
 }
 

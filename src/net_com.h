@@ -11,6 +11,8 @@
 #ifndef NET_COM_H
 #define	NET_COM_H
 
+//#include "net_recon.h"
+
 enum ksnCMD {
 
     // Core level not TR-UDP mode: 0...63
@@ -35,6 +37,8 @@ enum ksnCMD {
     CMD_PEERS,              ///< #72 Get peers
     CMD_PEERS_ANSWER,       ///< #73 Get peers answer
     CMD_RESEND,             ///< #74 Resend command
+    CMD_RECONNECT,          ///< #75 Reconnect command
+    CMD_RECONNECT_ANSWER,   ///< #76 Reconnect answer command
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
@@ -54,7 +58,8 @@ enum ksnCMD {
 typedef struct ksnCommandClass {
 
     void *kc; ///< Pointer to KSNet core class object
-    void *ks; ///< Pointer to KSNet split class
+    void *ks; ///< Pointer to KSNet split class    
+    void *kr; ///< Pointer to KSNet reconnect class
 
 } ksnCommandClass;
 

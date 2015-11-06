@@ -900,7 +900,7 @@ void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
         
         // Remove IP map record (in remove mode))
         if (options) {
-            pblMapRemove(tu->ip_map, key, key_len, &val_len);
+            pblMapRemoveFree(tu->ip_map, key, key_len, &val_len);
         }                
     }
 }
@@ -958,7 +958,7 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
             sl_timer_stop(kev->ev_loop, &sl_d->w);
 
             // Remove record from send list
-            pblMapRemove(ip_map_d->send_list, &id, sizeof (id), &val_len);
+            pblMapRemoveFree(ip_map_d->send_list, &id, sizeof (id), &val_len);
             
             // Statistic
             ksnTRUDPstatSendListRemove(tu);    
