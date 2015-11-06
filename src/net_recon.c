@@ -118,7 +118,7 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
             #ifdef DEBUG_KSNET
             ksnet_printf(conf, DEBUG,
                 "%sReconnect:%s "
-                "callback: Got the CMD_RECONNECT_ANSWER for peer - stop\n",
+                "callback: Got the CMD_RECONNECT_ANSWER for peer \"%s\" - stop\n",
                 ANSI_GREEN, ANSI_NONE,
                 map_data->peer);
             #endif
