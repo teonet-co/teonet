@@ -13,7 +13,7 @@
 #include <pthread.h>
 
 
-#include "teo_http.h"
+#include "teo_web/teo_web.h"
 
 #define TWEB_VERSION "0.0.1"
 
@@ -32,37 +32,51 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
     // Switch Teonet events
     switch(event) {
 
-        case EV_K_ASYNC:
-            {
+        // Process async messages from teo_web module
+        case EV_K_ASYNC: {
+            
+            if(data != NULL && user_data != NULL) {
+
                 struct mg_connection *nc = user_data;
                 struct teoweb_data *td = data;
-                
-                if(data != NULL) {
-                    
-                    switch(td->cmd) {
+
+                // Process websocket events
+                switch(td->cmd) {
+
+                    // Web socket client was connected
+                    case WS_CONNECTED:
                         
-                        case WS_CONNECTED:
-                            printf("Async event was received from %p, "
-                                "connected\n", nc);
-                            mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, "Hello!", 6);
-                            break;
-                            
-                        case WS_DISCONNECTED:
-                            printf("Async event was received from %p, "
-                                "disconnected\n", nc);
-                            break;
-                            
-                        case WS_MESSAGE: 
-                            printf("Async event was received from %p, "
-                                   "%d bytes: '%.*s'\n", 
-                                   nc, (int)data_len, (int)td->data_len, 
-                                   (char*) td->data);
-                            mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
-                            break;
-                    }
-                }                
-            }
-            break;
+                        printf("Async event was received from %p, "
+                            "connected\n", nc);
+                        
+                        // Send message to client
+                        mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, "Hello!", 6);
+                        
+                        break;
+
+                    // Web socket client was disconnected
+                    case WS_DISCONNECTED:
+                        
+                        printf("Async event was received from %p, "
+                            "disconnected\n", nc);
+                        break;
+
+                    // Web socket client send a message
+                    case WS_MESSAGE: 
+                        
+                        printf("Async event was received from %p, "
+                               "%d bytes: '%.*s'\n", 
+                               nc, (int)data_len, (int)td->data_len, 
+                               (char*) td->data);
+                        
+                        // Send echo message
+                        mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
+                        
+                        break;
+                }
+            }            
+            
+        } break;
             
         default:
             break;
