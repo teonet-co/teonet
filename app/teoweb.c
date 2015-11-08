@@ -70,7 +70,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                (char*) td->data);
                         
                         // Send echo message
-                        mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
+                        // mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
                         
                         break;
                 }
