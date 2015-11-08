@@ -174,6 +174,9 @@ void ksnTcpCbStop(struct ev_loop *loop, ev_io *watcher, int close_flg, int remov
 /*                                                                            */
 /******************************************************************************/
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 /**
  * Create TCP server and add it to Event manager
  *
@@ -218,16 +221,13 @@ int ksnTcpServerCreate(
         w_accept->clients_map = pblMapNewHashMap();
 
         // Start watcher
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wstrict-aliasing"
         ev_ksnet_io_start (kev->ev_loop, &w_accept->io,
                            w_accept->tcpServerAccept_cb, w_accept->fd, EV_READ);
-        #pragma GCC diagnostic pop
 
         // Add server to TCP servers map
         pblMapAdd(kt->map, &sd, sizeof(sd), &w_accept, sizeof(ev_ksnet_io*));       
     }
-    
+
     // Can't create server
     else { 
         if(port_created != NULL) *port_created = 0;
@@ -241,6 +241,8 @@ int ksnTcpServerCreate(
 
     return sd;
 }
+
+#pragma GCC diagnostic pop
 
 /**
  * Stop and destroy TCP server

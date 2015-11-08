@@ -7,7 +7,8 @@ AM_CFLAGS = \
 	 $(DRELEASE_TEONET) \
 	 -I../src \
 	 -I../embedded/libpbl/src \
-	 -I../embedded/teocli/libteol0
+	 -I../embedded/teocli/libteol0 \
+	 -I/usr/include/libev
 	
 if TEO_THREAD	
 AM_CFLAGS += -DTEO_THREAD
