@@ -32,7 +32,8 @@ AM_CFLAGS = \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
 	 -I../embedded/libpbl/src \
-	 -I../embedded/teocli/libteol0 
+	 -I../embedded/teocli/libteol0 \
+	 -I/usr/include/libev
 
 if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD

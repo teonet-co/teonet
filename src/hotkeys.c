@@ -461,6 +461,9 @@ void _keys_non_blocking_start(ksnetHotkeysClass *kh) {
     kh->non_blocking = 1;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 /**
  * Initialize hot keys module
  *
@@ -481,9 +484,6 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->pet = NULL;
     kh->put = NULL;
     kh->ke = ke;
-    
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
     // Initialize and start STDIN keyboard input watcher
     ev_init (&kh->stdin_w, stdin_cb);
@@ -493,9 +493,7 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 
     // Initialize STDIN idle watchers
     ev_idle_init (&kh->idle_stdin_w, idle_stdin_cb);
-    
-    #pragma GCC diagnostic pop
-    
+
     // Start show peer
     if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_peers_f) {
         kh->pet = peer_timer_init( ((ksnetEvMgrClass*)ke)->kc );
@@ -510,6 +508,8 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 
     return kh;
 }
+
+#pragma GCC diagnostic pop
 
 /**
  * De-initialize hot key module

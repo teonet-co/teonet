@@ -923,6 +923,9 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
     }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 //! \file   tcp_proxy.c
 //!     * Connect client to TCP Proxy server: ksnTCPProxyServerClientConnect()
 //!         * Register connection 
@@ -939,17 +942,17 @@ void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
  * 
  */
 void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
-    
+
     // Set TCP_NODELAY option
     set_tcp_nodelay(fd);
 
     int udp_proxy_fd, udp_proxy_port = kev->ksn_cfg.port;
-    
+
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
             "%sTCP Proxy:%s "
             "TCP Proxy client fd %d connected\n", 
             ANSI_YELLOW, ANSI_NONE, fd);
-   
+
     // Open UDP Proxy client/server
     ksnet_printf(&kev->ksn_cfg, CONNECT, 
             "%sTCP Proxy:%s "
@@ -963,7 +966,7 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
             ANSI_YELLOW, ANSI_NONE,
             udp_proxy_fd,
             udp_proxy_port);
-            
+
     // Register client in tcp proxy map 
     ksnTCPProxyData data;
     data.tcp_proxy_fd = fd;
@@ -971,41 +974,38 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     data.udp_proxy_port = udp_proxy_port;
     pblMapAdd(tp->map, &fd, sizeof(fd), &data, sizeof(ksnTCPProxyData));
     pblMapAdd(tp->map, &udp_proxy_fd, sizeof(udp_proxy_fd), &data, sizeof(ksnTCPProxyData));
-    
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
     // Create and start TCP and UDP watchers (start client processing)
     size_t valueLength;
     ksnTCPProxyData* tpd = pblMapGet(tp->map, &fd, sizeof(fd), &valueLength);
     if(tpd != NULL) {   
-        
+
         // Initialize input packet buffer parameters
         tpd->packet.ptr = 0; // Pointer to data end in packet buffer
         tpd->packet.length = 0; // Length of received packet
         tpd->packet.stage = WAIT_FOR_START; // Stage of receiving packet
         tpd->packet.header = (ksnTCPProxyHeader*) tpd->packet.buffer; // Pointer to packet header
-        
+
         // Create and start TCP watcher (start TCP client processing)
         ev_init (&tpd->w, cmd_tcpp_read_cb);
         ev_io_set (&tpd->w, fd, EV_READ);
         tpd->w.data = tp;
         ev_io_start (kev->ev_loop, &tpd->w);
-        
+
         // Create and start UDP watcher (start UDP client processing)
         ev_init (&tpd->w_udp, cmd_udpp_read_cb);
         ev_io_set (&tpd->w_udp, udp_proxy_fd, EV_READ);
         tpd->w_udp.data = tp;
         ev_io_start (kev->ev_loop, &tpd->w_udp);
     }
-    
+
     // Error: can't register TCP fd in tcp proxy map
     else {
         // \todo process error: can't register TCP fd in tcp proxy map
     }
-
-    #pragma GCC diagnostic pop
 }
+
+#pragma GCC diagnostic pop
 
 //! \file   tcp_proxy.c
 //!     * Disconnect client from TCP Proxy server: ksnTCPProxyServerClientDisconnect()
