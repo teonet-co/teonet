@@ -1,5 +1,5 @@
 /** 
- * File:   teo_http.c
+ * File:   teo_web.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Teonet HTTP/WS Server module
@@ -8,13 +8,19 @@
  */
 
 #include "teo_web.h"
+#include "teo_ws.h"
+
+/**
+ * Teonet websocket class
+ */
+#define tws ((teoWSClass *)kh->kws)
 
 /**
  * Mongoose websocket send broadcast
  * 
- * @param nc
- * @param msg
- * @param len
+ * @param nc Pointer to structure mg_connection
+ * @param msg Message
+ * @param len Message length
  */
 static void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len) {
     
@@ -67,9 +73,12 @@ void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data,
  */
 static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
     
-    struct http_message *hm = (struct http_message *) ev_data;
-    struct websocket_message *wm = (struct websocket_message *) ev_data;
-    ksnHTTPClass *kh = nc->mgr->user_data;
+    #define hm ((struct http_message *) ev_data)
+    #define wm ((struct websocket_message *) ev_data)
+    #define kh ((ksnHTTPClass *) nc->mgr->user_data)
+    
+    // Teonet websocket handler
+    if(!tws->handler(tws, ev, nc, wm->data, wm->size))
     
     // Check server events
     switch(ev) {
@@ -104,6 +113,10 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
         default:
             break;
     }
+    
+    #undef kh
+    #undef wm
+    #undef hm
 }
 
 /**
@@ -165,6 +178,8 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
     kh->s_http_server_opts.enable_directory_listing = "yes";
     kh->s_http_server_opts.index_files = "index.html";
     
+    kh->kws = teoWSInit(kh); // Initialize websocket class
+    
     // Start mongoose thread
     int err = pthread_create(&kh->tid, NULL, &http_thread, kh);
     if (err != 0) printf("Can't create mongoose thread :[%s]\n", strerror(err));
@@ -175,12 +190,14 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
 
 /**
  * Destroy teonet HTTP module
- * @param kh
+ * 
+ * @param kh Pointer to ksnHTTPClass
  */
 void ksnHTTPDestroy(ksnHTTPClass *kh) {
     
     kh->stop = 1;
     while(!kh->stopped) usleep(1000);
+    tws->destroy(tws);
     free(kh->s_http_port);
     free(kh);
 }
