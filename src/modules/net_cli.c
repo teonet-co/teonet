@@ -2330,6 +2330,9 @@ void cli_loop_idle_cb (EV_P_ ev_idle *w, int revents) {
     }
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 /**
  * The main loop of the command-line environment. This must be called with the
  * FD of a socket open for bi-directional communication (sockfd).
@@ -2440,9 +2443,6 @@ int cli_loop(struct cli_def *cli, int sockfd)
     // Async connection to TCP server
     #else
 
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
-
     // Create and start watcher (start client processing)
     ev_init (&cd->w, cli_loop_read_cb);
     ev_io_set (&cd->w, cd->sockfd, EV_READ);
@@ -2456,13 +2456,13 @@ int cli_loop(struct cli_def *cli, int sockfd)
     cd->tw.data = cd;
     ev_timer_start (cli->ke->ev_loop, &cd->tw);
 
-    #pragma GCC diagnostic pop
-
     #endif
 
     return CLI_OK;
     #undef sync_mode
 }
+
+#pragma GCC diagnostic pop
 
 /**
  * This reads and processes every line read from f as if it were entered at the

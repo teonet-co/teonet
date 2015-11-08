@@ -562,6 +562,9 @@ void cmd_tun_disconnected_send(ksnTunClass *ktun, uint16_t fd) {
         data, data_len);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 /**
  * Connection with endpoint server was established
  *
@@ -578,8 +581,6 @@ void cmd_tun_created_cb(ksnTunClass * ktun, char *from, uint8_t from_len,
     ksnTunMapAdd(ktun, fd, from, from_len, from_fd);
 
     // Add FD to ksnet event manager
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
     // Create and start watcher (start client processing)
     ev_io *w = malloc(sizeof(*w));
@@ -587,8 +588,9 @@ void cmd_tun_created_cb(ksnTunClass * ktun, char *from, uint8_t from_len,
     ev_io_set (w, fd, EV_READ);
     w->data = ktun;
     ev_io_start (((ksnetEvMgrClass*)ktun->ke)->ev_loop, w);
-    #pragma GCC diagnostic pop
 }
+
+#pragma GCC diagnostic pop
 
 /**
  * Connection with endpoint server was not established

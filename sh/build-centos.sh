@@ -9,10 +9,11 @@ yum -y update
 yum install -y autoconf intltool libtool glib2-devel doxygen make gcc
 
 # Project dependence
+yum install -y epel-release # Need to install libev-devel under Centos 6
 yum install -y openssl-devel libev-devel libuuid-devel
 
 # Install CentOS cUnit project dependence
-yum install -y wget bzip2
+yum install -y wget tar bzip2
 wget http://sourceforge.net/projects/cunit/files/CUnit/2.1-3/CUnit-2.1-3.tar.bz2
 tar -xvf CUnit-2.1-3.tar.bz2
 cd CUnit-2.1-3
@@ -42,7 +43,13 @@ patch < ../../confuse-2.7-src-Makefile.patch
 cd ..
 make
 make install
-cd ../..
+#cd ../..
+
+# Remove confuse source
+cd ..
+rm -fr confuse-2.7
+cd ..
+
 
 # Libtuntap dependence
 yum install -y cmake gcc-c++ unzip

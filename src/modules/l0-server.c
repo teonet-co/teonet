@@ -364,6 +364,9 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     return rv;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+
 /**
  * Connect l0 Server client
  * 
@@ -375,7 +378,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
  * 
  */
 void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
-    
+
     // Set TCP_NODELAY option
     set_tcp_nodelay(fd);
 
@@ -383,7 +386,7 @@ void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
             "%sl0 Server:%s "
             "L0 client with fd %d connected\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, fd);
-    
+
     // Register client in tcp proxy map 
     ksnLNullData data;
     data.name = NULL;
@@ -392,29 +395,26 @@ void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
     data.read_buffer_ptr = 0;
     data.read_buffer_size = 0;
     pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));
-    
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
     // Create and start TCP watcher (start client processing)
     size_t valueLength;
     ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength);
     if(kld != NULL) {   
-        
+
         // Create and start TCP watcher (start TCP client processing)
         ev_init (&kld->w, cmd_l0_read_cb);
         ev_io_set (&kld->w, fd, EV_READ);
         kld->w.data = kl;
-        ev_io_start (kev->ev_loop, &kld->w);        
+        ev_io_start (kev->ev_loop, &kld->w);
     }
-    
+
     // Error: can't register TCP fd in tcp proxy map
     else {
         // \todo process error: can't register TCP fd in tcp proxy map
     }
-
-    #pragma GCC diagnostic pop
 }
+
+#pragma GCC diagnostic pop
 
 /**
  * Disconnect l0 Server client
