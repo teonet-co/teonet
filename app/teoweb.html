@@ -15,7 +15,10 @@
     }
     #messages {
       border: 2px solid #fec; border-radius: 1em;
-      height: 10em; overflow: scroll; padding: 0.5em 1em;
+      height: 20em; overflow: scroll; padding: 0.5em 1em;
+    }
+    #send_input {
+        width: 400px
     }
     a:link, a:visited { color: #69c; text-decoration: none; }
     @media (max-width: 700px) {
@@ -37,15 +40,15 @@
     return {
         
       login: function () {
-          ws.send("login, ");
+          ws.send('{ "cmd": 0, "to": "", "data": "client_name" }');
       },
       
-      peer: function (to) {
-          ws.send("peer, " + to);
+      peers: function (to) {
+          ws.send('{ "cmd": 72, "to": "' + to + '", "data": "" }');
       },
       
-      echo: function (to) {
-          ws.send("echo, " + to);
+      echo: function (to, data) {
+          ws.send('{ "cmd": 65, "to": "' + to + '", "data": "' + data + '" }');
       }
       
     };
@@ -58,8 +61,8 @@
   ws.onopen = function(ev)  { 
       console.log(ev); 
       teocli.login();
-      teocli.peer("ps-server");
-      teocli.echo("ps-server");
+      teocli.peers("ps-server");
+      teocli.echo("ps-server", "hello");
   };
   ws.onerror = function(ev) { console.log(ev); };
   ws.onclose = function(ev) { console.log(ev); };
@@ -68,7 +71,6 @@
     var div = document.createElement('div');
     div.innerHTML = ev.data;
     document.getElementById('messages').appendChild(div);
-
   };
 
   window.onload = function() {
@@ -78,7 +80,7 @@
       ws.send(msg);
     };
     document.getElementById('send_input').onkeypress = function(ev) {
-      if (ev.keyCode == 13 || ev.which == 13) {
+      if (ev.keyCode === 13 || ev.which === 13) {
         document.getElementById('send_button').click();
       }
     };
