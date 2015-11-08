@@ -31,10 +31,36 @@
 
   var rooms = [];
   var ws = new WebSocket('ws://' + location.host + '/ws');
+  
+  function Teocli() {
+      
+    return {
+        
+      login: function () {
+          ws.send("login, ");
+      },
+      
+      peer: function (to) {
+          ws.send("peer, " + to);
+      },
+      
+      echo: function (to) {
+          ws.send("echo, " + to);
+      }
+      
+    };
+  };
+  
+  var teocli = Teocli();
 
   if (!window.console) { window.console = { log: function() {} } };
 
-  ws.onopen = function(ev)  { console.log(ev); };
+  ws.onopen = function(ev)  { 
+      console.log(ev); 
+      teocli.login();
+      teocli.peer("ps-server");
+      teocli.echo("ps-server");
+  };
   ws.onerror = function(ev) { console.log(ev); };
   ws.onclose = function(ev) { console.log(ev); };
   ws.onmessage = function(ev) {

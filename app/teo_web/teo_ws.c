@@ -8,6 +8,7 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "teo_ws.h"
 
 // Local functions
@@ -29,6 +30,8 @@ int teoWSprocessMsg(teoWSClass *kws, void *nc, void *data, size_t data_length);
  */
 teoWSClass* teoWSInit(ksnHTTPClass *kh) {
     
+    printf("Initialize\n");
+    
     teoWSClass *this = malloc(sizeof(teoWSClass));
     this->kh = kh;
     
@@ -44,6 +47,8 @@ teoWSClass* teoWSInit(ksnHTTPClass *kh) {
  * @param kws Pointer to teoWSClass
  */
 void teoWSDestroy(teoWSClass *kws) {
+    
+    printf("Destroy\n");
     
     if(kws != NULL)
         free(kws);
@@ -71,7 +76,7 @@ int teoWSevHandler(teoWSClass *kws, int ev, void *nc_p, void *data,
         // Websocket message.
         case MG_EV_WEBSOCKET_FRAME: {
             
-            kws->processMsg(kws, nc_p, data, data_length);
+            processed = kws->processMsg(kws, nc_p, data, data_length);
                     
         } break;
         
@@ -100,10 +105,38 @@ int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     // \todo
     
     // Check for L0 websocket Login command
+    const char *login = "login, ";
+    const size_t login_len = strlen(login);
+    
+    if(data_length >= login_len &&
+       !strncmp(data, login, login_len)) {
+        
+        printf("Login received\n");
+        processed = 1;
+    }
     
     // Check for L0 websocket Peer command
+    const char *peer = "peer, ";
+    const size_t peer_len = strlen(peer);
+    
+    if(data_length >= peer_len &&
+       !strncmp(data, peer, peer_len)) {
+        
+        printf("Peer request command received\n");
+        processed = 1;
+    }
+    
     
     // Check for L0 websocket ECHO command
+    const char *echo = "echo, ";
+    const size_t echo_len = strlen(echo);
+    
+    if(data_length >= echo_len &&
+       !strncmp(data, echo, echo_len)) {
+        
+        printf("Echo command received\n");
+        processed = 1;
+    }
     
     return processed;
 }
