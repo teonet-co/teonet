@@ -8,6 +8,7 @@ AM_CFLAGS = \
 	 -I../../src \
 	 -I../../embedded/libpbl/src \
 	 -I../../embedded/teocli/libteol0 \
+	 -I/usr/include/libev \
 	 -pthread
 
 if MINGW
