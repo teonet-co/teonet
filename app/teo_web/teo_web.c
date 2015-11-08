@@ -73,12 +73,13 @@ void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data,
  */
 static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
     
-    #define hm ((struct http_message *) ev_data)
-    #define wm ((struct websocket_message *) ev_data)
-    #define kh ((ksnHTTPClass *) nc->mgr->user_data)
+//    #define hm ((struct http_message *) ev_data)
+//    #define wm ((struct websocket_message *) ev_data)
+//    #define kh ((ksnHTTPClass *) nc->mgr->user_data)
     
-    // Teonet websocket handler
-    if(!tws->handler(tws, ev, nc, wm->data, wm->size))
+    struct http_message *hm  = ((struct http_message *) ev_data);
+    struct websocket_message *wm = ((struct websocket_message *) ev_data);
+    ksnHTTPClass *kh = ((ksnHTTPClass *) nc->mgr->user_data);
     
     // Check server events
     switch(ev) {
@@ -90,23 +91,30 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
             break;
             
         // New websocket connection. Tell everybody. 
-        case MG_EV_WEBSOCKET_HANDSHAKE_DONE: {
-            ws_broadcast(nc, "joined", 6); 
-            teoSendAsync(nc, WS_CONNECTED, NULL, 0);
-        } break;
+        case MG_EV_WEBSOCKET_HANDSHAKE_DONE: 
+            if(!tws->handler(tws, ev, nc, NULL, 0)) {
+                ws_broadcast(nc, "joined", 6); 
+                teoSendAsync(nc, WS_CONNECTED, NULL, 0);
+            }
+            break;
             
         // New websocket message. Tell everybody.
-        case MG_EV_WEBSOCKET_FRAME: {
-            ws_broadcast(nc, (char *) wm->data, wm->size);
-            teoSendAsync(nc, WS_MESSAGE, wm->data, wm->size);
-        } break;
+        case MG_EV_WEBSOCKET_FRAME: 
+            if(!tws->handler(tws, ev, nc, wm->data, wm->size)) {
+                ws_broadcast(nc, (char *) wm->data, wm->size);
+                teoSendAsync(nc, WS_MESSAGE, wm->data, wm->size);
+            }
+            break;
             
         // Disconnect 
         case MG_EV_CLOSE:
             // Disconnect websocket connection. Tell everybody.
             if(is_websocket(nc)) {
-                ws_broadcast(nc, "left", 4);
-                teoSendAsync(nc, WS_DISCONNECTED, NULL, 0);
+                
+                if(!tws->handler(tws, ev, nc, NULL, 0)) {
+                    ws_broadcast(nc, "left", 4);
+                    teoSendAsync(nc, WS_DISCONNECTED, NULL, 0);
+                }
             }
             break;
             
@@ -114,9 +122,9 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
             break;
     }
     
-    #undef kh
-    #undef wm
-    #undef hm
+//    #undef kh
+//    #undef wm
+//    #undef hm
 }
 
 /**
