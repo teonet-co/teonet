@@ -22,7 +22,7 @@
  * @param msg Message
  * @param len Message length
  */
-static void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len) {
+void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len) {
     
     struct mg_connection *c;
     char buf[500];
@@ -52,7 +52,7 @@ static int is_websocket(const struct mg_connection *nc) {
  * @param data
  * @param data_len
  */
-void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data, 
+static void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data, 
         size_t data_len) {
     
     size_t td_size = sizeof(struct teoweb_data) + data_len;
@@ -72,10 +72,6 @@ void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data,
  * @param ev_data
  */
 static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
-    
-//    #define hm ((struct http_message *) ev_data)
-//    #define wm ((struct websocket_message *) ev_data)
-//    #define kh ((ksnHTTPClass *) nc->mgr->user_data)
     
     struct http_message *hm  = ((struct http_message *) ev_data);
     struct websocket_message *wm = ((struct websocket_message *) ev_data);
@@ -121,10 +117,6 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
         default:
             break;
     }
-    
-//    #undef kh
-//    #undef wm
-//    #undef hm
 }
 
 /**
@@ -134,7 +126,7 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
  * 
  * @return 
  */
-void* http_thread(void *kh) {
+static void* http_thread(void *kh) {
 
     struct mg_mgr mgr;
     struct mg_connection *nc;

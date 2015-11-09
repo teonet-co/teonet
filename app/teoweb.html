@@ -39,16 +39,19 @@
       
     return {
         
-      login: function () {
-          ws.send('{ "cmd": 0, "to": "", "data": "client_name" }');
+      login: function (client_name) {
+          ws.send('{ "cmd": 0, "to": "", "data": "' + client_name + '" }');
       },
       
       peers: function (to) {
           ws.send('{ "cmd": 72, "to": "' + to + '", "data": "" }');
       },
       
-      echo: function (to, data) {
-          ws.send('{ "cmd": 65, "to": "' + to + '", "data": "' + data + '" }');
+      echo: function (to, msg) {
+          
+          var d = new Date();
+          var n = d.getTime();
+          ws.send('{ "cmd": 65, "to": "' + to + '", "data": { "msg": "' + msg + '", "time": ' + n + ' } }');
       }
       
     };
@@ -56,13 +59,14 @@
   
   var teocli = Teocli();
 
-  if (!window.console) { window.console = { log: function() {} } };
+  if (!window.console) { window.console = { log: function() {} }; };
 
   ws.onopen = function(ev)  { 
       console.log(ev); 
-      teocli.login();
+      var client_name = "ws-" + Math.floor((Math.random() * 100) + 1);
+      teocli.login(client_name);
       teocli.peers("ps-server");
-      teocli.echo("ps-server", "hello");
+      teocli.echo("ps-server", "Hello " + client_name + "!");
   };
   ws.onerror = function(ev) { console.log(ev); };
   ws.onclose = function(ev) { console.log(ev); };
