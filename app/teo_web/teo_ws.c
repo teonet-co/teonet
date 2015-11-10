@@ -16,7 +16,8 @@
 
 // Local functions
 static void teoWSDestroy(teoWSClass *kws);
-static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p, char *login);
+static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p, 
+                            const char *server, const int port, char *login);
 static int teoWSremove(teoWSClass *kws, void *nc_p);
 static int teoWSevHandler(teoWSClass *kws, int ev, void *nc, void *data, size_t data_length);
 static ssize_t teoWSLNullsend(teoWSClass *kws, void *nc_p, int cmd, 
@@ -106,6 +107,7 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     for(;;) {
         
+        // Read data
         ssize_t rc = teoLNullRecv(con);
         
         // Process received data
@@ -114,14 +116,37 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             teoLNullCPacket *cp = (teoLNullCPacket*) con->read_buffer;
             char *data = cp->peer_name + cp->peer_name_length;
             printf("Receive %d bytes: %d bytes data from L0 server, "
-                    "from peer %s, cmd = %d, data: %s\n", 
-                    (int)rc, cp->data_length, cp->peer_name, cp->cmd, data);
+                   "from peer %s, cmd = %d, data: %.*s\n", 
+                   (int)rc, cp->data_length, cp->peer_name, cp->cmd, 
+                   cp->data_length,
+                   data);
             
-            // \todo broadcast shown as example
-            //ws_broadcast(nc_p, data, strlen(data));
+            // Define json type of data field
+            //
+            char *beg, *end;
+            jsmn_parser p;
+            jsmntok_t t[128]; 
+            jsmntype_t type = JSMN_UNDEFINED;
             
-            // \todo create json data and send to websocket client
-            mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data, strlen(data));
+            // Parse json
+            jsmn_init(&p);
+            int r = jsmn_parse(&p, data, cp->data_length, t, 
+                    sizeof(t)/sizeof(t[0]));    
+            if(!(r < 1)) type = t[0].type;
+            if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
+            else beg = end = "\"";
+
+            // Create json data and send it to websocket client
+            size_t data_json_len = 128 + cp->data_length;
+            char *data_json = malloc(data_json_len);
+            data_json_len = snprintf(data_json, data_json_len, 
+                "{ \"cmd\": %d, \"from\": \"%s\", \"data\": %s%.*s%s }",
+                cp->cmd, cp->peer_name, 
+                beg, cp->data_length, data, end
+            );
+            mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data_json, 
+                    data_json_len);
+            free(data_json);
         }
         else break;
     }
@@ -133,11 +158,14 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * 
  * @param kws Pointer to teoWSClass
  * @param nc_p Pointer to websocket connector
+ * @param server L0 Server name or IP
+ * @param port L0 Server port
  * @param login L0 server login
  * 
  * @return Pointer to teoLNullConnectData or NULL if error
  */
-static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p, char *login) {
+static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p, 
+        const char *server, const int port, char *login) {
     
     int rv = -1;
     
@@ -204,7 +232,8 @@ static int teoWSremove(teoWSClass *kws, void *nc_p) {
     //teoLNullConnectData *con;
     teoWSmapData *td;
     
-    if((td = pblMapGet(kws->map, (void*)&nc_p, sizeof(nc_p), &valueLength)) != NULL) { 
+    if((td = pblMapGet(kws->map, (void*)&nc_p, sizeof(nc_p), &valueLength)) 
+            != NULL) { 
         
         ev_io_stop(((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, &td->w); // stop watcher
         teoLNullDisconnect(td->con); // disconnect connection to L0 server
@@ -398,7 +427,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
         #endif
 
         // Connect to L0 server
-        if(kws->add(kws, nc_p, cmd_data) != NULL)        
+        if(kws->add(kws, nc_p, "gt1.kekalan.net", 9010, cmd_data) != NULL)        
             processed = 1;
     }
     
@@ -428,6 +457,21 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
                 MODULE_LABEL
                 "Echo command to \"%s\" peer with message \"%s\" received\n", 
                 ANSI_YELLOW, ANSI_NONE, to, cmd_data);
+        #endif
+
+        // Send echo command to L0 server
+        if(kws->send(kws, nc_p, cmd, to, cmd_data, strlen(cmd_data) + 1) != -1)
+            processed = 1;
+    }
+    
+    // Send other commands to L0 server
+    else if(to[0] != 0) {
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(conf, DEBUG,
+                MODULE_LABEL
+                "Resend command %d to \"%s\" peer with message \"%s\" received\n", 
+                ANSI_YELLOW, ANSI_NONE, cmd, to, cmd_data);
         #endif
 
         // Send echo command
