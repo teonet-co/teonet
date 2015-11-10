@@ -32,30 +32,85 @@
 
 <script language="javascript" type="text/javascript">
 
-  var rooms = [];
-  var ws = new WebSocket('ws://' + location.host + '/ws');
-  
+  /**
+   * Teonet client class
+   * 
+   * @returns {Teocli.teowebAnonym$0}
+   */
   function Teocli() {
       
     return {
         
+      /**
+       * Login to L0 server
+       *  
+       * @param {type} client_name
+       * @returns {undefined}
+       */  
       login: function (client_name) {
           ws.send('{ "cmd": 0, "to": "", "data": "' + client_name + '" }');
       },
       
+      /**
+       * Send peers request command to peer
+       * 
+       * @param {type} to
+       * @returns {undefined}
+       */
       peers: function (to) {
           ws.send('{ "cmd": 72, "to": "' + to + '", "data": "" }');
       },
       
+      /**
+       * Send peers answer request command to peer
+       * 
+       * @param {type} to
+       * @returns {undefined}
+       */
+      peersAnswer: function (to) {
+          ws.send('{ "cmd": 73, "to": "' + to + '", "data": "" }');
+      },
+      
+      /**
+       * Send echo command to peer
+       * 
+       * @param {type} to
+       * @param {type} msg
+       * @returns {undefined}
+       */
       echo: function (to, msg) {
           
           var d = new Date();
           var n = d.getTime();
           ws.send('{ "cmd": 65, "to": "' + to + '", "data": { "msg": "' + msg + '", "time": ' + n + ' } }');
-      }
+      },
       
+      /**
+       * Send echo answer command to peer
+       * 
+       * @param {type} to
+       * @param {type} obj
+       * @returns {undefined}
+       */
+      echoAnswer: function (to, obj) {
+          
+          ws.send('{ "cmd": 66, "to": "' + to + '", "data": ' + obj + ' }');
+      },
+      
+      IsJsonString: function (str) {
+          
+        try {
+            JSON.parse(str);
+        } catch (e) {
+            return false;
+        }
+        return true;
+      }      
     };
   };
+  
+  var rooms = [];
+  var ws = new WebSocket('ws://' + location.host + '/ws');
   
   var teocli = Teocli();
 
@@ -63,18 +118,34 @@
 
   ws.onopen = function(ev)  { 
       console.log(ev); 
-      var client_name = "ws-" + Math.floor((Math.random() * 100) + 1);
-      teocli.login(client_name);
+      teocli.client_name = "ws-" + Math.floor((Math.random() * 100) + 1);
+      teocli.login(teocli.client_name);
       teocli.peers("ps-server");
-      teocli.echo("ps-server", "Hello " + client_name + "!");
+      teocli.echo("ps-server", "Hello " + teocli.client_name + "!");
   };
   ws.onerror = function(ev) { console.log(ev); };
   ws.onclose = function(ev) { console.log(ev); };
   ws.onmessage = function(ev) {
+    var processed = 0;  
     console.log(ev);
-    var div = document.createElement('div');
-    div.innerHTML = ev.data;
-    document.getElementById('messages').appendChild(div);
+    if(teocli.IsJsonString(ev.data)) {
+        console.log("Data in JSON format");
+        console.log(JSON.parse(ev.data));
+        var p = JSON.parse(ev.data);
+        if(p.cmd === 65) {
+            teocli.echoAnswer(p.from, p.data);
+            processed = 1;
+        }
+        else if(p.cmd === 72) {
+            teocli.peersAnswer(p.from);
+            processed = 1;
+        }
+    }
+    if(!processed) {
+        var div = document.createElement('div');
+        div.innerHTML = ev.data;
+        document.getElementById('messages').appendChild(div);
+    }
   };
 
   window.onload = function() {

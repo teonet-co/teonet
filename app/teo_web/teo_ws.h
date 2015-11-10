@@ -35,11 +35,14 @@ struct teoWSClass {
      * 
      * @param kws Pointer to teoWSClass
      * @param nc_p Pointer to websocket connector
+     * @param server L0 Server name or IP
+     * @param port L0 Server port
      * @param login L0 server login
      * 
      * @return Pointer to teoLNullConnectData or NULL if error
      */    
-    teoLNullConnectData * (*add)(teoWSClass *kws, void *nc_p, char *login);
+    teoLNullConnectData * (*add)(teoWSClass *kws, void *nc_p, 
+                            const char *server, const int port, char *login);
     
     /*
      * Disconnect WS client from L0 server, remove it from connected map and stop 

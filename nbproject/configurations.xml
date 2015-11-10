@@ -177,11 +177,11 @@
         <cTool flags="2">
         </cTool>
       </item>
-      <item path="app/teo_web/teo_web.c" ex="false" tool="0" flavor2="0">
+      <item path="app/teo_web/teo_web.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
-      <item path="app/teo_web/teo_ws.c" ex="false" tool="0" flavor2="0">
+      <item path="app/teo_web/teo_ws.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
@@ -380,15 +380,13 @@
       <item path="embedded/teocli/main_select.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
           <incDir>
-            <pElem>app</pElem>
+            <pElem>examples</pElem>
             <pElem>src/config</pElem>
             <pElem>/opt/local/include</pElem>
             <pElem>src</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-            <pElem>examples</pElem>
           </incDir>
         </cTool>
       </item>
@@ -528,6 +526,32 @@
             <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/embedded/libpbl">
+        <cTool>
+          <preprocessorList>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/embedded/teocli/libteol0">
+        <cTool>
+          <preprocessorList>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/embedded/teocli/python">
+        <cTool>
           <preprocessorList>
             <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
             <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
