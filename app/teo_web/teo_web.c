@@ -195,9 +195,9 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
  */
 void ksnHTTPDestroy(ksnHTTPClass *kh) {
     
+    tws->destroy(tws);
     kh->stop = 1;
     while(!kh->stopped) usleep(1000);
-    tws->destroy(tws);
     free(kh->s_http_port);
     free(kh);
 }

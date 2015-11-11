@@ -84,8 +84,18 @@ static void teoWSDestroy(teoWSClass *kws) {
                 ANSI_YELLOW, ANSI_NONE);
         #endif
 
-        // \todo disconnect all connected clients
-
+        // Disconnect all connected clients and stop it watchers
+        PblIterator *it = pblMapIteratorReverseNew(kws->map);
+        if (it != NULL) {
+            while (pblIteratorHasPrevious(it)) {
+                void *entry = pblIteratorPrevious(it);
+                teoWSmapData *td = pblMapEntryValue(entry);
+//                ev_io_stop(((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, &td->w); // stop watcher
+                teoLNullDisconnect(td->con); // disconnect connection to L0 server
+            }
+            pblIteratorFree(it);
+        }
+        
         pblMapFree(kws->map);
         free(kws);
     }
@@ -103,7 +113,7 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     teoLNullConnectData *con = w->data;
     void *nc_p = con->user_data;
     
-    printf("Got a data ...\n");
+    // printf("Got a data ...\n");
     
     for(;;) {
         
@@ -115,11 +125,16 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             
             teoLNullCPacket *cp = (teoLNullCPacket*) con->read_buffer;
             char *data = cp->peer_name + cp->peer_name_length;
+//            #ifdef DEBUG_KSNET
+//            ksnet_printf(conf, DEBUG,
+//                   MODULE_LABEL
             printf("Receive %d bytes: %d bytes data from L0 server, "
                    "from peer %s, cmd = %d, data: %.*s\n", 
+//                   ANSI_YELLOW, ANSI_NONE,  
                    (int)rc, cp->data_length, cp->peer_name, cp->cmd, 
                    cp->data_length,
                    data);
+//            #endif
             
             // Define json type of data field
             //
@@ -135,6 +150,35 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             if(!(r < 1)) type = t[0].type;
             if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
             else beg = end = "\"";
+            
+            char *data_str = data;
+            int data_len = cp->data_length;
+            if(cp->cmd == CMD_L_PEERS_ANSWER) {
+                ksnet_arp_data_ar *arp_data_ar = (ksnet_arp_data_ar *) data;
+                data_str = malloc(sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length);
+                int ptr = sprintf(data_str, "{ \"length\": %d, \"arp_data_ar\": [ ", arp_data_ar->length);
+                int i = 0;
+                for(i = 0; i < arp_data_ar->length; i++) {
+                    ptr += sprintf(data_str + ptr, 
+                            "%s{ "
+                            "\"name\": \"%s\", "
+                            "\"mode\": %d, "
+                            "\"addr\": \"%s\", "
+                            "\"port\": %d, "
+                            "\"triptime\": %.3f"
+                            " }", 
+                            i ? ", " : "", 
+                            arp_data_ar->arp_data[i].name,
+                            arp_data_ar->arp_data[i].data.mode,
+                            arp_data_ar->arp_data[i].data.addr,
+                            arp_data_ar->arp_data[i].data.port,
+                            arp_data_ar->arp_data[i].data.last_triptime
+                    );
+                }
+                sprintf(data_str + ptr, " ] }");
+                data_len = strlen(data_str);
+                beg = end = ""; 
+            }
 
             // Create json data and send it to websocket client
             size_t data_json_len = 128 + cp->data_length;
@@ -142,10 +186,13 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             data_json_len = snprintf(data_json, data_json_len, 
                 "{ \"cmd\": %d, \"from\": \"%s\", \"data\": %s%.*s%s }",
                 cp->cmd, cp->peer_name, 
-                beg, cp->data_length, data, end
+                beg, data_len, data_str, end
             );
+            
             mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data_json, 
                     data_json_len);
+            
+            if(data_str != data) free(data_str);
             free(data_json);
         }
         else break;
@@ -196,9 +243,13 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
                     ev_io_start (((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, 
                             &td->w);                
 
-                    printf("WS client %p has connected to L0 server ...\n", 
-                            nc_p);
-                    
+                    #ifdef DEBUG_KSNET
+                    ksnet_printf(conf, DEBUG,
+                            MODULE_LABEL
+                            "WS client %p has connected to L0 server ...\n", 
+                            ANSI_YELLOW, ANSI_NONE, nc_p);
+                    #endif
+
                     rv = 0;
                 }
             }
@@ -239,7 +290,12 @@ static int teoWSremove(teoWSClass *kws, void *nc_p) {
         teoLNullDisconnect(td->con); // disconnect connection to L0 server
         pblMapRemoveFree(kws->map, (void*)&nc_p, sizeof(nc_p), &valueLength);
         
-        printf("WS client %p has disconnected from L0 server ...\n", nc_p);
+        #ifdef DEBUG_KSNET
+        ksnet_printf(conf, DEBUG,
+                MODULE_LABEL
+                "WS client %p has disconnected from L0 server ...\n", 
+                ANSI_YELLOW, ANSI_NONE, nc_p);
+        #endif
         
         rv = 1;
     }
@@ -271,6 +327,7 @@ static int teoWSevHandler(teoWSClass *kws, int ev, void *nc_p, void *data,
             processed = kws->processMsg(kws, nc_p, data, data_length);
             break;
             
+        // Websocket closed    
         case MG_EV_CLOSE:
             processed = kws->remove(kws, nc_p);
             break;
@@ -427,6 +484,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
         #endif
 
         // Connect to L0 server
+        // \todo Send L0 server name and port in Login command or use WS host L0 server
         if(kws->add(kws, nc_p, "gt1.kekalan.net", 9010, cmd_data) != NULL)        
             processed = 1;
     }
@@ -442,7 +500,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
                 ANSI_YELLOW, ANSI_NONE, to);
         #endif
 
-        // Send peers command
+        // Send request peers command
         if(kws->send(kws, nc_p, cmd, to, NULL, 0) != -1)
             processed = 1;
     }
