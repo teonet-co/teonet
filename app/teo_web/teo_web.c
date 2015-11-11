@@ -83,7 +83,7 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
         // Serve HTTP request
         case MG_EV_HTTP_REQUEST:
             mg_serve_http(nc, hm, kh->s_http_server_opts);
-            //nc->flags |= MG_F_SEND_AND_CLOSE;
+            nc->flags |= MG_F_SEND_AND_CLOSE;
             break;
             
         // New websocket connection. Tell everybody. 
@@ -195,9 +195,9 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
  */
 void ksnHTTPDestroy(ksnHTTPClass *kh) {
     
-    tws->destroy(tws);
     kh->stop = 1;
-    while(!kh->stopped) usleep(1000);
+    while(!kh->stopped) usleep(100000);
+    tws->destroy(tws);
     free(kh->s_http_port);
     free(kh);
 }
