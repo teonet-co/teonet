@@ -39,11 +39,27 @@
    * @returns {Teocli.teowebAnonym$0}
    */
   function Teocli(ws) {
-      
-    ws.onopen = function(ev)  { teocli.onopen_callback(ev); };
-    ws.onerror = function(ev) { teocli.onerror_callback(ev); };
-    ws.onclose = function(ev) { teocli.onclose_callback(ev); };
-    ws.onmessage = function(ev) { teocli.onmessage_callback(ev); };  
+    
+    if(typeof ws.onopen === 'function') teocli.old_onopen = ws.onopen;    
+    if(typeof ws.onerror === 'function') teocli.old_onerror = ws.onerror;
+    if(typeof ws.onclose === 'function') teocli.old_onclose = ws.onclose;
+    if(typeof ws.onmessage === 'function') teocli.old_onmessage = ws.onmessage;
+    
+    ws.onopen = function(ev)  { 
+        if(teocli.onopen) teocli.onopen(ev); 
+        if(teocli.old_onopen) teocli.old_onopen(ev); 
+    };
+    ws.onerror = function(ev) { 
+        if(teocli.onerror) teocli.onerror(ev); 
+        if(teocli.old_onerror) teocli.old_onerror(ev); 
+    };
+    ws.onclose = function(ev) { 
+        if(teocli.onclose) teocli.onclose(ev); 
+        if(teocli.old_onclose) teocli.old_onclose(ev); };
+    ws.onmessage = function(ev) { 
+        if(teocli.onmessage) teocli.onmessage(ev); 
+        if(teocli.old_onmessage) teocli.old_onmessage(ev); 
+    };  
       
     return {
                   
@@ -167,11 +183,12 @@
             else if(p.cmd === 66) {
                 // Calculate triptime command
                 p.data.time = teocli.triptime(p.data.time);
-                console.log("Teocli.process: Triptime " + p.data.time + " ms");
+                //console.log("Teocli.process: Triptime " + p.data.time + " ms");
                 // Exequte echo callback
-                if(typeof this.echo_callback === 'function') {
-                    this.echo_callback(null, p);
+                if(typeof this.onecho === 'function') {
+                    this.onecho(null, p);
                 } 
+                
                 processed = 1;                
             }
             
@@ -184,10 +201,10 @@
             
             // Got PEERS answer command
             else if(p.cmd === 73) {
-                teocli.peersAnswer(p.from);
+                //teocli.peersAnswer(p.from);
                 // Exequte peers callback
-                if(typeof this.peers_callback === 'function') {
-                    this.peers_callback(null, p);
+                if(typeof this.onpeers === 'function') {
+                    this.onpeers(null, p);
                 } 
                 processed = 1;
             }
@@ -195,27 +212,27 @@
             // Got some other command
             else {
                 // Exequte other callback
-                if(typeof this.other_callback === 'function') {
-                    this.other_callback(null, p);
+                if(typeof this.onother === 'function') {
+                    this.onother(null, p);
                 } 
                 processed = 0;
             }
         }     
         
         return processed;
-      },
-      
-      /**
-       * Set received data callback
-       * 
-       * @param {type} type echo, peers or other
-       * @param {type} callback Callback function
-       * 
-       * @returns {undefined}
-       */
-      setCallback: function(type, callback) {
-          this[type + '_callback'] = callback;
       }
+      
+//      /**
+//       * Set received data callback
+//       * 
+//       * @param {type} type echo, peers or other
+//       * @param {type} callback Callback function
+//       * 
+//       * @returns {undefined}
+//       */
+//      setCallback: function(type, callback) {
+//          this[type + '_callback'] = callback;
+//      }
       
     };
   };
@@ -263,15 +280,16 @@
    * @param {type} ev
    * @returns {undefined}
    */
-  function onopen_func(ev) {
+  function open_func(ev) {
       
+      // Client name (random created)
       teocli.client_name = "ws-" + Math.floor((Math.random() * 100) + 1);
       
       console.log('onopen', teocli.client_name, ev); 
       
-      teocli.login(teocli.client_name);
-      teocli.peers("ps-server");
-      teocli.echo("ps-server", "Hello " + teocli.client_name + "!");
+      teocli.login(teocli.client_name); // Send login command to L0 server
+      teocli.peers("ps-server"); // Send peers list request command to "ps-server" peer
+      teocli.echo("ps-server", "Hello " + teocli.client_name + "!"); // Send echo command to "ps-server" peer
   }
   
   /**
@@ -280,7 +298,7 @@
    * @param {type} ev
    * @returns {undefined}
    */
-  function onerror_func(ev) {
+  function error_func(ev) {
       
       console.log('onerror', ev); 
   }
@@ -291,7 +309,7 @@
    * @param {type} ev
    * @returns {undefined}
    */
-  function onclose_func(ev) {
+  function close_func(ev) {
       
       console.log('onclose', ev); 
   }
@@ -302,7 +320,7 @@
    * @param {type} ev
    * @returns {undefined}
    */
-  function onmessage_func(ev) {
+  function message_func(ev) {
       
     console.log('onmessage', ev, ev.data.slice(0,20));
     
@@ -323,33 +341,31 @@
   // Create Teocli object
   var teocli = Teocli(ws);
   
-  // Define received data callback
-  teocli.setCallback('echo', echo_func); // Calls when echo_answer received
-  teocli.setCallback('peers', peers_func); // Calls when peers_answer received
-  teocli.setCallback('other', other_func); // Calls when some other command received
-  //
-  teocli.setCallback('onopen', onopen_func); // Calls when client connected to websocket
-  teocli.setCallback('onclose', onclose_func); // Calls when client connected to websocket
-  teocli.setCallback('onmessage', onmessage_func); // Calls when client connected to websocket
+  // Define received data callbacks
+  teocli.onecho = echo_func; // Calls when echo_answer received
+  teocli.onpeers = peers_func; // Calls when peers_answer received
+  teocli.onother = other_func; // Calls when some other command received
+  // Define common websocket callbacks
+  teocli.onopen = open_func; // Calls when client connected to websocket
+  teocli.onclose = close_func; // Calls when client connected to websocket
+  teocli.onmessage = message_func; // Calls when websocket message received
+  teocli.onerror = error_func; // Calls when websocket error hapend
 
-//  ws.onopen = function(ev)  { teocli.onopen_callback(ev); };
-//  ws.onerror = function(ev) { teocli.onerror_callback(ev); };
-//  ws.onclose = function(ev) { teocli.onclose_callback(ev); };
-//  ws.onmessage = function(ev) { teocli.onmessage_callback(ev); };
-      
- 
   // Current web page controls
   window.onload = function() {
+      
     document.getElementById('send_button').onclick = function(ev) {
       var msg = document.getElementById('send_input').value;
       document.getElementById('send_input').value = '';
       ws.send(msg);
     };
+    
     document.getElementById('send_input').onkeypress = function(ev) {
       if (ev.keyCode === 13 || ev.which === 13) {
         document.getElementById('send_button').click();
       }
     };
+    
   };
   
 </script>
