@@ -24,6 +24,7 @@
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>app</word>
+            <word>atoi</word>
             <word>Autoconf</word>
             <word>Cesanta</word>
             <word>cmd</word>
@@ -35,6 +36,8 @@
             <word>Hotkeys</word>
             <word>internet</word>
             <word>ip</word>
+            <word>Jsmt</word>
+            <word>json</word>
             <word>ksnet</word>
             <word>len</word>
             <word>libteol</word>
@@ -48,10 +51,13 @@
             <word>pc</word>
             <word>perror</word>
             <word>po</word>
+            <word>printf</word>
             <word>recvfrom</word>
             <word>sh</word>
             <word>src</word>
             <word>str</word>
+            <word>strndup</word>
+            <word>strtol</word>
             <word>subpacket</word>
             <word>subpackets</word>
             <word>tcp</word>

@@ -28,12 +28,28 @@
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
+    
+    static ksnHTTPClass *kh = NULL;
 
     // Switch Teonet events
     switch(event) {
-
+        
+        // Calls immediately after event manager starts
+        case EV_K_STARTED:
+            
+            // Start HTTP server
+            kh = ksnHTTPInit(ke, 8000, ".");    
+            break;
+            
+        // Calls before event manager stopped
+        case EV_K_STOPPED_BEFORE:
+            
+            // Stop HTTP server
+            if(kh != NULL) ksnHTTPDestroy(kh);
+            break;
+            
         // Process async messages from teo_web module
-        case EV_K_ASYNC: {
+        case EV_K_ASYNC:         
             
             if(data != NULL && user_data != NULL) {
 
@@ -70,13 +86,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                (char*) td->data);
                         
                         // Send echo message
-                        mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
+                        // mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
                         
                         break;
                 }
-            }            
-            
-        } break;
+            }  
+            break;
             
         default:
             break;
@@ -97,14 +112,8 @@ int main(int argc, char** argv) {
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
     
-    // Start HTTP server
-    ksnHTTPClass *kh = ksnHTTPInit(ke, 8000, ".");
-    
     // Start teonet
     ksnetEvMgrRun(ke);
     
-    // Stop HTTP server
-    ksnHTTPDestroy(kh);
-
     return (EXIT_SUCCESS);
 }

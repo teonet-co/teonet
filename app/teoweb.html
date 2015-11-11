@@ -15,7 +15,10 @@
     }
     #messages {
       border: 2px solid #fec; border-radius: 1em;
-      height: 10em; overflow: scroll; padding: 0.5em 1em;
+      height: 20em; overflow: scroll; padding: 0.5em 1em;
+    }
+    #send_input {
+        width: 400px
     }
     a:link, a:visited { color: #69c; text-decoration: none; }
     @media (max-width: 700px) {
@@ -29,34 +32,342 @@
 
 <script language="javascript" type="text/javascript">
 
-  var rooms = [];
-  var ws = new WebSocket('ws://' + location.host + '/ws');
+  /**
+   * Teonet client class
+   * 
+   * @param {Object} ws Websocket connection
+   * @returns {Teocli.teowebAnonym$0}
+   */
+  function Teocli(ws) {
+    
+    if(typeof ws.onopen === 'function') teocli.old_onopen = ws.onopen;    
+    if(typeof ws.onerror === 'function') teocli.old_onerror = ws.onerror;
+    if(typeof ws.onclose === 'function') teocli.old_onclose = ws.onclose;
+    if(typeof ws.onmessage === 'function') teocli.old_onmessage = ws.onmessage;
+    
+    ws.onopen = function(ev)  { 
+        if(teocli.onopen) teocli.onopen(ev); 
+        if(teocli.old_onopen) teocli.old_onopen(ev); 
+    };
+    ws.onerror = function(ev) { 
+        if(teocli.onerror) teocli.onerror(ev); 
+        if(teocli.old_onerror) teocli.old_onerror(ev); 
+    };
+    ws.onclose = function(ev) { 
+        if(teocli.onclose) teocli.onclose(ev); 
+        if(teocli.old_onclose) teocli.old_onclose(ev); };
+    ws.onmessage = function(ev) { 
+        if(teocli.onmessage) teocli.onmessage(ev); 
+        if(teocli.old_onmessage) teocli.old_onmessage(ev); 
+    };  
+      
+    return {
+                  
+      /**
+       * Send login command to L0 server
+       *  
+       * @param {type} client_name Name of this client
+       * @returns {undefined}
+       */  
+      login: function (client_name) {
+          ws.send('{ "cmd": 0, "to": "", "data": "' + client_name + '" }');
+      },
+      
+      /**
+       * Send peers request command to peer
+       * 
+       * @param {type} to Peer name to send to
+       * @returns {undefined}
+       */
+      peers: function (to) {
+          ws.send('{ "cmd": 72, "to": "' + to + '", "data": "" }');
+      },
+      
+      /**
+       * Send peers answer request command to peer
+       * 
+       * @param {type} to Peer name to send to
+       * @returns {undefined}
+       */
+      peersAnswer: function (to) {
+          ws.send('{ "cmd": 73, "to": "' + to + '", "data": "" }');
+      },
+      
+      /**
+       * Send echo command to peer
+       * 
+       * @param {type} to Peer name to send to
+       * @param {type} msg Text message to send to peer
+       * @returns {undefined}
+       */
+      echo: function (to, msg) {
+          
+          var d = new Date();
+          var n = d.getTime();
+          ws.send('{ "cmd": 65, "to": "' + to + '", "data": { "msg": "' + msg + '", "time": ' + n + ' } }');
+      },
+      
+      /**
+       * Send echo answer command to peer
+       * 
+       * @param {type} to Peer name to send to
+       * @param {type} obj Data (object) to send to peer
+       * @returns {undefined}
+       */
+      echoAnswer: function (to, obj) {          
+          ws.send('{ "cmd": 66, "to": "' + to + '", "data": ' + obj + ' }');
+      },
+      
+      /**
+       * Calculate echo triptime
+       * 
+       * @param {type} t Previous time in ms
+       * @returns {Number} Return triptime - diference between now and previous time 
+       *                   in ms
+       */
+      triptime: function (t) {
+          
+          var d = new Date();
+          var n = d.getTime();
+          
+          return n - t;
+      },
+      
+      /**
+       * Check if input string is JSON object
+       * 
+       * @param {type} str JSON string
+       * 
+       * @returns {Array|Object|undefined} Parsed json object or undefined if input 
+       *                         string can't be parsed
+       */
+      IsJsonString: function (str) {
+          
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            return undefined;
+        }
+      },
+      
+      /**
+       * Process received data
+       * 
+       * @param {type} data Received data
+       * 
+       * @returns {int} 1 - if processed, 0 - if not processed
+       */
+      process: function (data) {
+          
+        var processed = 0; 
+          
+        // Parse JSON command
+        var p = teocli.IsJsonString(data);
+        
+        // Check that command is in JSON format
+        if(p && p.hasOwnProperty('cmd') && p.hasOwnProperty('from') && 
+           p.hasOwnProperty('data')) {
+            
+            console.log("Teocli.process", p);
 
-  if (!window.console) { window.console = { log: function() {} } };
-
-  ws.onopen = function(ev)  { console.log(ev); };
-  ws.onerror = function(ev) { console.log(ev); };
-  ws.onclose = function(ev) { console.log(ev); };
-  ws.onmessage = function(ev) {
-    console.log(ev);
-    var div = document.createElement('div');
-    div.innerHTML = ev.data;
-    document.getElementById('messages').appendChild(div);
-
+            // Check received commands
+            //
+            // Got ECHO command
+            if(p.cmd === 65) {
+                // Send echo answer
+                teocli.echoAnswer(p.from, p.data);
+                processed = 1;
+            }
+            
+            // Got ECHO answer command
+            else if(p.cmd === 66) {
+                // Calculate triptime command
+                p.data.time = teocli.triptime(p.data.time);
+                //console.log("Teocli.process: Triptime " + p.data.time + " ms");
+                // Exequte echo callback
+                if(typeof this.onecho === 'function') {
+                    this.onecho(null, p);
+                } 
+                
+                processed = 1;                
+            }
+            
+            // Got PEERS command
+            else if(p.cmd === 72) {
+                // Send peers answer command
+                teocli.peersAnswer(p.from);
+                processed = 1;
+            }
+            
+            // Got PEERS answer command
+            else if(p.cmd === 73) {
+                //teocli.peersAnswer(p.from);
+                // Exequte peers callback
+                if(typeof this.onpeers === 'function') {
+                    this.onpeers(null, p);
+                } 
+                processed = 1;
+            }
+            
+            // Got some other command
+            else {
+                // Exequte other callback
+                if(typeof this.onother === 'function') {
+                    this.onother(null, p);
+                } 
+                processed = 0;
+            }
+        }     
+        
+        return processed;
+      }
+      
+//      /**
+//       * Set received data callback
+//       * 
+//       * @param {type} type echo, peers or other
+//       * @param {type} callback Callback function
+//       * 
+//       * @returns {undefined}
+//       */
+//      setCallback: function(type, callback) {
+//          this[type + '_callback'] = callback;
+//      }
+      
+    };
   };
+  
+  
+  /**
+   * Echo answer callback function example
+   * 
+   * @param {type} err
+   * @param {type} data
+   * @returns {undefined}
+   */
+  function echo_func (err, data) {
+      
+      console.log("echo_func, triptime: " + data.data.time + " ms" , data); 
+  }
+  
+  /**
+   * Peers answer callback function example
+   * 
+   * @param {type} err
+   * @param {type} data
+   * @returns {undefined}
+   */
+  function peers_func (err, data) {
+      
+      console.log("peers_func", data); 
+  }
+  
+  /**
+   * Other callback function example
+   * 
+   * @param {type} err
+   * @param {type} data
+   * @returns {undefined}
+   */
+  function other_func (err, data) {
+      
+      console.log("other_func" , data); 
+  }
+  
+  /**
+   * On client connected callback function example
+   * 
+   * @param {type} ev
+   * @returns {undefined}
+   */
+  function open_func(ev) {
+      
+      // Client name (random created)
+      teocli.client_name = "ws-" + Math.floor((Math.random() * 100) + 1);
+      
+      console.log('onopen', teocli.client_name, ev); 
+      
+      teocli.login(teocli.client_name); // Send login command to L0 server
+      teocli.peers("ps-server"); // Send peers list request command to "ps-server" peer
+      teocli.echo("ps-server", "Hello " + teocli.client_name + "!"); // Send echo command to "ps-server" peer
+  }
+  
+  /**
+   * On error callback function example
+   * 
+   * @param {type} ev
+   * @returns {undefined}
+   */
+  function error_func(ev) {
+      
+      console.log('onerror', ev); 
+  }
+   
+  /**
+   * On close callback function example
+   * 
+   * @param {type} ev
+   * @returns {undefined}
+   */
+  function close_func(ev) {
+      
+      console.log('onclose', ev); 
+  }
+  
+  /**
+   * On message callback function example
+   * 
+   * @param {type} ev
+   * @returns {undefined}
+   */
+  function message_func(ev) {
+      
+    console.log('onmessage', ev, ev.data.slice(0,20));
+    
+    // Process command. If command not processed show it in html page
+    if(!teocli.process(ev.data)) {
+        
+        var div = document.createElement('div');
+        div.innerHTML = ev.data;
+        document.getElementById('messages').appendChild(div);
+    }
+  }
+   
+  if (!window.console) { window.console = { log: function() {} }; };
+  
+  // Connect to websocket server
+  var ws = new WebSocket('ws://' + location.host + '/ws');
+  
+  // Create Teocli object
+  var teocli = Teocli(ws);
+  
+  // Define received data callbacks
+  teocli.onecho = echo_func; // Calls when echo_answer received
+  teocli.onpeers = peers_func; // Calls when peers_answer received
+  teocli.onother = other_func; // Calls when some other command received
+  // Define common websocket callbacks
+  teocli.onopen = open_func; // Calls when client connected to websocket
+  teocli.onclose = close_func; // Calls when client connected to websocket
+  teocli.onmessage = message_func; // Calls when websocket message received
+  teocli.onerror = error_func; // Calls when websocket error hapend
 
+  // Current web page controls
   window.onload = function() {
+      
     document.getElementById('send_button').onclick = function(ev) {
       var msg = document.getElementById('send_input').value;
       document.getElementById('send_input').value = '';
       ws.send(msg);
     };
+    
     document.getElementById('send_input').onkeypress = function(ev) {
-      if (ev.keyCode == 13 || ev.which == 13) {
+      if (ev.keyCode === 13 || ev.which === 13) {
         document.getElementById('send_button').click();
       }
     };
+    
   };
+  
 </script>
 </head>
 <body>

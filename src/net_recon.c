@@ -38,13 +38,13 @@ typedef struct reconnect_map_data {
 } reconnect_map_data;
 
 // Local functions
-void ksnReconnectDestroy(ksnReconnectClass *this);
-int ksnReconnectSend(ksnReconnectClass *this, const char *peer);
-int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer, 
+static void ksnReconnectDestroy(ksnReconnectClass *this);
+static int ksnReconnectSend(ksnReconnectClass *this, const char *peer);
+static int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer, 
         const char* peer_to_reconnect);
-int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd);
-int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd);
-void ksnReconnectCQueCallback(uint32_t id, int type, void *data);
+static int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd);
+static int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd);
+static void ksnReconnectCQueCallback(uint32_t id, int type, void *data);
 //
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
@@ -58,7 +58,7 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_dat
  * @param data User data selected in ksnCQueAdd function
  *  
  */
-void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
+static void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
     
     #define kcor ((ksnCoreClass*)((ksnCommandClass*) \
                     map_data->kr->kco)->kc)
@@ -147,7 +147,7 @@ void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
  * @retval -1 Has not connected to r-host
  * @retval -2 PBL error
  */
-int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
+static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
     
     int retval = 0;
     
@@ -254,7 +254,7 @@ int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
  * @retval  0 Send command successfully
  * @retval -1 Has not connected to peer
  */
-int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer, 
+static int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer, 
         const char* peer_to_reconnect) {
     
     #ifdef DEBUG_KSNET
@@ -283,7 +283,7 @@ int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer,
  * @param rd Pointer to ksnCorePacketData
  * @return 
  */
-int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
+static int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
     
     #define kcom ((ksnCommandClass*)this->kco)
     #define karp ((ksnCoreClass*)kcom->kc)->ka
@@ -332,7 +332,7 @@ int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
  * @param rd Pointer to ksnCorePacketData
  * @return 
  */
-int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
+static int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
     
     #ifdef DEBUG_KSNET
     ksnet_printf(conf, DEBUG_VV,
@@ -403,7 +403,7 @@ ksnReconnectClass *ksnReconnectInit(void *kco) {
  * 
  * @param this Pointer to ksnReconnectClass
  */
-void ksnReconnectDestroy(ksnReconnectClass *this) {
+static void ksnReconnectDestroy(ksnReconnectClass *this) {
     
     if(this != NULL) {
         

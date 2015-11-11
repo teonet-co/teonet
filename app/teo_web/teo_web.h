@@ -1,5 +1,5 @@
 /** 
- * File:   teo_http.h
+ * File:   teo_web.h
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Teonet HTTP/WS Server module
@@ -19,6 +19,7 @@
 typedef struct ksnHTTPClass {
     
     void *ke; ///< Ponter to ksnetEvMgrClass
+    void *kws; ///< Pointer to teoWSClass
     char *s_http_port; ///< HTTP port
     struct mg_serve_http_opts s_http_server_opts; ///< HTTP server options
     pthread_t tid; ///< HTTP thread id
@@ -60,4 +61,3 @@ void ksnHTTPDestroy(ksnHTTPClass *kh);
 #endif
 
 #endif	/* TEO_HTTP_H */
-
