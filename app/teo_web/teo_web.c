@@ -1,5 +1,5 @@
 /** 
- * File:   teo_http.c
+ * File:   teo_web.c
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Teonet HTTP/WS Server module
@@ -8,15 +8,21 @@
  */
 
 #include "teo_web.h"
+#include "teo_ws.h"
+
+/**
+ * Teonet websocket class
+ */
+#define tws ((teoWSClass *)kh->kws)
 
 /**
  * Mongoose websocket send broadcast
  * 
- * @param nc
- * @param msg
- * @param len
+ * @param nc Pointer to structure mg_connection
+ * @param msg Message
+ * @param len Message length
  */
-static void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len) {
+void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len) {
     
     struct mg_connection *c;
     char buf[500];
@@ -46,7 +52,7 @@ static int is_websocket(const struct mg_connection *nc) {
  * @param data
  * @param data_len
  */
-void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data, 
+static void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data, 
         size_t data_len) {
     
     size_t td_size = sizeof(struct teoweb_data) + data_len;
@@ -67,9 +73,9 @@ void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data,
  */
 static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
     
-    struct http_message *hm = (struct http_message *) ev_data;
-    struct websocket_message *wm = (struct websocket_message *) ev_data;
-    ksnHTTPClass *kh = nc->mgr->user_data;
+    struct http_message *hm  = ((struct http_message *) ev_data);
+    struct websocket_message *wm = ((struct websocket_message *) ev_data);
+    ksnHTTPClass *kh = ((ksnHTTPClass *) nc->mgr->user_data);
     
     // Check server events
     switch(ev) {
@@ -77,27 +83,34 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
         // Serve HTTP request
         case MG_EV_HTTP_REQUEST:
             mg_serve_http(nc, hm, kh->s_http_server_opts);
-            //nc->flags |= MG_F_SEND_AND_CLOSE;
+            nc->flags |= MG_F_SEND_AND_CLOSE;
             break;
             
         // New websocket connection. Tell everybody. 
-        case MG_EV_WEBSOCKET_HANDSHAKE_DONE: {
-            ws_broadcast(nc, "joined", 6); 
-            teoSendAsync(nc, WS_CONNECTED, NULL, 0);
-        } break;
+        case MG_EV_WEBSOCKET_HANDSHAKE_DONE: 
+            if(!tws->handler(tws, ev, nc, NULL, 0)) {
+                ws_broadcast(nc, "joined", 6); 
+                teoSendAsync(nc, WS_CONNECTED, NULL, 0);
+            }
+            break;
             
         // New websocket message. Tell everybody.
-        case MG_EV_WEBSOCKET_FRAME: {
-            ws_broadcast(nc, (char *) wm->data, wm->size);
-            teoSendAsync(nc, WS_MESSAGE, wm->data, wm->size);
-        } break;
+        case MG_EV_WEBSOCKET_FRAME: 
+            if(!tws->handler(tws, ev, nc, wm->data, wm->size)) {
+                ws_broadcast(nc, (char *) wm->data, wm->size);
+                teoSendAsync(nc, WS_MESSAGE, wm->data, wm->size);
+            }
+            break;
             
         // Disconnect 
         case MG_EV_CLOSE:
             // Disconnect websocket connection. Tell everybody.
             if(is_websocket(nc)) {
-                ws_broadcast(nc, "left", 4);
-                teoSendAsync(nc, WS_DISCONNECTED, NULL, 0);
+                
+                if(!tws->handler(tws, ev, nc, NULL, 0)) {
+                    ws_broadcast(nc, "left", 4);
+                    teoSendAsync(nc, WS_DISCONNECTED, NULL, 0);
+                }
             }
             break;
             
@@ -113,7 +126,7 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
  * 
  * @return 
  */
-void* http_thread(void *kh) {
+static void* http_thread(void *kh) {
 
     struct mg_mgr mgr;
     struct mg_connection *nc;
@@ -165,6 +178,8 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
     kh->s_http_server_opts.enable_directory_listing = "yes";
     kh->s_http_server_opts.index_files = "index.html";
     
+    kh->kws = teoWSInit(kh); // Initialize websocket class
+    
     // Start mongoose thread
     int err = pthread_create(&kh->tid, NULL, &http_thread, kh);
     if (err != 0) printf("Can't create mongoose thread :[%s]\n", strerror(err));
@@ -175,12 +190,14 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
 
 /**
  * Destroy teonet HTTP module
- * @param kh
+ * 
+ * @param kh Pointer to ksnHTTPClass
  */
 void ksnHTTPDestroy(ksnHTTPClass *kh) {
     
     kh->stop = 1;
-    while(!kh->stopped) usleep(1000);
+    while(!kh->stopped) usleep(100000);
+    tws->destroy(tws);
     free(kh->s_http_port);
     free(kh);
 }

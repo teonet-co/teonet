@@ -37,6 +37,7 @@ extern const char *null_str;
 typedef enum ksnetEvMgrEvents {
 
     EV_K_STARTED,       ///< Calls immediately after event manager starts
+    EV_K_STOPPED_BEFORE,///< Calls before event manager stopped
     EV_K_STOPPED,       ///< Calls after event manager stopped
     EV_K_CONNECTED,     ///< New peer connected to host
     EV_K_DISCONNECTED,  ///< A peer was disconnected from host
