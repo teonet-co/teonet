@@ -90,7 +90,7 @@ static void teoWSDestroy(teoWSClass *kws) {
             while (pblIteratorHasPrevious(it)) {
                 void *entry = pblIteratorPrevious(it);
                 teoWSmapData *td = pblMapEntryValue(entry);
-//                ev_io_stop(((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, &td->w); // stop watcher
+                ev_io_stop(((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, &td->w); // stop watcher
                 teoLNullDisconnect(td->con); // disconnect connection to L0 server
             }
             pblIteratorFree(it);
@@ -249,6 +249,11 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
                             "WS client %p has connected to L0 server ...\n", 
                             ANSI_YELLOW, ANSI_NONE, nc_p);
                     #endif
+
+                    // Send websocket welcome message
+                    char *WELCOME_NET = ksnet_formatMessage("Hi %s! Welcome to Teonet!", login);
+                    mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, WELCOME_NET, strlen(WELCOME_NET) + 1);
+                    free(WELCOME_NET);
 
                     rv = 0;
                 }

@@ -262,6 +262,9 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
     // Free all other class data
     if(free_async == 0 || free_async == 2) {
         
+        // Send stopped event to user level
+        if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STOPPED_BEFORE, NULL, 0, NULL);
+        
         // Stop watchers
         ev_async_stop(ke->ev_loop, &ke->sig_async_w);
         ev_timer_stop(ke->ev_loop, &ke->timer_w);
