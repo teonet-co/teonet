@@ -141,7 +141,7 @@ static void* http_thread(void *kh) {
         ((ksnHTTPClass *)kh)->s_http_port);
     
     for (;;) {
-      mg_mgr_poll(&mgr, 50);
+      mg_mgr_poll(&mgr, 2);
       if(((ksnHTTPClass *)kh)->stop) break;
     }
     mg_mgr_free(&mgr);
