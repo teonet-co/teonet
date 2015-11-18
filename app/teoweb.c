@@ -66,7 +66,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             "connected\n", nc);
                         
                         // Send message to client
-                        mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, "Hello!", 6);
+                        #define HELLO_MSG "Hello from WS server!"
+                        mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, 
+                                HELLO_MSG, sizeof(HELLO_MSG));
                         
                         break;
 
