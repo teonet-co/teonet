@@ -171,7 +171,7 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
     kh->stop = 0;
     kh->stopped = 0;
     char buffer[KSN_BUFFER_SIZE];
-    snprintf(buffer, KSN_BUFFER_SIZE, "%d", port);
+    snprintf(buffer, KSN_BUFFER_SIZE, ":%d", port);
     kh->s_http_port = strdup(buffer); 
     memset(&kh->s_http_server_opts, 0, sizeof(kh->s_http_server_opts));
     kh->s_http_server_opts.document_root = document_root;  // Serve current directory
