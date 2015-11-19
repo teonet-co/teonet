@@ -38,7 +38,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
             
             // Start HTTP server
-            kh = ksnHTTPInit(ke, 8080, ".");    
+            kh = ksnHTTPInit(ke, 8080, "/opt/www");    
             break;
             
         // Calls before event manager stopped
