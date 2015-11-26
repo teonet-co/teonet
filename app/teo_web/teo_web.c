@@ -83,18 +83,42 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
     switch(ev) {
 
         // Serve HTTP request
-        case MG_EV_HTTP_REQUEST:
+        case MG_EV_HTTP_REQUEST: 
             
-            // \ todo try to connect to other server
+            printf("\n### MG_EV_HTTP_REQUEST: \n");            
             printf("HTTP URI: %.*s\n", (int)hm->uri.len, hm->uri.p);
-            if(!strncmp(hm->uri.p, "/test", 5)) {
-                printf("!!! Test !!!\n");
-//                mg_printf_http_chunk(nc, "%s", "Test<br>");
-//                mg_send_http_chunk(nc, "", 0); // Tell the client we're finished
-                //mg_printf(nc, "%s", "<html>Test<br></html>");
-                mg_connect_http(nc->mgr, mg_ev_handler, "http://www.google.com", NULL,
-                        NULL);
-                nc->flags |= MG_F_CLOSE_IMMEDIATELY;
+            
+            // Connect to other server if needle URI sent
+            const char *auth_uri = "/api/auth/";
+            const char *auth_server_url = "http://172.17.0.2:1234"; 
+            
+            if(!strncmp(hm->uri.p, auth_uri, strlen(auth_uri))) {
+                
+                printf("!!! %s  !!! nc: %p, user_data: %p\n", 
+                        auth_uri, nc, nc->user_data);
+                
+                // Connect to remote HTTP server and resend request(headers)
+                const size_t auth_url_len = hm->uri.len + strlen(auth_server_url);
+                char auth_url[auth_url_len + 1];
+                strcpy(auth_url, auth_server_url);
+                memcpy(auth_url + strlen(auth_server_url), hm->uri.p, hm->uri.len);
+                auth_url[auth_url_len] = 0;
+                
+                printf("auth_url: %s\n", auth_url);
+                printf("message: \n%.*s\n", (int)hm->message.len, hm->message.p);
+                    
+//                // Post
+//                struct mg_connection *nc_con = mg_connect_http(nc->mgr, 
+//                        mg_ev_handler, auth_url, hm->message.p, "");
+
+                // Get
+                struct mg_connection *nc_con = mg_connect_http(nc->mgr, 
+                        mg_ev_handler, auth_url, NULL, NULL);
+
+                // Save current connection to user_data of new connection
+                if(nc_con != NULL) {
+                    nc_con->user_data = nc;
+                }
             }
             else {
                 mg_serve_http(nc, hm, kh->s_http_server_opts);
@@ -102,22 +126,37 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
             }
             break;
             
-        case MG_EV_CONNECT:
+        // Connected to remote HTTP server    
+        case MG_EV_CONNECT:       
+            
             connect_status = * (int *) ev_data;
+            printf("\n### MG_EV_CONNECT: \n");
             if (connect_status == 0) {
-              printf("Connected to %s, sending request...\n", "");
-              mg_printf(nc, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n",
-                        "", "");
+                printf("Connected to nc = %p, nc->user_data: %p ...\n", 
+                        nc, nc->user_data);
+                //mg_printf(nc, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", "", "");
             } else {
-              printf("Error connecting to %s: %s\n",
-                     "", strerror(connect_status));
-//              s_exit_flag = 1;
+                printf("Error connecting to remote HTTP server: %s\n", 
+                      strerror(connect_status));
             }
             break;
+            
+        // Replay from remote HTTP server
         case MG_EV_HTTP_REPLY:
-            printf("Got reply:\n%.*s\n", (int) hm->body.len, hm->body.p);
-            nc->flags |= MG_F_SEND_AND_CLOSE;
-//            s_exit_flag = 1;
+            
+            printf("\n### MG_EV_HTTP_REPLY: \n");
+            printf("MG_EV_HTTP_REPLY: nc = %p, nc->user_data: %p\n", 
+                    nc, nc->user_data);
+            printf("Got reply:\n%.*s\n", (int) hm->message.len, hm->message.p); //   (int) hm->body.len, hm->body.p);
+            
+            // Send replay to user
+            if(nc->user_data != NULL) {
+                mg_printf(nc->user_data, "%.*s",  (int) hm->message.len, hm->message.p); //   (int) hm->body.len, hm->body.p);
+                ((struct mg_connection *)nc->user_data)->flags |= 
+                        MG_F_SEND_AND_CLOSE;
+            }
+            
+            nc->flags |= MG_F_CLOSE_IMMEDIATELY;
             break;
             
         // New websocket connection. Tell everybody. 
