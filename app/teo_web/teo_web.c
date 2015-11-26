@@ -73,8 +73,10 @@ static void teoSendAsync(struct mg_connection *nc, uint16_t cmd, void *data,
  */
 static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
     
+    int connect_status;
     struct http_message *hm  = ((struct http_message *) ev_data);
     struct websocket_message *wm = ((struct websocket_message *) ev_data);
+    
     ksnHTTPClass *kh = ((ksnHTTPClass *) nc->mgr->user_data);
     
     // Check server events
@@ -82,8 +84,40 @@ static void mg_ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
 
         // Serve HTTP request
         case MG_EV_HTTP_REQUEST:
-            mg_serve_http(nc, hm, kh->s_http_server_opts);
+            
+            // \ todo try to connect to other server
+            printf("HTTP URI: %.*s\n", (int)hm->uri.len, hm->uri.p);
+            if(!strncmp(hm->uri.p, "/test", 5)) {
+                printf("!!! Test !!!\n");
+//                mg_printf_http_chunk(nc, "%s", "Test<br>");
+//                mg_send_http_chunk(nc, "", 0); // Tell the client we're finished
+                //mg_printf(nc, "%s", "<html>Test<br></html>");
+                mg_connect_http(nc->mgr, mg_ev_handler, "http://www.google.com", NULL,
+                        NULL);
+                nc->flags |= MG_F_CLOSE_IMMEDIATELY;
+            }
+            else {
+                mg_serve_http(nc, hm, kh->s_http_server_opts);
+                nc->flags |= MG_F_SEND_AND_CLOSE;
+            }
+            break;
+            
+        case MG_EV_CONNECT:
+            connect_status = * (int *) ev_data;
+            if (connect_status == 0) {
+              printf("Connected to %s, sending request...\n", "");
+              mg_printf(nc, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n",
+                        "", "");
+            } else {
+              printf("Error connecting to %s: %s\n",
+                     "", strerror(connect_status));
+//              s_exit_flag = 1;
+            }
+            break;
+        case MG_EV_HTTP_REPLY:
+            printf("Got reply:\n%.*s\n", (int) hm->body.len, hm->body.p);
             nc->flags |= MG_F_SEND_AND_CLOSE;
+//            s_exit_flag = 1;
             break;
             
         // New websocket connection. Tell everybody. 
