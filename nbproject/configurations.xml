@@ -116,6 +116,7 @@
         <in>tr-udp_stat.c</in>
       </df>
       <df name="tests">
+        <in>http-post.c</in>
         <in>teonet_tst.c</in>
       </df>
     </df>
@@ -1006,6 +1007,8 @@
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="tests/http-post.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
