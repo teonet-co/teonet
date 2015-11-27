@@ -28,7 +28,7 @@ int main(void) {
     /* First set the URL that is about to receive our POST. This URL can
        just as well be a https:// URL if that is what should receive the
        data. */ 
-    curl_easy_setopt(curl, CURLOPT_URL, "http://172.17.0.2:1234/api/auth/register-client");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://172.17.0.3:1234/api/auth/register-client");
     
     // Now specify the POST data 
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "type=http-post&project=teonet");
