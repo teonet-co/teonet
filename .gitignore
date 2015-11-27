@@ -111,3 +111,5 @@
 /examples/teol0cli_ns
 /user_data
 /tests/http-post
+/tests/post/post-callback
+/tests/post/http-post

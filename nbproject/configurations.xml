@@ -116,7 +116,6 @@
         <in>tr-udp_stat.c</in>
       </df>
       <df name="tests">
-        <in>http-post.c</in>
         <in>teonet_tst.c</in>
       </df>
     </df>
@@ -1008,7 +1007,9 @@
           </incDir>
         </cTool>
       </item>
-      <item path="tests/http-post.c" ex="false" tool="0" flavor2="0">
+      <item path="tests/post/http-post.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="tests/post/post-callback.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
