@@ -1007,10 +1007,6 @@
           </incDir>
         </cTool>
       </item>
-      <item path="tests/post/http-post.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="tests/post/post-callback.c" ex="false" tool="0" flavor2="0">
-      </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
