@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-
 #include "teo_web/teo_web.h"
+#include "teo_web/teo_web_conf.h"
 
 #define TWEB_VERSION "0.0.1"
 
@@ -30,6 +30,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
     
     static ksnHTTPClass *kh = NULL;
+    teoweb_config *tw_cfg = teowebConfigGet();
 
     // Switch Teonet events
     switch(event) {
@@ -38,7 +39,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
             
             // Start HTTP server
-            kh = ksnHTTPInit(ke, 8088, "/var/www");    
+            kh = ksnHTTPInit(ke, tw_cfg->http_port, tw_cfg->document_root);    
             break;
             
         // Calls before event manager stopped
@@ -114,8 +115,14 @@ int main(int argc, char** argv) {
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
     
+    // Read teoweb configuration
+    teowebConfigRead();
+    
     // Start teonet
     ksnetEvMgrRun(ke);
+    
+    // Free teoweb configuration
+    teowebConfigFree();
     
     return (EXIT_SUCCESS);
 }
