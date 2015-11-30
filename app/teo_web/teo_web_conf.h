@@ -33,7 +33,6 @@ extern "C" {
 
     
 teoweb_config *teowebConfigRead();
-teoweb_config *teowebConfigGet();
 void teowebConfigFree();
 
 

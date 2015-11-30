@@ -8,10 +8,22 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include "teo_web/teo_web_conf.h"
 
-teoweb_config tw_cfg;
+//teoweb_config tw_cfg;
+
+/**
+ * Set default configuration parameters
+ * 
+ * @param tw_cfg
+ */
+static void set_defaults(teoweb_config *tw_cfg) {
+    
+    tw_cfg->http_port = 8088;
+    tw_cfg->document_root = "/var/www";               
+}
 
 /**
  * Read teoweb configuration file
@@ -20,27 +32,18 @@ teoweb_config tw_cfg;
  */
 teoweb_config *teowebConfigRead() {
     
-    memset(&tw_cfg, 0, sizeof(tw_cfg));
+    teoweb_config *tw_cfg = malloc(sizeof(teoweb_config));
+    memset(tw_cfg, 0, sizeof(teoweb_config));
     
-    tw_cfg.http_port = 8088;
-    tw_cfg.document_root = "/var/www";
+    set_defaults(tw_cfg);
             
-    return &tw_cfg;
-}
-
-/**
- * Get teoweb configuration
- * 
- * @return Pointer to teoweb_config
- */
-teoweb_config *teowebConfigGet() {
-
-    return &tw_cfg;
+    return tw_cfg;
 }
 
 /**
  * Free teoweb configuration
  */
-void teowebConfigFree() {
+void teowebConfigFree(teoweb_config *tw_cfg) {
     
+    free(tw_cfg);
 }
