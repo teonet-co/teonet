@@ -30,7 +30,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
     
     static ksnHTTPClass *kh = NULL;
-    teoweb_config *tw_cfg = teowebConfigGet();
+    teoweb_config *tw_cfg = ke->user_data;
 
     // Switch Teonet events
     switch(event) {
@@ -112,17 +112,18 @@ int main(int argc, char** argv) {
     
     printf("Teoweb ver " TWEB_VERSION ", based on teonet ver " VERSION "\n");
     
-    // Initialize teonet event manager and Read configuration
-    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
-    
     // Read teoweb configuration
-    teowebConfigRead();
+    teoweb_config *tw_cfg = teowebConfigRead();
     
+    // Initialize teonet event manager and Read configuration
+    // ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
+    ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, tw_cfg);
+        
     // Start teonet
     ksnetEvMgrRun(ke);
     
     // Free teoweb configuration
-    teowebConfigFree();
+    teowebConfigFree(tw_cfg);
     
     return (EXIT_SUCCESS);
 }
