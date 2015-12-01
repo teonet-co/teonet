@@ -11,10 +11,16 @@
             <in>mongoose.c</in>
           </df>
         </df>
-        <df name="teo_web">
-          <in>teo_web.c</in>
-          <in>teo_web_conf.c</in>
-          <in>teo_ws.c</in>
+        <df name="modules">
+          <df name="teo_auth">
+            <in>teo_auth.c</in>
+            <in>teo_auth.h</in>
+          </df>
+          <df name="teo_web">
+            <in>teo_web.c</in>
+            <in>teo_web_conf.c</in>
+            <in>teo_ws.c</in>
+          </df>
         </df>
         <in>teodb.c</in>
         <in>teovpn.c</in>
@@ -181,15 +187,19 @@
         <cTool flags="2">
         </cTool>
       </item>
-      <item path="app/teo_web/teo_web.c" ex="false" tool="0" flavor2="2">
+      <item path="app/modules/teo_auth/teo_auth.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="app/modules/teo_auth/teo_auth.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="app/modules/teo_web/teo_web.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
-      <item path="app/teo_web/teo_web_conf.c" ex="false" tool="0" flavor2="2">
+      <item path="app/modules/teo_web/teo_web_conf.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
-      <item path="app/teo_web/teo_ws.c" ex="false" tool="0" flavor2="2">
+      <item path="app/modules/teo_web/teo_ws.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
