@@ -35,7 +35,7 @@ bin_PROGRAMS = teovpn teodb teoweb
 
 teovpn_SOURCES = teovpn.c
 teodb_SOURCES = teodb.c
-teoweb_SOURCES = teoweb.c teo_web/teo_web_conf.c teo_web/teo_web.c teo_web/teo_ws.c embedded/mongoose/mongoose.c embedded/jsmn/jsmn.c
+teoweb_SOURCES = teoweb.c modules/teo_web/teo_web_conf.c modules/teo_web/teo_web.c modules/teo_web/teo_ws.c embedded/mongoose/mongoose.c embedded/jsmn/jsmn.c
 
 teoweb_LDFLAGS = $(AM_LDFLAGS) -pthread -lev 
 
