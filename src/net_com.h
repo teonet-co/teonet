@@ -39,6 +39,8 @@ enum ksnCMD {
     CMD_RESEND,             ///< #74 Resend command
     CMD_RECONNECT,          ///< #75 Reconnect command
     CMD_RECONNECT_ANSWER,   ///< #76 Reconnect answer command
+    CMD_AUTH,               ///< #77 Auth command
+    CMD_AUTH_ANSWER,        ///< #78 Auth answer command
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use

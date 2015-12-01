@@ -441,7 +441,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     };
     int i, cmd = 0, keys = 0;
     char *to = NULL, *cmd_data = NULL;
-    for (i = 1; i < r; i++) {
+    for (i = 1; i < r && keys != ALL_KEYS; i++) {
         
         if(jsoneq(data, &t[i], "cmd") == 0) {
             
@@ -527,14 +527,28 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
             processed = 1;
     }
     
+    // \todo 
+    // Authentication command CMD_L_AUTH
+    // { "cmd": 77, "to": "peer_name", "data": { "method": "POST", "url": "register-client", "cda": "data", "headers": "headers" } }
+    else if(cmd == CMD_L_AUTH && cmd_data[0] != 0) {
+        
+        #ifdef DEBUG_KSNET
+        ksnet_printf(conf, DEBUG,
+            MODULE_LABEL
+            "Authentication command to \"%s\" peer, with data \"%s\" was received\n", 
+            ANSI_YELLOW, ANSI_NONE, to, cmd_data);
+        #endif
+        processed = 1;
+    }
+    
     // Send other commands to L0 server
     else if(to[0] != 0) {
         
         #ifdef DEBUG_KSNET
         ksnet_printf(conf, DEBUG,
-                MODULE_LABEL
-                "Resend command %d to \"%s\" peer with message \"%s\" received\n", 
-                ANSI_YELLOW, ANSI_NONE, cmd, to, cmd_data);
+            MODULE_LABEL
+            "Resend command %d to \"%s\" peer with message \"%s\" received\n", 
+            ANSI_YELLOW, ANSI_NONE, cmd, to, cmd_data);
         #endif
 
         // Send echo command

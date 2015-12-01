@@ -14,7 +14,6 @@
         <df name="modules">
           <df name="teo_auth">
             <in>teo_auth.c</in>
-            <in>teo_auth.h</in>
           </df>
           <df name="teo_web">
             <in>teo_web.c</in>
@@ -179,7 +178,7 @@
           </cTool>
         </makeTool>
       </makefileType>
-      <item path="app/embedded/jsmn/jsmn.c" ex="false" tool="0" flavor2="0">
+      <item path="app/embedded/jsmn/jsmn.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
@@ -188,8 +187,8 @@
         </cTool>
       </item>
       <item path="app/modules/teo_auth/teo_auth.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="app/modules/teo_auth/teo_auth.h" ex="false" tool="3" flavor2="0">
+        <cTool flags="2">
+        </cTool>
       </item>
       <item path="app/modules/teo_web/teo_web.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
@@ -399,6 +398,12 @@
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -406,6 +411,12 @@
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
