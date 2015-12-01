@@ -17,14 +17,9 @@ typedef struct teoweb_config {
 
     long http_port;
     char document_root[KSN_BUFFER_SM_SIZE];
+    char l0_server_name[KSN_BUFFER_SM_SIZE];
+    long l0_server_port;
     
-//    char *name;
-//    char *web_site;
-//    char *server;
-//    char *database;
-//    char *login;
-//    char *password;
-
 } teoweb_config;
 
 #ifdef	__cplusplus

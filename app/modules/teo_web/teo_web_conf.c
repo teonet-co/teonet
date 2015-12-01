@@ -23,16 +23,18 @@
 /**
  * Set default configuration parameters
  * 
- * @param tw_cfg
+ * @param tw_cfg Pointer to teoweb_config
  */
 static void teoweb_set_defaults(teoweb_config *tw_cfg) {
     
     tw_cfg->http_port = 8088;
-    strncpy(tw_cfg->document_root, "/var/www", KSN_BUFFER_SM_SIZE);               
+    strncpy(tw_cfg->document_root, "/var/www", KSN_BUFFER_SM_SIZE); 
+    strncpy(tw_cfg->l0_server_name, "gt1.kekalan.net", KSN_BUFFER_SM_SIZE);
+    tw_cfg->l0_server_port = 9010;
 }
 
 /**
- * Read configuration file
+ * Read configuration fcfg_freeile
  * 
  * @param conf Pointer to teoweb_config
  * @param network Network name or NULL
@@ -41,19 +43,24 @@ static void teoweb_set_defaults(teoweb_config *tw_cfg) {
 void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) {
     
     #define CONF_NAME "/teoweb.conf"
+
     // Save values back to structure
     #define save_conf_back() \
-        strncpy(conf->document_root, document_root, KSN_BUFFER_SM_SIZE)
+        strncpy(conf->document_root, document_root, KSN_BUFFER_SM_SIZE), \
+        strncpy(conf->l0_server_name, l0_server_name, KSN_BUFFER_SM_SIZE)
 
     // Load string values
     char *document_root = strdup(conf->document_root);
+    char *l0_server_name = strdup(conf->l0_server_name);
     
     // Config data define
     cfg_opt_t opts[] = {
 
         CFG_SIMPLE_STR("document_root", &document_root),
         CFG_SIMPLE_INT("http_port", &conf->http_port),
-        
+        CFG_SIMPLE_STR("l0_server_name", &l0_server_name),
+        CFG_SIMPLE_INT("l0_server_port", &conf->l0_server_port),
+
         CFG_END()
     };
     
@@ -62,6 +69,7 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
     cfg_t *cfg;
     cfg = cfg_init(opts, 0);
     char buf[KSN_BUFFER_SIZE];
+    //
     // Open and parse configure file in system and then in data directory
     for(i = 0; i < 2; i++) {
         

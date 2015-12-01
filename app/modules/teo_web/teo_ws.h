@@ -30,8 +30,8 @@ struct teoWSClass {
     void (*destroy)(teoWSClass *kws); 
     
     /**
-     * Connect WS client with L0 server, add it to connected map and create READ 
-     * watcher
+     * Connect WS client with L0 server and add it to connected map and create 
+     * READ watcher
      * 
      * @param kws Pointer to teoWSClass
      * @param nc_p Pointer to websocket connector

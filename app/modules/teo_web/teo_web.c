@@ -236,23 +236,24 @@ static void* http_thread(void *kh) {
  * 
  * @return 
  */
-ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, int port, char * document_root) {
+ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, teoweb_config *tw_cfg) { 
     
     ksnHTTPClass *kh = malloc(sizeof(ksnHTTPClass));
     kh->ke = ke;
-    
+    kh->conf = tw_cfg;
+   
     kh->stop = 0;
     kh->stopped = 0;
     char buffer[KSN_BUFFER_SIZE];
-    snprintf(buffer, KSN_BUFFER_SIZE, "%d", port);
+    snprintf(buffer, KSN_BUFFER_SIZE, "%d", (int)tw_cfg->http_port);
     kh->s_http_port = strdup(buffer); 
     memset(&kh->s_http_server_opts, 0, sizeof(kh->s_http_server_opts));
-    kh->s_http_server_opts.document_root = document_root;  // Serve current directory
+    kh->s_http_server_opts.document_root = tw_cfg->document_root;  // Serve current directory
     kh->s_http_server_opts.enable_directory_listing = "yes";
     kh->s_http_server_opts.index_files = "index.html";
     
     kh->kws = teoWSInit(kh); // Initialize websocket class
-    
+
     // Start mongoose thread
     int err = pthread_create(&kh->tid, NULL, &http_thread, kh);
     if (err != 0) printf("Can't create mongoose thread :[%s]\n", strerror(err));
