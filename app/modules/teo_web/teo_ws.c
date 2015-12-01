@@ -33,7 +33,7 @@ void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len);
 /**
  * Pointer to ksnet_cfg structure
  */
-#define conf &((ksnetEvMgrClass*)kws->kh->ke)->ksn_cfg
+#define ksn_conf &((ksnetEvMgrClass*)kws->kh->ke)->ksn_cfg
 /**
  * This module label
  */
@@ -78,7 +78,7 @@ static void teoWSDestroy(teoWSClass *kws) {
     if(kws != NULL) {
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG,
                 MODULE_LABEL
                 "Destroy\n", 
                 ANSI_YELLOW, ANSI_NONE);
@@ -126,7 +126,7 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             teoLNullCPacket *cp = (teoLNullCPacket*) con->read_buffer;
             char *data = cp->peer_name + cp->peer_name_length;
 //            #ifdef DEBUG_KSNET
-//            ksnet_printf(conf, DEBUG,
+//            ksnet_printf(ksn_conf, DEBUG,
 //                   MODULE_LABEL
             printf("Receive %d bytes: %d bytes data from L0 server, "
                    "from peer %s, cmd = %d, data: %.*s\n", 
@@ -217,8 +217,8 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
     int rv = -1;
     
     // Connect to L0 server
-    // \todo get L0 server name and port from parameters
-    teoLNullConnectData *con = teoLNullConnect("gt1.kekalan.net", 9010);
+    teoLNullConnectData *con = teoLNullConnect(server, port);
+    
     if(con != NULL && con->fd > 0) {
         
         ssize_t snd = teoLNullLogin(con, login);
@@ -244,7 +244,7 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
                             &td->w);                
 
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(conf, DEBUG,
+                    ksnet_printf(ksn_conf, DEBUG,
                             MODULE_LABEL
                             "WS client %p has connected to L0 server ...\n", 
                             ANSI_YELLOW, ANSI_NONE, nc_p);
@@ -296,7 +296,7 @@ static int teoWSremove(teoWSClass *kws, void *nc_p) {
         pblMapRemoveFree(kws->map, (void*)&nc_p, sizeof(nc_p), &valueLength);
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG,
                 MODULE_LABEL
                 "WS client %p has disconnected from L0 server ...\n", 
                 ANSI_YELLOW, ANSI_NONE, nc_p);
@@ -418,6 +418,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     int r = jsmn_parse(&p, data, data_length, t, sizeof(t)/sizeof(t[0]));    
     if(r < 0) {
         
+        // This is not JSON string - skip processing
         // printf("Failed to parse JSON: %d\n", r);
         return 0;
     }
@@ -425,14 +426,17 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     // Assume the top-level element is an object 
     if (r < 1 || t[0].type != JSMN_OBJECT) {
         
+        // This is not JSON object - skip processing
         // printf("Object expected\n");
         return 0;
     }
     
     // Teonet L0 websocket connector json command string format:
-    // { "cmd": 1, "to": "peer_name", "data": "Command data" }
     //
-    // Loop over all keys of the root object
+    // { "cmd": 1, "to": "peer_name", "data": "Command data string" }
+    // or
+    // { "cmd": 1, "to": "peer_name", "data": { Command data object } }
+    //
     enum KEYS {
         CMD = 0x1,
         TO = 0x2,
@@ -441,6 +445,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     };
     int i, cmd = 0, keys = 0;
     char *to = NULL, *cmd_data = NULL;
+    // Loop over json keys of the root object and find needle: cmd, to, cmd_data
     for (i = 1; i < r && keys != ALL_KEYS; i++) {
         
         if(jsoneq(data, &t[i], "cmd") == 0) {
@@ -482,7 +487,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     if(cmd == 0 && to[0] == 0 && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG,
                 MODULE_LABEL 
                 "Login from \"%s\" received\n", 
                 ANSI_YELLOW, ANSI_NONE, cmd_data);
@@ -490,8 +495,9 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
 
         // Connect to L0 server
         // \todo Send L0 server name and port in Login command or use WS host L0 server
-        if(kws->add(kws, nc_p, "gt1.kekalan.net", 9010, cmd_data) != NULL)        
-            processed = 1;
+        if(kws->add(kws, nc_p, kws->kh->conf->l0_server_name, 
+           kws->kh->conf->l0_server_port, cmd_data) != NULL)        
+                processed = 1;
     }
     
     // Check for L0 websocket Peers command
@@ -499,7 +505,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_PEERS && to[0] != 0 && cmd_data[0] == 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG,
                 MODULE_LABEL
                 "Peers command to \"%s\" peer received\n", 
                 ANSI_YELLOW, ANSI_NONE, to);
@@ -516,7 +522,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_ECHO && to[0] != 0 && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG,
                 MODULE_LABEL
                 "Echo command to \"%s\" peer with message \"%s\" received\n", 
                 ANSI_YELLOW, ANSI_NONE, to, cmd_data);
@@ -527,17 +533,18 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
             processed = 1;
     }
     
-    // \todo 
-    // Authentication command CMD_L_AUTH
+    // \todo Authentication command CMD_L_AUTH
     // { "cmd": 77, "to": "peer_name", "data": { "method": "POST", "url": "register-client", "cda": "data", "headers": "headers" } }
     else if(cmd == CMD_L_AUTH && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG,
             MODULE_LABEL
             "Authentication command to \"%s\" peer, with data \"%s\" was received\n", 
             ANSI_YELLOW, ANSI_NONE, to, cmd_data);
         #endif
+
+        // Process Authentication command in Authentication module
         processed = 1;
     }
     
@@ -545,13 +552,13 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(to[0] != 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG,
             MODULE_LABEL
             "Resend command %d to \"%s\" peer with message \"%s\" received\n", 
             ANSI_YELLOW, ANSI_NONE, cmd, to, cmd_data);
         #endif
 
-        // Send echo command
+        // Send other command
         if(kws->send(kws, nc_p, cmd, to, cmd_data, strlen(cmd_data) + 1) != -1)
             processed = 1;
     }

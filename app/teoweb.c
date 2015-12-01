@@ -47,7 +47,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
             
             // Start HTTP server
-            kh = ksnHTTPInit(ke, tw_cfg->http_port, tw_cfg->document_root);    
+            kh = ksnHTTPInit(ke, tw_cfg); 
             break;
             
         // Calls before event manager stopped
@@ -129,13 +129,13 @@ int main(int argc, char** argv) {
     // Initialize teonet event manager and Read configuration
     // ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, &tm);
-    
+
     // Read teoweb configuration
     teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
-        
+
     // Initialize Teonet authenticate module
     tm.ta = teoAuthInit();
-    
+
     
     // Start teonet
     ksnetEvMgrRun(ke);
