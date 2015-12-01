@@ -14,8 +14,16 @@
 
 #include "modules/teo_web/teo_web.h"
 #include "modules/teo_web/teo_web_conf.h"
+#include "modules/teo_auth/teo_auth.h"
 
 #define TWEB_VERSION "0.0.1"
+
+typedef struct teowebModules {
+    
+    teoweb_config *tw_cfg;
+    teoAuthClass *ta;
+    
+} teowebModules;
 
 /**
  * Teonet event handler
@@ -30,7 +38,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
     
     static ksnHTTPClass *kh = NULL;
-    teoweb_config *tw_cfg = ke->user_data;
+    teoweb_config *tw_cfg = ((teowebModules *)ke->user_data)->tw_cfg;
 
     // Switch Teonet events
     switch(event) {
@@ -101,6 +109,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
     }
 }
 
+
 /**
  * Main application function
  *
@@ -112,21 +121,31 @@ int main(int argc, char** argv) {
     
     printf("Teoweb ver " TWEB_VERSION ", based on teonet ver " VERSION "\n");
     
+    teowebModules tm;
+    
     // Initialize teoweb configuration module
-    teoweb_config *tw_cfg = teowebConfigInit();
+    tm.tw_cfg = teowebConfigInit();
     
     // Initialize teonet event manager and Read configuration
     // ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
-    ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, tw_cfg);
+    ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, &tm);
     
     // Read teoweb configuration
-    teowebConfigRead(tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
+    teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
         
+    // Initialize Teonet authenticate module
+    tm.ta = teoAuthInit();
+    
+    
     // Start teonet
     ksnetEvMgrRun(ke);
     
+    
+    // Destroy Teonet authenticate module
+    teoAuthDestroy(tm.ta);
+    
     // Free teoweb configuration
-    teowebConfigFree(tw_cfg);
+    teowebConfigFree(tm.tw_cfg);
     
     return (EXIT_SUCCESS);
 }
