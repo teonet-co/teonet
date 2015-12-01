@@ -16,7 +16,7 @@
 typedef struct teoweb_config {
 
     long http_port;
-    char *document_root;
+    char document_root[KSN_BUFFER_SM_SIZE];
     
 //    char *name;
 //    char *web_site;
@@ -32,7 +32,8 @@ extern "C" {
 #endif
 
     
-teoweb_config *teowebConfigRead();
+teoweb_config *teowebConfigInit();
+void teowebConfigRead(teoweb_config *conf, const char *network, int port_param);
 void teowebConfigFree();
 
 

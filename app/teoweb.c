@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#include "teo_web/teo_web.h"
-#include "teo_web/teo_web_conf.h"
+#include "modules/teo_web/teo_web.h"
+#include "modules/teo_web/teo_web_conf.h"
 
 #define TWEB_VERSION "0.0.1"
 
@@ -112,12 +112,15 @@ int main(int argc, char** argv) {
     
     printf("Teoweb ver " TWEB_VERSION ", based on teonet ver " VERSION "\n");
     
-    // Read teoweb configuration
-    teoweb_config *tw_cfg = teowebConfigRead();
+    // Initialize teoweb configuration module
+    teoweb_config *tw_cfg = teowebConfigInit();
     
     // Initialize teonet event manager and Read configuration
     // ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, tw_cfg);
+    
+    // Read teoweb configuration
+    teowebConfigRead(tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
         
     // Start teonet
     ksnetEvMgrRun(ke);
