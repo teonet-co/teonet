@@ -12,6 +12,9 @@
           </df>
         </df>
         <df name="modules">
+          <df name="teo_auth">
+            <in>teo_auth.c</in>
+          </df>
           <df name="teo_web">
             <in>teo_web.c</in>
             <in>teo_web_conf.c</in>
@@ -125,6 +128,8 @@
         <in>teonet_tst.c</in>
       </df>
     </df>
+    <df root="." name="1">
+    </df>
     <logicalFolder name="test_teonet"
                    displayName="Teonet cUnit test"
                    projectFiles="true"
@@ -143,9 +148,16 @@
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>configure.ac</itemPath>
     </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>configure.ac</itemPath>
+    </logicalFolder>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
   <sourceRootList>
+    <Elem>.</Elem>
     <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
@@ -185,19 +197,6 @@
       </item>
       <item path="app/modules/teo_auth/teo_auth.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
-          <incDir>
-            <pElem>app</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </item>
       <item path="app/modules/teo_web/teo_web.c" ex="false" tool="0" flavor2="2">
