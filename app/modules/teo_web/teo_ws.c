@@ -533,7 +533,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
             processed = 1;
     }
     
-    // \todo Authentication command CMD_L_AUTH
+    // Authentication command CMD_L_AUTH
     // { "cmd": 77, "to": "peer_name", "data": { "method": "POST", "url": "register-client", "cda": "data", "headers": "headers" } }
     else if(cmd == CMD_L_AUTH && cmd_data[0] != 0) {
         
@@ -544,7 +544,14 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
             ANSI_YELLOW, ANSI_NONE, to, cmd_data);
         #endif
 
-        // Process Authentication command in Authentication module
+        // \todo Process Authentication command in Authentication module
+        
+        // Send tests answer command
+        const char *data_json = "{ \"cmd\": 78, \"from\": \"peer_name\", \"data\": \"ok\" }";
+        const size_t data_json_len = strlen(data_json);
+        mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data_json, 
+                    data_json_len);
+        
         processed = 1;
     }
     
