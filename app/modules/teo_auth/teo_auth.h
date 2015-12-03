@@ -10,9 +10,30 @@
 #ifndef TEO_AUTH_H
 #define	TEO_AUTH_H
 
+#include <stdio.h>
+#include <pbl.h>
+
+/**
+ * Teonet authentication module class structure
+ */
 typedef struct teoAuthClass {
     
+    PblList* list; ///< Commands list
+    pthread_mutex_t async_mutex; ///< Command list mutex    
+    
 } teoAuthClass;
+
+/**
+ * Teonet authentication request list data structure
+ */
+typedef struct teoAuthData {
+    
+    const char *method;
+    const char *url;
+    const char *data; 
+    const char *headers;
+    
+} teoAuthData;
 
 typedef void (*command_callback)(void *error, void *success);
 
