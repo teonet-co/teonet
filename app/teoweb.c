@@ -21,7 +21,6 @@
 typedef struct teowebModules {
     
     teoweb_config *tw_cfg;
-    teoAuthClass *ta;
     
 } teowebModules;
 
@@ -133,16 +132,16 @@ int main(int argc, char** argv) {
     // Read teoweb configuration
     teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
 
-    // Initialize Teonet authenticate module
-    tm.ta = teoAuthInit();
+//    // Initialize Teonet authenticate module
+//    tm.ta = teoAuthInit();    
 
     
     // Start teonet
     ksnetEvMgrRun(ke);
     
     
-    // Destroy Teonet authenticate module
-    teoAuthDestroy(tm.ta);
+//    // Destroy Teonet authenticate module
+//    teoAuthDestroy(tm.ta);
     
     // Free teoweb configuration
     teowebConfigFree(tm.tw_cfg);

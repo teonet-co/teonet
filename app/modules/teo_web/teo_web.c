@@ -241,6 +241,7 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, teoweb_config *tw_cfg) {
     ksnHTTPClass *kh = malloc(sizeof(ksnHTTPClass));
     kh->ke = ke;
     kh->conf = tw_cfg;
+    kh->ta = teoAuthInit(); // Initialize authentication class
    
     kh->stop = 0;
     kh->stopped = 0;
@@ -268,10 +269,13 @@ ksnHTTPClass* ksnHTTPInit(ksnetEvMgrClass *ke, teoweb_config *tw_cfg) {
  * @param kh Pointer to ksnHTTPClass
  */
 void ksnHTTPDestroy(ksnHTTPClass *kh) {
-    
+        
     kh->stop = 1;
     while(!kh->stopped) usleep(100000);
     tws->destroy(tws);
     free(kh->s_http_port);
+    
+    teoAuthDestroy(kh->ta);
+    
     free(kh);
 }

@@ -10,9 +10,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "teo_ws.h"
 #include "embedded/jsmn/jsmn.h"
 #include "utils/rlutil.h"
+
+#include "../teo_auth/teo_auth.h"
+#include "teo_ws.h"
 
 // Local functions
 static void teoWSDestroy(teoWSClass *kws);
@@ -25,6 +27,8 @@ static ssize_t teoWSLNullsend(teoWSClass *kws, void *nc_p, int cmd,
 static int teoWSprocessMsg(teoWSClass *kws, void *nc, void *data, size_t data_length);
 //
 void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len);
+
+static void send_answer(void *nc_p, char* err, char *result);
 
 /**
  * Pointer to mg_connection structure
@@ -534,7 +538,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     }
     
     // Authentication command CMD_L_AUTH
-    // { "cmd": 77, "to": "peer_name", "data": { "method": "POST", "url": "register-client", "cda": "data", "headers": "headers" } }
+    // { "cmd": 77, "to": "peer_name", "data": { "method": "POST", "url": "register-client", "data": "data", "headers": "headers" } }
     else if(cmd == CMD_L_AUTH && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
@@ -545,12 +549,59 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
         #endif
 
         // \todo Process Authentication command in Authentication module
+        jsmn_init(&p);
+        int r = jsmn_parse(&p, cmd_data, strlen(cmd_data), t, 
+                sizeof(t)/sizeof(t[0]));    
         
-        // Send tests answer command
-        const char *data_json = "{ \"cmd\": 78, \"from\": \"peer_name\", \"data\": \"ok\" }";
-        const size_t data_json_len = strlen(data_json);
-        mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data_json, 
-                    data_json_len);
+        if(!(r < 1)) { //type = t[0].type;
+            enum KEYS {
+                METHOD = 0x01,
+                URL = 0x02,
+                DATA = 0x04,
+                HEADERS = 0x08,
+                ALL_KEYS = METHOD | URL | DATA | HEADERS
+            };
+            int i, keys = 0;
+            char *method = NULL, *url = NULL, *data = NULL, *headers = NULL;
+            for (i = 1; i < r && keys != ALL_KEYS; i++) {
+        
+                if(jsoneq(cmd_data, &t[i], "method") == 0) {
+
+                    method = strndup((char*)cmd_data + t[i+1].start, 
+                            t[i+1].end-t[i+1].start);
+                    keys |= METHOD;
+                    i++;
+
+                } else if(jsoneq(cmd_data, &t[i], "url") == 0) {
+
+                    url = strndup((char*)cmd_data + t[i+1].start, 
+                            t[i+1].end-t[i+1].start);
+                    keys |= URL;
+                    i++;
+
+                } else if(!(keys & DATA) && jsoneq(cmd_data, &t[i], "data") == 0) {
+
+                    data = strndup((char*)cmd_data + t[i+1].start, 
+                            t[i+1].end-t[i+1].start);
+                    keys |= DATA;
+                    i++;
+                    
+                } else if(jsoneq(cmd_data, &t[i], "headers") == 0) {
+
+                    headers = strndup((char*)cmd_data + t[i+1].start, 
+                            t[i+1].end-t[i+1].start);
+                    keys |= HEADERS;
+                    i++;
+                }
+            }
+            
+            // Process and execute authenticate command
+            if(ALL_KEYS) {
+                
+                teoAuthProcessCommand(kws->kh->ta, method, url, data, headers,
+                        nc_p, send_answer);
+            }
+        }
         
         processed = 1;
     }
@@ -574,4 +625,14 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     free(cmd_data);
     
     return processed;
+}
+
+static void send_answer(void *nc_p, char* err, char *result) {
+        
+    // Send tests answer command
+    const char *data_json = "{ \"cmd\": 78, \"from\": \"\", \"data\": %s }";
+    size_t data_json_len = strlen(data_json)  + strlen(result);
+    char data[data_json_len + 1];
+    data_json_len = snprintf(data, data_json_len, data_json, result);
+    mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data, data_json_len);    
 }

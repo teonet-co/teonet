@@ -11,6 +11,8 @@
 #define	TEO_AUTH_H
 
 #include <stdio.h>
+#include <pthread.h>
+
 #include <pbl.h>
 
 /**
@@ -20,22 +22,34 @@ typedef struct teoAuthClass {
     
     PblList* list; ///< Commands list
     pthread_mutex_t async_mutex; ///< Command list mutex    
+    pthread_t tid; ///< Authentication module thread id
+    pthread_mutex_t cv_mutex; ///< Command list condition variables mutex
+    pthread_cond_t cv_threshold; ///< Command list condition variable    
+    
+    int stop; ///< Stop Authentication module thread server flag
+    int stopped; ///< Authentication module thread is stopped
+    int running; ///< Authentication module thread running state: 1 - running; 0 - waiting
     
 } teoAuthClass;
+
+//typedef void (*command_callback)(void *error, void *success);
+typedef void (*command_callback)(void *nc_p, char* err, char *result);
 
 /**
  * Teonet authentication request list data structure
  */
 typedef struct teoAuthData {
     
-    const char *method;
-    const char *url;
-    const char *data; 
-    const char *headers;
+    char *method;
+    char *url;
+    char *data; 
+    char *headers;
+    
+    void *nc_p;
+    command_callback callback;
     
 } teoAuthData;
 
-typedef void (*command_callback)(void *error, void *success);
 
 #ifdef	__cplusplus
 extern "C" {
@@ -43,6 +57,10 @@ extern "C" {
 
 teoAuthClass *teoAuthInit();
 void teoAuthDestroy(teoAuthClass *ta);
+
+int teoAuthProcessCommand(teoAuthClass *ta, const char *method, const char *url, 
+        const char *data, const char *headers, void *nc_p, 
+        command_callback callback);
 
 #ifdef	__cplusplus
 }
