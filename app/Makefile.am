@@ -40,7 +40,7 @@ teoweb_SOURCES = teoweb.c \
 		 modules/teo_web/teo_web.c modules/teo_web/teo_ws.c \
 		 embedded/mongoose/mongoose.c embedded/jsmn/jsmn.c
 
-teoweb_LDFLAGS = $(AM_LDFLAGS) -pthread -lev -lconfuse
+teoweb_LDFLAGS = $(AM_LDFLAGS) -pthread -lev -lconfuse -lcurl
 
 EXTRA_DIST = modules/teo_web/teo_ws.h \
 	     modules/teo_web/teo_web.h \
