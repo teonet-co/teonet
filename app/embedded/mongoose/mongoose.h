@@ -26,6 +26,10 @@
 #ifdef MG_LOCALS
 #include <mg_locals.h>
 #endif
+
+#if defined(MG_ENABLE_DEBUG) && !defined(CS_ENABLE_DEBUG)
+#define CS_ENABLE_DEBUG
+#endif
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -101,7 +105,7 @@
 
 #include <assert.h>
 #include <ctype.h>
-#include <errno.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -135,7 +139,7 @@
 #define __func__ __FILE__ ":" STR(__LINE__)
 #endif
 #define snprintf _snprintf
-#define fileno  _fileno
+#define fileno _fileno
 #define vsnprintf _vsnprintf
 #define sleep(x) Sleep((x) *1000)
 #define to64(x) _atoi64(x)
@@ -229,8 +233,11 @@ struct dirent *readdir(DIR *dir);
 #include <sys/select.h>
 #endif
 
-#ifndef _WIN32
+#ifndef LWIP_PROVIDE_ERRNO
 #include <errno.h>
+#endif
+
+#ifndef _WIN32
 #include <inttypes.h>
 #include <stdarg.h>
 
@@ -260,25 +267,54 @@ int64_t strtoll(const char *str, char **endptr, int base);
 #endif
 #endif /* !_WIN32 */
 
-#define __DBG(x)                \
-  do {                          \
-    printf("%-20s ", __func__); \
-    printf x;                   \
-    putchar('\n');              \
-    fflush(stdout);             \
-  } while (0)
-
-#ifdef MG_ENABLE_DEBUG
-#define DBG __DBG
-#else
-#define DBG(x)
-#endif
-
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 #endif
 
 #endif /* OSDEP_HEADER_INCLUDED */
+#ifndef _CS_DBG_H_
+#define _CS_DBG_H_
+
+enum cs_log_level {
+  LL_NONE = -1,
+  LL_ERROR = 0,
+  LL_WARN = 1,
+  LL_INFO = 2,
+  LL_DEBUG = 3,
+
+  _LL_MIN = -2,
+  _LL_MAX = 4,
+};
+
+#ifndef CS_NDEBUG
+
+extern enum cs_log_level s_cs_log_level;
+void cs_log_set_level(enum cs_log_level level);
+
+void cs_log_printf(const char *fmt, ...);
+
+#define LOG(l, x)                        \
+  if (s_cs_log_level >= l) {             \
+    fprintf(stderr, "%-20s ", __func__); \
+    cs_log_printf x;                     \
+  }
+
+#define DBG(x)                           \
+  if (s_cs_log_level >= LL_DEBUG) {      \
+    fprintf(stderr, "%-20s ", __func__); \
+    cs_log_printf x;                     \
+  }
+
+#else /* NDEBUG */
+
+#define cs_log_set_level(l)
+
+#define LOG(l, x)
+#define DBG(x)
+
+#endif
+
+#endif /* _CS_DBG_H_ */
 /*
  * Copyright (c) 2015 Cesanta Software Limited
  * All rights reserved
@@ -485,9 +521,12 @@ extern "C" {
 int c_snprintf(char *buf, size_t buf_size, const char *format, ...);
 int c_vsnprintf(char *buf, size_t buf_size, const char *format, va_list ap);
 
-#if !(_XOPEN_SOURCE >= 700 || _POSIX_C_SOURCE >= 200809L) &&    \
-        !(__DARWIN_C_LEVEL >= 200809L) && !defined(RTOS_SDK) || \
+#if (!(defined(_XOPEN_SOURCE) && _XOPEN_SOURCE >= 700) &&           \
+     !(defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200809L) &&   \
+     !(defined(__DARWIN_C_LEVEL) && __DARWIN_C_LEVEL >= 200809L) && \
+     !defined(RTOS_SDK)) ||                                         \
     defined(_WIN32)
+#define _MG_PROVIDE_STRNLEN
 size_t strnlen(const char *s, size_t maxlen);
 #endif
 
@@ -707,10 +746,9 @@ struct mg_connection {
 
 /* Flags that are settable by user */
 #define MG_F_SEND_AND_CLOSE (1 << 10)      /* Push remaining data and close  */
-#define MG_F_DONT_SEND (1 << 11)           /* Do not send data to peer */
-#define MG_F_CLOSE_IMMEDIATELY (1 << 12)   /* Disconnect */
-#define MG_F_WEBSOCKET_NO_DEFRAG (1 << 13) /* Websocket specific */
-#define MG_F_DELETE_CHUNK (1 << 14)        /* HTTP specific */
+#define MG_F_CLOSE_IMMEDIATELY (1 << 11)   /* Disconnect */
+#define MG_F_WEBSOCKET_NO_DEFRAG (1 << 12) /* Websocket specific */
+#define MG_F_DELETE_CHUNK (1 << 13)        /* HTTP specific */
 
 #define MG_F_USER_1 (1 << 20) /* Flags left for application */
 #define MG_F_USER_2 (1 << 21)
@@ -1183,6 +1221,10 @@ FILE *mg_fopen(const char *path, const char *mode);
 int mg_open(const char *path, int flag, int mode);
 #endif /* MG_DISABLE_FILESYSTEM */
 
+#ifdef _WIN32
+#define MG_ENABLE_THREADS
+#endif
+
 #ifdef MG_ENABLE_THREADS
 /*
  * Start a new detached thread.
@@ -1314,7 +1356,11 @@ extern "C" {
 #endif
 
 #ifndef MG_MAX_PATH
+#ifdef PATH_MAX
+#define MG_MAX_PATH PATH_MAX
+#else
 #define MG_MAX_PATH 1024
+#endif
 #endif
 
 #ifndef MG_MAX_HTTP_SEND_IOBUF
@@ -1489,6 +1535,38 @@ void mg_send_http_chunk(struct mg_connection *nc, const char *buf, size_t len);
  * Functionality is similar to `mg_send_http_chunk()`.
  */
 void mg_printf_http_chunk(struct mg_connection *, const char *, ...);
+
+/*
+ * Send response status line.
+ * If `extra_headers` is not NULL, then `extra_headers` are also sent
+ * after the reponse line. `extra_headers` must NOT end end with new line.
+ * Example:
+ *
+ *      mg_send_response_line(nc, 200, "Access-Control-Allow-Origin: *");
+ *
+ * Will result in:
+ *
+ *      HTTP/1.1 200 OK\r\n
+ *      Access-Control-Allow-Origin: *\r\n
+ */
+void mg_send_response_line(struct mg_connection *c, int status_code,
+                           const char *extra_headers);
+
+/*
+ * Send response line and headers.
+ * This function sends response line with the `status_code`, and automatically
+ * sends one header: either "Content-Length", or "Transfer-Encoding".
+ * If `content_length` is negative, then "Transfer-Encoding: chunked" header
+ * is sent, otherwise, "Content-Length" header is sent.
+ *
+ * NOTE: If `Transfer-Encoding` is `chunked`, then message body must be sent
+ * using `mg_send_http_chunk()` or `mg_printf_http_chunk()` functions.
+ * Otherwise, `mg_send()` or `mg_printf()` must be used.
+ * Extra headers could be set through `extra_headers` - and note `extra_headers`
+ * must NOT be terminated by a new line.
+ */
+void mg_send_head(struct mg_connection *n, int status_code,
+                  int64_t content_length, const char *extra_headers);
 
 /*
  * Send printf-formatted HTTP chunk, escaping HTML tags.
@@ -1717,6 +1795,12 @@ struct mg_serve_http_opts {
    * ".txt=text/plain; charset=utf-8,.c=text/plain"
    */
   const char *custom_mime_types;
+
+  /*
+   * Extra HTTP headers to add to each server response.
+   * Example: to enable CORS, set this to "Access-Control-Allow-Origin: *".
+   */
+  const char *extra_headers;
 };
 
 /*
