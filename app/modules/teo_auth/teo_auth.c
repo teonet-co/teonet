@@ -217,7 +217,8 @@ static int teoAuthProccess(teoAuthClass *ta, const char *method,
     if(valid_url) {
     
         char full_url[KSN_BUFFER_SM_SIZE];
-        snprintf(full_url, KSN_BUFFER_SM_SIZE, 
+        // \todo Set authentication server URL from config
+        snprintf(full_url, KSN_BUFFER_SM_SIZE,
                 "http://localhost:1234/api/auth/%s", url);
         
         // Send authentication request        
@@ -380,9 +381,9 @@ static int send_request(char *url, void *data, size_t data_len, char *header,
     /* Now specify we want to POST data */ 
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     
-    struct curl_slist *chunk = curl_slist_append(NULL, header);
-    chunk = curl_slist_append(chunk, "Content-Type: application/json");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
+    struct curl_slist *headers = curl_slist_append(NULL, header);
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
  
     /* we want to use our own read function */ 
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
@@ -440,36 +441,41 @@ static int send_request(char *url, void *data, size_t data_len, char *header,
     /* Perform the request, res will get the return code */ 
     res = curl_easy_perform(curl);
     
-    // Check for errors
+    // Check for curl errors
     if(res != CURLE_OK) {
         fprintf(stderr, "curl_easy_perform() failed: %s\n",
               curl_easy_strerror(res));
     }
-    // Success result
+    
+    // Success curl result
     else {
         
+        // Get response info
         long http_code = 0;
-        char ct[KSN_BUFFER_SM_SIZE];
         curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
-        curl_easy_getinfo (curl, CURLINFO_CONTENT_TYPE, &ct);
         
-        printf("Post response: HTTP CODE: %d, CONTENT TYPE: '%s', \n%s\n", 
-                (int)http_code, ct, s.ptr);
-        
-        
-        
-        char *qq = http_code != 200 ? "\"":"";
-        char buf[128 + strlen(s.ptr)];
-        sprintf(buf, "{ \"status\": %d, \"data\": %s%s%s }", (int)http_code, qq, s.ptr, qq);
-        callback(nc_p, NULL, buf);
+        printf("Post response: HTTP CODE: %d\n%s\n", (int)http_code, s.ptr);
+          
+        // Create response json string
+        size_t http_code_s_len = 32;
+        char http_code_s[http_code_s_len];
+        char *buf_format = "{ \"status\": %d, \"data\": %s%s%s }";
+        size_t buf_len = strlen(buf_format) + http_code_s_len + strlen(s.ptr);
+        char buf[buf_len];
+        char *q = http_code != 200 ? "\"":"";
+        snprintf(http_code_s, http_code_s_len, "%d", (int)http_code);
+        snprintf(buf, buf_len, buf_format, (int)http_code, q, s.ptr, q);
+        // Call response callback and send response
+        callback(nc_p, http_code != 200 ? http_code_s : NULL, buf);
+        // Free HTTP server response string
         free(s.ptr);
     }    
     
-    // always cleanup 
+    // Always cleanup 
     curl_easy_cleanup(curl);
     
-    // free the custom headers
-    curl_slist_free_all(chunk);
+    // Free the custom headers
+    curl_slist_free_all(headers);
   }
   
   return 0;

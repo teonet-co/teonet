@@ -133,11 +133,10 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 //            ksnet_printf(ksn_conf, DEBUG,
 //                   MODULE_LABEL
             printf("Receive %d bytes: %d bytes data from L0 server, "
-                   "from peer %s, cmd = %d, data: %.*s\n", 
+                   "from peer %s, cmd = %d\n", 
 //                   ANSI_YELLOW, ANSI_NONE,  
                    (int)rc, cp->data_length, cp->peer_name, cp->cmd, 
-                   cp->data_length,
-                   data);
+                   cp->data_length);
 //            #endif
             
             // Define json type of data field
