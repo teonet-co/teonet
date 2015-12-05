@@ -35,8 +35,16 @@ bin_PROGRAMS = teovpn teodb teoweb
 
 teovpn_SOURCES = teovpn.c
 teodb_SOURCES = teodb.c
-teoweb_SOURCES = teoweb.c teo_web/teo_web.c teo_web/teo_ws.c embedded/mongoose/mongoose.c embedded/jsmn/jsmn.c
+teoweb_SOURCES = teoweb.c \
+		 modules/teo_auth/teo_auth.c modules/teo_web/teo_web_conf.c \
+		 modules/teo_web/teo_web.c modules/teo_web/teo_ws.c \
+		 embedded/mongoose/mongoose.c embedded/jsmn/jsmn.c
 
-teoweb_LDFLAGS = $(AM_LDFLAGS) -pthread -lev
+teoweb_LDFLAGS = $(AM_LDFLAGS) -pthread -lev -lconfuse -lcurl
 
-EXTRA_DIST = teo_web/teo_web.h embedded/mongoose/mongoose.h embedded/jsmn/jsmn.c
+EXTRA_DIST = modules/teo_web/teo_ws.h \
+	     modules/teo_web/teo_web.h \
+	     modules/teo_web/teo_web_conf.h \
+	     modules/teo_auth/teo_auth.h \
+	     embedded/mongoose/mongoose.h \
+	     embedded/jsmn/jsmn.h
