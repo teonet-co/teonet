@@ -9,7 +9,7 @@ zypper -y update
 zypper install -y autoconf intltool libtool glib2-devel doxygen make gcc patch
 
 # Project dependence
-zypper install -y openssl-devel libev-devel libuuid-devel
+zypper install -y openssl-devel libev-devel libuuid-devel libcurl-devel
 
 # Install Suse cUnit project dependence
 zypper install cunit-devel

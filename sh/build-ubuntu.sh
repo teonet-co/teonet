@@ -10,7 +10,7 @@ sudo apt-get -y upgrade
 sudo apt-get -y install autoconf intltool libtool libglib2.0-dev doxygen make gcc 
 
 # Project dependence
-sudo apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev
+sudo apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev libcurl4-openssl-dev
 
 # Libtuntap dependence
 sudo apt-get install -y cmake g++ unzip

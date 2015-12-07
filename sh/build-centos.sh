@@ -10,7 +10,7 @@ yum install -y autoconf intltool libtool glib2-devel doxygen make gcc
 
 # Project dependence
 yum install -y epel-release # Need to install libev-devel under Centos 6
-yum install -y openssl-devel libev-devel libuuid-devel
+yum install -y openssl-devel libev-devel libuuid-devel libcurl-devel
 
 # Install CentOS cUnit project dependence
 yum install -y wget tar bzip2
