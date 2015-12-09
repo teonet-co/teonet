@@ -106,6 +106,29 @@ static void teoWSDestroy(teoWSClass *kws) {
 }
 
 /**
+ * Calculate number of tags in json string
+ * 
+ * @param data
+ * @param data_length
+ * @return 
+ */
+static size_t get_num_of_tags(char *data, size_t data_length) {
+    
+    int i = 0;
+    size_t num_of_tags = 0;
+    
+    for(i = 0; i < data_length; i++) 
+        if(data[i] == ':') 
+            num_of_tags++;
+    
+    if(num_of_tags) num_of_tags++;
+    
+    printf("@@@ num_of_tags: %d\n", (int) num_of_tags);
+        
+    return num_of_tags * 2;
+}
+
+/**
  * Read data from L0 server
  * 
  * @param loop
@@ -135,22 +158,27 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             printf("Receive %d bytes: %d bytes data from L0 server, "
                    "from peer %s, cmd = %d\n", 
 //                   ANSI_YELLOW, ANSI_NONE,  
-                   (int)rc, cp->data_length, cp->peer_name, cp->cmd, 
-                   cp->data_length);
+                   (int)rc, cp->data_length, cp->peer_name, cp->cmd 
+                   /*,cp->data_length*/);
 //            #endif
             
             // Define json type of data field
             //
             char *beg, *end;
             jsmn_parser p;
-            jsmntok_t t[128]; 
             jsmntype_t type = JSMN_UNDEFINED;
-            
-            // Parse json
-            jsmn_init(&p);
-            int r = jsmn_parse(&p, data, cp->data_length, t, 
-                    sizeof(t)/sizeof(t[0]));    
-            if(!(r < 1)) type = t[0].type;
+            //jsmntok_t t[num_of_tags /*128*/]; 
+            int num_of_tags = 1048; //get_num_of_tags(data, cp->data_length);
+            if(num_of_tags) {
+                jsmntok_t *t = malloc(num_of_tags * sizeof(jsmntok_t));
+                //
+                // Parse json
+                jsmn_init(&p);
+                int r = jsmn_parse(&p, data, cp->data_length, t, 
+                        /*sizeof(t)/sizeof(t[0])*/ num_of_tags);    
+                if(!(r < 1)) type = t[0].type;
+                free(t);
+            }
             if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
             else beg = end = "\"";
             
