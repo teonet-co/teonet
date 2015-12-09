@@ -126,6 +126,7 @@
       </df>
       <df name="tests">
         <in>teonet_tst.c</in>
+        <in>tstson.json</in>
       </df>
     </df>
     <df root="." name="1">
@@ -1075,6 +1076,8 @@
       <item path="tests/test_tr-udp.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
+      </item>
+      <item path="tests/tstson.json" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>
