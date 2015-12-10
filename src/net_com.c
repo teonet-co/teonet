@@ -26,8 +26,9 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 /**
  * Initialize ksnet command class
@@ -141,6 +142,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         case CMD_RECONNECT_ANSWER:
             processed = cmd_reconnect_answer_cb(kco, rd);
             break;
+            
+        case CMD_L0_CLIENTS:
+            processed = cmd_l0_clients_cb(kco, rd);
+            break;
 
         default:
             break;
@@ -253,6 +258,33 @@ int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 }
 
 /**
+ * Process CMD_L0_CLIENTS command
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    // Get l0 clients data
+    teonet_client_data_ar *client_data = ksnLNullClientsList(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
+    size_t client_data_length = ksnLNullClientsListLength(client_data);
+    
+    // Send CMD_L0_CLIENTS_ANSWER to L0 user
+    if(rd->l0_f)
+        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                rd->addr, rd->port, rd->from, rd->from_len, CMD_L0_CLIENTS_ANSWER, 
+                client_data, client_data_length);
+    
+    // Send PEERS_ANSWER to peer
+    else
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_L0_CLIENTS_ANSWER,
+                client_data, client_data_length);
+    
+    return 1; // Command processed
+}
+
+/**
  * Process CMD_RESEND command
  * 
  * The RESEND command sent by sender to peer if sender does not connected to 
@@ -310,7 +342,7 @@ inline int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-inline int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+inline static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     return ((ksnReconnectClass*)kco->kr)->processAnswer(kco->kr, rd); // Process reconnect answer command
 }
@@ -587,7 +619,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
 
