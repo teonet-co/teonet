@@ -125,6 +125,8 @@ teoAuthClass *teoAuthInit() {
  * @param url
  * @param data
  * @param headers
+ * @param nc_p
+ * @param callback
  * 
  * @return 
  */

@@ -22,7 +22,7 @@
  * @param msg Message
  * @param len Message length
  */
-void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len) {
+static void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len) {
     
     struct mg_connection *c;
     char buf[500];
@@ -231,8 +231,7 @@ static void* http_thread(void *kh) {
  * Initialize teonet HTTP module
  * 
  * @param ke Pointer to ksnetEvMgrClass
- * @param port HTTP server port
- * @param document_root HTTP Document root folder
+ * @param tw_cfg Pointer to teoweb_config
  * 
  * @return 
  */
