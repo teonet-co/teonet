@@ -17,10 +17,10 @@
 #include "utils/rlutil.h"
 
 // Local functions
-int ksnLNullStart(ksnLNullClass *kl);
-void ksnLNullStop(ksnLNullClass *kl);
-void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
-ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
+static int ksnLNullStart(ksnLNullClass *kl);
+static void ksnLNullStop(ksnLNullClass *kl);
+static void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
+static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
         char *cname, size_t cname_length);
 
 // Other modules not declared functions
@@ -88,7 +88,7 @@ void ksnLNullDestroy(ksnLNullClass *kl) {
  * @param revents Events
  * 
  */
-void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
+static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     size_t data_len = KSN_BUFFER_DB_SIZE; // Buffer length
     ksnLNullClass *kl = w->data; // Pointer to ksnLNullClass
@@ -257,7 +257,7 @@ void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  * @param cname_length Length of the L0 client name
  * @return Pointer to ksnet_arp_data or NULL if to peer is absent
  */
-ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
+static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet, 
         char *cname, size_t cname_length) {
     
     size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + 
@@ -377,7 +377,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
  * @param fd TCP client connection file descriptor
  * 
  */
-void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
+static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
 
     // Set TCP_NODELAY option
     set_tcp_nodelay(fd);
@@ -427,7 +427,7 @@ void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
  * @param remove_f If true than remove disconnected record from map
  * 
  */
-void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
+static void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
 
     size_t valueLength;
 
@@ -483,7 +483,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
  * @param fd File description of created client connection
  * 
  */
-void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
+static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
                        int revents, int fd) {
     
     ksnLNullClientConnect(w->data, fd);    
@@ -498,7 +498,7 @@ void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
  * 
  * @return If return value > 0 than server was created successfully
  */
-int ksnLNullStart(ksnLNullClass *kl) {
+static int ksnLNullStart(ksnLNullClass *kl) {
     
     int fd = 0;
     
@@ -535,7 +535,7 @@ int ksnLNullStart(ksnLNullClass *kl) {
  * @param kl Pointer to ksnLNullClass
  * 
  */
-void ksnLNullStop(ksnLNullClass *kl) {
+static void ksnLNullStop(ksnLNullClass *kl) {
     
     // If server started
     if(kev->ksn_cfg.l0_allow_f && kl->fd) {
