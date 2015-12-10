@@ -25,10 +25,9 @@ static int teoWSevHandler(teoWSClass *kws, int ev, void *nc, void *data, size_t 
 static ssize_t teoWSLNullsend(teoWSClass *kws, void *nc_p, int cmd, 
         const char *to_peer_name, void *data, size_t data_length);
 static int teoWSprocessMsg(teoWSClass *kws, void *nc, void *data, size_t data_length);
-//
-void ws_broadcast(struct mg_connection *nc, const char *msg, size_t len);
 
-static void send_answer(void *nc_p, char* err, char *result);
+static void send_auth_answer(void *nc_p, char* err, char *result);
+static size_t get_num_of_tags(char *data, size_t data_length);
 
 /**
  * Pointer to mg_connection structure
@@ -106,29 +105,6 @@ static void teoWSDestroy(teoWSClass *kws) {
 }
 
 /**
- * Calculate number of tags in json string
- * 
- * @param data
- * @param data_length
- * @return 
- */
-static size_t get_num_of_tags(char *data, size_t data_length) {
-    
-    int i = 0;
-    size_t num_of_tags = 0;
-    
-    for(i = 0; i < data_length; i++) 
-        if(data[i] == ':') 
-            num_of_tags++;
-    
-    if(num_of_tags) num_of_tags++;
-    
-    printf("@@@ num_of_tags: %d\n", (int) num_of_tags);
-        
-    return num_of_tags * 2;
-}
-
-/**
  * Read data from L0 server
  * 
  * @param loop
@@ -140,8 +116,6 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     teoLNullConnectData *con = w->data;
     void *nc_p = con->user_data;
     
-    // printf("Got a data ...\n");
-    
     for(;;) {
         
         // Read data
@@ -152,31 +126,36 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             
             teoLNullCPacket *cp = (teoLNullCPacket*) con->read_buffer;
             char *data = cp->peer_name + cp->peer_name_length;
-//            #ifdef DEBUG_KSNET
-//            ksnet_printf(ksn_conf, DEBUG,
-//                   MODULE_LABEL
             printf("Receive %d bytes: %d bytes data from L0 server, "
                    "from peer %s, cmd = %d\n", 
-//                   ANSI_YELLOW, ANSI_NONE,  
                    (int)rc, cp->data_length, cp->peer_name, cp->cmd 
-                   /*,cp->data_length*/);
+            );
+            // \todo use ksnet_printf and ksn_conf in this function
+//            #ifdef DEBUG_KSNET
+//            ksnet_printf(ksn_conf, DEBUG,
+//                MODULE_LABEL
+//                "Receive %d bytes: %d bytes data from L0 server, "
+//                "from peer %s, cmd = %d\n",
+//                ANSI_YELLOW, ANSI_NONE, 
+//                (int)rc, cp->data_length, cp->peer_name, cp->cmd );
 //            #endif
+            
             
             // Define json type of data field
             //
             char *beg, *end;
-            jsmn_parser p;
             jsmntype_t type = JSMN_UNDEFINED;
-            //jsmntok_t t[num_of_tags /*128*/]; 
-            int num_of_tags = 1048; //get_num_of_tags(data, cp->data_length);
+            size_t num_of_tags = get_num_of_tags(data, cp->data_length);
             if(num_of_tags) {
+                
+                // Parse json
                 jsmntok_t *t = malloc(num_of_tags * sizeof(jsmntok_t));
                 //
-                // Parse json
+                jsmn_parser p;
                 jsmn_init(&p);
-                int r = jsmn_parse(&p, data, cp->data_length, t, 
-                        /*sizeof(t)/sizeof(t[0])*/ num_of_tags);    
+                int r = jsmn_parse(&p, data, cp->data_length, t, num_of_tags);    
                 if(!(r < 1)) type = t[0].type;
+                //
                 free(t);
             }
             if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
@@ -185,6 +164,8 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             char *data_str = data;
             int data_len = cp->data_length;
             if(cp->cmd == CMD_L_PEERS_ANSWER) {
+                
+                // Convert binary peer list data to json
                 ksnet_arp_data_ar *arp_data_ar = (ksnet_arp_data_ar *) data;
                 data_str = malloc(sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length);
                 int ptr = sprintf(data_str, "{ \"length\": %d, \"arp_data_ar\": [ ", arp_data_ar->length);
@@ -440,17 +421,30 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     
     int processed = 0;
     
+    #ifdef DEBUG_KSNET
+    ksnet_printf(ksn_conf, DEBUG,
+        MODULE_LABEL
+        "Receive %d bytes: from WS client %p\n",
+        ANSI_YELLOW, ANSI_NONE, 
+        data_length, nc_p );
+    #endif
+    
+    
     // Json parser data
-    jsmn_parser p;
-    jsmntok_t t[128]; // We expect no more than 128 tokens
+    size_t num_of_tags = get_num_of_tags(data, data_length);
+    if(!num_of_tags) return 0;
+    
+    jsmntok_t *t = malloc(num_of_tags * sizeof(jsmntok_t));
         
     // Parse json
+    jsmn_parser p;
     jsmn_init(&p);
-    int r = jsmn_parse(&p, data, data_length, t, sizeof(t)/sizeof(t[0]));    
+    int r = jsmn_parse(&p, data, data_length, t, num_of_tags/*sizeof(t)/sizeof(t[0])*/);    
     if(r < 0) {
         
         // This is not JSON string - skip processing
         // printf("Failed to parse JSON: %d\n", r);
+        free(t);
         return 0;
     }
     
@@ -459,6 +453,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
         
         // This is not JSON object - skip processing
         // printf("Object expected\n");
+        free(t);
         return 0;
     }
     
@@ -503,6 +498,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
             i++;
         }        
     }
+    free(t);
     
     // Skip this request if not all keys was send
     if(keys != ALL_KEYS) {
@@ -576,58 +572,66 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
         #endif
 
         // \todo Process Authentication command in Authentication module
-        jsmn_init(&p);
-        int r = jsmn_parse(&p, cmd_data, strlen(cmd_data), t, 
-                sizeof(t)/sizeof(t[0]));    
-        
-        if(!(r < 1)) { //type = t[0].type;
-            enum KEYS {
-                METHOD = 0x01,
-                URL = 0x02,
-                DATA = 0x04,
-                HEADERS = 0x08,
-                ALL_KEYS = METHOD | URL | DATA | HEADERS
-            };
-            int i, keys = 0;
-            char *method = NULL, *url = NULL, *data = NULL, *headers = NULL;
-            for (i = 1; i < r && keys != ALL_KEYS; i++) {
-        
-                if(jsoneq(cmd_data, &t[i], "method") == 0) {
+        jsmn_parser p;
+        size_t cmd_data_len = strlen(cmd_data);
+        size_t num_of_tags = get_num_of_tags(cmd_data, data_length);
+        if(num_of_tags) {
+            
+            jsmntok_t *t = malloc(num_of_tags * sizeof(jsmntok_t));        
+            jsmn_init(&p);
+            int r = jsmn_parse(&p, cmd_data, cmd_data_len, t, num_of_tags
+                    /*sizeof(t)/sizeof(t[0])*/);    
 
-                    method = strndup((char*)cmd_data + t[i+1].start, 
-                            t[i+1].end-t[i+1].start);
-                    keys |= METHOD;
-                    i++;
+            if(!(r < 1)) { //type = t[0].type;
+                enum KEYS {
+                    METHOD = 0x01,
+                    URL = 0x02,
+                    DATA = 0x04,
+                    HEADERS = 0x08,
+                    ALL_KEYS = METHOD | URL | DATA | HEADERS
+                };
+                int i, keys = 0;
+                char *method = NULL, *url = NULL, *data = NULL, *headers = NULL;
+                for (i = 1; i < r && keys != ALL_KEYS; i++) {
 
-                } else if(jsoneq(cmd_data, &t[i], "url") == 0) {
+                    if(jsoneq(cmd_data, &t[i], "method") == 0) {
 
-                    url = strndup((char*)cmd_data + t[i+1].start, 
-                            t[i+1].end-t[i+1].start);
-                    keys |= URL;
-                    i++;
+                        method = strndup((char*)cmd_data + t[i+1].start, 
+                                t[i+1].end-t[i+1].start);
+                        keys |= METHOD;
+                        i++;
 
-                } else if(!(keys & DATA) && jsoneq(cmd_data, &t[i], "data") == 0) {
+                    } else if(jsoneq(cmd_data, &t[i], "url") == 0) {
 
-                    data = strndup((char*)cmd_data + t[i+1].start, 
-                            t[i+1].end-t[i+1].start);
-                    keys |= DATA;
-                    i++;
-                    
-                } else if(jsoneq(cmd_data, &t[i], "headers") == 0) {
+                        url = strndup((char*)cmd_data + t[i+1].start, 
+                                t[i+1].end-t[i+1].start);
+                        keys |= URL;
+                        i++;
 
-                    headers = strndup((char*)cmd_data + t[i+1].start, 
-                            t[i+1].end-t[i+1].start);
-                    keys |= HEADERS;
-                    i++;
+                    } else if(!(keys & DATA) && jsoneq(cmd_data, &t[i], "data") == 0) {
+
+                        data = strndup((char*)cmd_data + t[i+1].start, 
+                                t[i+1].end-t[i+1].start);
+                        keys |= DATA;
+                        i++;
+
+                    } else if(jsoneq(cmd_data, &t[i], "headers") == 0) {
+
+                        headers = strndup((char*)cmd_data + t[i+1].start, 
+                                t[i+1].end-t[i+1].start);
+                        keys |= HEADERS;
+                        i++;
+                    }
+                }
+
+                // Process and execute authenticate command
+                if(ALL_KEYS) {
+
+                    teoAuthProcessCommand(kws->kh->ta, method, url, data, headers,
+                            nc_p, send_auth_answer);
                 }
             }
-            
-            // Process and execute authenticate command
-            if(ALL_KEYS) {
-                
-                teoAuthProcessCommand(kws->kh->ta, method, url, data, headers,
-                        nc_p, send_answer);
-            }
+            free(t);
         }
         
         processed = 1;
@@ -654,7 +658,14 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     return processed;
 }
 
-static void send_answer(void *nc_p, char* err, char *result) {
+/**
+ * Send authenticate command answer
+ * 
+ * @param nc_p
+ * @param err
+ * @param result
+ */
+static void send_auth_answer(void *nc_p, char* err, char *result) {
         
     // Send tests answer command
     const char *data_json = "{ \"cmd\": 78, \"from\": \"\", \"data\": %s }";
@@ -662,4 +673,27 @@ static void send_answer(void *nc_p, char* err, char *result) {
     char data[data_json_len + 1];
     data_json_len = snprintf(data, data_json_len, data_json, result);
     mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data, data_json_len);    
+}
+
+/**
+ * Calculate number of tags in json string
+ * 
+ * @param data
+ * @param data_length
+ * @return 
+ */
+static size_t get_num_of_tags(char *data, size_t data_length) {
+    
+    int i = 0;
+    size_t num_of_tags = 0;
+    
+    for(i = 0; i < data_length; i++) 
+        if(data[i] == ':') 
+            num_of_tags++;
+    
+    printf("number of json tags in request: %d\n", (int) num_of_tags);
+
+    if(num_of_tags) num_of_tags++;
+    
+    return num_of_tags * 2;
 }
