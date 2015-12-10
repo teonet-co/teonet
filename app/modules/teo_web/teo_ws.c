@@ -191,6 +191,26 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 data_len = strlen(data_str);
                 beg = end = ""; 
             }
+            else if(cp->cmd == CMD_L_L0_CLIENTS_ANSWER) {
+                
+                // Convert binary client list data to json
+                teonet_client_data_ar *client_data_ar = (teonet_client_data_ar *) data;
+                data_str = malloc(sizeof(client_data_ar->client_data[0]) * 2 * client_data_ar->length);
+                int ptr = sprintf(data_str, "{ \"length\": %d, \"client_data_ar\": [ ", client_data_ar->length);
+                int i = 0;
+                for(i = 0; i < client_data_ar->length; i++) {
+                    ptr += sprintf(data_str + ptr, 
+                            "%s{ "
+                            "\"name\": \"%s\""
+                            " }", 
+                            i ? ", " : "", 
+                            client_data_ar->client_data[i].name
+                    );
+                }
+                sprintf(data_str + ptr, " ] }");
+                data_len = strlen(data_str);
+                beg = end = ""; 
+            }
 
             // Create json data and send it to websocket client
             size_t data_json_len = 128 + cp->data_length;

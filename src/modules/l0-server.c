@@ -700,4 +700,53 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     return retval;
 }
 
+/**
+ * Create list of clients
+ * 
+ * @param kl
+ * @return 
+ */
+teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
+
+    teonet_client_data_ar *data_ar = NULL;
+    
+    if(kev->ksn_cfg.l0_allow_f && kl->fd) {
+        
+        uint32_t length = pblMapSize(kl->map);
+        data_ar = malloc(sizeof(teonet_client_data_ar) + 
+                length * sizeof(data_ar->client_data[0]));
+        data_ar->length = length;
+        int i = 0;
+        
+        // Create clients list
+        PblIterator *it = pblMapIteratorReverseNew(kl->map);
+        if(it != NULL) {
+            while(pblIteratorHasPrevious(it) > 0) {
+                void *entry = pblIteratorPrevious(it);
+                //int *fd = (int *) pblMapEntryKey(entry);
+                ksnLNullData *data = pblMapEntryValue(entry);
+                strncpy(data_ar->client_data[i].name, data->name, 
+                        sizeof(data_ar->client_data[i].name));
+                i++;
+            }
+            pblIteratorFree(it);
+        }
+    }
+    
+    return data_ar;
+}
+
+/**
+ * Return size of teonet_client_data_ar data
+ * 
+ * @param clients_data
+ * @return Size of teonet_client_data_ar data
+ */
+inline size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data) {
+    
+    return clients_data != NULL ?
+        sizeof(teonet_client_data_ar) + 
+            clients_data->length * sizeof(clients_data->client_data[0]) : 0;
+}
+
 #undef kev
