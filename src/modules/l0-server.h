@@ -17,12 +17,12 @@
  */
 typedef struct ksnLNullData {
     
-    ev_io w;                ///< TCP Client watcher
-    char *name;             ///< Clients name
-    size_t name_length;     ///< Clients name length
-    void *read_buffer;      ///< Pointer to saved buffer
-    size_t read_buffer_ptr; ///< Pointer in read buffer
-    size_t read_buffer_size;///< Read buffer size
+    ev_io w;                  ///< TCP Client watcher
+    char *name;               ///< Clients name
+    size_t name_length;       ///< Clients name length
+    void *read_buffer;        ///< Pointer to saved buffer
+    size_t read_buffer_ptr;   ///< Pointer in read buffer
+    size_t read_buffer_size;  ///< Read buffer size
 
     
 } ksnLNullData;  
@@ -62,6 +62,8 @@ void ksnLNullDestroy(ksnLNullClass *kl);
 int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname, 
         size_t cname_length, uint8_t cmd, void *data, size_t data_len);
 int *ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name);
+teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl);
+size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data);
 
 #ifdef	__cplusplus
 }
