@@ -49,12 +49,12 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
     #define save_conf_back() \
         strncpy(conf->document_root, document_root, KSN_BUFFER_SM_SIZE), \
         strncpy(conf->l0_server_name, l0_server_name, KSN_BUFFER_SM_SIZE), \
-        strncpy(conf->auth_server_url, l0_server_name, KSN_BUFFER_SM_SIZE)
+        strncpy(conf->auth_server_url, auth_server_url, KSN_BUFFER_SM_SIZE)
 
     // Load string values
     char *document_root = strdup(conf->document_root);
     char *l0_server_name = strdup(conf->l0_server_name);
-    char *auth_server_url = strdup(conf->l0_server_name);
+    char *auth_server_url = strdup(conf->auth_server_url);
     
     // Config data define
     cfg_opt_t opts[] = {
