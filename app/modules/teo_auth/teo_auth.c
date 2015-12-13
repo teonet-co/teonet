@@ -90,10 +90,11 @@ static void auth_thread_signal(teoAuthClass *ta) {
  * 
  * @return 
  */
-teoAuthClass *teoAuthInit() {
+teoAuthClass *teoAuthInit(ksnHTTPClass *kh) {
     
     teoAuthClass *ta = malloc(sizeof(teoAuthClass));
     ta->list = pblListNewArrayList();
+    ta->kh = kh;
     
     // In windows, this will initialize the winsock stuff 
     CURLcode res = curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -219,12 +220,12 @@ static int teoAuthProccess(teoAuthClass *ta, const char *method,
     if(valid_url) {
     
         char full_url[KSN_BUFFER_SM_SIZE];
-        // \todo Set authentication server URL from config
         snprintf(full_url, KSN_BUFFER_SM_SIZE,
-                "http://localhost:1234/api/auth/%s", url);
+                "%s%s", ta->kh->conf->auth_server_url, url);
         
         // Send authentication request        
-        send_request(full_url, (void*) data, strlen(data), (char*)header, nc_p, callback);
+        send_request(full_url, (void*) data, strlen(data), (char*)header, nc_p, 
+                callback);
     }
     
     return 0;

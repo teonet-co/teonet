@@ -12,7 +12,7 @@
 
 #include "ev_mgr.h"
 #include "teo_web_conf.h"
-#include "../teo_auth/teo_auth.h"
+//#include "../teo_auth/teo_auth.h"
 #include "embedded/mongoose/mongoose.h"
 
 /**
