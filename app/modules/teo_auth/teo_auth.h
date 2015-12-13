@@ -15,11 +15,14 @@
 
 #include <pbl.h>
 
+#include "../teo_web/teo_web.h"
+
 /**
  * Teonet authentication module class structure
  */
 typedef struct teoAuthClass {
     
+    ksnHTTPClass *kh; ///< Pointer to ksnHTTPClass
     PblList* list; ///< Commands list
     pthread_mutex_t async_mutex; ///< Command list mutex    
     pthread_t tid; ///< Authentication module thread id
@@ -55,7 +58,7 @@ typedef struct teoAuthData {
 extern "C" {
 #endif
 
-teoAuthClass *teoAuthInit();
+teoAuthClass *teoAuthInit(ksnHTTPClass *kh);
 void teoAuthDestroy(teoAuthClass *ta);
 
 int teoAuthProcessCommand(teoAuthClass *ta, const char *method, const char *url, 
