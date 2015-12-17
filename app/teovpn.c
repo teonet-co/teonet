@@ -3,7 +3,7 @@
  * Author: Kirill Scherba <kirill@scherba.ru>
  * 
  * Teonet VPN application.
- *
+ *CMD_USER
  * Created on July 14, 2015, 9:52 AM
  */
 

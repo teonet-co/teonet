@@ -31,7 +31,7 @@ if TEO_THREAD
 LIBS += -pthread
 endif
 
-bin_PROGRAMS = teovpn teodb teoweb
+bin_PROGRAMS = teovpn teodb teoweb teoroom
 
 teovpn_SOURCES = teovpn.c
 teodb_SOURCES = teodb.c
@@ -39,6 +39,7 @@ teoweb_SOURCES = teoweb.c \
 		 modules/teo_auth/teo_auth.c modules/teo_web/teo_web_conf.c \
 		 modules/teo_web/teo_web.c modules/teo_web/teo_ws.c \
 		 embedded/mongoose/mongoose.c embedded/jsmn/jsmn.c
+teoroom_SOURCES = teoroom.c
 
 teoweb_LDFLAGS = $(AM_LDFLAGS) -pthread -lev -lconfuse -lcurl
 
