@@ -22,6 +22,7 @@
           </df>
         </df>
         <in>teodb.c</in>
+        <in>teoroom.c</in>
         <in>teovpn.c</in>
         <in>teoweb.c</in>
       </df>
@@ -214,6 +215,8 @@
       <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
+      </item>
+      <item path="app/teoroom.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="app/teovpn.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
