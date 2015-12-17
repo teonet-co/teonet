@@ -56,7 +56,7 @@ static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
                 printf("Resend cmd %d to user: %s\n", rd->cmd, name);
                 
                 
-                // \todo Create teonet command to send to peer or to L0 client
+                // \todo Issue #141: Create teonet command to send data to Peer or to L0 client
                 
                 if(rd->l0_f)
                     ksnLNullSendToL0(ke, 
