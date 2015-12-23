@@ -33,6 +33,16 @@ enum CMD_R {
 PblMap _map;
 PblMap *map;
 
+#define sendCmdTo(ke, rd, name, out_data, out_data_len) \
+    if(rd->l0_f) \
+    ksnLNullSendToL0(ke, \
+        rd->addr, rd->port, name, strlen(name) + 1, rd->cmd, \
+        out_data, out_data_len); \
+    else \
+        ksnCoreSendCmdto(ke->kc, name, rd->cmd, \
+            out_data, out_data_len)
+
+
 static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     
     // Resend data to all users except of me
@@ -41,7 +51,7 @@ static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         
         
         void *out_data = malloc(rd->data_len + rd->from_len);
-        memcpy(out_data, rd->data, rd->data_len);
+        if(rd->data_len) memcpy(out_data, rd->data, rd->data_len);
         memcpy(out_data + rd->data_len, rd->from, rd->from_len);
         size_t out_data_len = rd->data_len + rd->from_len;
 
@@ -58,13 +68,15 @@ static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
                 
                 // \todo Issue #141: Create teonet command to send data to Peer or to L0 client
                 
-                if(rd->l0_f)
-                    ksnLNullSendToL0(ke, 
-                        rd->addr, rd->port, name, strlen(name) + 1, rd->cmd, 
-                        out_data, out_data_len);
-                else
-                    ksnCoreSendCmdto(ke->kc, name, rd->cmd, 
-                        out_data, out_data_len);
+//                if(rd->l0_f)
+//                    ksnLNullSendToL0(ke, 
+//                        rd->addr, rd->port, name, strlen(name) + 1, rd->cmd, 
+//                        out_data, out_data_len);
+//                else
+//                    ksnCoreSendCmdto(ke->kc, name, rd->cmd, 
+//                        out_data, out_data_len);
+                
+                sendCmdTo(ke, rd, name, out_data, out_data_len);
             //}
         }
         pblIteratorFree(it);
@@ -171,7 +183,7 @@ int main(int argc, char** argv) {
     map = pblMapNewHashMap();
     
     // Initialize teonet event manager and Read configuration
-    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
+    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb, READ_ALL);
     
     // Start teonet
     ksnetEvMgrRun(ke);

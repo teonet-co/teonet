@@ -217,6 +217,8 @@
         </cTool>
       </item>
       <item path="app/teoroom.c" ex="false" tool="0" flavor2="0">
+        <cTool flags="2">
+        </cTool>
       </item>
       <item path="app/teovpn.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
