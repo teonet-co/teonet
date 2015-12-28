@@ -113,6 +113,7 @@ nobase_teonetinclude_HEADERS = \
     modules/net_term.h \
     modules/net_tun.h \
     modules/stream.h \
+    modules/subscribe.h \
     modules/tcp_proxy.h \
     modules/teodb.h \
     modules/vpn.h \
@@ -148,6 +149,7 @@ libteonet_la_SOURCES = \
     modules/net_term.c \
     modules/net_tun.c \
     modules/stream.c \
+    modules/subscribe.c \
     modules/tcp_proxy.c \
     modules/teodb.c \
     modules/vpn.c \
