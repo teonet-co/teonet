@@ -85,7 +85,8 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     if(cq != NULL) {
         
         // Stop watcher
-        ev_timer_stop(kev->ev_loop, &cq->w);
+        if(cq->timeout > 0.0)
+            ev_timer_stop(kev->ev_loop, &cq->w);
         
         // Execute queue callback
         if(cq->cb != NULL)
@@ -173,7 +174,8 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout,
         // If successfully added get real ksnCQueData pointer and start timeout 
         // watcher
         cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);
-        if(cq != NULL) {
+        cq->timeout = timeout;
+        if(cq != NULL && timeout > 0.0) {
             
             // Initialize, set user data and start the timer
             ev_timer_init(&cq->w, cq_timer_cb, timeout, 0.0);

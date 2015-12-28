@@ -59,28 +59,48 @@ static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
             void *entry = pblIteratorNext(it);
             char *name = (char *) pblMapEntryKey(entry);
-
             
-            //if(strcmp(rd->from, name)) {
-
+            if(strcmp(rd->from, name)) {
+                
                 printf("Resend cmd %d to user: %s\n", rd->cmd, name);
                 
-                
-                // \todo Issue #141: Create teonet command to send data to Peer or to L0 client
-                
-//                if(rd->l0_f)
-//                    ksnLNullSendToL0(ke, 
-//                        rd->addr, rd->port, name, strlen(name) + 1, rd->cmd, 
-//                        out_data, out_data_len);
-//                else
-//                    ksnCoreSendCmdto(ke->kc, name, rd->cmd, 
-//                        out_data, out_data_len);
-                
+                // \todo Issue #141: Create teonet command to send data to Peer or to L0 client                
                 sendCmdTo(ke, rd, name, out_data, out_data_len);
-            //}
+            }
         }
+        
         pblIteratorFree(it);
         free(out_data);
+    }
+}
+
+/**
+ * Send all existing users (R_START) to this user
+ * 
+ * @param ke
+ * @param rd
+ */
+static void send_all_connected(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
+
+    // Resend data to all users except of me
+    PblIterator *it = pblMapIteratorNew(map);
+    if(it != NULL) {
+        
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *name = (char *) pblMapEntryKey(entry);
+            size_t name_len = pblMapEntryKeyLength(entry);
+            
+            if(strcmp(rd->from, name)) {
+
+                printf("Resend cmd %d about user %s to user: %s\n", rd->cmd, 
+                        name, rd->from);
+                sendCmdTo(ke, rd, rd->from, name, name_len);
+            }
+        }
+        
+        pblIteratorFree(it);
     }
 }
 
@@ -115,11 +135,16 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                     if(!pblMapContainsKeyStr(map, rd->from)) {
                         
+                        // Send all existing users (R_START) to this user
+                        send_all_connected(ke, rd);
+                        
                         // Add to user map
                         pblMapAdd(map, rd->from, rd->from_len, "", 1);
                         
-                        // Resend START to all user
+                        // Resend START to all users
                         send_to_all(ke, rd);
+                        
+                        // \todo: Subscribe to client disconnected command at L0 server
                     }
                     
                 } break;    
