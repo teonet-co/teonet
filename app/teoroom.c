@@ -42,7 +42,12 @@ PblMap *map;
         ksnCoreSendCmdto(ke->kc, name, rd->cmd, \
             out_data, out_data_len)
 
-
+/**
+ * Send data to all clients
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param rd Pointer to ksnCorePacketData
+ */
 static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     
     // Resend data to all users except of me
@@ -71,6 +76,28 @@ static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         
         pblIteratorFree(it);
         free(out_data);
+    }
+}
+
+/**
+ * Send END command to all connected clients and remove client from map
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param rd Pointer to ksnCorePacketData
+ */
+static void remove_client(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
+
+    size_t valueLengthPtr;
+    if(pblMapGet(map, rd->from, rd->from_len, &valueLengthPtr) != NULL) {
+        
+        // Send END to all user
+        send_to_all(ke, rd);
+
+        // Remove user from map
+        size_t valueLength;
+        pblMapRemove(map, rd->from, rd->from_len, &valueLength);    
+        
+        printf("Client %s removed\n", rd->from);
     }
 }
 
@@ -117,6 +144,50 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
 
     switch(event) {
+
+        // Connected event received
+        case EV_K_CONNECTED: 
+        {
+            char *peer = ((ksnCorePacketData*)data)->from;
+            if(!strcmp(peer, "teo-web")) {
+                
+                printf("L0 server: '%s' was connected\n", peer);
+                
+                // Subscribe to client disconnected command at L0 server
+                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_DISCONNECTED);
+                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_CONNECTED);
+            }
+            
+        } break;
+        
+        // Subscribe event received
+        case EV_K_SUBSCRIBE:
+        {
+            ksnCorePacketData *rd = data;
+            uint16_t ev = *((uint16_t*)rd->data);
+            char *peer_name = rd->data + sizeof(uint16_t);
+            
+            printf("EV_K_SUBSCRIBE received from: %s, event: %d, name %s\n", 
+                    rd->from, ev, peer_name);
+            
+            if(ev == EV_K_DISCONNECTED) {
+                                
+                ksnCorePacketData rd_s;
+                
+                // Send event to all clients and remove from map
+                rd_s.cmd = CMD_R_END;
+                rd_s.from = peer_name;
+                rd_s.from_len = strlen(peer_name) + 1;
+                rd_s.addr = rd->addr, 
+                rd_s.port = rd->port,
+                rd_s.l0_f = 1,
+                rd_s.data = NULL;
+                rd_s.data_len = 0;                
+                remove_client(ke, &rd_s);
+            }
+            
+        } break;
+       
 
         // DATA received
         case EV_K_RECEIVED:
@@ -174,13 +245,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 {
                     printf("Got END from: %s\n", rd->from); 
                     
-                    // Resend END to all user
-                    send_to_all(ke, rd);
-                    
-                    // Remove user from map
-                    size_t valueLength;
-                    pblMapRemove(map, rd->from, rd->from_len, &valueLength);
-                    
+                    // Resend event to all clients and remove from map
+                    remove_client(ke, rd);
+                                                
                 } break;    
                     
                 default:

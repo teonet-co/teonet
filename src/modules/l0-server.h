@@ -34,7 +34,6 @@ typedef struct ksnLNullData {
 typedef struct  ksnLNullClass {
     
     void *ke;           ///< Pointer to ksnEvMgrClass
-    teoSScrClass *sscr; ///< Pointer to teoSScrClass
     PblMap *map;        ///< Pointer to the L0 clients map (by fd)
     PblMap *map_n;      ///< Pointer to the L0 FDs map (by name)
     int fd;             ///< L0 TCP Server FD
