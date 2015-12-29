@@ -8,13 +8,16 @@
 #ifndef SUBSCRIBE_H
 #define	SUBSCRIBE_H
 
-#include "cque.h"
+#include <stdint.h>
+#include <pbl.h>
 
+/**
+ * teoSScr Class structure definition
+ */
 typedef struct teoSScrClass {
     
     void *ke; ///< Pointer to ksnetEvMgrClass
-    PblMap *map; ///< Pointer to the subscribers map
-    ksnCQueClass *cq; ///< Pointer to callback queue
+    PblList *list; ///< Pointer to the subscribers map
     
 } teoSScrClass;
 
@@ -24,6 +27,10 @@ extern "C" {
 
 teoSScrClass *teoSScrInit(void *ke);
 void teoSScrDestroy(teoSScrClass *sscr);
+void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev);
+void teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev);
+void teoSScrSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev);
+void teoSScrUnSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev);
 void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data, size_t data_length);
 
 #ifdef	__cplusplus
@@ -31,4 +38,3 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data, size_t data_length
 #endif
 
 #endif	/* SUBSCRIBE_H */
-

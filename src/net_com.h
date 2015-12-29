@@ -43,6 +43,9 @@ enum ksnCMD {
     CMD_AUTH_ANSWER,        ///< #78 Auth answer command
     CMD_L0_CLIENTS,         ///< #79 Request clients list
     CMD_L0_CLIENTS_ANSWER,  ///< #80 Clients list
+    CMD_SUBSCRIBE,          ///< #81 Subscribe to event
+    CMD_UNSUBSCRIBE,        ///< #82 UnSubscribe from event
+    CMD_SUBSCRIBE_ANSWER,   ///< #83 Subscribe answer
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
@@ -64,6 +67,7 @@ typedef struct ksnCommandClass {
     void *kc; ///< Pointer to KSNet core class object
     void *ks; ///< Pointer to KSNet split class    
     void *kr; ///< Pointer to KSNet reconnect class
+    void *ksscr; ///< Pointer to teoSScrClass 
 
 } ksnCommandClass;
 
