@@ -9,6 +9,7 @@
 #define	L0_SERVER_H
 
 #include <pbl.h>
+#include "subscribe.h"
 #include "teonet_l0_client.h"
 
 /**
@@ -32,10 +33,10 @@ typedef struct ksnLNullData {
  */
 typedef struct  ksnLNullClass {
     
-    void *ke;       ///< Pointer to ksnEvMgrClass
-    PblMap *map;    ///< Pointer to the L0 clients map (by fd)
-    PblMap *map_n;  ///< Pointer to the L0 FDs map (by name)
-    int fd;         ///< L0 TCP Server FD
+    void *ke;           ///< Pointer to ksnEvMgrClass
+    PblMap *map;        ///< Pointer to the L0 clients map (by fd)
+    PblMap *map_n;      ///< Pointer to the L0 FDs map (by name)
+    int fd;             ///< L0 TCP Server FD
     
 } ksnLNullClass;
 

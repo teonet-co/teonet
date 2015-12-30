@@ -22,6 +22,7 @@
           </df>
         </df>
         <in>teodb.c</in>
+        <in>teoroom.c</in>
         <in>teovpn.c</in>
         <in>teoweb.c</in>
       </df>
@@ -98,6 +99,8 @@
           <in>net_term.c</in>
           <in>net_tun.c</in>
           <in>stream.c</in>
+          <in>subscribe.c</in>
+          <in>subscribe.h</in>
           <in>tcp_proxy.c</in>
           <in>teodb.c</in>
           <in>vpn.c</in>
@@ -212,6 +215,10 @@
         </cTool>
       </item>
       <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="2">
+        </cTool>
+      </item>
+      <item path="app/teoroom.c" ex="false" tool="0" flavor2="2">
         <cTool flags="2">
         </cTool>
       </item>
@@ -895,6 +902,10 @@
       <item path="src/modules/stream.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
         </cTool>
+      </item>
+      <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="src/modules/subscribe.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
