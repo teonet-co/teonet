@@ -67,7 +67,9 @@ typedef enum ksnetEvMgrEvents {
     EV_K_STREAM_CONNECTED,          ///< After stream connected
     EV_K_STREAM_CONNECT_TIMEOUT,    ///< Connection timeout
     EV_K_STREAM_DISCONNECTED,       ///< After stream disconnected
-    EV_K_STREAM_DATA                ///< Input stream has a data
+    EV_K_STREAM_DATA,               ///< Input stream has a data
+            
+    EV_K_SUBSCRIBE                  ///< Subscribe answer command received
 
 } ksnetEvMgrEvents;
 

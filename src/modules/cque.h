@@ -10,6 +10,7 @@
 
 #include <ev.h>
 #include <pbl.h>
+#include <stdint.h>
 
 /**
  * ksnCQue Class structure definition
@@ -38,6 +39,7 @@ typedef struct ksnCQueData {
     
     ksnCQueCallback cb; ///< Pointer to callback function
     ksnCQueClass *kq; ///< Pointer to ksnCQueClass
+    double timeout; ///< Timeout value
     uint32_t id; ///< Callback ID (equal to key)
     //char data[]; ///< \todo: Some data 
     void *data; ///< User data

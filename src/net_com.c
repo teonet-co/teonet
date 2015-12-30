@@ -14,21 +14,23 @@
 #include "net_split.h"
 #include "net_recon.h"
 #include "utils/rlutil.h"
+#include "modules/subscribe.h"
 
 // Local functions
-int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
-int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 /**
  * Initialize ksnet command class
@@ -41,6 +43,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
     kco->kc = kc;
     kco->ks = ksnSplitInit(kco);
     kco->kr = ksnReconnectInit(kco);
+    kco->ksscr = teoSScrInit(((ksnCoreClass *)kc)->ke);
 
     return kco;
 }
@@ -51,6 +54,7 @@ ksnCommandClass *ksnCommandInit(void *kc) {
  */
 void ksnCommandDestroy(ksnCommandClass *kco) {
 
+    teoSScrDestroy(kco->ksscr); // Destroy subscribe class
     ksnSplitDestroy(kco->ks); // Destroy split class
     ((ksnReconnectClass*)kco->kr)->destroy(kco->kr); // Destroy reconnect class
     free(kco);
@@ -146,6 +150,14 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         case CMD_L0_CLIENTS:
             processed = cmd_l0_clients_cb(kco, rd);
             break;
+            
+        case CMD_SUBSCRIBE:
+        case CMD_UNSUBSCRIBE:
+        case CMD_SUBSCRIBE_ANSWER:
+            processed = cmd_subscribe_cb(kco, rd);
+            break;
+            
+        
 
         default:
             break;
@@ -213,7 +225,7 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
          
     // Send ECHO to L0 user
     if(rd->l0_f)
@@ -237,7 +249,7 @@ int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         
     // Get peers data
     ksnet_arp_data_ar *peers_data = ksnetArpShowData(((ksnCoreClass*)kco->kc)->ka);
@@ -295,7 +307,7 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     // Parse CMD_RESEND data
     size_t ptr = 0;
@@ -354,7 +366,7 @@ inline static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketDat
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #define ke ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))
 
@@ -457,7 +469,7 @@ int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Replay to address we got from peer
     ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE,
@@ -530,7 +542,7 @@ int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param rd Pointer to ksnCorePacketData
  * @return True if command is processed
  */
-int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     /**
      * KSNet CMD_PEER command data
@@ -552,10 +564,10 @@ int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     pd.port = *((uint32_t *)(rd->data + ptr));
 
     #ifdef DEBUG_KSNET
-        ksnet_printf(
-            &((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ksn_cfg,
-            DEBUG_VV,
-            "cmd_connect_cb: %s %s:%d\n", pd.name, pd.addr, pd.port);
+    ksnet_printf(
+        &((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ksn_cfg,
+        DEBUG_VV,
+        "cmd_connect_cb: %s %s:%d\n", pd.name, pd.addr, pd.port);
     #endif
 
     // Check ARP
@@ -645,3 +657,4 @@ static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     #undef kev
 }
+
