@@ -17,7 +17,8 @@
 typedef struct teoSScrClass {
     
     void *ke; ///< Pointer to ksnetEvMgrClass
-    PblList *list; ///< Pointer to the subscribers map
+//    PblList *list; ///< Pointer to the subscribers map
+    PblMap *map; ///< Pointer to the subscribers map
     
 } teoSScrClass;
 
