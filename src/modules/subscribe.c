@@ -96,7 +96,7 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
 }
 
 /**
- * Sort the list
+ * Sort the list function
  * 
  * @param prev Previous element
  * @param next Next element
@@ -117,7 +117,7 @@ static int list_compare (const void* prev, const void* next) {
  * @param peer_name Remote peer name. (If empty - return first element with ev)
  * @param ev Event
  * 
- * @return Index number in list
+ * @return Index number in the list or -1 if not found
  */
 static int find_at_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     
@@ -158,7 +158,6 @@ static void teoSScrFree(teoSScrData *element) {
     
     if(element != NULL) {
         
-        //free(element->data);
         free(element);
     }
 }
@@ -206,7 +205,7 @@ void teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     
     // Find in list
     int idx = find_at_list(sscr, peer_name, ev);
-    if(idx > 0) {
+    if(idx >= 0) {
         
         // Remove from list
         teoSScrData *sscr_data = pblListRemoveAt(sscr->list, idx);

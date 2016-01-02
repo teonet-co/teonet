@@ -100,7 +100,6 @@
           <in>net_tun.c</in>
           <in>stream.c</in>
           <in>subscribe.c</in>
-          <in>subscribe.h</in>
           <in>tcp_proxy.c</in>
           <in>teodb.c</in>
           <in>vpn.c</in>
@@ -129,6 +128,7 @@
       </df>
       <df name="tests">
         <in>teonet_tst.c</in>
+        <in>test_subscribe.c</in>
       </df>
     </df>
     <df root="." name="1">
@@ -156,6 +156,16 @@
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>configure.ac</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+      <logicalFolder name="f1"
+                     displayName="Subscribe CUnit Test"
+                     projectFiles="true"
+                     kind="TEST">
+      </logicalFolder>
     </logicalFolder>
   </logicalFolder>
   <sourceFolderFilter>^(nbproject)$</sourceFolderFilter>
@@ -794,6 +804,14 @@
           </preprocessorList>
         </cTool>
       </folder>
+      <folder path="TestFiles/f1">
+        <linkerTool>
+          <output>${TESTDIR}/TestFiles/f1</output>
+          <linkerLibItems>
+            <linkerOptionItem>-lcunit</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
+      </folder>
       <folder path="test_teonet">
         <cTool>
           <incDir>
@@ -903,9 +921,9 @@
         <cTool flags="4">
         </cTool>
       </item>
-      <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="0">
-      </item>
-      <item path="src/modules/subscribe.h" ex="false" tool="3" flavor2="0">
+      <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="4">
+        </cTool>
       </item>
       <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
@@ -1068,6 +1086,10 @@
         </cTool>
       </item>
       <item path="tests/test_crypt.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="1">
+        </cTool>
+      </item>
+      <item path="tests/test_subscribe.c" ex="false" tool="0" flavor2="0">
         <cTool flags="1">
         </cTool>
       </item>
