@@ -25,7 +25,7 @@
  */
 typedef struct teoSScrListData {
     
-//    uint16_t ev; ///< Event to subscribe to
+    uint16_t ev; ///< Event (used whensend data to subscriber)
     char data[]; ///< Remote peer name in list or data in CMD_SUBSCRIBE_ANSWER
         
 } teoSScrListData;
@@ -47,7 +47,6 @@ teoSScrClass *teoSScrInit(void *ke) {
     teoSScrClass *sscr = malloc(sizeof(teoSScrClass));
     
     if(sscr != NULL) {
-//        sscr->list = pblListNewArrayList();        
         sscr->map = pblMapNewHashMap();
         sscr->ke = ke;
     }
@@ -70,35 +69,39 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
     teoSScrListData *sscr_data = malloc(sscr_data_length);
     sscr_data->ev = ev;
     memcpy(sscr_data->data, data, data_length);
-    
-    
-    int i, num = pblListSize(sscr->list);
-    
-    #ifdef DEBUG_KSNET
-    ksnet_printf(
-           &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
-           DEBUG, 
-           "%sSubscribe:%s " 
-           "Prepare to Send CMD_SUBSCRIBE_ANSWER with event #%d, "
-           "and data '%s'. Number of subscribers: %d.\n", 
-            ANSI_LIGHTGREEN, ANSI_NONE,
-            ev, (char*)data, num
-    );
-    #endif
-    
-    // Send event to subscribers
-    for(i = 0; i < num; i++) {
         
-        teoSScrListData *sscr_list_data = pblListGet(sscr->list, i);
-        if(sscr_list_data->ev == ev) {
-            
-            // Send subscribe command to remote peer
-            ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc, 
-                sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, sscr_data, 
-                sscr_data_length);    
-        }
-    }
+    size_t valueLength;
+    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), &valueLength);
     
+    if(sscr_map_data != NULL) {
+        
+        int i, num = pblListSize(sscr_map_data->list);
+
+        #ifdef DEBUG_KSNET
+        ksnet_printf(
+               &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
+               DEBUG, 
+               "%sSubscribe:%s " 
+               "Prepare to Send CMD_SUBSCRIBE_ANSWER with event #%d, "
+               "and data '%s'. Number of subscribers: %d.\n", 
+                ANSI_LIGHTGREEN, ANSI_NONE,
+                ev, (char*)data, num
+        );
+        #endif
+
+        // Send event to subscribers
+        for(i = 0; i < num; i++) {
+
+            teoSScrListData *sscr_list_data = pblListGet(sscr_map_data->list, i);
+            if(sscr_list_data->ev == ev) {
+
+                // Send subscribe command to remote peer
+                ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc, 
+                    sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, sscr_data, 
+                    sscr_data_length);    
+            }
+        }    
+    }
     free(sscr_data);
 }
 
@@ -112,9 +115,11 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
  */
 static int list_compare (const void* prev, const void* next) {
     
-    if(((teoSScrListData*)prev)->ev < ((teoSScrListData*)next)->ev ) return -1;
-    else if(((teoSScrListData*)prev)->ev > ((teoSScrListData*)next)->ev ) return 1;
-    else return 0;
+//    if(((teoSScrListData*)prev)->ev < ((teoSScrListData*)next)->ev ) return -1;
+//    else if(((teoSScrListData*)prev)->ev > ((teoSScrListData*)next)->ev ) return 1;
+//    else return 0;
+    
+    return strcmp(((teoSScrListData*)prev)->data, ((teoSScrListData*)next)->data);
 }
 
 /**
@@ -129,8 +134,8 @@ static int list_compare (const void* prev, const void* next) {
 static int find_in_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     
     int retval = -1;
-    size_t valueLength;
     
+    size_t valueLength;    
     teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), &valueLength);
     if(sscr_map_data != NULL) {
         
@@ -141,20 +146,44 @@ static int find_in_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
             int idx = 0;
             while(pblIteratorHasNext(it)) {        
 
-                teoSScrListData *sscr_data = pblIteratorNext(it);  
-//                if(sscr_data->ev == ev) {
+                void *entry = pblIteratorNext(it);  
+                teoSScrListData *sscr_list_data = entry; //pblMapEntryValue(entry);
+                if(peer_name[0] && !strcmp(sscr_list_data->data, peer_name)) {
 
-                    if(!peer_name[0] || !strcmp(sscr_data->data, peer_name)) {
-
-                        retval = idx;
-                        break;
-                    }
-//                }    
+                    retval = idx;
+                    break;
+                }
 
                 idx++;
             }
             pblIteratorFree(it);
         }
+    }
+    
+    return retval;
+}
+
+/**
+ * Calculate number of subscribers
+ * 
+ * @param sscr
+ * @return 
+ */
+int number_of_subscribers(teoSScrClass *sscr) {
+
+    int retval = 0;
+    
+    PblIterator *it = pblMapIteratorNew(sscr->map);
+    if(it != NULL) {
+    
+        while(pblIteratorHasNext(it)) {
+            
+            void *entry = pblIteratorNext(it);
+            
+            teoSScrMapData *sscr_map_data = pblMapEntryValue(entry);
+            retval += pblListSize(sscr_map_data->list);
+        }
+        pblIteratorFree(it);
     }
     
     return retval;
@@ -185,18 +214,10 @@ static void teoSScrFree(teoSScrListData *element) {
  */
 void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     
-//    teoSScrData *sscr_data = malloc(sizeof(teoSScrData) + strlen(peer_name) + 1);
-//    sscr_data->ev = ev;
-//    strcpy(sscr_data->data, peer_name);
-//    pblListAdd(sscr->list, (void*)sscr_data);
-//    
-//    pblListSort(sscr->list, list_compare);
-    
     #define add_data_to_list(sscr_list, peer_name) \
         teoSScrListData *sscr_list_data = malloc(sizeof(teoSScrListData) + strlen(peer_name) + 1); \
         strcpy(sscr_list_data->data, peer_name); \
         pblListAdd(sscr_list, (void*)sscr_list_data)
-
     
     // Check event in map and create new record or update existing
     teoSScrMapData *sscr_data;
@@ -208,12 +229,10 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
         // Add record to map
         teoSScrMapData sscr_map_data;
         sscr_map_data.list = pblListNewArrayList(); 
-//        teoSScrListData *sscr_list_data = malloc(sizeof(teoSScrListData) + strlen(peer_name) + 1);
-//        strcpy(sscr_list_data->data, peer_name);
-//        pblListAdd(sscr_map_data.list, (void*)sscr_list_data);
         add_data_to_list(sscr_map_data.list, peer_name);
         pblMapAdd(sscr->map, &ev, sizeof(ev), &sscr_map_data, sizeof(sscr_map_data));
     }
+    
     // Add new peer_name to existing event list
     else {
         
@@ -221,9 +240,6 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
         if(find_in_list(sscr, peer_name, ev) == -1) {
         
             // Add peer_name to list
-//            teoSScrListData *sscr_list_data = malloc(sizeof(teoSScrListData) + strlen(peer_name) + 1);
-//            strcpy(sscr_list_data->data, peer_name);
-//            pblListAdd(sscr_list, (void*)sscr_list_data);
             add_data_to_list(sscr_data->list, peer_name);
         }
     }
@@ -236,11 +252,10 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
            "Peer '%s' was added to the Subscribers to event #%d. "
            "Number of subscribers: %d\n", 
             ANSI_LIGHTGREEN, ANSI_NONE,
-            peer_name, ev, 0 // \todo pblListSize(sscr->list)
+            peer_name, ev, number_of_subscribers(sscr)
     );
     #endif
 }
-
 
 /**
  * Remote peer unsubscribed from event at this host
@@ -251,15 +266,20 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
  */
 void teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     
-    // Find in list
-    int idx = find_in_list(sscr, peer_name, ev);
-    if(idx >= 0) {
-        
-        // Remove from list
-        teoSScrListData *sscr_data = pblListRemoveAt(sscr->list, idx);
-        
-        // Free element 
-        if(sscr_data !=  (void*)-1) teoSScrFree(sscr_data);
+    size_t valueLength;    
+    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), &valueLength);
+    if(sscr_map_data != NULL) {
+
+        // Find in list
+        int idx = find_in_list(sscr, peer_name, ev);
+        if(idx >= 0) {
+
+            // Remove from list
+            teoSScrListData *sscr_data = pblListRemoveAt(sscr_map_data->list, idx);
+
+            // Free element 
+            if(sscr_data !=  (void*)-1) teoSScrFree(sscr_data);
+        }    
     }
 }
 
@@ -300,18 +320,28 @@ void teoSScrDestroy(teoSScrClass *sscr) {
 
     if(sscr != NULL) {
         
-        // Loop list and destroy all loaded modules
-        PblIterator *it =  pblListIterator(sscr->list);
-        if(it != NULL) {     
+        PblIterator *it =  pblMapIteratorNew(sscr->map);
+        if(it != NULL) {
             
-            while(pblIteratorHasNext(it)) {        
+            while(pblIteratorHasNext(it)) {
+                
+                void *entry = pblIteratorNext(it);
+                teoSScrMapData *sscr_map_data = pblMapEntryValue(entry);
 
-              teoSScrFree(pblIteratorNext(it));              
+                // Loop list and destroy all loaded modules
+                PblIterator *it_l =  pblListIterator(sscr_map_data->list);
+                if(it_l != NULL) {     
+
+                    while(pblIteratorHasNext(it_l)) {        
+
+                        teoSScrFree(pblIteratorNext(it_l));              
+                    }
+                    pblIteratorFree(it_l);
+                }        
+
+                pblListFree(sscr_map_data->list);
             }
-            pblIteratorFree(it);
-        }        
-        
-        pblListFree(sscr->list);
+        }
         free(sscr);
     }
 }

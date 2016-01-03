@@ -14,6 +14,8 @@
 
 extern CU_pSuite pSuite; // Test global variable
 
+int number_of_subscribers(teoSScrClass *sscr);
+
 /**
  * Emulate ksnetEvMgrClass
  */
@@ -38,7 +40,7 @@ void test_6_1() {
     // Initialize module
     teoSScrClass* ksscr = teoSScrInit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(ksscr);
-    CU_ASSERT_PTR_NOT_NULL_FATAL(ksscr->list);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(ksscr->map);
     
     // Destroy module
     teoSScrDestroy(ksscr);
@@ -55,12 +57,33 @@ void test_6_2() {
     
     teoSScrClass* sscr = teoSScrInit(ke);
     char *peer_name = "test-peer";
+    char *peer_name_2 = "test-peer_2";
     
+    //
     teoSScrSubscription(sscr, peer_name, 100);
-    CU_ASSERT(!pblListIsEmpty(sscr->list));
+    CU_ASSERT(number_of_subscribers(sscr) == 1);
     
+    teoSScrSubscription(sscr, peer_name, 110);
+    CU_ASSERT(number_of_subscribers(sscr) == 2);
+    
+    teoSScrSubscription(sscr, peer_name_2, 110);
+    CU_ASSERT(number_of_subscribers(sscr) == 3);
+    
+    teoSScrSubscription(sscr, peer_name_2, 100);
+    CU_ASSERT(number_of_subscribers(sscr) == 4);
+    
+    // 
     teoSScrUnSubscription(sscr, peer_name, 100);
-    CU_ASSERT(pblListIsEmpty(sscr->list));
+    CU_ASSERT(number_of_subscribers(sscr) == 3);
+    
+    teoSScrUnSubscription(sscr, peer_name_2, 100);
+    CU_ASSERT(number_of_subscribers(sscr) == 2);
+    
+    teoSScrUnSubscription(sscr, peer_name, 110);
+    CU_ASSERT(number_of_subscribers(sscr) == 1);
+    
+    teoSScrUnSubscription(sscr, peer_name_2, 110);
+    CU_ASSERT(number_of_subscribers(sscr) == 0);       
     
     teoSScrDestroy(sscr);
 }
