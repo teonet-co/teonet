@@ -71,7 +71,8 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
     memcpy(sscr_data->data, data, data_length);
         
     size_t valueLength;
-    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), &valueLength);
+    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), 
+            &valueLength);
     
     if(sscr_map_data != NULL) {
         
@@ -106,7 +107,7 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
 }
 
 /**
- * Sort the list function
+ * Sort list function
  * 
  * @param prev Previous element
  * @param next Next element
@@ -136,7 +137,8 @@ static int find_in_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     int retval = -1;
     
     size_t valueLength;    
-    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), &valueLength);
+    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), 
+            &valueLength);
     if(sscr_map_data != NULL) {
         
         // Loop list and destroy all loaded modules
@@ -147,7 +149,7 @@ static int find_in_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
             while(pblIteratorHasNext(it)) {        
 
                 void *entry = pblIteratorNext(it);  
-                teoSScrListData *sscr_list_data = entry; //pblMapEntryValue(entry);
+                teoSScrListData *sscr_list_data = entry; 
                 if(peer_name[0] && !strcmp(sscr_list_data->data, peer_name)) {
 
                     retval = idx;
@@ -169,7 +171,7 @@ static int find_in_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
  * @param sscr
  * @return 
  */
-int number_of_subscribers(teoSScrClass *sscr) {
+int teoSScrNumberOfSubscribers(teoSScrClass *sscr) {
 
     int retval = 0;
     
@@ -215,7 +217,8 @@ static void teoSScrFree(teoSScrListData *element) {
 void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     
     #define add_data_to_list(sscr_list, peer_name) \
-        teoSScrListData *sscr_list_data = malloc(sizeof(teoSScrListData) + strlen(peer_name) + 1); \
+        teoSScrListData *sscr_list_data = malloc(sizeof(teoSScrListData) + \
+            strlen(peer_name) + 1); \
         strcpy(sscr_list_data->data, peer_name); \
         pblListAdd(sscr_list, (void*)sscr_list_data)
     
@@ -224,13 +227,15 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     size_t valueLength;
     
     // Create new record (new list) in map
-    if((sscr_data = pblMapGet(sscr->map, &ev, sizeof(ev), &valueLength)) == NULL) {
+    if((sscr_data = pblMapGet(sscr->map, &ev, 
+            sizeof(ev), &valueLength)) == NULL) {
     
         // Add record to map
         teoSScrMapData sscr_map_data;
         sscr_map_data.list = pblListNewArrayList(); 
         add_data_to_list(sscr_map_data.list, peer_name);
-        pblMapAdd(sscr->map, &ev, sizeof(ev), &sscr_map_data, sizeof(sscr_map_data));
+        pblMapAdd(sscr->map, &ev, sizeof(ev), &sscr_map_data, 
+                sizeof(sscr_map_data));
     }
     
     // Add new peer_name to existing event list
@@ -252,7 +257,7 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
            "Peer '%s' was added to the Subscribers to event #%d. "
            "Number of subscribers: %d\n", 
             ANSI_LIGHTGREEN, ANSI_NONE,
-            peer_name, ev, number_of_subscribers(sscr)
+            peer_name, ev, teoSScrNumberOfSubscribers(sscr)
     );
     #endif
 }
@@ -263,11 +268,15 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
  * @param sscr Pointer to teoSScrClass
  * @param peer_name Remote peer name
  * @param ev Event
+ * 
+ * @return True if this peer_name and event was present and successfully removed
  */
-void teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
+int teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
     
+    int retval = 0;
     size_t valueLength;    
-    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), &valueLength);
+    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), 
+            &valueLength);
     if(sscr_map_data != NULL) {
 
         // Find in list
@@ -275,16 +284,48 @@ void teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
         if(idx >= 0) {
 
             // Remove from list
-            teoSScrListData *sscr_data = pblListRemoveAt(sscr_map_data->list, idx);
+            teoSScrListData *sscr_data = pblListRemoveAt(sscr_map_data->list, 
+                    idx);
 
             // Free element 
             if(sscr_data !=  (void*)-1) teoSScrFree(sscr_data);
+            
+            retval = 1;
         }    
     }
+    
+    return retval;
 }
 
 /**
- * This host subscribe to event at remote peer
+ * Unsubscribe peer_name from all events 
+ * 
+ * @param sscr
+ * @param peer_name
+ * @return 
+ */
+int teoSScrUnSubscriptionAll(teoSScrClass *sscr, char *peer_name) {
+
+    int retval = 0;
+    
+    PblIterator *it = pblMapIteratorNew(sscr->map);
+    if(it != NULL) {
+    
+        while(pblIteratorHasNext(it)) {
+            
+            void *entry = pblIteratorNext(it);
+            
+            uint16_t *ev = (uint16_t *) pblMapEntryKey(entry);
+            retval += teoSScrUnSubscription(sscr, peer_name, *ev);
+        }
+        pblIteratorFree(it);
+    }
+    
+    return retval;    
+}
+
+/**
+ * Send command to subscribe this host to event at remote peer
  * 
  * @param sscr Pointer to teoSScrClass
  * @param peer_name Remote host name
@@ -298,7 +339,7 @@ void teoSScrSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
 }
 
 /**
- * This host unsubscribe from event at remote peer
+ * Send command to unsubscribe this host from event at remote peer
  * 
  * @param sscr Pointer to teoSScrClass
  * @param peer_name Remote host name

@@ -14,7 +14,7 @@
 
 extern CU_pSuite pSuite; // Test global variable
 
-int number_of_subscribers(teoSScrClass *sscr);
+int teoSScrNumberOfSubscribers(teoSScrClass *sscr);
 
 /**
  * Emulate ksnetEvMgrClass
@@ -59,31 +59,49 @@ void test_6_2() {
     char *peer_name = "test-peer";
     char *peer_name_2 = "test-peer_2";
     
-    //
+    // Subscribe
     teoSScrSubscription(sscr, peer_name, 100);
-    CU_ASSERT(number_of_subscribers(sscr) == 1);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 1);
     
     teoSScrSubscription(sscr, peer_name, 110);
-    CU_ASSERT(number_of_subscribers(sscr) == 2);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 2);
     
     teoSScrSubscription(sscr, peer_name_2, 110);
-    CU_ASSERT(number_of_subscribers(sscr) == 3);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 3);
     
     teoSScrSubscription(sscr, peer_name_2, 100);
-    CU_ASSERT(number_of_subscribers(sscr) == 4);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 4);
     
-    // 
+    // UnSubscribe
     teoSScrUnSubscription(sscr, peer_name, 100);
-    CU_ASSERT(number_of_subscribers(sscr) == 3);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 3);
     
     teoSScrUnSubscription(sscr, peer_name_2, 100);
-    CU_ASSERT(number_of_subscribers(sscr) == 2);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 2);
     
     teoSScrUnSubscription(sscr, peer_name, 110);
-    CU_ASSERT(number_of_subscribers(sscr) == 1);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 1);
     
     teoSScrUnSubscription(sscr, peer_name_2, 110);
-    CU_ASSERT(number_of_subscribers(sscr) == 0);       
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 0);       
+    
+    
+    // Subscribe
+    teoSScrSubscription(sscr, peer_name, 100);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 1);
+    
+    teoSScrSubscription(sscr, peer_name, 110);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 2);
+    
+    teoSScrSubscription(sscr, peer_name, 120);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 3);
+    
+    teoSScrSubscription(sscr, peer_name, 130);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 4);
+    
+    // UnSubscribe All
+    teoSScrUnSubscriptionAll(sscr, peer_name);
+    CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 0);
     
     teoSScrDestroy(sscr);
 }
