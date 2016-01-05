@@ -78,6 +78,7 @@
         <in>teomulti.c</in>
         <in>teomulti_t.c</in>
         <in>teosend.c</in>
+        <in>teosscr.c</in>
         <in>teostream.c</in>
         <in>teotcp.c</in>
         <in>teoterm.c</in>
@@ -424,12 +425,6 @@
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -437,12 +432,6 @@
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -551,6 +540,19 @@
         </cTool>
       </item>
       <item path="examples/teosend.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="1">
+          <incDir>
+            <pElem>examples</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>/usr/include/libev</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="examples/teosscr.c" ex="false" tool="0" flavor2="0">
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
@@ -1089,7 +1091,7 @@
         <cTool flags="1">
         </cTool>
       </item>
-      <item path="tests/test_subscribe.c" ex="false" tool="0" flavor2="0">
+      <item path="tests/test_subscribe.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
         </cTool>
       </item>
