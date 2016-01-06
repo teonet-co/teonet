@@ -1,4 +1,4 @@
-/* 
+/** 
  * \file   teosscr.c
  * \author Kirill Scherba <kirill@scherba.ru>
  *
@@ -38,7 +38,7 @@ static int app_type = 0;
  * Clients Teonet Events callback
  *
  * @param ke Pointer to ksnetEvMgrClass
- * @param event Teonet event selected in ksnetEvMgrEvents enum
+ * @param event Teonet event selected in ::ksnetEvMgrEvents enum
  * @param data Events data
  * @param data_len Data length
  * @param user_data User data selected in ksnetEvMgrInitPort() function
@@ -63,7 +63,8 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         } 
         break;
         
-        // Calls by timer
+        // Calls by timer started in main() function by calling the 
+        // ksnetEvMgrSetCustomTimer() function
         case EV_K_TIMER:
         {
             // Client send CMD_USER command to server
@@ -84,7 +85,7 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }
         break;        
         
-        // Undefined event (an error)
+        // Sum other events
         default:
             break;
     }    
@@ -94,7 +95,7 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  * Servers Teonet Events callback
  *
  * @param ke Pointer to ksnetEvMgrClass
- * @param event Teonet event selected in ksnetEvMgrEvents enum
+ * @param event Teonet event selected in ::ksnetEvMgrEvents enum
  * @param data Events data
  * @param data_len Data length
  * @param user_data User data selected in ksnetEvMgrInitPort() function
@@ -139,7 +140,7 @@ void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }    
         break;
         
-        // Undefined event (an error)
+        // Sum other events
         default:
             break;
     }
@@ -149,7 +150,7 @@ void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  * Common Teonet Events callback
  *
  * @param ke Pointer to ksnetEvMgrClass
- * @param event Teonet event selected in ksnetEvMgrEvents enum
+ * @param event Teonet event selected in ::ksnetEvMgrEvents enum
  * @param data Events data
  * @param data_len Data length
  * @param user_data User data selected in ksnetEvMgrInitPort() function
@@ -184,7 +185,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }
         break;
                     
-        // Undefined event (an error)
+        // All other events (switch to clients or servers event_cb)
         default:
             if(!app_type) event_cb_client(ke, event, data, data_len, user_data);
             else  event_cb_server(ke, event, data, data_len, user_data);
@@ -193,7 +194,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 }
 
 /**
- * Main QUEUE callback example function
+ * Main Subscribe example function
  *
  * @param argc Number of arguments
  * @param argv Arguments array
@@ -202,6 +203,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  */
 int main(int argc, char** argv) {
     
+    // Show application info
     printf("Teosscr example ver " TSSCR_VERSION ", "
            "based on teonet ver. " VERSION "\n");
 
