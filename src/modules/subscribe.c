@@ -25,7 +25,7 @@
  */
 typedef struct teoSScrListData {
     
-    uint16_t ev; ///< Event (used whensend data to subscriber)
+    uint16_t ev; ///< Event (used when send data to subscriber)
     char data[]; ///< Remote peer name in list or data in CMD_SUBSCRIBE_ANSWER
         
 } teoSScrListData;
@@ -62,7 +62,7 @@ teoSScrClass *teoSScrInit(void *ke) {
  * @param data Event data
  * @param data_length Event data length
  */
-void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data, 
+void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
         size_t data_length) {
     
     size_t sscr_data_length = sizeof(teoSScrListData) + data_length;
@@ -81,10 +81,10 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
         #ifdef DEBUG_KSNET
         ksnet_printf(
                &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
-               DEBUG, 
-               "%sSubscribe:%s " 
-               "Prepare to Send CMD_SUBSCRIBE_ANSWER with event #%d, "
-               "and data '%s'. Number of subscribers: %d.\n", 
+               DEBUG,
+               "%sSubscribe:%s "
+               "Send CMD_SUBSCRIBE_ANSWER with event #%d, "
+               "and data '%s'. Number of subscribers: %d.\n",
                 ANSI_LIGHTGREEN, ANSI_NONE,
                 ev, (char*)data, num
         );
@@ -94,14 +94,12 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
         for(i = 0; i < num; i++) {
 
             teoSScrListData *sscr_list_data = pblListGet(sscr_map_data->list, i);
-            if(sscr_list_data->ev == ev) {
 
-                // Send subscribe command to remote peer
-                ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc, 
-                    sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, sscr_data, 
-                    sscr_data_length);    
-            }
-        }    
+            // Send subscribe command to remote peer
+            ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc,
+                sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, sscr_data,
+                sscr_data_length);
+        }
     }
     free(sscr_data);
 }
