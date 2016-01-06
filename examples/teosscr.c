@@ -28,18 +28,134 @@
 #define TSSCR_VERSION "0.0.1"
 
 /**
- * Teonet Events callback
+ * This Application type:
+ *  0 - client
+ *  1 - server
+ */
+static int app_type = 0;
+
+/**
+ * Clients Teonet Events callback
  *
- * @param ke
- * @param event
- * @param data
- * @param data_len
- * @param user_data
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param event Teonet event selected in ksnetEvMgrEvents enum
+ * @param data Events data
+ * @param data_len Data length
+ * @param user_data User data selected in ksnetEvMgrInitPort() function
+ */
+void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
+              size_t data_len, void *user_data) {
+    
+    switch(event) {
+    
+        // Connected event received
+        case EV_K_CONNECTED: 
+        {
+            // Client send subscribe command to server                
+            char *peer = ((ksnCorePacketData*)data)->from;
+            if(!strcmp(peer, ke->ksn_cfg.app_argv[1])) {
+
+                printf("The peer: '%s' was connected\n", peer);
+
+                // Subscribe to EV_K_RECEIVED event in remote peer
+                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_RECEIVED);
+            }
+        } 
+        break;
+        
+        // Calls by timer
+        case EV_K_TIMER:
+        {
+            // Client send CMD_USER command to server
+            ksnCoreSendCmdto(ke->kc, ke->ksn_cfg.app_argv[1], CMD_USER, 
+                        "Hello!", 7);
+        }
+        break;
+        
+        // Subscribe event received
+        case EV_K_SUBSCRIBE:
+        {
+            ksnCorePacketData *rd = data;
+            uint16_t ev = *((uint16_t*)rd->data);
+            char *data = rd->data + sizeof(uint16_t);
+            
+            printf("EV_K_SUBSCRIBE received from: %s, event: %d, data: %s\n", 
+                    rd->from, ev, data);
+        }
+        break;        
+        
+        // Undefined event (an error)
+        default:
+            break;
+    }    
+}
+    
+/**
+ * Servers Teonet Events callback
+ *
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param event Teonet event selected in ksnetEvMgrEvents enum
+ * @param data Events data
+ * @param data_len Data length
+ * @param user_data User data selected in ksnetEvMgrInitPort() function
+ */
+void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
+              size_t data_len, void *user_data) {
+    
+    switch(event) {
+    
+        // Calls when client peer disconnected
+        case EV_K_DISCONNECTED: 
+        {
+            ksnCorePacketData *rd = data;
+            if(rd->from != NULL) {
+                
+                printf("Peer %s was disconnected \n", rd->from);
+                
+                // Server UnSubscribe peer
+                // UnSubscribe peer from EV_K_RECEIVED event
+                teoSScrUnSubscription(ke->kc->kco->ksscr, rd->from,
+                        EV_K_RECEIVED);
+            }
+            else printf("Peer was disconnected\n");
+        }    
+        break;
+        
+        // Calls when data received
+        case EV_K_RECEIVED: 
+        {
+            // Server send EV_K_SUBSCRIBE command to client when CMD_USER 
+            // command received
+            ksnCorePacketData *rd = data;
+            if(rd->cmd == CMD_USER) {
+
+                printf("EV_K_RECEIVED command: %d, from %s\n", rd->cmd, 
+                        rd->from);
+
+                // Send EV_K_RECEIVED event to all subscribers
+                teoSScrSend(ke->kc->kco->ksscr, EV_K_RECEIVED, rd->data, 
+                        rd->data_len);
+            }
+        }    
+        break;
+        
+        // Undefined event (an error)
+        default:
+            break;
+    }
+}
+
+/**
+ * Common Teonet Events callback
+ *
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param event Teonet event selected in ksnetEvMgrEvents enum
+ * @param data Events data
+ * @param data_len Data length
+ * @param user_data User data selected in ksnetEvMgrInitPort() function
  */
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
-    
-    static int app_type = 0;
     
     switch(event) {
         
@@ -53,7 +169,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if(strcmp(ke->ksn_cfg.app_argv[1], "null")) {
                 
                 printf("Client peer subscribed to '%s' peer\n", 
-                        ke->ksn_cfg.app_argv[1]);                
+                        ke->ksn_cfg.app_argv[1]);       
+                
+                app_type = 0;
             }
             
             // Server
@@ -65,91 +183,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             }
         }
         break;
-        
-        // Connected event received
-        case EV_K_CONNECTED: 
-        {
-            // Client send subscribe command to server
-            if(!app_type) {
-                
-                char *peer = ((ksnCorePacketData*)data)->from;
-                if(!strcmp(peer, ke->ksn_cfg.app_argv[1])) {
-
-                    printf("The peer: '%s' was connected\n", peer);
-
-                    // Subscribe to EV_K_RECEIVED event in remote peer
-                    teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_RECEIVED);
-                }
-            }            
-        } 
-        break;
-        
-        // Calls when peer disconnected
-        case EV_K_DISCONNECTED: 
-        {
-            ksnCorePacketData *rd = data;
-            if(rd->from != NULL) {
-                
-                printf("Peer %s was disconnected \n", rd->from);
-                
-                // Server UnSubscribe peer
-                if(app_type) {
                     
-                    // UnSubscribe peer from EV_K_RECEIVED event
-                    teoSScrUnSubscription(ke->kc->kco->ksscr, rd->from,
-                            EV_K_RECEIVED);
-                }
-            }
-            else printf("Peer was disconnected\n");
-        }    
-        break;
-        
-        // Calls by timer
-        case EV_K_TIMER:
-        {
-            // Client send CMD_USER command to server
-            if(!app_type) {
-                ksnCoreSendCmdto(ke->kc, ke->ksn_cfg.app_argv[1], CMD_USER, 
-                        "Hello!", 7);
-            }
-        }
-        break;
-        
-        // Calls when data received
-        case EV_K_RECEIVED: 
-        {            
-            // Server send EV_K_SUBSCRIBE command to client when CMD_USER 
-            // command received
-            if(app_type) {
-                
-                ksnCorePacketData *rd = data;
-                if(rd->cmd == CMD_USER) {
-                    
-                    printf("EV_K_RECEIVED command: %d, from %s\n", rd->cmd, 
-                            rd->from);
-
-                    // Send EV_K_RECEIVED event to all subscribers
-                    teoSScrSend(ke->kc->kco->ksscr, EV_K_RECEIVED, rd->data, 
-                            rd->data_len);
-                }
-            }
-        }    
-        break;
-        
-        // Subscribe event received
-        case EV_K_SUBSCRIBE:
-        {
-            ksnCorePacketData *rd = data;
-            uint16_t ev = *((uint16_t*)rd->data);
-            char *data = rd->data + sizeof(uint16_t);
-            
-            printf("EV_K_SUBSCRIBE received from: %s, event: %d, data: %s\n", 
-                    rd->from, ev, data);
-        }
-        break;
-            
         // Undefined event (an error)
         default:
+            if(!app_type) event_cb_client(ke, event, data, data_len, user_data);
+            else  event_cb_server(ke, event, data, data_len, user_data);
             break;
     }
 }
