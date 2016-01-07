@@ -164,20 +164,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_SUBSCRIBE:
         {
             ksnCorePacketData *rd = data;
-            uint16_t ev = *((uint16_t*)rd->data);
-            char *peer_name = rd->data + sizeof(uint16_t);
+            teoSScrData *ssrc_data = rd->data;
             
             printf("EV_K_SUBSCRIBE received from: %s, event: %d, name %s\n", 
-                    rd->from, ev, peer_name);
+                    rd->from, ssrc_data->ev, ssrc_data->data);
             
-            if(ev == EV_K_DISCONNECTED) {
+            if(ssrc_data->ev == EV_K_DISCONNECTED) {
                                 
                 ksnCorePacketData rd_s;
                 
                 // Send event to all clients and remove from map
                 rd_s.cmd = CMD_R_END;
-                rd_s.from = peer_name;
-                rd_s.from_len = strlen(peer_name) + 1;
+                rd_s.from = ssrc_data->data;
+                rd_s.from_len = strlen(ssrc_data->data) + 1;
                 rd_s.addr = rd->addr, 
                 rd_s.port = rd->port,
                 rd_s.l0_f = 1,
