@@ -49,7 +49,7 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
     switch(event) {
     
         // Connected event received
-        case EV_K_CONNECTED: 
+        case EV_K_CONNECTED:
         {
             // Client send subscribe command to server                
             char *peer = ((ksnCorePacketData*)data)->from;
@@ -60,7 +60,7 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // Subscribe to EV_K_RECEIVED event in remote peer
                 teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_RECEIVED);
             }
-        } 
+        }
         break;
         
         // Calls by timer started in main() function by calling the 
@@ -77,11 +77,11 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_SUBSCRIBE:
         {
             ksnCorePacketData *rd = data;
-            uint16_t ev = *((uint16_t*)rd->data);
-            char *data = rd->data + sizeof(uint16_t);
+            teoSScrData *ssrc_data = rd->data;
             
-            printf("EV_K_SUBSCRIBE received from: %s, event: %d, data: %s\n", 
-                    rd->from, ev, data);
+            printf("EV_K_SUBSCRIBE received from: %s, event: %d, command: %d, "
+                   "data: %s\n", 
+                    rd->from, ssrc_data->ev, ssrc_data->cmd, ssrc_data->data);
         }
         break;        
         
@@ -106,7 +106,7 @@ void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
     switch(event) {
     
         // Calls when client peer disconnected
-        case EV_K_DISCONNECTED: 
+        case EV_K_DISCONNECTED:
         {
             ksnCorePacketData *rd = data;
             if(rd->from != NULL) {
@@ -123,7 +123,7 @@ void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         break;
         
         // Calls when data received
-        case EV_K_RECEIVED: 
+        case EV_K_RECEIVED:
         {
             // Server send EV_K_SUBSCRIBE command to client when CMD_USER 
             // command received
@@ -135,7 +135,7 @@ void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                 // Send EV_K_RECEIVED event to all subscribers
                 teoSScrSend(ke->kc->kco->ksscr, EV_K_RECEIVED, rd->data, 
-                        rd->data_len);
+                        rd->data_len, rd->cmd);
             }
         }    
         break;
