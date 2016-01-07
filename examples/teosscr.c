@@ -80,8 +80,9 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             teoSScrData *ssrc_data = rd->data;
             
             printf("EV_K_SUBSCRIBE received from: %s, event: %d, command: %d, "
-                   "data: %s\n", 
-                    rd->from, ssrc_data->ev, ssrc_data->cmd, ssrc_data->data);
+                   "from: %s, data: %s\n", 
+                    rd->from, ssrc_data->ev, ssrc_data->cmd, ssrc_data->data, 
+                    ssrc_data->data + strlen(ssrc_data->data) + 1 );
         }
         break;        
         
@@ -130,12 +131,19 @@ void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             ksnCorePacketData *rd = data;
             if(rd->cmd == CMD_USER) {
 
-                printf("EV_K_RECEIVED command: %d, from %s\n", rd->cmd, 
-                        rd->from);
+                printf("EV_K_RECEIVED command: %d, from %s, data: %s\n", 
+                        rd->cmd, rd->from, (char*)rd->data);
 
+                size_t rec_data_len = rd->from_len + rd->data_len;
+                char *rec_data = malloc(rec_data_len);
+                memcpy(rec_data, rd->from, rd->from_len);
+                memcpy(rec_data + rd->from_len, rd->data, rd->data_len);
+                
                 // Send EV_K_RECEIVED event to all subscribers
-                teoSScrSend(ke->kc->kco->ksscr, EV_K_RECEIVED, rd->data, 
-                        rd->data_len, rd->cmd);
+                teoSScrSend(ke->kc->kco->ksscr, EV_K_RECEIVED, rec_data, 
+                        rec_data_len, rd->cmd);
+                
+                free(rec_data);
             }
         }    
         break;
