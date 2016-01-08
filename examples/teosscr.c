@@ -8,13 +8,28 @@
  * Module: subscribe.c  
  *   
  * This is example application to subscribe one teonet application to other 
- * teonet application event. 
+ * teonet application event. This application has code for two type of 
+ * applications: server and client. Client subscribed to server and get 
+ * EV_K_SUBSCRIBE event when event happen at the server application.
  * 
- * In this example we:
+ * Start applications:
+ * 
  * * start one application as server: 
  *   ```examples/teosscr teosscr-ser null```
+ * 
  * * start other application as client: 
  *   ```examples/teosscr teosscr-cli teosscr-ser -r 9000 -a 127.0.0.1```
+ * 
+ * In client application use:
+ * 
+ * * teoSScrSubscribe() function to subscribe to remote peer event
+ * * case EV_K_SUBSCRIBE in event loop to get event when event happen at the
+ *   remote peer
+ * 
+ * In server application use:
+ * 
+ * * teoSScrSend() function to send event to subscriber
+ * * teoSScrUnSubscription() function to unsubscribe disconnected peer
  * 
  * Created on January 5, 2016, 3:38 PM
  */
@@ -86,7 +101,7 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }
         break;        
         
-        // Sum other events
+        // Some other events
         default:
             break;
     }    
@@ -148,7 +163,7 @@ void event_cb_server(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }    
         break;
         
-        // Sum other events
+        // Some other events
         default:
             break;
     }
