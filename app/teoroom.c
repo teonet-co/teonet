@@ -1,15 +1,26 @@
-/* 
- * File:   teoroom.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+/** 
+ * \file   teoroom.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
+ * Room controller
+ * 
+ * Teonet peer name: teo-room
+ * 
+ * API, teonet commands:
+ * 
+ * * CMD_R_START = 129 - start game
+ * * CMD_R_POSITION = 130 - transfer position
+ * * CMD_R_END = 131 - end game
+ * 
+ * Command line to execute:
+ * 
+ *     app/teoroom teo-room
+ * 
  * Created on December 17, 2015, 1:52 PM
  */
 
 /*
  *
- * Command line to execute:
- * 
- *  app/teoroom teo-room
  * 
  */
 
@@ -154,8 +165,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 printf("L0 server: '%s' was connected\n", peer);
                 
                 // Subscribe to client disconnected command at L0 server
-                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_DISCONNECTED);
-                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_CONNECTED);
+                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_L0_DISCONNECTED);
+                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_L0_CONNECTED);
             }
             
         } break;
@@ -169,7 +180,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             printf("EV_K_SUBSCRIBE received from: %s, event: %d, name %s\n", 
                     rd->from, ssrc_data->ev, ssrc_data->data);
             
-            if(ssrc_data->ev == EV_K_DISCONNECTED) {
+            if(ssrc_data->ev == EV_K_L0_DISCONNECTED) {
                                 
                 ksnCorePacketData rd_s;
                 
