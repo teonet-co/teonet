@@ -69,7 +69,10 @@ typedef enum ksnetEvMgrEvents {
     EV_K_STREAM_DISCONNECTED,       ///< After stream disconnected
     EV_K_STREAM_DATA,               ///< Input stream has a data
             
-    EV_K_SUBSCRIBE                  ///< Subscribe answer command received
+    EV_K_SUBSCRIBE,                 ///< Subscribe answer command received
+    EV_K_L0_CONNECTED,              ///< New L0 client connected to L0 server
+    EV_K_L0_DISCONNECTED            ///< A L0 client was disconnected from L0 server
+
 
 } ksnetEvMgrEvents;
 

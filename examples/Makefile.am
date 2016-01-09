@@ -32,7 +32,8 @@ LIBS += -pthread
 endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
-	  teoack teoackm teocque teostream teol0cli teol0cli_n teol0cli_n teol0cli_ns
+	  teoack teoackm teocque teostream teol0cli teol0cli_n teol0cli_n \
+	  teol0cli_ns teosscr
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
@@ -48,6 +49,7 @@ teostream_SOURCES = teostream.c
 teol0cli_SOURCES = teol0cli.c 
 teol0cli_n_SOURCES = ../embedded/teocli/main.c
 teol0cli_ns_SOURCES = ../embedded/teocli/main_select.c
+teosscr_SOURCES = teosscr.c
 
 exampledir = $(datarootdir)/doc/@PACKAGE@/examples
 example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \

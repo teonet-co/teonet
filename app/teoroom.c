@@ -1,15 +1,26 @@
-/* 
- * File:   teoroom.c
- * Author: Kirill Scherba <kirill@scherba.ru>
+/** 
+ * \file   teoroom.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
+ * Room controller
+ * 
+ * Teonet peer name: teo-room
+ * 
+ * API, teonet commands:
+ * 
+ * * CMD_R_START = 129 - start game
+ * * CMD_R_POSITION = 130 - transfer position
+ * * CMD_R_END = 131 - end game
+ * 
+ * Command line to execute:
+ * 
+ *     app/teoroom teo-room
+ * 
  * Created on December 17, 2015, 1:52 PM
  */
 
 /*
  *
- * Command line to execute:
- * 
- *  app/teoroom teo-room
  * 
  */
 
@@ -154,8 +165,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 printf("L0 server: '%s' was connected\n", peer);
                 
                 // Subscribe to client disconnected command at L0 server
-                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_DISCONNECTED);
-                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_CONNECTED);
+                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_L0_DISCONNECTED);
+                teoSScrSubscribe(ke->kc->kco->ksscr, peer, EV_K_L0_CONNECTED);
             }
             
         } break;
@@ -164,20 +175,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_SUBSCRIBE:
         {
             ksnCorePacketData *rd = data;
-            uint16_t ev = *((uint16_t*)rd->data);
-            char *peer_name = rd->data + sizeof(uint16_t);
+            teoSScrData *ssrc_data = rd->data;
             
             printf("EV_K_SUBSCRIBE received from: %s, event: %d, name %s\n", 
-                    rd->from, ev, peer_name);
+                    rd->from, ssrc_data->ev, ssrc_data->data);
             
-            if(ev == EV_K_DISCONNECTED) {
+            if(ssrc_data->ev == EV_K_L0_DISCONNECTED) {
                                 
                 ksnCorePacketData rd_s;
                 
                 // Send event to all clients and remove from map
                 rd_s.cmd = CMD_R_END;
-                rd_s.from = peer_name;
-                rd_s.from_len = strlen(peer_name) + 1;
+                rd_s.from = ssrc_data->data;
+                rd_s.from_len = strlen(ssrc_data->data) + 1;
                 rd_s.addr = rd->addr, 
                 rd_s.port = rd->port,
                 rd_s.l0_f = 1,
