@@ -56,7 +56,6 @@ ksnLNullClass *ksnLNullInit(void *ke) {
             kl->ke = ke; // Pointer event manager class
             kl->map = pblMapNewHashMap(); // Create a new hash map      
             kl->map_n = pblMapNewHashMap(); // Create a new hash map    
-//            kl->sscr = teoSScrInit(ke); // Initialize subscribe class
             ksnLNullStart(kl); // Start L0 Server
         }
     }
@@ -390,7 +389,7 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
             ANSI_LIGHTCYAN, ANSI_NONE, fd);
     
     // Send Connected event to all subscribers
-    teoSScrSend(kev->kc->kco->ksscr, EV_K_CONNECTED, "", 1, 0);
+    teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, "", 1, 0);
 
     // Register client in tcp proxy map 
     ksnLNullData data;
@@ -452,7 +451,7 @@ static void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             ANSI_LIGHTCYAN, ANSI_NONE, fd);
         
         // Send Disconnect event to all subscribers
-        teoSScrSend(kev->kc->kco->ksscr, EV_K_DISCONNECTED, kld->name, 
+        teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name, 
                 kld->name_length, 0);
         
         // Free name
