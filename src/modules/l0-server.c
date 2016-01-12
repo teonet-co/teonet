@@ -203,6 +203,10 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                                 "Connection initialized, client name: %s ...\n", 
                                 ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
                             #endif
+
+                            // Send Connected event to all subscribers
+                            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, 
+                                    kld->name, kld->name_length, 0);
                         }
                         
                         // Resend data to teonet
