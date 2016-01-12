@@ -172,7 +172,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 23:0:0 
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info 24:0:0 
 
 uninstall-local:
 	-rm -r $(teonetincludedir)
