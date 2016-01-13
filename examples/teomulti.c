@@ -1,4 +1,4 @@
-/* 
+/** 
  * \file   teomulti.c
  * \author Kirill Scherba <kirill@scherba.ru>
  * 
