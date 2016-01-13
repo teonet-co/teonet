@@ -106,7 +106,7 @@ static void remove_client(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
         // Remove user from map
         size_t valueLength;
-        pblMapRemove(map, rd->from, rd->from_len, &valueLength);    
+        pblMapRemoveFree(map, rd->from, rd->from_len, &valueLength);    
         
         printf("Client %s removed\n", rd->from);
     }
