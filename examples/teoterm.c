@@ -1,4 +1,4 @@
-/* 
+/** 
  * \file   teoterm.c
  * \author Kirill Scherba <kirill@scherba.ru>
  * 
