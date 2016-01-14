@@ -1,4 +1,4 @@
-/* 
+/** 
  * \file   teoackm.c
  * \author Kirill Scherba <kirill@scherba.ru>
  * 
