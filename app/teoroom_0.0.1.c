@@ -32,83 +32,17 @@
 
 #include "ev_mgr.h"
 
-#define TROOM_VERSION "0.0.2"
+#define TROOM_VERSION "0.0.1"
 
-/**
- * Application API commands
- */
+// Application API command
 enum CMD_R {    
-    
-    CMD_R_START = CMD_USER, ///< #129 Start game, data: GameParameters
-    CMD_R_POSITION,         ///< #130 Transfer position, data: * (resend to room members)
-    CMD_R_END               ///< #131 End game, data: NULL 
-            
+    CMD_R_START = CMD_USER, ///< #129 Start game
+    CMD_R_POSITION,         ///< #130 Transfer position
+    CMD_R_END               ///< #131 End game 
 };
 
-/**
- * Data structure of CMD_R_START command
- */
-typedef struct GameParameters {
-
- uint32_t roomId;
- 
-} GameParameters;
-
-/**
- * Room controller (this application) data structure
- */
-typedef struct roomData {
-    
-    ksnetEvMgrClass *ke;
-    PblMap *map_n; // map with key = name
-    PblMap *map_r; // map with key = roomId
-    
-} roomData;
-
-/**
- * Room controllers name map data
- */
-typedef struct mapNameData {
-    
-    uint32_t roomId;    
-    
-} mapNameData;
-
-/**
- * Room controllers room map data
- */
-typedef struct mapRoomData {
-    
-    char **name;
-    
-} mapRoomData;
-
-/**
- * Initialize room module
- * 
- * @return 
- */
-static roomData *roomInit(ksnetEvMgrClass *ke) {
-    
-    roomData *rd = malloc(sizeof(roomData));
-    rd->map_n = pblMapNewHashMap();
-    rd->map_r = pblMapNewHashMap();
-    rd->ke = ke;
-    
-    return rd;
-}
-
-static void roomDestroy(roomData *rd) {
-    
-    if(rd != NULL) {
-        
-        pblMapFree(rd->map_n);        
-        pblMapFree(rd->map_r);
-        
-        free(rd);
-    }
-}
-
+PblMap _map;
+PblMap *map;
 
 #define sendCmdTo(ke, rd, name, out_data, out_data_len) \
     if(rd->l0_f) \
@@ -120,21 +54,17 @@ static void roomDestroy(roomData *rd) {
             out_data, out_data_len)
 
 /**
- * Send data to all clients in this room (in room of rd->from client)
+ * Send data to all clients
  * 
  * @param ke Pointer to ksnetEvMgrClass
  * @param rd Pointer to ksnCorePacketData
  */
-static void roomSendToAll(roomData *room, ksnCorePacketData *rd) {
-    
-    // Get room of data sender
-    size_t valueLengthPtr;
-    mapNameData *this_md = (mapNameData *)pblMapGet(room->map_n, rd->from, 
-            rd->from_len, &valueLengthPtr);
+static void send_to_all(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     
     // Resend data to all users except of me
-    PblIterator *it = pblMapIteratorNew(room->map_n);
-    if(it != NULL) {        
+    PblIterator *it = pblMapIteratorNew(map);
+    if(it != NULL) {
+        
         
         void *out_data = malloc(rd->data_len + rd->from_len);
         if(rd->data_len) memcpy(out_data, rd->data, rd->data_len);
@@ -145,15 +75,13 @@ static void roomSendToAll(roomData *room, ksnCorePacketData *rd) {
 
             void *entry = pblIteratorNext(it);
             char *name = (char *) pblMapEntryKey(entry);
-            mapNameData *md = (mapNameData *) pblMapEntryValue(entry);
             
-            if(this_md->roomId == md->roomId && strcmp(rd->from, name)) {
-            //if(strcmp(rd->from, name)) {
+            if(strcmp(rd->from, name)) {
                 
                 printf("Resend cmd %d to user: %s\n", rd->cmd, name);
                 
                 // \todo Issue #141: Create teonet command to send data to Peer or to L0 client                
-                sendCmdTo(room->ke, rd, name, out_data, out_data_len);
+                sendCmdTo(ke, rd, name, out_data, out_data_len);
             }
         }
         
@@ -168,37 +96,32 @@ static void roomSendToAll(roomData *room, ksnCorePacketData *rd) {
  * @param ke Pointer to ksnetEvMgrClass
  * @param rd Pointer to ksnCorePacketData
  */
-static void roomRemoveClient(roomData *room, ksnCorePacketData *rd) {
+static void remove_client(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
     size_t valueLengthPtr;
-    if(pblMapGet(room->map_n, rd->from, rd->from_len, &valueLengthPtr) != NULL) {
+    if(pblMapGet(map, rd->from, rd->from_len, &valueLengthPtr) != NULL) {
         
-        // Send to all clients in this room
-        roomSendToAll(room, rd);
+        // Send END to all user
+        send_to_all(ke, rd);
 
         // Remove user from map
         size_t valueLength;
-        pblMapRemoveFree(room->map_n, rd->from, rd->from_len, &valueLength);    
+        pblMapRemoveFree(map, rd->from, rd->from_len, &valueLength);    
         
         printf("Client %s removed\n", rd->from);
     }
 }
 
 /**
- * Send all existing clients in this room (R_START) to this user
+ * Send all existing users (R_START) to this user
  * 
  * @param ke
  * @param rd
  */
-static void roomSendAllConnected(roomData *room, ksnCorePacketData *rd) {
+static void send_all_connected(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
-    // Get room
-    size_t valueLengthPtr;
-    mapNameData *this_md = (mapNameData *)pblMapGet(room->map_n, rd->from, rd->from_len, 
-            &valueLengthPtr);
-    
     // Resend data to all users except of me
-    PblIterator *it = pblMapIteratorNew(room->map_n);
+    PblIterator *it = pblMapIteratorNew(map);
     if(it != NULL) {
         
         while(pblIteratorHasNext(it)) {
@@ -206,45 +129,17 @@ static void roomSendAllConnected(roomData *room, ksnCorePacketData *rd) {
             void *entry = pblIteratorNext(it);
             char *name = (char *) pblMapEntryKey(entry);
             size_t name_len = pblMapEntryKeyLength(entry);
-            mapNameData *md = (mapNameData *) pblMapEntryValue(entry);
             
-            if(this_md->roomId == md->roomId && strcmp(rd->from, name)) {
-            //if(strcmp(rd->from, name)) {
+            if(strcmp(rd->from, name)) {
 
                 printf("Resend cmd %d about user %s to user: %s\n", rd->cmd, 
                         name, rd->from);
-                sendCmdTo(room->ke, rd, rd->from, name, name_len);
+                sendCmdTo(ke, rd, rd->from, name, name_len);
             }
         }
         
         pblIteratorFree(it);
     }
-}
-
-/**
- * Add client to room maps
- * 
- * @param room Pointer to roomData
- * @param rd Pointer to ksnCorePacketData
- * @param md Pointer to mapNameData
- * 
- * @return int rc >  0: The map did not already contain a mapping for the key.
- * @return int rc == 0: The map did already contain a mapping for the key.
- * @return int rc <  0: An error, see pbl_errno:
- */
-int roomAdd(roomData *room, ksnCorePacketData *rd, mapNameData *md) {
-    
-    int retval = -1;
-    
-    // Add to name map
-    retval = pblMapAdd(room->map_n, rd->from, rd->from_len, md, sizeof(mapNameData));
-    
-    // Add to room map
-    if(!pblMapContainsKey(room->map_r, &md->roomId, sizeof(md->roomId))) {
-        
-    }
-    
-    return retval;
 }
 
 /**
@@ -259,8 +154,6 @@ int roomAdd(roomData *room, ksnCorePacketData *rd, mapNameData *md) {
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
 
-    roomData *room = (roomData *) ke->user_data;
-            
     switch(event) {
 
         // Connected event received
@@ -300,7 +193,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 rd_s.l0_f = 1,
                 rd_s.data = NULL;
                 rd_s.data_len = 0;                
-                roomRemoveClient(room, &rd_s);
+                remove_client(ke, &rd_s);
             }
             
         } break;
@@ -320,21 +213,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 case CMD_R_START:
                 {
                     printf("Got START from: %s\n", rd->from); 
-
-                    if(!pblMapContainsKeyStr(room->map_n, rd->from)) {
-                        
-                        GameParameters *gp = (GameParameters *)rd->data;
+                    
+                    if(!pblMapContainsKeyStr(map, rd->from)) {
                         
                         // Send all existing users (R_START) to this user
-                        roomSendAllConnected(room, rd);
+                        send_all_connected(ke, rd);
                         
                         // Add to user map
-                        mapNameData md;
-                        md.roomId = gp != NULL ? gp->roomId : 1;
-                        roomAdd(room, rd, &md);
+                        pblMapAdd(map, rd->from, rd->from_len, "", 1);
                         
-                        // Resend START to all room users
-                        roomSendToAll(room, rd);
+                        // Resend START to all users
+                        send_to_all(ke, rd);
+                        
+                        // \todo: Subscribe to client disconnected command at L0 server
                     }
                     
                 } break;    
@@ -345,19 +236,17 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                     printf("Got POSITION from: %s\n", rd->from); 
 
-                    // If not connected
-                    if(!pblMapContainsKeyStr(room->map_n, rd->from)) {
+                    // \todo If not connected
+                    if(!pblMapContainsKeyStr(map, rd->from)) {
                         
                         printf("Emulate START from: %s\n", rd->from); 
                         
                         // Add to user map
-                        mapNameData md;
-                        md.roomId = 1;
-                        roomAdd(room, rd, &md);                        
+                        pblMapAdd(map, rd->from, rd->from_len, "", 1);
                     }
                     
                     // Resend POSITION to all users
-                    roomSendToAll(room, rd);
+                    send_to_all(ke, rd);
                     
                 } break;    
                     
@@ -367,7 +256,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     printf("Got END from: %s\n", rd->from); 
                     
                     // Resend event to all clients and remove from map
-                    roomRemoveClient(room, rd);
+                    remove_client(ke, rd);
                                                 
                 } break;    
                     
@@ -393,19 +282,16 @@ int main(int argc, char** argv) {
     
     printf("Teo room ver " TROOM_VERSION ", based on teonet ver " VERSION "\n");
     
-    roomData *rd = roomInit(NULL);
+    map = pblMapNewHashMap();
     
     // Initialize teonet event manager and Read configuration
-    //ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb, READ_ALL);
-    ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, rd);
-    
-    rd->ke = ke;
+    ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb, READ_ALL);
     
     // Start teonet
     ksnetEvMgrRun(ke);
     
-    //pblMapFree(map);
-    roomDestroy(rd);
+    pblMapFree(map);
 
     return (EXIT_SUCCESS);
 }
+
