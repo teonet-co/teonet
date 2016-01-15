@@ -27,7 +27,7 @@
 
 #include "ev_mgr.h"
 
-#define TROOM_VERSION "0.0.3"
+#define TROOM_VERSION "0.0.4"
 
 /**
  * Application API commands
@@ -94,7 +94,22 @@ typedef struct mapRoomData {
 } mapRoomData;
 
 /**
- * Initialize room module
+ * Sent teonet command to peer or l0 client
+ * 
+ * @param ke
+ * @return 
+ */
+#define sendCmdTo(ke, rd, name, out_data, out_data_len) \
+    if(rd->l0_f) \
+    ksnLNullSendToL0(ke, \
+        rd->addr, rd->port, name, strlen(name) + 1, rd->cmd, \
+        out_data, out_data_len); \
+    else \
+        ksnCoreSendCmdto(ke->kc, name, rd->cmd, \
+            out_data, out_data_len)
+
+/**
+ * Initialize room controller module
  * 
  * @return 
  */
@@ -110,6 +125,10 @@ static roomClass *roomInit(ksnetEvMgrClass *ke) {
     return rd;
 }
 
+/**
+ * Destroy room controller module
+ * @param rd
+ */
 static void roomDestroy(roomClass *rd) {
     
     if(rd != NULL) {
@@ -123,21 +142,11 @@ static void roomDestroy(roomClass *rd) {
     }
 }
 
-
-#define sendCmdTo(ke, rd, name, out_data, out_data_len) \
-    if(rd->l0_f) \
-    ksnLNullSendToL0(ke, \
-        rd->addr, rd->port, name, strlen(name) + 1, rd->cmd, \
-        out_data, out_data_len); \
-    else \
-        ksnCoreSendCmdto(ke->kc, name, rd->cmd, \
-            out_data, out_data_len)
-
 /**
  * Send data to all clients in this room (in room of rd->from client)
  * 
  * @param ke Pointer to ksnetEvMgrClass
- * @param rd Pointer to ksnCorePacketData
+ * @param rd Pointer to ksnCorePacketData received in EV_K_RECEIVED event case
  */
 static void roomSendToAll(roomClass *room, ksnCorePacketData *rd) {
     
@@ -166,7 +175,8 @@ static void roomSendToAll(roomClass *room, ksnCorePacketData *rd) {
                 if(room->show_printf)
                     printf("Resend cmd %d to user: %s\n", rd->cmd, name);
                 
-                // \todo Issue #141: Create teonet command to send data to Peer or to L0 client                
+                // \todo Issue #141: Create teonet command to send data to Peer 
+                //                   or to L0 client                
                 sendCmdTo(room->ke, rd, name, out_data, out_data_len);
             }
         }        
@@ -180,10 +190,10 @@ static void roomSendToAll(roomClass *room, ksnCorePacketData *rd) {
  * Add client to room maps
  * 
  * @param room Pointer to roomClass
- * @param rd Pointer to ksnCorePacketData
+ * @param rd Pointer to ksnCorePacketData received in EV_K_RECEIVED event case
  * @param roomId Room ID
  * 
- * @return int rc >  0: The map did not alrea|dy contain a mapping for the key.
+ * @return int rc >  0: The map did not already contain a mapping for the key.
  * @return int rc == 0: The map did already contain a mapping for the key.
  * @return int rc <  0: An error, see pbl_errno:
  */
@@ -211,8 +221,7 @@ int roomAddClient(roomClass *room, ksnCorePacketData *rd, uint32_t roomId) {
         if(room->show_printf)
             printf("Room id %d was opened\n", md.roomId);
     }    
-    else 
-        set = *set_ptr;
+    else set = *set_ptr;
     
     // Add pointer to client to room set
     pblSetAdd(set, md.name);
@@ -224,7 +233,7 @@ int roomAddClient(roomClass *room, ksnCorePacketData *rd, uint32_t roomId) {
  * Send END command to all connected clients and remove client from map
  * 
  * @param ke Pointer to ksnetEvMgrClass
- * @param rd Pointer to ksnCorePacketData
+ * @param rd Pointer to ksnCorePacketData received in EV_K_RECEIVED event case
  */
 static void roomRemoveClient(roomClass *room, ksnCorePacketData *rd) {
 
@@ -268,8 +277,8 @@ static void roomRemoveClient(roomClass *room, ksnCorePacketData *rd) {
 /**
  * Send all existing clients in this room (R_START) to this user
  * 
- * @param ke
- * @param rd
+ * @param room Pointer to roomClass
+ * @param rd Pointer to ksnCorePacketData received in EV_K_RECEIVED event case
  */
 static void roomSendAllConnected(roomClass *room, ksnCorePacketData *rd) {
 
@@ -398,7 +407,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             
         } break;
        
-
         // DATA received
         case EV_K_RECEIVED:
         {
@@ -416,12 +424,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     GameParameters *gp = (GameParameters *)rd->data;
                     
                     //if(room->show_printf)
-                    printf("Got START from: %s, roomID: %d (data length: %d)\n", rd->from, 
-                            gp->roomId, rd->data_len); 
+                    printf("Got START from: %s, roomID: %d (data length: %d)\n", 
+                            rd->from, gp->roomId, rd->data_len); 
                     
                     if(!pblMapContainsKeyStr(room->map_n, rd->from)) {
                                            
-                        // Add to user map                        
+                        // Add client to maps and set                        
                         roomAddClient(room, rd, gp != NULL ? gp->roomId : 1);
                         
                         // Send all existing users (R_START) to this user
@@ -543,15 +551,17 @@ int main(int argc, char** argv) {
     
     printf("Teo room ver " TROOM_VERSION ", based on teonet ver " VERSION "\n");
     
+    // Initialize room controller class
     roomClass *rd = roomInit(NULL);
     
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, rd);    
-    rd->ke = ke;
+    rd->ke = ke; // Set 
     
     // Start teonet
     ksnetEvMgrRun(ke);
     
+    // Destroy room controller class
     roomDestroy(rd);
 
     return (EXIT_SUCCESS);
