@@ -96,7 +96,12 @@ typedef struct mapRoomData {
 /**
  * Sent teonet command to peer or l0 client
  * 
- * @param ke
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param rd
+ * @param name
+ * @param out_data
+ * @param out_data_len
+ * 
  * @return 
  */
 #define sendCmdTo(ke, rd, name, out_data, out_data_len) \
@@ -110,6 +115,8 @@ typedef struct mapRoomData {
 
 /**
  * Initialize room controller module
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
  * 
  * @return 
  */
@@ -133,7 +140,7 @@ static void roomDestroy(roomClass *rd) {
     
     if(rd != NULL) {
         
-        // \todo Remove all clients from name map
+        // \todo Remove all clients from the name map
         
         pblMapFree(rd->map_n);        
         pblMapFree(rd->map_r);
@@ -155,22 +162,23 @@ static void roomSendToAll(roomClass *room, ksnCorePacketData *rd) {
     mapNameData *this_md = (mapNameData *)pblMapGet(room->map_n, rd->from, 
             rd->from_len, &valueLength);
     
-    // Resend data to all users except of me
-    PblIterator *it = pblMapIteratorNew(room->map_n);
-    if(it != NULL) {        
+    // Resend data to all users in this room except of me
+    PblSet **set_ptr = pblMapGet(room->map_r, &this_md->roomId, 
+            sizeof(this_md->roomId), &valueLength);
+    if(set_ptr != NULL) {
         
+        // Prepare out data
         void *out_data = malloc(rd->data_len + rd->from_len);
         if(rd->data_len) memcpy(out_data, rd->data, rd->data_len);
         memcpy(out_data + rd->data_len, rd->from, rd->from_len);
         size_t out_data_len = rd->data_len + rd->from_len;
-
-        while(pblIteratorHasNext(it)) {
-
-            void *entry = pblIteratorNext(it);
-            char *name = (char *) pblMapEntryKey(entry);
-            mapNameData *md = (mapNameData *) pblMapEntryValue(entry);
+        
+        // Loop through all clients in room set
+        int i, num = pblSetSize(*set_ptr);
+        for(i = 0; i < num; i++) {
             
-            if(this_md->roomId == md->roomId && strcmp(rd->from, name)) {
+            char *name = (char*)pblSetGet(*set_ptr, i);
+            if(strcmp(rd->from, name)) {
                 
                 if(room->show_printf)
                     printf("Resend cmd %d to user: %s\n", rd->cmd, name);
@@ -179,11 +187,41 @@ static void roomSendToAll(roomClass *room, ksnCorePacketData *rd) {
                 //                   or to L0 client                
                 sendCmdTo(room->ke, rd, name, out_data, out_data_len);
             }
-        }        
-        pblIteratorFree(it);
+        }
         
+        // Free out data
         free(out_data);
     }
+    
+//    // Resend data to all users except of me
+//    PblIterator *it = pblMapIteratorNew(room->map_n);
+//    if(it != NULL) {        
+//        
+//        void *out_data = malloc(rd->data_len + rd->from_len);
+//        if(rd->data_len) memcpy(out_data, rd->data, rd->data_len);
+//        memcpy(out_data + rd->data_len, rd->from, rd->from_len);
+//        size_t out_data_len = rd->data_len + rd->from_len;
+//
+//        while(pblIteratorHasNext(it)) {
+//
+//            void *entry = pblIteratorNext(it);
+//            char *name = (char *) pblMapEntryKey(entry);
+//            mapNameData *md = (mapNameData *) pblMapEntryValue(entry);
+//            
+//            if(this_md->roomId == md->roomId && strcmp(rd->from, name)) {
+//                
+//                if(room->show_printf)
+//                    printf("Resend cmd %d to user: %s\n", rd->cmd, name);
+//                
+//                // \todo Issue #141: Create teonet command to send data to Peer 
+//                //                   or to L0 client                
+//                sendCmdTo(room->ke, rd, name, out_data, out_data_len);
+//            }
+//        }        
+//        pblIteratorFree(it);
+//        
+//        free(out_data);
+//    }
 }
 
 /**
@@ -288,29 +326,51 @@ static void roomSendAllConnected(roomClass *room, ksnCorePacketData *rd) {
             rd->from_len, &valueLength);
     
     // Resend data to all users except of me
-    PblIterator *it = pblMapIteratorNew(room->map_n);
-    if(it != NULL) {
+    PblSet **set_ptr = pblMapGet(room->map_r, &this_md->roomId, 
+            sizeof(this_md->roomId), &valueLength);
+    if(set_ptr != NULL) {
         
-        while(pblIteratorHasNext(it)) {
-
-            void *entry = pblIteratorNext(it);
-            char *name = (char *) pblMapEntryKey(entry);
-            size_t name_len = pblMapEntryKeyLength(entry);
-            mapNameData *md = (mapNameData *) pblMapEntryValue(entry);
+        // Loop through all clients in room set
+        int i, num = pblSetSize(*set_ptr);
+        for(i = 0; i < num; i++) {
             
-            if(this_md->roomId == md->roomId && strcmp(rd->from, name)) {
-
+            char *name = (char*)pblSetGet(*set_ptr, i);
+            if(strcmp(rd->from, name)) {
+                                
                 if(room->show_printf)
                     printf("Resend cmd %d of client %s to user: %s\n", rd->cmd, 
                         name, rd->from);
                 
-                sendCmdTo(room->ke, rd, rd->from, name, name_len);
+                size_t name_len = strlen(name) + 1;
+                sendCmdTo(room->ke, rd, rd->from, name, name_len);            
             }
-            
-        }
+        }        
+    }    
         
-        pblIteratorFree(it);
-    }
+//    // Resend data to all users except of me
+//    PblIterator *it = pblMapIteratorNew(room->map_n);
+//    if(it != NULL) {
+//        
+//        while(pblIteratorHasNext(it)) {
+//
+//            void *entry = pblIteratorNext(it);
+//            char *name = (char *) pblMapEntryKey(entry);
+//            size_t name_len = pblMapEntryKeyLength(entry);
+//            mapNameData *md = (mapNameData *) pblMapEntryValue(entry);
+//            
+//            if(this_md->roomId == md->roomId && strcmp(rd->from, name)) {
+//
+//                if(room->show_printf)
+//                    printf("Resend cmd %d of client %s to user: %s\n", rd->cmd, 
+//                        name, rd->from);
+//                
+//                sendCmdTo(room->ke, rd, rd->from, name, name_len);
+//            }
+//            
+//        }
+//        
+//        pblIteratorFree(it);
+//    }
 }
 
 /**
@@ -324,7 +384,7 @@ static void roomShowRooms(roomClass *room) {
     if(it != NULL) {        
         
         int r = 0;
-        const char *line = "---------------\n";
+        const char *line = "------------------";
         
         while(pblIteratorHasNext(it)) {
 
@@ -334,12 +394,12 @@ static void roomShowRooms(roomClass *room) {
             
             if(r > 0) printf("\n");
             printf("Room ID: %d\n", *roomId);
-            printf(line);
+            puts(line);
             int i, num = pblSetSize(*set);
             for(i = 0; i < num; i++) {
                 printf("Client: %s\n", (char*)pblSetGet(*set, i));
             }
-            printf(line);
+            puts(line);
             r++;
         }        
         pblIteratorFree(it);
@@ -425,7 +485,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                     //if(room->show_printf)
                     printf("Got START from: %s, roomID: %d (data length: %d)\n", 
-                            rd->from, gp->roomId, rd->data_len); 
+                            rd->from, gp->roomId, (int)rd->data_len); 
                     
                     if(!pblMapContainsKeyStr(room->map_n, rd->from)) {
                                            

@@ -6,7 +6,7 @@
             <name>teonet</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc</cpp-extensions>
-            <header-extensions>h</header-extensions>
+            <header-extensions>h,l</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
@@ -35,7 +35,6 @@
             <word>gethostbyname</word>
             <word>hotkey</word>
             <word>Hotkeys</word>
-            <word>int</word>
             <word>internet</word>
             <word>ip</word>
             <word>Jsmt</word>
@@ -54,7 +53,6 @@
             <word>perror</word>
             <word>po</word>
             <word>printf</word>
-            <word>rc</word>
             <word>recvfrom</word>
             <word>sh</word>
             <word>src</word>
