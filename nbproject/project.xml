@@ -11,6 +11,7 @@
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>.</sourceRootElem>
+                <sourceRootElem>.</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
@@ -48,6 +49,7 @@
             <word>ms</word>
             <word>mtu</word>
             <word>mutex</word>
+            <word>name'</word>
             <word>nonblock</word>
             <word>pc</word>
             <word>perror</word>
@@ -74,6 +76,8 @@
             <word>tuntap</word>
             <word>Ubuntu</word>
             <word>udp</word>
+            <word>Unsubscribe</word>
+            <word>unsubscribed</word>
             <word>uuid</word>
             <word>ver</word>
             <word>vpn</word>
