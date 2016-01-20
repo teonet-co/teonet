@@ -47,7 +47,7 @@ typedef enum ksnetEvMgrEvents {
     EV_K_IDLE,          ///< Idle check host events (after 11.5 after last host send or receive data)
     EV_K_TIMER,         ///< Timer event
     EV_K_HOTKEY,        ///< Hotkey event
-    EV_K_USER,          ///< User press U hotkey
+    EV_K_USER,          ///< User press A hotkey
     EV_K_ASYNC,         ///< Async event           
     EV_K_TERM_STARTED,  ///< After terminal started (in place to define commands 
     /**
@@ -70,8 +70,12 @@ typedef enum ksnetEvMgrEvents {
     EV_K_STREAM_DATA,               ///< Input stream has a data
             
     EV_K_SUBSCRIBE,                 ///< Subscribe answer command received
+    EV_K_SUBSCRIBED,                ///< A peer subscribed to event at this host
+            
     EV_K_L0_CONNECTED,              ///< New L0 client connected to L0 server
-    EV_K_L0_DISCONNECTED            ///< A L0 client was disconnected from L0 server
+    EV_K_L0_DISCONNECTED,           ///< A L0 client was disconnected from L0 server
+            
+    EV_K_APP_USER = 0x8000          ///< Teonet based Applications events
 
 
 } ksnetEvMgrEvents;
