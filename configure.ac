@@ -1,7 +1,7 @@
-AC_INIT([teonet], [0.1.12], [kirill@scherba.ru])
+AC_INIT([teonet], [0.1.13], [kirill@scherba.ru])
 
-AC_DEFINE(LIBRARY_HI_VERSION, ["26"], [Teonet dynamic library version])
-AC_DEFINE(LIBRARY_VERSION,    ["26.0.0"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_HI_VERSION, ["27"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_VERSION,    ["27.0.0"], [Teonet dynamic library version])
 
 AC_CONFIG_HEADERS([src/config/config.h])
 

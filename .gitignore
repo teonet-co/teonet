@@ -115,3 +115,13 @@
 /tests/post/http-post
 /examples/teosscr
 /app/teoroom
+/src/config/.dirstamp
+/src/utils/.dirstamp
+/src/config/.deps/.dirstamp
+/app/modules/teo_auth/.dirstamp
+/src/modules/.dirstamp
+/app/modules/teo_auth/.deps/.dirstamp
+/app/modules/teo_web/.deps/.dirstamp
+/src/modules/.deps/.dirstamp
+/src/utils/.deps/.dirstamp
+/app/modules/teo_web/.dirstamp
