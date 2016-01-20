@@ -410,7 +410,13 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     if(rd->cmd == CMD_SUBSCRIBE) {
         
-        teoSScrSubscription(kco->ksscr, rd->from, *((uint16_t *)rd->data));
+        const uint16_t ev = *((uint16_t *)rd->data);
+        teoSScrSubscription(kco->ksscr, rd->from, ev);
+        
+        // Send event callback
+        if(kev->event_cb != NULL)
+            kev->event_cb(kev, EV_K_SUBSCRIBED, (void*)rd, sizeof(*rd), NULL);
+        
         processed = 1;        
     }
     
