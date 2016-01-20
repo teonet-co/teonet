@@ -125,3 +125,5 @@
 /src/modules/.deps/.dirstamp
 /src/utils/.deps/.dirstamp
 /app/modules/teo_web/.dirstamp
+/configure.scan
+/autoscan.log

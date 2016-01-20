@@ -1,20 +1,79 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.69])
 AC_INIT([teonet], [0.1.13], [kirill@scherba.ru])
+AC_CONFIG_SRCDIR([src/teonet.c])
+AC_CONFIG_HEADERS([src/config/config.h])
 
 AC_DEFINE(LIBRARY_HI_VERSION, ["27"], [Teonet dynamic library version])
 AC_DEFINE(LIBRARY_VERSION,    ["27.0.0"], [Teonet dynamic library version])
-
-AC_CONFIG_HEADERS([src/config/config.h])
+AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2016"], [Teonet library copyright])
 
 AM_INIT_AUTOMAKE
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
 
-AC_PROG_CC
-AC_PROG_CXX
-AM_PROG_LEX
-AC_PROG_LIBTOOL
+AC_USE_SYSTEM_EXTENSIONS
 
-AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2015"], [Teonet library copyright])
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_AWK
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_INSTALL
+AC_PROG_LN_S
+AC_PROG_MAKE_SET
+AC_PROG_RANLIB
+
+# Checks for libraries.
+# FIXME: Replace `main' with a function in `-lconfuse':
+AC_CHECK_LIB([confuse], [main])
+# FIXME: Replace `main' with a function in `-lcrypt':
+AC_CHECK_LIB([crypt], [main])
+# FIXME: Replace `main' with a function in `-lcrypto':
+#AC_CHECK_LIB([crypto], [main])
+# FIXME: Replace `main' with a function in `-lcunit':
+AC_CHECK_LIB([cunit], [main])
+# FIXME: Replace `main' with a function in `-lcurl':
+AC_CHECK_LIB([curl], [main])
+# FIXME: Replace `main' with a function in `-lev':
+AC_CHECK_LIB([ev], [main])
+# FIXME: Replace `main' with a function in `-lteocli':
+#AC_CHECK_LIB([teocli], [main])
+# FIXME: Replace `main' with a function in `-lteonet':
+#AC_CHECK_LIB([teonet], [main])
+# FIXME: Replace `main' with a function in `-ltuntap':
+AC_CHECK_LIB([tuntap], [main])
+# FIXME: Replace `main' with a function in `-luuid':
+AC_CHECK_LIB([uuid], [uuid_generate])
+
+# Checks for header files.
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h limits.h malloc.h memory.h netdb.h netinet/in.h stddef.h stdint.h stdlib.h string.h sys/ioctl.h sys/socket.h sys/time.h sys/timeb.h syslog.h termios.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_C_INLINE
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT64_T
+AC_TYPE_INT8_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT64_T
+AC_TYPE_UINT8_T
+
+# Checks for library functions.
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_FUNC_FSEEKO
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_FUNC_STRNLEN
+AC_CHECK_FUNCS([bzero dup2 ftime getcwd gethostbyname gettimeofday inet_ntoa memchr memmove memset mkdir realpath regcomp rmdir select socket strcasecmp strchr strcspn strdup strerror strncasecmp strndup strpbrk strrchr strspn strstr strtoul])
 
 dnl ***************************************************************************
 dnl Debug info
@@ -157,24 +216,6 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
 
 AM_GLIB_GNU_GETTEXT
 
-# Checks for header files.
-AC_HEADER_STDC
-AC_CHECK_HEADERS([getopt.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-
-# Checks for library functions.
-AC_CHECK_FUNCS([strcasecmp strdup strndup])
-
-
-dnl ***************************************************************************
-dnl Check modules
-dnl ***************************************************************************
-
-#PKG_CHECK_MODULES(TEONET, [libconfuse])
-AC_SEARCH_LIBS(libuuid,uuid_generate)
-
 dnl ***************************************************************************
 dnl Documentation
 dnl ***************************************************************************
@@ -210,11 +251,6 @@ AC_CACHE_SAVE
 
 LT_INIT
 
-# Create libtuntap make file
-#cd src/libtuntap/
-#cmake ./
-#cd ../..
-
 
 AC_CONFIG_FILES([
     Makefile
@@ -229,5 +265,4 @@ AC_CONFIG_FILES([
     embedded/Makefile 
     embedded/teocli/linux/Makefile
 ])
-AC_PROG_CC
 AC_OUTPUT
