@@ -211,8 +211,8 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
     // Create command data
     size_t ptr = 0;
     char data[KSN_BUFFER_DB_SIZE];
-    strcpy(data, name); ptr = strlen(name) + 1;
-    strcpy(data + ptr, addr); ptr += strlen(addr) + 1;
+    strncpy(data, name, KSN_BUFFER_DB_SIZE); ptr = strlen(name) + 1;
+    strncpy(data + ptr, addr, KSN_BUFFER_DB_SIZE - ptr); ptr += strlen(addr) + 1;
     *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
 
     return ksnCoreSendCmdto(kco->kc, to, CMD_CONNECT, data, ptr) != NULL;

@@ -56,12 +56,6 @@ teoSScrClass *teoSScrInit(void *ke) {
 void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
         size_t data_length, uint8_t cmd) {
     
-    size_t sscr_data_length = sizeof(teoSScrData) + data_length;
-    teoSScrData *sscr_data = malloc(sscr_data_length);
-    sscr_data->ev = ev;
-    sscr_data->cmd = cmd;
-    memcpy(sscr_data->data, data, data_length);
-        
     size_t valueLength;
     teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &ev, sizeof(ev), 
             &valueLength);
@@ -70,30 +64,40 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
         
         int i, num = pblListSize(sscr_map_data->list);
 
-        #ifdef DEBUG_KSNET
-        ksnet_printf(
-               &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
-               DEBUG,
-               "%sSubscribe:%s "
-               "Send CMD_SUBSCRIBE_ANSWER with event #%d, "
-               "and data '%s', number of event subscribers: %d.\n",
-                ANSI_LIGHTGREEN, ANSI_NONE,
-                ev, (char*)data, num
-        );
-        #endif
+        if(num) {
+            
+            size_t sscr_data_length = sizeof(teoSScrData) + data_length;
+            teoSScrData *sscr_data = malloc(sscr_data_length);
+            sscr_data->ev = ev;
+            sscr_data->cmd = cmd;
+            memcpy(sscr_data->data, data, data_length);
+        
+            #ifdef DEBUG_KSNET
+            ksnet_printf(
+                   &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
+                   DEBUG,
+                   "%sSubscribe:%s "
+                   "Send CMD_SUBSCRIBE_ANSWER with event #%d, "
+                   "data length %d, number of subscribers to this event: %d\n",
+                    ANSI_LIGHTGREEN, ANSI_NONE,
+                    ev, data_length, num
+            );
+            #endif
 
-        // Send event to subscribers
-        for(i = 0; i < num; i++) {
+            // Send event to subscribers
+            for(i = 0; i < num; i++) {
 
-            teoSScrData *sscr_list_data = pblListGet(sscr_map_data->list, i);
+                teoSScrData *sscr_list_data = pblListGet(sscr_map_data->list, i);
 
-            // Send subscribe command to remote peer
-            ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc,
-                sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, sscr_data,
-                sscr_data_length);
+                // Send subscribe command to remote peer
+                ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc,
+                    sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, sscr_data,
+                    sscr_data_length);
+            }
+            
+            free(sscr_data);
         }
     }
-    free(sscr_data);
 }
 
 /**
@@ -156,7 +160,7 @@ static int find_in_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
 }
 
 /**
- * Calculate number of subscribers
+ * Calculate number of subscriptions
  * 
  * @param sscr
  * @return 
@@ -245,7 +249,7 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
            DEBUG, 
            "%sSubscribe:%s "
            "Peer '%s' was added to the Subscribers to event #%d. "
-           "Number of subscribers: %d\n", 
+           "Number of subscriptions: %d\n", 
             ANSI_LIGHTGREEN, ANSI_NONE,
             peer_name, ev, teoSScrNumberOfSubscribers(sscr)
     );
@@ -288,7 +292,7 @@ int teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
                        DEBUG, 
                        "%sSubscribe:%s "
                        "Peer '%s' was removed from the Subscribers to event #%d. "
-                       "Number of subscribers: %d\n", 
+                       "Number of subscriptions: %d\n", 
                         ANSI_LIGHTGREEN, ANSI_NONE,
                         sscr_data->data, sscr_data->ev, 
                         teoSScrNumberOfSubscribers(sscr)

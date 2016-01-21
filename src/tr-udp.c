@@ -482,8 +482,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                 ksnCorePacketData rd;
                                 memset(&rd, 0, sizeof(rd));
 
-                                // Remote peer address and peer
-                                rd.addr = inet_ntoa(((struct sockaddr_in*)addr)->sin_addr); // IP to string
+                                // Remote peer address and port
+                                rd.addr = strdup(inet_ntoa(((struct sockaddr_in*)addr)->sin_addr)); // IP to string
                                 rd.port = ntohs(((struct sockaddr_in*)addr)->sin_port); // Port to integer
 
                                 // Parse packet and check if it valid
@@ -497,7 +497,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             sizeof(rd), // Length of ksnCorePacketData
                                             &tru_header->id); // Pointer to packet ID
                                     }
-                                }
+                                }                                
+                                free(rd.addr);
                             }
                         }
 
