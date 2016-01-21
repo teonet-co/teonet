@@ -534,32 +534,22 @@
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="4">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/teocli/main.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="7">
           <incDir>
+            <pElem>embedded/teocli</pElem>
             <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/teocli/main_select.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="7">
           <incDir>
+            <pElem>embedded/teocli</pElem>
             <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -870,27 +860,10 @@
           </preprocessorList>
         </cTool>
       </folder>
-      <folder path="0/embedded/teocli">
-        <cTool>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-          </preprocessorList>
-        </cTool>
-      </folder>
-      <folder path="0/embedded/teocli/libteol0">
-        <cTool>
-          <preprocessorList>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-          </preprocessorList>
-        </cTool>
-      </folder>
       <folder path="0/embedded/teocli/python">
         <cTool>
           <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
             <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
             <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
             <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
