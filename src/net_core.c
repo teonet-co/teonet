@@ -660,7 +660,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
     // Data received    
     if(recvlen > 0) {
         
-        char *addr = inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr); // IP to string
+        char *addr = strdup(inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr)); // IP to string
         int port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
 
         #ifdef DEBUG_KSNET
@@ -747,6 +747,9 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
                 ke->event_cb(ke, event, (void*)&rd, sizeof(rd), NULL);
 
         }
+        
+        // Free address buffer
+        free(addr);
     }
 
 //    // Socket disconnected
