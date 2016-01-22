@@ -279,19 +279,26 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     // Get l0 clients data
-    teonet_client_data_ar *client_data = ksnLNullClientsList(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
-    size_t client_data_length = ksnLNullClientsListLength(client_data);
+    teonet_client_data_ar *client_data = 
+        ksnLNullClientsList(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
     
-    // Send CMD_L0_CLIENTS_ANSWER to L0 user
-    if(rd->l0_f)
-        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
-                rd->addr, rd->port, rd->from, rd->from_len, CMD_L0_CLIENTS_ANSWER, 
-                client_data, client_data_length);
-    
-    // Send PEERS_ANSWER to peer
-    else
-        ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_L0_CLIENTS_ANSWER,
-                client_data, client_data_length);
+    if(client_data != NULL) {
+        
+        size_t client_data_length = ksnLNullClientsListLength(client_data);
+
+        // Send CMD_L0_CLIENTS_ANSWER to L0 user
+        if(rd->l0_f)
+            ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                    rd->addr, rd->port, rd->from, rd->from_len, 
+                    CMD_L0_CLIENTS_ANSWER, client_data, client_data_length);
+
+        // Send PEERS_ANSWER to peer
+        else
+            ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_L0_CLIENTS_ANSWER,
+                    client_data, client_data_length);
+
+        free(client_data);
+    }
     
     return 1; // Command processed
 }
