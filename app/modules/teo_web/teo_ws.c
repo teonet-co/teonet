@@ -158,7 +158,10 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 //
                 free(t);
             }
-            if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
+//            if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
+//            else beg = end = "\"";
+            
+            if(type != JSMN_STRING) beg = end = ""; 
             else beg = end = "\"";
             
             char *data_str = data;
@@ -715,5 +718,5 @@ static size_t get_num_of_tags(char *data, size_t data_length) {
 
     if(num_of_tags) num_of_tags++;
     
-    return num_of_tags * 2;
+    return num_of_tags * 4;
 }
