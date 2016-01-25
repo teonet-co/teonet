@@ -127,3 +127,5 @@
 /app/modules/teo_web/.dirstamp
 /configure.scan
 /autoscan.log
+/app/embedded/mongoose/.deps/
+/app/embedded/mongoose/mongoose.o
