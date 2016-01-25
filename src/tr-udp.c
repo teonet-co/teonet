@@ -1177,23 +1177,24 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
         uint32_t id, int fd, int cmd, int flags, __CONST_SOCKADDR_ARG addr, 
         socklen_t addr_len) {
 
-    #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            "%sTR-UDP:%s send list timer start, message id %d\n",
-            ANSI_LIGHTGREEN, ANSI_NONE,
-            id
-    );
-    #endif
-
     // Timer value 
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
-    double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000000.0;
+    double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // 1000000.0;
     if(max_ack_wait > 0) {
-        max_ack_wait += max_ack_wait * 
+        max_ack_wait += 1.0 * max_ack_wait * 
             (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
     }
     else max_ack_wait = MAX_ACK_WAIT; // Default value
     
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+        "%sTR-UDP:%s send list timer start, message id %d, timer value: %f\n",
+        ANSI_LIGHTGREEN, ANSI_NONE,
+        id, max_ack_wait
+    );
+    #endif
+    kev->ksn_cfg.show_debug_vv_f = 0;
+
     // Initialize, set user data and start the timer
     ev_timer_init(w, sl_timer_cb, max_ack_wait, 0.0);
     sl_timer_cb_data *sl_t_data = w_data;
