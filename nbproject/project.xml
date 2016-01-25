@@ -6,11 +6,10 @@
             <name>teonet</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc</cpp-extensions>
-            <header-extensions>h,l</header-extensions>
+            <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>.</sourceRootElem>
                 <sourceRootElem>.</sourceRootElem>
             </sourceRootList>
             <confList>
@@ -26,7 +25,7 @@
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
             <word>app</word>
             <word>atoi</word>
-            <word>Autoconf</word>
+            <word>autoconf</word>
             <word>Cesanta</word>
             <word>cmd</word>
             <word>config</word>
@@ -35,7 +34,6 @@
             <word>fd</word>
             <word>gethostbyname</word>
             <word>hotkey</word>
-            <word>Hotkeys</word>
             <word>internet</word>
             <word>ip</word>
             <word>Jsmt</word>
@@ -49,7 +47,6 @@
             <word>ms</word>
             <word>mtu</word>
             <word>mutex</word>
-            <word>name'</word>
             <word>nonblock</word>
             <word>pc</word>
             <word>perror</word>
@@ -74,10 +71,8 @@
             <word>triptime</word>
             <word>ttl</word>
             <word>tuntap</word>
-            <word>Ubuntu</word>
+            <word>ubuntu</word>
             <word>udp</word>
-            <word>Unsubscribe</word>
-            <word>unsubscribed</word>
             <word>uuid</word>
             <word>ver</word>
             <word>vpn</word>
