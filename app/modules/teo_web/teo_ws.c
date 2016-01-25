@@ -126,10 +126,11 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             
             teoLNullCPacket *cp = (teoLNullCPacket*) con->read_buffer;
             char *data = cp->peer_name + cp->peer_name_length;
-            printf("Receive %d bytes: %d bytes data from L0 server, "
-                   "from peer %s, cmd = %d\n", 
-                   (int)rc, cp->data_length, cp->peer_name, cp->cmd 
-            );
+//            printf("Receive %d bytes: %d bytes data from L0 server, "
+//                   "from peer %s, cmd = %d\n", 
+//                   (int)rc, cp->data_length, cp->peer_name, cp->cmd 
+//            );
+//            
             // \todo use ksnet_printf and ksn_conf in this function
 //            #ifdef DEBUG_KSNET
 //            ksnet_printf(ksn_conf, DEBUG,
@@ -158,7 +159,10 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 //
                 free(t);
             }
-            if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
+//            if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
+//            else beg = end = "\"";
+            
+            if(type != JSMN_STRING) beg = end = ""; 
             else beg = end = "\"";
             
             char *data_str = data;
@@ -442,7 +446,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     int processed = 0;
     
     #ifdef DEBUG_KSNET
-    ksnet_printf(ksn_conf, DEBUG,
+    ksnet_printf(ksn_conf, DEBUG_VV,
         MODULE_LABEL
         "Receive %d bytes: from WS client %p\n",
         ANSI_YELLOW, ANSI_NONE, 
@@ -552,7 +556,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_PEERS && to[0] != 0 && cmd_data[0] == 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(ksn_conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG_VV,
                 MODULE_LABEL
                 "Peers command to \"%s\" peer received\n", 
                 ANSI_YELLOW, ANSI_NONE, to);
@@ -569,7 +573,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_ECHO && to[0] != 0 && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(ksn_conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG_VV,
                 MODULE_LABEL
                 "Echo command to \"%s\" peer with message \"%s\" received\n", 
                 ANSI_YELLOW, ANSI_NONE, to, cmd_data);
@@ -585,7 +589,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_AUTH && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(ksn_conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG_VV,
             MODULE_LABEL
             "Authentication command to \"%s\" peer, with data \"%s\" was received\n", 
             ANSI_YELLOW, ANSI_NONE, to, cmd_data);
@@ -661,7 +665,7 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(to[0] != 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(ksn_conf, DEBUG,
+        ksnet_printf(ksn_conf, DEBUG_VV,
             MODULE_LABEL
             "Resend command %d to \"%s\" peer with message \"%s\" received\n", 
             ANSI_YELLOW, ANSI_NONE, cmd, to, cmd_data);
@@ -711,9 +715,10 @@ static size_t get_num_of_tags(char *data, size_t data_length) {
         if(data[i] == ':') 
             num_of_tags++;
     
-    printf("number of json tags in request: %d\n", (int) num_of_tags);
+//    printf("number of json tags in request: %d, request: %s\n", 
+//            (int) num_of_tags, data);
 
     if(num_of_tags) num_of_tags++;
     
-    return num_of_tags * 2;
+    return num_of_tags * 4;
 }
