@@ -76,6 +76,8 @@
 /app/teovpn
 /app/Makefile
 /app/Makefile.in
+/app/embedded/mongoose/.dirstamp
+/app/embedded/mongoose/.deps/.dirstamp
 /tests/.libs/
 /tests/Makefile
 /tests/Makefile.in
@@ -127,5 +129,3 @@
 /app/modules/teo_web/.dirstamp
 /configure.scan
 /autoscan.log
-/app/embedded/mongoose/.deps/
-/app/embedded/mongoose/mongoose.o
