@@ -636,7 +636,7 @@ int *ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name) {
     
     size_t valueLength;
     int *fd = pblMapGet(kl->map_n, client_name, strlen(client_name) + 1, 
-            &valueLength);
+                &valueLength);
     
     return fd;
 }
@@ -722,7 +722,7 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
 
     teonet_client_data_ar *data_ar = NULL;
     
-    if(kev->ksn_cfg.l0_allow_f && kl->fd) {
+    if(kl != NULL && kev->ksn_cfg.l0_allow_f && kl->fd) {
         
         uint32_t length = pblMapSize(kl->map);
         data_ar = malloc(sizeof(teonet_client_data_ar) + 
