@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <logicalFolder name="src"
-                   displayName="src"
-                   projectFiles="true"
-                   root="../confuse-2.7/src">
-      <itemPath>../confuse-2.7/src/confuse.c</itemPath>
-      <itemPath>../confuse-2.7/src/confuse.h</itemPath>
-      <itemPath>../confuse-2.7/src/lexer.c</itemPath>
-      <itemPath>../confuse-2.7/src/lexer.l</itemPath>
-    </logicalFolder>
     <df root="." name="0">
       <df name="app">
         <df name="embedded">
@@ -188,14 +179,6 @@
           <preBuildCommand>./configure CC=${IDE_CC} CXX=${IDE_CXX} CFLAGS="-g3 -gdwarf-2" CXXFLAGS="-g3 -gdwarf-2"</preBuildCommand>
         </preBuild>
       </makefileType>
-      <item path="../confuse-2.7/src/confuse.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-        </cTool>
-      </item>
-      <item path="../confuse-2.7/src/lexer.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-        </cTool>
-      </item>
       <item path="app/embedded/jsmn/jsmn.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
         </cTool>
@@ -704,13 +687,6 @@
         <cTool>
           <incDir>
             <pElem>src/utils</pElem>
-          </incDir>
-        </cTool>
-      </folder>
-      <folder path="src">
-        <cTool>
-          <incDir>
-            <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
       </folder>
