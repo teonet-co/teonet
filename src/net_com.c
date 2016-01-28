@@ -30,7 +30,11 @@ int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+
+// Constant
+const char *JSON = "JSON";
 
 /**
  * Initialize ksnet command class
@@ -149,6 +153,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             
         case CMD_L0_CLIENTS:
             processed = cmd_l0_clients_cb(kco, rd);
+            break;
+            
+        case CMD_L0_CLIENTS_N:
+            processed = cmd_l0_clients_n_cb(kco, rd);
             break;
             
         case CMD_SUBSCRIBE:
@@ -299,6 +307,50 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         free(client_data);
     }
+    
+    return 1; // Command processed
+}
+
+/**
+ * Process CMD_L0_CLIENTS_N command
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    // Get l0 clients data
+    teonet_client_data_ar *client_data = 
+        ksnLNullClientsList(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
+    
+    uint32_t clients_number = client_data == NULL ? 0 : client_data->length;
+    
+    char *json_str = NULL;
+    void *data_out = &clients_number;
+    size_t data_out_len = sizeof(clients_number);
+    if(rd->data_len && !strcmp(rd->data, JSON)) {
+        
+        json_str = ksnet_sformatMessage(json_str, 
+            "{ \"clients_number\": %d }", clients_number           
+        );
+        data_out = json_str;
+        data_out_len = strlen(json_str) + 1;
+    }
+        
+    // Send CMD_L0_CLIENTS_ANSWER to L0 user
+    if(rd->l0_f)
+        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                rd->addr, rd->port, rd->from, rd->from_len, 
+                CMD_L0_CLIENTS_N_ANSWER, data_out, data_out_len);
+
+    // Send PEERS_ANSWER to peer
+    else
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_L0_CLIENTS_N_ANSWER,
+                data_out, data_out_len);
+    
+    if(client_data != NULL) free(client_data);
+    if(json_str != NULL) free(json_str);
     
     return 1; // Command processed
 }

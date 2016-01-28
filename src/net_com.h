@@ -46,6 +46,8 @@ enum ksnCMD {
     CMD_SUBSCRIBE,          ///< #81 Subscribe to event
     CMD_UNSUBSCRIBE,        ///< #82 UnSubscribe from event
     CMD_SUBSCRIBE_ANSWER,   ///< #83 Subscribe answer
+    CMD_L0_CLIENTS_N,       ///< #84 Request clients number
+    CMD_L0_CLIENTS_N_ANSWER,///< #85 Clients number
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
