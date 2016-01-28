@@ -1193,6 +1193,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
         id, max_ack_wait
     );
     #endif
+    // \todo Remove this test operator
     kev->ksn_cfg.show_debug_vv_f = 0;
 
     // Initialize, set user data and start the timer
