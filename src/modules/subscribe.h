@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <pbl.h>
 
+#include "teonet_l0_client.h"
+
 /**
  * teoSScr Class structure definition
  */
@@ -24,6 +26,22 @@ typedef struct teoSScrClass {
 /**
  * teoSScr class list or CMD_SUBSCRIBE_ANSWER data
  */
+typedef struct teoSScrListData {
+    
+    uint16_t ev; ///< Event (used when send data to subscriber)
+    uint8_t cmd; ///< Command ID (used when send data to subscriber)
+    uint8_t l0_f; ///< This is L0 client. The L0 server name added to the beginning of data
+    char addr[40]; ///< L0 peer IP address
+    int16_t port; ///< L0 peer port    
+    char data[]; ///< Remote peer name in list or data in CMD_SUBSCRIBE_ANSWER
+        
+} teoSScrListData;
+
+#pragma pack(push)
+#pragma pack(1)
+/**
+ * teoSScr class list or CMD_SUBSCRIBE_ANSWER data
+ */
 typedef struct teoSScrData {
     
     uint16_t ev; ///< Event (used when send data to subscriber)
@@ -32,6 +50,7 @@ typedef struct teoSScrData {
         
 } teoSScrData;
 
+#pragma pack(pop)
 
 #ifdef	__cplusplus
 extern "C" {
@@ -39,7 +58,7 @@ extern "C" {
 
 teoSScrClass *teoSScrInit(void *ke);
 void teoSScrDestroy(teoSScrClass *sscr);
-void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev);
+void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev, ksnet_arp_data *arp);
 int teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev);
 int teoSScrUnSubscriptionAll(teoSScrClass *sscr, char *peer_name);
 void teoSScrSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev);

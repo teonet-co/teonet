@@ -60,16 +60,16 @@ void test_6_2() {
     char *peer_name_2 = "test-peer_2";
     
     // Subscribe
-    teoSScrSubscription(sscr, peer_name, 100);
+    teoSScrSubscription(sscr, peer_name, 100, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 1);
     
-    teoSScrSubscription(sscr, peer_name, 110);
+    teoSScrSubscription(sscr, peer_name, 110, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 2);
     
-    teoSScrSubscription(sscr, peer_name_2, 110);
+    teoSScrSubscription(sscr, peer_name_2, 110, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 3);
     
-    teoSScrSubscription(sscr, peer_name_2, 100);
+    teoSScrSubscription(sscr, peer_name_2, 100, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 4);
     
     // UnSubscribe
@@ -87,16 +87,16 @@ void test_6_2() {
     
     
     // Subscribe
-    teoSScrSubscription(sscr, peer_name, 100);
+    teoSScrSubscription(sscr, peer_name, 100, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 1);
     
-    teoSScrSubscription(sscr, peer_name, 110);
+    teoSScrSubscription(sscr, peer_name, 110, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 2);
     
-    teoSScrSubscription(sscr, peer_name, 120);
+    teoSScrSubscription(sscr, peer_name, 120, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 3);
     
-    teoSScrSubscription(sscr, peer_name, 130);
+    teoSScrSubscription(sscr, peer_name, 130, NULL);
     CU_ASSERT(teoSScrNumberOfSubscribers(sscr) == 4);
     
     // UnSubscribe All

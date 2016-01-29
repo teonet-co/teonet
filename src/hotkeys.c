@@ -533,7 +533,7 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
 /**
  * STDIN (has data) callback
  *
- * @param loop
+ * param loop
  * @param w
  * @param revents
  */
@@ -551,7 +551,9 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
     if(((ksnetEvMgrClass *)w->data)->kh->non_blocking == 0) {
 
         char *buffer = malloc(KSN_BUFFER_SM_SIZE);
-        fgets(buffer, KSN_BUFFER_SM_SIZE , stdin);
+        if(fgets(buffer, KSN_BUFFER_SM_SIZE , stdin) == NULL) {
+            buffer[0] = 0;
+        }
         data = buffer;
     }
     // Get character
@@ -580,7 +582,7 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
 /**
  * STDIN Idle callback: execute STDIN callback in idle time
  *
- * @param loop
+ * param loop
  * @param w
  * @param revents
  */
@@ -618,7 +620,7 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 /**
  * Ping timer callback
  *
- * @param loop
+ * param loop
  * @param w
  * @param revents
  */
@@ -687,8 +689,10 @@ void ping_timer_stop(ping_timer_data **pt) {
 /**
  * Send network monitor ping to one peer
  *
- * @param kn
+ * @param ka
  * @param peer_name
+ * @param arp_data
+ * @param data
  */
 int monitor_timer_one_cb(ksnetArpClass *ka, char *peer_name, 
         ksnet_arp_data *arp_data, void *data) {
@@ -716,7 +720,7 @@ int monitor_timer_one_cb(ksnetArpClass *ka, char *peer_name,
 /**
  * Monitor timer callback
  *
- * @param loop
+ * param loop
  * @param w
  * @param revents
  */
@@ -732,7 +736,7 @@ void monitor_timer_cb(EV_P_ ev_timer *w, int revents) {
 /**
  * Initialize monitor timer
  *
- * @param peer
+ * @param kn
  * @return
  */
 #pragma GCC diagnostic push
@@ -777,8 +781,8 @@ void monitor_timer_stop(monitor_timer_data **mt) {
 /**
  * Peer show idle callback
  *
- * @param loop
- * @param tw
+ * param loop
+ * @param iw
  * @param revents
  */
 void peer_idle_cb(EV_P_ ev_idle *iw, int revents) {
@@ -805,7 +809,7 @@ void peer_idle_cb(EV_P_ ev_idle *iw, int revents) {
 /**
  * Peer timer callback
  *
- * @param loop
+ * param loop
  * @param tw
  * @param revents
  */
@@ -867,8 +871,8 @@ void peer_timer_stop(peer_timer_data **pet) {
 /**
  * TR-UDP show idle callback
  *
- * @param loop
- * @param tw
+ * param loop
+ * @param iw
  * @param revents
  */
 void tr_udp_idle_cb(EV_P_ ev_idle *iw, int revents) {
@@ -898,7 +902,7 @@ void tr_udp_idle_cb(EV_P_ ev_idle *iw, int revents) {
 /**
  * TR-UDP timer callback
  *
- * @param loop
+ * param loop
  * @param tw
  * @param revents
  */
