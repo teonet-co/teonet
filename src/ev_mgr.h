@@ -36,20 +36,20 @@ extern const char *null_str;
  */
 typedef enum ksnetEvMgrEvents {
 
-    EV_K_STARTED,       ///< Calls immediately after event manager starts
-    EV_K_STOPPED_BEFORE,///< Calls before event manager stopped
-    EV_K_STOPPED,       ///< Calls after event manager stopped
-    EV_K_CONNECTED,     ///< New peer connected to host
-    EV_K_DISCONNECTED,  ///< A peer was disconnected from host
-    EV_K_RECEIVED,      ///< This host Received a data
-    EV_K_RECEIVED_WRONG,///< Wrong packet received
-    EV_K_RECEIVED_ACK,  ///< This host Received ACK to sent data
-    EV_K_IDLE,          ///< Idle check host events (after 11.5 after last host send or receive data)
-    EV_K_TIMER,         ///< Timer event
-    EV_K_HOTKEY,        ///< Hotkey event
-    EV_K_USER,          ///< User press A hotkey
-    EV_K_ASYNC,         ///< Async event           
-    EV_K_TERM_STARTED,  ///< After terminal started (in place to define commands 
+    EV_K_STARTED,       ///< #0  Calls immediately after event manager starts
+    EV_K_STOPPED_BEFORE,///< #1  Calls before event manager stopped
+    EV_K_STOPPED,       ///< #2  Calls after event manager stopped
+    EV_K_CONNECTED,     ///< #3  New peer connected to host
+    EV_K_DISCONNECTED,  ///< #4  A peer was disconnected from host
+    EV_K_RECEIVED,      ///< #5  This host Received a data
+    EV_K_RECEIVED_WRONG,///< #6  Wrong packet received
+    EV_K_RECEIVED_ACK,  ///< #7  This host Received ACK to sent data
+    EV_K_IDLE,          ///< #8  Idle check host events (after 11.5 after last host send or receive data)
+    EV_K_TIMER,         ///< #9  Timer event
+    EV_K_HOTKEY,        ///< #10 Hotkey event
+    EV_K_USER,          ///< #11 User press A hotkey
+    EV_K_ASYNC,         ///< #12 Async event           
+    EV_K_TERM_STARTED,  ///< #13 After terminal started (in place to define commands 
     /**
      * Teonet Callback QUEUE event. 
      * 
@@ -62,21 +62,20 @@ typedef enum ksnetEvMgrEvents {
      * @param user_data Pointer to integer with type of this event: 
      *                  1 - success; 0 - timeout
      */
-    EV_K_CQUE_CALLBACK,
+    EV_K_CQUE_CALLBACK,             ///< #14 
             
-    EV_K_STREAM_CONNECTED,          ///< After stream connected
-    EV_K_STREAM_CONNECT_TIMEOUT,    ///< Connection timeout
-    EV_K_STREAM_DISCONNECTED,       ///< After stream disconnected
-    EV_K_STREAM_DATA,               ///< Input stream has a data
+    EV_K_STREAM_CONNECTED,          ///< #15 After stream connected
+    EV_K_STREAM_CONNECT_TIMEOUT,    ///< #16 Connection timeout
+    EV_K_STREAM_DISCONNECTED,       ///< #17 After stream disconnected
+    EV_K_STREAM_DATA,               ///< #18 Input stream has a data
             
-    EV_K_SUBSCRIBE,                 ///< Subscribe answer command received
-    EV_K_SUBSCRIBED,                ///< A peer subscribed to event at this host
+    EV_K_SUBSCRIBE,                 ///< #19 Subscribe answer command received
+    EV_K_SUBSCRIBED,                ///< #20 A peer subscribed to event at this host
             
-    EV_K_L0_CONNECTED,              ///< New L0 client connected to L0 server
-    EV_K_L0_DISCONNECTED,           ///< A L0 client was disconnected from L0 server
+    EV_K_L0_CONNECTED,              ///< #21 New L0 client connected to L0 server
+    EV_K_L0_DISCONNECTED,           ///< #22 A L0 client was disconnected from L0 server
             
-    EV_K_APP_USER = 0x8000          ///< Teonet based Applications events
-
+    EV_K_APP_USER = 0x8000          ///< #0x8000 Teonet based Applications events
 
 } ksnetEvMgrEvents;
 

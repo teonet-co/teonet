@@ -55,7 +55,7 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
                       "close -- close this client\n"
                       "close_all -- close all clients of this TCP server\n"
                       "destroy -- destroy this TCP server\n";
-            write(w->fd, b, strlen(b));
+            if(write(w->fd, b, strlen(b)) == -1); // \todo check write error
         }
         
         // Check close client command
@@ -84,7 +84,7 @@ void tcp_server_receive_cb(struct ev_loop *loop, ev_io *w, int revents) {
 
         // Send the data back to client
         else {
-            write(w->fd, buffer, read_len);            
+            if(write(w->fd, buffer, read_len) == -1); // \todo check write error
         }
         
         // Free temporary buffer
@@ -155,7 +155,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 printf("Client mode example is under construction yet,\n"
                        "trying system telnet application ...\n"); 
                 char *buffer = ksnet_formatMessage("telnet 0 %d", SERVER_PORT);
-                system(buffer);
+                if(system(buffer) == -1); // \todo check system call error
                 free(buffer);
                 ksnetEvMgrStop(ke);
             }

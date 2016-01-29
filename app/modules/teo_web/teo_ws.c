@@ -162,8 +162,11 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 //            if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
 //            else beg = end = "\"";
             
-            if(type != JSMN_STRING) beg = end = ""; 
-            else beg = end = "\"";
+//            if(type != JSMN_STRING) beg = end = ""; 
+//            else beg = end = "\"";
+            
+            if(type == JSMN_STRING || type == JSMN_UNDEFINED) beg = end = "\"";
+            else beg = end = "";             
             
             char *data_str = data;
             int data_len = cp->data_length;
@@ -214,6 +217,19 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 sprintf(data_str + ptr, " ] }");
                 data_len = strlen(data_str);
                 beg = end = ""; 
+            }
+            else if(cp->cmd == CMD_L_SUBSCRIBE_ANSWER) {
+                
+                teoSScrData *sscr_data = (teoSScrData *) data;
+                data_str = ksnet_formatMessage(
+                    "{ \"ev\": %d, \"cmd\": %d, \"client\": \"%s\" }", 
+                    sscr_data->ev, sscr_data->cmd, sscr_data->data);
+                data_len = strlen(data_str);
+                beg = end = ""; 
+            }
+            else if(type == JSMN_UNDEFINED) {
+                data_str = strdup("undefined"); 
+                data_len = strlen(data_str);
             }
 
             // Create json data and send it to websocket client
