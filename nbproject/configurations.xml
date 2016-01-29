@@ -1,15 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="97">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-    <logicalFolder name="src"
-                   displayName="src"
-                   projectFiles="true"
-                   root="../confuse-2.7/src">
-      <itemPath>../confuse-2.7/src/confuse.c</itemPath>
-      <itemPath>../confuse-2.7/src/confuse.h</itemPath>
-      <itemPath>../confuse-2.7/src/lexer.c</itemPath>
-      <itemPath>../confuse-2.7/src/lexer.l</itemPath>
-    </logicalFolder>
     <df root="." name="0">
       <df name="app">
         <df name="embedded">
@@ -165,10 +156,8 @@
         <element flagsID="3" commonFlags="-g -O2"/>
         <element flagsID="4" commonFlags="-g -fPIC -O2 -g -O2 -fPIC"/>
         <element flagsID="5"
-                 commonFlags="-mtune=generic -march=x86-64 -g -O2 -fPIC -fstack-protector"/>
-        <element flagsID="6"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -fPIC -fstack-protector"/>
-        <element flagsID="7"
+        <element flagsID="6"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fPIC -fstack-protector"/>
       </flagsDictionary>
       <codeAssistance>
@@ -179,7 +168,7 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath></executablePath>
-          <cTool flags="5">
+          <cTool flags="-mtune=generic -march=x86-64 -g -O2 -fPIC -fstack-protector">
           </cTool>
         </makeTool>
         <preBuild>
@@ -187,20 +176,12 @@
           <preBuildCommand>./configure CC=${IDE_CC} CXX=${IDE_CXX} CFLAGS="-g3 -gdwarf-2" CXXFLAGS="-g3 -gdwarf-2"</preBuildCommand>
         </preBuild>
       </makefileType>
-      <item path="../confuse-2.7/src/confuse.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-        </cTool>
-      </item>
-      <item path="../confuse-2.7/src/lexer.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
-        </cTool>
-      </item>
       <item path="app/embedded/jsmn/jsmn.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="app/embedded/mongoose/mongoose.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="app/modules/teo_auth/teo_auth.c" ex="false" tool="0" flavor2="2">
@@ -225,7 +206,7 @@
         </cTool>
       </item>
       <item path="app/modules/teo_web/teo_web_conf.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
           <incDir>
             <pElem>app/modules/teo_web</pElem>
             <pElem>src/utils</pElem>
@@ -398,11 +379,11 @@
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="6">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="embedded/teocli/main.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
           <incDir>
             <pElem>embedded/teocli</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
@@ -411,7 +392,7 @@
         </cTool>
       </item>
       <item path="embedded/teocli/main_select.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
           <incDir>
             <pElem>embedded/teocli</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
@@ -420,7 +401,7 @@
         </cTool>
       </item>
       <item path="examples/fossa/fossa.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="2">
@@ -790,13 +771,6 @@
           </preprocessorList>
         </cTool>
       </folder>
-      <folder path="src">
-        <cTool>
-          <incDir>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-        </cTool>
-      </folder>
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
         </cTool>
@@ -1162,7 +1136,7 @@
         </cTool>
       </item>
       <item path="src/utils/string_arr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="6">
+        <cTool flags="5">
           <incDir>
             <pElem>src/utils</pElem>
             <pElem>src</pElem>
