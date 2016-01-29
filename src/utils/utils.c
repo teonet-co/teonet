@@ -275,7 +275,7 @@ const char* getDataPath(void) {
 
 //#define DATA_DIR ".ksnet"
 #ifdef HAVE_LINUX
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
 #include <errno.h>
 #include <libgen.h>
 extern char *program_invocation_name;

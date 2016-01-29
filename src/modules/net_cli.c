@@ -684,9 +684,9 @@ int cli_int_help(struct cli_def *cli, UNUSED(const char *command),
  * Show history command
  *
  * @param cli
- * @param command
- * @param argv
- * @param argc
+ * param command
+ * param argv
+ * param argc
  * @return
  */
 int cli_int_history(struct cli_def *cli, UNUSED(const char *command),
@@ -744,7 +744,7 @@ int cli_int_configure_terminal(struct cli_def *cli, UNUSED(const char *command),
  * This must be called before any other cli_xxx function. It sets up the
  * internal data structures used for command-line processing.
  *
- * @param ev KSNet event manager class pointer
+ * @param ke KSNet event manager class pointer
  * @return Returns a struct cli_def * which must be passed to all other cli_xxx
  *         functions.
  */
@@ -1483,11 +1483,7 @@ void cli_loop_set_show_prompt(struct cli_loop_data_def *cd) {
 /**
  * Show prompt before select or ask User/Password
  *
- * @param cli
- * @param sockfd
- * @param cursor
- * @param cmd
- * @param l
+ * @param cd Pointer to cli_loop_data_def structure
  */
 void cli_loop_show_prompt(struct cli_loop_data_def *cd) { //struct cli_def *cli, int sockfd, int cursor, char *cmd, int l) {
 

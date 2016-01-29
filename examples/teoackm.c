@@ -108,7 +108,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     case '1':
                         printf("How much package to send (0 - to exit): ");
                         _keys_non_blocking_stop(ke->kh);
-                        scanf("%d", &num_packets);
+                        if(scanf("%d", &num_packets)); // \todo check scanf error
                         _keys_non_blocking_start(ke->kh);
 
                         printf("Send %d messages to %s\n",num_packets, peer_to);
