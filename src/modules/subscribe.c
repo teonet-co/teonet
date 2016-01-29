@@ -89,10 +89,26 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
 
                 teoSScrData *sscr_list_data = pblListGet(sscr_map_data->list, i);
 
-                // Send subscribe command to remote peer
-                ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc,
-                    sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, sscr_data,
-                    sscr_data_length);
+                if(!sscr_list_data->l0_f) {
+
+                    // Send subscribe command to remote peer
+                    ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc,
+                        sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, 
+                        sscr_data, sscr_data_length);
+                }
+                else {
+                    
+                    // Send subscribe command to L0 client
+                    ksnLNullSendToL0(sscr->ke, 
+                        sscr_list_data->addr, sscr_list_data->port, 
+                        sscr_list_data->data, strlen(sscr_list_data->data) + 1, 
+                        CMD_SUBSCRIBE_ANSWER, 
+                        sscr_data, sscr_data_length); 
+                    
+                    printf("!!! Send to L0 client %s, server %s:%d\n", 
+                        sscr_list_data->data,
+                        sscr_list_data->addr, sscr_list_data->port);
+                }
             }
             
             free(sscr_data);
@@ -207,13 +223,30 @@ static void teoSScrFree(teoSScrData *element) {
  * @param sscr Pointer to teoSScrClass
  * @param peer_name Remote peer name
  * @param ev Event
+ * @param arp Pointer to arp data if peer_name is L0 client, or NULL if it's a peer
  */
-void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
+void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev, 
+        ksnet_arp_data *arp) {
     
+    // \todo In the add_data_to_list() Subscribe to L0 disconnect and remove 
+    // disconnected clients    
+    
+    // \todo Remove all clients of disconnected L0 peer
+
     #define add_data_to_list(sscr_list, peer_name) \
         teoSScrData *sscr_list_data = malloc(sizeof(teoSScrData) + \
             strlen(peer_name) + 1); \
         strcpy(sscr_list_data->data, peer_name); \
+        if(arp == NULL) { \
+            sscr_list_data->l0_f = 0; \
+            sscr_list_data->addr[0] = 0; \
+            sscr_list_data->port = 0; \
+        } \
+        else { \
+            sscr_list_data->l0_f = 1; \
+            strncpy(sscr_list_data->addr, arp->addr, sizeof(sscr_list_data->addr)); \
+            sscr_list_data->port = arp->port; \
+        } \
         pblListAdd(sscr_list, (void*)sscr_list_data)
     
     // Check event in map and create new record or update existing
@@ -414,8 +447,12 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     if(rd->cmd == CMD_SUBSCRIBE) {
         
-        const uint16_t ev = *((uint16_t *)rd->data);
-        teoSScrSubscription(kco->ksscr, rd->from, ev);
+        uint16_t ev = *((uint16_t *)rd->data);
+        if(rd->data_len >= 6 && !strncmp(rd->data, "TEXT:", 5)) {
+            ev = atoi((char*)rd->data + 5);
+            printf("!!! %s\n", rd->data);
+        }
+        teoSScrSubscription(kco->ksscr, rd->from, ev, rd->l0_f ? rd->arp:NULL);
         
         // Send event callback
         if(kev->event_cb != NULL)

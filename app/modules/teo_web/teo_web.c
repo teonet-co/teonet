@@ -9,6 +9,7 @@
 
 #include "teo_web.h"
 #include "teo_ws.h"
+#include "../teo_auth/teo_auth.h"
 
 /**
  * Teonet websocket class
