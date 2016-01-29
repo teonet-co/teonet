@@ -67,10 +67,10 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
         if(num) {
             
             size_t sscr_data_length = sizeof(teoSScrData) + data_length;
-            teoSScrData *sscr_data = malloc(sscr_data_length);
-            sscr_data->ev = ev;
-            sscr_data->cmd = cmd;
-            memcpy(sscr_data->data, data, data_length);
+            teoSScrData *sscr_out_data = malloc(sscr_data_length);
+            sscr_out_data->ev = ev;
+            sscr_out_data->cmd = cmd;
+            memcpy(sscr_out_data->data, data, data_length);
         
             #ifdef DEBUG_KSNET
             ksnet_printf(
@@ -87,14 +87,14 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
             // Send event to subscribers
             for(i = 0; i < num; i++) {
 
-                teoSScrData *sscr_list_data = pblListGet(sscr_map_data->list, i);
+                teoSScrListData *sscr_list_data = pblListGet(sscr_map_data->list, i);
 
                 if(!sscr_list_data->l0_f) {
 
                     // Send subscribe command to remote peer
                     ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc,
                         sscr_list_data->data, CMD_SUBSCRIBE_ANSWER, 
-                        sscr_data, sscr_data_length);
+                        sscr_out_data, sscr_data_length);
                 }
                 else {
                     
@@ -103,15 +103,15 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
                         sscr_list_data->addr, sscr_list_data->port, 
                         sscr_list_data->data, strlen(sscr_list_data->data) + 1, 
                         CMD_SUBSCRIBE_ANSWER, 
-                        sscr_data, sscr_data_length); 
+                        sscr_out_data, sscr_data_length); 
                     
-                    printf("!!! Send to L0 client %s, server %s:%d\n", 
-                        sscr_list_data->data,
-                        sscr_list_data->addr, sscr_list_data->port);
+//                    printf("!!! Send to L0 client %s, server %s:%d\n", 
+//                        sscr_list_data->data,
+//                        sscr_list_data->addr, sscr_list_data->port);
                 }
             }
             
-            free(sscr_data);
+            free(sscr_out_data);
         }
     }
 }
@@ -130,7 +130,7 @@ static int list_compare (const void* prev, const void* next) {
 //    else if(((teoSScrListData*)prev)->ev > ((teoSScrListData*)next)->ev ) return 1;
 //    else return 0;
     
-    return strcmp(((teoSScrData*)prev)->data, ((teoSScrData*)next)->data);
+    return strcmp(((teoSScrListData*)prev)->data, ((teoSScrListData*)next)->data);
 }
 
 /**
@@ -159,7 +159,7 @@ static int find_in_list(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
             while(pblIteratorHasNext(it)) {        
 
                 void *entry = pblIteratorNext(it);  
-                teoSScrData *sscr_list_data = entry; 
+                teoSScrListData *sscr_list_data = entry; 
                 if(peer_name[0] && !strcmp(sscr_list_data->data, peer_name)) {
 
                     retval = idx;
@@ -207,7 +207,7 @@ int teoSScrNumberOfSubscribers(teoSScrClass *sscr) {
  * @param sscr Pointer to teoSScrClass
  * @param element List element
  */
-static void teoSScrFree(teoSScrData *element) {
+static void teoSScrFree(teoSScrListData *element) {
     
     if(element != NULL) {
         
@@ -233,10 +233,12 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev,
     
     // \todo Remove all clients of disconnected L0 peer
 
-    #define add_data_to_list(sscr_list, peer_name) \
-        teoSScrData *sscr_list_data = malloc(sizeof(teoSScrData) + \
+    #define add_data_to_list(sscr_list, peer_name, e, c) \
+        teoSScrListData *sscr_list_data = malloc(sizeof(teoSScrListData) + \
             strlen(peer_name) + 1); \
         strcpy(sscr_list_data->data, peer_name); \
+        sscr_list_data->cmd = c; \
+        sscr_list_data->ev = e; \
         if(arp == NULL) { \
             sscr_list_data->l0_f = 0; \
             sscr_list_data->addr[0] = 0; \
@@ -260,7 +262,7 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev,
         // Add record to map
         teoSScrMapData sscr_map_data;
         sscr_map_data.list = pblListNewArrayList(); 
-        add_data_to_list(sscr_map_data.list, peer_name);
+        add_data_to_list(sscr_map_data.list, peer_name, ev, 0);
         pblMapAdd(sscr->map, &ev, sizeof(ev), &sscr_map_data, 
                 sizeof(sscr_map_data));
     }
@@ -268,11 +270,11 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev,
     // Add new peer_name to existing event list
     else {
         
-        // Find peer_name in list and add if absent
+        // Find peer_name in list and add it if absent
         if(find_in_list(sscr, peer_name, ev) == -1) {
         
             // Add peer_name to list
-            add_data_to_list(sscr_data->list, peer_name);
+            add_data_to_list(sscr_data->list, peer_name, ev, 0);
         }
     }
     
@@ -314,7 +316,7 @@ int teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
         if(idx >= 0) {
 
             // Remove from list
-            teoSScrData *sscr_data = pblListRemoveAt(sscr_map_data->list, idx);
+            teoSScrListData *sscr_data = pblListRemoveAt(sscr_map_data->list, idx);
 
             // Free element 
             if(sscr_data !=  (void*)-1) {
@@ -450,7 +452,7 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         uint16_t ev = *((uint16_t *)rd->data);
         if(rd->data_len >= 6 && !strncmp(rd->data, "TEXT:", 5)) {
             ev = atoi((char*)rd->data + 5);
-            printf("!!! %s\n", rd->data);
+//            printf("!!! %s\n", rd->data);
         }
         teoSScrSubscription(kco->ksscr, rd->from, ev, rd->l0_f ? rd->arp:NULL);
         

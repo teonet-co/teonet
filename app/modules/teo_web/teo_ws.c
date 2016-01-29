@@ -222,12 +222,14 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 
                 teoSScrData *sscr_data = (teoSScrData *) data;
                 data_str = ksnet_formatMessage(
-                    "{ \"ev\": %d, \"client\": \"%s\" }", 
-                    sscr_data->ev, sscr_data->data);
+                    "{ \"ev\": %d, \"cmd\": %d, \"client\": \"%s\" }", 
+                    sscr_data->ev, sscr_data->cmd, sscr_data->data);
+                data_len = strlen(data_str);
                 beg = end = ""; 
             }
             else if(type == JSMN_UNDEFINED) {
                 data_str = strdup("undefined"); 
+                data_len = strlen(data_str);
             }
 
             // Create json data and send it to websocket client
