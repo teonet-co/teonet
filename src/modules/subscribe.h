@@ -26,7 +26,7 @@ typedef struct teoSScrClass {
 /**
  * teoSScr class list or CMD_SUBSCRIBE_ANSWER data
  */
-typedef struct teoSScrData {
+typedef struct teoSScrListData {
     
     uint16_t ev; ///< Event (used when send data to subscriber)
     uint8_t cmd; ///< Command ID (used when send data to subscriber)
@@ -35,8 +35,22 @@ typedef struct teoSScrData {
     int16_t port; ///< L0 peer port    
     char data[]; ///< Remote peer name in list or data in CMD_SUBSCRIBE_ANSWER
         
+} teoSScrListData;
+
+#pragma pack(push)
+#pragma pack(1)
+/**
+ * teoSScr class list or CMD_SUBSCRIBE_ANSWER data
+ */
+typedef struct teoSScrData {
+    
+    uint16_t ev; ///< Event (used when send data to subscriber)
+    uint8_t cmd; ///< Command ID (used when send data to subscriber)
+    char data[]; ///< Remote peer name in list or data in CMD_SUBSCRIBE_ANSWER
+        
 } teoSScrData;
 
+#pragma pack(pop)
 
 #ifdef	__cplusplus
 extern "C" {
