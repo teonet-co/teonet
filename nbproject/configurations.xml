@@ -170,6 +170,11 @@
           <executablePath></executablePath>
           <cTool flags="-mtune=generic -march=x86-64 -g -O2 -fPIC -fstack-protector">
           </cTool>
+          <ccTool>
+            <preprocessorList>
+              <Elem>HAVE_CONFIG_H</Elem>
+            </preprocessorList>
+          </ccTool>
         </makeTool>
         <preBuild>
           <preBuildCommandWorkingDir>.</preBuildCommandWorkingDir>
@@ -184,104 +189,33 @@
         <cTool flags="6">
         </cTool>
       </item>
-      <item path="app/modules/teo_auth/teo_auth.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-        </cTool>
+      <item path="app/modules/teo_auth/teo_auth.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="2">
+        </ccTool>
       </item>
-      <item path="app/modules/teo_web/teo_web.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-          <incDir>
-            <pElem>app</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+      <item path="app/modules/teo_web/teo_web.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="2">
+        </ccTool>
       </item>
-      <item path="app/modules/teo_web/teo_web_conf.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="6">
-          <incDir>
-            <pElem>app/modules/teo_web</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>src</pElem>
-            <pElem>app</pElem>
-          </incDir>
-        </cTool>
+      <item path="app/modules/teo_web/teo_web_conf.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="2">
+        </ccTool>
       </item>
-      <item path="app/modules/teo_web/teo_ws.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-          <incDir>
-            <pElem>app</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+      <item path="app/modules/teo_web/teo_ws.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="2">
+        </ccTool>
       </item>
-      <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-          <incDir>
-            <pElem>app</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+      <item path="app/teodb.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="2">
+        </ccTool>
       </item>
-      <item path="app/teovpn.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-          <incDir>
-            <pElem>app</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+      <item path="app/teovpn.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="2">
+        </ccTool>
       </item>
-      <item path="app/teoweb.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="2">
-          <incDir>
-            <pElem>app</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+      <item path="app/teoweb.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="2">
+        </ccTool>
       </item>
       <item path="embedded/libpbl/src/pbl.c" ex="false" tool="0" flavor2="2">
         <cTool flags="0">
@@ -404,24 +338,12 @@
         <cTool flags="6">
         </cTool>
       </item>
-      <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
-          <incDir>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+      <item path="examples/fossa/teofossa.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
+        </ccTool>
       </item>
-      <item path="examples/teoack.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teoack.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -431,14 +353,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teoackm.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teoackm.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -448,14 +366,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teocque.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teocque.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -465,14 +379,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teol0cli.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teol0cli.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -482,14 +392,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teolarge.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teolarge.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -499,14 +405,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teomulti.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teomulti.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -516,14 +418,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teomulti_t.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teomulti_t.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -533,14 +431,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teosend.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teosend.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -550,14 +444,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teosscr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teosscr.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -567,14 +457,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teostream.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teostream.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -584,14 +470,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teotcp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teotcp.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -601,14 +483,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teoterm.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teoterm.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -618,14 +496,10 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+        </ccTool>
       </item>
-      <item path="examples/teotun.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+      <item path="examples/teotun.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
           <incDir>
             <pElem>examples</pElem>
             <pElem>src/config</pElem>
@@ -635,12 +509,24 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
+        </ccTool>
+      </item>
+      <folder path="0/app">
+        <ccTool>
+          <incDir>
+            <pElem>app</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>/usr/include/libev</pElem>
+          </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
           </preprocessorList>
-        </cTool>
-      </item>
+        </ccTool>
+      </folder>
       <folder path="0/app/embedded/jsmn">
         <cTool>
           <incDir>
@@ -692,12 +578,30 @@
           </incDir>
         </cTool>
       </folder>
-      <folder path="0/examples/fossa">
+      <folder path="0/examples">
         <cTool>
           <incDir>
             <pElem>examples/fossa</pElem>
           </incDir>
         </cTool>
+        <ccTool>
+          <preprocessorList>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+          </preprocessorList>
+        </ccTool>
+      </folder>
+      <folder path="0/examples/fossa">
+        <ccTool>
+          <incDir>
+            <pElem>examples/fossa</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>/usr/include/libev</pElem>
+          </incDir>
+        </ccTool>
       </folder>
       <folder path="0/sh">
         <cTool>
@@ -709,6 +613,27 @@
             <Elem>HAVE_CONFIG_H</Elem>
           </preprocessorList>
         </cTool>
+      </folder>
+      <folder path="0/src">
+        <ccTool>
+          <incDir>
+            <pElem>src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>/usr/include/libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+          </preprocessorList>
+        </ccTool>
       </folder>
       <folder path="0/src/config">
         <cTool>
@@ -770,6 +695,20 @@
             <Elem>TEONE_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
           </preprocessorList>
         </cTool>
+        <ccTool>
+          <incDir>
+            <pElem>tests</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>/usr/include/libev</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>TEONE_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+          </preprocessorList>
+        </ccTool>
       </folder>
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
@@ -937,27 +876,9 @@
           </preprocessorList>
         </cTool>
       </item>
-      <item path="src/net_com.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
+      <item path="src/net_com.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="4">
+        </ccTool>
       </item>
       <item path="src/net_core.c" ex="false" tool="0" flavor2="2">
         <cTool flags="4">
@@ -1177,9 +1098,9 @@
         <cTool flags="1">
         </cTool>
       </item>
-      <item path="tests/test_subscribe.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
-        </cTool>
+      <item path="tests/test_subscribe.c" ex="false" tool="1" flavor2="2">
+        <ccTool flags="1">
+        </ccTool>
       </item>
       <item path="tests/test_tcp_proxy.c" ex="false" tool="0" flavor2="2">
         <cTool flags="1">
