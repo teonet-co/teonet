@@ -678,6 +678,9 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(kev->event_cb != NULL)
         kev->event_cb(kev, EV_K_DISCONNECTED, (void*)rd, sizeof(*rd), NULL);
 
+    // Send event to subscribers
+    teoSScrSend(kev->kc->kco->ksscr, EV_K_DISCONNECTED, rd->from, rd->from_len, 0);
+    
     return 1;
 
     #undef kev

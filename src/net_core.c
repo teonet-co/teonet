@@ -640,6 +640,9 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         // Send event callback
         if(ke->event_cb != NULL)
             ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
+        
+        // Send event to subscribers
+        teoSScrSend(ke->kc->kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
     }
 }
 
