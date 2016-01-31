@@ -62,6 +62,18 @@ ksnet_arp_data * ksnetArpGet(ksnetArpClass *ka, char *name) {
     return (ksnet_arp_data *) pblMapGetStr(ka->map, name, &val_len);
 }
 
+
+/**
+ * Returns the number of entries in arp map.
+ * 
+ * @param ka Pointer to ksnetArpClass
+ * @return The number of entries in arp map.
+ */
+int ksnetArpSize(ksnetArpClass *ka) {
+    
+    return pblMapSize(ka->map);
+}
+
 /**
  * Add or update record in KSNet Peer ARP table
  *
