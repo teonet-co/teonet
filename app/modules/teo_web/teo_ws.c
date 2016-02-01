@@ -221,10 +221,15 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             else if(cp->cmd == CMD_L_SUBSCRIBE_ANSWER) {
                 
                 teoSScrData *sscr_data = (teoSScrData *) data;
+                data_len =  cp->data_length  - sizeof(teoSScrData);
+                int b64_data_size = 1.6 * data_len + 4; //((cp->data_length - 1) / 3) * 4 + 4;
+                char *b64_data = malloc(b64_data_size);
+                mg_base64_encode((const unsigned char*)sscr_data->data, data_len, b64_data);
                 data_str = ksnet_formatMessage(
-                    "{ \"ev\": %d, \"cmd\": %d, \"client\": \"%s\" }", 
-                    sscr_data->ev, sscr_data->cmd, sscr_data->data);
+                    "{ \"ev\": %d, \"cmd\": %d, \"data\": \"%s\" }", 
+                    sscr_data->ev, sscr_data->cmd, b64_data);
                 data_len = strlen(data_str);
+                free(b64_data);
                 beg = end = ""; 
             }
             else if(type == JSMN_UNDEFINED) {
