@@ -28,12 +28,13 @@
  * 
  * In server application use:
  * 
- * * teoSScrSend() function to send event to subscriber
- * * teoSScrUnSubscription() function to unsubscribe disconnected peer
+ * * teoSScrSend() function to send event to Subscriber
+ * * teoSScrUnSubscription() function to Unsubscribe disconnected peer
  * 
- * Only the EV_K_L0_CONNECTED and EV_K_L0_DISCONNECTED events sent automatically 
- * by the teonet library. All other events should be described and send by 
- * applications provided this events from its event callback function.
+ * Only the EV_K_CONNECTED, EV_K_DISCONNECTED, EV_K_L0_CONNECTED and 
+ * EV_K_L0_DISCONNECTED events sent automatically by the teonet library. 
+ * All other events should be described and send by applications provided this 
+ * events from its event callback function.
  * 
  * Created on January 5, 2016, 3:38 PM
  */

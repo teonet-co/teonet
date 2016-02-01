@@ -25,6 +25,7 @@ int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -35,6 +36,7 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
+const char *BINARY = "BINARY";
 
 /**
  * Initialize ksnet command class
@@ -137,6 +139,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         case CMD_PEERS:
             processed = cmd_peers_cb(kco, rd);
+            break;
+            
+        case CMD_GET_NUM_PEERS:
+            processed = cmd_peers_num_cb(kco, rd);
             break;
             
         case CMD_RESEND:
@@ -278,6 +284,60 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 }
 
 /**
+ * Process CMD_GET_NUM_PEERS command
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    void *peers_data;
+    size_t peers_data_length = 0;
+            
+    // Get peers number data
+    // Get type of request: 0 - binary; 1 - JSON
+    const int data_type = rd->data_len && !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
+    uint32_t peers_number = ksnetArpSize(((ksnCoreClass*)kco->kc)->ka); // Get peers number
+    
+    // JSON data type
+    if(data_type == 1) {
+        
+        char *json_str = ksnet_formatMessage(
+            "{ \"numPeers\": %d }",
+            peers_number
+        );
+        
+        peers_data = json_str;
+        peers_data_length = strlen(json_str) + 1;
+    }
+    
+    // BINARY data type
+    else {
+        
+        peers_data_length = sizeof(peers_number);
+        peers_data = memdup(&peers_number, peers_data_length);
+    }
+    
+    // Send PEERS_ANSWER to L0 user
+    if(rd->l0_f)
+        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                rd->addr, rd->port, rd->from, rd->from_len, 
+                CMD_GET_NUM_PEERS_ANSWER, 
+                peers_data, peers_data_length);
+    
+    // Send PEERS_ANSWER to peer
+    else
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, 
+                CMD_GET_NUM_PEERS_ANSWER,
+                peers_data, peers_data_length);
+    
+    free(peers_data);
+    
+    return 1; // Command processed
+}
+
+/**
  * Process CMD_L0_CLIENTS command
  *
  * @param kco Pointer to ksnCommandClass
@@ -329,10 +389,10 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     char *json_str = NULL;
     void *data_out = &clients_number;
     size_t data_out_len = sizeof(clients_number);
-    if(rd->data_len && !strcmp(rd->data, JSON)) {
+    if(rd->data_len && !strncmp(rd->data, JSON, rd->data_len)) {
         
         json_str = ksnet_sformatMessage(json_str, 
-            "{ \"clients_number\": %d }", clients_number           
+            "{ \"numClients\": %d }", clients_number           
         );
         data_out = json_str;
         data_out_len = strlen(json_str) + 1;
@@ -678,6 +738,9 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(kev->event_cb != NULL)
         kev->event_cb(kev, EV_K_DISCONNECTED, (void*)rd, sizeof(*rd), NULL);
 
+    // Send event to subscribers
+    teoSScrSend(kev->kc->kco->ksscr, EV_K_DISCONNECTED, rd->from, rd->from_len, 0);
+    
     return 1;
 
     #undef kev
