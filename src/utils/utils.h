@@ -39,6 +39,7 @@ char *ksnet_vformatMessage(const char *fmt, va_list ap);
 
 char *getRandomHostName(void); // Implemented in enet.c module
 
+void *memdup(const void* d, size_t s);
 char *trim(char *str);
 char *trimlf(char *str);
 //char* itoa(int ival);

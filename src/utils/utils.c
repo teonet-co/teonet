@@ -215,6 +215,21 @@ char *trim(char *str) {
     return str;
 }
 
+/**
+ * Duplicate memory \todo move this function to teonet library
+ * 
+ * Allocate memory and copy selected value to it
+ * 
+ * @param d Pointer to value to copy
+ * @param s Length of value
+ * @return 
+ */
+void *memdup(const void* d, size_t s) { 
+    
+    void* p; 
+    return ((p = malloc(s))?memcpy(p, d, s):NULL);
+}
+
 /*
  * Convert integer to string
  *

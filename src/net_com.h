@@ -48,6 +48,8 @@ enum ksnCMD {
     CMD_SUBSCRIBE_ANSWER,   ///< #83 Subscribe answer
     CMD_L0_CLIENTS_N,       ///< #84 Request clients number
     CMD_L0_CLIENTS_N_ANSWER,///< #85 Clients number
+    CMD_GET_NUM_PEERS,      ///< #86 Request number of peers
+    CMD_GET_NUM_PEERS_ANSWER,///< #87 Number of peers answer
             
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
