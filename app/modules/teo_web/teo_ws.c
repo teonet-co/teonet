@@ -72,6 +72,8 @@ teoWSClass* teoWSInit(ksnHTTPClass *kh) {
     return this;
 }
 
+#define teoLNullDisconnectThis(con) { free(con->user_data); teoLNullDisconnect(con); }
+
 /**
  * Destroy teonet HTTP module]
  * @param kws Pointer to teoWSClass
@@ -94,7 +96,7 @@ static void teoWSDestroy(teoWSClass *kws) {
                 void *entry = pblIteratorPrevious(it);
                 teoWSmapData *td = pblMapEntryValue(entry);
                 ev_io_stop(((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, &td->w); // stop watcher
-                teoLNullDisconnect(td->con); // disconnect connection to L0 server
+                teoLNullDisconnectThis(td->con); // disconnect connection to L0 server
             }
             pblIteratorFree(it);
         }
@@ -103,6 +105,16 @@ static void teoWSDestroy(teoWSClass *kws) {
         free(kws);
     }
 }
+
+/**
+ * L0 server teonet L0 connect user data
+ */
+typedef struct teoLNullConnectUserData {
+    
+    void *nc_p; ///< Pointer to mg_connection structure
+    teoWSClass *kws; ///< Pointer to teoWSClass
+    
+} teoLNullConnectUserData;
 
 /**
  * Read data from L0 server
@@ -114,7 +126,9 @@ static void teoWSDestroy(teoWSClass *kws) {
 static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     teoLNullConnectData *con = w->data;
-    void *nc_p = con->user_data;
+    #define ksn_conf_t \
+    ((ksnetEvMgrClass*)((teoLNullConnectUserData*)con->user_data)->kws->kh->ke)->ksn_cfg
+    void *nc_p = ((teoLNullConnectUserData*)con->user_data)->nc_p;
     
     for(;;) {
         
@@ -126,22 +140,16 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             
             teoLNullCPacket *cp = (teoLNullCPacket*) con->read_buffer;
             char *data = cp->peer_name + cp->peer_name_length;
-//            printf("Receive %d bytes: %d bytes data from L0 server, "
-//                   "from peer %s, cmd = %d\n", 
-//                   (int)rc, cp->data_length, cp->peer_name, cp->cmd 
-//            );
-//            
-            // \todo use ksnet_printf and ksn_conf in this function
-//            #ifdef DEBUG_KSNET
-//            ksnet_printf(ksn_conf, DEBUG,
-//                MODULE_LABEL
-//                "Receive %d bytes: %d bytes data from L0 server, "
-//                "from peer %s, cmd = %d\n",
-//                ANSI_YELLOW, ANSI_NONE, 
-//                (int)rc, cp->data_length, cp->peer_name, cp->cmd );
-//            #endif
             
-            
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&ksn_conf_t, DEBUG_VV,
+                MODULE_LABEL
+                "Receive %d bytes: %d bytes data from L0 server, "
+                "from peer %s, cmd = %d\n",
+                ANSI_YELLOW, ANSI_NONE, 
+                (int)rc, cp->data_length, cp->peer_name, cp->cmd);
+            #endif
+                        
             // Define json type of data field
             //
             char *beg, *end;
@@ -159,11 +167,6 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 //
                 free(t);
             }
-//            if(type == JSMN_OBJECT || type == JSMN_ARRAY) beg = end = ""; 
-//            else beg = end = "\"";
-            
-//            if(type != JSMN_STRING) beg = end = ""; 
-//            else beg = end = "\"";
             
             if(type == JSMN_STRING || type == JSMN_UNDEFINED) beg = end = "\"";
             else beg = end = "";             
@@ -233,7 +236,12 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 beg = end = ""; 
             }
             else if(type == JSMN_UNDEFINED) {
-                data_str = strdup("undefined"); 
+                
+                data_len = cp->data_length;
+                int b64_data_size = 2 * data_len + 4;
+                char *b64_data = malloc(b64_data_size);
+                mg_base64_encode((const unsigned char*)data, data_len, b64_data);
+                data_str = b64_data; //strdup("undefined"); 
                 data_len = strlen(data_str);
             }
 
@@ -246,14 +254,23 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 beg, data_len, data_str, end
             );
             
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&ksn_conf_t, DEBUG_VV,
+                MODULE_LABEL
+                "Send %d bytes JSON: %s to L0 client\n",
+                ANSI_YELLOW, ANSI_NONE, 
+                data_json_len, data_json);
+            #endif
+
             mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data_json, 
-                    data_json_len);
+                    data_json_len);                        
             
             if(data_str != data) free(data_str);
             free(data_json);
         }
         else break;
     }
+    #undef ksn_conf_t
 }
 
 /**
@@ -275,7 +292,9 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
     
     // Connect to L0 server
     teoLNullConnectData *con = teoLNullConnect(server, port);
-    
+    con->user_data = malloc(sizeof(teoLNullConnectUserData));
+    ((teoLNullConnectUserData*)con->user_data)->kws = kws;
+            
     if(con != NULL && con->fd > 0) {
         
         ssize_t snd = teoLNullLogin(con, login);
@@ -296,7 +315,7 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
                     ev_init (&td->w, read_cb);
                     ev_io_set (&td->w, td->con->fd, EV_READ);
                     td->w.data = con;
-                    con->user_data = nc_p;
+                    ((teoLNullConnectUserData*)con->user_data)->nc_p = nc_p;
                     ev_io_start (((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, 
                             &td->w);                
 
@@ -319,7 +338,7 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
 
         // Disconnect from L0 server at error
         if(rv) {
-            teoLNullDisconnect(con);
+            teoLNullDisconnectThis(con);
             con = NULL;
         }
     } 
@@ -349,7 +368,7 @@ static int teoWSremove(teoWSClass *kws, void *nc_p) {
             != NULL) { 
         
         ev_io_stop(((ksnetEvMgrClass*)kws->kh->ke)->ev_loop, &td->w); // stop watcher
-        teoLNullDisconnect(td->con); // disconnect connection to L0 server
+        teoLNullDisconnectThis(td->con); // disconnect connection to L0 server
         pblMapRemoveFree(kws->map, (void*)&nc_p, sizeof(nc_p), &valueLength);
         
         #ifdef DEBUG_KSNET
@@ -739,7 +758,8 @@ static size_t get_num_of_tags(char *data, size_t data_length) {
 //    printf("number of json tags in request: %d, request: %s\n", 
 //            (int) num_of_tags, data);
 
-    if(num_of_tags) num_of_tags++;
+    //if(num_of_tags) 
+        num_of_tags++;
     
     return num_of_tags * 4;
 }
