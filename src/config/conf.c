@@ -72,7 +72,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Remote host default
     ksn_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
     ksn_cfg->r_host_name[0] = '\0';
-    ksn_cfg->r_host_addr[0] = '\0';
+    strncpy(ksn_cfg->r_host_addr, localhost, KSN_BUFFER_SM_SIZE/2);
     ksn_cfg->r_tcp_f = 0;
     ksn_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
 
