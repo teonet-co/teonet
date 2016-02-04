@@ -2,12 +2,12 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([teonet], [0.1.21], [kirill@scherba.ru])
+AC_INIT([teonet], [0.1.22], [kirill@scherba.ru])
 AC_CONFIG_SRCDIR([src/teonet.c])
 AC_CONFIG_HEADERS([src/config/config.h])
 
-AC_DEFINE(LIBRARY_HI_VERSION, ["35"], [Teonet dynamic library version])
-AC_DEFINE(LIBRARY_VERSION,    ["35.0.0"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_HI_VERSION, ["36"], [Teonet dynamic library version])
+AC_DEFINE(LIBRARY_VERSION,    ["36.0.0"], [Teonet dynamic library version])
 AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2016"], [Teonet library copyright])
 
 AM_INIT_AUTOMAKE
