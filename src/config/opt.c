@@ -87,7 +87,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         data_path = getDataPath();
         #ifdef DEBUG_KSNET
-        printf("current data path: %s\n", data_path);
+        printf("Current data path: %s\n", data_path);
         #endif
     }
 
@@ -263,7 +263,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
     if(show_arg) {
 
         // Show network
-        printf("network: %s\n", conf->network);
+        printf("Network: %s\n", conf->network);
 
         int i;
         for(i = 0; i < app_argc; i++) {
