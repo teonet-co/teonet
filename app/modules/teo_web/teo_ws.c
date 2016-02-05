@@ -187,14 +187,16 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                             "\"mode\": %d, "
                             "\"addr\": \"%s\", "
                             "\"port\": %d, "
-                            "\"triptime\": %.3f"
+                            "\"triptime\": %.3f,"
+                            "\"uptime\": %.3f"
                             " }", 
                             i ? ", " : "", 
                             arp_data_ar->arp_data[i].name,
                             arp_data_ar->arp_data[i].data.mode,
                             arp_data_ar->arp_data[i].data.addr,
                             arp_data_ar->arp_data[i].data.port,
-                            arp_data_ar->arp_data[i].data.last_triptime
+                            arp_data_ar->arp_data[i].data.last_triptime,
+                            arp_data_ar->arp_data[i].data.connected_time // uptime
                     );
                 }
                 sprintf(data_str + ptr, " ] }");

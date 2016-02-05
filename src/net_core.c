@@ -629,6 +629,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         // Add peer to ARP Table
         memset(rd->arp, 0, sizeof(*rd->arp));
         strncpy(rd->arp->addr, rd->addr, sizeof(rd->arp->addr));
+        rd->arp->connected_time = ksnetEvMgrGetTime(ke);
         rd->arp->port = rd->port;
         rd->arp->mode = mode;
         ksnetArpAdd(kc->ka, rd->from, rd->arp);
