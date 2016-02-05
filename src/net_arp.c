@@ -97,17 +97,18 @@ void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data) {
  */
 void ksnetArpAddHost(ksnetArpClass *ka) { 
 
-    ksnet_arp_data arp;
     ksnetEvMgrClass *ke = ka->ke;
+    ksnet_arp_data arp;
     
     char* name = ke->ksn_cfg.host_name;
     char *addr = (char*)localhost; //"0.0.0.0";
     int port = ke->kc->port;
     
     memset(&arp, 0, sizeof(arp));
-    arp.mode = -1;
+    arp.connected_time = ev_now(ke->ev_loop); //ksnetEvMgrGetTime(ke);
     strncpy(arp.addr, addr, sizeof(arp.addr));
     arp.port = port;
+    arp.mode = -1;
 
     ksnetArpAdd(ka, name, &arp);
 }
@@ -339,6 +340,7 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
             ksnet_arp_data *data = pblMapEntryValue(entry);
             strncpy(data_ar->arp_data[i].name, name, sizeof(data_ar->arp_data[i].name));
             memcpy(&data_ar->arp_data[i].data, data, sizeof(data_ar->arp_data[i].data));
+            data_ar->arp_data[i].data.connected_time = ksnetEvMgrGetTime(ka->ke) - data_ar->arp_data[i].data.connected_time;
             i++;
         }
     }
