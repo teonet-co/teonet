@@ -207,6 +207,8 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                             // Send Connected event to all subscribers
                             teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, 
                                     kld->name, kld->name_length, 0);
+                            
+                            // \todo Issue #161: Add connection to L0 statistic
                         }
                         
                         // Resend data to teonet

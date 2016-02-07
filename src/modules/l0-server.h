@@ -40,6 +40,9 @@ typedef struct  ksnLNullClass {
     
 } ksnLNullClass;
 
+#pragma pack(push)
+#pragma pack(1)
+
 /**
  * L0 Server resend to peer packet data structure
  * 
@@ -53,6 +56,7 @@ typedef struct ksnLNullSPacket {
 
 } ksnLNullSPacket;
 
+#pragma pack(pop)
 
 #ifdef	__cplusplus
 extern "C" {
