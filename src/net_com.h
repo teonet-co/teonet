@@ -24,7 +24,7 @@ enum ksnCMD {
     CMD_CONNECT,            ///< #5 Inform peer about connected peer
     CMD_DISCONNECTED,       ///< #6 Inform peer about disconnected peer
     CMD_VPN,                ///< #7 VPN command
-    
+
     // Core level TR-UDP mode: 64...127
     CMD_64_RESERVED = 64,   ///< #64 Reserver for future use
     CMD_ECHO,               ///< #65 Echo test message: auto replay test message command
@@ -50,11 +50,13 @@ enum ksnCMD {
     CMD_L0_CLIENTS_N_ANSWER,///< #85 Clients number
     CMD_GET_NUM_PEERS,      ///< #86 Request number of peers
     CMD_GET_NUM_PEERS_ANSWER,///< #87 Number of peers answer
-            
+    CMD_L0_STAT,             ///< #88 Get LO server statistic request
+    CMD_L0_STAT_ANSWER,      ///< #89 LO server statistic 
+
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
     CMD_USER,               ///< #129 User command
-            
+
     // Application level not TR-UDP mode: 192...254
     CMD_192_RESERVED = 192, ///< #192 Reserver for future use
     CMD_USER_NR,            ///< #193 User command
@@ -69,9 +71,9 @@ enum ksnCMD {
 typedef struct ksnCommandClass {
 
     void *kc; ///< Pointer to KSNet core class object
-    void *ks; ///< Pointer to KSNet split class    
+    void *ks; ///< Pointer to KSNet split class
     void *kr; ///< Pointer to KSNet reconnect class
-    void *ksscr; ///< Pointer to teoSScrClass 
+    void *ksscr; ///< Pointer to teoSScrClass
 
 } ksnCommandClass;
 
@@ -95,7 +97,7 @@ typedef struct ksnCorePacketData {
     size_t raw_data_len;    ///< Received packet length
 
     ksnet_arp_data *arp;    ///< Pointer to ARP Table data
-    
+
     int l0_f;               ///< L0 command flag (from set to l0 client name)
 
 } ksnCorePacketData;
