@@ -74,6 +74,7 @@ typedef enum ksnetEvMgrEvents {
             
     EV_K_L0_CONNECTED,              ///< #21 New L0 client connected to L0 server
     EV_K_L0_DISCONNECTED,           ///< #22 A L0 client was disconnected from L0 server
+    EV_K_L0_NEW_VISIT,              ///< #23 New clients visit event to all subscribers (equal to L0_CONNECTED but send number of visits)
             
     EV_K_APP_USER = 0x8000          ///< #0x8000 Teonet based Applications events
 
