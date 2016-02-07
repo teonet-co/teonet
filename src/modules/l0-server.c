@@ -55,7 +55,8 @@ ksnLNullClass *ksnLNullInit(void *ke) {
         if(kl != NULL)  {
             kl->ke = ke; // Pointer event manager class
             kl->map = pblMapNewHashMap(); // Create a new hash map      
-            kl->map_n = pblMapNewHashMap(); // Create a new hash map    
+            kl->map_n = pblMapNewHashMap(); // Create a new hash map  
+            memset(&kl->stat, 0, sizeof(kl->stat)); // Clear statistic data
             ksnLNullStart(kl); // Start L0 Server
         }
     }
@@ -209,6 +210,17 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                                     kld->name, kld->name_length, 0);
                             
                             // \todo Issue #161: Add connection to L0 statistic
+                            kl->stat.visits++; // Increment number of visits
+                            
+                            // Send "new visit" event to all subscribers
+                            size_t vd_length = sizeof(ksnLNullSVisitsData) + 
+                                    kld->name_length;
+                            ksnLNullSVisitsData *vd = malloc(vd_length);
+                            vd->visits = kl->stat.visits;
+                            memcpy(vd->client, kld->name, kld->name_length);
+                            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_NEW_VISIT, 
+                                    vd, vd_length, 0);
+                            free(vd);
                         }
                         
                         // Resend data to teonet
@@ -253,6 +265,25 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             else kld->read_buffer_ptr = 0;
         }        
     }
+}
+
+// \todo Issue #161: Get L0 server statistic 
+/**
+ * Get L0 server statistic
+ * 
+ * @param kl Pointer to ksnLNullClass
+ * @return Pointer to ksnLNullSStat or NULL if L0 server has not started
+ */
+ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl) {
+    
+    ksnLNullSStat *stat = NULL;
+    
+    if(kl != NULL) {
+        
+        stat = &kl->stat;
+    }
+    
+    return stat;
 }
 
 /**
@@ -588,7 +619,7 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         
     // Process command
     if(data->cmd == CMD_ECHO || data->cmd == CMD_PEERS || data->cmd == CMD_L0_CLIENTS ||
-       data->cmd == CMD_SUBSCRIBE || data->cmd == CMD_L0_CLIENTS_N || 
+       data->cmd == CMD_SUBSCRIBE || data->cmd == CMD_L0_CLIENTS_N || CMD_L0_STAT ||
        data->cmd == CMD_GET_NUM_PEERS ||
        (data->cmd >= CMD_USER && data->cmd < CMD_192_RESERVED) ||
        (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {

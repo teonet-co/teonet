@@ -37,6 +37,7 @@ typedef struct  ksnLNullClass {
     PblMap *map;        ///< Pointer to the L0 clients map (by fd)
     PblMap *map_n;      ///< Pointer to the L0 FDs map (by name)
     int fd;             ///< L0 TCP Server FD
+    ksnLNullSStat stat; ///< L0 server statistic
     
 } ksnLNullClass;
 
@@ -69,6 +70,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 int *ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name);
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl);
 size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data);
+ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl);
 
 #ifdef	__cplusplus
 }
