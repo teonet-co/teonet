@@ -33,6 +33,7 @@ static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -163,6 +164,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             
         case CMD_L0_CLIENTS_N:
             processed = cmd_l0_clients_n_cb(kco, rd);
+            break;
+            
+        case CMD_L0_STAT:
+            processed = cmd_l0_stat_cb(kco, rd);
             break;
             
         case CMD_SUBSCRIBE:
@@ -411,6 +416,66 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     if(client_data != NULL) free(client_data);
     if(json_str != NULL) free(json_str);
+    
+    return 1; // Command processed
+}
+
+/**
+ * Process CMD_L0_STAT command
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    // Get l0 clients statistic
+    ksnLNullSStat *stat_data = 
+        ksnLNullStat(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
+    
+    if(stat_data != NULL) {
+        
+        // Get type of request: 0 - binary; 1 - JSON
+        const int data_type = rd->data_len && 
+                              !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
+        
+        size_t l0_stat_data_len = sizeof(ksnLNullSStat);
+        void *l0_stat_data = stat_data;
+        char *json_str = NULL;
+        
+        // JSON data type
+        if(data_type == 1) {
+
+            json_str = ksnet_formatMessage(
+                "{ \"visits\": %d }",
+                stat_data->visits
+            );
+
+            l0_stat_data = json_str;
+            l0_stat_data_len = strlen(json_str) + 1;
+        }
+
+//        // BINARY data type
+//        else {
+//
+//        }
+
+        // Send PEERS_ANSWER to L0 user
+        if(rd->l0_f)
+            ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                    rd->addr, rd->port, rd->from, rd->from_len, 
+                    CMD_L0_STAT_ANSWER, 
+                    l0_stat_data, l0_stat_data_len);
+
+        // Send PEERS_ANSWER to peer
+        else
+            ksnCoreSendto(kco->kc, rd->addr, rd->port, 
+                    CMD_L0_STAT_ANSWER,
+                    l0_stat_data, l0_stat_data_len);
+        
+        // Free json string data
+        if(json_str != NULL) free(json_str);        
+    }
     
     return 1; // Command processed
 }
