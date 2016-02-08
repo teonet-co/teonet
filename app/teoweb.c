@@ -146,5 +146,8 @@ int main(int argc, char** argv) {
     // Free teoweb configuration
     teowebConfigFree(tm.tw_cfg);
     
+    // ReStart teonet if need it
+    ksnetEvMgrRestart(argc, argv);
+    
     return (EXIT_SUCCESS);
 }
