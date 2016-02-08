@@ -209,7 +209,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                             teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, 
                                     kld->name, kld->name_length, 0);
                             
-                            // \todo Issue #161: Add connection to L0 statistic
+                            // Add connection to L0 statistic
                             kl->stat.visits++; // Increment number of visits
                             
                             // Send "new visit" event to all subscribers
@@ -267,7 +267,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     }
 }
 
-// \todo Issue #161: Get L0 server statistic 
+// Get L0 server statistic 
 /**
  * Get L0 server statistic
  * 
@@ -701,7 +701,6 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + 
             data->data_length;
     char *out_data = malloc(out_data_len);
-    teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
     memset(out_data, 0, out_data_len);
     size_t packet_length = teoLNullPacketCreate(out_data, out_data_len, 
             data->cmd, rd->from, data->from + data->from_length, 
@@ -717,15 +716,15 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         if((snd = write(*fd, out_data, packet_length)) >= 0);
 
         #ifdef DEBUG_KSNET
-        void *packet_data = packet->peer_name + packet->peer_name_length;
+        teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
+        //void *packet_data = packet->peer_name + packet->peer_name_length;
         ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
             "%sl0 Server:%s "
             "Send %d bytes to \"%s\" L0 client: %d bytes data, "
-            "from peer \"%s\": %s\n", 
+            "from peer \"%s\"\n", 
             ANSI_LIGHTCYAN, ANSI_NONE, 
             (int)snd, data->from, 
-            packet->data_length, packet->peer_name, 
-            packet_data);
+            packet->data_length, packet->peer_name);
         #endif
     } 
     

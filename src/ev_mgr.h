@@ -138,15 +138,22 @@ typedef struct ksnetEvMgrClass {
     // Define signals watchers
     ev_signal sigint_w;  ///< Signal SIGINT watcher
     ev_signal sigterm_w; ///< Signal SIGTERM watcher
+    ev_signal sigsegv_w; ///< Signal SIGSEGV watcher
+    ev_signal sigabrt_w; ///< Signal SIGABRT watcher
     #ifndef HAVE_MINGW
     ev_signal sigquit_w; ///< Signal SIGQUIT watcher
     ev_signal sigkill_w; ///< Signal SIGKILL watcher
     ev_signal sigstop_w; ///< Signal SIGSTOP watcher
     #endif
-
+    
     void *user_data; ///< Pointer to user data or NULL if absent
     
     struct cli_def *cli;
+    
+//    char *argv0;    ///< Applications argv[0] parameter 
+//    char *argv1;    ///< Applications parameters string
+    int argc;         ///< Copy of argc
+    char** argv;      ///< Copy of argv  
 
 } ksnetEvMgrClass;
 
@@ -184,6 +191,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async);
 int ksnetEvMgrRunThread(ksnetEvMgrClass *ke);
 #endif
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
+int ksnetEvMgrRestart(int argc, char **argv);
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);
 char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke);

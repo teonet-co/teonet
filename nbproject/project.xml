@@ -6,7 +6,7 @@
             <name>teonet</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc</cpp-extensions>
-            <header-extensions>h</header-extensions>
+            <header-extensions>h,l</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
@@ -23,18 +23,20 @@
             </formatting>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">
+            <word>addr</word>
             <word>app</word>
             <word>atoi</word>
-            <word>Autoconf</word>
+            <word>autoconf</word>
             <word>Cesanta</word>
             <word>cmd</word>
             <word>config</word>
             <word>cque</word>
-            <word>Ctrl</word>
+            <word>ctrl</word>
+            <word>deinitialize</word>
             <word>fd</word>
             <word>gethostbyname</word>
             <word>hotkey</word>
-            <word>Hotkeys</word>
+            <word>hotkeys</word>
             <word>internet</word>
             <word>ip</word>
             <word>Jsmt</word>
@@ -73,9 +75,9 @@
             <word>triptime</word>
             <word>ttl</word>
             <word>tuntap</word>
-            <word>Ubuntu</word>
+            <word>ubuntu</word>
             <word>udp</word>
-            <word>Unsubscribe</word>
+            <word>unsubscribe</word>
             <word>unsubscribed</word>
             <word>uuid</word>
             <word>ver</word>

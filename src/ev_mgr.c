@@ -8,11 +8,14 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <pthread.h>    // For mutex and TEO_TREAD
+
 
 #include "ev_mgr.h"
 #include "utils/utils.h"
@@ -22,6 +25,8 @@
 // Constants
 const char *null_str = "";
 
+static int restartApp = 0;
+
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
 void idle_activity_cb(EV_P_ ev_idle *w, int revents); // Idle activity callback
@@ -29,6 +34,7 @@ void timer_cb (EV_P_ ev_timer *w, int revents); // Timer callback
 void host_cb (EV_P_ ev_io *w, int revents); // Host callback
 void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
+void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGSEGV or SIGABRT callback
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
@@ -94,10 +100,12 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->n_prev = NULL;
     ke->n_next = NULL;
     ke->user_data = user_data;
+    ke->argc = argc;
+    ke->argv = argv;
     
     // Initialize async mutex
     pthread_mutex_init(&ke->async_mutex, NULL);
-
+    
     // KSNet parameters
     const int app_argc = options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1 ? ((ksnetEvMgrAppParam*)user_data)->app_argc : 1; // number of application arguments
     char *app_argv[app_argc];           // array for argument names
@@ -119,7 +127,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
-    
+
     ke->ksn_cfg.app_argc = app_argc;
     ke->ksn_cfg.app_argv = argv_ret;
 //    
@@ -219,6 +227,20 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             ke->sigstop_w.data = ke;
             ev_signal_start (loop, &ke->sigstop_w);
             #endif
+
+            // SIGSEGV
+            #ifdef SIGSEGV
+            ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
+            ke->sigsegv_w.data = ke;
+            ev_signal_start (loop, &ke->sigsegv_w);
+            #endif
+
+            // SIGABRT
+            #ifdef SIGABRT
+            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
+            ke->sigabrt_w.data = ke;
+            ev_signal_start (loop, &ke->sigabrt_w);
+            #endif
         }
 
         // Initialize and start a async signal watcher for event add
@@ -236,7 +258,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     }
     
     ksnetEvMgrFree(ke, 0); // Free class variables and watchers after run
-    
+            
     return 0;
 }
 
@@ -284,8 +306,15 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         // Send stopped event to user level
         if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STOPPED, NULL, 0, NULL);
 
+        // Save application parameters to restart it
+        int argc = ke->argc;
+        char **argv = ke->argv;
+
         // Free memory
         free(ke);
+        
+        // Restart application if need it
+        ksnetEvMgrRestart(argc, argv);        
     }
     
     return 0;
@@ -637,6 +666,80 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     #endif
 
     ((ksnetEvMgrClass *)w->data)->runEventMgr = 0;
+}
+
+/**
+ * SIGSEGV or SIGABRT signal handler
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
+
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
+    static int attempt = 0;
+    
+    restartApp = 1;
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, ERROR_M,
+            "\n%sEvent manager:%s Got a signal %s ...\n", 
+            ANSI_RED, ANSI_NONE,
+            w->signum == SIGSEGV ? "SIGSEGV" : 
+            w->signum == SIGABRT ? "SIGABRT" : 
+                                   "?");
+    #endif
+    
+    // If SIGSEGV repeated than we can't exit from application
+    if(attempt) exit(-1);
+    
+    // \todo Issue #162: Initiate restart application
+    else {
+        
+        restartApp = 1; // Set restart flag
+        attempt++;
+        ksnetEvMgrStop(ke);
+        #ifdef SHOW_DFL
+        signal(w->signum, SIG_DFL);
+        kill(getpid(), w->signum);     
+        ksnetEvMgrRestart(ke->argc, ke->argv);
+        exit(0);
+        #endif
+    }
+}
+
+/**
+ * Restart application 
+ * 
+ * @param argc
+ * @param argv
+ * @return 
+ */
+int ksnetEvMgrRestart(int argc, char **argv) {
+    
+    if(restartApp) {
+        
+        // Show application path and parameters
+        int i = 1;
+        puts("");
+        printf("Restart application: %s", argv[0]);
+        for(;;i++) {
+            if(argv[i] != NULL) printf(" %s", argv[i]);
+            else break;
+        }
+        puts("\n");
+
+        // Execute application
+        if(execv(argv[0], argv) == -1) {
+            fprintf(stderr, "Can't execute application %s: %s\n", 
+                    argv[0], strerror(errno));
+            exit(-1);
+        }
+        printf("Quitted...\n");        
+    }
+    
+    return restartApp;
 }
 
 /**
