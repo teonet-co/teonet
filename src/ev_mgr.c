@@ -8,11 +8,14 @@
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 #include <pthread.h>    // For mutex and TEO_TREAD
+
 
 #include "ev_mgr.h"
 #include "utils/utils.h"
@@ -29,6 +32,7 @@ void timer_cb (EV_P_ ev_timer *w, int revents); // Timer callback
 void host_cb (EV_P_ ev_io *w, int revents); // Host callback
 void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
+void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGSEGV or SIGABRT callback
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
@@ -94,6 +98,18 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->n_prev = NULL;
     ke->n_next = NULL;
     ke->user_data = user_data;
+    ke->argv0 = strdup(argv[0]); // Application path
+    // Applications parameters
+    {
+        int i;
+        ke->argv1 = strdup(null_str);
+        for(i = 1; i < argc; i++) {
+            ke->argv1 = ksnet_sformatMessage(ke->argv1, "%s%s%s", 
+                i == 1 ? null_str : ke->argv1, 
+                i == 1 ? null_str : " ", 
+                argv[i]);
+        }
+    }
     
     // Initialize async mutex
     pthread_mutex_init(&ke->async_mutex, NULL);
@@ -219,6 +235,20 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             ke->sigstop_w.data = ke;
             ev_signal_start (loop, &ke->sigstop_w);
             #endif
+
+            // SIGSEGV
+            #ifdef SIGSEGV
+            ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
+            ke->sigsegv_w.data = ke;
+            ev_signal_start (loop, &ke->sigsegv_w);
+            #endif
+
+            // SIGABRT
+            #ifdef SIGABRT
+            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
+            ke->sigabrt_w.data = ke;
+            ev_signal_start (loop, &ke->sigabrt_w);
+            #endif
         }
 
         // Initialize and start a async signal watcher for event add
@@ -285,6 +315,8 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STOPPED, NULL, 0, NULL);
 
         // Free memory
+        free(ke->argv0);
+        free(ke->argv1);
         free(ke);
     }
     
@@ -637,6 +669,70 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     #endif
 
     ((ksnetEvMgrClass *)w->data)->runEventMgr = 0;
+}
+
+/**
+ * SIGSEGV or SIGABRT signal handler
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
+
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
+    
+    #ifdef DEBUG_KSNET
+    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, ERROR_M,
+            "\n%sEvent manager:%s got a signal %s ...\n", 
+            ANSI_RED, ANSI_NONE,
+            w->signum == SIGSEGV ? "SIGSEGV" : 
+            w->signum == SIGABRT ? "SIGABRT" : 
+                                   "?" );
+    #endif
+    
+    // \todo Issue #162: Restart application
+    
+    // Get application path
+    {
+        #define DEBUG_MSG
+        char resolved_path[PATH_MAX];
+
+        // Resolve and show application path
+        if (realpath(ke->argv0, resolved_path) == 0) {
+            fprintf(stderr, "The realpath failed: %s\n", strerror(errno));
+        } else {
+            #ifdef DEBUG_MSG
+            printf("Application's full path is '%s'\n", resolved_path);
+            #endif
+        
+            // Show application parameters
+            printf("Application's parameters is '%s'\n", ke->argv1);
+
+            // Get process name and path
+            if (realpath(ke->argv0, resolved_path));
+            char *_dirname = strdup(dirname(resolved_path));
+            if (realpath(ke->argv0, resolved_path));
+            char *_basename = strdup(basename(resolved_path));
+            // Combine path and parameters and execute application
+            char *app = ksnet_formatMessage("%s %s", _basename, ke->argv1);
+            if (realpath(ke->argv0, resolved_path));
+            pid_t cpid = fork();
+            // \todo Code executed by child
+            if(!cpid) {
+                if(execl(resolved_path, app, NULL) == -1) {
+                    fprintf(stderr, "Can't execute application %s: %s\n", 
+                            app, strerror(errno));
+                }
+            }    
+            free(_basename);
+            free(_dirname);
+            free(app);
+        }
+        exit(0);
+        
+        #undef DEBUG_MSG
+    }
 }
 
 /**

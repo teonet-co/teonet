@@ -31,6 +31,7 @@
             <word>config</word>
             <word>cque</word>
             <word>Ctrl</word>
+            <word>Deinitialize</word>
             <word>fd</word>
             <word>gethostbyname</word>
             <word>hotkey</word>
@@ -54,6 +55,7 @@
             <word>perror</word>
             <word>po</word>
             <word>printf</word>
+            <word>realpath</word>
             <word>recvfrom</word>
             <word>sh</word>
             <word>src</word>
