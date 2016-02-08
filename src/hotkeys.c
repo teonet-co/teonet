@@ -42,7 +42,8 @@ tr_udp_timer_data *tr_udp_timer_init(ksnCoreClass *kn);
 void tr_udp_timer_stop(tr_udp_timer_data **pet);
 
 // Constants
-#define COLOR_DW "\033[1;37m"
+#define COLOR_DW "\033[01;32m"
+//"\033[1;37m"
 #define COLOR_END "\033[0m"
 //
 const char
@@ -104,6 +105,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             "%s"
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
             " "COLOR_DW"a"COLOR_END" - show application menu\n"
+            " "COLOR_DW"r"COLOR_END" - restart application\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
             #if M_ENAMBE_VPN
@@ -410,6 +412,21 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
         case 'q':
             puts("Press y to quit application");
             khv->wait_y = Y_QUIT;
+            break;
+            
+        // Restart
+        case 'r':
+            printf("Restart application...\n");            
+            kill(getpid(),SIGABRT);
+            // Emulate error Write to null
+            //int i = *(int*)0;
+            //printf ("%s", 'a');
+//            {
+//                int i = 0;
+//                for(;;)
+//                    ((char *) 0)[i++] = 'q';
+//                    usleep(100);
+//            }
             break;
 
         // Y - yes

@@ -150,8 +150,10 @@ typedef struct ksnetEvMgrClass {
     
     struct cli_def *cli;
     
-    char *argv0;    ///< Applications argv[0] parameter 
-    char *argv1;    ///< Applications parameters string
+//    char *argv0;    ///< Applications argv[0] parameter 
+//    char *argv1;    ///< Applications parameters string
+    int argc;         ///< Copy of argc
+    char** argv;      ///< Copy of argv  
 
 } ksnetEvMgrClass;
 
@@ -189,6 +191,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async);
 int ksnetEvMgrRunThread(ksnetEvMgrClass *ke);
 #endif
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
+int ksnetEvMgrRestart(int argc, char **argv);
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);
 char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke);

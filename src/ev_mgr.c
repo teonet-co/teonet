@@ -25,6 +25,8 @@
 // Constants
 const char *null_str = "";
 
+static int restartApp = 0;
+
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
 void idle_activity_cb(EV_P_ ev_idle *w, int revents); // Idle activity callback
@@ -98,22 +100,12 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->n_prev = NULL;
     ke->n_next = NULL;
     ke->user_data = user_data;
-    ke->argv0 = strdup(argv[0]); // Application path
-    // Applications parameters
-    {
-        int i;
-        ke->argv1 = strdup(null_str);
-        for(i = 1; i < argc; i++) {
-            ke->argv1 = ksnet_sformatMessage(ke->argv1, "%s%s%s", 
-                i == 1 ? null_str : ke->argv1, 
-                i == 1 ? null_str : " ", 
-                argv[i]);
-        }
-    }
+    ke->argc = argc;
+    ke->argv = argv;
     
     // Initialize async mutex
     pthread_mutex_init(&ke->async_mutex, NULL);
-
+    
     // KSNet parameters
     const int app_argc = options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1 ? ((ksnetEvMgrAppParam*)user_data)->app_argc : 1; // number of application arguments
     char *app_argv[app_argc];           // array for argument names
@@ -135,7 +127,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
-    
+
     ke->ksn_cfg.app_argc = app_argc;
     ke->ksn_cfg.app_argv = argv_ret;
 //    
@@ -266,7 +258,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     }
     
     ksnetEvMgrFree(ke, 0); // Free class variables and watchers after run
-    
+            
     return 0;
 }
 
@@ -314,10 +306,15 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         // Send stopped event to user level
         if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STOPPED, NULL, 0, NULL);
 
+        // Save application parameters to restart it
+        int argc = ke->argc;
+        char **argv = ke->argv;
+
         // Free memory
-        free(ke->argv0);
-        free(ke->argv1);
         free(ke);
+        
+        // Restart application if need it
+        ksnetEvMgrRestart(argc, argv);        
     }
     
     return 0;
@@ -681,58 +678,68 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
+    static int attempt = 0;
+    
+    restartApp = 1;
     
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, ERROR_M,
-            "\n%sEvent manager:%s got a signal %s ...\n", 
+            "\n%sEvent manager:%s Got a signal %s ...\n", 
             ANSI_RED, ANSI_NONE,
             w->signum == SIGSEGV ? "SIGSEGV" : 
             w->signum == SIGABRT ? "SIGABRT" : 
-                                   "?" );
+                                   "?");
     #endif
     
-    // \todo Issue #162: Restart application
+    // If SIGSEGV repeated than we can't exit from application
+    if(attempt) exit(-1);
     
-    // Get application path
-    {
-        #define DEBUG_MSG
-        char resolved_path[PATH_MAX];
-
-        // Resolve and show application path
-        if (realpath(ke->argv0, resolved_path) == 0) {
-            fprintf(stderr, "The realpath failed: %s\n", strerror(errno));
-        } else {
-            #ifdef DEBUG_MSG
-            printf("Application's full path is '%s'\n", resolved_path);
-            #endif
+    // \todo Issue #162: Initiate restart application
+    else {
         
-            // Show application parameters
-            printf("Application's parameters is '%s'\n", ke->argv1);
-
-            // Get process name and path
-            if (realpath(ke->argv0, resolved_path));
-            char *_dirname = strdup(dirname(resolved_path));
-            if (realpath(ke->argv0, resolved_path));
-            char *_basename = strdup(basename(resolved_path));
-            // Combine path and parameters and execute application
-            char *app = ksnet_formatMessage("%s %s", _basename, ke->argv1);
-            if (realpath(ke->argv0, resolved_path));
-            pid_t cpid = fork();
-            // \todo Code executed by child
-            if(!cpid) {
-                if(execl(resolved_path, app, NULL) == -1) {
-                    fprintf(stderr, "Can't execute application %s: %s\n", 
-                            app, strerror(errno));
-                }
-            }    
-            free(_basename);
-            free(_dirname);
-            free(app);
-        }
+        restartApp = 1; // Set restart flag
+        attempt++;
+        ksnetEvMgrStop(ke);
+        #ifdef SHOW_DFL
+        signal(w->signum, SIG_DFL);
+        kill(getpid(), w->signum);     
+        ksnetEvMgrRestart(ke->argc, ke->argv);
         exit(0);
-        
-        #undef DEBUG_MSG
+        #endif
     }
+}
+
+/**
+ * Restart application 
+ * 
+ * @param argc
+ * @param argv
+ * @return 
+ */
+int ksnetEvMgrRestart(int argc, char **argv) {
+    
+    if(restartApp) {
+        
+        // Show application path and parameters
+        int i = 1;
+        puts("");
+        printf("Restart application: %s", argv[0]);
+        for(;;i++) {
+            if(argv[i] != NULL) printf(" %s", argv[i]);
+            else break;
+        }
+        puts("\n");
+
+        // Execute application
+        if(execv(argv[0], argv) == -1) {
+            fprintf(stderr, "Can't execute application %s: %s\n", 
+                    argv[0], strerror(errno));
+            exit(-1);
+        }
+        printf("Quitted...\n");        
+    }
+    
+    return restartApp;
 }
 
 /**
