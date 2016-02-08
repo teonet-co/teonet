@@ -416,11 +416,13 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             
         // Restart
         case 'r':
-            printf("Restart application...\n");            
-            kill(getpid(),SIGABRT);
+            // \todo Issue #162: restart application by sending SIGABRT
+            printf("Restart application...\n");        
+            //kill(getpid(),SIGUSR2);
+            //kill(getpid(),SIGABRT);
             // Emulate error Write to null
             //int i = *(int*)0;
-            //printf ("%s", 'a');
+            printf ("%s", 'a');
 //            {
 //                int i = 0;
 //                for(;;)

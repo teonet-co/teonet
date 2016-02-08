@@ -25,7 +25,7 @@
 // Constants
 const char *null_str = "";
 
-static int restartApp = 0;
+int restartApp = 0;
 
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
@@ -35,6 +35,7 @@ void host_cb (EV_P_ ev_io *w, int revents); // Host callback
 void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
 void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGSEGV or SIGABRT callback
+void sigsegv_cb_h(int signum);
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
@@ -230,14 +231,22 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
             // SIGSEGV
             #ifdef SIGSEGV
-            ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
-            ke->sigsegv_w.data = ke;
-            ev_signal_start (loop, &ke->sigsegv_w);
+            //signal(SIGSEGV, sigsegv_cb_h);
+//            ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
+//            ke->sigsegv_w.data = ke;
+//            ev_signal_start (loop, &ke->sigsegv_w);
             #endif
 
             // SIGABRT
             #ifdef SIGABRT
-            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
+            //signal(SIGSEGV, sigsegv_cb_h);
+//            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
+//            ke->sigabrt_w.data = ke;
+//            ev_signal_start (loop, &ke->sigabrt_w);
+            #endif
+            
+            #ifdef SIGUSR2
+            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGUSR2);
             ke->sigabrt_w.data = ke;
             ev_signal_start (loop, &ke->sigabrt_w);
             #endif
@@ -669,7 +678,7 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 }
 
 /**
- * SIGSEGV or SIGABRT signal handler
+ * SIGSEGV or SIGABRT or SIGUSR2 signal handler
  *
  * @param loop
  * @param w
@@ -699,6 +708,9 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
         
         restartApp = 1; // Set restart flag
         attempt++;
+        
+        //ksnetEvMgrRestart(ke->argc, ke->argv);
+        
         ksnetEvMgrStop(ke);
         #ifdef SHOW_DFL
         signal(w->signum, SIG_DFL);
@@ -707,6 +719,20 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
         exit(0);
         #endif
     }
+}
+
+void sigsegv_cb_h(int signum) {
+    
+    printf("\n%sEvent manager:%s Got a signal %s ...\n",
+            ANSI_RED, ANSI_NONE,
+            signum == SIGSEGV ? "SIGSEGV" : 
+            signum == SIGABRT ? "SIGABRT" : 
+                                   "?");
+    sleep(3);
+    kill(getpid(), SIGUSR2);
+    
+//    signal(signum, SIG_DFL);
+//    kill(getpid(), signum);
 }
 
 /**
