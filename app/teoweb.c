@@ -116,8 +116,39 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  * @param argv
  * @return
  */
+#include <signal.h> 
+#include <setjmp.h> 
+
+extern int restartApp;
+
+sigjmp_buf buf; 
+void handler(int sig) { 
+    restartApp = 1;
+    siglongjmp(buf, 1); 
+}
 int main(int argc, char** argv) {
     
+    struct sigaction new_action, old_action;
+    new_action.sa_handler = handler;
+    sigemptyset (&new_action.sa_mask);
+    new_action.sa_flags = 0;
+
+    sigaction (SIGSEGV, NULL, &old_action);
+    if (old_action.sa_handler != SIG_IGN)
+    sigaction (SIGSEGV, &new_action, NULL);
+
+    if (!sigsetjmp(buf, 1)){
+    printf("starting\n"); 
+    //code or function/method here
+    sleep(5);
+    }
+    else{  
+     printf("restarting\n"); 
+     //code or function/method here
+     restartApp = 1;
+     ksnetEvMgrRestart(argc, argv);
+    }
+
     printf("Teoweb ver " TWEB_VERSION ", based on teonet ver " VERSION "\n");
     
     teowebModules tm;
@@ -145,9 +176,6 @@ int main(int argc, char** argv) {
     
     // Free teoweb configuration
     teowebConfigFree(tm.tw_cfg);
-    
-    // ReStart teonet if need it
-    ksnetEvMgrRestart(argc, argv);
     
     return (EXIT_SUCCESS);
 }
