@@ -416,7 +416,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             
         // Restart
         case 'r':
-            // \todo Issue #162: restart application by sending SIGABRT
+            // Restart application by sending SIGUSR2
             printf("Restart application...\n");        
             kill(getpid(),SIGUSR2);
             break;

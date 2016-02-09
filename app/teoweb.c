@@ -116,50 +116,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  * @param argv
  * @return
  */
-#include <signal.h> 
-#include <setjmp.h> 
-
-extern int teoRestartApp;
-extern int teo_argc; 
-extern char** teo_argv;
-
-//sigjmp_buf buf; 
-//void handler(int sig) { 
-//    //restartApp = 1;
-//    siglongjmp(buf, 1); 
-//}
 int main(int argc, char** argv) {
     
-    teo_argc = argc;
-    teo_argv = argv;
-    
-//    int i;
-//    puts("starting...");
-//    for(i = 0; i < 100; i++) usleep(30000);
-    
-//    struct sigaction new_action, old_action;
-//    new_action.sa_handler = handler;
-//    sigemptyset (&new_action.sa_mask);
-//    new_action.sa_flags = 0;
-//
-//    sigaction (SIGSEGV, NULL, &old_action);
-//    if (old_action.sa_handler != SIG_IGN)
-//    sigaction (SIGSEGV, &new_action, NULL);
-//
-//    if (!sigsetjmp(buf, 1)) {
-//        restartApp = 0;
-//        printf("starting\n"); 
-//        //code or function/method here
-//        sleep(5);
-//    }
-//    else {  
-//        printf("restarting\n"); 
-//        //code or function/method here
-//        restartApp = 1;
-//        ksnetEvMgrRestart(argc, argv);
-//        exit(0);
-//    }
-
     printf("Teoweb ver " TWEB_VERSION ", based on teonet ver " VERSION "\n");
     
     teowebModules tm;
@@ -168,22 +126,14 @@ int main(int argc, char** argv) {
     tm.tw_cfg = teowebConfigInit();
     
     // Initialize teonet event manager and Read configuration
-    // ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, &tm);
 
     // Read teoweb configuration
     teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
-
-//    // Initialize Teonet authenticate module
-//    tm.ta = teoAuthInit();    
-
     
     // Start teonet
     ksnetEvMgrRun(ke);
     
-    
-//    // Destroy Teonet authenticate module
-//    teoAuthDestroy(tm.ta);
     
     // Free teoweb configuration
     teowebConfigFree(tm.tw_cfg);

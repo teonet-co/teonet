@@ -195,15 +195,6 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
         return -1;
     }
     
-    // Make socket reusable
-    if (set_reuseaddr(sd) == -1) {
-        // error handling
-        ksnet_printf(ksn_cfg, ERROR_M,
-                "%sNet core:%s can't set socket options\n", 
-                ANSI_GREEN, ANSI_NONE);
-        return -1;
-    }
-
     memset((char *)&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
