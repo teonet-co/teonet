@@ -782,18 +782,6 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                    !strcmp(kev->ksn_cfg.r_host_name,rd->from);
     if(is_rhost) kev->ksn_cfg.r_host_name[0] = '\0';
 
-    // Remove from ARP Table
-    ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
-    
-//    // Try to reconnect and resend Echo command through r-host:
-//    //
-//    // Send Echo command to disconnected peer. This command will be resend to 
-//    // r-host. R-Host will try to resend this command to peer. If peer has 
-//    // connected to r-host, r-host will send Connect commands to peer and this 
-//    // host
-//    if(!is_rhost) 
-//        ksnCommandSendCmdEcho(kco, peer_name, (void*) TRIPTIME, TRIPTIME_LEN);
-    
     // Try to reconnect, send CMD_RECONNECT command
     if(!is_rhost) 
         ((ksnReconnectClass*)kco->kr)->send(((ksnReconnectClass*)kco->kr), 
@@ -805,6 +793,9 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Send event to subscribers
     teoSScrSend(kev->kc->kco->ksscr, EV_K_DISCONNECTED, rd->from, rd->from_len, 0);
+    
+    // Remove from ARP Table
+    ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
     
     return 1;
 

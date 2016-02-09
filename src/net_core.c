@@ -186,15 +186,15 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
  */
 int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
     
-    int i, fd;
+    int i, sd;
     struct sockaddr_in addr;	// Our address 
     
     // Create a UDP socket
-    if((fd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    if((sd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("cannot create socket\n");
         return -1;
     }
-
+    
     memset((char *)&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -205,7 +205,7 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
         
         addr.sin_port = htons(*port);
 
-        if(ksn_bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
             ksnet_printf(ksn_cfg, MESSAGE, 
                     "%sNet core:%s Can't bind on port %d, "
@@ -220,7 +220,7 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
         else break;
     }
     
-    return fd;
+    return sd;
 }
 
 /**

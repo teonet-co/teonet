@@ -126,28 +126,17 @@ int main(int argc, char** argv) {
     tm.tw_cfg = teowebConfigInit();
     
     // Initialize teonet event manager and Read configuration
-    // ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, &tm);
 
     // Read teoweb configuration
     teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
-
-//    // Initialize Teonet authenticate module
-//    tm.ta = teoAuthInit();    
-
     
     // Start teonet
     ksnetEvMgrRun(ke);
     
     
-//    // Destroy Teonet authenticate module
-//    teoAuthDestroy(tm.ta);
-    
     // Free teoweb configuration
     teowebConfigFree(tm.tw_cfg);
-    
-    // ReStart teonet if need it
-    ksnetEvMgrRestart(argc, argv);
     
     return (EXIT_SUCCESS);
 }
