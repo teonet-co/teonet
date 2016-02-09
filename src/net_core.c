@@ -186,12 +186,21 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
  */
 int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
     
-    int i, fd;
+    int i, sd;
     struct sockaddr_in addr;	// Our address 
     
     // Create a UDP socket
-    if((fd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    if((sd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("cannot create socket\n");
+        return -1;
+    }
+    
+    // Make socket reusable
+    if (set_reuseaddr(sd) == -1) {
+        // error handling
+        ksnet_printf(ksn_cfg, ERROR_M,
+                "%sNet core:%s can't set socket options\n", 
+                ANSI_GREEN, ANSI_NONE);
         return -1;
     }
 
@@ -205,7 +214,7 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
         
         addr.sin_port = htons(*port);
 
-        if(ksn_bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
             ksnet_printf(ksn_cfg, MESSAGE, 
                     "%sNet core:%s Can't bind on port %d, "
@@ -220,7 +229,7 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
         else break;
     }
     
-    return fd;
+    return sd;
 }
 
 /**

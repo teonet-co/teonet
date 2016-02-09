@@ -25,7 +25,7 @@
 // Constants
 const char *null_str = "";
 
-int restartApp = 0;
+int teoRestartApp = 0;
 
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
@@ -231,7 +231,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
             // SIGSEGV
             #ifdef SIGSEGV
-            //signal(SIGSEGV, sigsegv_cb_h);
+            puts("Set signal handler");
+            signal(SIGSEGV, sigsegv_cb_h);
 //            ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
 //            ke->sigsegv_w.data = ke;
 //            ev_signal_start (loop, &ke->sigsegv_w);
@@ -239,7 +240,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
             // SIGABRT
             #ifdef SIGABRT
-            //signal(SIGSEGV, sigsegv_cb_h);
+            puts("Set signal handler");
+            signal(SIGABRT, sigsegv_cb_h);
 //            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
 //            ke->sigabrt_w.data = ke;
 //            ev_signal_start (loop, &ke->sigabrt_w);
@@ -689,7 +691,7 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     static int attempt = 0;
     
-    restartApp = 1;
+    teoRestartApp = 1; // Set restart flag
     
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, ERROR_M,
@@ -697,6 +699,7 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
             ANSI_RED, ANSI_NONE,
             w->signum == SIGSEGV ? "SIGSEGV" : 
             w->signum == SIGABRT ? "SIGABRT" : 
+            w->signum == SIGUSR2 ? "SIGUSR2" :
                                    "?");
     #endif
     
@@ -706,11 +709,9 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     // \todo Issue #162: Initiate restart application
     else {
         
-        restartApp = 1; // Set restart flag
         attempt++;
         
-        //ksnetEvMgrRestart(ke->argc, ke->argv);
-        
+        //ksnetEvMgrRestart(ke->argc, ke->argv);        
         ksnetEvMgrStop(ke);
         #ifdef SHOW_DFL
         signal(w->signum, SIG_DFL);
@@ -721,18 +722,34 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     }
 }
 
+int teo_argc; 
+char** teo_argv;
+
 void sigsegv_cb_h(int signum) {
     
-    printf("\n%sEvent manager:%s Got a signal %s ...\n",
+    printf("\n%sApplication:%s Got a signal %s ...\n",
             ANSI_RED, ANSI_NONE,
             signum == SIGSEGV ? "SIGSEGV" : 
             signum == SIGABRT ? "SIGABRT" : 
                                    "?");
-    sleep(3);
-    kill(getpid(), SIGUSR2);
+    sleep(1);
     
-//    signal(signum, SIG_DFL);
-//    kill(getpid(), signum);
+    // Send signal SIGUSR2
+    //kill(getpid(), SIGUSR2);
+    
+//    if(!fork()) {
+        puts("starting restart process...");
+        sleep(1);
+//        kill(getpid(), SIGCONT);
+        
+        teoRestartApp = 1;
+        ksnetEvMgrRestart(teo_argc, teo_argv);
+//    }
+//    exit(0);
+    
+    // Default action
+    signal(signum, SIG_DFL);
+    kill(getpid(), signum);
 }
 
 /**
@@ -744,7 +761,7 @@ void sigsegv_cb_h(int signum) {
  */
 int ksnetEvMgrRestart(int argc, char **argv) {
     
-    if(restartApp) {
+    if(teoRestartApp) {
         
         // Show application path and parameters
         int i = 1;
@@ -756,16 +773,28 @@ int ksnetEvMgrRestart(int argc, char **argv) {
         }
         puts("\n");
 
+        //#define USE_SYSTEM
+        #ifdef USE_SYSTEM
+        // Execute application
+        char *app = ksnet_formatMessage("%s", argv[0]);
+        for(i = 1; argv[i] != NULL; i++) {
+            app = ksnet_formatMessage("%s %s", app, argv[i]);
+        }            
+        if(system(app));
+        free(app);
+        exit(0);
+        #else
         // Execute application
         if(execv(argv[0], argv) == -1) {
             fprintf(stderr, "Can't execute application %s: %s\n", 
                     argv[0], strerror(errno));
             exit(-1);
         }
-        printf("Quitted...\n");        
+        exit(0); // Not need it because execv never return
+        #endif
     }
     
-    return restartApp;
+    return teoRestartApp;
 }
 
 /**
