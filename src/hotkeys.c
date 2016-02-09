@@ -418,18 +418,16 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
         case 'r':
             // \todo Issue #162: restart application by sending SIGABRT
             printf("Restart application...\n");        
-            //kill(getpid(),SIGUSR2);
-            //kill(getpid(),SIGABRT);
-            // Emulate error Write to null
-            //int i = *(int*)0;
-            printf ("%s", 'a');
-//            {
-//                int i = 0;
-//                for(;;)
-//                    ((char *) 0)[i++] = 'q';
-//                    usleep(100);
-//            }
+            kill(getpid(),SIGUSR2);
             break;
+            
+        // Emulate segmentation fault error
+        case 'e':
+        {
+            int *segv;
+            segv = 0; 
+            *segv = 1;
+        } break;
 
         // Y - yes
         case 'y':

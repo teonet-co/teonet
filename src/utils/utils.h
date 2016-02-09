@@ -46,7 +46,8 @@ char *trimlf(char *str);
 int calculate_lines(char *str);
 int inarray(int val, const int *arr, int size);
 
-void set_nonblock(int fd);
+void set_nonblock(int sd);
+int set_reuseaddr(int sd);
 
 const char* getDataPath(void);
 const char *ksnet_getSysConfigDir(void);
