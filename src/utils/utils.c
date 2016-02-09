@@ -423,6 +423,22 @@ char *getExecPath (char *path, size_t dest_len, char *argv0) {
 //    flags = fcntl(fd, F_GETFL, 0);
 //    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
 //}
+
+/**
+ * Make socket reusable
+ * 
+ * @param sd
+ * @return 
+ */
+int set_reuseaddr(int sd) {
+    
+    // Make socket reusable
+    int yes = 1;
+    if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+        return -1;
+    }
+    return 0;
+}
 #endif
 
 /**

@@ -394,15 +394,14 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
         // Create IPv4 only server socket
         if( (sd = socket(PF_INET, SOCK_STREAM, 0)) < 0 )
         {
-            ksnet_printf(ERROR, "%sTCP Server:%s: socket error", 
+            ksnet_printf(&kev->ksn_cfg, ERROR_M, "%sTCP Server:%s: socket error", 
                     ANSI_MAGENTA, ANSI_NONE);
             return -1;
         }
         #endif
 
-        // Set server socket options
-        int yes = 1;
-        if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+        // Make socket reusable
+        if (set_reuseaddr(sd) == -1) {
             // error handling
             ksnet_printf(&kev->ksn_cfg, ERROR_M,
                     "%sTCP Server:%s can't set socket options\n", 
@@ -442,7 +441,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
                 ANSI_MAGENTA, ANSI_NONE, *port);
         return -1;
     }
-
+        
     // Set non block mode
     set_nonblock(sd);
 
@@ -521,7 +520,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
     char client_ip[100];
     struct sockaddr_in *addr = (struct sockaddr_in*) &client_addr;
     #ifndef KSNET_IPV6_ENABLE
-    strcpy(client_ip, inet_ntoa(addr->sin_addr))
+    strncpy(client_ip, inet_ntoa(addr->sin_addr), 100);
     printf("IP address is: %s\n", client_ip);
     #endif
     int client_port = (int) ntohs(addr->sin_port);

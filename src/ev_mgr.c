@@ -20,12 +20,16 @@
 #include "ev_mgr.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
-//#include "modules/tcp_proxy.h"
 
-// Constants
+// Global module variables
+static int teoRestartApp_f = 0; // Restart teonet application before exit
+
+// Global library variables to process SIGSEGV, SIGABRT signals handler
+extern int teo_argc; 
+extern char** teo_argv;
+
+// Global library constants
 const char *null_str = "";
-
-static int restartApp = 0;
 
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
@@ -35,9 +39,9 @@ void host_cb (EV_P_ ev_io *w, int revents); // Host callback
 void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
 void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGSEGV or SIGABRT callback
+void sigsegv_cb_h(int signum);
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
-
 
 /**
  * Initialize KSNet Event Manager and network
@@ -102,6 +106,10 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->user_data = user_data;
     ke->argc = argc;
     ke->argv = argv;
+    
+    // Set Global Variables used by SIGSEGV signal handler
+    teo_argc = argc;
+    teo_argv = argv;
     
     // Initialize async mutex
     pthread_mutex_init(&ke->async_mutex, NULL);
@@ -228,19 +236,40 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             ev_signal_start (loop, &ke->sigstop_w);
             #endif
 
+            // SIGABRT used to restart this application
+            #ifdef SIGUSR2
+            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGUSR2);
+            ke->sigabrt_w.data = ke;
+            ev_signal_start (loop, &ke->sigabrt_w);
+            #endif
+            
             // SIGSEGV
             #ifdef SIGSEGV
-            ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
-            ke->sigsegv_w.data = ke;
-            ev_signal_start (loop, &ke->sigsegv_w);
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&ke->ksn_cfg, MESSAGE, 
+                    "%sEvent manager:%s Set SIGSEGV signal handler\n",
+                    ANSI_CYAN, ANSI_NONE);
+            #endif
+            signal(SIGSEGV, sigsegv_cb_h);
+            // Libev can't process this signal properly 
+            // ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
+            // ke->sigsegv_w.data = ke;
+            // ev_signal_start (loop, &ke->sigsegv_w);
             #endif
 
             // SIGABRT
             #ifdef SIGABRT
-            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
-            ke->sigabrt_w.data = ke;
-            ev_signal_start (loop, &ke->sigabrt_w);
+            #ifdef DEBUG_KSNET
+            ksnet_printf(&ke->ksn_cfg, MESSAGE, 
+                    "%sEvent manager:%s Set SIGABRT signal handler\n",
+                    ANSI_CYAN, ANSI_NONE);
             #endif
+            signal(SIGABRT, sigsegv_cb_h);
+            // Libev can't process this signal properly 
+            // ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
+            // ke->sigabrt_w.data = ke;
+            // ev_signal_start (loop, &ke->sigabrt_w);
+            #endif            
         }
 
         // Initialize and start a async signal watcher for event add
@@ -669,7 +698,7 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 }
 
 /**
- * SIGSEGV or SIGABRT signal handler
+ * SIGUSR2 signal handler
  *
  * @param loop
  * @param w
@@ -679,27 +708,27 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     static int attempt = 0;
-    
-    restartApp = 1;
-    
+        
     #ifdef DEBUG_KSNET
     ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, ERROR_M,
             "\n%sEvent manager:%s Got a signal %s ...\n", 
             ANSI_RED, ANSI_NONE,
             w->signum == SIGSEGV ? "SIGSEGV" : 
             w->signum == SIGABRT ? "SIGABRT" : 
+            w->signum == SIGUSR2 ? "SIGUSR2" :
                                    "?");
     #endif
     
     // If SIGSEGV repeated than we can't exit from application
-    if(attempt) exit(-1);
+    if(w->signum != SIGUSR2 && attempt) exit(-1);
     
-    // \todo Issue #162: Initiate restart application
+    // Initiate restart application
     else {
         
-        restartApp = 1; // Set restart flag
-        attempt++;
-        ksnetEvMgrStop(ke);
+        attempt++; // Calculate attempts 
+        
+        teoRestartApp_f = 1; // Set restart flag
+        ksnetEvMgrStop(ke); // Stop event manager and restart application before exit
         #ifdef SHOW_DFL
         signal(w->signum, SIG_DFL);
         kill(getpid(), w->signum);     
@@ -707,6 +736,35 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
         exit(0);
         #endif
     }
+}
+
+// Global variables to process SIGSEGV, SIGABRT signals handler
+int teo_argc; 
+char** teo_argv;
+
+/**
+ * SIGSEGV, SIGABRT signals handler
+ * 
+ * @param signum
+ */
+void sigsegv_cb_h(int signum) {
+    
+    printf("\n%sApplication:%s Got a signal %s ...\n",
+            ANSI_RED, ANSI_NONE,
+            signum == SIGSEGV ? "SIGSEGV" : 
+            signum == SIGABRT ? "SIGABRT" : 
+                                   "?");
+    sleep(1);    
+    puts("starting application restart process...");
+    sleep(1);
+
+    teoRestartApp_f = 1;
+    ksnetEvMgrRestart(teo_argc, teo_argv);
+    
+    // Default action 
+    // (this code does not executed because ksnetEvMgrRestart never return)
+    signal(signum, SIG_DFL);
+    kill(getpid(), signum);
 }
 
 /**
@@ -718,7 +776,7 @@ void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
  */
 int ksnetEvMgrRestart(int argc, char **argv) {
     
-    if(restartApp) {
+    if(teoRestartApp_f) {
         
         // Show application path and parameters
         int i = 1;
@@ -730,16 +788,28 @@ int ksnetEvMgrRestart(int argc, char **argv) {
         }
         puts("\n");
 
+        //#define USE_SYSTEM
+        #ifdef USE_SYSTEM
+        // Execute application
+        char *app = ksnet_formatMessage("%s", argv[0]);
+        for(i = 1; argv[i] != NULL; i++) {
+            app = ksnet_formatMessage("%s %s", app, argv[i]);
+        }            
+        if(system(app));
+        free(app);
+        exit(0);
+        #else
         // Execute application
         if(execv(argv[0], argv) == -1) {
             fprintf(stderr, "Can't execute application %s: %s\n", 
                     argv[0], strerror(errno));
             exit(-1);
         }
-        printf("Quitted...\n");        
+        exit(0); // Not need it because execv never return
+        #endif
     }
     
-    return restartApp;
+    return teoRestartApp_f;
 }
 
 /**

@@ -472,18 +472,17 @@ void test_2_7() {
  */
 int bind_udp(int *port) {
 
-    int fd, i;
+    int sd, i;
     struct sockaddr_in addr;	// Our address 
 
     // Create a UDP socket
-    if((fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+    if((sd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror(" cannot create socket ...");
         return -1;
     }
     
     // Set server socket options
-    int yes = 1;
-    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+    if (set_reuseaddr(sd) == -1) {
         // error handling
         perror(" can't set socket options\n");
         return -3;
@@ -498,7 +497,7 @@ int bind_udp(int *port) {
         addr.sin_addr.s_addr = htonl(INADDR_ANY);
         addr.sin_port = htons(*port);
 
-        if(bind(fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        if(bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
             // Show message. Use perror to show this message in the test output
             char *err_msg = ksnet_formatMessage(
@@ -517,9 +516,9 @@ int bind_udp(int *port) {
     }
     
     // Set non block mode
-    set_nonblock(fd);
+    set_nonblock(sd);
 
-    return fd;
+    return sd;
 }
 
 //! TR-UDP sendto function
