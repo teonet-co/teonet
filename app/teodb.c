@@ -69,11 +69,14 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  */
 int main(int argc, char** argv) {
     
-    printf("Teodb ver " TDB_VERSION ", based on teonet ver "
-            VERSION "\n");
+    printf("Teonet database ver " TDB_VERSION ", based on teonet ver "
+            "%s" "\n", teoGetLibteonetVersion());
     
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
+
+    // Set application type
+    teoSetAppType(ke, "teo-db");
     
     // Start teonet
     ksnetEvMgrRun(ke);

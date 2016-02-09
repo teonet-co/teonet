@@ -34,6 +34,7 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_l0_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -168,6 +169,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             
         case CMD_L0_STAT:
             processed = cmd_l0_stat_cb(kco, rd);
+            break;
+            
+        case CMD_HOST_INFO:
+            processed = cmd_l0_host_info_cb(kco, rd);
             break;
             
         case CMD_SUBSCRIBE:
@@ -455,19 +460,14 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             l0_stat_data_len = strlen(json_str) + 1;
         }
 
-//        // BINARY data type
-//        else {
-//
-//        }
-
-        // Send PEERS_ANSWER to L0 user
+        // Send L0_STAT_ANSWER to L0 user
         if(rd->l0_f)
             ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
                     rd->addr, rd->port, rd->from, rd->from_len, 
                     CMD_L0_STAT_ANSWER, 
                     l0_stat_data, l0_stat_data_len);
 
-        // Send PEERS_ANSWER to peer
+        // Send L0_STAT_ANSWER to peer
         else
             ksnCoreSendto(kco->kc, rd->addr, rd->port, 
                     CMD_L0_STAT_ANSWER,
@@ -477,6 +477,70 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         if(json_str != NULL) free(json_str);        
     }
     
+    return 1; // Command processed
+}
+
+/**
+ * Process CMD_HOST_INFO
+ * 
+ * @param kco
+ * @param rd
+ * @return 
+ */
+static int cmd_l0_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    // Get host info
+    size_t hid_len;
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
+    host_info_data *hid = teoGetHostInfo(ke, &hid_len);
+    
+    if(hid != NULL) {
+        
+        // Get type of request: 0 - binary; 1 - JSON
+        const int data_type = rd->data_len && 
+                              !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
+        
+        void *data_out = hid;
+        char *json_str = NULL;
+        size_t data_out_len = hid_len;
+
+        // JSON data type
+        if(data_type == 1) {
+
+            const char *teoAppType = teoGetAppType(ke);
+            json_str = ksnet_formatMessage(
+                "{ "
+                    "\"name\": \"%s\", "
+                    "\"type\": \"%s\", "
+                    "\"version\": \"%d.%d.%d\""
+                " }",
+                hid->string_ar,
+                teoAppType != NULL ? teoAppType : "teo-default",
+                hid->ver[0], hid->ver[1], hid->ver[2]
+            );
+
+            data_out = json_str;
+            data_out_len = strlen(json_str) + 1;
+        }
+        
+        // Send PEERS_ANSWER to L0 user
+        if(rd->l0_f)
+            ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                    rd->addr, rd->port, rd->from, rd->from_len, 
+                    CMD_HOST_INFO_ANSWER, 
+                    data_out, data_out_len);
+
+        // Send HOST_INFO_ANSWER to peer
+        else
+            ksnCoreSendto(kco->kc, rd->addr, rd->port, 
+                    CMD_HOST_INFO_ANSWER,
+                    data_out, data_out_len);        
+        
+        // Free json string data
+        if(json_str != NULL) free(json_str);   
+        free(hid);
+    }
+                
     return 1; // Command processed
 }
 
