@@ -247,7 +247,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             #ifdef SIGSEGV
             #ifdef DEBUG_KSNET
             ksnet_printf(&ke->ksn_cfg, MESSAGE, 
-                    "%sEvent manager:%s Set SIGSEGV signal handler",
+                    "%sEvent manager:%s Set SIGSEGV signal handler\n",
                     ANSI_CYAN, ANSI_NONE);
             #endif
             signal(SIGSEGV, sigsegv_cb_h);
@@ -261,7 +261,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             #ifdef SIGABRT
             #ifdef DEBUG_KSNET
             ksnet_printf(&ke->ksn_cfg, MESSAGE, 
-                    "%sEvent manager:%s Set SIGABRT signal handler",
+                    "%sEvent manager:%s Set SIGABRT signal handler\n",
                     ANSI_CYAN, ANSI_NONE);
             #endif
             signal(SIGABRT, sigsegv_cb_h);
