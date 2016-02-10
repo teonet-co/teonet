@@ -7,6 +7,11 @@
 
 #include "string_arr.h"
 
+// Local functions
+static char *remove_extras(char *str, const char *extras);
+static char find_replace_to_char(const char *str, const char *replace_to_str);
+static int replace_char_between_quotas(char *str, char replace_from, char replace_to);
+
 /**
  * Create empty c string array
  *
@@ -53,6 +58,48 @@ int ksnet_stringArrLength(ksnet_stringArr arr) {
     }
 
     return len;
+}
+
+/**
+ * Move array item from one position to another
+ * 
+ * @param arr
+ * @param fromIdx
+ * @param toIdx
+ * 
+ * @return True at success, null at error
+ */
+int ksnet_stringArrMoveTo(ksnet_stringArr arr, unsigned int fromIdx, unsigned toIdx) {
+    
+    int i, retval = 0, len = ksnet_stringArrLength(arr);
+    if(len && fromIdx < len && toIdx < len && fromIdx != toIdx) {
+        
+        if(fromIdx < toIdx) {
+            char *from = arr[fromIdx];
+            for(i = fromIdx + 1; i < len; i++) {
+                arr[i-1] = arr[i];
+                if(i == toIdx) {
+                    arr[i] = from;
+                    retval = 1;
+                    break;
+                }
+            }
+        }
+        
+        else {
+            char *from = arr[fromIdx];
+            for(i = fromIdx - 1; i >= 0; i--) {
+                arr[i+1] = arr[i];
+                if(i == toIdx) {
+                    arr[i] = from;
+                    retval = 1;
+                    break;
+                }
+            }
+        }
+    }
+    
+    return retval;
 }
 
 /**
@@ -116,7 +163,7 @@ ksnet_stringArr ksnet_stringArrSplit(const char* string, const char* separators,
         // Find separator inside quotas and replace it with temporary character
         const char *replace_to_str = "_$#%*@!-+|\001";
         char replace_ch = find_replace_to_char(string, replace_to_str);
-        int replaced = replaceCharBetweenQuotas((char*)string, ' ', replace_ch);
+        int replaced = replace_char_between_quotas((char*)string, ' ', replace_ch);
 
         int leftBound = 0;
         int rightBound = 0;
@@ -168,11 +215,11 @@ ksnet_stringArr ksnet_stringArrSplit(const char* string, const char* separators,
         if(replaced) {
 
             int i;
-            replaceCharBetweenQuotas((char*)string, replace_ch, ' ');
+            replace_char_between_quotas((char*)string, replace_ch, ' ');
 
             for(i = 0; i <= pos; i++) {
                 if(result[i] != NULL)
-                    replaceCharBetweenQuotas(result[i], replace_ch, ' ');
+                    replace_char_between_quotas(result[i], replace_ch, ' ');
             }
         }
 
@@ -185,18 +232,19 @@ ksnet_stringArr ksnet_stringArrSplit(const char* string, const char* separators,
 /**
  * Combine string array to string
  *
- * @param arr
+ * @param arr String array
+ * @param separator
  * @return Combined string, should be free after use
  */
-char *ksnet_stringArrCombine(ksnet_stringArr arr) {
+char *ksnet_stringArrCombine(ksnet_stringArr arr, const char* separator) {
 
     if(arr == NULL) return NULL;
 
-    int i, len = 0;
+    int i, len = 0, len_separator = strlen(separator);
 
-    // Define string length
+    // Define string length    
     for(i = 0; arr[i] != NULL; i++) {
-        len += strlen(arr[i]) + 1;
+        len += strlen(arr[i]) + len_separator + 1;
     }
     if(!len) return NULL;
 
@@ -204,7 +252,7 @@ char *ksnet_stringArrCombine(ksnet_stringArr arr) {
     char *str = malloc(len);
     str[0] = '\0';
     for(i = 0; arr[i] != NULL; i++) {
-        if(!i) strcat(str, " ");
+        if(i) strcat(str, separator);
         strcat(str, arr[i]);
     }
 
@@ -222,7 +270,7 @@ char *ksnet_stringArrCombine(ksnet_stringArr arr) {
  * @param extras
  * @return The same string with extras removed
  */
-char *remove_extras(char *str, const char *extras) {
+static char *remove_extras(char *str, const char *extras) {
 
     int i, j = 0, k = 0, flg = 0, ex = 0;
 
@@ -261,7 +309,7 @@ char *remove_extras(char *str, const char *extras) {
  * @param replace_to
  * @return
  */
-int replaceCharBetweenQuotas(char *str, char replace_from, char replace_to) {
+static int replace_char_between_quotas(char *str, char replace_from, char replace_to) {
 
     int i, beg = 0,
         replaced = 0,
@@ -307,7 +355,7 @@ int replaceCharBetweenQuotas(char *str, char replace_from, char replace_to) {
  * @param replace_to_str
  * @return
  */
-char find_replace_to_char(const char *str, const char *replace_to_str) {
+static char find_replace_to_char(const char *str, const char *replace_to_str) {
 
     int i, j;
     char replace_to_char = 0;
