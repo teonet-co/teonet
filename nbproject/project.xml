@@ -26,21 +26,21 @@
             <word>addr</word>
             <word>app</word>
             <word>atoi</word>
-            <word>autoconf</word>
-            <word>cesanta</word>
+            <word>Autoconf</word>
+            <word>Cesanta</word>
             <word>cmd</word>
             <word>config</word>
             <word>cque</word>
-            <word>ctrl</word>
+            <word>Ctrl</word>
             <word>fd</word>
             <word>gethostbyname</word>
             <word>hotkey</word>
             <word>Hotkeys</word>
             <word>internet</word>
             <word>ip</word>
-            <word>jsmt</word>
+            <word>Jsmt</word>
             <word>json</word>
-            <word>kirill</word>
+            <word>Kirill</word>
             <word>ksnet</word>
             <word>len</word>
             <word>libev</word>
@@ -58,7 +58,7 @@
             <word>po</word>
             <word>printf</word>
             <word>recvfrom</word>
-            <word>scherba</word>
+            <word>Scherba</word>
             <word>sh</word>
             <word>src</word>
             <word>str</word>
@@ -77,9 +77,9 @@
             <word>triptime</word>
             <word>ttl</word>
             <word>tuntap</word>
-            <word>ubuntu</word>
+            <word>Ubuntu</word>
             <word>udp</word>
-            <word>unsubscribe</word>
+            <word>Unsubscribe</word>
             <word>unsubscribed</word>
             <word>uuid</word>
             <word>ver</word>
