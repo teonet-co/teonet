@@ -89,6 +89,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ) {
 
     ksnetEvMgrClass *ke = malloc(sizeof(ksnetEvMgrClass));
+    memset(ke, 0, sizeof(ksnetEvMgrClass));
     ke->custom_timer_interval = 0.0;
     ke->last_custom_timer = 0.0;
     ke->runEventMgr = 0;
@@ -149,11 +150,43 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
 }
 
 /**
+ * Set Teonet application type
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param type Application type string
+ */
+inline void teoSetAppType(ksnetEvMgrClass *ke, char *type) {
+    
+    ke->type = strdup(type);
+}
+
+/**
+ * Get current application type
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @return Application type string
+ */
+inline const char *teoGetAppType(ksnetEvMgrClass *ke) {
+    
+    return (const char *)ke->type;
+}
+
+/**
+ * Get teonet library version
+ * 
+ * @return 
+ */
+inline const char *teoGetLibteonetVersion() {
+    
+    return VERSION;
+}
+
+/**
  * Stop event manager
  *
- * @param ke
+ * @param ke Pointer to ksnetEvMgrClass
  */
-void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
+inline void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
 
     ke->runEventMgr = 0;
 }
@@ -294,7 +327,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 /**
  * Free ksnetEvMgrClass after run
  * 
- * @param ke
+ * @param ke Pointer to ksnetEvMgrClass
  * @param free_async 1 - free async queue data and destroy queue mutex; 
  *                   0 - free basic class data;
  *                   2 - free all - async queue data and basic class data
@@ -339,6 +372,9 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         int argc = ke->argc;
         char **argv = ke->argv;
 
+        // Free info parameters
+        if(ke->type != NULL) free(ke->type);
+        
         // Free memory
         free(ke);
         
@@ -371,7 +407,7 @@ int ksnetEvMgrRunThread(ksnetEvMgrClass *ke) {
 /**
  * Set custom timer interval
  *
- * @param ke
+ * @param ke Pointer to ksnetEvMgrClass
  * @param time_interval
  */
 void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval) {
@@ -383,12 +419,69 @@ void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval) {
 /**
  * Return host name
  *
- * @param ke
+ * @param ke Pointer to ksnetEvMgrClass
  * @return
  */
-char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
+inline char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
 
     return ke->ksn_cfg.host_name;
+}
+
+/**
+ * Get host info data
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param hd_len Pointer to host_info_data length holder
+ * 
+ * @return  Pointer to host_info_data, should be free after use
+ */
+host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
+    
+    // String arrays members
+    const uint8_t string_ar_num = 2;
+    char *name = ksnetEvMgrGetHostName(ke);
+    size_t name_len = strlen(name) + 1;
+    char *type = "";
+    size_t type_len = strlen(type) + 1;
+    
+    // Create host info data 
+    size_t string_ar_len = name_len + type_len;
+    *hd_len = sizeof(host_info_data) + string_ar_len;
+    host_info_data* hd = malloc(*hd_len);
+    memset(hd, 0, *hd_len);
+    
+    if(hd != NULL) {
+        
+        // Fill version array data (split string version to 3 digits array)
+        {
+            size_t ptr = 0;
+            const char *version = VERSION;
+            int i, j; for(i = 0; i < DIG_IN_TEO_VER; i++) {            
+                for(j = ptr;;j++) {
+                    const char c = *(version + j);
+                    if(c == '.' || c == 0) {
+                        char dig[10];
+                        if(j-ptr < 10) {
+                            memcpy(dig, version + ptr, j-ptr);
+                            dig[j-ptr] = 0;
+                            hd->ver[i] = atoi(dig);
+                        }
+                        else hd->ver[i] = 0;
+                        ptr = j + 1;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Fill string array data 
+        size_t ptr = 0;
+        hd->string_ar_num = string_ar_num;
+        memcpy(hd->string_ar + ptr, name, name_len); ptr += name_len;
+        memcpy(hd->string_ar + ptr, type, type_len); ptr += type_len;
+    }
+    
+    return hd;
 }
 
 /**
