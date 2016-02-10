@@ -50,10 +50,14 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  */
 int main(int argc, char** argv) {
 
-    printf("Teovpn ver " TVPN_VERSION "\n");
+    printf("Teovpn ver " TVPN_VERSION ", based on teonet ver "
+            "%s" "\n", teoGetLibteonetVersion());
     
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
+    
+    // Set application type
+    teoSetAppType(ke, "teo-vpn");
     
     // To run teonet as thread change AM_CONDITIONAL(TEO_THREAD, false) in configure.ac to true
     #ifdef TEO_THREAD

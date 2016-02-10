@@ -50,8 +50,10 @@ enum ksnCMD {
     CMD_L0_CLIENTS_N_ANSWER,///< #85 Clients number
     CMD_GET_NUM_PEERS,      ///< #86 Request number of peers
     CMD_GET_NUM_PEERS_ANSWER,///< #87 Number of peers answer
-    CMD_L0_STAT,             ///< #88 Get LO server statistic request
-    CMD_L0_STAT_ANSWER,      ///< #89 LO server statistic 
+    CMD_L0_STAT,            ///< #88 Get LO server statistic request
+    CMD_L0_STAT_ANSWER,     ///< #89 LO server statistic 
+    CMD_HOST_INFO,          ///< #90 Request host info
+    CMD_HOST_INFO_ANSWER,   ///< #91 Host info amswer
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use

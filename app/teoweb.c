@@ -118,7 +118,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  */
 int main(int argc, char** argv) {
     
-    printf("Teoweb ver " TWEB_VERSION ", based on teonet ver " VERSION "\n");
+    printf("Teoweb ver " TWEB_VERSION ", based on teonet ver "
+            "%s" "\n", teoGetLibteonetVersion());
     
     teowebModules tm;
     
@@ -127,6 +128,9 @@ int main(int argc, char** argv) {
     
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb, READ_ALL, 0, &tm);
+    
+    // Set application type
+    teoSetAppType(ke, "teo-web");
 
     // Read teoweb configuration
     teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
