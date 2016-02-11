@@ -88,7 +88,7 @@ void test_3_2() {
     CU_ASSERT(data_len == 10);
     
     // Remove namespace if exist
-    //ksnPblKfNamespaceRemove(kf, "test");
+    ksnTDBnamespaceRemove(kf, "test");
     
     // Destroy module
     ksnTDBdestroy(kf);
@@ -154,7 +154,7 @@ void test_3_3() {
     CU_ASSERT(data_len == 0);
 
     // Remove namespace if exist
-    //ksnPblKfNamespaceRemove(kf, "test");    
+    ksnTDBnamespaceRemove(kf, "test");  
     
     // Destroy module
     ksnTDBdestroy(kf);
@@ -203,6 +203,9 @@ void test_3_4() {
     data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
     CU_ASSERT_PTR_NULL(data);
     CU_ASSERT(data_len == 0);
+    
+    // Remove namespace if exist
+    ksnTDBnamespaceRemove(kf, "test");
     
     // Destroy module
     ksnTDBdestroy(kf);
