@@ -59,13 +59,52 @@ enum CMD_D {
  * Check data type and show message
  */
 #define get_data_type() rd->data_len && \
-                        rd->data_len > sizeof(JSON) && \
-                        !strcmp(rd->data, JSON)  ? 1 : 0; \
+                        rd->data_len > JSON_LEN && \
+                        !strncmp(rd->data, JSON, JSON_LEN)  ? 1 : 0; \
     \
     ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME \
-        "Got cmd %d, type %s, from %s\n", \
+        "Got cmd: %d, type: %s, from: %s\n", \
         rd->cmd, data_type  ? JSON : BINARY, rd->from \
     )
+
+/**
+ * Convert data to JSON string
+ *
+ * @param data
+ */
+#define data_to_json_str(data) \
+    (char*)data + JSON_LEN + (((char*)data)[JSON_LEN] == ':' ? 1 : 0)
+
+/**
+ * Replace substring in string
+ *
+ * @param target
+ * @param source
+ * @param needle
+ * @param to
+ * @return
+ */
+static char *str_replace(char *target, char *source, char *needle, char *to) {
+
+    size_t needle_len = strlen(needle);
+    size_t to_len = strlen(to);
+    char *fnd = NULL;
+    size_t ptr = 0;
+
+
+    if((fnd = strstr(source + ptr, needle)) != NULL) {
+
+        size_t fnd_pos = fnd - (source + ptr);
+        strncpy(target, source, fnd_pos); target[fnd_pos] = 0;
+        strcat(target, to);
+//        strcat(target + fnd_pos + to_len, fnd + needle_len);
+
+      str_replace(target + fnd_pos + to_len, fnd + needle_len, needle, to);
+    }
+    else strcpy(target, source);
+
+    return target;
+}
 
 /**
  * Teonet event handler
@@ -89,6 +128,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             ksnCorePacketData *rd = data;
 
             // Request type
+            const int JSON_LEN = 4;
             const char *JSON = "JSON";
             const char *BINARY = "BINARY";
 
@@ -99,7 +139,21 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 {
                     // Get type of request JSON - 1 or BINARY - 0
                     const int data_type = get_data_type();
+                    if(data_type) {
 
+                        char *json_data = data_to_json_str((char*)rd->data);
+                        char *json_data_unesc =
+                            trim(str_replace(strdup(json_data),
+                                json_data, "\\\"", "\""));
+
+                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                "CMD_D_SET data: %s\n", json_data_unesc);
+
+                        // \todo Parse request
+                        // \todo Process the data
+
+                        free(json_data_unesc);
+                    }
                 }
                 break;
 
@@ -108,7 +162,21 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 {
                     // Get type of request JSON - 1 or BINARY - 0
                     const int data_type = get_data_type();
-                    
+                    if(data_type) {
+
+                        char *json_data = data_to_json_str((char*)rd->data);
+                        char *json_data_unesc =
+                            trim(str_replace(strdup(json_data),
+                                json_data, "\\\"", "\""));
+
+                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                "CMD_D_GET data: %s\n", json_data_unesc);
+
+                        // \todo Parse request
+                        // \todo Process the data
+                        
+                        free(json_data_unesc);
+                    }
                 }
                 break;
             }
