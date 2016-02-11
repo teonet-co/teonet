@@ -482,11 +482,11 @@ int bind_udp(int *port) {
     }
     
     // Set server socket options
-    if (set_reuseaddr(sd) == -1) {
-        // error handling
-        perror(" can't set socket options\n");
-        return -3;
-    }
+//    if (set_reuseaddr(sd) == -1) {
+//        // error handling
+//        perror(" can't set socket options\n");
+//        return -3;
+//    }
 
     // Bind the socket to any valid IP address and a specific port, increment 
     // port if busy 

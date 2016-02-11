@@ -6,7 +6,7 @@
             <name>teonet</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc</cpp-extensions>
-            <header-extensions>h,l</header-extensions>
+            <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
@@ -26,21 +26,22 @@
             <word>addr</word>
             <word>app</word>
             <word>atoi</word>
-            <word>Autoconf</word>
+            <word>autoconf</word>
             <word>Cesanta</word>
             <word>cmd</word>
             <word>config</word>
             <word>cque</word>
-            <word>Ctrl</word>
+            <word>ctrl</word>
+            <word>execv</word>
             <word>fd</word>
             <word>gethostbyname</word>
             <word>hotkey</word>
             <word>Hotkeys</word>
             <word>internet</word>
             <word>ip</word>
-            <word>Jsmt</word>
+            <word>jsmt</word>
             <word>json</word>
-            <word>Kirill</word>
+            <word>kirill</word>
             <word>ksnet</word>
             <word>len</word>
             <word>libev</word>
@@ -52,13 +53,15 @@
             <word>mtu</word>
             <word>mutex</word>
             <word>name'</word>
+            <word>namespace</word>
             <word>nonblock</word>
             <word>pc</word>
             <word>perror</word>
             <word>po</word>
             <word>printf</word>
             <word>recvfrom</word>
-            <word>Scherba</word>
+            <word>scherba</word>
+            <word>segv</word>
             <word>sh</word>
             <word>src</word>
             <word>str</word>
@@ -77,9 +80,9 @@
             <word>triptime</word>
             <word>ttl</word>
             <word>tuntap</word>
-            <word>Ubuntu</word>
+            <word>ubuntu</word>
             <word>udp</word>
-            <word>Unsubscribe</word>
+            <word>unsubscribe</word>
             <word>unsubscribed</word>
             <word>uuid</word>
             <word>ver</word>
