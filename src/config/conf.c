@@ -85,6 +85,9 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->vpn_connect_f = 0;
     ksn_cfg->vpn_mtu = 0;
     
+    // SIGSEGV processing
+    ksn_cfg->sig_segv_f = 0;
+    
     // Terminal
 //    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
 //    strncpy(ksn_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
@@ -146,6 +149,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("show_tr_udp_f", &conf->show_tr_udp_f),
         CFG_SIMPLE_BOOL("hot_keys_f", &conf->hot_keys_f),
         CFG_SIMPLE_BOOL("daemon_mode_f", &conf->dflag),
+        CFG_SIMPLE_BOOL("sig_segv_f", &conf->sig_segv_f),
 
         #if M_ENAMBE_VPN
         CFG_SIMPLE_BOOL("vpn_connect_f", &conf->vpn_connect_f),

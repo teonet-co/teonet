@@ -14,6 +14,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <libgen.h>
+#include <signal.h>
 #include <pthread.h>    // For mutex and TEO_TREAD
 
 
@@ -38,8 +39,8 @@ void timer_cb (EV_P_ ev_timer *w, int revents); // Timer callback
 void host_cb (EV_P_ ev_io *w, int revents); // Host callback
 void sig_async_cb (EV_P_ ev_async *w, int revents); // Async signal callback
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGINT callback
-void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGSEGV or SIGABRT callback
-void sigsegv_cb_h(int signum);
+void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGSEGV or SIGABRT callback
+static void sigsegv_cb_h(int signum, siginfo_t *si, void *unused);
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 
@@ -191,6 +192,30 @@ inline void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
     ke->runEventMgr = 0;
 }
 
+/**
+ * Set sigaction function typedef
+ */
+typedef void (*set_sigaction_h) (int, siginfo_t *, void *);
+
+/**
+ * Set system signal action
+ * @param ke Pointer to ksnetEvMgrClass
+ * @return 
+ */
+static void set_sigaction(ksnetEvMgrClass *ke, int sig, 
+        set_sigaction_h sigsegv_cb_h) {
+
+    if(ke->ksn_cfg.sig_segv_f) {
+        
+        struct sigaction sa;
+        sa.sa_flags = SA_NOMASK; //SA_SIGINFO; // 
+        sigemptyset(&sa.sa_mask);
+        sa.sa_sigaction = sigsegv_cb_h;
+        if (sigaction(sig, &sa, NULL) == -1)
+            ksnet_printf(&ke->ksn_cfg, ERROR_M, "Set sigaction error\n");
+    }    
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 /**
@@ -271,7 +296,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
             // SIGABRT used to restart this application
             #ifdef SIGUSR2
-            ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGUSR2);
+            ev_signal_init (&ke->sigabrt_w, sigusr2_cb, SIGUSR2);
             ke->sigabrt_w.data = ke;
             ev_signal_start (loop, &ke->sigabrt_w);
             #endif
@@ -283,11 +308,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
                     "%sEvent manager:%s Set SIGSEGV signal handler\n",
                     ANSI_CYAN, ANSI_NONE);
             #endif
-            signal(SIGSEGV, sigsegv_cb_h);
             // Libev can't process this signal properly 
-            // ev_signal_init (&ke->sigsegv_w, sigsegv_cb, SIGSEGV);
-            // ke->sigsegv_w.data = ke;
-            // ev_signal_start (loop, &ke->sigsegv_w);
+            set_sigaction(ke, SIGSEGV, sigsegv_cb_h);
             #endif
 
             // SIGABRT
@@ -297,11 +319,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
                     "%sEvent manager:%s Set SIGABRT signal handler\n",
                     ANSI_CYAN, ANSI_NONE);
             #endif
-            signal(SIGABRT, sigsegv_cb_h);
             // Libev can't process this signal properly 
-            // ev_signal_init (&ke->sigabrt_w, sigsegv_cb, SIGABRT);
-            // ke->sigabrt_w.data = ke;
-            // ev_signal_start (loop, &ke->sigabrt_w);
+            set_sigaction(ke, SIGABRT, sigsegv_cb_h);
             #endif            
         }
 
@@ -797,13 +816,13 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
  * @param w
  * @param revents
  */
-void sigsegv_cb (struct ev_loop *loop, ev_signal *w, int revents) {
+void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     static int attempt = 0;
         
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, ERROR_M,
+    ksnet_printf(&ke->ksn_cfg, ERROR_M,
             "\n%sEvent manager:%s Got a signal %s ...\n", 
             ANSI_RED, ANSI_NONE,
             w->signum == SIGSEGV ? "SIGSEGV" : 
@@ -839,18 +858,29 @@ char** teo_argv;
  * SIGSEGV, SIGABRT signals handler
  * 
  * @param signum
+ * @param si
+ * @param unused
  */
-void sigsegv_cb_h(int signum) {
+static void sigsegv_cb_h(int signum, siginfo_t *si, void *unused) {
     
-    printf("\n%sApplication:%s Got a signal %s ...\n",
-            ANSI_RED, ANSI_NONE,
-            signum == SIGSEGV ? "SIGSEGV" : 
-            signum == SIGABRT ? "SIGABRT" : 
-                                   "?");
-    sleep(1);    
+    printf("\n%sApplication:%s Got a signal %s ...\n\n",
+           (char*)ANSI_RED, (char*)ANSI_NONE,
+           signum == SIGSEGV ? "SIGSEGV" : 
+           signum == SIGABRT ? "SIGABRT" : 
+                                  "?");
+    usleep(250000);    
     puts("starting application restart process...");
-    sleep(1);
-
+    // Unbind sockets
+    int i; for (i = 9000; i <= 9030; i++) {
+        //if (FD_ISSET(i, &set)) {
+            close(i);
+        //}
+    }
+    usleep(250000);
+    
+    signal(signum, SIG_DFL); // Restore signal processing
+    if(system("reset")); // Rest terminal
+    
     teoRestartApp_f = 1;
     ksnetEvMgrRestart(teo_argc, teo_argv);
     

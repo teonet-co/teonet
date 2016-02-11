@@ -75,6 +75,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "vpn_ip",         required_argument, 0, 'i' },
         { "vpn_mtu",        required_argument, 0, 'm' },
         #endif
+
+        { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
+        
         { "daemon",         no_argument,       &conf->dflag, 1 },
         { "kill",           no_argument,       &conf->kflag, 1 },
 
@@ -347,6 +350,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --vpn_mtu            VPN MTU\n"
     #endif
     "\n"
+    "      --sig_segv           Segmentation fault error processing by library\n"
     "  -d, --daemon             Start this application in daemon mode\n"
     "  -k, --kill               Kill the application running in daemon mode\n"
     "\n",
