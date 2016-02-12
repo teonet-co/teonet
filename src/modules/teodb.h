@@ -33,15 +33,26 @@ void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace);
 char *ksnTDBnamespaceGet(ksnTDBClass *kf);
 void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* namespace);
 
-void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len);
-int ksnTDBset(ksnTDBClass *kf, const char *key, void *data, size_t data_len);
-int ksnTDBdelete(ksnTDBClass *kf, const char *key);
-
-void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const char *key, 
+void *ksnTDBgetStr(ksnTDBClass *kf, const char *key, size_t *data_len);
+void *ksnTDBget(ksnTDBClass *kf, const void *key, size_t key_len, 
         size_t *data_len);
-int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const char *key, 
+int ksnTDBsetStr(ksnTDBClass *kf, const char *key, void *data, size_t data_len);
+int ksnTDBset(ksnTDBClass *kf, const void *key, size_t key_len, void *data,
+        size_t data_len);
+int ksnTDBdeleteStr(ksnTDBClass *kf, const char *key);
+int ksnTDBdelete(ksnTDBClass *kf, const void *key, size_t key_len);
+
+void *ksnTDBgetNsStr(ksnTDBClass *kf, const char *namespace, const char *key, 
+        size_t *data_len);
+void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+        size_t key_len, size_t *data_len);
+int ksnTDBsetNsStr(ksnTDBClass *kf, const char *namespace, const char *key, 
         void *data, size_t data_len);
-int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const char *key);
+int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+        size_t key_len, void *data, size_t data_len);
+int ksnTDBdeleteNsStr(ksnTDBClass *kf, const char *namespace, const char *key);
+int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+        size_t key_len);
 
 #ifdef	__cplusplus
 }
