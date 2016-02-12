@@ -68,7 +68,7 @@ void test_3_2() {
     //if(kf->k == NULL) printf("pbl_errno: %d ...", pbl_errno);
     
     // Set test data
-    int rv = ksnTDBset(kf, "test_key", "test data", 10);
+    int rv = ksnTDBsetStr(kf, "test_key", "test data", 10);
     CU_ASSERT(rv == 0);
     
     // Set NULL namespace - the file should be flashed and closed
@@ -83,7 +83,7 @@ void test_3_2() {
     
     // Read test data
     size_t data_len;
-    char *data = ksnTDBget(kf, "test_key", &data_len);
+    char *data = ksnTDBgetStr(kf, "test_key", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data");
     CU_ASSERT(data_len == 10);
     
@@ -114,42 +114,42 @@ void test_3_3() {
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     
     // Set test data
-    int rv = ksnTDBset(kf, "test_key_01", "test data - 01", 15);
+    int rv = ksnTDBsetStr(kf, "test_key_01", "test data - 01", 15);
     CU_ASSERT(rv == 0);
 
     // Set test data
-    rv = ksnTDBset(kf, "test_key_02", "test data - 02", 15);
+    rv = ksnTDBsetStr(kf, "test_key_02", "test data - 02", 15);
     CU_ASSERT(rv == 0);
 
     // Set test data
-    rv = ksnTDBset(kf, "test_key_03", "test data - 03", 15);
+    rv = ksnTDBsetStr(kf, "test_key_03", "test data - 03", 15);
     CU_ASSERT(rv == 0);
 
     // Set test data
-    rv = ksnTDBset(kf, "test_key_04", "test data - 04", 15);
+    rv = ksnTDBsetStr(kf, "test_key_04", "test data - 04", 15);
     CU_ASSERT(rv == 0);
 
     // Read test data
     size_t data_len;
-    char *data = ksnTDBget(kf, "test_key_03", &data_len);
+    char *data = ksnTDBgetStr(kf, "test_key_03", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data - 03");
     CU_ASSERT(data_len == 15);
     
     // Update test data with existing key
-    rv = ksnTDBset(kf, "test_key_03", "test data - 03 - second", 24);
+    rv = ksnTDBsetStr(kf, "test_key_03", "test data - 03 - second", 24);
     CU_ASSERT(rv == 0);
 
     // Read test data
-    data = ksnTDBget(kf, "test_key_03", &data_len);
+    data = ksnTDBgetStr(kf, "test_key_03", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data - 03 - second");
     CU_ASSERT(data_len == 24);
     
     // Delete all records with key
-    rv = ksnTDBdelete(kf, "test_key_03");
+    rv = ksnTDBdeleteStr(kf, "test_key_03");
     CU_ASSERT(rv == 0);
     
     // Try to read deleted data
-    data = ksnTDBget(kf, "test_key_03", &data_len);
+    data = ksnTDBgetStr(kf, "test_key_03", &data_len);
     CU_ASSERT_PTR_NULL(data);
     CU_ASSERT(data_len == 0);
 
@@ -177,30 +177,30 @@ void test_3_4() {
     ksnTDBnamespaceRemove(kf, "test");
     
     // Set test data
-    int rv = ksnTDBsetNs(kf, "test", "test_key", "test data", 10);
+    int rv = ksnTDBsetNsStr(kf, "test", "test_key", "test data", 10);
     CU_ASSERT(rv == 0);    
     
     // Read test data
     size_t data_len;
-    char *data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
+    char *data = ksnTDBgetNsStr(kf, "test", "test_key", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data");
     CU_ASSERT(data_len == 10);
     
     // Update test data
-    rv = ksnTDBsetNs(kf, "test", "test_key", "test data updated", 18);
+    rv = ksnTDBsetNsStr(kf, "test", "test_key", "test data updated", 18);
     CU_ASSERT(rv == 0);    
     
     // Read updated test data
-    data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
+    data = ksnTDBgetNsStr(kf, "test", "test_key", &data_len);
     CU_ASSERT_STRING_EQUAL(data, "test data updated");
     CU_ASSERT(data_len == 18);
     
     // Delete all records with key
-    rv = ksnTDBdeleteNs(kf, "test", "test_key");
+    rv = ksnTDBdeleteNsStr(kf, "test", "test_key");
     CU_ASSERT(rv == 0);
     
     // Try to read deleted data
-    data = ksnTDBgetNs(kf, "test", "test_key", &data_len);
+    data = ksnTDBgetNsStr(kf, "test", "test_key", &data_len);
     CU_ASSERT_PTR_NULL(data);
     CU_ASSERT(data_len == 0);
     

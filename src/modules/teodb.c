@@ -131,7 +131,7 @@ void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* namespace) {
 }
 
 /**
- * Get data by key from default namespace
+ * Get data by string key from default namespace
  *
  * @param kf Pointer to ksnTDBClass
  * @param key String with key
@@ -140,7 +140,24 @@ void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* namespace) {
  * @return Pointer to data with data_len length or NULL if not found,
  *         should be free after use
  */
-void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len) {
+inline void *ksnTDBgetStr(ksnTDBClass *kf, const char *key, size_t *data_len) {
+
+    return ksnTDBget(kf, key, strlen(key) + 1, data_len);
+}
+
+/**
+ * Get data by string key from default namespace
+ *
+ * @param kf Pointer to ksnTDBClass
+ * @param key String with key
+ * @param key_len Key length
+ * @param data_len [out] Length of data
+ *
+ * @return Pointer to data with data_len length or NULL if not found,
+ *         should be free after use
+ */
+void *ksnTDBget(ksnTDBClass *kf, const void *key, size_t key_len, 
+        size_t *data_len) {
 
     *data_len = 0;
     void *data = NULL;
@@ -149,7 +166,7 @@ void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len) {
 
     if(kf->k != NULL) {
 
-        long rc = pblKfFind(kf->k, /*PBLEQ*/ PBLLA, (void*) key, strlen(key) + 1,
+        long rc = pblKfFind(kf->k, /*PBLEQ*/ PBLLA, (void*) key, key_len,
                 (void*) okey, &okey_len);
 
         if(rc >= 0) {
@@ -167,7 +184,7 @@ void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len) {
 }
 
 /**
- * Add (insert or update) data by key to default namespace
+ * Add (insert or update) data by string key to default namespace
  *
  * @param kf Pointer to ksnTDBClass
  * @param key String with key
@@ -176,27 +193,62 @@ void *ksnTDBget(ksnTDBClass *kf, const char *key, size_t *data_len) {
  *
  * @return 0: call went OK; or an error if != 0
  */
-int ksnTDBset(ksnTDBClass *kf, const char *key, void *data,
+inline int ksnTDBsetStr(ksnTDBClass *kf, const char *key, void *data,
+        size_t data_len) {
+
+    return ksnTDBset(kf, key, strlen(key) + 1, data, data_len);
+}
+
+/**
+ * Add (insert or update) data by key to default namespace
+ *
+ * @param kf Pointer to ksnTDBClass
+ * @param key Binary key
+ * @param key_len Key length
+ * @param data Pointer to data
+ * @param data_len Data length
+ *
+ * @return 0: call went OK; or an error if != 0
+ */
+int ksnTDBset(ksnTDBClass *kf, const void *key, size_t key_len, void *data,
         size_t data_len) {
 
     int retval = -1;
 
-    if(kf->k != NULL)
-        retval = pblKfInsert(kf->k, (void*) key, strlen(key) + 1, data,
+    if(kf->k != NULL) {
+        // \todo Check key & data, and may be do delete record if data == NULL 
+        if(key != NULL && data != NULL) {
+            retval = pblKfInsert(kf->k, (void*) key, key_len, data,
                 data_len);
+        }
+    }
 
     return retval;
 }
 
 /**
- * Delete all records with key
+ * Delete all records with string key
  *
  * @param kf Pointer to ksnTDBClass
  * @param key String with key
  *
  * @return 0: call went OK; != 0 if key not found or some error occurred
  */
-int ksnTDBdelete(ksnTDBClass *kf, const char *key) {
+inline int ksnTDBdeleteStr(ksnTDBClass *kf, const char *key) {
+
+    return ksnTDBdelete(kf, key, strlen(key) + 1);
+}
+
+/**
+ * Delete all records with key
+ *
+ * @param kf Pointer to ksnTDBClass
+ * @param key Binary key
+ * @param key_len Key length
+ *
+ * @return 0: call went OK; != 0 if key not found or some error occurred
+ */
+int ksnTDBdelete(ksnTDBClass *kf, const void *key, size_t key_len) {
 
     int retval = -1;
 
@@ -204,7 +256,7 @@ int ksnTDBdelete(ksnTDBClass *kf, const char *key) {
 
         void *data;
         size_t data_len;
-        while((data=ksnTDBget(kf, key, &data_len)) != NULL) {
+        while((data=ksnTDBget(kf, key, key_len, &data_len)) != NULL) {
             pblKfDelete(kf->k);
             free(data);
             retval = 0;
@@ -215,7 +267,7 @@ int ksnTDBdelete(ksnTDBClass *kf, const char *key) {
 }
 
 /**
- * Get data by key from namespace
+ * Get data by string key from namespace
  *
  * @param kf Pointer to ksnTDBClass
  * @param namespace String with namespace
@@ -224,12 +276,29 @@ int ksnTDBdelete(ksnTDBClass *kf, const char *key) {
  *
  * @return
  */
-void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const char *key,
+inline void *ksnTDBgetNsStr(ksnTDBClass *kf, const char *namespace, const char *key,
         size_t *data_len) {
+
+    return ksnTDBgetNs(kf, namespace, key, strlen(key) + 1, data_len);
+}
+
+/**
+ * Get data by key from namespace
+ *
+ * @param kf Pointer to ksnTDBClass
+ * @param namespace String with namespace
+ * @param key Binary key
+ * @param key_len Key length
+ * @param data_len [out] Data length
+ *
+ * @return
+ */
+void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+        size_t key_len, size_t *data_len) {
 
     char *save_namespace = ksnTDBnamespaceGet(kf);
     ksnTDBnamespaceSet(kf, namespace);
-    void *data = ksnTDBget(kf, key, data_len);
+    void *data = ksnTDBget(kf, key, key_len, data_len);
     ksnTDBnamespaceSet(kf, save_namespace);
     if(save_namespace != NULL) free(save_namespace);
 
@@ -237,7 +306,7 @@ void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const char *key,
 }
 
 /**
- * Add (insert or update) data by key to namespace
+ * Add (insert or update) data by string key to namespace
  *
  * @param kf Pointer to ksnTDBClass
  * @param namespace String with namespace
@@ -247,12 +316,30 @@ void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const char *key,
  *
  * @return
  */
-int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const char *key,
+inline int ksnTDBsetNsStr(ksnTDBClass *kf, const char *namespace, const char *key,
         void *data, size_t data_len) {
+
+    return ksnTDBsetNs(kf, namespace, key, strlen(key) + 1, data, data_len);
+}
+
+/**
+ * Add (insert or update) data by key to namespace
+ *
+ * @param kf Pointer to ksnTDBClass
+ * @param namespace String with namespace
+ * @param key Binary key
+ * @param key_len Key length
+ * @param data Pointer to data
+ * @param data_len [out] Data length
+ *
+ * @return
+ */
+int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+        size_t key_len, void *data, size_t data_len) {
 
     char *save_namespace = ksnTDBnamespaceGet(kf);
     ksnTDBnamespaceSet(kf, namespace);
-    int retval = ksnTDBset(kf, key, data, data_len);
+    int retval = ksnTDBset(kf, key, key_len, data, data_len);
     ksnTDBnamespaceSet(kf, save_namespace);
     if(save_namespace != NULL) free(save_namespace);
 
@@ -268,11 +355,27 @@ int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const char *key,
  *
  * @return 0: call went OK; != 0 if key not found or some error occurred
  */
-int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const char *key) {
+inline int ksnTDBdeleteNsStr(ksnTDBClass *kf, const char *namespace, const char *key) {
+
+    return ksnTDBdeleteNs(kf, namespace, key, strlen(key) + 1);
+}
+
+/**
+ * Delete all records with key
+ *
+ * @param kf Pointer to ksnTDBClass
+ * @param namespace String with namespace
+ * @param key Binary key
+ * @param key_len Key length
+ *
+ * @return 0: call went OK; != 0 if key not found or some error occurred
+ */
+int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+        size_t key_len) {
 
     char *save_namespace = ksnTDBnamespaceGet(kf);
     ksnTDBnamespaceSet(kf, namespace);
-    int retval = ksnTDBdelete(kf, key);
+    int retval = ksnTDBdelete(kf, key, key_len);
     ksnTDBnamespaceSet(kf, save_namespace);
     if(save_namespace != NULL) free(save_namespace);
 

@@ -591,3 +591,28 @@ int ip_is_private(char *ip) {
 
     else return 0;
 }
+
+/**
+ * Calculate number of tags in json string
+ * 
+ * @param data
+ * @param data_length
+ * @return 
+ */
+size_t get_num_of_tags(char *data, size_t data_length) {
+    
+    int i = 0;
+    size_t num_of_tags = 0;
+    
+    for(i = 0; i < data_length; i++) 
+        if(data[i] == ':') 
+            num_of_tags++;
+    
+//    printf("number of json tags in request: %d, request: %s\n", 
+//            (int) num_of_tags, data);
+
+    //if(num_of_tags) 
+        num_of_tags++;
+    
+    return num_of_tags * 4;
+}
