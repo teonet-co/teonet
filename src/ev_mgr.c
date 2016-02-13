@@ -304,9 +304,10 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             // SIGSEGV
             #ifdef SIGSEGV
             #ifdef DEBUG_KSNET
-            ksnet_printf(&ke->ksn_cfg, MESSAGE, 
-                    "%sEvent manager:%s Set SIGSEGV signal handler\n",
-                    ANSI_CYAN, ANSI_NONE);
+            if(ke->ksn_cfg.sig_segv_f)
+                ksnet_printf(&ke->ksn_cfg, MESSAGE, 
+                        "%sEvent manager:%s Set SIGSEGV signal handler\n",
+                        ANSI_CYAN, ANSI_NONE);
             #endif
             // Libev can't process this signal properly 
             set_sigaction(ke, SIGSEGV, sigsegv_cb_h);
@@ -315,7 +316,8 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             // SIGABRT
             #ifdef SIGABRT
             #ifdef DEBUG_KSNET
-            ksnet_printf(&ke->ksn_cfg, MESSAGE, 
+            if(ke->ksn_cfg.sig_segv_f)
+                ksnet_printf(&ke->ksn_cfg, MESSAGE, 
                     "%sEvent manager:%s Set SIGABRT signal handler\n",
                     ANSI_CYAN, ANSI_NONE);
             #endif

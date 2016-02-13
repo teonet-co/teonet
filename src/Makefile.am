@@ -27,7 +27,6 @@ AM_CPPFLAGS = \
 
 AM_CFLAGS = \
 	 -Wall \
-	 -g \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
@@ -50,7 +49,6 @@ AM_CXXFLAGS = \
 	-std=c++11 \
 	-fPIC \
 	-Wall \
-	-g \
 	-I/opt/local/include
 
 AM_LDFLAGS = -L/opt/local/lib

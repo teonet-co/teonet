@@ -71,7 +71,7 @@ int main() {
     add_suite_2_tests();
     
     // Add a suite to the registry
-    pSuite = CU_add_suite("Callback QUEUE module functions", init_suite, clean_suite);
+    pSuite = CU_add_suite("Teonet DB based at PBL KeyFile module functions", init_suite, clean_suite);
     if (NULL == pSuite) {
         CU_cleanup_registry();
         return CU_get_error();
@@ -79,7 +79,7 @@ int main() {
     add_suite_3_tests();
 
     // Add a suite to the registry
-    pSuite = CU_add_suite("Teonet DB based at PBL KeyFile module functions", init_suite, clean_suite);
+    pSuite = CU_add_suite("Callback QUEUE module functions", init_suite, clean_suite);
     if (NULL == pSuite) {
         CU_cleanup_registry();
         return CU_get_error();
