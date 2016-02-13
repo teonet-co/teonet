@@ -152,6 +152,15 @@ void test_3_3() {
     data = ksnTDBgetStr(kf, "test_key_03", &data_len);
     CU_ASSERT_PTR_NULL(data);
     CU_ASSERT(data_len == 0);
+    
+    // Large data set
+    char *ld = malloc(64*1024);
+    rv = ksnTDBsetStr(kf, "test_key_04", ld, 64*1024);
+    CU_ASSERT(rv == 0);
+    
+    // Large data delete
+    rv = ksnTDBdeleteStr(kf, "test_key_04");
+    CU_ASSERT(rv == 0);
 
     // Remove namespace if exist
     ksnTDBnamespaceRemove(kf, "test");  
