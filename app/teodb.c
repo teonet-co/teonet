@@ -141,13 +141,21 @@ static char *str_replace(char *target, char *source, char *needle, char *to) {
  * @return String contain fixed and unescaped JSON, should be free after use
  */
 static char *data_to_json_str(void *data, size_t data_len) {
-    
+
+    char *json_data_unesc_;
     size_t ptr = JSON_LEN + (((char*)data)[JSON_LEN] == ':' ? 1 : 0);
-    char *json_str = strndup((char*)data + ptr, data_len - ptr);
+    char *json_data_unesc = strndup((char*)data + ptr, data_len - ptr);
+
+    trim(json_data_unesc);
     
-    char *json_data_unesc = strdup(json_str);    
-    trim(str_replace(json_data_unesc, json_str, "\\\"", "\""));
-    free(json_str);
+    json_data_unesc_ = strdup(json_data_unesc);
+    str_replace(json_data_unesc, json_data_unesc_, "\\\"", "\"");
+    free(json_data_unesc_);
+
+    json_data_unesc_ = strdup(json_data_unesc);    
+    str_replace(json_data_unesc, json_data_unesc_, "\\\\", "\\");      
+    free(json_data_unesc_);
+    
         
     return json_data_unesc;
 }
