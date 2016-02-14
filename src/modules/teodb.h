@@ -10,6 +10,8 @@
 #ifndef TEODB_H
 #define	TEODB_H
 
+#include "utils/string_arr.h"
+
 /**
  * PBL KeyFile data 
  */
@@ -53,6 +55,7 @@ int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const void *key,
 int ksnTDBdeleteNsStr(ksnTDBClass *kf, const char *namespace, const char *key);
 int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key, 
         size_t key_len);
+int ksnTDBkeyList(ksnTDBClass *kf, ksnet_stringArr *argv);
 
 #ifdef	__cplusplus
 }

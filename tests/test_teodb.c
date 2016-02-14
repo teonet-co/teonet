@@ -221,6 +221,69 @@ void test_3_4() {
     CU_PASS("Destroy ksnPblKfClass done");
 }
 
+//! Get list of keys without default namespace
+void test_3_5() {
+    
+    // Emulate ksnCoreClass
+    kc_emul();
+    
+    // Initialize module
+    ksnTDBClass *kf = ksnTDBinit(ke);
+    CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
+    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->k);
+    
+    // Remove namespace if exist
+    ksnTDBnamespaceRemove(kf, "test");
+    
+    // Set default namespace - the file at disk should be created
+    ksnTDBnamespaceSet(kf, "test");
+    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_PTR_NOT_NULL(kf->k);
+    
+    // Set three keys
+    //
+    // Set test data
+    int rv = ksnTDBsetStr(kf, "key_01", "test data - 01", 15);
+    CU_ASSERT(rv == 0);
+    //
+    // Set test data
+    rv = ksnTDBsetStr(kf, "key_02", "test data - 02", 15);
+    CU_ASSERT(rv == 0);
+    //
+    // Set test data
+    rv = ksnTDBsetStr(kf, "key_03", "test data - 03", 15);
+    CU_ASSERT(rv == 0);
+    
+    // Get list of keys
+    ksnet_stringArr argv = ksnet_stringArrCreate();
+    int num_of_keys = ksnTDBkeyList(kf, &argv);
+    CU_ASSERT(num_of_keys == 3);
+    
+    // Check string array
+    int length_of_array = ksnet_stringArrLength(argv);
+    CU_ASSERT(length_of_array == 3);
+    CU_ASSERT(!strcmp(argv[0], "key_01"));
+    CU_ASSERT(!strcmp(argv[1], "key_02"));
+    CU_ASSERT(!strcmp(argv[2], "key_03"));
+    
+    // Combine arrays element to string
+    char *ar_str = ksnet_stringArrCombine(argv, ", ");
+    printf(" keys: %s ...", ar_str);
+    free(ar_str);
+    
+    // Free string array
+    ksnet_stringArrFree(&argv);
+    CU_ASSERT(argv == NULL);
+    
+    // Remove namespace if exist
+    ksnTDBnamespaceRemove(kf, "test");
+    
+    // Destroy module
+    ksnTDBdestroy(kf);
+    CU_PASS("Destroy ksnPblKfClass done");
+}
+
 //! Test template
 void test_3_template() {
     
@@ -248,7 +311,8 @@ int add_suite_3_tests(void) {
     if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_3_1)) ||
         (NULL == CU_add_test(pSuite, "Set default namespace", test_3_2)) ||
         (NULL == CU_add_test(pSuite, "Set and get data with default namespace", test_3_3)) ||
-        (NULL == CU_add_test(pSuite, "Set and get data without default namespace", test_3_4))) {
+        (NULL == CU_add_test(pSuite, "Set and get data without default namespace", test_3_4)) ||
+        (NULL == CU_add_test(pSuite, "Get list of keys without default namespace", test_3_5))) {
         
         CU_cleanup_registry();
         return CU_get_error();

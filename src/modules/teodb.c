@@ -391,3 +391,41 @@ int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key,
 
     return retval;
 }
+
+/**
+ * Get list of keys // \todo Add parameters: From - from key number, To - to key number
+ * 
+ * @param kf Pointer to ksnTDBClass
+ * @param argv Pointer to ksnet_stringArr
+ * 
+ * @return Number of 
+ */
+int ksnTDBkeyList(ksnTDBClass *kf, ksnet_stringArr *argv) {
+    
+    int num_of_key = 0;
+    *argv = NULL;
+    
+    if(kf->k != NULL) {
+        
+        char okey[KSN_BUFFER_SM_SIZE];
+        size_t okey_len = KSN_BUFFER_SM_SIZE;        
+                
+        // Get first key
+        long data_len; 
+        if((data_len = pblKfGetAbs(kf->k, 0, (void*) okey, &okey_len)) >= 0) {
+            
+            // Create string array and add first key to string array
+            ksnet_stringArrAdd(argv, okey);
+            num_of_key++;
+            
+            // Get next keys and add it to string array
+            while((data_len = pblKfNext(kf->k, okey, &okey_len)) >= 0) {
+                
+                ksnet_stringArrAdd(argv, okey);
+                num_of_key++;
+            }
+        }
+    }
+    
+    return num_of_key;
+}
