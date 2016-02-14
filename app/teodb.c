@@ -277,6 +277,7 @@ static void send_get_answer(ksnetEvMgrClass *ke, ksnCorePacketData *rd,
                 rd->addr, rd->port, rd->from, rd->from_len, 
                 CMD_D_GET_ANSWER, 
                 data_out, data_out_len);
+    
     // Send ANSWER to peer
     else
         ksnCoreSendto(ke->kc, rd->addr, rd->port, 
@@ -323,7 +324,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                     // JSON data
                     if(data_type) {
-
+                        
                         // Get JSON string from input data
                         char *json_data_unesc = data_to_json_str(rd->data, rd->data_len);                        
                         ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME

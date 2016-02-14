@@ -223,14 +223,13 @@ int ksnTDBset(ksnTDBClass *kf, const void *key, size_t key_len, void *data,
             char okey[KSN_BUFFER_SM_SIZE];
             size_t okey_len = KSN_BUFFER_SM_SIZE;
 
-            long rc = pblKfFind(kf->k, PBLLA, (void*) key, key_len, (void*) okey, &okey_len);
-            if(rc >= 0) {   
-                retval = pblKfUpdate(kf->k, data, data_len);
-            }
-            else {
-                retval = pblKfInsert(kf->k, (void*) key, key_len, "", 1); //data, data_len);
-                retval = pblKfUpdate(kf->k, data, data_len);
-            }
+            // Check if record exists
+            long rc = pblKfFind(kf->k, PBLLA, (void*) key, key_len, 
+                    (void*) okey, &okey_len);
+            
+            // Update or insert record
+            if(rc >= 0) retval = pblKfUpdate(kf->k, data, data_len);
+            else retval = pblKfInsert(kf->k, (void*) key, key_len, data, data_len);
         }
     }
 
