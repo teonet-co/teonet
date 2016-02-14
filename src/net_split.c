@@ -99,8 +99,11 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
 /**
  * Combine packets to one large packet
  *
- * @param ks
- * @param rd
+ * @param ks Pointer to ksnSplitClass
+ * @param rd Pointer to ksnCorePacketData
+ * 
+ * @return Pointer to combined packet ksnCorePacketData or NULL if not combined 
+ *         or error
  */
 ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
 
@@ -165,7 +168,10 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             void *data_s = pblMapGet(ks->map, key, key_len, &data_s_len);
 
             // Check error (the subpacket has not received or added to the map)
-            if(data_s == NULL) return NULL;
+            if(data_s == NULL) {                 
+                free(key); 
+                return NULL; 
+            }
 
             // Get command from first subpacket
             if(!i) {
