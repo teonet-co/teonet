@@ -48,10 +48,14 @@
  */
 enum CMD_D {
 
-    CMD_D_SET = 129,    ///< #129 Set data request:  type_of_request: { id, namespace, key, data, data_len } }
-    CMD_D_GET,          ///< #130 Get data request:  type_of_request: { id, namespace, key } }
-    CMD_D_GET_ANSWER,   ///< #131 Get data response: { namespace, key, data, data_len } }
-
+                        ///< The TYPE_OF_REQUEST field: "JSON:" or empty
+                        ///< The ID field:  id of reques, it resend to user in answer
+    CMD_D_SET = 129,    ///< #129 Set data request:  TYPE_OF_REQUEST: { namespace, key, data, data_len } }
+    CMD_D_GET,          ///< #130 Get data request:  TYPE_OF_REQUEST: { namespace, key, ID } }
+    CMD_D_LIST,         ///< #131 List request:  TYPE_OF_REQUEST: { ID, namespace } }
+    CMD_D_GET_ANSWER,   ///< #132 Get data response: { namespace, key, data, data_len, ID } }
+    CMD_D_LIST_ANSWER,  ///< #133 List response:  [ key, key, ... ]
+    
     // Reserved
     CMD_R_NONE          ///< Reserved
 };
@@ -268,20 +272,20 @@ static int json_parse(char *data, json_param *jp) {
  * @param data_out Answer data
  * @param data_out_len Answer data length
  */
-static void send_get_answer(ksnetEvMgrClass *ke, ksnCorePacketData *rd, 
+static void send_get_answer(ksnetEvMgrClass *ke, ksnCorePacketData *rd, int cmd, 
         void *data_out, size_t data_out_len) {
     
     // Send ANSWER to L0 user
     if(rd->l0_f)
         ksnLNullSendToL0(ke, 
                 rd->addr, rd->port, rd->from, rd->from_len, 
-                CMD_D_GET_ANSWER, 
+                cmd, 
                 data_out, data_out_len);
     
     // Send ANSWER to peer
     else
         ksnCoreSendto(ke->kc, rd->addr, rd->port, 
-                CMD_D_GET_ANSWER,
+                cmd,
                 data_out, data_out_len);
 }
                         
@@ -316,7 +320,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
             switch(rd->cmd) {
 
-                // Set data request
+                // Set data request #129
                 case CMD_D_SET:
                 {
                     // Get type of request JSON - 1 or BINARY - 0
@@ -377,7 +381,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 }
                 break;
 
-                // Get data request
+                // Get data request #130
                 case CMD_D_GET:
                 {
                     // Get type of request JSON - 1 or BINARY - 0
@@ -415,7 +419,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         free(data);
 
                         // Send request answer
-                        send_get_answer(ke, rd, data_out, data_out_len);
+                        send_get_answer(ke, rd, CMD_D_GET_ANSWER, data_out, data_out_len);
                         
                         // Free out data
                         free(data_out);
@@ -447,7 +451,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             memcpy(data_out->key_data + tdd->key_length, data, data_len);
                             
                             // Send request answer
-                            send_get_answer(ke, rd, data_out, data_out_len);
+                            send_get_answer(ke, rd, CMD_D_GET_ANSWER, data_out, data_out_len);
                             
                             // Free out data
                             free(data_out);
@@ -456,6 +460,40 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                 }
                 break;
+                
+                // List keys request #131
+                case CMD_D_LIST:
+                {
+                    // Get type of request JSON - 1 or BINARY - 0
+                    const int data_type = get_data_type();
+                    
+                    // JSON data
+                    if(data_type) {
+                                            
+                        // Process the data
+                        size_t list_len;
+                        ksnet_stringArr argv;
+                        list_len = ksnTDBkeyList(ke->kf, &argv);
+                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                "LIST_LEN: %d\n", 
+                                list_len);
+                        
+                        // Prepare ANSWER data
+                        char *ar_str = ksnet_formatMessage("[ ");
+                        int i; for(i = 0; i < list_len; i++) {
+                            ar_str = ksnet_sformatMessage(ar_str, "%s%s{ \"key\":\"%s\" }", 
+                                    ar_str, i ? ", " : "", argv[i]);
+                        }
+                        ar_str = ksnet_sformatMessage(ar_str, "%s ]", ar_str);
+                        
+                        // Send request answer
+                        send_get_answer(ke, rd, CMD_D_LIST_ANSWER, ar_str, strlen(ar_str));
+                                                
+                        // Free used data
+                        free(ar_str);
+                        ksnet_stringArrFree(&argv);                        
+                    }
+                }
             }
         }
         break;
