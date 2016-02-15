@@ -40,12 +40,13 @@ LIBS += -pthread
 endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
-	  teoack teoackm teocque teostream teol0cli teol0cli_n teol0cli_n \
+	  teoack teoackm teocque teodb_ex teostream teol0cli teol0cli_n teol0cli_n \
 	  teol0cli_ns teosscr
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
 teocque_SOURCES = teocque.c
+teodb_ex_SOURCES = teodb_ex.c
 teolarge_SOURCES = teolarge.c
 teomulti_SOURCES = teomulti.c
 teomulti_t_SOURCES = teomulti_t.c
