@@ -313,20 +313,27 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Free JSON string
                         free(json_data_unesc);
                         
-                        // \todo Process the data
+                        // Process the data
                         int rv = -1;
-                        if(jp.key != NULL && jp.data != NULL) {
-                            rv = ksnTDBsetStr(ke->kf, jp.key, jp.data, 
+                        if(jp.key != NULL && jp.key[0]) {
+                            
+                            // Set/update data
+                            if(jp.data != NULL && jp.data[0])
+                                rv = ksnTDBsetStr(ke->kf, jp.key, jp.data, 
                                     strlen(jp.data) + 1);
+                            // Remove key
+                            else
+                                rv = ksnTDBdeleteStr(ke->kf, jp.key);
                         }
                         if(!rv)
                             ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
-                                "KEY: %s, DATA: %s, DB set status: %d\n", 
+                                "KEY: \"%s\", DATA: \"%s\", DB set status: %d\n", 
                                 jp.key, jp.data, rv);
                         else
                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
                                 "An error happened during write to DB, "
-                                "rv: %d ...\n", rv); 
+                                "KEY: \"%s\", DATA: \"%s\", "
+                                "rv: %d ...\n", jp.key, jp.data, rv); 
 
                         // Free parameters data
                         if(jp.key != NULL) free(jp.key);
@@ -442,16 +449,16 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                     tdd->key_data, data);
                                 
                                 // Create output data
-                                size_t data_out_len = sizeof(teo_db_data) + tdd->key_length + data_len;
-                                teo_db_data *data_out = malloc(data_out_len);
-                                data_out->key_length = tdd->key_length;
-                                data_out->data_length = data_len;
-                                data_out->id = tdd->id;
-                                memcpy(data_out->key_data, tdd->key_data, tdd->key_length);
-                                memcpy(data_out->key_data + tdd->key_length, data, data_len);
+                                size_t data_out_len;
+                                teo_db_data *data_out = prepare_request_data(
+                                    tdd->key_data, tdd->key_length, 
+                                    data, data_len, 
+                                    tdd->id, &data_out_len
+                                );
 
                                 // Send request answer
-                                send_get_answer(ke, rd, CMD_D_GET_ANSWER, data_out, data_out_len);
+                                send_get_answer(ke, rd, CMD_D_GET_ANSWER, 
+                                        data_out, data_out_len);
 
                                 // Free out data
                                 free(data_out);
@@ -466,7 +473,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                     "Wrong request DB packet size %d...\n", 
                                     rd->data_len);
                     }
-
                 }
                 break;
                 
@@ -476,17 +482,18 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Get type of request JSON - 1 or BINARY - 0
                     const int data_type = get_data_type();
                     
+                    // Process the data
+                    void *out_data;
+                    size_t out_data_len, list_len;
+                    ksnet_stringArr argv;
+                    list_len = ksnTDBkeyList(ke->kf, &argv);
+                    ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                            "LIST_LEN: %d\n", 
+                            list_len);
+                        
                     // JSON data
                     if(data_type) {
                                             
-                        // Process the data
-                        size_t list_len;
-                        ksnet_stringArr argv;
-                        list_len = ksnTDBkeyList(ke->kf, &argv);
-                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
-                                "LIST_LEN: %d\n", 
-                                list_len);
-                        
                         // Prepare ANSWER data
                         char *ar_str = ksnet_formatMessage("[ ");
                         int i; for(i = 0; i < list_len; i++) {
@@ -495,13 +502,49 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         }
                         ar_str = ksnet_sformatMessage(ar_str, "%s ]", ar_str);
                         
-                        // Send request answer
-                        send_get_answer(ke, rd, CMD_D_LIST_ANSWER, ar_str, strlen(ar_str));
-                                                
-                        // Free used data
-                        free(ar_str);
-                        ksnet_stringArrFree(&argv);                        
+                        out_data = ar_str;
+                        out_data_len = strlen(ar_str);
+                        
                     }
+                    
+                    // Binary
+                    else {
+                        
+                        // Parse Binary data structure
+                        teo_db_data *tdd = rd->data;
+                        
+                        // Prepare ANSWER data
+                        size_t ar_bin_len = sizeof(uint32_t), ptr = ar_bin_len;
+                        void *ar_bin = malloc(ar_bin_len);
+                        // Number of keys
+                        *(uint32_t *)ar_bin = list_len; 
+                        // List of keys with 0 at and
+                        int i; for(i = 0; i < list_len; i++) {
+                            size_t len = strlen(argv[i]) + 1;
+                            ar_bin_len += len;
+                            ar_bin = realloc(ar_bin, ar_bin_len);
+                            memcpy(ar_bin + ptr, argv[i], len);
+                            ptr = ar_bin_len;
+                        }
+                        
+                        // Create output data
+                        out_data = prepare_request_data(
+                            tdd->key_data, tdd->key_length, 
+                            ar_bin,ar_bin_len, 
+                            tdd->id, &out_data_len
+                        );
+                        
+                        // Free binary array
+                        free(ar_bin);                           
+                    }
+                    
+                    // Send request answer
+                    send_get_answer(ke, rd, CMD_D_LIST_ANSWER, out_data, 
+                            out_data_len);
+
+                    // Free used data
+                    free(out_data);
+                    ksnet_stringArrFree(&argv);                                            
                 }
             }
         }

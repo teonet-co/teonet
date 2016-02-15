@@ -42,7 +42,7 @@ endif
 bin_PROGRAMS = teovpn teodb teoweb
 
 teovpn_SOURCES = teovpn.c
-teodb_SOURCES = teodb.c embedded/jsmn/jsmn.c
+teodb_SOURCES = teodb.c embedded/jsmn/jsmn.c ../src/modules/teodb_com.c
 teoweb_SOURCES = teoweb.c \
 		 modules/teo_auth/teo_auth.c modules/teo_web/teo_web_conf.c \
 		 modules/teo_web/teo_web.c modules/teo_web/teo_ws.c \

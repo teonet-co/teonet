@@ -8,6 +8,7 @@
 #ifndef TEODB_COM_H
 #define TEODB_COM_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 /**
@@ -27,6 +28,9 @@ enum CMD_D {
     CMD_R_NONE          ///< Reserved
 };
 
+#pragma pack(push)
+#pragma pack(1)
+
 /**
  * Teo DB binary network structure
  */
@@ -39,11 +43,14 @@ typedef struct teo_db_data {
     
 } teo_db_data;
 
+#pragma pack(pop)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-
+teo_db_data *prepare_request_data(const void *key, size_t key_len, 
+        const void *data, size_t data_len, uint32_t id, size_t *tdd_len);
 
 
 #ifdef __cplusplus
