@@ -114,6 +114,7 @@ nobase_teonetinclude_HEADERS = \
     modules/subscribe.h \
     modules/tcp_proxy.h \
     modules/teodb.h \
+    modules/teodb_com.h \
     modules/vpn.h \
     utils/string_arr.h \
     utils/utils.h \

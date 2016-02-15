@@ -159,6 +159,7 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout,
         void *data) {
     
     ksnCQueData data_new, *cq = NULL; // Create CQue data buffer
+    if(!kq->id) kq->id++; // Skip ID = 0
     uint32_t id = kq->id++; // Get new ID
     size_t data_len; // Length of data
     

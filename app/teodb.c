@@ -38,44 +38,17 @@
 #include <string.h>
 
 #include "embedded/jsmn/jsmn.h"
+#include "modules/teodb_com.h"
 #include "ev_mgr.h"
 
 #define TDB_VERSION "0.0.1"
 #define APPNAME "\033[22;35m" "Teodb: " "\033[0m"
-
-/**
- * Teonet database API commands
- */
-enum CMD_D {
-
-                        ///< The TYPE_OF_REQUEST field: "JSON:" or empty
-                        ///< The ID field:  id of reques, it resend to user in answer
-    CMD_D_SET = 129,    ///< #129 Set data request:  TYPE_OF_REQUEST: { namespace, key, data, data_len } }
-    CMD_D_GET,          ///< #130 Get data request:  TYPE_OF_REQUEST: { namespace, key, ID } }
-    CMD_D_LIST,         ///< #131 List request:  TYPE_OF_REQUEST: { ID, namespace } }
-    CMD_D_GET_ANSWER,   ///< #132 Get data response: { namespace, key, data, data_len, ID } }
-    CMD_D_LIST_ANSWER,  ///< #133 List response:  [ key, key, ... ]
-    
-    // Reserved
-    CMD_R_NONE          ///< Reserved
-};
 
 // Constants
 #define DEFAULT_NAMESPACE "test"
 #define BINARY "BINARY"
 #define JSON "JSON"
 #define JSON_LEN 4
-
-/**
- * Teo DB binary network structure
- */
-typedef struct teo_db_data {
-    
-    uint8_t key_length;
-    uint32_t data_length;
-    char key_data[];    
-    
-} teo_db_data;
 
 /**
  * JSON request parameters structure
@@ -101,7 +74,6 @@ typedef struct json_param {
         "Got cmd: %d, type: %s, from: %s\n", \
         rd->cmd, data_type  ? JSON : BINARY, rd->from \
     )
-
 
 /**
  * Replace substring in string
@@ -370,13 +342,32 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Save data to DB
                         int rv = -1;
                         if(tdd->key_length && 
-                           tdd->key_length + tdd->data_length == rd->data_len) {
+                           tdd->key_length + tdd->data_length + 
+                                sizeof(teo_db_data) == rd->data_len) {
                             
                             rv = ksnTDBset(ke->kf, 
-                                tdd->key_data, tdd->key_length, 
-                                tdd->key_data + tdd->key_length, tdd->data_length);
+                                tdd->key_data, 
+                                tdd->key_length, 
+                                tdd->key_data + tdd->key_length, 
+                                tdd->data_length
+                            );
+                            
+                            if(!rv)
+                                ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                    "KEY: %s, DATA: %s, DB set status: %d\n", 
+                                    tdd->key_data, 
+                                    tdd->key_data + tdd->key_length, rv);
                         }
-                        if(!rv); // \todo check error if != 0
+                        else 
+                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                    "Wrong request DB packet size %d...\n", 
+                                    rd->data_len);                        
+                        
+                        if(rv) { // \todo check error if != 0
+                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                    "An error happened during write to DB, "
+                                    "rv: %d ...\n", rv);
+                        }
                     }
                 }
                 break;
@@ -435,27 +426,45 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Parse Binary data structure
                         teo_db_data *tdd = rd->data;
                         
-                        if(tdd->key_length && tdd->key_length == rd->data_len) {
+                        if(tdd->key_length && 
+                           tdd->key_length + tdd->data_length + 
+                                sizeof(teo_db_data) == rd->data_len) {
                             
                             // Get data from DB
                             size_t data_len;
                             char *data = ksnTDBget(ke->kf, tdd->key_data, 
                                     tdd->key_length, &data_len);
                             
-                            // Create output data
-                            size_t data_out_len = sizeof(teo_db_data) + tdd->key_length + data_len;
-                            teo_db_data *data_out = malloc(data_out_len);
-                            data_out->key_length = tdd->key_length;
-                            data_out->data_length = data_len;
-                            memcpy(data_out->key_data, tdd->key_data, tdd->key_length);
-                            memcpy(data_out->key_data + tdd->key_length, data, data_len);
-                            
-                            // Send request answer
-                            send_get_answer(ke, rd, CMD_D_GET_ANSWER, data_out, data_out_len);
-                            
-                            // Free out data
-                            free(data_out);
+                            if(data != NULL) {
+                                
+                                ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                    "Get value from DB: KEY: %s, DATA: %s\n", 
+                                    tdd->key_data, data);
+                                
+                                // Create output data
+                                size_t data_out_len = sizeof(teo_db_data) + tdd->key_length + data_len;
+                                teo_db_data *data_out = malloc(data_out_len);
+                                data_out->key_length = tdd->key_length;
+                                data_out->data_length = data_len;
+                                data_out->id = tdd->id;
+                                memcpy(data_out->key_data, tdd->key_data, tdd->key_length);
+                                memcpy(data_out->key_data + tdd->key_length, data, data_len);
+
+                                // Send request answer
+                                send_get_answer(ke, rd, CMD_D_GET_ANSWER, data_out, data_out_len);
+
+                                // Free out data
+                                free(data_out);
+                            }
+                            else 
+                                ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                    "The KEY %s not found in DB\n", 
+                                    tdd->key_data);
                         }
+                        else 
+                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                    "Wrong request DB packet size %d...\n", 
+                                    rd->data_len);
                     }
 
                 }
