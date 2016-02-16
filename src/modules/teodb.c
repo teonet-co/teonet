@@ -166,7 +166,7 @@ void *ksnTDBget(ksnTDBClass *kf, const void *key, size_t key_len,
 
     if(kf->k != NULL) {
 
-        long rc = pblKfFind(kf->k, /*PBLEQ*/ PBLLA, (void*) key, key_len,
+        long rc = pblKfFind(kf->k, PBLLA, (void*) key, key_len,
                 (void*) okey, &okey_len);
 
         if(rc >= 0) {
@@ -411,21 +411,52 @@ int ksnTDBkeyList(ksnTDBClass *kf, const char *key, ksnet_stringArr *argv) {
         char okey[KSN_BUFFER_SM_SIZE];
         size_t okey_len = KSN_BUFFER_SM_SIZE;        
                 
-        // Get first key
         long data_len; 
-        if((data_len = pblKfGetAbs(kf->k, 0, (void*) okey, &okey_len)) >= 0) {
+        
+        // No key present
+        if(key == NULL || key[0] == 0) {
             
-            // Create string array and add first key to string array
-            ksnet_stringArrAdd(argv, okey);
-            num_of_key++;
-            
-            // Get next keys and add it to string array
-            while((data_len = pblKfNext(kf->k, okey, &okey_len)) >= 0) {
-                
+            // Get first key
+            if((data_len = pblKfGetAbs(kf->k, 0, (void*) okey, &okey_len)) >= 0) {
+
+                // Add first key to string array
                 ksnet_stringArrAdd(argv, okey);
                 num_of_key++;
+
+                // Get next keys and add it to string array
+                while((data_len = pblKfNext(kf->k, okey, &okey_len)) >= 0) {
+
+                    ksnet_stringArrAdd(argv, okey);
+                    num_of_key++;
+                }
             }
         }
+        
+        //Key is present
+        else {
+            
+            // Get first key
+            size_t key_len = strlen(key) + 1;
+            if((data_len = pblKfFind (kf->k, PBLGE, (void *)key, key_len, (void *)okey, 
+                    &okey_len )) >= 0) {
+                
+                if(!strncmp(key, okey, key_len - 1)) {
+                    
+                    // Add first key to string array
+                    ksnet_stringArrAdd(argv, okey);
+                    num_of_key++;
+
+                    // Get next keys and add it to string array
+                    while((data_len = pblKfNext(kf->k, okey, &okey_len)) >= 0) {
+
+                        if(strncmp(key, okey, key_len - 1)) break;
+
+                        ksnet_stringArrAdd(argv, okey);
+                        num_of_key++;
+                    }
+                }
+            }
+        }                
     }
     
     return num_of_key;
