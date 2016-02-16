@@ -6,7 +6,7 @@
             <name>teonet</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc</cpp-extensions>
-            <header-extensions>h,l</header-extensions>
+            <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
@@ -15,6 +15,10 @@
             <confList>
                 <confElem>
                     <name>Default</name>
+                    <type>0</type>
+                </confElem>
+                <confElem>
+                    <name>Debug</name>
                     <type>0</type>
                 </confElem>
             </confList>
@@ -83,6 +87,7 @@
             <word>tuntap</word>
             <word>ubuntu</word>
             <word>udp</word>
+            <word>unescaped</word>
             <word>unsubscribe</word>
             <word>unsubscribed</word>
             <word>uuid</word>
