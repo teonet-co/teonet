@@ -60,6 +60,7 @@ typedef struct json_param {
     
     char *key;
     char *data;
+    char *id;
     
 } json_param;
 
@@ -203,8 +204,10 @@ static int json_parse(char *data, json_param *jp) {
     enum KEYS {
         KEY = 0x1,
         DATA = 0x2, // 0x4 0x8
-        ALL_KEYS = KEY | DATA
+        ID = 0x4, // 0x4 0x8
+        ALL_KEYS = KEY | DATA | ID
     };
+    const char *ID_TAG = "id";
     const char *KEY_TAG = "key";
     const char *DATA_TAG = "data";
     memset(jp, 0, sizeof(*jp)); // Set JSON parameters to NULL
@@ -228,6 +231,15 @@ static int json_parse(char *data, json_param *jp) {
             jp->data = strndup((char*)data + t[i+1].start, 
                     t[i+1].end-t[i+1].start);
             keys |= DATA;
+            i++;
+        }
+        
+        // Find ID tag
+        else if(!(keys & ID) && jsoneq(data, &t[i], ID_TAG) == 0) {
+            
+            jp->id = strndup((char*)data + t[i+1].start, 
+                    t[i+1].end-t[i+1].start);
+            keys |= ID;
             i++;
         }
     }
@@ -307,7 +319,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 "CMD_D_SET data: %s\n", json_data_unesc);
 
                         // Parse request
-                        json_param jp = { NULL, NULL };
+                        json_param jp = { NULL, NULL, NULL };
                         json_parse(json_data_unesc, &jp);
                         
                         // Free JSON string
@@ -336,6 +348,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 "rv: %d ...\n", jp.key, jp.data, rv); 
 
                         // Free parameters data
+                        if(jp.id != NULL) free(jp.id);
                         if(jp.key != NULL) free(jp.key);
                         if(jp.data != NULL) free(jp.data);
                     }
@@ -394,7 +407,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 "CMD_D_GET data: %s\n", json_data_unesc);
 
                         // Parse request
-                        json_param jp = { NULL, NULL };
+                        json_param jp = { NULL, NULL, NULL };
                         json_parse(json_data_unesc, &jp);
                         
                         // Free JSON string
@@ -423,6 +436,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         free(data_out);
 
                         // Free parameters data
+                        if(jp.id != NULL) free(jp.id);
                         if(jp.key != NULL) free(jp.key);
                         if(jp.data != NULL) free(jp.data);
                     }
@@ -481,12 +495,33 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 {
                     // Get type of request JSON - 1 or BINARY - 0
                     const int data_type = get_data_type();
+                    char *key = NULL;
+                    
+                    // JSON data
+                    if(data_type) {
+
+                        // Get JSON string from input data
+                        char *json_data_unesc = data_to_json_str(rd->data, rd->data_len);
+                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                    "CMD_D_LIST data: %s\n", json_data_unesc);
+                        
+                        // Parse request
+                        json_param jp = { NULL, NULL, NULL };
+                        json_parse(json_data_unesc, &jp);
+                        
+                        key = jp.key;
+                        
+                        // Free JSON string
+                        free(json_data_unesc);
+                        if(jp.id != NULL) free(jp.id);
+                        if(jp.data != NULL) free(jp.data);                        
+                    }
                     
                     // Process the data
                     void *out_data;
                     size_t out_data_len, list_len;
                     ksnet_stringArr argv;
-                    list_len = ksnTDBkeyList(ke->kf, &argv);
+                    list_len = ksnTDBkeyList(ke->kf, key, &argv);
                     ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
                             "LIST_LEN: %d\n", 
                             list_len);
@@ -544,6 +579,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                     // Free used data
                     free(out_data);
+                    if(key != NULL) free(key);
                     ksnet_stringArrFree(&argv);                                            
                 }
             }

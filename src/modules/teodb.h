@@ -55,7 +55,7 @@ int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const void *key,
 int ksnTDBdeleteNsStr(ksnTDBClass *kf, const char *namespace, const char *key);
 int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key, 
         size_t key_len);
-int ksnTDBkeyList(ksnTDBClass *kf, ksnet_stringArr *argv);
+int ksnTDBkeyList(ksnTDBClass *kf, const char *key, ksnet_stringArr *argv);
 
 #ifdef	__cplusplus
 }

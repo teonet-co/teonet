@@ -257,7 +257,7 @@ void test_3_5() {
     
     // Get list of keys
     ksnet_stringArr argv = ksnet_stringArrCreate();
-    int num_of_keys = ksnTDBkeyList(kf, &argv);
+    int num_of_keys = ksnTDBkeyList(kf, NULL, &argv);
     CU_ASSERT(num_of_keys == 3);
     
     // Check string array
