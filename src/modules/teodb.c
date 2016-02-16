@@ -396,11 +396,12 @@ int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key,
  * Get list of keys // \todo Add parameters: From - from key number, To - to key number
  * 
  * @param kf Pointer to ksnTDBClass
+ * @param key
  * @param argv Pointer to ksnet_stringArr
  * 
  * @return Number of 
  */
-int ksnTDBkeyList(ksnTDBClass *kf, ksnet_stringArr *argv) {
+int ksnTDBkeyList(ksnTDBClass *kf, const char *key, ksnet_stringArr *argv) {
     
     int num_of_key = 0;
     *argv = NULL;
