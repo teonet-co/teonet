@@ -1,7 +1,6 @@
 AM_CFLAGS = \
 	 -fPIC \
 	 -Wall \
-	 -g \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONE) \
@@ -9,6 +8,15 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I/usr/include/libev
+	
+## Debug info
+if DEBUG
+  AM_CFLAGS += -g3 -O0
+#  AM_CXXFLAGS += -g3 -O0
+else
+  AM_CFLAGS += -O2
+#  AM_CXXFLAGS += -O2
+endif	
 	
 if TEO_THREAD	
 AM_CFLAGS += -DTEO_THREAD
@@ -34,7 +42,7 @@ endif
 bin_PROGRAMS = teovpn teodb teoweb
 
 teovpn_SOURCES = teovpn.c
-teodb_SOURCES = teodb.c
+teodb_SOURCES = teodb.c embedded/jsmn/jsmn.c ../src/modules/teodb_com.c
 teoweb_SOURCES = teoweb.c \
 		 modules/teo_auth/teo_auth.c modules/teo_web/teo_web_conf.c \
 		 modules/teo_web/teo_web.c modules/teo_web/teo_ws.c \
