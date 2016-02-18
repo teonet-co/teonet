@@ -34,7 +34,7 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-static int cmd_l0_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -172,7 +172,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             break;
             
         case CMD_HOST_INFO:
-            processed = cmd_l0_host_info_cb(kco, rd);
+            processed = cmd_host_info_cb(kco, rd);
             break;
             
         case CMD_SUBSCRIBE:
@@ -487,7 +487,7 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param rd
  * @return 
  */
-static int cmd_l0_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     // Get host info
     size_t hid_len;
@@ -507,17 +507,27 @@ static int cmd_l0_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         // JSON data type
         if(data_type == 1) {
 
-            const char *teoAppType = teoGetAppType(ke);
+            // Combine types
+            int i; 
+            size_t ptr = strlen(hid->string_ar) + 1;
+            char *type_str = strdup(null_str);
+            for(i = 1; i < hid->string_ar_num; i++) {
+
+                type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"", 
+                        type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
+                ptr += strlen(hid->string_ar + ptr) + 1;                
+            }
             json_str = ksnet_formatMessage(
                 "{ "
                     "\"name\": \"%s\", "
-                    "\"type\": \"%s\", "
+                    "\"type\": [ %s ], "
                     "\"version\": \"%d.%d.%d\""
                 " }",
-                hid->string_ar,
-                teoAppType != NULL ? teoAppType : "teo-default",
-                hid->ver[0], hid->ver[1], hid->ver[2]
+                hid->string_ar, // Name
+                type_str, // App type and services     
+                hid->ver[0], hid->ver[1], hid->ver[2] // Version
             );
+            free(type_str);
 
             data_out = json_str;
             data_out_len = strlen(json_str) + 1;

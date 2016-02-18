@@ -56,6 +56,8 @@ ksnet_stringArr getIPs(ksnet_cfg *conf);
 int ip_is_private(char *ip);
 int ip_to_array(char* ip, uint8_t *arr);
 
+size_t get_num_of_tags(char *data, size_t data_length);
+
 void KSN_SET_TEST_MODE(int test_mode);
 int KSN_GET_TEST_MODE();
 

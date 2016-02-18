@@ -78,6 +78,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             
             switch(num) {
                 
+                // After 5 sec
                 case 1: {
                     
                     // Add callback to queue and wait timeout after 5 sec ...
@@ -86,6 +87,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 } 
                 break;
                     
+                // After 25 sec
                 case 5: {
                     
                     // Add callback to queue and wait success result ...
@@ -95,6 +97,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 }
                 break;
                     
+                // After 35 sec
                 case 7: {
                     
                     // Execute callback queue to make success result
@@ -102,6 +105,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 }
                 break;
                 
+                // After 50 sec
                 case 10: 
                     
                     // Stop teonet to finish this Example

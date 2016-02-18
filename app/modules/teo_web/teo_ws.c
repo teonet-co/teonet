@@ -27,7 +27,6 @@ static ssize_t teoWSLNullsend(teoWSClass *kws, void *nc_p, int cmd,
 static int teoWSprocessMsg(teoWSClass *kws, void *nc, void *data, size_t data_length);
 
 static void send_auth_answer(void *nc_p, char* err, char *result);
-static size_t get_num_of_tags(char *data, size_t data_length);
 
 /**
  * Pointer to mg_connection structure
@@ -739,29 +738,4 @@ static void send_auth_answer(void *nc_p, char* err, char *result) {
     char data[data_json_len + 1];
     data_json_len = snprintf(data, data_json_len, data_json, result);
     mg_send_websocket_frame(nc_p, WEBSOCKET_OP_TEXT, data, data_json_len);    
-}
-
-/**
- * Calculate number of tags in json string
- * 
- * @param data
- * @param data_length
- * @return 
- */
-static size_t get_num_of_tags(char *data, size_t data_length) {
-    
-    int i = 0;
-    size_t num_of_tags = 0;
-    
-    for(i = 0; i < data_length; i++) 
-        if(data[i] == ':') 
-            num_of_tags++;
-    
-//    printf("number of json tags in request: %d, request: %s\n", 
-//            (int) num_of_tags, data);
-
-    //if(num_of_tags) 
-        num_of_tags++;
-    
-    return num_of_tags * 4;
 }

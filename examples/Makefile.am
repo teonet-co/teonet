@@ -1,7 +1,6 @@
 AM_CFLAGS = \
 	 -fPIC \
 	 -Wall \
-	 -g \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
@@ -9,6 +8,15 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I/usr/include/libev
+
+## Debug info
+if DEBUG
+  AM_CFLAGS += -g3 -O0
+#  AM_CXXFLAGS += -g3 -O0
+else
+  AM_CFLAGS += -O2
+#  AM_CXXFLAGS += -O2
+endif
 	
 if TEO_THREAD	
 AM_CFLAGS += -DTEO_THREAD
@@ -32,12 +40,13 @@ LIBS += -pthread
 endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
-	  teoack teoackm teocque teostream teol0cli teol0cli_n teol0cli_n \
+	  teoack teoackm teocque teodb_ex teostream teol0cli teol0cli_n teol0cli_n \
 	  teol0cli_ns teosscr
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
 teocque_SOURCES = teocque.c
+teodb_ex_SOURCES = teodb_ex.c ../src/modules/teodb_com.c
 teolarge_SOURCES = teolarge.c
 teomulti_SOURCES = teomulti.c
 teomulti_t_SOURCES = teomulti_t.c

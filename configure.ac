@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([teonet], [0.1.32], [kirill@scherba.ru])
+AC_INIT([teonet], [0.1.33], [kirill@scherba.ru])
 AC_CONFIG_SRCDIR([src/teonet.c])
 AC_CONFIG_HEADERS([src/config/config.h])
 

@@ -737,12 +737,12 @@ void test_2_9() {
     // Start test UDP sender
     fd_s = bind_udp(&port_s);
     CU_ASSERT_FATAL(fd_s > 0);
-    printf("bind s OK ...\n");
+    printf("bind s OK ...");
     
     // Start test UDP receiver
     fd_r = bind_udp(&port_r);
     CU_ASSERT_FATAL(fd_r > 0);
-    printf("bind r OK ...\n");
+    printf("bind r OK ...");
     
     // Fill sender address 
     if(inet_aton(addr_str, &addr_s.sin_addr) == 0) CU_ASSERT(1 == 0);

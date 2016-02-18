@@ -564,7 +564,7 @@ static int ksnLNullStart(ksnLNullClass *kl) {
                     ANSI_LIGHTCYAN, ANSI_NONE,
                     fd, port_created);
 
-            kev->ksn_cfg.tcp_port = port_created;
+            kev->ksn_cfg.l0_tcp_port = port_created;
             kl->fd = fd;
         }
     }
@@ -632,16 +632,19 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
             ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
         #endif
 
+        ksnCorePacketData *rds = rd;
+        
         // Process command
-        rd->cmd = data->cmd;
-        rd->from = data->from;
-        rd->from_len = data->from_length;
-        rd->data = data->from + data->from_length;
-        rd->data_len = data->data_length;
-        rd->l0_f = 1;
+        rds->cmd = data->cmd;
+        rds->from = data->from;
+        rds->from_len = data->from_length;
+        rds->data = memdup(data->from + data->from_length, data->data_length);
+        rds->data_len = data->data_length;
+        rds->l0_f = 1;
 
         // Execute L0 client command
-        retval = ksnCommandCheck(ke->kc->kco, rd);
+        retval = ksnCommandCheck(ke->kc->kco, rds);
+        if(retval) free(rds->data);  // \todo How to free the rds->data if not processed
     }
     // Wrong command
     else {

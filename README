@@ -6,6 +6,11 @@ git clone git@gitlab.ksproject.org:teonet/teonet.git
 cd teonet
 git submodule update --init
 
+* at error: "SSL certificate problem: unable to get local issuer 
+certificate while accessing https ..." execute git command:
+
+    git config --global http.sslVerify false
+
 ## First time got sources from subversion repository
 
 ./autogen.sh
