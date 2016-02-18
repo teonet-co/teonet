@@ -564,7 +564,7 @@ static int ksnLNullStart(ksnLNullClass *kl) {
                     ANSI_LIGHTCYAN, ANSI_NONE,
                     fd, port_created);
 
-            kev->ksn_cfg.tcp_port = port_created;
+            kev->ksn_cfg.l0_tcp_port = port_created;
             kl->fd = fd;
         }
     }

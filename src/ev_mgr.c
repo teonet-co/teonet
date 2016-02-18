@@ -460,18 +460,19 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
     
     // String arrays members
     const uint8_t string_ar_num = 2;
-    char *name = ksnetEvMgrGetHostName(ke);
+    const char *name = ksnetEvMgrGetHostName(ke);
     size_t name_len = strlen(name) + 1;
-    char *type = "";
-    size_t type_len = strlen(type) + 1;
+    const char *app_type = teoGetAppType(ke); 
+    if(app_type == NULL) app_type = "teo-default";
+    size_t type_len = strlen(app_type) + 1;
     
     // Create host info data 
     size_t string_ar_len = name_len + type_len;
     *hd_len = sizeof(host_info_data) + string_ar_len;
     host_info_data* hd = malloc(*hd_len);
-    memset(hd, 0, *hd_len);
-    
     if(hd != NULL) {
+        
+        memset(hd, 0, *hd_len);    
         
         // Fill version array data (split string version to 3 digits array)
         {
@@ -499,7 +500,27 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
         size_t ptr = 0;
         hd->string_ar_num = string_ar_num;
         memcpy(hd->string_ar + ptr, name, name_len); ptr += name_len;
-        memcpy(hd->string_ar + ptr, type, type_len); ptr += type_len;
+        memcpy(hd->string_ar + ptr, app_type, type_len); ptr += type_len;
+        
+        // Add fill services
+        // L0 server
+        if(ke->ksn_cfg.l0_allow_f) {
+            const char *l0 = "teo-l0";
+            size_t l0_len = strlen(l0) + 1;
+            *hd_len += l0_len;
+            hd = realloc(hd, *hd_len);
+            memcpy(hd->string_ar + ptr, l0, l0_len);
+            hd->string_ar_num++;
+        }
+        // VPN
+        if(ke->ksn_cfg.vpn_connect_f) {
+            const char *vpn = "teo-vpn";
+            size_t vpn_len = strlen(vpn) + 1;
+            *hd_len += vpn_len;
+            hd = realloc(hd, *hd_len);
+            memcpy(hd->string_ar + ptr, vpn, vpn_len);
+            hd->string_ar_num++;
+        }
     }
     
     return hd;
