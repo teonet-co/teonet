@@ -36,11 +36,71 @@ extern const char *null_str;
  */
 typedef enum ksnetEvMgrEvents {
 
-    EV_K_STARTED,       ///< #0  Calls immediately after event manager starts
-    EV_K_STOPPED_BEFORE,///< #1  Calls before event manager stopped
-    EV_K_STOPPED,       ///< #2  Calls after event manager stopped
-    EV_K_CONNECTED,     ///< #3  New peer connected to host
-    EV_K_DISCONNECTED,  ///< #4  A peer was disconnected from host
+    /**
+     * #0 Calls immediately after event manager starts
+     * 
+     * Parameters of Teonet Events callback function:
+     * 
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param event This event
+     * @param data NULL
+     * @param data_len 0
+     * @param user_data NULL
+     */
+    EV_K_STARTED,       // #0  Calls immediately after event manager starts
+            
+    /**
+     * #1 Calls before event manager stopped
+     * 
+     * Parameters of Teonet Events callback function:
+     * 
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param event This event
+     * @param data NULL
+     * @param data_len 0
+     * @param user_data NULL
+     */            
+    EV_K_STOPPED_BEFORE,// #1  Calls before event manager stopped
+            
+    /**
+     * #2  Calls after event manager stopped
+     * 
+     * Parameters of Teonet Events callback function:
+     * 
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param event This event
+     * @param data NULL
+     * @param data_len 0
+     * @param user_data NULL
+     */                        
+    EV_K_STOPPED,       // #2  Calls after event manager stopped
+            
+    /**
+     * #3 New peer connected to host event
+     * 
+     * Parameters of Teonet Events callback function:
+     * 
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param event This event
+     * @param data Pointer to ksnCorePacketData
+     * @param data_len Size of ksnCorePacketData
+     * @param user_data NULL
+     */
+    EV_K_CONNECTED,     // #3  New peer connected to host
+            
+    /**
+     * #4  A peer was disconnected from host
+     * 
+     * Parameters of Teonet Events callback function:
+     * 
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param event This event
+     * @param data Pointer to ksnCorePacketData
+     * @param data_len Size of ksnCorePacketData
+     * @param user_data NULL
+     */
+    EV_K_DISCONNECTED,  // #4  A peer was disconnected from host
+            
     EV_K_RECEIVED,      ///< #5  This host Received a data
     EV_K_RECEIVED_WRONG,///< #6  Wrong packet received
     EV_K_RECEIVED_ACK,  ///< #7  This host Received ACK to sent data
@@ -51,7 +111,7 @@ typedef enum ksnetEvMgrEvents {
     EV_K_ASYNC,         ///< #12 Async event           
     EV_K_TERM_STARTED,  ///< #13 After terminal started (in place to define commands 
     /**
-     * Teonet Callback QUEUE event. 
+     * #14 Teonet Callback QUEUE event
      * 
      * Parameters of Teonet Events callback function:
      * 
@@ -62,7 +122,7 @@ typedef enum ksnetEvMgrEvents {
      * @param user_data Pointer to integer with type of this event: 
      *                  1 - success; 0 - timeout
      */
-    EV_K_CQUE_CALLBACK,             ///< #14 
+    EV_K_CQUE_CALLBACK,             // #14 Teonet Callback QUEUE event
             
     EV_K_STREAM_CONNECTED,          ///< #15 After stream connected
     EV_K_STREAM_CONNECT_TIMEOUT,    ///< #16 Connection timeout
