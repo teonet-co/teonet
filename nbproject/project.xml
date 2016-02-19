@@ -76,7 +76,6 @@
             <word>tcp</word>
             <word>teo</word>
             <word>teocli</word>
-            <word>teodb</word>
             <word>teonet</word>
             <word>teostream</word>
             <word>teotproxy</word>
@@ -87,7 +86,6 @@
             <word>tuntap</word>
             <word>ubuntu</word>
             <word>udp</word>
-            <word>unescaped</word>
             <word>unsubscribe</word>
             <word>unsubscribed</word>
             <word>uuid</word>
