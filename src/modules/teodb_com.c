@@ -16,7 +16,7 @@
  * @param key Key
  * @param key_len Key length
  * @param data Pointer to value
- * @param data Value length
+ * @param data_len Value length
  * @param id Request ID
  * @param tdd_len Pointer to variable to hold result packet length
  *
