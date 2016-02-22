@@ -124,12 +124,11 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 0:
           if(!strcmp(loptions[option_index].name, "app_name")) {
-              printf("Name of this application is: %s\n\n",
-                     conf->app_name);
+              printf("Name of this application is: %s\n\n", conf->app_name);
               exit(EXIT_SUCCESS);
           }
 
-          else if(!strcmp(loptions[option_index].name, "app_desc")) {
+          else if(!strcmp(loptions[option_index].name, "app_description")) {
               printf("Application description:\n%s\n\n",
                      conf->app_description);
               exit(EXIT_SUCCESS);
