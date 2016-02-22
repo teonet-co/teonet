@@ -9,6 +9,8 @@
  * TCP client/server based on teonet event manager
  */
 
+// \todo Closing client does not processed by server (does not disconnect)
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,35 +45,6 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents);
 #define ev_ksnet_io_stop(loop, watcher) \
     ev_io_stop (loop, watcher)
 
-// Moved to teonet_l0_client.c
-///**
-// * Set TCP NODELAY option
-// * 
-// * @param ke Pointer toksnetEvMgrClass
-// * @param fd TCP socket descriptor
-// * 
-// * @return Result of setting. Success if >= 0.
-// */
-//int set_tcp_nodelay(void* ke, int fd) {
-//
-//    int flag = 1;
-//    int result = setsockopt(fd,           // socket affected
-//                         IPPROTO_TCP,     // set option at TCP level
-//                         TCP_NODELAY,     // name of option
-//                         (char *) &flag,  // the cast is historical cruft
-//                         sizeof(int));    // length of option value
-//    if (result < 0) {
-//        
-//        #ifdef DEBUG_KSNET
-//        ksnet_printf(& ((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG, 
-//            "%sTCP Server:%s "
-//            "Set TCP_NODELAY of fd %d error %s\n", 
-//            ANSI_MAGENTA, ANSI_NONE, ANSI_RED, fd, ANSI_NONE);
-//        #endif
-//    }
-//    
-//    return result;
-//}
 
 /******************************************************************************/
 /* TCP Client/Server module methods                                           */
@@ -143,6 +116,7 @@ struct ev_io *ksnTcpCb(
 
 /**
  * Stop receive client data callback 
+ * 
  * @param loop
  * @param watcher
  * @param close_fl
@@ -398,7 +372,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 //            ksnet_printf(&kev->ksn_cfg, ERROR_M, 
 //                    "%sTCP Server:%s socket error\n", 
 //                    ANSI_MAGENTA, ANSI_NONE);
-            ksn_prints(kev, MODULE, ERROR_M, "socket error");
+            ksn_puts(kev, MODULE, ERROR_M, "create socket error");
             return -1;
         }
         #else
@@ -407,7 +381,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
         {
 //            ksnet_printf(&kev->ksn_cfg, ERROR_M, "%sTCP Server:%s: socket error", 
 //                    ANSI_MAGENTA, ANSI_NONE);
-            ksn_printf(kev, MODULE, ERROR_M, "socket error");
+            ksn_puts(kev, MODULE, ERROR_M, "socket error");
             return -1;
         }
         #endif
@@ -418,7 +392,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 //            ksnet_printf(&kev->ksn_cfg, ERROR_M,
 //                    "%sTCP Server:%s can't set socket options\n", 
 //                    ANSI_MAGENTA, ANSI_NONE);
-            ksn_prints(kev, MODULE, ERROR_M, "can't set socket options");
+            ksn_puts(kev, MODULE, ERROR_M, "can't set socket options");
             return -1;
         }
 
@@ -441,9 +415,9 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 //                    "%sTCP Server:%s Can't bind on port %d, "
 //                    "try next port number ...%s\n", 
 //                    ANSI_MAGENTA, ANSI_GREY, *port, ANSI_NONE);
-            ksn_printf(kev, MODULE, ERROR_M,
-                    "can't bind on port %d, try next port number ...%s\n", 
-                    *port, ANSI_NONE);
+            ksn_printf(kev, MODULE, MESSAGE,
+                    "%s""can't bind on port %d, trying next port number ...%s\n", 
+                    ANSI_DARKGREY, *port, ANSI_NONE);
             close(sd);
             if(try_port) (*port)++;
         }
@@ -455,8 +429,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 //        ksnet_printf(&kev->ksn_cfg, ERROR_M,
 //                "%sTCP Server:%s Listen on port %d error\n", 
 //                ANSI_MAGENTA, ANSI_NONE, *port);
-        ksn_printf(kev, MODULE, ERROR_M,
-                "listen on port %d error\n", *port);
+        ksn_printf(kev, MODULE, ERROR_M, "listen on port %d error\n", *port);
         return -1;
     }
         
@@ -533,7 +506,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
 //        ksnet_printf(&ke->ksn_cfg, ERROR_M, 
 //                "%sTCP Server:%s accept, accept error\n",
 //                ANSI_MAGENTA, ANSI_NONE);
-        ksn_prints(ke, MODULE, ERROR_M, "accept, accept error");
+        ksn_puts(ke, MODULE, ERROR_M, "accept error");
         return;
     }
 
@@ -590,7 +563,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
 //        client_sd, client_family == AF_INET6 ? "v6" : "" , client_ip
 //    );
     ksn_printf(ke, MODULE, DEBUG,
-        "successfully connected with client (%d), from IP%s: %s.\n",
+        "successfully connected with client (%d), from IP%s: %s\n",
         client_sd, client_family == AF_INET6 ? "v6" : "" , client_ip
     );
     //ksnet_printf(&ke->ksn_cfg, DEBUG, "TCP Server: %d client(s) connected.\n", total_clients);
@@ -614,6 +587,9 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
 /* TCP Client methods                                                         */
 /*                                                                            */
 /******************************************************************************/
+
+#undef MODULE
+#define MODULE _ANSI_MAGENTA "tcp_client" _ANSI_NONE
 
 /**
  * Create TCP client and connect to server
@@ -644,7 +620,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 //        ksnet_printf(&kev->ksn_cfg, ERROR_M, 
 //                "%sTCP client:%s Client-socket() error\n", 
 //                ANSI_LIGHTMAGENTA, ANSI_NONE);
-        ksn_prints(kev, MODULE, ERROR_M, "client-socket() error");
+        ksn_puts(kev, MODULE, ERROR_M, "client-socket() error");
         return(-1);
     }
     else {
@@ -652,7 +628,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 //        ksnet_printf(&kev->ksn_cfg, DEBUG, 
 //                "%sTCP client:%s Client-socket() OK\n", 
 //                ANSI_LIGHTMAGENTA, ANSI_NONE);
-        ksn_prints(kev, MODULE, DEBUG, "client-socket() OK");
+        ksn_puts(kev, MODULE, DEBUG, "client-socket() OK");
         #endif
     }
 
@@ -700,7 +676,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 //        ksnet_printf(&kev->ksn_cfg, ERROR_M, 
 //                "%sTCP client:%s Client-connect() error\n", 
 //                ANSI_LIGHTMAGENTA, ANSI_NONE);
-        ksn_prints(kev, MODULE, ERROR_M, "client-connect() error");
+        ksn_puts(kev, MODULE, ERROR_M, "client-connect() error");
         
         close(sd);
         return(-3);
@@ -710,7 +686,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 //        ksnet_printf(&kev->ksn_cfg, DEBUG, 
 //                "%sTCP client:%s Connection established...\n", 
 //                ANSI_LIGHTMAGENTA, ANSI_NONE);
-        ksn_prints(kev, MODULE, DEBUG, "connection established ...");
+        ksn_puts(kev, MODULE, DEBUG, "connection established ...");
         #endif
     }
 

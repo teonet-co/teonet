@@ -29,18 +29,29 @@ typedef enum ksnet_printf_type {
 
 } ksnet_printf_type;
 
-#define ksn_printf_type(type) \
+#define _ksn_printf_type_(type) \
    (type == MESSAGE ? "MESSAGE" : \
     type == ERROR_M ? "ERROR" : \
     type == DEBUG ? "DEBUG" : \
     type == DEBUG_VV ? "DEBUG_VV" : \
     type == CONNECT ? "CONNECT" : "DISPLAY")
 
+#define _ksn_printf_format_(format) "%s %s:" _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " format
+
 #define ksn_printf(ke, module, type, format, ...) \
-    ksnet_printf(&ke->ksn_cfg, type, "%s %s:%s:(%s:%d): " format, \
-        ksn_printf_type(type), \
+    ksnet_printf(&ke->ksn_cfg, type, \
+        _ksn_printf_format_(format), \
+        _ksn_printf_type_(type), \
         module == NULL ? ke->ksn_cfg.app_name : module, \
         __func__, __FILE__, __LINE__, __VA_ARGS__)
+
+#define ksn_puts(ke, module, type, format) \
+    ksnet_printf(&ke->ksn_cfg, type, \
+        _ksn_printf_format_(format) "\n", \
+        _ksn_printf_type_(type), \
+        module == NULL ? ke->ksn_cfg.app_name : module, \
+        __func__, __FILE__, __LINE__)
+
 
 #ifdef	__cplusplus
 extern "C" {
