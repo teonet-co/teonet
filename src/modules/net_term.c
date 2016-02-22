@@ -18,6 +18,8 @@
 #include "net_cli.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_LIGHTBLUE "terminal_server" _ANSI_NONE
+
 #ifdef M_ENAMBE_TERM
 
 // Local functions
@@ -54,10 +56,14 @@ ksnTermClass *ksnTermInit(void *ke) {
     if((fd = ksnTcpServerCreate(((ksnetEvMgrClass*)ke)->kt, port, ksnet_accept_cb, kter,
         &port_created)) > 0) {
     
-        ksnet_printf(&kev->ksn_cfg, MESSAGE, 
-                "%sTerminal server:%s "
+//        ksnet_printf(&kev->ksn_cfg, MESSAGE, 
+//                "%sTerminal server:%s "
+//                "Terminal server started at port %d, socket fd %d\n", 
+//                ANSI_LIGHTBLUE, ANSI_NONE, port_created, fd);
+        ksn_printf(kev, MODULE, MESSAGE, 
                 "Terminal server started at port %d, socket fd %d\n", 
-                ANSI_LIGHTBLUE, ANSI_NONE, port_created, fd);
+                port_created, fd);
+        
     }
     
     return kter;
