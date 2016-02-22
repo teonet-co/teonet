@@ -28,6 +28,11 @@ extern "C" {
 char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         int app_argc, char** app_argv, int show_opt);
 
+void ksnet_optSetApp(ksnet_cfg *conf,
+                     const char* app_name,
+                     const char* app_prompt,
+                     const char* app_description);
+
 #ifdef	__cplusplus
 }
 #endif

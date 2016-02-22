@@ -134,6 +134,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ksnet_configInit(&ke->ksn_cfg, ke); // Set configuration default
     if(port) ke->ksn_cfg.port = port; // Set port default
     char **argv_ret = NULL;
+    ksnet_optSetApp(&ke->ksn_cfg, basename(argv[0]), basename(argv[0]), null_str);
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)

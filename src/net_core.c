@@ -32,6 +32,9 @@ typedef int socklen_t;
 const char *localhost = "127.0.0.1";
 #define PACKET_HEADER_ADD_SIZE 2    // Sizeof from length + Sizeof command
 
+#define MODULE _ANSI_GREEN "net_core" _ANSI_GREY
+#define kev ((ksnetEvMgrClass *)ksn_cfg->ke)
+
 // Local functions
 void host_cb(EV_P_ ev_io *w, int revents);
 int ksnCoreBind(ksnCoreClass *kc);
@@ -207,12 +210,16 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
 
         if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
-            ksnet_printf(ksn_cfg, MESSAGE, 
-                    "%sNet core:%s Can't bind on port %d, "
-                    "try next port number ...%s\n", 
-                    ANSI_GREEN, ANSI_GREY,
-                    *port, 
-                    ANSI_NONE);
+//            ksnet_printf(ksn_cfg, MESSAGE, 
+//                    "%sNet core:%s Can't bind on port %d, "
+//                    "try next port number ...%s\n", 
+//                    ANSI_GREEN, ANSI_GREY,
+//                    *port, 
+//                    ANSI_NONE);
+            ksnPrintf(kev, MODULE, MESSAGE,
+                    "Can't bind on port %d, try next port number ...\n", 
+                    *port);
+                    
             (*port)++;
             if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
             else return -2;
@@ -235,9 +242,11 @@ int ksnCoreBind(ksnCoreClass *kc) {
     ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
     
     #ifdef DEBUG_KSNET
-    ksnet_printf(ksn_cfg, MESSAGE, 
-                    "%sNet core:%s Create UDP client/server at port %d ...\n", 
-                    ANSI_GREEN, ANSI_NONE, kc->port);
+//    ksnet_printf(ksn_cfg, MESSAGE, 
+//                    "%sNet core:%s Create UDP client/server at port %d ...\n", 
+//                    ANSI_GREEN, ANSI_NONE, kc->port);
+    ksnPrintf(kev, MODULE, MESSAGE, 
+            "Create UDP client/server at port %d ...\n", kc->port);
     #endif
     
     if((fd = ksnCoreBindRaw(ksn_cfg, &kc->port)) > 0) {

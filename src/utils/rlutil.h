@@ -197,6 +197,25 @@ enum {
     NONE
 };
 
+#define _ANSI_NONE  "\033[0m"
+#define _ANSI_CLS  "\033[2J"
+#define _ANSI_BLACK  "\033[22;30m"
+#define _ANSI_RED  "\033[22;31m"
+#define _ANSI_GREEN  "\033[22;32m"
+#define _ANSI_BROWN  "\033[22;33m"
+#define _ANSI_BLUE  "\033[22;34m"
+#define _ANSI_MAGENTA  "\033[22;35m"
+#define _ANSI_CYAN  "\033[22;36m"
+#define _ANSI_GREY  "\033[22;37m"
+#define _ANSI_DARKGREY  "\033[01;30m"
+#define _ANSI_LIGHTRED  "\033[01;31m"
+#define _ANSI_LIGHTGREEN  "\033[01;32m"
+#define _ANSI_YELLOW  "\033[01;33m"
+#define _ANSI_LIGHTBLUE  "\033[01;34m"
+#define _ANSI_LIGHTMAGENTA  "\033[01;35m"
+#define _ANSI_LIGHTCYAN  "\033[01;36m"
+#define _ANSI_WHITE  "\033[01;37m"
+
 /**
  * Consts: ANSI color strings
  *

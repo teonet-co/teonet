@@ -20,18 +20,32 @@
  */
 typedef enum ksnet_printf_type {
 
-            MESSAGE = 0,
-            ERROR_M,
-            DEBUG,
-            DEBUG_VV,
-            CONNECT
+            MESSAGE = 0,  ///< Regular message
+            ERROR_M,      ///< Error message
+            DEBUG,        ///< Debug message (normal)
+            DEBUG_VV,     ///< Debug message (extra)
+            CONNECT,      ///< Connect or Auth message 
+            DISPLAY       ///< Regular message (display only)
 
 } ksnet_printf_type;
+
+#define ksnPrintfType(type) \
+   (type == MESSAGE ? "MESSAGE" : \
+    type == ERROR_M ? "ERROR" : \
+    type == DEBUG ? "DEBUG" : \
+    type == DEBUG_VV ? "DEBUG_VV" : \
+    type == CONNECT ? "CONNECT" : "DISPLAY")
+
+#define ksnPrintf(ke, module, type, format, ...) \
+    ksnet_printf(&ke->ksn_cfg, type, "%s %s:%s:(%s:%d): " format, \
+        ksnPrintfType(type), \
+        module == NULL ? ke->ksn_cfg.app_name : module, \
+        __func__, __FILE__, __LINE__, __VA_ARGS__)
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
-
+    
 int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...);
 char *ksnet_formatMessage(const char *fmt, ...);
 char *ksnet_sformatMessage(char *str_to_free, const char *fmt, ...);
@@ -42,6 +56,7 @@ char *getRandomHostName(void); // Implemented in enet.c module
 void *memdup(const void* d, size_t s);
 char *trim(char *str);
 char *trimlf(char *str);
+char *removeTEsc(char *str);
 //char* itoa(int ival);
 int calculate_lines(char *str);
 int inarray(int val, const int *arr, int size);

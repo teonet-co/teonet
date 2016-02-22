@@ -40,6 +40,8 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 const char *JSON = "JSON";
 const char *BINARY = "BINARY";
 
+#define MODULE _ANSI_LIGHTBLUE "Net command" _ANSI_NONE
+
 /**
  * Initialize ksnet command class
  *
@@ -680,15 +682,23 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Show command message
         #ifdef DEBUG_KSNET
-        ksnet_printf(& ke->ksn_cfg, DEBUG,
-            "%sNet command:%s "
-            "received Echo answer command => from '%s': %d byte data: "
+//        ksnet_printf(& ke->ksn_cfg, DEBUG,
+//            "%sNet command:%s "
+//            "received Echo answer command => from '%s': %d byte data: "
+//            "%s, %.3f ms\n",
+//            ANSI_LIGHTBLUE, ANSI_NONE,
+//            rd->from,        // from
+//            rd->data_len,    // command data length
+//            rd->data,        // commands data
+//            triptime
+//        );
+        ksnPrintf(ke, MODULE, DEBUG,
+            "received Echo answer command from '%s': %d byte data: "
             "%s, %.3f ms\n",
-            ANSI_LIGHTBLUE, ANSI_NONE,
             rd->from,        // from
             rd->data_len,    // command data length
             rd->data,        // commands data
-            triptime
+            triptime         // trip time
         );
         #endif
     }
