@@ -216,7 +216,7 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
 //                    ANSI_GREEN, ANSI_GREY,
 //                    *port, 
 //                    ANSI_NONE);
-            ksnPrintf(kev, MODULE, MESSAGE,
+            ksn_printf(kev, MODULE, MESSAGE,
                     "Can't bind on port %d, try next port number ...\n", 
                     *port);
                     
@@ -245,7 +245,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
 //    ksnet_printf(ksn_cfg, MESSAGE, 
 //                    "%sNet core:%s Create UDP client/server at port %d ...\n", 
 //                    ANSI_GREEN, ANSI_NONE, kc->port);
-    ksnPrintf(kev, MODULE, MESSAGE, 
+    ksn_printf(kev, MODULE, MESSAGE, 
             "Create UDP client/server at port %d ...\n", kc->port);
     #endif
     
