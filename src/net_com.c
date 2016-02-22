@@ -695,8 +695,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 //            triptime
 //        );
         ksn_printf(ke, MODULE, DEBUG,
-            "echo answer command received from \"%s\", %d byte data: "
-            "\"%s\", %.3f ms\n",
+            "got echo answer from \"%s\", %d byte data: \"%s\", %.3f ms\n",
             rd->from,        // from
             rd->data_len,    // command data length
             rd->data,        // commands data
