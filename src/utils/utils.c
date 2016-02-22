@@ -85,7 +85,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             show_it = 1;
             break;
             
-        case DISPLAY:
+        case DISPLAY_M:
             priority = LOG_NOTICE;
             show_it = 1;
             show_log = 0;

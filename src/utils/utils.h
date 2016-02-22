@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#include "rlutil.h"
 #include "string_arr.h"
 #include "config/conf.h"
 
@@ -25,7 +26,7 @@ typedef enum ksnet_printf_type {
             DEBUG,        ///< Debug message (normal)
             DEBUG_VV,     ///< Debug message (extra)
             CONNECT,      ///< Connect or Auth message 
-            DISPLAY       ///< Regular message (display only)
+            DISPLAY_M     ///< Regular message (display only)
 
 } ksnet_printf_type;
 
@@ -39,17 +40,17 @@ typedef enum ksnet_printf_type {
 #define _ksn_printf_format_(format) "%s %s:" _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " format
 
 #define ksn_printf(ke, module, type, format, ...) \
-    ksnet_printf(&ke->ksn_cfg, type, \
+    ksnet_printf(&((ke)->ksn_cfg), type, \
         _ksn_printf_format_(format), \
         _ksn_printf_type_(type), \
-        module == NULL ? ke->ksn_cfg.app_name : module, \
+        module == NULL ? (ke)->ksn_cfg.app_name : module, \
         __func__, __FILE__, __LINE__, __VA_ARGS__)
 
 #define ksn_puts(ke, module, type, format) \
-    ksnet_printf(&ke->ksn_cfg, type, \
+    ksnet_printf(&((ke)->ksn_cfg), type, \
         _ksn_printf_format_(format) "\n", \
         _ksn_printf_type_(type), \
-        module == NULL ? ke->ksn_cfg.app_name : module, \
+        module == NULL ? (ke)->ksn_cfg.app_name : module, \
         __func__, __FILE__, __LINE__)
 
 
