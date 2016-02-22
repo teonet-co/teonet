@@ -29,16 +29,16 @@ typedef enum ksnet_printf_type {
 
 } ksnet_printf_type;
 
-#define ksnPrintfType(type) \
+#define ksn_printf_type(type) \
    (type == MESSAGE ? "MESSAGE" : \
     type == ERROR_M ? "ERROR" : \
     type == DEBUG ? "DEBUG" : \
     type == DEBUG_VV ? "DEBUG_VV" : \
     type == CONNECT ? "CONNECT" : "DISPLAY")
 
-#define ksnPrintf(ke, module, type, format, ...) \
+#define ksn_printf(ke, module, type, format, ...) \
     ksnet_printf(&ke->ksn_cfg, type, "%s %s:%s:(%s:%d): " format, \
-        ksnPrintfType(type), \
+        ksn_printf_type(type), \
         module == NULL ? ke->ksn_cfg.app_name : module, \
         __func__, __FILE__, __LINE__, __VA_ARGS__)
 
