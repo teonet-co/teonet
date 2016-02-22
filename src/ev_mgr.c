@@ -216,7 +216,7 @@ static void set_sigaction(ksnetEvMgrClass *ke, int sig,
         sa.sa_sigaction = sigsegv_cb_h;
         if (sigaction(sig, &sa, NULL) == -1) {
             //ksnet_printf(&ke->ksn_cfg, ERROR_M, "Set sigaction error\n");
-            ksn_puts(ke, MODULE, ERROR_M, "Set sigaction error");
+            ksn_puts(ke, MODULE, ERROR_M, "set sigaction error");
         }
     }    
 }
