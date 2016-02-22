@@ -178,7 +178,7 @@ int ksnTcpServerCreate(
 //            "%sTCP Server:%s Create TCP server at port %d ...\n", 
 //            ANSI_MAGENTA, ANSI_NONE, port);
     ksn_printf(((ksnetEvMgrClass*)kt->ke), MODULE, MESSAGE,
-            "create TCP server at port %d ...\n", port);
+            "try create TCP server at port %d ...\n", port);
     #endif
 
     ev_ksnet_io *w_accept = (ev_ksnet_io*) malloc(sizeof(ev_ksnet_io));

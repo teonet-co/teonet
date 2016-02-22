@@ -22,6 +22,8 @@
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
+
 // Global module variables
 static int teoRestartApp_f = 0; // Restart teonet application before exit
 
@@ -212,8 +214,10 @@ static void set_sigaction(ksnetEvMgrClass *ke, int sig,
         sa.sa_flags = SA_NOMASK; //SA_SIGINFO; // 
         sigemptyset(&sa.sa_mask);
         sa.sa_sigaction = sigsegv_cb_h;
-        if (sigaction(sig, &sa, NULL) == -1)
-            ksnet_printf(&ke->ksn_cfg, ERROR_M, "Set sigaction error\n");
+        if (sigaction(sig, &sa, NULL) == -1) {
+            //ksnet_printf(&ke->ksn_cfg, ERROR_M, "Set sigaction error\n");
+            ksn_puts(ke, MODULE, ERROR_M, "Set sigaction error");
+        }
     }    
 }
 
@@ -230,8 +234,9 @@ static void set_sigaction(ksnetEvMgrClass *ke, int sig,
 int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, MESSAGE, "%sEvent manager:%s Started ...\n", 
-            ANSI_CYAN, ANSI_NONE);
+//    ksnet_printf(&ke->ksn_cfg, MESSAGE, "%sEvent manager:%s Started ...\n", 
+//            ANSI_CYAN, ANSI_NONE);
+    ksn_puts(ke, MODULE, MESSAGE, "started ...");
     #endif
 
     ke->timer_val = 0;
@@ -305,10 +310,12 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             // SIGSEGV
             #ifdef SIGSEGV
             #ifdef DEBUG_KSNET
-            if(ke->ksn_cfg.sig_segv_f)
-                ksnet_printf(&ke->ksn_cfg, MESSAGE, 
-                        "%sEvent manager:%s Set SIGSEGV signal handler\n",
-                        ANSI_CYAN, ANSI_NONE);
+            if(ke->ksn_cfg.sig_segv_f) {
+//                ksnet_printf(&ke->ksn_cfg, MESSAGE, 
+//                        "%sEvent manager:%s Set SIGSEGV signal handler\n",
+//                        ANSI_CYAN, ANSI_NONE);
+                ksn_puts(ke, MODULE, MESSAGE, "set SIGSEGV signal handler");
+            }
             #endif
             // Libev can't process this signal properly 
             set_sigaction(ke, SIGSEGV, sigsegv_cb_h);
@@ -318,9 +325,10 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             #ifdef SIGABRT
             #ifdef DEBUG_KSNET
             if(ke->ksn_cfg.sig_segv_f)
-                ksnet_printf(&ke->ksn_cfg, MESSAGE, 
-                    "%sEvent manager:%s Set SIGABRT signal handler\n",
-                    ANSI_CYAN, ANSI_NONE);
+//                ksnet_printf(&ke->ksn_cfg, MESSAGE, 
+//                    "%sEvent manager:%s Set SIGABRT signal handler\n",
+//                    ANSI_CYAN, ANSI_NONE);
+                ksn_puts(ke, MODULE, MESSAGE, "set SIGABRT signal handler");
             #endif
             // Libev can't process this signal properly 
             set_sigaction(ke, SIGABRT, sigsegv_cb_h);
@@ -383,8 +391,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
 
         #ifdef DEBUG_KSNET
         //ksnet_printf(&ke->ksn_cfg, DEBUG, "Event manager: stopped.\n");
-        printf("%sEvent manager:%s at port %d stopped.\n", ANSI_CYAN, ANSI_NONE,
-               (int)ke->ksn_cfg.port );
+        printf(MODULE " at port %d stopped.\n", (int)ke->ksn_cfg.port );
         #endif
 
         // Send stopped event to user level
@@ -538,9 +545,10 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sEvent manager:%s make Async call to Event manager\n", 
-            ANSI_CYAN, ANSI_NONE);
+//    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+//            "%sEvent manager:%s make Async call to Event manager\n", 
+//            ANSI_CYAN, ANSI_NONE);
+    ksn_puts(ke, MODULE, DEBUG_VV, "make Async call to Event manager");
     #endif
 
     // Add something to queue and send async signal to event loop
@@ -722,9 +730,10 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     #define kev ((ksnetEvMgrClass *)((ksnCoreClass *)w->data)->ke)
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-            "%sEvent manager:%s idle callback %d\n", ANSI_CYAN, ANSI_NONE,            
-            kev->idle_count);
+//    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
+//            "%sEvent manager:%s idle callback %d\n", ANSI_CYAN, ANSI_NONE,            
+//            kev->idle_count);
+    ksn_printf(kev, MODULE, DEBUG_VV, "idle callback %d\n", kev->idle_count);
     #endif
 
     // Stop this watcher
@@ -786,11 +795,13 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
         // Show timer info
         #ifdef DEBUG_KSNET
         if( !(ke->timer_val % show_interval) ) {
-            ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                    "%sEvent manager:%s timer (%.1f sec of %f)\n", 
-                    ANSI_CYAN, ANSI_NONE,
-                    show_interval*KSNET_EVENT_MGR_TIMER, t);
-
+//            ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
+//                    "%sEvent manager:%s timer (%.1f sec of %f)\n", 
+//                    ANSI_CYAN, ANSI_NONE,
+//                    show_interval*KSNET_EVENT_MGR_TIMER, t);
+            ksn_printf(((ksnetEvMgrClass *)w->data), MODULE, DEBUG_VV,
+                    "timer (%.1f sec of %f)\n", 
+                    show_interval * KSNET_EVENT_MGR_TIMER, t);
         }
         #endif
 
@@ -827,9 +838,11 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG,
-            "\n%sEvent manager:%s got a signal to stop event manager ...\n", 
-            ANSI_CYAN, ANSI_NONE);
+//    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG,
+//            "\n%sEvent manager:%s got a signal to stop event manager ...\n", 
+//            ANSI_CYAN, ANSI_NONE);
+    ksn_puts(((ksnetEvMgrClass *)w->data), MODULE, DEBUG,
+            "got a signal to stop event manager ...");
     #endif
 
     ((ksnetEvMgrClass *)w->data)->runEventMgr = 0;
@@ -848,9 +861,15 @@ void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     static int attempt = 0;
         
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, ERROR_M,
-            "\n%sEvent manager:%s Got a signal %s ...\n", 
-            ANSI_RED, ANSI_NONE,
+//    ksnet_printf(&ke->ksn_cfg, ERROR_M,
+//            "\n%sEvent manager:%s Got a signal %s ...\n", 
+//            ANSI_RED, ANSI_NONE,
+//            w->signum == SIGSEGV ? "SIGSEGV" : 
+//            w->signum == SIGABRT ? "SIGABRT" : 
+//            w->signum == SIGUSR2 ? "SIGUSR2" :
+//                                   "?");
+    ksn_printf(ke, MODULE, ERROR_M,
+            "got a signal %s ...\n",
             w->signum == SIGSEGV ? "SIGSEGV" : 
             w->signum == SIGABRT ? "SIGABRT" : 
             w->signum == SIGUSR2 ? "SIGUSR2" :
@@ -973,9 +992,10 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
     #define kev ((ksnetEvMgrClass*)(w->data))
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            "%sEvent manager:%s async event callback\n", 
-            ANSI_CYAN, ANSI_NONE);
+//    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
+//            "%sEvent manager:%s async event callback\n", 
+//            ANSI_CYAN, ANSI_NONE);
+    ksn_puts(kev, MODULE, DEBUG_VV, "async event callback");
     #endif
 
     // Get data from async queue and send user event with it
@@ -1012,10 +1032,12 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
     #define kev ((ksnetEvMgrClass *)w->data)
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(& ((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-                "%sEvent manager:%s idle activity callback %d\n", 
-                ANSI_CYAN, ANSI_NONE,
-                kev->idle_activity_count);
+//    ksnet_printf(& ((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
+//                "%sEvent manager:%s idle activity callback %d\n", 
+//                ANSI_CYAN, ANSI_NONE,
+//                kev->idle_activity_count);
+    ksn_printf(((ksnetEvMgrClass *)w->data), MODULE, DEBUG_VV,
+                "idle activity callback %d\n", kev->idle_activity_count);
     #endif
 
     // Start(restart) connection to R-Host

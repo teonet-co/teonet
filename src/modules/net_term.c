@@ -61,8 +61,7 @@ ksnTermClass *ksnTermInit(void *ke) {
 //                "Terminal server started at port %d, socket fd %d\n", 
 //                ANSI_LIGHTBLUE, ANSI_NONE, port_created, fd);
         ksn_printf(kev, MODULE, MESSAGE, 
-                "Terminal server started at port %d, socket fd %d\n", 
-                port_created, fd);
+                "started at port %d, socket fd %d\n", port_created, fd);
         
     }
     
