@@ -208,8 +208,6 @@ inline int ksnTRUDPstatShow(ksnTRUDPClass *tu) {
     int num_line = 0;
     char *str = ksnTRUDPstatShowStr(tu);
 
-//    ksnet_printf(&((ksnetEvMgrClass*) (((ksnCoreClass*)tu->kc)->ke))->ksn_cfg, 
-//            MESSAGE, "%s", str);
     ksn_printf(((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke)), MODULE, DISPLAY_M, 
             "%s", str);
     

@@ -149,7 +149,7 @@ void start_stop_daemon(char **argv, ksnet_cfg *conf) {
         // Pid file already exist
         else {
 
-            ksnet_printf(conf, MESSAGE,
+            ksnet_printf(conf, ERROR_M,
               "Another one daemon is running. Use -k option to kill it.\n\n");
 
             kill_pidfile();
