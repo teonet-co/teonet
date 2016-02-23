@@ -17,16 +17,17 @@
 #include "config/conf.h"
 
 /**
- * KSNet printf types
+ * KSNet printf messages types
  */
 typedef enum ksnet_printf_type {
 
-            MESSAGE = 0,  ///< Regular message
+            NONE_LOG,     ///< Log off
             ERROR_M,      ///< Error message
+            CONNECT,      ///< Connect or Auth messages 
+            DISPLAY_M,    ///< Regular messages (display only)
+            MESSAGE,      ///< Regular messages
             DEBUG,        ///< Debug message (normal)
             DEBUG_VV,     ///< Debug message (extra)
-            CONNECT,      ///< Connect or Auth message 
-            DISPLAY_M     ///< Regular message (display only)
 
 } ksnet_printf_type;
 
