@@ -21,14 +21,14 @@
  */
 typedef enum ksnet_printf_type {
 
-            NONE_LOG,     ///< Log off
-            ERROR_M,      ///< Error message
-            CONNECT,      ///< Connect or Auth messages 
-            DISPLAY_M,    ///< Regular messages (display only)
-            MESSAGE,      ///< Regular messages
-            DEBUG,        ///< Debug message (normal)
-            DEBUG_VV,     ///< Debug message (extra)
-
+            NONE_LOG,     ///< #0 Log off
+            ERROR_M,      ///< #1 Error message
+            CONNECT,      ///< #2 Connect or Auth messages 
+            MESSAGE,      ///< #3 Regular messages
+            DEBUG,        ///< #4 Debug message (normal)
+            DEBUG_VV,     ///< #5 Debug message (extra)
+            DISPLAY_M,    ///< #6 Regular messages (display only)
+                    
 } ksnet_printf_type;
 
 #define _ksn_printf_type_(type) \

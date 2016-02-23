@@ -105,6 +105,9 @@ typedef struct ksnet_cfg {
 //    char t_username[KSN_BUFFER_SM_SIZE/2]; ///< User name to login to terminal
 //    char t_password[KSN_BUFFER_SM_SIZE/2]; ///< Password to login to terminal
     
+    // Syslog options
+    long log_priority;                       ///< Syslog priority 
+    
     // Helpers
     int pp;
     char pn[KSN_BUFFER_SM_SIZE];

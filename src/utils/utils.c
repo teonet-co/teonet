@@ -101,6 +101,8 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             show_it = 1;
             break;
     }
+    
+    show_log = show_log & ksn_cfg->log_priority >= type;
 
     if(show_it || show_log) {
         
@@ -124,7 +126,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         }
 
         // Log message
-        if(show_log) {
+        if(show_log ) {
 
             // Open log at first message
             if(!log_opened) {
