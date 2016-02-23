@@ -210,7 +210,7 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
 
         if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
-            ksn_printf(kev, MODULE, MESSAGE,
+            ksn_printf(kev, MODULE, DEBUG,
                     "can't bind on port %d, try next port number ...\n", 
                     *port);
                     
@@ -236,7 +236,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
     ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
     
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, MESSAGE, 
+    ksn_printf(kev, MODULE, DEBUG, 
             "create UDP client/server at port %d ...\n", kc->port);
     #endif
     
