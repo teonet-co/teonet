@@ -16,6 +16,8 @@
 #include "../teo_auth/teo_auth.h"
 #include "teo_ws.h"
 
+#define MODULE _ANSI_YELLOW "websocket_l0" _ANSI_NONE
+
 // Local functions
 static void teoWSDestroy(teoWSClass *kws);
 static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p, 
@@ -40,7 +42,6 @@ static void send_auth_answer(void *nc_p, char* err, char *result);
 /**
  * This module label
  */
-#define MODULE _ANSI_YELLOW "websocket_L0" _ANSI_NONE
 
 /**
  * Initialize teonet websocket module
