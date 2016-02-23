@@ -53,10 +53,6 @@ static void send_auth_answer(void *nc_p, char* err, char *result);
 teoWSClass* teoWSInit(ksnHTTPClass *kh) {
     
     #ifdef DEBUG_KSNET
-//    ksnet_printf(&((ksnetEvMgrClass*)kh->ke)->ksn_cfg, DEBUG,
-//            MODULE_LABEL
-//            "Initialize\n",
-//            ANSI_YELLOW, ANSI_NONE);
     ksn_puts(((ksnetEvMgrClass*)kh->ke), MODULE, DEBUG, "initialize");
     #endif
     
@@ -85,10 +81,6 @@ static void teoWSDestroy(teoWSClass *kws) {
     if(kws != NULL) {
 
         #ifdef DEBUG_KSNET
-//        ksnet_printf(ksn_conf, DEBUG,
-//                MODULE_LABEL
-//                "Destroy\n", 
-//                ANSI_YELLOW, ANSI_NONE);
         ksn_puts(kev, MODULE, DEBUG, "Destroy");
         #endif
 
@@ -145,12 +137,6 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             char *data = cp->peer_name + cp->peer_name_length;
             
             #ifdef DEBUG_KSNET
-//            ksnet_printf(&ksn_conf_t, DEBUG_VV,
-//                MODULE_LABEL
-//                "Receive %d bytes: %d bytes data from L0 server, "
-//                "from peer %s, cmd = %d\n",
-//                ANSI_YELLOW, ANSI_NONE, 
-//                (int)rc, cp->data_length, cp->peer_name, cp->cmd);
             ksn_printf(kev_t, MODULE, DEBUG_VV,
                 "receive %d bytes: %d bytes data from L0 server, "
                 "from peer %s, cmd = %d\n",
@@ -264,11 +250,6 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             );
             
             #ifdef DEBUG_KSNET
-//            ksnet_printf(&ksn_conf_t, DEBUG_VV,
-//                MODULE_LABEL
-//                "Send %d bytes JSON: %s to L0 client\n",
-//                ANSI_YELLOW, ANSI_NONE, 
-//                data_json_len, data_json);
             ksn_printf(kev_t, MODULE, DEBUG_VV,
                 "send %d bytes JSON: %s to L0 client\n",
                 data_json_len, data_json);
@@ -332,10 +313,6 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
                             &td->w);                
 
                     #ifdef DEBUG_KSNET
-//                    ksnet_printf(ksn_conf, DEBUG,
-//                            MODULE_LABEL
-//                            "WS client %p has connected to L0 server ...\n", 
-//                            ANSI_YELLOW, ANSI_NONE, nc_p);
                     ksn_printf(kev, MODULE, DEBUG,
                             "WS client %p has connected to L0 server ...\n", 
                             nc_p);
@@ -387,10 +364,6 @@ static int teoWSremove(teoWSClass *kws, void *nc_p) {
         pblMapRemoveFree(kws->map, (void*)&nc_p, sizeof(nc_p), &valueLength);
         
         #ifdef DEBUG_KSNET
-//        ksnet_printf(ksn_conf, DEBUG,
-//                MODULE_LABEL
-//                "WS client %p has disconnected from L0 server ...\n", 
-//                ANSI_YELLOW, ANSI_NONE, nc_p);
         ksn_printf(kev, MODULE, DEBUG,
                 "WS client %p has disconnected from L0 server ...\n", nc_p);        
         #endif
@@ -503,11 +476,6 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     int processed = 0;
     
     #ifdef DEBUG_KSNET
-//    ksnet_printf(ksn_conf, DEBUG_VV,
-//        MODULE_LABEL
-//        "Receive %d bytes: from WS client %p\n",
-//        ANSI_YELLOW, ANSI_NONE, 
-//        data_length, nc_p );
     ksn_printf(kev, MODULE, DEBUG_VV,
         "receive %d bytes: from WS client %p\n",
         data_length, nc_p );
@@ -598,10 +566,6 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     if(cmd == 0 && to[0] == 0 && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-//        ksnet_printf(ksn_conf, DEBUG,
-//                MODULE_LABEL 
-//                "Login from \"%s\" received\n", 
-//                ANSI_YELLOW, ANSI_NONE, cmd_data);
         ksn_printf(kev, MODULE, DEBUG,
                 "login from \"%s\" received\n", cmd_data);
         #endif
@@ -618,10 +582,6 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_PEERS && to[0] != 0 && cmd_data[0] == 0) {
         
         #ifdef DEBUG_KSNET
-//        ksnet_printf(ksn_conf, DEBUG_VV,
-//                MODULE_LABEL
-//                "Peers command to \"%s\" peer received\n", 
-//                ANSI_YELLOW, ANSI_NONE, to);
         ksn_printf(kev, MODULE, DEBUG_VV,
                 "peers command to \"%s\" peer received\n", to);
         #endif
@@ -637,10 +597,6 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_ECHO && to[0] != 0 && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-//        ksnet_printf(ksn_conf, DEBUG_VV,
-//                MODULE_LABEL
-//                "Echo command to \"%s\" peer with message \"%s\" received\n", 
-//                ANSI_YELLOW, ANSI_NONE, to, cmd_data);
         ksn_printf(kev, MODULE, DEBUG_VV,
                 "echo command to \"%s\" peer with message \"%s\" received\n", 
                 to, cmd_data);
@@ -656,10 +612,6 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(cmd == CMD_L_AUTH && cmd_data[0] != 0) {
         
         #ifdef DEBUG_KSNET
-//        ksnet_printf(ksn_conf, DEBUG_VV,
-//            MODULE_LABEL
-//            "Authentication command to \"%s\" peer, with data \"%s\" was received\n", 
-//            ANSI_YELLOW, ANSI_NONE, to, cmd_data);
         ksn_printf(kev, MODULE, DEBUG_VV,
             "authentication command to \"%s\" peer, with data \"%s\" was received\n", 
             to, cmd_data);
@@ -735,10 +687,6 @@ static int teoWSprocessMsg(teoWSClass *kws, void *nc_p, void *data,
     else if(to[0] != 0) {
         
         #ifdef DEBUG_KSNET
-//        ksnet_printf(ksn_conf, DEBUG_VV,
-//            MODULE_LABEL
-//            "Resend command %d to \"%s\" peer with message \"%s\" received\n", 
-//            ANSI_YELLOW, ANSI_NONE, cmd, to, cmd_data);
         ksn_printf(kev, MODULE, DEBUG_VV,
             "resend command %d to \"%s\" peer with message \"%s\" received\n", 
             cmd, to, cmd_data);        
