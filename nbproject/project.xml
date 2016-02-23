@@ -76,6 +76,7 @@
             <word>strtol</word>
             <word>subpacket</word>
             <word>subpackets</word>
+            <word>Syslog</word>
             <word>tcp</word>
             <word>teo</word>
             <word>teocli</word>
