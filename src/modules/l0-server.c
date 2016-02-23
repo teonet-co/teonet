@@ -547,7 +547,7 @@ static int ksnLNullStart(ksnLNullClass *kl) {
                     &port_created)) > 0) {
 
             ksn_printf(kev, MODULE, MESSAGE, 
-                    "l0 Server fd %d started at port %d\n", 
+                    "l0 server fd %d started at port %d\n", 
                     fd, port_created);
 
             kev->ksn_cfg.l0_tcp_port = port_created;
