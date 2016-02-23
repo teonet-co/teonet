@@ -527,7 +527,6 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
         }
         pblIteratorFree(it);
     }
-    //ksnet_printf(&((ksnetEvMgrClass*)kn->ke)->ksn_cfg, MESSAGE,
     str = ksnet_sformatMessage(str, "%s%s", str, div);
 
 
@@ -546,7 +545,7 @@ int ksnetArpShow(ksnetArpClass *ka) {
     int num_line = 0;
     char *str = ksnetArpShowStr(ka);
 
-    ksnet_printf(&((ksnetEvMgrClass*)ka->ke)->ksn_cfg, MESSAGE, "%s", str);
+    ksnet_printf(&((ksnetEvMgrClass*)ka->ke)->ksn_cfg, DISPLAY_M, "%s", str);
     num_line = calculate_lines(str);
 
     free(str);
