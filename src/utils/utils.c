@@ -137,9 +137,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
                 size_t prefix_len = LOG_PREFIX_SIZE + strlen(ksn_cfg->app_name) + 1;
                 char *prefix = malloc(prefix_len); // \todo Free this at exit
                 strncpy(prefix, LOG_PREFIX, prefix_len);
-                char *lt = "lt-"; size_t lt_len = 3, ptr = 0;
-                if(!strncmp(ksn_cfg->app_name, lt, lt_len)) ptr = lt_len;
-                strncat(prefix, ksn_cfg->app_name + ptr, prefix_len - LOG_PREFIX_SIZE);
+                strncat(prefix, ksn_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
 
                 // Open log
                 setlogmask (LOG_UPTO (LOG_INFO));
