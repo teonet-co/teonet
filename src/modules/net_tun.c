@@ -416,7 +416,7 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
     if(!read_len) {
 
         #ifdef DEBUG_KSNET
-        ksnet_printf((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke, MODULE, DEBUG,
+        ksn_printf((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke, MODULE, DEBUG,
             "connection closed, stop listening fd %d\n", w->fd
         );
         #endif
