@@ -373,7 +373,10 @@ void ksnet_optSetApp(ksnet_cfg *conf,
                      const char* app_prompt,
                      const char* app_description) {
 
-    strncpy(conf->app_name, app_name, KSN_BUFFER_SM_SIZE/2);
+    const char *lt = "lt-"; 
+    const size_t lt_len = 3, ptr = !strncmp(app_name, lt, lt_len) ? lt_len : 0;
+    
+    strncpy(conf->app_name, app_name + ptr, KSN_BUFFER_SM_SIZE/2);
     strncpy(conf->app_prompt, app_prompt, KSN_BUFFER_SM_SIZE/2);
     strncpy(conf->app_description, app_description, KSN_BUFFER_SM_SIZE/2);
 }
