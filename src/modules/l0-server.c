@@ -16,7 +16,7 @@
 #include "l0-server.h"
 #include "utils/rlutil.h"
 
-#define MODULE _ANSI_LIGHTCYAN "l0 Server" _ANSI_NONE
+#define MODULE _ANSI_LIGHTCYAN "l0_server" _ANSI_NONE
 
 // Local functions
 static int ksnLNullStart(ksnLNullClass *kl);

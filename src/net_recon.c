@@ -26,6 +26,8 @@
 #include "net_recon.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_GREEN "net_reconnect" _ANSI_NONE
+
 /**
  * Reconnect command map data structure
  */
@@ -48,7 +50,7 @@ static void ksnReconnectCQueCallback(uint32_t id, int type, void *data);
 //
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
-#define conf (& ((ksnetEvMgrClass*)kcor->ke)->ksn_cfg)
+#define kev ((ksnetEvMgrClass*)kcor->ke)
     
 /**
  * CallbackQueue callback
@@ -77,10 +79,8 @@ static void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
 
             // Check peer is connected and resend CMD_RECONNECT if not
             #ifdef DEBUG_KSNET
-            ksnet_printf(conf, DEBUG_VV,
-                    "%sReconnect:%s "
+            ksn_printf(kev, MODULE, DEBUG_VV,
                     "callback: Got timeout for peer \"%s\"\n",
-                    ANSI_GREEN, ANSI_NONE,
                     map_data->peer);
             #endif
             
@@ -90,10 +90,8 @@ static void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
                 
                 // ... do nothing ...
                 #ifdef DEBUG_KSNET
-                ksnet_printf(conf, DEBUG_VV,
-                    "%sReconnect:%s "
-                    "callback: Has already connected - stop\n",
-                    ANSI_GREEN, ANSI_NONE);
+                ksn_puts(kev, MODULE, DEBUG_VV,
+                    "callback: Has already connected - stop");
                 #endif
             }
             
@@ -101,10 +99,8 @@ static void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
             else { 
                 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(conf, DEBUG_VV,
-                    "%sReconnect:%s "
-                    "callback: Has not connected yet - reconnect\n",
-                    ANSI_GREEN, ANSI_NONE);
+                ksn_puts(kev, MODULE, DEBUG_VV,
+                    "callback: Has not connected yet - reconnect");
                 #endif
 
                 map_data->kr->send(map_data->kr, map_data->peer);
@@ -116,10 +112,8 @@ static void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
         else {
             // ... do nothing ...
             #ifdef DEBUG_KSNET
-            ksnet_printf(conf, DEBUG_VV,
-                "%sReconnect:%s "
+            ksn_printf(kev, MODULE, DEBUG_VV,
                 "callback: Got the CMD_RECONNECT_ANSWER for peer \"%s\" - stop\n",
-                ANSI_GREEN, ANSI_NONE,
                 map_data->peer);
             #endif
         }
@@ -151,7 +145,7 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
     
     int retval = 0;
     
-    char *r_host = conf->r_host_name;
+    char *r_host = kev->ksn_cfg.r_host_name;
     ksnet_arp_data *arp;
 
     // If connected to r-host
@@ -170,11 +164,9 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
                 sizeof(md))) >= 0) {
 
             #ifdef DEBUG_KSNET
-            ksnet_printf(conf, DEBUG_VV, 
-                    "%sReconnect:%s "
+            ksn_printf(kev, MODULE, DEBUG_VV, 
                     "send reconnect request with peer \"%s\" "
                     "(and save it to queue)\n",                     
-                    ANSI_GREEN, ANSI_NONE,
                     peer);
             #endif
             
@@ -215,10 +207,8 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
         else if(rc == 0) {
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(conf, DEBUG_VV,
-                "%sReconnect:%s "
-                "send skipped - reconnect request already running\n", 
-                ANSI_GREEN, ANSI_NONE);
+            ksn_puts(kev, MODULE, DEBUG_VV,
+                "send skipped - reconnect request already running");
             #endif
             
             retval = 1;
@@ -228,10 +218,7 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
         else {
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(conf, DEBUG_VV,
-                "%sReconnect:%s "
-                "send skipped - PBL error\n", 
-                ANSI_GREEN, ANSI_NONE);
+            ksn_puts(kev, MODULE, DEBUG_VV, "send skipped - PBL error");
             #endif
 
             retval = -2;        
@@ -258,12 +245,7 @@ static int ksnReconnectSendAnswer(ksnReconnectClass *this, const char *peer,
         const char* peer_to_reconnect) {
     
     #ifdef DEBUG_KSNET
-    ksnet_printf(conf, DEBUG_VV,
-        "%sReconnect:%s "
-        "send answer to \"%s\"\n", 
-        ANSI_GREEN, ANSI_NONE,
-        peer
-    );
+    ksn_printf(kev, MODULE, DEBUG_VV, "send answer to \"%s\"\n", peer);
     #endif
     
     // Send command reconnect answer to peer
@@ -289,10 +271,8 @@ static int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
     #define karp ((ksnCoreClass*)kcom->kc)->ka
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(conf, DEBUG_VV,
-        "%sReconnect:%s "
+    ksn_printf(kev, MODULE, DEBUG_VV,
         "process reconnect command from peer \"%s\" with \"%s\"\n", 
-        ANSI_GREEN, ANSI_NONE,        
         rd->from, rd->data
     );
     #endif
@@ -335,10 +315,8 @@ static int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
 static int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData *rd) {
     
     #ifdef DEBUG_KSNET
-    ksnet_printf(conf, DEBUG_VV,
-        "%sReconnect:%s "
+    ksn_printf(kev, MODULE, DEBUG_VV,
         "process reconnect answer command with peer \"%s\"\n", 
-        ANSI_GREEN, ANSI_NONE,
         rd->data);
     #endif
     
@@ -370,17 +348,14 @@ static int ksnReconnectProcessAnswer(ksnReconnectClass *this, ksnCorePacketData 
  */
 ksnReconnectClass *ksnReconnectInit(void *kco) {
     
-    #define conf_ (&((ksnetEvMgrClass*)((ksnCoreClass*) \
-                        (((ksnCommandClass*)kco)->kc))->ke)->ksn_cfg)
+    #define kev_ ((ksnetEvMgrClass*)((ksnCoreClass*) \
+                        (((ksnCommandClass*)kco)->kc))->ke)
           
     #ifdef DEBUG_KSNET
-    ksnet_printf(conf_, DEBUG_VV,
-        "%sReconnect:%s "
-        "Initialize ksnReconnectClass\n", 
-        ANSI_GREEN, ANSI_NONE);
+    ksn_puts(kev_, MODULE, DEBUG_VV, "Initialize ksnReconnectClass");
     #endif
 
-    #undef conf_
+    #undef kev_
     
     ksnReconnectClass *this = malloc(sizeof(ksnReconnectClass));
     
@@ -408,10 +383,7 @@ static void ksnReconnectDestroy(ksnReconnectClass *this) {
     if(this != NULL) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(conf, DEBUG_VV,
-            "%sReconnect:%s "
-            "Destroy ksnReconnectClass\n", 
-            ANSI_GREEN, ANSI_NONE);
+        ksn_puts(kev, MODULE, DEBUG_VV, "Destroy ksnReconnectClass");
         #endif
     
         pblMapFree(this->map);
