@@ -353,6 +353,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "      --sig_segv           Segmentation fault error processing by library\n"
     "      --log_priority       Syslog priority: (Default: 4)\n"
     "                             DEBUG: 4, MESSAGE: 3, CONNECT: 2, ERROR_M: 1\n"
+    "                             NO_LOG: 0\n"
     "\n"
     "  -d, --daemon             Start this application in daemon mode\n"
     "  -k, --kill               Kill the application running in daemon mode\n"
