@@ -113,7 +113,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         if(show_it) {
 
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
-            if(type != MESSAGE && ct != 0.00)
+            if(type != MESSAGE && type != DISPLAY_M && ct != 0.00)
                 printf(_ANSI_DARKGREY"%f: "_ANSI_NONE, ct);
 
 //            va_list args;
