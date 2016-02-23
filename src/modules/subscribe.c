@@ -75,15 +75,6 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
             memcpy(sscr_out_data->data, data, data_length);
         
             #ifdef DEBUG_KSNET
-//            ksnet_printf(
-//                   &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
-//                   DEBUG,
-//                   "%sSubscribe:%s "
-//                   "Send CMD_SUBSCRIBE_ANSWER with event #%d, "
-//                   "data length %d, number of subscribers to this event: %d\n",
-//                    ANSI_LIGHTGREEN, ANSI_NONE,
-//                    ev, data_length, num
-//            );
             ksn_printf(((ksnetEvMgrClass*)sscr->ke), MODULE, DEBUG,
                    "send CMD_SUBSCRIBE_ANSWER with event #%d, "
                    "data length %d, number of subscribers to this event: %d\n",
@@ -286,15 +277,6 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev,
     }
     
     #ifdef DEBUG_KSNET
-//    ksnet_printf(
-//           &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
-//           DEBUG, 
-//           "%sSubscribe:%s "
-//           "Peer '%s' was added to the Subscribers to event #%d. "
-//           "Number of subscriptions: %d\n", 
-//            ANSI_LIGHTGREEN, ANSI_NONE,
-//            peer_name, ev, teoSScrNumberOfSubscribers(sscr)
-//    );
     ksn_printf(((ksnetEvMgrClass*)sscr->ke), MODULE, DEBUG, 
            "peer '%s' was added to the Subscribers to event #%d, "
            "number of subscriptions: %d\n", 
@@ -334,16 +316,6 @@ int teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev) {
             if(sscr_data !=  (void*)-1) {
             
                 #ifdef DEBUG_KSNET
-//                ksnet_printf(
-//                       &((ksnetEvMgrClass*)sscr->ke)->ksn_cfg,
-//                       DEBUG, 
-//                       "%sSubscribe:%s "
-//                       "Peer '%s' was removed from the Subscribers to event #%d. "
-//                       "Number of subscriptions: %d\n", 
-//                        ANSI_LIGHTGREEN, ANSI_NONE,
-//                        sscr_data->data, sscr_data->ev, 
-//                        teoSScrNumberOfSubscribers(sscr)
-//                );
                 ksn_printf(((ksnetEvMgrClass*)sscr->ke), MODULE, DEBUG, 
                        "peer \"%s\" was removed from the Subscribers to event #%d, "
                        "number of subscriptions: %d\n", 

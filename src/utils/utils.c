@@ -149,7 +149,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 //            va_start(args, format);
 //            vsyslog(priority, format, args);
 //            va_end(args);
-            syslog(priority, "%s", removeTEsc(p));
+            syslog(priority, "%s", trimlf(removeTEsc(p)));
         }
         free(p);
     }

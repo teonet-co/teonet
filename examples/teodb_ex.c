@@ -21,6 +21,7 @@
 #include "modules/teodb_com.h"
 
 #define TDB_VERSION "0.0.1"
+#define APPNAME _ANSI_MAGENTA "teodb_ex" _ANSI_NONE
 
 #define TEODB_PEER ke->ksn_cfg.app_argv[1]
 
@@ -276,7 +277,7 @@ int main(int argc, char** argv) {
 //    ksnetEvMgrSetCustomTimer(ke, 2.00);
     
     // Show Hello message
-    ksnet_printf(&ke->ksn_cfg, MESSAGE, "Example started...\n\n");
+    ksn_puts(ke, APPNAME, MESSAGE, "started ...\n");
 
     // Start teonet
     ksnetEvMgrRun(ke);    
