@@ -89,9 +89,6 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
         }
 
         #ifdef DEBUG_KSNET
-//        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-//            "%sksnSplitPacket:%s %d bytes packet was splitted to %d subpackets\n",
-//            ANSI_BLUE, ANSI_NONE, (int)packet_len, *num_subpackets);
         ksn_printf(kev, MODULE, DEBUG_VV,
             "%d bytes packet was splitted to %d subpackets\n",
             (int)packet_len, *num_subpackets);
@@ -200,9 +197,6 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
        }
 
         #ifdef DEBUG_KSNET
-//        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-//            "%sksnSplitCombine:%s combine %d subpackets to large %d bytes packet\n",
-//            ANSI_BLUE, ANSI_NONE, subpacket_num+1, (int)data_len);
         ksn_printf(kev, MODULE, DEBUG_VV,
             "combine %d subpackets to large %d bytes packet\n",
             subpacket_num+1, (int)data_len);

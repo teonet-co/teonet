@@ -645,8 +645,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         
         // Show command message
         //#ifdef DEBUG_KSNET
-        //ksnet_printf(& ke->ksn_cfg, MESSAGE,
-        printf(
+        ksnet_printf(& ke->ksn_cfg, DISPLAY_M,
             "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             (int)rd->data_len, // command data length
             rd->from,          // from
@@ -665,8 +664,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         
         // Show command message
         //#ifdef DEBUG_KSNET
-        //ksnet_printf(& ke->ksn_cfg, DEBUG_VV,
-        printf(
+        ksnet_printf(& ke->ksn_cfg, DISPLAY_M,
             "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             (int)rd->data_len,   // command data length
             rd->from,            // from
@@ -684,16 +682,6 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Show command message
         #ifdef DEBUG_KSNET
-//        ksnet_printf(& ke->ksn_cfg, DEBUG,
-//            "%sNet command:%s "
-//            "received Echo answer command => from '%s': %d byte data: "
-//            "%s, %.3f ms\n",
-//            ANSI_LIGHTBLUE, ANSI_NONE,
-//            rd->from,        // from
-//            rd->data_len,    // command data length
-//            rd->data,        // commands data
-//            triptime
-//        );
         ksn_printf(ke, MODULE, DEBUG,
             "got echo answer from \"%s\", %d byte data: \"%s\", %.3f ms\n",
             rd->from,        // from
@@ -833,10 +821,6 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     pd.port = *((uint32_t *)(rd->data + ptr));
 
     #ifdef DEBUG_KSNET
-//    ksnet_printf(
-//        &((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ksn_cfg,
-//        DEBUG_VV,
-//        "cmd_connect_cb: %s %s:%d\n", pd.name, pd.addr, pd.port);
     ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), MODULE, DEBUG_VV, 
             "got CMD_CONNECT from: \"%s\" %s:%d\n", pd.name, pd.addr, pd.port);
     #endif

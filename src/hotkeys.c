@@ -559,9 +559,6 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
 void stdin_cb (EV_P_ ev_io *w, int revents) {
 
     #ifdef DEBUG_KSNET
-//    ksnet_printf(&((ksnetEvMgrClass *)w->data)->ksn_cfg, DEBUG_VV,
-//            "%sEvent manager:%s STDIN (has data) callback\n", 
-//            ANSI_CYAN, ANSI_NONE);
     ksn_puts(((ksnetEvMgrClass *)w->data), MODULE, DEBUG_VV,
             "STDIN (has data) callback");
     #endif
@@ -610,10 +607,6 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
 void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 
     #ifdef DEBUG_KSNET
-//    ksnet_printf(& ((stdin_idle_data *)w->data)->ke->ksn_cfg, DEBUG_VV,
-//                "%sEvent manager:%s STDIN idle (process data) callback (%c)\n", 
-//                ANSI_CYAN, ANSI_NONE,
-//                *((int*)((stdin_idle_data *)w->data)->data));
     ksn_printf(((stdin_idle_data *)w->data)->ke, MODULE, DEBUG_VV,
                 "STDIN idle (process data) callback (%c)\n", 
                 *((int*)((stdin_idle_data *)w->data)->data));

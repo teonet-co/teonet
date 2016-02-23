@@ -56,10 +56,6 @@ ksnTermClass *ksnTermInit(void *ke) {
     if((fd = ksnTcpServerCreate(((ksnetEvMgrClass*)ke)->kt, port, ksnet_accept_cb, kter,
         &port_created)) > 0) {
     
-//        ksnet_printf(&kev->ksn_cfg, MESSAGE, 
-//                "%sTerminal server:%s "
-//                "Terminal server started at port %d, socket fd %d\n", 
-//                ANSI_LIGHTBLUE, ANSI_NONE, port_created, fd);
         ksn_printf(kev, MODULE, MESSAGE, 
                 "started at port %d, socket fd %d\n", port_created, fd);
         
