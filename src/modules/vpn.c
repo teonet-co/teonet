@@ -26,6 +26,8 @@
 #include "tuntap.h"
 #include "utils/utils.h"
 
+#define MODULE "vpn_module"
+
 #if M_ENAMBE_VPN
 
 /**
@@ -123,8 +125,7 @@ void* ksnVpnInit(void *ke) {
     kvpn->ksnet_vpn_map = pblMapNewHashMap();
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV,
-        "VPN module have been initialized\n");
+    ksn_puts((ksnetEvMgrClass*)ke, MODULE, DEBUG_VV, "have been initialized");
     #endif
 
     //usleep(500000);
@@ -169,8 +170,8 @@ void ksnVpnDestroy(void *vpn) {
         ke->kvpn = NULL;
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV,
-            "VPN module have been de-initialized\n");
+        ksn_puts((ksnetEvMgrClass*)ke, MODULE, DEBUG_VV, 
+                "have been de-initialized\n");
         #endif
     }
 }
@@ -230,9 +231,7 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
     // Show VPN Command info
     #if SHOW_VPN_DEBUG
     #ifdef DEBUG_KSNET
-    ksnet_printf(
-        &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
-        DEBUG_THIS,
+    ksn_printf((ksnetEvMgrClass*)kvpn->ke, MODULE, DEBUG_THIS,
         "Command VPN received from %s peer, destination: %s , source: %s \n",
         from, destination, source
     );
@@ -258,9 +257,8 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
         // Insert name and MAC to list
         #if SHOW_VPN_DEBUG
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-                &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
-                DEBUG_THIS, "insert source %s to VPN list\n", source);
+        ksn_printf((ksnetEvMgrClass*)kvpn->ke, MODULE, DEBUG_THIS, 
+                "insert source %s to VPN list\n", source);
         #endif
         #endif
 
@@ -362,9 +360,7 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
     // Show statistic message
     #if SHOW_VPN_DEBUG
     #ifdef DEBUG_KSNET
-    ksnet_printf(
-            &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
-            DEBUG_THIS,
+    ksn_printf((ksnetEvMgrClass*)kvpn->ke, MODULE, DEBUG_THIS,
             "Read %d bytes from interface %s, \tdestination: %s \tsource %s\n",
             nread, kvpn->tuntap_name, destination, source);
     #endif
@@ -374,9 +370,7 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
     if(mac_is_broadcast(&eth->destination)) {
         #if SHOW_VPN_DEBUG
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-                &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
-                DEBUG_THIS, "send to all...\n");
+        ksn_puts((ksnetEvMgrClass*)kvpn->ke, MODULE, DEBUG_THIS, "send to all ...");
         #endif
         #endif
         send_to_all(kvpn, buffer, nread);
@@ -390,9 +384,8 @@ static void tuntap_io_cb (EV_P_ ev_io *w, int revents) {
     else {
         #if SHOW_VPN_DEBUG
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-                &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg,
-                DEBUG_THIS, "unknown MAC %s\n", destination);
+        ksn_printf((ksnetEvMgrClass*)kvpn->ke, MODULE, DEBUG_THIS, 
+                "unknown MAC %s\n", destination);
         #endif
         #endif
     }
@@ -457,8 +450,8 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         }
 
         // Show success message
-        ksnet_printf(&ke->ksn_cfg, MESSAGE,
-                     "Interface %s (addr: %s, mtu: %d) opened ...\n",
+        ksn_printf(ke, MODULE, MESSAGE,
+                     "interface %s (addr: %s, mtu: %d) opened ...\n",
                      kvpn->tuntap_name,
                      tuntap_haddr,
                      ke->ksn_cfg.vpn_mtu ? ke->ksn_cfg.vpn_mtu : 1500);
@@ -475,7 +468,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
     //		ret = 1;
             }
             else {
-                ksnet_printf(&ke->ksn_cfg, MESSAGE,
+                ksn_printf(ke, MODULE, MESSAGE,
                              "VPN IP set to: %s/%d\n\n",
                              ke->ksn_cfg.vpn_ip, ke->ksn_cfg.vpn_ip_net);
 

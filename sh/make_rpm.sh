@@ -9,7 +9,7 @@
 # Parameters:
 #
 # @param $1 Version
-# @param $2 Library HI version
+# @param $2 Library Major version
 # @param $3 Library version
 # @param $4 Release
 # @param $5 Architecture

@@ -15,6 +15,8 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_BLUE "stream" _ANSI_NONE
+
 // Local functions
 void connect_watchers(ksnStreamClass *ks, ksnStreamMapData *data, 
         void *key_buf, size_t key_buf_len);
@@ -99,10 +101,8 @@ void kq_connect_cb(uint32_t id, int type, void *data) {
     ksnetEvMgrClass *ke = smd->ke;
     
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-        "%sStream:%s " 
-        "Got connect CQueue callback with id: %d, type: %d => %s\n", 
-        ANSI_BLUE, ANSI_NONE,
+    ksn_printf(ke, MODULE, DEBUG_VV, 
+        "got connect CQueue callback with id: %d, type: %d => %s\n", 
         id, type, type ? "success" : "timeout");
     #endif
 
@@ -171,10 +171,8 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
                 if(send_f == CMD_ST_CREATE) {
 
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                        "%sStream:%s " 
+                    ksn_printf(kev, MODULE, DEBUG_VV, 
                         "Send CREATE stream name \"%s\" to peer \"%s\" ...\n", 
-                        ANSI_BLUE, ANSI_NONE,
                         stream_name, to_peer);
                     #endif
 
@@ -192,10 +190,8 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
                 else {
 
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                        "%sStream:%s "
-                        "Got CREATE stream name \"%s\" request from peer \"%s\" ...\n", 
-                        ANSI_BLUE, ANSI_NONE,
+                    ksn_printf(kev, MODULE, DEBUG_VV, 
+                        "got CREATE stream name \"%s\" request from peer \"%s\" ...\n", 
                         stream_name, to_peer);
                     #endif
 
@@ -219,10 +215,8 @@ int ksnStreamCreate(ksnStreamClass *ks, char *to_peer, char *stream_name,
                 != NULL) {        
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                "%sStream:%s "
+            ksn_printf(kev, MODULE, DEBUG_VV, 
                 "Got CREATED stream name \"%s\" from peer \"%s\" ...\n", 
-                ANSI_BLUE, ANSI_NONE,
                 stream_name, to_peer);
             #endif
                         
@@ -281,10 +275,8 @@ int ksnStreamClose(ksnStreamClass *ks, char *to_peer, char *stream_name,
                         key_buf_len, NULL);
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                "%sStream:%s "
+            ksn_printf(kev, MODULE, DEBUG_VV, 
                 "Stream with name \"%s\" was disconnected from peer \"%s\" ...\n", 
-                ANSI_BLUE, ANSI_NONE,
                 stream_name, to_peer);
             #endif
             
@@ -427,10 +419,8 @@ void stream_out_cb (struct ev_loop *loop, /*EV_P_*/ ev_io *w, int revents) {
         const char *to_peer = data->key;
         const char *stream_name = data->key + strlen(data->key) + 1;
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sStream:%s "
-            "Sent %d byte DATA to stream name \"%s\" to peer \"%s\" ...\n", 
-            ANSI_BLUE, ANSI_NONE,
+        ksn_printf(ke, MODULE, DEBUG_VV, 
+            "sent %d byte DATA to stream name \"%s\" to peer \"%s\" ...\n", 
             (int) rc,
             stream_name, to_peer);
         #endif
@@ -513,10 +503,8 @@ int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd) {
                 != NULL) { 
                 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                    "%sStream:%s "
-                    "Got %d byte DATA to stream name \"%s\" from peer \"%s\" ...\n", 
-                    ANSI_BLUE, ANSI_NONE,
+                ksn_printf(kev, MODULE, DEBUG_VV, 
+                    "got %d byte DATA to stream name \"%s\" from peer \"%s\" ...\n", 
                     data->data_len,
                     data->data, rd->from);
                 #endif

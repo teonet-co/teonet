@@ -24,6 +24,8 @@
 #include "tr-udp_.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_YELLOW "tcp_proxy" _ANSI_NONE
+
 // Core module functions
 void host_cb(EV_P_ ev_io *w, int revents);
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
@@ -188,10 +190,9 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sTCP Proxy:%s "
-            "Send %d bytes to TCP Proxy server, fd %d\n", 
-            ANSI_YELLOW, ANSI_NONE, buffer_len, ke->tp->fd_client);
+        ksn_printf(ke, MODULE, DEBUG_VV, 
+            "send %d bytes to TCP Proxy server, fd %d\n", 
+            buffer_len, ke->tp->fd_client);
         #endif            
         
         // Send TCP package
@@ -480,10 +481,9 @@ int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
             ev_io_start (kev->ev_loop, &tp->w_client);
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                "%sTCP Proxy:%s "
+            ksn_printf(kev, MODULE, DEBUG, 
                 "TCP Proxy client fd %d started at port %d\n", 
-                ANSI_YELLOW, ANSI_NONE, fd_client, kev->ksn_cfg.r_tcp_port);
+                fd_client, kev->ksn_cfg.r_tcp_port);
             #endif
         }
     }
@@ -542,10 +542,9 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             (struct sockaddr *)&remaddr, &addrlen);
     
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            "%sTCP Proxy:%s "
-            "Got something from UDP fd %d w->events = %d, received = %d ...\n", 
-            ANSI_YELLOW, ANSI_NONE, w->fd, w->events, (int)received);
+    ksn_printf(kev, MODULE, DEBUG_VV,
+            "got something from UDP fd %d w->events = %d, received = %d ...\n", 
+            w->fd, w->events, (int)received);
     #endif
   
     // Resend UDP packet to TCP Proxy
@@ -576,10 +575,9 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 
                 // Show write to TCP Proxy client error
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG,
-                    "%sTCP Proxy:%s "
-                    "Send to TCP client fd %d error, rv: %d, pl: %d %s\n", 
-                    ANSI_YELLOW, ANSI_RED, tpd->tcp_proxy_fd, rv, pl, ANSI_NONE);
+                ksn_printf(kev, MODULE, DEBUG,
+                    "send to TCP client fd %d error, rv: %d, pl: %d %s\n", 
+                    tpd->tcp_proxy_fd, rv, pl, ANSI_NONE);
                 #endif
             } 
             
@@ -587,20 +585,18 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             else {
                 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-                    "%sTCP Proxy:%s "
-                    "Resent UDP packet to TCP client, packet size: %d bytes\n", 
-                    ANSI_YELLOW, ANSI_NONE, pl);
+                ksn_printf(kev, MODULE, DEBUG_VV,
+                    "resent UDP packet to TCP client, packet size: %d bytes\n", 
+                    pl);
                 #endif
             }
         }
         else {
             
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                    "%sTCP Proxy:%s "
-                    "Can't find fd %d in TCP Proxy map%s\n", 
-                    ANSI_YELLOW, ANSI_RED, w->fd, ANSI_NONE);
+                ksn_printf(kev, MODULE, DEBUG, 
+                    "can't find fd %d in TCP Proxy map%s\n", 
+                    w->fd, ANSI_NONE);
                 #endif
         }
     }    
@@ -627,10 +623,9 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
     // Read TCP data
     ssize_t received = read(w->fd, data, data_len);
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-            "%sTCP Proxy:%s "
-            "Got something from fd %d w->events = %d, received = %d ...\n", 
-            ANSI_YELLOW, ANSI_NONE, w->fd, w->events, (int)received);
+    ksn_printf(kev, MODULE, DEBUG_VV, 
+            "got something from fd %d w->events = %d, received = %d ...\n", 
+            w->fd, w->events, (int)received);
     #endif
 
     // Disconnect client:
@@ -638,11 +633,9 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
     if(!received) {        
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-            &kev->ksn_cfg , DEBUG,
-            "%sTCP Proxy:%s "
-            "Connection closed. Stop listening fd %d ...\n",
-            ANSI_YELLOW, ANSI_NONE, w->fd
+        ksn_printf(kev, MODULE, DEBUG,
+            "connection closed. Stop listening fd %d ...\n",
+            w->fd
         );
         #endif
         
@@ -660,10 +653,8 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
         //        }
     
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-            &kev->ksn_cfg, DEBUG,
-            "%sTCP Proxy:%s Read error ...%s\n", 
-            ANSI_YELLOW, ANSI_RED, ANSI_NONE
+        ksn_printf(kev, MODULE, DEBUG,
+            "read error ...%s\n", ANSI_NONE
         );
         #endif
     }
@@ -769,30 +760,27 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
                 // Wrong process package stage error
                 if(rv == -1) { 
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                        "%sTCP Proxy:%s "
-                        "Wrong process package stage ...%s\n", 
-                        ANSI_YELLOW, ANSI_RED, ANSI_NONE);
+                    ksn_printf(kev, MODULE, DEBUG, 
+                        "%s" "wrong process package stage ...%s\n", 
+                        ANSI_RED, ANSI_NONE);
                     #endif
                 }
 
                 // Wrong packet received error
                 else if(rv == -2) {
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                        "%sTCP Proxy:%s "
-                        "Wrong packet received ...%s\n", 
-                        ANSI_YELLOW, ANSI_RED, ANSI_NONE);
+                    ksn_printf(kev, MODULE, DEBUG, 
+                        "%s" "wrong packet received ...%s\n", 
+                        ANSI_RED, ANSI_NONE);
                     #endif
                 }
 
                 // Wrong packet body received error
                 else if(rv == -3) {
                     #ifdef DEBUG_KSNET
-                    ksnet_printf(&kev->ksn_cfg, DEBUG, 
-                        "%sTCP Proxy:%s "
-                        "Wrong packet checksum ...%s\n", 
-                        ANSI_YELLOW, ANSI_RED, ANSI_NONE);
+                    ksn_printf(kev, MODULE, DEBUG, 
+                        "%s" "wrong packet checksum ...%s\n", 
+                        ANSI_RED, ANSI_NONE);
                     #endif
                 }
                 
@@ -804,10 +792,9 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
             else {                
                 // Do nothing
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                    "%sTCP Proxy:%s "
-                    "Part of packet received. Wait for next part ...%s\n", 
-                    ANSI_YELLOW, ANSI_GREY, ANSI_NONE);
+                ksn_printf(kev, MODULE, DEBUG_VV, 
+                    "%s" "part of packet received. Wait for next part ...%s\n", 
+                    ANSI_GREY, ANSI_NONE);
                 #endif                
             }
             
@@ -876,9 +863,8 @@ int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
                     tp, 
                     &port_created)) > 0) {
 
-            ksnet_printf(&kev->ksn_cfg, MESSAGE, 
-                    "%sTCP Proxy:%s TCP Proxy server fd %d started at port %d\n", 
-                    ANSI_YELLOW, ANSI_NONE,
+            ksn_printf(kev, MODULE, MESSAGE, 
+                    "TCP Proxy server fd %d started at port %d\n", 
                     fd, port_created);
 
             kev->ksn_cfg.tcp_port = port_created;
@@ -948,22 +934,15 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
 
     int udp_proxy_fd, udp_proxy_port = kev->ksn_cfg.port;
 
-    ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s "
-            "TCP Proxy client fd %d connected\n", 
-            ANSI_YELLOW, ANSI_NONE, fd);
+    ksn_printf(kev, MODULE, CONNECT, "TCP Proxy client fd %d connected\n", fd);
 
     // Open UDP Proxy client/server
-    ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s "
-            "Create UDP client/server Proxy at port %d ...\n", 
-            ANSI_YELLOW, ANSI_NONE,
+    ksn_printf(kev, MODULE, CONNECT, 
+            "create UDP client/server Proxy at port %d ...\n", 
             udp_proxy_port);
     udp_proxy_fd = ksnCoreBindRaw(&kev->ksn_cfg, &udp_proxy_port);
-    ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s "
+    ksn_printf(kev, MODULE, CONNECT, 
             "UDP client/server Proxy fd %d created at port %d\n", 
-            ANSI_YELLOW, ANSI_NONE,
             udp_proxy_fd,
             udp_proxy_port);
 
@@ -1038,18 +1017,17 @@ void ksnTCPProxyServerClientDisconnect(ksnTCPProxyClass *tp, int fd,
         close(fd); 
 
         // Show disconnect message
-        ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s TCP Proxy client fd %d disconnected\n", 
-            ANSI_YELLOW, ANSI_NONE, fd);
+        ksn_printf(kev, MODULE, CONNECT, 
+                "TCP Proxy client fd %d disconnected\n", fd);
 
         // Stop UDP client/server Proxy watcher and Close UDP Proxy connection 
         ev_io_stop (kev->ev_loop, &tpd->w_udp);
         close(tpd->udp_proxy_fd); 
 
         // Show disconnect message
-        ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sTCP Proxy:%s UDP Proxy client fd %d disconnected\n", 
-            ANSI_YELLOW, ANSI_NONE, tpd->udp_proxy_fd);
+        ksn_printf(kev, MODULE, CONNECT, 
+            "UDP Proxy client fd %d disconnected\n", 
+            tpd->udp_proxy_fd);
 
         // Remove data from map
         if(remove_f) {

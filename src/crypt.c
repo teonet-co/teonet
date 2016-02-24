@@ -17,6 +17,8 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_BROWN "net_crypt" _ANSI_NONE
+
 // Number of modules started
 int num_crypt_module = 0;
 
@@ -195,9 +197,9 @@ int _decrypt(ksnCryptClass *kcr, unsigned char *ciphertext, int ciphertext_len, 
   if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) {
       
         #ifdef DEBUG_KSNET
-        ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG,
-                    "%sEncrypt:%s Can't decrypt %d bytes package ...\n",
-                    ANSI_BROWN, ANSI_NONE, plaintext_len);
+        ksn_printf(((ksnetEvMgrClass*)kcr->ke), MODULE, DEBUG,
+                    "can't decrypt %d bytes package ...\n",
+                    plaintext_len);
         #endif
         //handleErrors();
         return 0;
@@ -247,9 +249,9 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 
     // Encrypt the package
     #ifdef DEBUG_KSNET
-    ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
-                "%sEncrypt:%s %d bytes to %d bytes buffer ...\n",
-                ANSI_BROWN, ANSI_NONE, package_len, (int)(*encrypt_len));
+    ksn_printf(((ksnetEvMgrClass*)kcr->ke), MODULE, DEBUG_VV,
+                "encrypt %d bytes to %d bytes buffer ...\n",
+                package_len, (int)(*encrypt_len));
     #endif
     *encrypt_len = _encrypt(package, package_len, kcr->key, kcr->iv,
                             buffer + ptr);
@@ -279,9 +281,9 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
 
     // Decrypt the package
     #ifdef DEBUG_KSNET
-    ksnet_printf( & ((ksnetEvMgrClass*)kcr->ke)->ksn_cfg, DEBUG_VV,
-                "%sDecrypt:%s %d bytes from %d bytes package ...\n",
-                ANSI_BROWN, ANSI_NONE, *decrypt_len, package_len - ptr);
+    ksn_printf(((ksnetEvMgrClass*)kcr->ke), MODULE, DEBUG_VV,
+                "decrypt %d bytes from %d bytes package ...\n",
+                *decrypt_len, package_len - ptr);
     #endif
     *decrypt_len = _decrypt(kcr, package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);

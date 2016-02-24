@@ -32,6 +32,9 @@ typedef int socklen_t;
 const char *localhost = "127.0.0.1";
 #define PACKET_HEADER_ADD_SIZE 2    // Sizeof from length + Sizeof command
 
+#define MODULE _ANSI_GREEN "net_core" _ANSI_GREY
+#define kev ((ksnetEvMgrClass *)ksn_cfg->ke)
+
 // Local functions
 void host_cb(EV_P_ ev_io *w, int revents);
 int ksnCoreBind(ksnCoreClass *kc);
@@ -207,12 +210,10 @@ int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
 
         if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
-            ksnet_printf(ksn_cfg, MESSAGE, 
-                    "%sNet core:%s Can't bind on port %d, "
-                    "try next port number ...%s\n", 
-                    ANSI_GREEN, ANSI_GREY,
-                    *port, 
-                    ANSI_NONE);
+            ksn_printf(kev, MODULE, DEBUG,
+                    "can't bind on port %d, try next port number ...\n", 
+                    *port);
+                    
             (*port)++;
             if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
             else return -2;
@@ -235,18 +236,16 @@ int ksnCoreBind(ksnCoreClass *kc) {
     ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
     
     #ifdef DEBUG_KSNET
-    ksnet_printf(ksn_cfg, MESSAGE, 
-                    "%sNet core:%s Create UDP client/server at port %d ...\n", 
-                    ANSI_GREEN, ANSI_NONE, kc->port);
+    ksn_printf(kev, MODULE, DEBUG, 
+            "create UDP client/server at port %d ...\n", kc->port);
     #endif
     
     if((fd = ksnCoreBindRaw(ksn_cfg, &kc->port)) > 0) {
 
         kc->fd = fd;
         #ifdef DEBUG_KSNET
-        ksnet_printf(ksn_cfg, MESSAGE, 
-                "%sNet core:%s Start listen at port %d, socket fd %d\n", 
-                ANSI_GREEN, ANSI_NONE, kc->port, kc->fd);
+        ksn_printf(((ksnetEvMgrClass*)kc->ke), MODULE, MESSAGE, 
+                "start listen at port %d, socket fd %d\n", kc->port, kc->fd);
         #endif
 
         // Set non block mode
@@ -274,9 +273,8 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
                   void *data, size_t data_len) {
 
     #ifdef DEBUG_KSNET
-    ksnet_printf( & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg, DEBUG_VV,
-                 "%sNet core:%s >> ksnCoreSendto %s:%d %d \n", 
-                 ANSI_GREEN, ANSI_NONE, addr, port, data_len);
+    ksn_printf(((ksnetEvMgrClass*)kc->ke), MODULE, DEBUG_VV,
+                 "send %d bytes to %s:%d\n", data_len, addr, port);
     #endif
 
 
@@ -370,9 +368,8 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                 data_len))) {
                
         #ifdef DEBUG_KSNET
-        ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG, 
-                "%sNet core:%s Send to peer %s at other network\n", 
-                ANSI_GREEN, ANSI_NONE, to);
+        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG, 
+                "send to peer \"%s\" at other network\n", to);
         #endif
     }
     
@@ -383,10 +380,8 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                     to)) != NULL) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG_VV, 
-                "%sNet core:%s Send command to L0 client \"%s\" to r-host\n", 
-                ANSI_GREEN, ANSI_NONE, 
-                to);
+        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV, 
+                "send command to L0 client \"%s\" to r-host\n", to);
         #endif                
 
         ssize_t snd;                
@@ -415,10 +410,8 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         if(r_host[0] && (arp = ksnetArpGet(kc->ka, r_host)) != NULL) {
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(&((ksnetEvMgrClass*)(kc->ke))->ksn_cfg, DEBUG_VV, 
-                    "%sNet core:%s Resend command to peer \"%s\" to r-host\n", 
-                    ANSI_GREEN, ANSI_NONE, 
-                    to);
+            ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV, 
+                    "resend command to peer \"%s\" to r-host\n", to);
             #endif
 
             // Create resend command buffer and Send command to r-host 
@@ -668,12 +661,8 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         int port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-                "%sNet core:%s << host_cb receive %d bytes from %s:%d\n", 
-                ANSI_GREEN, ANSI_NONE, 
-                recvlen, 
-                addr,
-                port);
+        ksn_printf(ke, MODULE, DEBUG_VV, 
+                "receive %d bytes from %s:%d\n", recvlen, addr, port);
         #endif
 
         void *data; // Decrypted packet data
@@ -727,9 +716,8 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         else {
             
             #ifdef DEBUG_KSNET
-            ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-                "%sNet core:%s << got data %d bytes len, cmd = %d, from %s\n",
-                ANSI_GREEN, ANSI_NONE, 
+            ksn_printf(ke, MODULE, DEBUG_VV, 
+                "got %d byte data, cmd = %d, from %s\n",
                 rd.data_len, rd.cmd, rd.from);
             #endif
          

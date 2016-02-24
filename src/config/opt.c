@@ -77,6 +77,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         #endif
 
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
+        { "log_priority",   required_argument, &conf->log_priority, 0 },
         
         { "daemon",         no_argument,       &conf->dflag, 1 },
         { "kill",           no_argument,       &conf->kflag, 1 },
@@ -124,12 +125,11 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 0:
           if(!strcmp(loptions[option_index].name, "app_name")) {
-              printf("Name of this application is: %s\n\n",
-                     conf->app_name);
+              printf("Name of this application is: %s\n\n", conf->app_name);
               exit(EXIT_SUCCESS);
           }
 
-          else if(!strcmp(loptions[option_index].name, "app_desc")) {
+          else if(!strcmp(loptions[option_index].name, "app_description")) {
               printf("Application description:\n%s\n\n",
                      conf->app_description);
               exit(EXIT_SUCCESS);
@@ -351,6 +351,10 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     "\n"
     "      --sig_segv           Segmentation fault error processing by library\n"
+    "      --log_priority       Syslog priority: (Default: 4)\n"
+    "                             DEBUG: 4, MESSAGE: 3, CONNECT: 2, ERROR_M: 1\n"
+    "                             NO_LOG: 0\n"
+    "\n"
     "  -d, --daemon             Start this application in daemon mode\n"
     "  -k, --kill               Kill the application running in daemon mode\n"
     "\n",
@@ -369,7 +373,10 @@ void ksnet_optSetApp(ksnet_cfg *conf,
                      const char* app_prompt,
                      const char* app_description) {
 
-    strncpy(conf->app_name, app_name, KSN_BUFFER_SM_SIZE/2);
+    const char *lt = "lt-"; 
+    const size_t lt_len = 3, ptr = !strncmp(app_name, lt, lt_len) ? lt_len : 0;
+    
+    strncpy(conf->app_name, app_name + ptr, KSN_BUFFER_SM_SIZE/2);
     strncpy(conf->app_prompt, app_prompt, KSN_BUFFER_SM_SIZE/2);
     strncpy(conf->app_description, app_description, KSN_BUFFER_SM_SIZE/2);
 }

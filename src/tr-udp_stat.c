@@ -13,7 +13,10 @@
 #include "tr-udp_.h"
 #include "tr-udp_stat.h"
 #include "utils/utils.h"
+
 #include "net_core.h"
+
+#define MODULE _ANSI_LIGHTGREEN "tr_udp_stat" _ANSI_NONE
 
 /******************************************************************************
  * 
@@ -205,8 +208,9 @@ inline int ksnTRUDPstatShow(ksnTRUDPClass *tu) {
     int num_line = 0;
     char *str = ksnTRUDPstatShowStr(tu);
 
-    ksnet_printf(&((ksnetEvMgrClass*) (((ksnCoreClass*)tu->kc)->ke))->ksn_cfg, 
-            MESSAGE, "%s", str);
+    ksn_printf(((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke)), MODULE, DISPLAY_M, 
+            "%s", str);
+    
     num_line = calculate_lines(str);
 
     free(str);

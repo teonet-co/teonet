@@ -46,9 +46,11 @@
             <word>jsmt</word>
             <word>json</word>
             <word>kirill</word>
+            <word>kirsoft</word>
             <word>ksnet</word>
             <word>len</word>
             <word>libev</word>
+            <word>libksmesh</word>
             <word>libteol</word>
             <word>libteonet</word>
             <word>linux</word>
@@ -67,15 +69,18 @@
             <word>scherba</word>
             <word>segv</word>
             <word>sh</word>
+            <word>splitted</word>
             <word>src</word>
             <word>str</word>
             <word>strndup</word>
             <word>strtol</word>
             <word>subpacket</word>
             <word>subpackets</word>
+            <word>Syslog</word>
             <word>tcp</word>
             <word>teo</word>
             <word>teocli</word>
+            <word>teodb</word>
             <word>teonet</word>
             <word>teostream</word>
             <word>teotproxy</word>

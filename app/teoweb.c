@@ -17,6 +17,7 @@
 #include "modules/teo_auth/teo_auth.h"
 
 #define TWEB_VERSION "0.0.1"
+#define APP_NAME "teoweb"
 
 typedef struct teowebModules {
     
@@ -70,8 +71,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Web socket client was connected
                     case WS_CONNECTED:
                         
-                        printf("Async event was received from %p, "
-                            "connected\n", nc);
+                        ksn_printf(ke, APP_NAME, DEBUG,
+                            "async event was received from %p, connected\n", 
+                            nc);
                         
                         // Send message to client
                         #define HELLO_MSG "Hello from WS server!"
@@ -83,20 +85,18 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Web socket client was disconnected
                     case WS_DISCONNECTED:
                         
-                        printf("Async event was received from %p, "
-                            "disconnected\n", nc);
+                        ksn_printf(ke, APP_NAME, DEBUG,
+                            "async event was received from %p, disconnected\n", 
+                            nc);
                         break;
 
                     // Web socket client send a message
                     case WS_MESSAGE: 
                         
-                        printf("Async event was received from %p, "
-                               "%d bytes: '%.*s'\n", 
-                               nc, (int)data_len, (int)td->data_len, 
-                               (char*) td->data);
-                        
-                        // Send echo message
-                        // mg_send_websocket_frame(nc, WEBSOCKET_OP_TEXT, td->data, td->data_len);
+                        ksn_printf(ke, APP_NAME, DEBUG,
+                            "Async event was received from %p, %d bytes: '%.*s'\n", 
+                            nc, (int)data_len, (int)td->data_len, 
+                            (char*) td->data);
                         
                         break;
                 }
@@ -118,7 +118,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  */
 int main(int argc, char** argv) {
     
-    printf("Teoweb ver " TWEB_VERSION ", based on teonet ver "
+    printf("Teoweb ver. " TWEB_VERSION ", based on teonet ver. "
             "%s" "\n", teoGetLibteonetVersion());
     
     teowebModules tm;

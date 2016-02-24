@@ -40,6 +40,8 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 const char *JSON = "JSON";
 const char *BINARY = "BINARY";
 
+#define MODULE _ANSI_LIGHTBLUE "net_command" _ANSI_NONE
+
 /**
  * Initialize ksnet command class
  *
@@ -643,11 +645,11 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         
         // Show command message
         //#ifdef DEBUG_KSNET
-        ksnet_printf(& ke->ksn_cfg, MESSAGE,
+        ksnet_printf(& ke->ksn_cfg, DISPLAY_M,
             "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
-            rd->data_len, // command data length
-            rd->from,     // from
-            triptime      // triptime
+            (int)rd->data_len, // command data length
+            rd->from,          // from
+            triptime           // triptime
         );
         //#endif
     }
@@ -661,14 +663,14 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     else if(!strcmp(rd->data, MONITOR)) {
         
         // Show command message
-        #ifdef DEBUG_KSNET
-        ksnet_printf(& ke->ksn_cfg, DEBUG_VV,
+        //#ifdef DEBUG_KSNET
+        ksnet_printf(& ke->ksn_cfg, DISPLAY_M,
             "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
-            rd->data_len,   // command data length
-            rd->from,       // from
-            triptime
+            (int)rd->data_len,   // command data length
+            rd->from,            // from
+            triptime             // triptime
         );
-        #endif
+        //#endif
 
         // Set monitor time
         ksnet_arp_data *arp_data = ksnetArpGet(ke->kc->ka, rd->from);
@@ -680,15 +682,12 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Show command message
         #ifdef DEBUG_KSNET
-        ksnet_printf(& ke->ksn_cfg, DEBUG,
-            "%sNet command:%s "
-            "received Echo answer command => from '%s': %d byte data: "
-            "%s, %.3f ms\n",
-            ANSI_LIGHTBLUE, ANSI_NONE,
+        ksn_printf(ke, MODULE, DEBUG,
+            "got echo answer from \"%s\", %d byte data: \"%s\", %.3f ms\n",
             rd->from,        // from
             rd->data_len,    // command data length
             rd->data,        // commands data
-            triptime
+            triptime         // trip time
         );
         #endif
     }
@@ -822,10 +821,8 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     pd.port = *((uint32_t *)(rd->data + ptr));
 
     #ifdef DEBUG_KSNET
-    ksnet_printf(
-        &((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)->ksn_cfg,
-        DEBUG_VV,
-        "cmd_connect_cb: %s %s:%d\n", pd.name, pd.addr, pd.port);
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), MODULE, DEBUG_VV, 
+            "got CMD_CONNECT from: \"%s\" %s:%d\n", pd.name, pd.addr, pd.port);
     #endif
 
     // Check ARP
