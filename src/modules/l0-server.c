@@ -16,6 +16,8 @@
 #include "l0-server.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_LIGHTCYAN "l0_server" _ANSI_NONE
+
 // Local functions
 static int ksnLNullStart(ksnLNullClass *kl);
 static void ksnLNullStop(ksnLNullClass *kl);
@@ -99,22 +101,19 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     // Read TCP data
     ssize_t received = read(w->fd, data, data_len);
     #ifdef DEBUG_KSNET
-    ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-            "%sl0 Server:%s "
+    ksn_printf(kev, MODULE, DEBUG_VV, 
             "Got something from fd %d w->events = %d, received = %d ...\n", 
-            ANSI_LIGHTCYAN, ANSI_NONE, w->fd, w->events, (int)received);
-    #endif
+            w->fd, w->events, (int)received);
+#endif
 
     // Disconnect client:
     // Close TCP connections and remove data from l0 clients map
     if(!received) {        
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-            &kev->ksn_cfg , DEBUG_VV,
-            "%sl0 Server:%s "
+        ksn_printf(kev, MODULE, DEBUG_VV,
             "Connection closed. Stop listening fd %d ...\n",
-            ANSI_LIGHTCYAN, ANSI_NONE, w->fd
+            w->fd
         );
         #endif
         
@@ -157,10 +156,9 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     kld->read_buffer = malloc(kld->read_buffer_size);     
                 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                    "%sl0 Server:%s "
-                    "Increase read buffer to new size: %d bytes ...%s\n", 
-                    ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_size, 
+                ksn_printf(kev, MODULE, DEBUG_VV, 
+                    "%s" "increase read buffer to new size: %d bytes ...%s\n", 
+                    ANSI_DARKGREY, kld->read_buffer_size, 
                     ANSI_NONE);
                 #endif
             }
@@ -199,10 +197,9 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                                     &w->fd, sizeof(w->fd));
 
                             #ifdef DEBUG_KSNET
-                            ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                                "%sl0 Server:%s "
-                                "Connection initialized, client name: %s ...\n", 
-                                ANSI_LIGHTCYAN, ANSI_NONE, kld->name);
+                            ksn_printf(kev, MODULE, DEBUG_VV, 
+                                "connection initialized, client name: %s ...\n", 
+                                kld->name);
                             #endif
 
                             // Send Connected event to all subscribers
@@ -234,10 +231,9 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     // Wrong checksum - drop this packet
                     else {
                         #ifdef DEBUG_KSNET
-                        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                            "%sl0 Server:%s "
-                            "Wrong packet %d bytes length; dropped ...%s\n", 
-                            ANSI_LIGHTCYAN, ANSI_RED, len, ANSI_NONE);
+                        ksn_printf(kev, MODULE, DEBUG_VV, 
+                            "%s" "wrong packet %d bytes length; dropped ...%s\n", 
+                            ANSI_RED, len, ANSI_NONE);
                         #endif
 
                         kld->read_buffer_ptr = 0;
@@ -251,10 +247,9 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             if(kld->read_buffer_ptr - ptr > 0) {
 
                 #ifdef DEBUG_KSNET
-                ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-                    "%sl0 Server:%s "
-                    "Wait next part of packet, now it has %d bytes ...%s\n", 
-                    ANSI_LIGHTCYAN, ANSI_DARKGREY, kld->read_buffer_ptr - ptr, 
+                ksn_printf(kev, MODULE, DEBUG_VV, 
+                    "%s" "wait next part of packet, now it has %d bytes ...%s\n", 
+                    ANSI_DARKGREY, kld->read_buffer_ptr - ptr, 
                     ANSI_NONE);
                 #endif
 
@@ -318,10 +313,9 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     if(strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-            "%sl0 Server:%s "
-            "Send command from L0 \"%s\" client to \"%s\" peer ...\n", 
-            ANSI_LIGHTCYAN, ANSI_NONE, spacket->from, packet->peer_name);
+        ksn_printf(kev, MODULE, DEBUG_VV, 
+            "send command from L0 \"%s\" client to \"%s\" peer ...\n", 
+            spacket->from, packet->peer_name);
         #endif
 
         arp = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0, 
@@ -330,10 +324,9 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     // Send to this host
     else {
         #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV, 
-            "%sl0 Server:%s "
-            "Send command to L0 server peer \"%s\" from L0 client \"%s\" ...\n", 
-            ANSI_LIGHTCYAN, ANSI_NONE, packet->peer_name, spacket->from);
+        ksn_printf(kev, MODULE, DEBUG_VV, 
+            "send command to L0 server peer \"%s\" from L0 client \"%s\" ...\n", 
+            packet->peer_name, spacket->from);
         #endif
         
         // Create packet
@@ -389,10 +382,9 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     
     // Send command to client of L0 server
     #ifdef DEBUG_KSNET
-    ksnet_printf(&((ksnetEvMgrClass*)ke)->ksn_cfg, DEBUG_VV, 
-        "%sl0 Server:%s "
-        "Send command to L0 server for client \"%s\" ...\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, spacket->from);
+    ksn_printf(((ksnetEvMgrClass*)ke), MODULE, DEBUG_VV, 
+        "send command to L0 server for client \"%s\" ...\n", 
+        spacket->from);
     #endif
     int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO, 
             out_data, out_data_len);    
@@ -420,10 +412,8 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
     // Set TCP_NODELAY option
     set_tcp_nodelay(fd);
 
-    ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sl0 Server:%s "
-            "L0 client with fd %d connected\n", 
-            ANSI_LIGHTCYAN, ANSI_NONE, fd);
+    ksn_printf(kev, MODULE, CONNECT, 
+            "L0 client with fd %d connected\n", fd);
     
     // Send Connected event to all subscribers
     teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, "", 1, 0);
@@ -482,10 +472,8 @@ static void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         close(fd); 
 
         // Show disconnect message
-        ksnet_printf(&kev->ksn_cfg, CONNECT, 
-            "%sl0 Server:%s "
-            "L0 client with fd %d disconnected\n", 
-            ANSI_LIGHTCYAN, ANSI_NONE, fd);
+        ksn_printf(kev, MODULE, CONNECT, 
+            "L0 client with fd %d disconnected\n", fd);
         
         // Send Disconnect event to all subscribers
         teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name, 
@@ -558,10 +546,8 @@ static int ksnLNullStart(ksnLNullClass *kl) {
                     kl, 
                     &port_created)) > 0) {
 
-            ksnet_printf(&kev->ksn_cfg, MESSAGE, 
-                    "%sl0 Server:%s "
-                    "l0 Server fd %d started at port %d\n", 
-                    ANSI_LIGHTCYAN, ANSI_NONE,
+            ksn_printf(kev, MODULE, MESSAGE, 
+                    "l0 server fd %d started at port %d\n", 
                     fd, port_created);
 
             kev->ksn_cfg.l0_tcp_port = port_created;
@@ -626,10 +612,9 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
        (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sl0 Server:%s "
+        ksn_printf(ke, MODULE, DEBUG_VV, 
             "Got valid command No %d from %s client with %d bytes data ...\n", 
-            ANSI_LIGHTCYAN, ANSI_NONE, data->cmd, data->from, data->data_length);
+            data->cmd, data->from, data->data_length);
         #endif
 
         ksnCorePacketData *rds = rd;
@@ -650,11 +635,10 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     else {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sl0 Server:%s "
-            "Got wrong command No %d from %s client with %d bytes data, "
+        ksn_printf(ke, MODULE, DEBUG_VV, 
+            "%s" "got wrong command No %d from %s client with %d bytes data, "
             "the command skipped ...%s\n", 
-            ANSI_LIGHTCYAN, ANSI_RED, 
+            ANSI_RED, 
             data->cmd, data->from, data->data_length, 
             ANSI_NONE);
         #endif
@@ -693,11 +677,9 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksnLNullSPacket *data = rd->data;
         
     #ifdef DEBUG_KSNET
-    ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-        "%sl0 Server:%s "
+    ksn_printf(ke, MODULE, DEBUG_VV, 
         "Got command No %d to \"%s\" L0 client from peer \"%s\" "
         "with %d bytes data\n", 
-        ANSI_LIGHTCYAN, ANSI_NONE, 
         data->cmd, data->from, rd->from, data->data_length);
     #endif
     
@@ -722,11 +704,9 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         #ifdef DEBUG_KSNET
         teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
         //void *packet_data = packet->peer_name + packet->peer_name_length;
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sl0 Server:%s "
-            "Send %d bytes to \"%s\" L0 client: %d bytes data, "
+        ksn_printf(ke, MODULE, DEBUG_VV, 
+            "send %d bytes to \"%s\" L0 client: %d bytes data, "
             "from peer \"%s\"\n", 
-            ANSI_LIGHTCYAN, ANSI_NONE, 
             (int)snd, data->from, 
             packet->data_length, packet->peer_name);
         #endif
@@ -736,12 +716,9 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     else {
         
         #ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
-            "%sl0 Server:%s "
-            "The \"%s\" L0 client has not connected to the server%s\n", 
-            ANSI_LIGHTCYAN, ANSI_RED, 
-            data->from,
-            ANSI_NONE);
+        ksn_printf(ke, MODULE, DEBUG_VV, 
+            "%s" "the \"%s\" L0 client has not connected to the server%s\n", 
+            ANSI_RED, data->from, ANSI_NONE);
         #endif
     }
 

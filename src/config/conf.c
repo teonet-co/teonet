@@ -88,6 +88,9 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // SIGSEGV processing
     ksn_cfg->sig_segv_f = 0;
     
+    // Syslog priority
+    ksn_cfg->log_priority = DEBUG;
+    
     // Terminal
 //    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
 //    strncpy(ksn_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
@@ -159,6 +162,8 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_STR("vpn_dev_name", &vpn_dev_name),
         CFG_SIMPLE_STR("vpn_dev_hwaddr", &vpn_dev_hwaddr),
         #endif
+
+        CFG_SIMPLE_INT("log_priority", &conf->log_priority),
 
         CFG_END()
     };

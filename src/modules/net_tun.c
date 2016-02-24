@@ -15,6 +15,8 @@
 #include "ev_mgr.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_BLUE "tunnel_server" _ANSI_NONE
+
 #ifdef M_ENAMBE_TUN
 
 /**
@@ -152,10 +154,9 @@ void ksn_tun_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *watcher,
 
         // Close socket
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-                & ((ksnetEvMgrClass *)(tun_d->ktun->ke))->ksn_cfg, DEBUG,
-                "%sTUN Server:%s Can't create tunnel to %s, disconnect... \n",
-                ANSI_BLUE, ANSI_NONE, tun_d->to
+        ksn_printf((ksnetEvMgrClass *)(tun_d->ktun->ke), MODULE, DEBUG,
+                "can't create tunnel to %s, disconnect... \n",
+                tun_d->to
         );
         #endif
         shutdown(fd, SHUT_RDWR);
@@ -164,10 +165,8 @@ void ksn_tun_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *watcher,
     else {
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-                & ((ksnetEvMgrClass *)(tun_d->ktun->ke))->ksn_cfg, DEBUG,
-                "%sTUN Server:%s Tunnel to %s created \n",
-                ANSI_BLUE, ANSI_NONE, tun_d->to
+        ksn_printf((ksnetEvMgrClass *)(tun_d->ktun->ke), MODULE, DEBUG,
+                "tunnel to %s created \n", tun_d->to
         );
         #endif
     }
@@ -417,10 +416,8 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
     if(!read_len) {
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-            & ((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke)->ksn_cfg , DEBUG,
-            "%sTUN Server:%s Connection closed. Stop listening fd %d\n",
-            ANSI_BLUE, ANSI_NONE, w->fd
+        ksn_printf((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke, MODULE, DEBUG,
+            "connection closed, stop listening fd %d\n", w->fd
         );
         #endif
 
@@ -451,9 +448,8 @@ void cmd_tun_read_cb (EV_P_ ev_io *w, int revents) {
 //        }
     
         #ifdef DEBUG_KSNET
-        ksnet_printf(
-            & ((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke)->ksn_cfg , DEBUG,
-            "%sTUN Server:%s Read error\n", ANSI_BLUE, ANSI_NONE
+        ksn_puts((ksnetEvMgrClass*)((ksnTunClass *)w->data)->ke, MODULE, DEBUG,
+            "read error"
         );
         #endif
 

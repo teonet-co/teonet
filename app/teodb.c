@@ -42,7 +42,7 @@
 #include "ev_mgr.h"
 
 #define TDB_VERSION "0.0.1"
-#define APPNAME "\033[22;35m" "Teodb: " "\033[0m"
+#define APPNAME _ANSI_MAGENTA "teodb" _ANSI_NONE
 
 // Constants
 #define DEFAULT_NAMESPACE "test"
@@ -71,7 +71,7 @@ typedef struct json_param {
                         rd->data_len > JSON_LEN && \
                         !strncmp(rd->data, JSON, JSON_LEN)  ? 1 : 0; \
     \
-    ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME \
+    ksn_printf(ke, APPNAME, DEBUG,  \
         "Got cmd: %d, type: %s, from: %s\n", \
         rd->cmd, data_type  ? JSON : BINARY, rd->from \
     )
@@ -315,7 +315,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         
                         // Get JSON string from input data
                         char *json_data_unesc = data_to_json_str(rd->data, rd->data_len);                        
-                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                        ksn_printf(ke, APPNAME, DEBUG, 
                                 "CMD_D_SET data: %s\n", json_data_unesc);
 
                         // Parse request
@@ -338,11 +338,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 rv = ksnTDBdeleteStr(ke->kf, jp.key);
                         }
                         if(!rv)
-                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                            ksn_printf(ke, APPNAME, DEBUG, 
                                 "KEY: \"%s\", DATA: \"%s\", DB set status: %d\n", 
                                 jp.key, jp.data, rv);
                         else
-                           ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                           ksn_printf(ke, APPNAME, DEBUG, 
                                 "An error happened during write to DB, "
                                 "KEY: \"%s\", DATA: \"%s\", "
                                 "rv: %d ...\n", jp.key, jp.data, rv); 
@@ -373,18 +373,18 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             );
                             
                             if(!rv)
-                                ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                ksn_printf(ke, APPNAME, DEBUG, 
                                     "KEY: %s, DATA: %s, DB set status: %d\n", 
                                     tdd->key_data, 
                                     tdd->key_data + tdd->key_length, rv);
                         }
                         else 
-                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                            ksn_printf(ke, APPNAME, DEBUG, 
                                     "Wrong request DB packet size %d...\n", 
                                     rd->data_len);                        
                         
                         if(rv) { // \todo check error if != 0
-                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                            ksn_printf(ke, APPNAME, DEBUG, 
                                     "An error happened during write to DB, "
                                     "rv: %d ...\n", rv);
                         }
@@ -403,7 +403,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                         // Get JSON string from input data
                         char *json_data_unesc = data_to_json_str(rd->data, rd->data_len);
-                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                        ksn_printf(ke, APPNAME, DEBUG, 
                                 "CMD_D_GET data: %s\n", json_data_unesc);
 
                         // Parse request
@@ -416,7 +416,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Process the data
                         size_t data_len;
                         char *data = ksnTDBgetStr(ke->kf, jp.key, &data_len);
-                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                        ksn_printf(ke, APPNAME, DEBUG, 
                                 "KEY: %s, DATA: %s, DB get status: %d\n", 
                                 jp.key, data != NULL ? data : "", data == NULL);
                         
@@ -458,7 +458,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             
                             if(data != NULL) {
                                 
-                                ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                ksn_printf(ke, APPNAME, DEBUG, 
                                     "Get value from DB: KEY: %s, DATA: %s\n", 
                                     tdd->key_data, data);
                                 
@@ -478,12 +478,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 free(data_out);
                             }
                             else 
-                                ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                                ksn_printf(ke, APPNAME, DEBUG, 
                                     "The KEY %s not found in DB\n", 
                                     tdd->key_data);
                         }
                         else 
-                            ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                            ksn_printf(ke, APPNAME, DEBUG, 
                                     "Wrong request DB packet size %d...\n", 
                                     rd->data_len);
                     }
@@ -502,7 +502,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                         // Get JSON string from input data
                         char *json_data_unesc = data_to_json_str(rd->data, rd->data_len);
-                        ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                        ksn_printf(ke, APPNAME, DEBUG, 
                                     "CMD_D_LIST data: %s\n", json_data_unesc);
                         
                         // Parse request
@@ -522,7 +522,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     size_t out_data_len, list_len;
                     ksnet_stringArr argv;
                     list_len = ksnTDBkeyList(ke->kf, key, &argv);
-                    ksnet_printf(&ke->ksn_cfg, DEBUG, APPNAME
+                    ksn_printf(ke, APPNAME, DEBUG, 
                             "LIST_LEN: %d\n", 
                             list_len);
                         

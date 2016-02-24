@@ -12,26 +12,53 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+#include "rlutil.h"
 #include "string_arr.h"
 #include "config/conf.h"
 
 /**
- * KSNet printf types
+ * KSNet printf messages types
  */
 typedef enum ksnet_printf_type {
 
-            MESSAGE = 0,
-            ERROR_M,
-            DEBUG,
-            DEBUG_VV,
-            CONNECT
-
+            NONE_LOG,     ///< #0 Log off
+            ERROR_M,      ///< #1 Error message
+            CONNECT,      ///< #2 Connect or Auth messages 
+            MESSAGE,      ///< #3 Regular messages
+            DEBUG,        ///< #4 Debug message (normal)
+            DEBUG_VV,     ///< #5 Debug message (extra)
+            DISPLAY_M,    ///< #6 Regular messages (display only)
+                    
 } ksnet_printf_type;
+
+#define _ksn_printf_type_(type) \
+   (type == MESSAGE ? "MESSAGE" : \
+    type == ERROR_M ? "ERROR" : \
+    type == DEBUG ? "DEBUG" : \
+    type == DEBUG_VV ? "DEBUG_VV" : \
+    type == CONNECT ? "CONNECT" : "DISPLAY")
+
+#define _ksn_printf_format_(format) "%s %s:" _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " format
+
+#define ksn_printf(ke, module, type, format, ...) \
+    ksnet_printf(&((ke)->ksn_cfg), type, \
+        _ksn_printf_format_(format), \
+        _ksn_printf_type_(type), \
+        module == NULL ? (ke)->ksn_cfg.app_name : module, \
+        __func__, __FILE__, __LINE__, __VA_ARGS__)
+
+#define ksn_puts(ke, module, type, format) \
+    ksnet_printf(&((ke)->ksn_cfg), type, \
+        _ksn_printf_format_(format) "\n", \
+        _ksn_printf_type_(type), \
+        module == NULL ? (ke)->ksn_cfg.app_name : module, \
+        __func__, __FILE__, __LINE__)
+
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
-
+    
 int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...);
 char *ksnet_formatMessage(const char *fmt, ...);
 char *ksnet_sformatMessage(char *str_to_free, const char *fmt, ...);
@@ -42,6 +69,7 @@ char *getRandomHostName(void); // Implemented in enet.c module
 void *memdup(const void* d, size_t s);
 char *trim(char *str);
 char *trimlf(char *str);
+char *removeTEsc(char *str);
 //char* itoa(int ival);
 int calculate_lines(char *str);
 int inarray(int val, const int *arr, int size);

@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <libgen.h>
+#include <syslog.h>
 
 #include "config/config.h"
 
@@ -49,47 +50,131 @@ inline int KSN_GET_TEST_MODE() {
  */
 int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
-    int show_it = 0, ret_val = 0;
+    static int log_opened = 0;
+    int show_it = 0, 
+        show_log = 1, 
+        priority = LOG_USER, 
+        ret_val = 0;
     
     // Skip execution in tests
     if(KSN_GET_TEST_MODE()) return ret_val;
 
+    // Check type
     switch(type) {
 
         case CONNECT:
 
             if(ksn_cfg->show_connect_f) show_it = 1;
+            priority = LOG_NOTICE; //LOG_AUTH;
             break;
 
         case DEBUG:
 
             if(ksn_cfg->show_debug_f) show_it = 1;
+            priority = LOG_INFO;
             break;
 
         case DEBUG_VV:
 
             if(ksn_cfg->show_debug_vv_f) show_it = 1;
+            priority = LOG_DEBUG;
             break;
 
         case MESSAGE:
-        case ERROR_M:
-        default:
+            priority = LOG_NOTICE;
             show_it = 1;
+            break;
+            
+        case DISPLAY_M:
+            priority = LOG_NOTICE;
+            show_it = 1;
+            show_log = 0;
+            break;
+            
+        case ERROR_M:
+            priority = LOG_ERR;
+            show_it = 1;
+            break;
+            
+        default:
+            priority = LOG_INFO;
+            show_it = 1;
+            break;
     }
+    
+    show_log = show_log & ksn_cfg->log_priority >= type;
 
-    if(show_it) {
-
-        double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
-        if(type != MESSAGE && ct != 0.00)
-            printf("%s%f:%s ", ANSI_DARKGREY, ct, ANSI_NONE);
-
+    if(show_it || show_log) {
+        
         va_list args;
         va_start(args, format);
-        ret_val = vprintf(format, args);
+        char *p = ksnet_vformatMessage(format, args);
         va_end(args);
-    }
+        
+        // Show message
+        if(show_it) {
 
+            double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
+            if(type != MESSAGE && type != DISPLAY_M && ct != 0.00)
+                printf(_ANSI_DARKGREY"%f: "_ANSI_NONE, ct);
+
+//            va_list args;
+//            va_start(args, format);
+//            ret_val = vprintf(format, args);
+//            va_end(args);
+            printf("%s", p);
+        }
+
+        // Log message
+        if(show_log ) {
+
+            // Open log at first message
+            if(!log_opened) {
+
+                // Create prefix
+                const char* LOG_PREFIX = "teonet:";
+                const size_t LOG_PREFIX_SIZE = strlen(LOG_PREFIX);
+                size_t prefix_len = LOG_PREFIX_SIZE + strlen(ksn_cfg->app_name) + 1;
+                char *prefix = malloc(prefix_len); // \todo Free this at exit
+                strncpy(prefix, LOG_PREFIX, prefix_len);
+                strncat(prefix, ksn_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
+
+                // Open log
+                setlogmask (LOG_UPTO (LOG_INFO));
+                openlog (prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);            
+                log_opened = 1;
+            }
+
+//            va_list args;
+//            va_start(args, format);
+//            vsyslog(priority, format, args);
+//            va_end(args);
+            syslog(priority, "%s", trimlf(removeTEsc(p)));
+        }
+        free(p);
+    }
+    
     return ret_val;
+}
+
+
+/**
+ * Remove terminal escape substrings from string
+ * 
+ * @param str
+ * @return 
+ */
+char *removeTEsc(char *str) {
+    
+    int i, j = 0, skip_esc = 0, len = strlen(str);
+    for(i = 0; i <= len; i++) {
+        
+        if(skip_esc && str[i] == 'm') skip_esc = 0;
+        else if(!skip_esc && str[i] == '\033') skip_esc = 1;
+        else if(!skip_esc) str[j++] = str[i];
+    }
+    
+    return str;
 }
 
 /**

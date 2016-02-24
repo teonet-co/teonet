@@ -101,12 +101,12 @@ int main(int argc, char** argv) {
 
     // Execute build packet script 
     char cmd[KSN_BUFFER_SM_SIZE]; 
-    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %s %s %s %s %s",  
-            b_type == DEB ? argv[1] : "rpm", 
+    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %d %d:0:0 %s %s %s",  
+            b_type == DEB ? argv[1] : "rpm",  // 0
             // Script parameters
-            version, // $1 Version
-            LIBRARY_HI_VERSION, // $2
-            LIBRARY_VERSION, // $3
+            version,                // $1 Version
+            LIBRARY_MAJOR_VERSION,  // $2 Library major version
+            LIBRARY_MAJOR_VERSION,  // $3 Library version
             CI_BUILD_ID != NULL ? CI_BUILD_ID : "1", // $4 Build
             argc >= 3 ? argv[2] : b_type == DEB ? "amd64" : "x86_64", // $5 Architecture
             b_type > DEB ? argv[1] : "deb" // $6 RPM subtype

@@ -13,6 +13,8 @@
 #include "net_split.h"
 #include "utils/rlutil.h"
 
+#define MODULE _ANSI_BLUE "net_split" _ANSI_NONE
+
 #define kev ((ksnetEvMgrClass*)(((ksnCoreClass*)(ks->kco->kc))->ke))
 
 /**
@@ -87,9 +89,9 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
         }
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            "%sksnSplitPacket:%s %d bytes packet was splitted to %d subpackets\n",
-            ANSI_BLUE, ANSI_NONE, (int)packet_len, *num_subpackets);
+        ksn_printf(kev, MODULE, DEBUG_VV,
+            "%d bytes packet was splitted to %d subpackets\n",
+            (int)packet_len, *num_subpackets);
         #endif
     }
 
@@ -195,9 +197,9 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
        }
 
         #ifdef DEBUG_KSNET
-        ksnet_printf(&kev->ksn_cfg, DEBUG_VV,
-            "%sksnSplitCombine:%s combine %d subpackets to large %d bytes packet\n",
-            ANSI_BLUE, ANSI_NONE, subpacket_num+1, (int)data_len);
+        ksn_printf(kev, MODULE, DEBUG_VV,
+            "combine %d subpackets to large %d bytes packet\n",
+            subpacket_num+1, (int)data_len);
         #endif
 
         // Create new ksnCorePacketData for combined block
