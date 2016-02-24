@@ -65,7 +65,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         case CONNECT:
 
             if(ksn_cfg->show_connect_f) show_it = 1;
-            priority = LOG_AUTH;
+            priority = LOG_NOTICE; //LOG_AUTH;
             break;
 
         case DEBUG:
@@ -97,7 +97,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             break;
             
         default:
-            priority = LOG_USER;
+            priority = LOG_INFO;
             show_it = 1;
             break;
     }
