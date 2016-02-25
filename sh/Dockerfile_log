@@ -1,0 +1,12 @@
+# Teonet Dockerfile
+
+FROM gitlab.ksproject.org:5000/teonet/teonet
+MAINTAINER Kirill Scherba <kirill@scherba.ru>
+
+ADD filebeat_inst.sh ~/
+WORKDIR ~/
+RUN ./filebeat_inst.sh
+RUN rm ./filebeat_inst.sh
+
+ENTRYPOINT ["/root/teonet_log"]
+#CMD []

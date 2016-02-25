@@ -36,8 +36,10 @@
             <word>config</word>
             <word>cque</word>
             <word>ctrl</word>
+            <word>elasticsearch</word>
             <word>execv</word>
             <word>fd</word>
+            <word>filebeat</word>
             <word>gethostbyname</word>
             <word>hotkey</word>
             <word>Hotkeys</word>
