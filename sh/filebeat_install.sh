@@ -93,13 +93,13 @@ if [ ! -f /root/.teonet_log ]; then
 
     # Start Filebeat:
     sudo /etc/init.d/filebeat start
-    sudo /etc/init.d/rsyslog start
+    #sudo /etc/init.d/rsyslog start
 
     sudo echo "Installed ..." > /root/.teonet_log
 
 fi
 
-exec "$@"
+#exec "$@"
 
 #sudo exec "$@"
 #exit 0
@@ -132,3 +132,6 @@ echo "Done"
 # docker build -f Dockerfile_log .
 # docker build -f Dockerfile_log -t gitlab.ksproject.org:5000/teonet/teonet_log .
 # docker push gitlab.ksproject.org:5000/teonet/teonet_log
+
+# Run teonet_log
+# docker run -ti gitlab.ksproject.org:5000/teonet/teonet_log

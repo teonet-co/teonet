@@ -3,10 +3,10 @@
 FROM gitlab.ksproject.org:5000/teonet/teonet
 MAINTAINER Kirill Scherba <kirill@scherba.ru>
 
-ADD filebeat_inst.sh ~/
+ADD filebeat_install.sh ~/
 WORKDIR ~/
-RUN ./filebeat_inst.sh
-RUN rm ./filebeat_inst.sh
+RUN ./filebeat_install.sh
+RUN rm ./filebeat_install.sh
 
-ENTRYPOINT ["/root/teonet_log"]
-#CMD []
+CMD ["/root/teonet_log"]
+#CMD ["sh"]
