@@ -13,9 +13,9 @@ sudo apt-get install -y curl apt-transport-https
 curl https://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
 echo "deb https://packages.elastic.co/beats/apt stable main" |  sudo tee -a /etc/apt/sources.list.d/beats.list
 sudo apt-get update 
-sudo apt-get install -y filebeat
-sudo update-rc.d filebeat defaults 95 10
-sudo update-rc.d rsyslog defaults 95 10
+sudo apt-get install -y filebeat rsyslog
+#sudo update-rc.d filebeat defaults 95 10
+#sudo update-rc.d rsyslog defaults 95 10
 
 # Install default configuration file
 sudo cat <<EOT > /etc/filebeat/filebeat.yml
@@ -69,10 +69,10 @@ EOT
 
 
 # Startup script
-sudo cat <<EOT > /root/teonet_log
+sudo cat <<EOT > /root/teonet_log_run
 #!/bin/sh
 #
-# teonet_log
+# teonet_log_run
 #
 # This script is executed at the end of each multiuser runlevel.
 # Make sure that the script will "exit 0" on success or any other
@@ -83,7 +83,7 @@ sudo cat <<EOT > /root/teonet_log
 #
 # By default this script does nothing.
 
-if [ ! -f /root/.teonet_log ]; then
+if [ ! -f /root/.teonet_log_run ]; then
 
     # Add elk to host
     sudo echo "172.17.0.1	elk" >> /etc/hosts
@@ -95,7 +95,7 @@ if [ ! -f /root/.teonet_log ]; then
     sudo /etc/init.d/filebeat start
     #sudo /etc/init.d/rsyslog start
 
-    sudo echo "Installed ..." > /root/.teonet_log
+    sudo echo "Installed ..." > /root/.teonet_log_run
 
 fi
 
@@ -105,10 +105,10 @@ fi
 #exit 0
 EOT
 #
-sudo chmod +x /root/teonet_log
+sudo chmod +x /root/teonet_log_run
 #
-#sudo update-rc.d -f teonet_log remove
-#sudo update-rc.d teonet_log defaults
+#sudo update-rc.d -f teonet_log_run remove
+#sudo update-rc.d teonet_log_run defaults
 #
 #sudo update-rc.d -f rc.local remove
 #sudo update-rc.d rc.local defaults
@@ -135,3 +135,6 @@ echo "Done"
 
 # Run teonet_log
 # docker run -ti gitlab.ksproject.org:5000/teonet/teonet_log
+#
+# Run it:
+# docker run --name syslog -d -v /tmp/syslogdev:/dev gitlab.ksproject.org:5000/teonet/teonet_log

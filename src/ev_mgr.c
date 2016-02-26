@@ -938,7 +938,7 @@ int ksnetEvMgrRestart(int argc, char **argv) {
         exit(0);
         #else
         // Execute application
-        if(execv(argv[0], argv) == -1) {
+        if(execvp(argv[0], argv) == -1) {
             fprintf(stderr, "Can't execute application %s: %s\n", 
                     argv[0], strerror(errno));
             exit(-1);
