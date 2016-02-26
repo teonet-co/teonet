@@ -36,11 +36,12 @@
             <word>config</word>
             <word>cque</word>
             <word>ctrl</word>
-            <word>elasticsearch</word>
+            <word>dockerfile</word>
             <word>execv</word>
             <word>fd</word>
             <word>filebeat</word>
             <word>gethostbyname</word>
+            <word>gitlab</word>
             <word>hotkey</word>
             <word>Hotkeys</word>
             <word>internet</word>
@@ -50,6 +51,7 @@
             <word>kirill</word>
             <word>kirsoft</word>
             <word>ksnet</word>
+            <word>ksproject</word>
             <word>len</word>
             <word>libev</word>
             <word>libksmesh</word>
@@ -63,11 +65,13 @@
             <word>name'</word>
             <word>namespace</word>
             <word>nonblock</word>
+            <word>org</word>
             <word>pc</word>
             <word>perror</word>
             <word>po</word>
             <word>printf</word>
             <word>recvfrom</word>
+            <word>rm</word>
             <word>scherba</word>
             <word>segv</word>
             <word>sh</word>
@@ -99,6 +103,7 @@
             <word>ver</word>
             <word>vpn</word>
             <word>websocket</word>
+            <word>workdir</word>
         </spellchecker-wordlist>
     </configuration>
 </project>
