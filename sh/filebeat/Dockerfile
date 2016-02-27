@@ -19,8 +19,8 @@ CMD ["/root/teonet_log_run"]
 
 #
 # Build
-# docker build -t filebeat .
+# docker build -t gitlab.ksproject.org:5000/teonet/filebeat .
 #
 # Run
-# docker run --name filebeat -d filebeat
+# docker run --volumes-from syslog --name filebeat -d gitlab.ksproject.org:5000/teonet/filebeat
 #

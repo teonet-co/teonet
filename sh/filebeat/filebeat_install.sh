@@ -86,7 +86,7 @@ sudo cat <<EOT > /root/teonet_log_run
 if [ ! -f /root/.teonet_log_run ]; then
 
     # Add elk to host
-    sudo echo "172.17.0.1	elk" >> /etc/hosts
+    sudo echo "172.18.0.20	elk" >> /etc/hosts
 
     # Load the default index template in Elasticsearch
     curl -XPUT 'http://elk:9200/_template/filebeat?pretty' -d@/etc/filebeat/filebeat.template.json
@@ -96,6 +96,8 @@ if [ ! -f /root/.teonet_log_run ]; then
     #sudo /etc/init.d/rsyslog start
 
     sudo echo "Installed ..." > /root/.teonet_log_run
+
+    tail -f /var/log/syslog
 
 fi
 
@@ -130,11 +132,11 @@ echo "Done"
 
 # Docker image create
 # docker build -f Dockerfile_log .
-# docker build -f Dockerfile_log -t gitlab.ksproject.org:5000/teonet/teonet_log .
-# docker push gitlab.ksproject.org:5000/teonet/teonet_log
+# docker build -f Dockerfile_log -t gitlab.ksproject.org:5000/teonet/filebeat .
+# docker push gitlab.ksproject.org:5000/teonet/filebeat
 
 # Run teonet_log
 # docker run -ti gitlab.ksproject.org:5000/teonet/teonet_log
 #
 # Run it:
-# docker run --name syslog -d -v /tmp/syslogdev:/dev gitlab.ksproject.org:5000/teonet/teonet_log
+# docker run --name syslog -d -v /tmp/syslogdev:/dev gitlab.ksproject.org:5000/teonet/filebeat
