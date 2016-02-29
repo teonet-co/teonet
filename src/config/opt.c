@@ -77,7 +77,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         #endif
 
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
-        { "log_priority",   required_argument, &conf->log_priority, 0 },
+        { "log_priority",   required_argument, (int*)&conf->log_priority, 0 },
         
         { "daemon",         no_argument,       &conf->dflag, 1 },
         { "kill",           no_argument,       &conf->kflag, 1 },

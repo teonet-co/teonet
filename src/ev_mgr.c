@@ -61,7 +61,8 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 ksnetEvMgrClass *ksnetEvMgrInit(
 
   int argc, char** argv,
-  void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+  //void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+  ksn_event_cb_type event_cb,
   int options
     ) {
     
@@ -938,7 +939,7 @@ int ksnetEvMgrRestart(int argc, char **argv) {
         exit(0);
         #else
         // Execute application
-        if(execv(argv[0], argv) == -1) {
+        if(execvp(argv[0], argv) == -1) {
             fprintf(stderr, "Can't execute application %s: %s\n", 
                     argv[0], strerror(errno));
             exit(-1);
