@@ -150,5 +150,5 @@ build_teonet_image:
     - docker tag -f kscherba/teonet gitlab.ksproject.org:5000/teonet/teonet
     - docker push gitlab.ksproject.org:5000/teonet/teonet
   only:
-    - master
-#    - tags  
+    - tags  
+#    - master
