@@ -9,10 +9,10 @@ package main
     go build teogo.go
  *
  * ### See dependences: 
- *    readelf -d teogo
+    readelf -d teogo
  *
  * ### Run: 
- *    ./teogo teo-go -a 172.18.0.30
+    ./teogo teo-go -a 172.18.0.30
  *
  */
 
