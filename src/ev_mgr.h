@@ -228,14 +228,17 @@ typedef struct stdin_idle_data {
 
 } stdin_idle_data;
 
+typedef void (*ksn_event_cb_type)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data);
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
+    
 ksnetEvMgrClass *ksnetEvMgrInit(
     int argc, char** argv,
-    void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+    //void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+    ksn_event_cb_type event_cb,
     int options
 );
 ksnetEvMgrClass *ksnetEvMgrInitPort(
