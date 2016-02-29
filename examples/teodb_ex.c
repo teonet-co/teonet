@@ -1,4 +1,4 @@
-/* 
+/** 
  * /file   teodb_ex.c
  * /author Kirill Scherba <kirill@scherba.ru>
  * 

@@ -1,4 +1,4 @@
-### version 0.1.38
+ - CI deploy only changed to master. Database example added to documentation### version 0.1.38
 
  - The wiki.go test added. The minore changes in teogo.go done.
 
