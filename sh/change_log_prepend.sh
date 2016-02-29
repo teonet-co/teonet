@@ -1,13 +1,23 @@
 #!/bin/sh
 # 
 # File:   change_log_prepend.sh
-# Author: kirill
+# Author: Kirill Scherba <kirill@scherba.ru>
 #
 # Created on Feb 29, 2016, 4:34:03 PM
 #
 
-git log --pretty=format:'  - %s' 776465a35a7954b962b3d017883200a6dfc85cc4..HEAD | cat - ChangeLog > temp && mv temp ChangeLog
-echo -e "" | cat - ChangeLog > temp && mv temp ChangeLog
+die () {
+    echo >&2 "$@"
+    exit 1
+}
+
+# Empty line
+echo "\n" | cat - ChangeLog > temp && mv temp ChangeLog
+# List of changes
+git log --pretty=format:'  - %s' $1..HEAD | cat - ChangeLog > temp && mv temp ChangeLog
+# Empty line
+echo "" | cat - ChangeLog > temp && mv temp ChangeLog
+# Last tag
 git describe --tags | cat - ChangeLog > temp && mv temp ChangeLog
 echo "### " | cat - ChangeLog > temp && mv temp ChangeLog
 
