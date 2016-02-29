@@ -61,7 +61,8 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 ksnetEvMgrClass *ksnetEvMgrInit(
 
   int argc, char** argv,
-  void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+  //void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+  ksn_event_cb_type event_cb,
   int options
     ) {
     
