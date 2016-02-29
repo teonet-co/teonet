@@ -692,7 +692,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #endif
     }
 
-    return 1;
+    return 0;
 
     #undef ke
 }

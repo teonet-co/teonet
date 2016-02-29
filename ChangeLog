@@ -1,3 +1,26 @@
+### version 0.1.38
+
+ - The wiki.go test added. The minore changes in teogo.go done.
+
+ - Teonet event callback was added to the go example
+
+ - Go examples started. Main library makefile updated
+
+ - Go examples added
+
+
+ - Readme file updated
+
+ - Merge origin/master into teo-log
+
+ - The filebeat and syslog Dockerfiles updated
+
+ - Install filebeat and rsyslog (2)
+
+ - Dockerfile updated
+
+ - Install filebeat and create Dockerfile_log for teonet_log image
+
 ### version 0.0.9
 
 * The QUEUE Callback module, cUnit test and example added
@@ -11,3 +34,4 @@ _Protocol not compatible with previous versions_
 _First stable release_
 
 * Master build system created 
+

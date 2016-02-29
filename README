@@ -1,5 +1,3 @@
-<iframe src="http://localhost:5601/app/kibana#/dashboard/teonet?embed=true&_g=(refreshInterval:(display:Off,pause:!f,value:0),time:(from:now-12h,mode:quick,to:now))&_a=(filters:!(),options:(darkTheme:!f),panels:!((col:1,id:teonet,panelIndex:1,row:1,size_x:3,size_y:2,type:visualization),(col:4,id:teonet-types,panelIndex:2,row:1,size_x:3,size_y:2,type:visualization)),query:(query_string:(analyze_wildcard:!t,query:'*')),title:teonet,uiState:(P-1:(spy:(mode:(fill:!f,name:!n)),vis:(legendOpen:!t))))" height="600" width="800"></iframe>
-
 ## Build from source notes: 
 
 ## Clone git repository  to get code

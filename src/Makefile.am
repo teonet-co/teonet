@@ -53,7 +53,7 @@ AM_CXXFLAGS = \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -ltuntap ../embedded/libpbl/src/libpbl.a
+LIBS = -lev -lcrypt -ltuntap ../embedded/libpbl/src/libpbl.a
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -64,7 +64,7 @@ endif
 # Mac OS only
 if DARWIN
 else
-LIBS += -luuid -lcrypt
+LIBS += -luuid -lcrypto
 endif
 
 lib_LTLIBRARIES = libteonet.la

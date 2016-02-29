@@ -45,7 +45,8 @@ job_ubuntu:
     # Build DEB package and upload it to repository
     - sh/make_package deb
   only:
-    - master
+    - tags  
+#    - master
     
 job_centos:
   type: build
@@ -63,7 +64,8 @@ job_centos:
     # Build RPM package and upload it to repository
     - sh/make_package yum
   only:
-    - master    
+    - tags  
+#    - master
 
 job_fedora:
   type: build
@@ -79,7 +81,8 @@ job_fedora:
     # Test
     - make test
   only:
-    - master
+    - tags  
+#    - master
     
 job_opensuse:
   type: build
@@ -97,8 +100,9 @@ job_opensuse:
     # Build RPM package and upload it to repository
     - sh/make_package zyp
   only:
-    - master     
-    
+    - tags  
+#    - master
+
 # Test
 
 # Deploy
@@ -113,7 +117,8 @@ job_opensuse:
 #    - cd sh; make; cd ..
 #    - sh/make_package deb
 #  only:
-#    - master
+#    - tags  
+##    - master
     
 #job_centos_deploy:
 #  type: deploy
@@ -126,7 +131,8 @@ job_opensuse:
 #    - cd sh; make; cd ..
 #    - sh/make_package yum
 #  only:
-#    - master
+#    - tags  
+##    - master
 
 # Build teonet docker image and upload it to Docker HUB
 build_teonet_image:
@@ -144,4 +150,5 @@ build_teonet_image:
     - docker tag -f kscherba/teonet gitlab.ksproject.org:5000/teonet/teonet
     - docker push gitlab.ksproject.org:5000/teonet/teonet
   only:
-    - master
+    - tags  
+#    - master
