@@ -102,7 +102,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             break;
     }
     
-    show_log = show_log & ksn_cfg->log_priority >= type;
+    show_log = show_log && (ksn_cfg->log_priority >= type);
 
     if(show_it || show_log) {
         

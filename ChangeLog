@@ -1,4 +1,10 @@
-### version 0.1.39 
+### version 0.1.41
+
+  - The CMD_RESET added
+  - The .gitlab-ci updated
+  - Change_log shell script updated
+
+### version 0.1.39
 
  - CI deploy only changed to master. Database example added to documentation
 

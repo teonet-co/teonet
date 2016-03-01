@@ -35,6 +35,7 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -85,6 +86,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         case CMD_NONE:
             processed = 1;
+            break;
+            
+        case CMD_RESET:
+            processed = cmd_reset_cb(kco, rd);
             break;
 
         case CMD_ECHO:
@@ -242,6 +247,35 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
     *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
 
     return ksnCoreSendCmdto(kco->kc, to, CMD_CONNECT, data, ptr) != NULL;
+}
+
+/**
+ * Process CMD_RESET command
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    int processed = 0;
+    
+    // Hard reset
+    if(rd->data_len >= 1 && 
+            (((char*)rd->data)[0] == '\1' || ((char*)rd->data)[0] == '1')) {
+        
+        // Execute restart of this application
+        kill(getpid(),SIGUSR2);
+        
+        processed = 1;
+    }
+    
+    // Soft reset
+    else {
+        // Do nothing, just send it to Application level
+    }
+    
+    return processed; // Command processed
 }
 
 /**

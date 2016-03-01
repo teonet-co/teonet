@@ -151,4 +151,3 @@ build_teonet_image:
     - docker push gitlab.ksproject.org:5000/teonet/teonet
   only:
     - tags  
-#    - master
