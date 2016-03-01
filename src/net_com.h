@@ -24,6 +24,7 @@ enum ksnCMD {
     CMD_CONNECT,            ///< #5 Inform peer about connected peer
     CMD_DISCONNECTED,       ///< #6 Inform peer about disconnected peer
     CMD_VPN,                ///< #7 VPN command
+    CMD_RESET,              ///< #8 Reset command, data: byte or char 0 - soft reset; 1 - hard reset
 
     // Core level TR-UDP mode: 64...127
     CMD_64_RESERVED = 64,   ///< #64 Reserver for future use
