@@ -83,7 +83,7 @@ sudo cat <<EOT > /root/teonet_log_run
 #
 # By default this script does nothing.
 
-if [ ! -f /root/.teonet_log_run ]; then
+#if [ ! -f /root/.teonet_log_run ]; then
 
     # Add elk to host
     sudo echo "172.18.0.20	elk" >> /etc/hosts
@@ -99,7 +99,7 @@ if [ ! -f /root/.teonet_log_run ]; then
 
     tail -f /var/log/syslog
 
-fi
+#fi
 
 #exec "$@"
 
