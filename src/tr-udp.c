@@ -1203,8 +1203,8 @@ inline void sl_timer_stop(EV_P_ ev_timer *w) {
 /**
  * Send list timer callback
  * 
- * The timer event appears if timer was not stopped during timeout. I means that 
- * packet was not received by peer and we need resend this packet.
+ * The timer event appears if timer was not stopped during timeout. It means 
+ * that packet was not received by peer and we need resend this packet.
  * 
  * param loop Event loop 
  * @param w Watcher
@@ -1223,10 +1223,10 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     sl_data *sl_d = ksnTRUDPsendListGetData(tu, sl_t_data.id, &sl_t_data.addr);
 
     if (sl_d != NULL) {
-
+        
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
-                "%stimeout for message with id %d was happened%s, "
+                "%s" "timeout for message with id %d was happened%s, "
                 "resend %d bytes data to %s:%d\n",
                 ANSI_RED, 
                 sl_t_data.id,
@@ -1236,14 +1236,25 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
                 ntohs(((struct sockaddr_in *) &sl_t_data.addr)->sin_port)
         );
         #endif
+
+        // Resend
+        if(1) {
         
-        // Resend message
-        ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
-                sl_t_data.fd, sl_d->data_buf, sl_d->data_len, sl_t_data.flags, 
-                &sl_t_data.addr, sl_t_data.addr_len);
+            // Resend message
+            ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd, 
+                    sl_t_data.fd, sl_d->data_buf, sl_d->data_len, sl_t_data.flags, 
+                    &sl_t_data.addr, sl_t_data.addr_len);
+
+            // Statistic
+            ksnTRUDPstatSendListAttempt(tu, &sl_t_data.addr);    
         
-        // Statistic
-        ksnTRUDPstatSendListAttempt(tu, &sl_t_data.addr);    
+        }
+        
+        // Reset this chanel if first time of 1 attempt older than 1 sec.
+        else {
+            
+            ksnTRUDPreset(tu, &sl_t_data.addr, 0);
+        }
 
     } else {
         
