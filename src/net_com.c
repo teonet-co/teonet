@@ -716,9 +716,10 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Show command message
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG,
-            "got echo answer from \"%s\", %d byte data: \"%s\", %.3f ms\n",
+        ksn_printf(ke, MODULE, DEBUG_VV,
+            "got echo answer from \"%s\", %d byte data: \"%.*s\", %.3f ms\n",
             rd->from,        // from
+            rd->data_len,    // command data length
             rd->data_len,    // command data length
             rd->data,        // commands data
             triptime         // trip time
