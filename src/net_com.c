@@ -720,7 +720,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             "got echo answer from \"%s\", %d byte data: \"%.*s\", %.3f ms\n",
             rd->from,        // from
             rd->data_len,    // command data length
-            rd->data_len,    // command data length
+            rd->data_len == 8 ? 0 : rd->data_len,    // command data length
             rd->data,        // commands data
             triptime         // trip time
         );
