@@ -1,10 +1,7 @@
-### 
-v0.1.41-4-gef40bdd
+### version 0.1.42
 
-  - version 0.1.42 released, fix length of got echo answer message data, type the message set to DEBUG_VV
-  - project file updated
-  - GoSQL example added
-  - Filebeat docker image updated
+  - fix length of got echo answer message data, type the message set to DEBUG_VV
+  - filebeat docker image updated
 
 ### version 0.1.41
 
