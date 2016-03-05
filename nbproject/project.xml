@@ -75,11 +75,11 @@
             <word>strtol</word>
             <word>subpacket</word>
             <word>subpackets</word>
+            <word>Syslog</word>
             <word>tcp</word>
             <word>teo</word>
             <word>teocli</word>
             <word>teodb</word>
-            <word>teogo</word>
             <word>teonet</word>
             <word>teostream</word>
             <word>teotproxy</word>
@@ -92,6 +92,7 @@
             <word>udp</word>
             <word>unsubscribe</word>
             <word>unsubscribed</word>
+            <word>usleep</word>
             <word>uuid</word>
             <word>ver</word>
             <word>vpn</word>
