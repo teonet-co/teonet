@@ -45,7 +45,7 @@ void base64_cleanup() {
  * 
  * @return Encoded data, should be free after use
  */
-char *base64_encode(const unsigned char *data,
+char *ksn_base64_encode(const unsigned char *data,
                     size_t input_length,
                     size_t *output_length) {
 
@@ -84,7 +84,7 @@ char *base64_encode(const unsigned char *data,
  * @param output_length Output data length
  * @return  Decoded data, should be free after use
  */
-unsigned char *base64_decode(const char *data,
+unsigned char *ksn_base64_decode(const char *data,
                              size_t input_length,
                              size_t *output_length) {
 
