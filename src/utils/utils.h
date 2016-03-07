@@ -90,11 +90,11 @@ void KSN_SET_TEST_MODE(int test_mode);
 int KSN_GET_TEST_MODE();
 
 
-char *base64_encode(const unsigned char *data,
+char *ksn_base64_encode(const unsigned char *data,
                     size_t input_length,
                     size_t *output_length);
 
-unsigned char *base64_decode(const char *data,
+unsigned char *ksn_base64_decode(const char *data,
                              size_t input_length,
                              size_t *output_length);
 
