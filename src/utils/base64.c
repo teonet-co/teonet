@@ -51,7 +51,7 @@ char *ksn_base64_encode(const unsigned char *data,
 
     *output_length = 4 * ((input_length + 2) / 3);
 
-    char *encoded_data = malloc(*output_length);
+    char *encoded_data = malloc(*output_length + 1);
     if (encoded_data == NULL) return NULL;
 
     int i, j;
@@ -72,6 +72,8 @@ char *ksn_base64_encode(const unsigned char *data,
     for (i = 0; i < mod_table[input_length % 3]; i++)
         encoded_data[*output_length - 1 - i] = '=';
 
+    encoded_data[*output_length] = 0;
+            
     return encoded_data;
 }
 
