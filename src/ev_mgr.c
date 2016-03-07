@@ -390,7 +390,9 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         if(ke->km == NULL || !ke->n_num) ev_loop_destroy(ke->ev_loop);
 
         #ifdef DEBUG_KSNET
-        printf(MODULE " at port %d stopped.\n", (int)ke->ksn_cfg.port );
+        //printf(MODULE " at port %d stopped.\n", (int)ke->ksn_cfg.port );
+        ksn_printf(ke, MODULE, MESSAGE, 
+                "at port %d stopped.\n", (int)ke->ksn_cfg.port);
         #endif
 
         // Send stopped event to user level
