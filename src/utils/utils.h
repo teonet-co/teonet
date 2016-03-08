@@ -89,6 +89,15 @@ size_t get_num_of_tags(char *data, size_t data_length);
 void KSN_SET_TEST_MODE(int test_mode);
 int KSN_GET_TEST_MODE();
 
+
+char *ksn_base64_encode(const unsigned char *data,
+                    size_t input_length,
+                    size_t *output_length);
+
+unsigned char *ksn_base64_decode(const char *data,
+                             size_t input_length,
+                             size_t *output_length);
+
 #ifdef	__cplusplus
 }
 #endif
