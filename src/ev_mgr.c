@@ -162,7 +162,18 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
  */
 inline void teoSetAppType(ksnetEvMgrClass *ke, char *type) {
     
-    ke->type = strdup(type);
+    ke->app_type = strdup(type);
+}
+
+/**
+ * Set Teonet application version
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param type Application version string
+ */
+inline void teoSetAppVersion(ksnetEvMgrClass *ke, char *version) {
+    
+    ke->app_version = strdup(version);
 }
 
 /**
@@ -173,7 +184,18 @@ inline void teoSetAppType(ksnetEvMgrClass *ke, char *type) {
  */
 inline const char *teoGetAppType(ksnetEvMgrClass *ke) {
     
-    return (const char *)ke->type;
+    return (const char *)ke->app_type;
+}
+
+/**
+ * Get current application version
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @return Application version string
+ */
+inline const char *teoGetAppVersion(ksnetEvMgrClass *ke) {
+    
+    return (const char *)ke->app_version;
 }
 
 /**
@@ -403,7 +425,8 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         char **argv = ke->argv;
 
         // Free info parameters
-        if(ke->type != NULL) free(ke->type);
+        if(ke->app_type != NULL) free(ke->app_type);
+        if(ke->app_version != NULL) free(ke->app_version);
         
         // Free memory
         free(ke);
@@ -472,7 +495,9 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
     const char *name = ksnetEvMgrGetHostName(ke);
     size_t name_len = strlen(name) + 1;
     const char *app_type = teoGetAppType(ke); 
+    const char *app_version = teoGetAppVersion(ke); 
     if(app_type == NULL) app_type = "teo-default";
+    if(app_version == NULL) app_version = null_str;
     size_t type_len = strlen(app_type) + 1;
     
     // Create host info data 
@@ -518,7 +543,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             size_t l0_len = strlen(l0) + 1;
             *hd_len += l0_len;
             hd = realloc(hd, *hd_len);
-            memcpy(hd->string_ar + ptr, l0, l0_len);
+            memcpy(hd->string_ar + ptr, l0, l0_len); ptr += l0_len;
             hd->string_ar_num++;
         }
         // VPN
@@ -527,9 +552,17 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             size_t vpn_len = strlen(vpn) + 1;
             *hd_len += vpn_len;
             hd = realloc(hd, *hd_len);
-            memcpy(hd->string_ar + ptr, vpn, vpn_len);
+            memcpy(hd->string_ar + ptr, vpn, vpn_len);  ptr += vpn_len;
             hd->string_ar_num++;
         }
+        // Application version
+        if(app_version != NULL) {
+            size_t app_version_len = strlen(app_version) + 1;
+            *hd_len += app_version_len;
+            hd = realloc(hd, *hd_len);
+            memcpy(hd->string_ar + ptr, app_version, app_version_len); ptr += app_version_len;
+            //hd->string_ar_num++;
+        }        
     }
     
     return hd;
