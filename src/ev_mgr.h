@@ -215,7 +215,8 @@ typedef struct ksnetEvMgrClass {
     int argc;         ///< Applications argc
     char** argv;      ///< Applications argv  
     
-    char *type;         ///< Application type
+    char *app_type;         ///< Application type
+    char *app_version;  ///< Application version
 
 } ksnetEvMgrClass;
 
@@ -265,7 +266,9 @@ void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval);
 
 const char *teoGetLibteonetVersion();
 void teoSetAppType(ksnetEvMgrClass *ke, char *type);
+void teoSetAppVersion(ksnetEvMgrClass *ke, char *version);
 const char *teoGetAppType(ksnetEvMgrClass *ke);
+const char *teoGetAppVersion(ksnetEvMgrClass *ke);
 
 #ifdef	__cplusplus
 }

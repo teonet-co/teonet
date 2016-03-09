@@ -553,15 +553,19 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                         type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
                 ptr += strlen(hid->string_ar + ptr) + 1;                
             }
+            char *app_version = hid->string_ar + ptr; // Last element is app_version
+            ptr += strlen(hid->string_ar + ptr) + 1; 
             json_str = ksnet_formatMessage(
                 "{ "
                     "\"name\": \"%s\", "
                     "\"type\": [ %s ], "
-                    "\"version\": \"%d.%d.%d\""
+                    "\"version\": \"%d.%d.%d\", "
+                    "\"app_version\": \"%s\""
                 " }",
                 hid->string_ar, // Name
                 type_str, // App type and services     
-                hid->ver[0], hid->ver[1], hid->ver[2] // Version
+                hid->ver[0], hid->ver[1], hid->ver[2], // Version
+                app_version // Application version
             );
             free(type_str);
 
