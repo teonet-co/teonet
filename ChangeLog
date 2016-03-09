@@ -1,3 +1,16 @@
+### version 0.1.44
+
+  - teoSetAppVersion() function added to set application version
+  - send application version host info
+
+### version 0.1.43
+
+  - allow reset command from l0 clients to peers
+  - base64 encode/decode functions added to utils module
+  - Merge origin/teo-hws into teo-hws
+  - event for teoHSW module added
+  - show debug message "event loop initialized"
+
 ### version 0.1.42
 
   - fix length of got echo answer message data, type the message set to DEBUG_VV
