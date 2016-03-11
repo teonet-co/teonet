@@ -1,3 +1,8 @@
+### version 0.1.45
+
+  - number of hotkeys buffer strings increased to 4
+  - facilities to get strings from stdin in applications hotkeys menu added
+
 ### version 0.1.44
 
   - teoSetAppVersion() function added to set application version
