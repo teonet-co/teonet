@@ -449,7 +449,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 kev->event_cb(kev, EV_K_HOTKEY, 
                                 (void*)&hotkey, // Pointer to integer hotkey
                                 sizeof(hotkey), // Length of integer (hotkey)
-                                NULL); 
+                                data); 
             }
             break;
     }
