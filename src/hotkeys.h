@@ -91,7 +91,7 @@ typedef struct ksnetHotkeysClass  {
     int tr_udp_m; ///< Show tr-udp mode: 0 - single; 1 - continously
     int last_hotkey; ///< Last hotkey
     int str_number; ///< Nuber of current string
-    char str[3][KSN_BUFFER_SM_SIZE]; ///< Strings
+    char str[4][KSN_BUFFER_SM_SIZE]; ///< Strings
 
     ping_timer_data *pt; ///< Hotkey Pinger timer data
     monitor_timer_data *mt; ///< Hotkey Monitor timer data
