@@ -282,9 +282,17 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                 // \todo this event can be sent forever and stopped all the event loop
                 
-//                // Send reset
+                // Send reset
 //                ksnTRUDPresetSend(kev->kc->ku, kev->kc->fd, 
 //                                        (__CONST_SOCKADDR_ARG) &addr);
+                
+                // Send disconnect
+                ksnCoreSendto(kev->kc, 
+                        inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                        ntohs(((struct sockaddr_in *) addr)->sin_port), 
+                        CMD_DISCONNECTED, 
+                        NULL, 0
+                );
 
                 recvlen = 0; // The received message is processed
 

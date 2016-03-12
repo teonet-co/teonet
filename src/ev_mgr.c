@@ -723,13 +723,13 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     double ct = ksnetEvMgrGetTime(kev); //Current time
 
     // Send trip time request
-    if(ct - arp_data->last_triptime_send > CHECK_EVENTS_AFTER) {
+    if(ct - arp_data->last_triptime_send > CHECK_EVENTS_AFTER / 10) {
         ksnCommandSendCmdEcho(kev->kc->kco, peer_name, (void*) TRIPTIME,
                               TRIPTIME_LEN);
     }
 
     // Disconnect dead peer
-    else if(ct - arp_data->last_activity > CHECK_EVENTS_AFTER * 1.5) {
+    else if(ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
         ksnCorePacketData rd;
         rd.from = peer_name;
@@ -882,7 +882,7 @@ void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents) {
     static int attempt = 0;
         
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, ERROR_M,
+    ksn_printf(ke, MODULE, MESSAGE,
             "got a signal %s ...\n",
             w->signum == SIGSEGV ? "SIGSEGV" : 
             w->signum == SIGABRT ? "SIGABRT" : 
