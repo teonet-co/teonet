@@ -41,7 +41,7 @@
 #include "modules/teodb_com.h"
 #include "ev_mgr.h"
 
-#define TDB_VERSION "0.0.1"
+#define TDB_VERSION "0.0.2"
 #define APPNAME _ANSI_MAGENTA "teodb" _ANSI_NONE
 
 // Constants
@@ -608,6 +608,7 @@ int main(int argc, char** argv) {
 
     // Set application type
     teoSetAppType(ke, "teo-db");
+    teoSetAppVersion(ke, TDB_VERSION);
 
     // Start teonet
     ksnetEvMgrRun(ke);
