@@ -84,7 +84,6 @@ typedef struct sl_data {
     size_t attempt; ///< Number of attempt
     size_t data_len; ///< Data buffer length
     char data_buf[]; ///< Data buffer
-    //char data_buf[KSN_BUFFER_DB_SIZE]; ///< Data buffer
 
 } sl_data;
 
