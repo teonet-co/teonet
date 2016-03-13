@@ -38,7 +38,7 @@ DEPENDS="libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-d
 MAINTAINER="Kirill Scherba <kirill@scherba.ru>"
 VER_ARCH=$VER"_"$ARCH
 PACKAGE_NAME=$PACKET_NAME"_"$VER_ARCH
-REPO_JUST_CREATED=1
+REPO_JUST_CREATED=0
 REPO=../repo
 
 # Main message
