@@ -58,6 +58,7 @@ int main(int argc, char** argv) {
     
     // Set application type
     teoSetAppType(ke, "teo-vpn");
+    teoSetAppVersion(ke, TVPN_VERSION);
     
     // To run teonet as thread change AM_CONDITIONAL(TEO_THREAD, false) in configure.ac to true
     #ifdef TEO_THREAD
