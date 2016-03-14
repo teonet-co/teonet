@@ -131,6 +131,7 @@ int main(int argc, char** argv) {
     
     // Set application type
     teoSetAppType(ke, "teo-web");
+    teoSetAppVersion(ke, TWEB_VERSION);
 
     // Read teoweb configuration
     teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
