@@ -19,7 +19,7 @@
 extern void AGo_event_cb_func(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, 
         void *data, size_t data_len, void *user_data);
 
-inline void AC_event_cb_func(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data) {
+void AC_event_cb_func(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data) {
     
     AGo_event_cb_func(ke, event, data, data_len, user_data);
 }
