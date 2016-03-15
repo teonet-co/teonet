@@ -8,6 +8,7 @@
 /**
  * \mainpage Teonet library Documentation
  * 
+ * See \ref md_README "README.md" file  
+ * 
+ * See \ref ChangeLog "ChangeLog" file
  */ 
-
-//const char *null_str;

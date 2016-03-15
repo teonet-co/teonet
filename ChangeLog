@@ -1,14 +1,36 @@
-### version 0.1.45
+
+Version 0.1.47
+==============
+
+  - peers view updated, Docker Registry view connected to registry item
+  - the Teogo example application updated
+  - the app version was added to the teovpn and teoweb applications
+
+
+Version 0.1.46
+==============
+
+  - version of teodb changed to 0.0.2 and added to application info
+  - core reconnect timeout changed from 11.5 second to 1.15 second
+  - send disconnect to peer if it send messages without registration (see: tr-udp: ignore message)
+
+
+Version 0.1.45
+==============
 
   - number of hotkeys buffer strings increased to 4
   - facilities to get strings from stdin in applications hotkeys menu added
 
-### version 0.1.44
+
+Version 0.1.44
+==============
 
   - teoSetAppVersion() function added to set application version
   - send application version host info
 
-### version 0.1.43
+
+Version 0.1.43
+==============
 
   - allow reset command from l0 clients to peers
   - base64 encode/decode functions added to utils module
@@ -16,56 +38,70 @@
   - event for teoHSW module added
   - show debug message "event loop initialized"
 
-### version 0.1.42
+
+Version 0.1.42
+==============
 
   - fix length of got echo answer message data, type the message set to DEBUG_VV
   - filebeat docker image updated
 
-### version 0.1.41
+
+Version 0.1.41
+==============
 
   - The CMD_RESET added
   - The .gitlab-ci updated
   - Change_log shell script updated
 
-### version 0.1.39
 
- - CI deploy only changed to master. Database example added to documentation
+Version 0.1.39
+==============
 
-
-### version 0.1.38
-
- - The wiki.go test added. The minore changes in teogo.go done.
-
- - Teonet event callback was added to the go example
-
- - Go examples started. Main library makefile updated
-
- - Go examples added
+  - CI deploy only changed to master. Database example added to documentation
 
 
- - Readme file updated
+Version 0.1.38
+==============
 
- - Merge origin/master into teo-log
+  - The wiki.go test added. The minore changes in teogo.go done.
 
- - The filebeat and syslog Dockerfiles updated
+  - Teonet event callback was added to the go example
 
- - Install filebeat and rsyslog (2)
+  - Go examples started. Main library makefile updated
 
- - Dockerfile updated
+  - Go examples added
 
- - Install filebeat and create Dockerfile_log for teonet_log image
+  - README file updated
 
-### version 0.0.9
+  - Merge origin/master into teo-log
 
-* The QUEUE Callback module, cUnit test and example added
+  - The filebeat and syslog Dockerfiles updated
 
-### version 0.0.8
+  - Install filebeat and rsyslog (2)
+
+  - Dockerfile updated
+
+  - Install filebeat and create Dockerfile_log for teonet_log image
+
+
+Version 0.0.9
+==============
+
+  - the QUEUE Callback module, cUnit test and example added
+
+
+Version 0.0.8
+==============
+
 _Protocol not compatible with previous versions_
 
-* The TR-UDP module, cUnit test and examples added
+  - the TR-UDP module, cUnit test and examples added
 
-### version 0.0.7
+
+Version 0.0.7
+==============
+
 _First stable release_
 
-* Master build system created 
+  - master build system created 
 

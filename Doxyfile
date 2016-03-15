@@ -337,8 +337,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = . src 
-#docs src/ksnet/ksnet
+INPUT  = . src 
 
 # If the value of the INPUT tag contains directories, you can use the
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp
@@ -347,7 +346,7 @@ INPUT                  = . src
 # *.c *.cc *.cxx *.cpp *.c++ *.java *.ii *.ixx *.ipp *.i++ *.inl *.h *.hh *.hxx *.hpp
 # *.h++ *.idl *.odl
 
-FILE_PATTERNS          = *.c *.cpp *.h *.hpp *.dox *.as  
+FILE_PATTERNS          = *.c *.cpp *.h *.hpp *.dox *.as *.md ChangeLog
 
 # The RECURSIVE tag can be used to turn specify whether or not subdirectories
 # should be searched for input files as well. Possible values are YES and NO.
@@ -359,7 +358,7 @@ RECURSIVE              = YES
 # excluded from the INPUT source files. This way you can easily exclude a
 # subdirectory from a directory tree whose root is specified with the INPUT tag.
 
-EXCLUDE = Tests embedded examples/fossa/fossa.c examples/fossa/fossa.h
+EXCLUDE = Tests embedded examples/fossa/fossa.c examples/fossa/fossa.h po/ChangeLog
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or directories
 # that are symbolic links (a Unix filesystem feature) are excluded from the input.
