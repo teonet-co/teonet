@@ -169,7 +169,7 @@ inline void teoSetAppType(ksnetEvMgrClass *ke, char *type) {
  * Set Teonet application version
  * 
  * @param ke Pointer to ksnetEvMgrClass
- * @param type Application version string
+ * @param version Application version string
  */
 inline void teoSetAppVersion(ksnetEvMgrClass *ke, char *version) {
     
