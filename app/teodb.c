@@ -422,8 +422,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         
                         // Prepare ANSWER data
                         void *data_out = ksnet_formatMessage(
-                            "{ \"key\":\"%s\", \"data\":\"%s\" }",  
-                            jp.key, data != NULL ? data : "");
+                            "{ \"key\":\"%s\", \"data\":\"%s\", \"id\":\"%s\" }",  
+                            jp.key, 
+                            data != NULL ? data : "",
+                            jp.id != NULL ? jp.id : ""
+                        );
                         size_t data_out_len = strlen(data_out);
                         
                         // Free DB data
@@ -496,6 +499,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Get type of request JSON - 1 or BINARY - 0
                     const int data_type = get_data_type();
                     char *key = NULL;
+                    char *id = NULL;
                     
                     // JSON data
                     if(data_type) {
@@ -510,10 +514,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         json_parse(json_data_unesc, &jp);
                         
                         key = jp.key;
+                        id = jp.id;
                         
                         // Free JSON string
                         free(json_data_unesc);
-                        if(jp.id != NULL) free(jp.id);
                         if(jp.data != NULL) free(jp.data);                        
                     }
                     
@@ -532,8 +536,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Prepare ANSWER data
                         char *ar_str = ksnet_formatMessage("[ ");
                         int i; for(i = 0; i < list_len; i++) {
-                            ar_str = ksnet_sformatMessage(ar_str, "%s%s{ \"key\":\"%s\" }", 
-                                    ar_str, i ? ", " : "", argv[i]);
+                            ar_str = ksnet_sformatMessage(ar_str, "%s%s{ \"key\":\"%s\", \"id\": \"%s\" }", 
+                                    ar_str, i ? ", " : "", argv[i], id != NULL ? id : "");
                         }
                         ar_str = ksnet_sformatMessage(ar_str, "%s ]", ar_str);
                         
@@ -579,6 +583,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                     // Free used data
                     free(out_data);
+                    if(id != NULL) free(id);
                     if(key != NULL) free(key);
                     ksnet_stringArrFree(&argv);                                            
                 }

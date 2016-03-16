@@ -1,5 +1,5 @@
 /** 
- * \file   teogo.c
+ * \file   teogo_lib.c
  * \author Kirill Scherba <kirill@scherba.ru> 
  *
  * Created on February 29, 2016, 1:13 AM
