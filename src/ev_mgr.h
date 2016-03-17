@@ -137,6 +137,8 @@ typedef enum ksnetEvMgrEvents {
     EV_K_L0_NEW_VISIT,              ///< #23 New clients visit event to all subscribers (equal to L0_CONNECTED but send number of visits)
             
     EV_H_HWS_EVENT,                 ///< #24 HTTP WebSocket server event, data - depends of event, user data - poiter to hws_event
+
+    EV_U_RECEIVED,                  ///< #25 UNIX socket received data event, data - data received from unix socket, user_data - pointer to the usock_class 
             
     EV_K_APP_USER = 0x8000          ///< #0x8000 Teonet based Applications events
 
