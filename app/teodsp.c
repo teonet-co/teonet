@@ -39,6 +39,8 @@ static int usock_disconnect(usock_class *us);
 
 #define MODULE _ANSI_LIGHTBLUE "usock" _ANSI_NONE
 
+#define HTTP_SUF " HTTP/1.1\r\n\r\n"
+
 static usock_class *usock_init(ksnetEvMgrClass *ke) {
     
     usock_class *us = malloc(sizeof(usock_class));
@@ -78,6 +80,7 @@ static void usock_receive_cb(EV_P_ ev_io *w, int revents) {
     
     // Process answer data - send message to application event callback
     else {
+        buf[rc] = 0;
         if(us->ke->event_cb != NULL) 
             us->ke->event_cb(us->ke, EV_U_RECEIVED, buf, rc, us);
     }
@@ -115,7 +118,8 @@ static int usock_connect(usock_class *us, char *socket_path) {
     us->w->data = us;
     ev_io_start(us->ke->ev_loop, us->w);
     
-    ksn_printf(us->ke, MODULE, MESSAGE, "connected to UNIX socket: %s\n", socket_path);
+    ksn_printf(us->ke, MODULE, MESSAGE, 
+            "connected to UNIX socket: %s\n", socket_path);
     
     return fd;
 }
@@ -136,15 +140,9 @@ static int usock_disconnect(usock_class *us) {
 
 static int usock_send_request(usock_class *us, char *request) {
     
-    const char *request_template = "%s HTTP/1.1\r\n\r\n";
-    const size_t BUFFER_LEN = strlen(request_template) + strlen(request);
-    char buf[BUFFER_LEN];
-    int  rc;
-    
-    // Write test command
-    rc = snprintf(buf, BUFFER_LEN, request_template, request); 
+    int  rc = strlen(request);
     if(rc > 0) {
-        if(write(us->w->fd, buf, rc) != rc) {
+        if(write(us->w->fd, request, rc) != rc) {
         //if(send(fd, buf, rc, 0) != rc) {
 
             if (rc > 0) fprintf(stderr,"partial write need");
@@ -153,11 +151,23 @@ static int usock_send_request(usock_class *us, char *request) {
                 return -1;
             }
         }
-        ksn_printf(us->ke, MODULE, DEBUG, "send request, %d bytes: %s\n", rc, request);
+        ksn_printf(us->ke, MODULE, DEBUG, "send request, %d bytes: %s\n", rc, 
+                trimlf(request));
     }
     else perror("send buffer create error");
     
     return 0;
+}
+
+static int usock_send_request_http(usock_class *us, char *request) {
+
+    size_t request_len = strlen(request);
+    char request_http[request_len + 1 + sizeof(HTTP_SUF)];
+    memcpy(request_http, request, request_len);
+    memcpy(request_http + request_len, HTTP_SUF, sizeof(HTTP_SUF));
+    request_http[request_len + sizeof(HTTP_SUF)] = 0;
+    
+    return usock_send_request(us, request_http);
 }
 
 /**
@@ -184,11 +194,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             ke->user_data = us;
             
             // Connect to Unix socket and send test request
-            char *socket_path = "/var/run/docker.sock"; // Unix socket path        
+            char *socket_path = "/var/run/docker.sock"; // Docker Unix socket path        
             int fd = usock_connect(us, socket_path);           
             if(fd > 0)
-                usock_send_request(us, "GET /containers/json");
-                usock_send_request(us, "GET /networks");
+                // Test requests
+                usock_send_request_http(us, "GET /info");
+                usock_send_request_http(us, "GET /containers/json");
+                usock_send_request_http(us, "GET /networks");
             break;
 
         // Before stop

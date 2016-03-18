@@ -32,13 +32,11 @@
             <word>atoi</word>
             <word>autoconf</word>
             <word>Cesanta</word>
-            <word>changelog</word>
             <word>cmd</word>
             <word>config</word>
             <word>cque</word>
             <word>ctrl</word>
             <word>dockerfile</word>
-            <word>dsp</word>
             <word>execv</word>
             <word>fd</word>
             <word>gethostbyname</word>
@@ -54,6 +52,7 @@
             <word>libev</word>
             <word>libteol</word>
             <word>libteonet</word>
+            <word>libtuntap</word>
             <word>linux</word>
             <word>localhost</word>
             <word>ms</word>
@@ -77,11 +76,13 @@
             <word>strtol</word>
             <word>subpacket</word>
             <word>subpackets</word>
-            <word>Syslog</word>
+            <word>syslog</word>
             <word>tcp</word>
             <word>teo</word>
             <word>teocli</word>
             <word>teodb</word>
+            <word>teodsp</word>
+            <word>teogo</word>
             <word>teonet</word>
             <word>teostream</word>
             <word>teotproxy</word>
