@@ -20,7 +20,7 @@
 #include "config/config.h"
 #include "utils/utils.h"
 
-extern const char *localhost;
+extern const char *localhost, *null_str;
 
 // Local function
 void set_defaults(ksnet_cfg *ksn_cfg);
@@ -72,13 +72,14 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Remote host default
     ksn_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
     ksn_cfg->r_host_name[0] = '\0';
-    strncpy(ksn_cfg->r_host_addr, localhost, KSN_BUFFER_SM_SIZE/2);
+    ksn_cfg->r_host_addr[0] = '\0';
+    //strncpy(ksn_cfg->r_host_addr, localhost, KSN_BUFFER_SM_SIZE/2); // set default r-host address to localhost
     ksn_cfg->r_tcp_f = 0;
     ksn_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
 
     // VPN
     ksn_cfg->vpn_dev_name[0] = '\0';
-    //strncpy(ksn_cfg->vpn_dev_name, "teonet", KSN_MAX_HOST_NAME);
+    //strncpy(ksn_cfg->vpn_dev_name, "teonet", KSN_MAX_HOST_NAME); // set default vpn device name to "teonet"
     ksn_cfg->vpn_dev_hwaddr[0] = '\0';
     ksn_cfg->vpn_ip[0] = '\0';
     ksn_cfg->vpn_ip_net = 24;
