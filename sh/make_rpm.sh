@@ -81,6 +81,7 @@ build_rpm_tarball $PACKAGE_NAME
 RPM_FILES="/usr/bin/teovpn
    /usr/bin/teodb
    /usr/bin/teoweb
+   /usr/bin/teodsp
    /usr/doc/teonet/
    /usr/etc/teonet/teonet.conf.default
    /usr/include/teonet/
