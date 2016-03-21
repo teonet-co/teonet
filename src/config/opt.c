@@ -62,8 +62,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "key",            required_argument, 0, 'e' },
         { "tcp_allow",      no_argument,       &conf->tcp_allow_f, 1 },
         { "tcp_port",       required_argument, 0, 'o' },
-        { "l0_allow",       no_argument,       &conf->l0_allow_f, 1 },
-        { "l0_tcp_port",    required_argument, 0, 'l' },
+        { "l0_allow",           no_argument,       &conf->l0_allow_f, 1 },
+        { "l0_tcp_port",        required_argument, 0, 'l' },
+        { "l0_remote_tcp_ip",   required_argument, 0, 'I' },
         { "hot_keys",       no_argument,       &conf->hot_keys_f, 1 },
         { "show_debug",     no_argument,       &conf->show_debug_f, 1 },
         { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
@@ -113,7 +114,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
     // Check online parameters
     for(;;) {
 
-      opt = getopt_long (argc, argv, "?hv:p:r:a:dkn:", loptions,
+      opt = getopt_long (argc, argv, "?hva:I:dkl:n:o:p:P:r:t:", loptions,
                          &option_index);
       if (opt==-1)
       {
@@ -183,6 +184,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           conf->port = atoi(optarg);
           break;
 
+        case 'P':
         case 'r':
           conf->r_port = atoi(optarg);
           break;
@@ -217,6 +219,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 'l':
           conf->l0_tcp_port = atoi(optarg);
+          break;
+          
+        case 'I':
+          strncpy((char*)conf->l0_tcp_ip_remote, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
           
         case 'd':
@@ -319,44 +325,45 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "\n"
     "Options:\n"
     "\n"
-    "  -h, --help               SHow this help message\n"
-    "  -v, --version            Show current version\n"
-    "      --uuid               Generate new uuid\n"
-    "      --app_name           Show this application name\n"
-    "      --app_description    Show this application description\n"
-    "  -n, --network=value      Set network name\n"
-    "      --key=value          Set network key\n"            
-    "  -p, --port=value         Set port number (default "KSNET_PORT_DEFAULT")\n"
-    "      --port_increment     Increment port if busy\n"
-    "  -a, --r_address=value    Set remote server address (default localhost)\n"
-    "  -r, --r_port=value       Set remote server port number (default "KSNET_PORT_DEFAULT")\n"
-    "      --r_tcp              Connect to remote TCP Proxy port\n"            
-    "  -t, --r_tcp_port=value   Set remote server TCP port number (default "KSNET_PORT_DEFAULT")\n"
-    "      --tcp_allow          Allow TCP Proxy connection to this server\n"
-    "  -o, --tcp_port=value     TCP Proxy port number (default "KSNET_PORT_DEFAULT")\n"
-    "      --l0_allow           Allow L0 Server and l0 clients connection\n"
-    "  -l, --l0_tcp_port=value  L0 Server TCP port number (default "KSNET_PORT_DEFAULT")\n"
-    "      --hot_keys           Switch on the hot keys monitor\n"
+    "  -h,  --help               SHow this help message\n"
+    "  -v,  --version            Show current version\n"
+    "       --uuid               Generate new uuid\n"
+    "       --app_name           Show this application name\n"
+    "       --app_description    Show this application description\n"
+    "  -n,  --network=value      Set network name\n"
+    "       --key=value          Set network key\n"            
+    "  -p,  --port=value         Set port number (default "KSNET_PORT_DEFAULT")\n"
+    "       --port_increment     Increment port if busy\n"
+    "  -a,  --r_address=value    Set remote server address (default localhost)\n"
+    "  -P|r --r_port=value       Set remote server port number (default "KSNET_PORT_DEFAULT")\n"
+    "       --r_tcp              Connect to remote TCP Proxy port\n"            
+    "  -t,  --r_tcp_port=value   Set remote server TCP port number (default "KSNET_PORT_DEFAULT")\n"
+    "       --tcp_allow          Allow TCP Proxy connection to this server\n"
+    "  -o,  --tcp_port=value     TCP Proxy port number (default "KSNET_PORT_DEFAULT")\n"
+    "       --l0_allow           Allow L0 Server and l0 clients connection\n"
+    "  -l,  --l0_tcp_port=value  L0 Server TCP port number (default "KSNET_PORT_DEFAULT")\n"
+    "  -I,  --l0_tcp_ip=value    L0 Server remote IP address (send to clients)\n"
+    "       --hot_keys           Switch on the hot keys monitor after starts\n"
     #ifdef DEBUG_KSNET
-    "      --show_debug         Show debug messages\n"
-    "      --show_debug_vv      Show debug additional messages\n"
+    "       --show_debug         Show debug messages\n"
+    "       --show_debug_vv      Show debug additional messages\n"
     #endif
-    "      --show_connect       Show connection messages\n"
-    "      --show_peers         Show peers screen after connection\n"
-    "      --show_TR-UDP        Show TR-UDP statistic after connection\n"
+    "       --show_connect       Show connection messages\n"
+    "       --show_peers         Show peers screen after connection\n"
+    "       --show_TR-UDP        Show TR-UDP statistic after connection\n"
     #if M_ENAMBE_VPN
-    "      --vpn_start          Start VPN\n"
-    "      --vpn_ip             VPN IP\n"
-    "      --vpn_mtu            VPN MTU\n"
+    "       --vpn_start          Start VPN\n"
+    "       --vpn_ip             VPN IP\n"
+    "       --vpn_mtu            VPN MTU\n"
     #endif
     "\n"
-    "      --sig_segv           Segmentation fault error processing by library\n"
-    "      --log_priority       Syslog priority: (Default: 4)\n"
-    "                             DEBUG: 4, MESSAGE: 3, CONNECT: 2, ERROR_M: 1\n"
-    "                             NO_LOG: 0\n"
+    "       --sig_segv           Segmentation fault error processing by library\n"
+    "       --log_priority       Syslog priority (Default: 4):\n"
+    "                            DEBUG: 4, MESSAGE: 3, CONNECT: 2, ERROR_M: 1,\n"
+    "                            NO_LOG: 0\n"
     "\n"
-    "  -d, --daemon             Start this application in daemon mode\n"
-    "  -k, --kill               Kill the application running in daemon mode\n"
+    "  -d, --daemon              Start this application in daemon mode\n"
+    "  -k, --kill                Kill the application running in daemon mode\n"
     "\n",
     basename(app_name_cpy), app_argv_str);
 
