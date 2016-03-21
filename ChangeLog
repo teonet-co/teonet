@@ -1,3 +1,22 @@
+Version 0.1.48
+==============
+
+  - net command CMD_L0_INFO (CMD_L0_INFO_ANSWER) implemented
+  - application configuration parameter l0_remote_tcp_ip was added
+  - reset r-host when connection to it is down 
+    *Note:* After host break with general protection failure and than restarted 
+    the r-host does not reconnect to this host. In this case the triptime == 0.0. 
+    To fix it we check r-hosts triptime and send disconnect command to it;
+  - when a peer is dead - does not answer to ping: we send disconnect command to 
+    it and disconnect this peer from host;
+  - default r-host address removed: set default r-host to null string, so if 
+    r-host parameter is empty than teonet application will not connect to 
+    default r-host address (it was localhost)
+  - tinc Dockerfile created
+  - teonet C dispatcher application created, - reading/writing UNIX socket 
+    module "usock" created, "data received from UNIX socket" event was added
+  - teodb applications return ID from request in DB response
+
 
 Version 0.1.47
 ==============
