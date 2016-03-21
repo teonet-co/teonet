@@ -36,6 +36,7 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -178,10 +179,14 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_l0_stat_cb(kco, rd);
             break;
             
+        case CMD_L0_INFO:
+            processed = cmd_l0_info_cb(kco, rd);
+            break;
+                        
         case CMD_HOST_INFO:
             processed = cmd_host_info_cb(kco, rd);
             break;
-            
+        
         case CMD_SUBSCRIBE:
         case CMD_UNSUBSCRIBE:
         case CMD_SUBSCRIBE_ANSWER:
@@ -457,6 +462,56 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     if(client_data != NULL) free(client_data);
     if(json_str != NULL) free(json_str);
+    
+    return 1; // Command processed
+}
+
+
+
+/**
+ * Process CMD_L0_INFO command
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return True if command is processed
+ */
+static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    l0_info_data *info_d = NULL;
+    size_t info_d_len = 0;
+    
+    // Get L0 info
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass*)((ksnCoreClass*)(kco->kc))->ke;
+    if(ke->kl != NULL) {
+        
+        if(ke->ksn_cfg.l0_allow_f) {
+                        
+            if(ke->ksn_cfg.l0_tcp_ip_remote[0]) {
+            
+                size_t l0_tcp_ip_remote_len =  strlen(ke->ksn_cfg.l0_tcp_ip_remote) + 1;    
+                info_d_len = sizeof(l0_info_data) + l0_tcp_ip_remote_len;    
+                info_d = malloc(info_d_len);
+
+                memcpy(info_d->l0_tcp_ip_remote, ke->ksn_cfg.l0_tcp_ip_remote, l0_tcp_ip_remote_len);
+                info_d->l0_tcp_port = ke->ksn_cfg.l0_tcp_port;
+            }
+        }
+    }
+    
+    // Send CMD_L0_INFO_ANSWER to L0 user
+    if(rd->l0_f)
+        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                rd->addr, rd->port, rd->from, rd->from_len, 
+                CMD_L0_INFO_ANSWER, 
+                info_d, info_d_len);
+
+    // Send L0_STAT_ANSWER to peer
+    else
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, 
+                CMD_L0_INFO_ANSWER,
+                    info_d, info_d_len);
+    
+    if(info_d != NULL) free(info_d);
     
     return 1; // Command processed
 }
