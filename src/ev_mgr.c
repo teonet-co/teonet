@@ -45,6 +45,8 @@ void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents); // SIGSEGV or
 static void sigsegv_cb_h(int signum, siginfo_t *si, void *unused);
 int modules_init(ksnetEvMgrClass *ke); // Initialize modules
 void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
+int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
+                            ksnet_arp_data *arp_data, void *data);
 
 /**
  * Initialize KSNet Event Manager and network
@@ -731,11 +733,15 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     // Disconnect dead peer
     else if(ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
+        // Disconnect dead peer from this host
         ksnCorePacketData rd;
         rd.from = peer_name;
         rd.data = NULL;
         cmd_disconnected_cb(kev->kc->kco, &rd);
-
+        
+        // Send this host disconnect command to dead peer
+        send_cmd_disconnect_cb(kev->kc->ka, NULL,  arp_data, NULL);
+        
         retval = 1;
     }
 
