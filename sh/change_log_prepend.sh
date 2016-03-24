@@ -17,9 +17,9 @@ echo "\n" | cat - ChangeLog > temp && mv temp ChangeLog
 git log --pretty=format:'  - %s' $1..HEAD | cat - ChangeLog > temp && mv temp ChangeLog
 # Empty line
 echo "" | cat - ChangeLog > temp && mv temp ChangeLog
+echo "============== " | cat - ChangeLog > temp && mv temp ChangeLog
 # Last tag
 git describe --tags | cat - ChangeLog > temp && mv temp ChangeLog
-echo "### " | cat - ChangeLog > temp && mv temp ChangeLog
 
 # git rev-parse v0.1.39-1-g197cc61
 # git describe --tags
