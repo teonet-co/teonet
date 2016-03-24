@@ -402,7 +402,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     if(data_type) {
 
                         // Get JSON string from input data
-                        char *json_data_unesc = data_to_json_str(rd->data, rd->data_len);
+                        char *json_data_unesc = data_to_json_str(rd->data, 
+                                rd->data_len);
                         ksn_printf(ke, APPNAME, DEBUG, 
                                 "CMD_D_GET data: %s\n", json_data_unesc);
 
@@ -433,7 +434,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         free(data);
 
                         // Send request answer
-                        send_get_answer(ke, rd, CMD_D_GET_ANSWER, data_out, data_out_len);
+                        send_get_answer(ke, rd, CMD_D_GET_ANSWER, data_out, 
+                                data_out_len);
                         
                         // Free out data
                         free(data_out);
@@ -463,27 +465,29 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 
                                 ksn_printf(ke, APPNAME, DEBUG, 
                                     "Get value from DB: KEY: %s, DATA: %s\n", 
-                                    tdd->key_data, data);
-                                
-                                // Create output data
-                                size_t data_out_len;
-                                teo_db_data *data_out = prepare_request_data(
-                                    tdd->key_data, tdd->key_length, 
-                                    data, data_len, 
-                                    tdd->id, &data_out_len
-                                );
-
-                                // Send request answer
-                                send_get_answer(ke, rd, CMD_D_GET_ANSWER, 
-                                        data_out, data_out_len);
-
-                                // Free out data
-                                free(data_out);
+                                    tdd->key_data, data);                                
                             }
-                            else 
+                            else  {
+                                                            
                                 ksn_printf(ke, APPNAME, DEBUG, 
                                     "The KEY %s not found in DB\n", 
                                     tdd->key_data);
+                            }
+                            
+                            // Create output data
+                            size_t data_out_len;
+                            teo_db_data *data_out = prepare_request_data(
+                                tdd->key_data, tdd->key_length, 
+                                data != NULL ? data : null_str , data_len, 
+                                tdd->id, &data_out_len
+                            );
+
+                            // Send request answer
+                            send_get_answer(ke, rd, CMD_D_GET_ANSWER, 
+                                    data_out, data_out_len);
+
+                            // Free out data
+                            free(data_out);                            
                         }
                         else 
                             ksn_printf(ke, APPNAME, DEBUG, 
@@ -505,7 +509,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     if(data_type) {
 
                         // Get JSON string from input data
-                        char *json_data_unesc = data_to_json_str(rd->data, rd->data_len);
+                        char *json_data_unesc = data_to_json_str(rd->data, 
+                                rd->data_len);
                         ksn_printf(ke, APPNAME, DEBUG, 
                                     "CMD_D_LIST data: %s\n", json_data_unesc);
                         
@@ -536,8 +541,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Prepare ANSWER data
                         char *ar_str = ksnet_formatMessage("[ ");
                         int i; for(i = 0; i < list_len; i++) {
-                            ar_str = ksnet_sformatMessage(ar_str, "%s%s{ \"key\":\"%s\", \"id\": \"%s\" }", 
-                                    ar_str, i ? ", " : "", argv[i], id != NULL ? id : "");
+                            ar_str = ksnet_sformatMessage(ar_str, 
+                                    "%s%s{ \"key\":\"%s\", \"id\": \"%s\" }", 
+                                    ar_str, i ? ", " : "", argv[i], 
+                                    id != NULL ? id : "");
                         }
                         ar_str = ksnet_sformatMessage(ar_str, "%s ]", ar_str);
                         
