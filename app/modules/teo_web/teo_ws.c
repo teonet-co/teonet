@@ -231,13 +231,70 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 beg = end = ""; 
             }
             else if(type == JSMN_UNDEFINED) {
-                
-                data_len = cp->data_length;
-                int b64_data_size = 2 * data_len + 4;
-                char *b64_data = malloc(b64_data_size);
-                mg_base64_encode((const unsigned char*)data, data_len, b64_data);
-                data_str = b64_data; //strdup("undefined"); 
-                data_len = strlen(data_str);
+
+                // fix "can't show database JSON strings with quotas without slash"
+                char *st;                
+                if((st = strstr(data, "\"data\":")) != NULL) {
+                    
+                    char *data_new = malloc(cp->data_length*2);
+                    int i = st - data, j = i;
+                    size_t data_new_len = 0;
+                    
+                    // Add Text before 'data'
+                    memcpy(data_new, data, i);
+                    
+                    /*
+                     * state_f values:
+                     * 0 - find {
+                     * 1 - find " and replace to \"
+                     */
+                    int state_f = 0; // Set state to 0
+                    
+                    // Replace quotes inside data tag
+                    for(; i < cp->data_length;) {
+                        
+                        switch(state_f) {
+                            
+                            // State 0
+                            case 0:
+                                // Find begin of substring
+                                if(data[i] == '{') state_f = 1; // change state to 1                               
+                                break;
+                                
+                            // State 1
+                            case 1:
+                                // Find end of substring
+                                if(data[i] == '}') {
+                                    goto exit_loop; // exit from loop
+                                }
+                                // replace " to \"
+                                else if(data[i] == '"') {
+                                    data_new[j++] = '\\';
+                                }
+                                break;
+                                
+                            default:
+                                break;
+                        }
+                        data_new[j++] = data[i++];
+                    }
+                    exit_loop: ;
+                    
+                    // Add text after '}' of line
+                    memcpy(&data_new[j], &data[i], cp->data_length - i);
+                    data_new_len = j + cp->data_length - i;
+                    data_len = data_new_len;
+                    data_str = data_new;
+                    beg = end = "";
+                }                
+                else {                
+                    data_len = cp->data_length;
+                    int b64_data_size = 2 * data_len + 4;
+                    char *b64_data = malloc(b64_data_size);
+                    mg_base64_encode((const unsigned char*)data, data_len, b64_data);
+                    data_str = b64_data; //strdup("undefined"); 
+                    data_len = strlen(data_str);
+                }
             }
 
             // Create json data and send it to websocket client
