@@ -27,7 +27,7 @@
 
 #define TEODB_EX_KEY "teo_db_ex"
 #define TEST_KEY "test"
-#define TEST_VALUE "Test value"
+#define TEST_VALUE "{ \"name\": \"1\" }"
 
 typedef struct get_cq_data {
     
