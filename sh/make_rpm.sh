@@ -80,6 +80,7 @@ build_rpm_tarball $PACKAGE_NAME
 # Copy tarball to the sources folder and create spec file
 RPM_FILES="/usr/bin/teovpn
    /usr/bin/teodb
+   /usr/bin/teogw
    /usr/bin/teoweb
    /usr/bin/teodsp
    /usr/doc/teonet/
