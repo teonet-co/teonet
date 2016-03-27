@@ -44,6 +44,7 @@ int main(int argc, char** argv) {
     md.num = TEONET_NUM;
     md.ports = TEONET_PORTS;
     md.names = TEONET_NAMES;
+    md.networks = NULL;
     
     md.run = 1;
     

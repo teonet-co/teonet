@@ -20,7 +20,36 @@
 
 #define TEONET_NUM 2
 const int TEONET_PORTS[] = { 9040, 9042 }; // Port numbers
-const char *TEONET_NAMES[] = { "teo-gw", "teo-gw-main" }; // Hosts names
+const char *TEONET_NAMES[] = { "teo-gw", "teo-gw-local" }; // Hosts names
+const char *TEONET_NETWORKS[] = { "local", "teonet" }; // Networks
+
+
+/**
+ * Teonet event handler
+ *
+ * @param ke
+ * @param event
+ * @param data
+ * @param data_len
+ * @param user_data
+ */
+void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
+              size_t data_len, void *user_data) {
+
+    // Switch Teonet event
+    switch(event) {
+        
+        // Set default namespace
+        case EV_K_STARTED:
+            // Set application type
+            teoSetAppType(ke, "teo-gw");
+            teoSetAppVersion(ke, TGW_VERSION);            
+            break;
+            
+        default:
+            break;
+    }
+}
 
 /**
  * Main application function
@@ -39,19 +68,16 @@ int main(int argc, char** argv) {
     
     md.argc = argc;
     md.argv = argv;
-    md.event_cb = NULL;
+    md.event_cb = event_cb;
     
     md.num = TEONET_NUM;
     md.ports = TEONET_PORTS;
     md.names = TEONET_NAMES;
+    md.networks = TEONET_NETWORKS;
     
     md.run = 1;
     
     ksnMultiClass *km = ksnMultiInit(&md);
-    
-    // Set application type
-//    teoSetAppType(ke, "teo-gw");
-//    teoSetAppVersion(ke, TDB_VERSION);
     
     ksnMultiDestroy(km);
     

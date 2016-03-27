@@ -42,6 +42,9 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md) {
             ke->n_num = i; // Set network number
             ke->num_nets = md->num; // Set number of networks
             strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME); // Host name
+            if(md->networks != NULL && md->networks[i] != NULL)
+                strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2); // Network name
+            
             
             // Add to network list
             pblListAdd(km->list, ke);
