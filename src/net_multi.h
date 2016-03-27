@@ -33,6 +33,7 @@ typedef struct ksnMultiData {
     size_t num; ///< Number of networks
     const int *ports; ///< Ports arrays
     const char **names; ///< Names arrays
+    const char **networks; ///< Networks arrays
     
     int run; ///< Run inside init
     
