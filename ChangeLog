@@ -1,3 +1,11 @@
+Version 0.1.50
+============== 
+
+  - add networks to net_multi module
+  - teonet gateway application created
+  - fix "can't show database JSON strings with quotas without slash"
+
+
 Version 0.1.49 at 2016-03-24
 ============== 
 
