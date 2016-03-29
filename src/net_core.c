@@ -39,11 +39,9 @@ const char *localhost = "127.0.0.1";
 void host_cb(EV_P_ ev_io *w, int revents);
 int ksnCoreBind(ksnCoreClass *kc);
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, size_t *packet_len);
-void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd, char *from, size_t from_len, const void *data, 
-        size_t data_len, size_t *packet_len);
-int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
+int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
 // UDP / UDT functions
 #define ksn_socket(domain, type, protocol) \
@@ -444,55 +442,16 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
  *
  * @return Pointer to packet. Should be free after use.
  */
-//void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
-//                          size_t data_len, size_t *packet_len) {
-//
-//    size_t ptr = 0;
-//    *packet_len = kc->name_len + data_len + PACKET_HEADER_ADD_SIZE;
-//    void *packet = malloc(*packet_len);
-//
-//    // Copy packet data
-//    *((uint8_t *)packet) = kc->name_len; ptr += sizeof(uint8_t); // Name length
-//    memcpy(packet + ptr, kc->name, kc->name_len); ptr += kc->name_len; // Name
-//    *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t); // Command
-//    memcpy(packet + ptr, data, data_len); ptr += data_len; // Data
-//
-//    return packet;
-//}
-inline void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
+void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
                           size_t data_len, size_t *packet_len) {
-    
-    return ksnCoreCreatePacketFrom(kc, cmd, kc->name, kc->name_len, data, 
-            data_len, packet_len);
-}
-
-/**
- * Create ksnet packet with from field from another host (Resend)
- * 
- * This function created to resend messages between networks in multi network 
- * application
- *
- * @param kc Pointer to ksnCore Class object
- * @param cmd Command ID
- * @param from From name
- * @param from_len From name length
- * @param data Pointer to data
- * @param data_len Data length
- * @param [out] packet_len Pointer to packet length
- *
- * @return Pointer to packet. Should be free after use.
- */
-void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd, 
-        char *from, size_t from_len, 
-        const void *data, size_t data_len, size_t *packet_len) {
 
     size_t ptr = 0;
-    *packet_len = from_len + data_len + PACKET_HEADER_ADD_SIZE;
+    *packet_len = kc->name_len + data_len + PACKET_HEADER_ADD_SIZE;
     void *packet = malloc(*packet_len);
 
     // Copy packet data
-    *((uint8_t *)packet) = from_len; ptr += sizeof(uint8_t); // From name length
-    memcpy(packet + ptr, from, from_len); ptr += from_len; // From name
+    *((uint8_t *)packet) = kc->name_len; ptr += sizeof(uint8_t); // Name length
+    memcpy(packet + ptr, kc->name, kc->name_len); ptr += kc->name_len; // Name
     *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t); // Command
     memcpy(packet + ptr, data, data_len); ptr += data_len; // Data
 
