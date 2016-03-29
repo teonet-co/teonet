@@ -131,6 +131,16 @@ void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* namespace) {
 }
 
 /**
+ * Flush a key file
+ * 
+ * @param kf
+ * @return 
+ */
+inline int ksnTDBflush(ksnTDBClass *kf) {
+    return pblKfFlush(kf->k);
+}
+
+/**
  * Get data by string key from default namespace
  *
  * @param kf Pointer to ksnTDBClass
