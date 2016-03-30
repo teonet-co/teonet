@@ -3,26 +3,27 @@
 
 ## Clone git repository  to get code
 
-git clone git@gitlab.ksproject.org:teonet/teonet.git
-cd teonet
-git submodule update --init
+    git clone git@gitlab.ksproject.org:teonet/teonet.git
+    cd teonet
+    git submodule update --init
 
 * at error: "SSL certificate problem: unable to get local issuer 
 certificate while accessing https ..." execute git command:
 
     git config --global http.sslVerify false
 
-## First time got sources from subversion repository
+## First time, after got sources from subversion repository
 
-./autogen.sh
-make
+    sh/build-ubuntu.sh
+    ./autogen.sh
+    make
  
 
 ## At errors try running:
 
-autoreconf --force --install
-./configure
-make
+    autoreconf --force --install
+    ./configure
+    make
 
 
 ## Third party notes:
@@ -43,31 +44,31 @@ MYSQL - MariaDB or MySQL connector (used in teoweb application)
 
 ## Install from repositories notes:
 
-DEB / RPM repository: http://repo.ksproject.org
+    DEB / RPM repository: http://repo.ksproject.org
 
 ### UBUNTU
 
-http://repo.ksproject.org/ubuntu/
+    http://repo.ksproject.org/ubuntu/
 
 #### Add repository
 
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
-sudo apt-get install -y software-properties-common
-sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
-sudo apt-get update
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
+    sudo apt-get install -y software-properties-common
+    sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
+    sudo apt-get update
 
 #### Install
 
-sudo apt-get install -y libteonet-dev
+    sudo apt-get install -y libteonet-dev
 
 #### Run
 
-teovpn -?
+    teovpn -?
 
 
 ### CENTOS / RHEL / FEDORA
 
-http://repo.ksproject.org/rhel/x86_64/
+    http://repo.ksproject.org/rhel/x86_64/
 
 # Add repository
 
