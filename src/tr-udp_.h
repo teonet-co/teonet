@@ -15,6 +15,7 @@
 
 
 #define TR_UDP_PROTOCOL_VERSION 1
+#define MIN_ACK_WAIT 0.006  // 6 MS
 #define MAX_ACK_WAIT 0.500  // 500 MS
 
 /**
