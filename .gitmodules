@@ -1,6 +1,6 @@
 [submodule "embedded/teocli"]
 	path = embedded/teocli
-	url = git@gitlab.ksproject.org:teonet/teocli.git
+	url = https://gitlab.ksproject.org/teonet/teocli.git
 
 [submodule "app/embedded/jsmn"]
 	path = app/embedded/jsmn
