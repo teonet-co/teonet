@@ -17,6 +17,8 @@
 #define TR_UDP_PROTOCOL_VERSION 1
 #define MIN_ACK_WAIT 0.006  // 6 MS
 #define MAX_ACK_WAIT 0.500  // 500 MS
+#define MAX_MAX_ACK_WAIT MAX_ACK_WAIT * 4 // 2 sec
+#define MAX_ATTEMPT 5 // maximum attempt with MAX_MAX_ACK_WAIT wait value
 
 /**
  * IP map records data
@@ -167,7 +169,7 @@ sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
 void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list);
 //
 ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *, uint32_t id, int fd,
-        int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+        int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len, int attempt);
 void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 //
