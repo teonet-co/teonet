@@ -253,7 +253,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
         // Set non block mode
         // \todo Test with "Set non block on" 
         //       and set the set_nonblock if it work correct
-        // set_nonblock(fd);
+        set_nonblock(fd);
     }
 
     return !(fd > 0);
