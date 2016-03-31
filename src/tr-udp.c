@@ -1045,16 +1045,25 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     // Start ACK timer watcher
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
-    sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
-            addr, addr_len); 
+    if(sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
+            addr, addr_len, attempt) != NULL) {
     
-    #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
-            "message with id %d, command %d was added "
-            "to %s Send List (len %d)\n",
-            id, cmd, key, pblMapSize(sl)
-    );
-    #endif
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG_VV,
+                "message with id %d, command %d was added "
+                "to %s Send List (len %d)\n",
+                id, cmd, key, pblMapSize(sl)
+        );
+        #endif
+    }
+    
+    // \todo Reset this TR-UDP channel
+    else {
+        //ksnTRUDPreset(tu, addr, 1);
+        ksnTRUDPresetSend(tu, fd, addr);
+        ksnTRUDPreset(tu, addr, 0);
+        ksnTRUDPstatReset(tu);
+    }
 
     return 1;
 }
@@ -1143,11 +1152,12 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
  * @param flags
  * @param addr
  * @param addr_len
+ * @param attempt
  * @return 
  */
 ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu, 
         uint32_t id, int fd, int cmd, int flags, __CONST_SOCKADDR_ARG addr, 
-        socklen_t addr_len) {
+        socklen_t addr_len, int attempt) {
 
     // Timer value 
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
@@ -1156,7 +1166,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
         max_ack_wait += 1.0 * max_ack_wait * 
             (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
         if(max_ack_wait < MIN_ACK_WAIT) max_ack_wait = MIN_ACK_WAIT;
-        else if(max_ack_wait > MAX_ACK_WAIT * 4) max_ack_wait = MAX_ACK_WAIT * 4;
+        else if(max_ack_wait > MAX_MAX_ACK_WAIT) max_ack_wait = MAX_MAX_ACK_WAIT;
     }
     else max_ack_wait = MAX_ACK_WAIT; // Default value
     
@@ -1168,6 +1178,9 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     #endif
     // \todo Add this test operator to stop debug_vv output
     // kev->ksn_cfg.show_debug_vv_f = 0;
+    
+    // Check for "reset TR-UDP if max_count = max_value and attempt > max_attempt"
+    if(attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT) return NULL;
 
     // Initialize, set user data and start the timer
     ev_timer_init(w, sl_timer_cb, max_ack_wait, 0.0);
