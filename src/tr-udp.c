@@ -1175,7 +1175,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // 1000000.0;
     if(max_ack_wait > 0) {
-        max_ack_wait += 2.0 * max_ack_wait * 
+        max_ack_wait += 2.5 * max_ack_wait * 
             (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
         if(max_ack_wait < MIN_ACK_WAIT*1000) max_ack_wait = MIN_ACK_WAIT*1000;
         else if(max_ack_wait > MAX_MAX_ACK_WAIT*1000) max_ack_wait = MAX_MAX_ACK_WAIT*1000;
