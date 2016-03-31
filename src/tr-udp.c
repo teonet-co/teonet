@@ -188,7 +188,6 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
         ksn_printf(kev, MODULE, DEBUG_VV,
                 ">> skip this packet, "
                 "send %d bytes direct by UDP to: %s:%d\n",
-                ANSI_LIGHTGREEN, ANSI_NONE,
                 buf_len,
                 inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
                 ntohs(((struct sockaddr_in *) addr)->sin_port)
@@ -1176,17 +1175,18 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // 1000000.0;
     if(max_ack_wait > 0) {
-        max_ack_wait += 1.0 * max_ack_wait * 
+        max_ack_wait += 2.0 * max_ack_wait * 
             (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
         if(max_ack_wait < MIN_ACK_WAIT*1000) max_ack_wait = MIN_ACK_WAIT*1000;
-        //else if(max_ack_wait > MAX_MAX_ACK_WAIT) max_ack_wait = MAX_MAX_ACK_WAIT;
+        else if(max_ack_wait > MAX_MAX_ACK_WAIT*1000) max_ack_wait = MAX_MAX_ACK_WAIT*1000;
     }
     else max_ack_wait = MAX_ACK_WAIT*1000; // Default value
     
     if(ack_wait != NULL) *ack_wait = max_ack_wait;
     
     // Check for "reset TR-UDP if max_count = max_value and attempt > max_attempt"
-    if(attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT*1000) return NULL;
+    if(attempt > MAX_ATTEMPT * 10 || 
+      (attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT*1000)) return NULL;
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
