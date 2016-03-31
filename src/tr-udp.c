@@ -1046,6 +1046,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     double ack_wait;
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
+    
     if(sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags, 
             addr, addr_len, attempt, &ack_wait) != NULL) {
     
@@ -1060,6 +1061,9 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     
     // \todo Reset this TR-UDP channel
     else {
+        
+        // Remove record from send list
+        pblMapRemoveFree(sl, &id, sizeof (id), &valueLength);
         
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
