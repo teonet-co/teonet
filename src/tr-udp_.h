@@ -169,7 +169,8 @@ sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
 void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list);
 //
 ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *, uint32_t id, int fd,
-        int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len, int attempt);
+        int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len, 
+        int attempt, double *ack_wait);
 void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 //
