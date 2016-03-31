@@ -839,7 +839,7 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
     #ifdef DEBUG_KSNET
     const int show_interval = 5 / KSNET_EVENT_MGR_TIMER /* 10 */;
     #endif
-    const int activity_interval = CHECK_EVENTS_AFTER / KSNET_EVENT_MGR_TIMER /* 23 */;
+    const int activity_interval = (CHECK_EVENTS_AFTER / 8) / KSNET_EVENT_MGR_TIMER /* 23 */;
     ksnetEvMgrClass *ke = w->data;
     double t = ksnetEvMgrGetTime(ke);
     if(ke->last_custom_timer == 0.0) ke->last_custom_timer = t;
