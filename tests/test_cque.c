@@ -129,7 +129,7 @@ void test_4_3() {
     int rv = ksnCQueExec(kq, 1);
     CU_ASSERT(rv == 0)
     CU_ASSERT(pblMapSize(kq->cque_map) == 1);
-    rv = ksnCQueExec(kq, 0);
+    rv = ksnCQueExec(kq, 2);
     CU_ASSERT(rv == 0)
     CU_ASSERT(pblMapSize(kq->cque_map) == 0);
     
