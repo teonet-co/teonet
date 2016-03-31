@@ -1190,8 +1190,8 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
-        "send list timer start, message id %d, timer value: %f\n",
-        id, max_ack_wait
+        "send list timer start, message id %d, " _ANSI_BROWN  "timer value: %f" 
+        _ANSI_NONE "\n", id, max_ack_wait
     );
     #endif
     // \todo Add this test operator if you want to stop debug_vv output
