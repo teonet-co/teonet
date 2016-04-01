@@ -1,8 +1,29 @@
+Version 0.1.53
+============== 
+
+  - change TR-UDP send list timeout
+  - add non_block mode to UDP sockets
+  - set idle activity interval to 11.5/8 sec to quick reconnect to r-host 
+  - fix an error in cque test
+  - reset TR-UDP if max_count = max_value (2.000 sec) and attempt > max_attempts (5) 
+    or attempt > 5*10  
+  - set core minimal and maximal delay to reconnect TR-UDP peers
+  - submodules definition changed
+  - README.md updated
+
+
+Version 0.1.52
+============== 
+
+  - TR-UDP delay corrected
+
+
 Version 0.1.51
 ============== 
 
   - the ksnTDBflush function added to the teodb module
   - function to create package for multi network was done
+
 
 Version 0.1.50
 ============== 
