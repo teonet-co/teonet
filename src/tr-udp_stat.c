@@ -142,24 +142,37 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
     
     uint32_t packets_send = 0, packets_receive = 0, ack_receive = 0, 
              packets_dropped = 0;
-            
+     
+    int i = 0;
+    char *tbl_str = strdup(null_str);
     PblIterator *it =  pblMapIteratorNew(tu->ip_map);
     if(it != NULL) {
 
         while(pblIteratorHasNext(it)) {
         
             void *entry = pblIteratorNext(it);
-            //char *key = pblMapEntryKey(entry);
+            char *key = pblMapEntryKey(entry);
+            size_t key_len = pblMapEntryKeyLength(entry);
             ip_map_data *ip_map_d = pblMapEntryValue(entry);
             packets_send += ip_map_d->stat.packets_send;
             ack_receive += ip_map_d->stat.ack_receive;
             packets_receive += ip_map_d->stat.packets_receive;
             packets_dropped += ip_map_d->stat.packets_receive_dropped;
+            
+            tbl_str = ksnet_sformatMessage(tbl_str, 
+                    "%s%3d %.*s\t %8ld %8ld %8ld %8ld %6d %6d\n", 
+                    tbl_str, i, 
+                    key_len, key, 
+                    ip_map_d->stat.packets_send, ip_map_d->stat.ack_receive, 
+                    ip_map_d->stat.packets_receive, ip_map_d->stat.packets_receive_dropped,
+                    pblMapSize(ip_map_d->send_list), pblHeapSize(ip_map_d->receive_heap)
+            );
+            i++;
         }
         pblIteratorFree(it);
     }
     
-    return ksnet_formatMessage(
+    char *ret_str = ksnet_formatMessage(
         "----------------------------------------\n"
         "TR-UDP statistics:\n"
         "----------------------------------------\n"
@@ -179,7 +192,11 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         "  size_max: %d\n"
         "  size_current: %d\n"
         "\n"
-        "----------------------------------------\n"
+        "-----------------------------------------------------------------------------\n"
+        "  # Key\t\t\t     Send      Ack     Recv     Drop     SL     RH  \n"
+        "-----------------------------------------------------------------------------\n"
+        "%s"
+        "-----------------------------------------------------------------------------\n"
         , ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke) - tu->started
         , packets_send
         , ack_receive
@@ -191,7 +208,12 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         , tu->stat.send_list.attempt
         , tu->stat.receive_heap.size_max
         , tu->stat.receive_heap.size_current
+        , tbl_str
     );
+    
+    free(tbl_str);
+    
+    return ret_str;
 }
 
 /**
