@@ -159,13 +159,13 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
             packets_receive += ip_map_d->stat.packets_receive;
             packets_dropped += ip_map_d->stat.packets_receive_dropped;
             
-            tbl_str = ksnet_sformatMessage(tbl_str, 
-                    "%s%3d %.*s\t %8ld %8ld %8ld %8ld %6d %6d\n", 
-                    tbl_str, i, 
-                    key_len, key, 
-                    ip_map_d->stat.packets_send, ip_map_d->stat.ack_receive, 
-                    ip_map_d->stat.packets_receive, ip_map_d->stat.packets_receive_dropped,
-                    pblMapSize(ip_map_d->send_list), pblHeapSize(ip_map_d->receive_heap)
+            tbl_str = ksnet_sformatMessage(tbl_str,  
+                "%s%3d "_ANSI_BROWN"%20.*s"_ANSI_NONE" %8d %8d %8d %8d %6d %6d\n", 
+                tbl_str, i, 
+                key_len, key, 
+                ip_map_d->stat.packets_send, ip_map_d->stat.ack_receive, 
+                ip_map_d->stat.packets_receive, ip_map_d->stat.packets_receive_dropped,
+                pblMapSize(ip_map_d->send_list), pblHeapSize(ip_map_d->receive_heap)
             );
             i++;
         }
