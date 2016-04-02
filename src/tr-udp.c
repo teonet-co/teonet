@@ -351,11 +351,13 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             // Check Received message Heap and send saved
                             // messages to core if first records ID Equals to
                             // Expected ID
-                            int num;
+                            int num, idx = 0;
                             while ((num = pblHeapSize(ip_map_d->receive_heap))) {
 
-                                rh_data *rh_d = ksnTRUDPreceiveHeapGetFirst(
-                                        ip_map_d->receive_heap);
+                                if(!(idx < num)) break;
+                                
+                                rh_data *rh_d = ksnTRUDPreceiveHeapGet(
+                                        ip_map_d->receive_heap, idx);
 
                                 #ifdef DEBUG_KSNET
                                 ksn_printf(kev, MODULE, DEBUG_VV,
@@ -377,8 +379,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             rh_d->data_len, &rh_d->addr);
 
                                     // Remove first record
-                                    ksnTRUDPreceiveHeapRemoveFirst(tu,
-                                            ip_map_d->receive_heap);
+                                    ksnTRUDPreceiveHeapRemove(tu,
+                                            ip_map_d->receive_heap, idx);
 
                                     // Change Expected ID
                                     ip_map_d->expected_id++;
@@ -392,8 +394,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     #endif
 
                                     // Remove first record
-                                    ksnTRUDPreceiveHeapRemoveFirst(tu,
-                                            ip_map_d->receive_heap);
+                                    ksnTRUDPreceiveHeapRemove(tu,
+                                            ip_map_d->receive_heap, idx);
                                 }
 
                                 // Drop saved message
@@ -403,6 +405,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     ksn_puts(kev, MODULE, DEBUG_VV, "skipped");
                                     #endif
 
+                                    idx++;
                                     //break; // while
                                 }
                             }
@@ -622,8 +625,9 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
 
         ip_map_data ip_map_d_new;
 
-        ip_map_d_new.id = 0;
-        ip_map_d_new.expected_id = 0;
+        memset(&ip_map_d_new, 0, sizeof(ip_map_data));
+//        ip_map_d_new.id = 0;
+//        ip_map_d_new.expected_id = 0;
         ip_map_d_new.send_list = pblMapNewHashMap();
         ip_map_d_new.receive_heap = pblHeapNew();
         ip_map_d_new.arp = ksnetArpFindByAddr(kev->kc->ka, addr);
@@ -1381,6 +1385,18 @@ inline rh_data *ksnTRUDPreceiveHeapGetFirst(PblHeap *receive_heap) {
 }
 
 /**
+ * Get element of Receive Heap (with lowest ID)
+ *
+ * @param receive_heap
+ * @param index Index of the element to return
+ * @return Pointer to rh_data or (void*)-1 at error - The heap is empty
+ */
+inline rh_data *ksnTRUDPreceiveHeapGet(PblHeap *receive_heap, int index) {
+
+    return pblHeapGet(receive_heap, index);
+}
+
+/**
  * Free Receive Heap data
  *
  * @param rh_d
@@ -1406,12 +1422,31 @@ int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d) {
  *
  * @return 1 if element removed or 0 heap was empty
  */
-inline int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu, PblHeap *receive_heap) {
+inline int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu, 
+        PblHeap *receive_heap) {
 
     // Statistic
     ksnTRUDPstatReceiveHeapRemove(tu);
 
     return ksnTRUDPreceiveHeapElementFree(pblHeapRemoveFirst(receive_heap));
+}
+
+/**
+ * Remove element from Receive Heap (with lowest ID)
+ *
+ * @param tu
+ * @param receive_heap
+ * @param index Index of the element to remove
+ *
+ * @return 1 if element removed or 0 heap was empty
+ */
+inline int ksnTRUDPreceiveHeapRemove(ksnTRUDPClass *tu, PblHeap *receive_heap, 
+        int index) {
+
+    // Statistic
+    ksnTRUDPstatReceiveHeapRemove(tu);
+
+    return ksnTRUDPreceiveHeapElementFree(pblHeapRemoveAt(receive_heap, index));
 }
 
 /**
