@@ -160,10 +160,11 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
             packets_dropped += ip_map_d->stat.packets_receive_dropped;
             
             tbl_str = ksnet_sformatMessage(tbl_str,  
-                "%s%3d "_ANSI_BROWN"%20.*s"_ANSI_NONE" %8d %8d %8d %8d %8d %6d %6d\n", 
+                "%s%3d "_ANSI_BROWN"%20.*s"_ANSI_NONE" %8d %8.3f %8d %8d %8d %8d %6d %6d\n", 
                 tbl_str, i, 
                 key_len, key, 
                 ip_map_d->stat.packets_send, 
+                ip_map_d->stat.wait,    
                 ip_map_d->stat.packets_receive, 
                 ip_map_d->stat.ack_receive, 
                 ip_map_d->stat.packets_receive_dropped,
@@ -195,11 +196,11 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         "  size_max: %d\n"
         "  size_current: %d\n"
         "\n"
-        "---------------------------------------------------------------------------------------\n"
-        "  # Key\t\t\t     Send     Recv      ACK  Attempt     Drop     SL     RH  \n"
-        "---------------------------------------------------------------------------------------\n"
+        "------------------------------------------------------------------------------------------------\n"
+        "  # Key\t\t\t     Send     Wait     Recv      ACK  Attempt     Drop     SL     RH  \n"
+        "------------------------------------------------------------------------------------------------\n"
         "%s"
-        "---------------------------------------------------------------------------------------\n"
+        "------------------------------------------------------------------------------------------------\n"
         , ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke) - tu->started
         , packets_send
         , ack_receive

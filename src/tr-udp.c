@@ -1192,6 +1192,9 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     }
     // Set default start timer value
     else max_ack_wait = MAX_ACK_WAIT*1000; 
+    
+    // Save send repeat timer wait time value to statistic
+    ip_map_d->stat.wait = max_ack_wait;
 
     // Save calculated timer value to output function parameter
     if(ack_wait != NULL) *ack_wait = max_ack_wait;
