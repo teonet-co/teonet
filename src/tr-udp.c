@@ -383,9 +383,13 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                                     // Change Expected ID
                                     ip_map_d->expected_id++;
+                                    
+                                    // Continue check from beginning of head
+                                    idx = 0;
                                 }
 
-                                // Remove already processed
+                                // Remove already processed... in real world we 
+                                // never will be here
                                 else if (rh_d->id < ip_map_d->expected_id) {
 
                                     #ifdef DEBUG_KSNET
