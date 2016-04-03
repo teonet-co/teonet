@@ -1184,7 +1184,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     if(max_ack_wait > 0) {
         
         // Set timer value based on max last 10 triptime
-        max_ack_wait += 3.5 * max_ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
+        max_ack_wait += 1 * max_ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
         
         // Check minimum and maximum timer value
         if(max_ack_wait < MIN_ACK_WAIT*1000) max_ack_wait = MIN_ACK_WAIT*1000;
