@@ -1,3 +1,11 @@
+Version 0.1.54
+============== 
+
+  - TR-UDP statistic updates
+  - fix logical TR-UDP error in Check Received message Heap
+  - TR-UDP set MAX_MAX_ACK_WAIT up to 10 second
+
+
 Version 0.1.53
 ============== 
 
