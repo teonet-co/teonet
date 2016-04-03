@@ -377,7 +377,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     tu->process_packet(kev->kc, rh_d->data,
                                             rh_d->data_len, &rh_d->addr);
 
-                                    // Remove first record
+                                    // Remove this record
                                     ksnTRUDPreceiveHeapRemove(tu,
                                             ip_map_d->receive_heap, idx);
 
@@ -396,7 +396,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     ksn_puts(kev, MODULE, DEBUG_VV, "removed");
                                     #endif
 
-                                    // Remove first record
+                                    // Remove this record
                                     ksnTRUDPreceiveHeapRemove(tu,
                                             ip_map_d->receive_heap, idx);
                                 }
