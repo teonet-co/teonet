@@ -289,8 +289,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         NULL, 0
                 );
 
-                recvlen = 0; // The received message is processed
-
+                recvlen = 0; // \todo: The received message is not processed
             }
             
             // Process TR-UDP request
@@ -398,7 +397,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             ip_map_d->receive_heap, idx);
                                 }
 
-                                // Drop saved message
+                                // Skip other messages and switch to next in this heap
                                 else {
 
                                     #ifdef DEBUG_KSNET
@@ -406,7 +405,6 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                     #endif
 
                                     idx++;
-                                    //break; // while
                                 }
                             }
                         }
@@ -753,12 +751,20 @@ uint32_t ksnTRUDPtimestamp() {
 
     struct timeval te;
     gettimeofday(&te, NULL); // get current time
-    //long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
-    long long milliseconds = te.tv_sec*1000000LL + te.tv_usec; // calculate thousands of milliseconds
-    return (uint32_t) (milliseconds & 0xFFFFFFFF);
+    long long tmilliseconds = te.tv_sec*1000000LL + te.tv_usec; // calculate thousands of milliseconds
+    return (uint32_t) (tmilliseconds & 0xFFFFFFFF);
 }
 
-// Make address from string
+/**
+ * Make address from the IPv4 numbers-and-dots notation and integer port number 
+ * into binary form
+ * 
+ * @param addr
+ * @param port
+ * @param remaddr
+ * @param addr_len
+ * @return 
+ */
 int make_addr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *addr_len) {
 
     if(*addr_len < sizeof(struct sockaddr_in)) return -3;
@@ -908,7 +914,7 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __CONST_SOCKADDR_ARG addr) {
     const socklen_t addr_len = sizeof(struct sockaddr_in); // Length of addresses
     teo_sendto(kev, fd, &tru_header, sizeof(tru_header), 0, addr, addr_len); // Send
 
-    //! \todo: Add sent reset to send list, and add Reset
+    //! \todo: May be Add sent reset to send list, and add Reset
 }
 
 
@@ -1045,8 +1051,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     // Start ACK timer watcher
     double ack_wait;
     size_t valueLength;
-    sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
-
+    sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);    
     if(sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags,
             addr, addr_len, attempt, &ack_wait) != NULL) {
 
@@ -1173,22 +1178,28 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
         uint32_t id, int fd, int cmd, int flags, __CONST_SOCKADDR_ARG addr,
         socklen_t addr_len, int attempt, double *ack_wait) {
 
-    // Timer value
+    // Calculate timer value (in milliseconds)
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
-    double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // 1000000.0;
+    double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // max last 10 triptime
     if(max_ack_wait > 0) {
-        max_ack_wait += 2.5 * max_ack_wait *
-            (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
+        
+        // Set timer value based on max last 10 triptime
+        max_ack_wait += 2.5 * max_ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
+        
+        // Check minimum and maximum timer value
         if(max_ack_wait < MIN_ACK_WAIT*1000) max_ack_wait = MIN_ACK_WAIT*1000;
         else if(max_ack_wait > MAX_MAX_ACK_WAIT*1000) max_ack_wait = MAX_MAX_ACK_WAIT*1000;
     }
-    else max_ack_wait = MAX_ACK_WAIT*1000; // Default value
+    // Set default start timer value
+    else max_ack_wait = MAX_ACK_WAIT*1000; 
 
+    // Save calculated timer value to output function parameter
     if(ack_wait != NULL) *ack_wait = max_ack_wait;
 
     // Check for "reset TR-UDP if max_count = max_value and attempt > max_attempt"
-    if(attempt > MAX_ATTEMPT * 10 ||
-      (attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT*1000)) return NULL;
+    if(/*attempt > MAX_ATTEMPT * 10 ||*/
+      (attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT*1000)) 
+        return NULL;
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
