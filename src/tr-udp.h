@@ -57,6 +57,7 @@ typedef struct ksnTRUDPClass {
     tr_udp_stat stat; ///< TR-UDP Common statistic data
     ksnTRUDPprocessPacketCb process_packet; ///< TR-UDP recvfrom Process Packet function
     double started; ///< Start module time
+    ev_io write_w; ///< Write watcher
 
 } ksnTRUDPClass;
 

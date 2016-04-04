@@ -1,5 +1,5 @@
 /**
- * \file   teodb.c
+ * \file   app/teodb.c
  * \author Kirill Scherba <kirill@scherba.ru>
  *
  * Teonet database based at PBL KEYFILE:

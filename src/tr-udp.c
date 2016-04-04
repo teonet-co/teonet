@@ -54,6 +54,8 @@ ksnTRUDPClass *ksnTRUDPinit(void *kc) {
     tu->ip_map = pblMapNewHashMap();
     ksnTRUDPregisterProcessPacket(tu, ksnCoreProcessPacket);
     ksnTRUDPstatInit(tu);
+    tu->write_w.data = tu;
+//    write_cb_start(tu);
 
     return tu;
 }
@@ -67,6 +69,7 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
 
     if (tu != NULL) {
 
+//        write_cb_stop(tu);
         ksnTRUDPsendListDestroyAll(tu); // Destroy all send lists
         ksnTRUDPreceiveHeapDestroyAll(tu); // Destroy all receive heap
         pblMapFree(tu->ip_map); // Free IP map
@@ -622,14 +625,12 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
     size_t key_len = ksnTRUDPkeyCreate(tu, addr, key, KSN_BUFFER_SM_SIZE);
     ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
 
-    // Create new ip map record if it absent
+    // Create new ip map record if it is absent
     if (ip_map_d == NULL) {
 
         ip_map_data ip_map_d_new;
 
         memset(&ip_map_d_new, 0, sizeof(ip_map_data));
-//        ip_map_d_new.id = 0;
-//        ip_map_d_new.expected_id = 0;
         ip_map_d_new.send_list = pblMapNewHashMap();
         ip_map_d_new.receive_heap = pblHeapNew();
         ip_map_d_new.arp = ksnetArpFindByAddr(kev->kc->ka, addr);
@@ -1158,7 +1159,7 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
 
 /*******************************************************************************
  *
- * Send list timer functions
+ * Send list timer & write watcher functions
  *
  ******************************************************************************/
 
@@ -1325,6 +1326,54 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
         #endif
     }
+}
+
+/**
+ * Start write watcher
+ * 
+ * @param tu
+ * @return 
+ */
+ev_io *write_cb_start(ksnTRUDPClass *tu) {
+    
+    ev_io_init(&tu->write_w, write_cb, kev->kc->fd, EV_WRITE);
+    ev_io_start(kev->ev_loop, &tu->write_w);
+    
+    return &tu->write_w;
+}
+
+/**
+ * Stop write watcher
+ * 
+ * @param tu
+ */
+void write_cb_stop(ksnTRUDPClass *tu) {        
+    
+    // Stop timer
+    ev_io_stop(kev->ev_loop, &tu->write_w);
+    tu->write_w.data = NULL;
+}
+
+/**
+ * Send list write callback
+ *
+ *
+ * param loop Event loop
+ * @param w Watcher
+ * @param revents Events (not used, reserved)
+ */
+void write_cb(EV_P_ ev_io *w, int revents) {
+    
+    ksnTRUDPClass *tu = w->data;
+    
+    #ifdef DEBUG_KSNET
+    ksn_puts(kev, MODULE, DEBUG,
+            "ready to write"
+    );
+    #endif
+    
+    //ev_io_stop(kev->ev_loop, &tu->write_w);
+    //ev_io_start(kev->ev_loop, &tu->write_w);
 }
 
 /*******************************************************************************

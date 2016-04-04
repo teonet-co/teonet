@@ -8,8 +8,10 @@
 #ifndef EV_MGR_H
 #define	EV_MGR_H
 
-#include <ev.h>
+#include <unistd.h>
 #include <pthread.h>
+
+#include <ev.h>
 
 #include "config/opt.h"
 #include "config/conf.h"

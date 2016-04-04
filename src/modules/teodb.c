@@ -1,6 +1,6 @@
 /**
- * File:   teodb.h
- * Author: Kirill Scherba <kirill@scherba.ru>
+ * \file   modules/teodb.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
  * Teonet database module based at PBL KeyFile
  *
