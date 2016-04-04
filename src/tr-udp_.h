@@ -175,6 +175,10 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *, uint32_t id
 void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 //
+void write_cb(EV_P_ ev_io *w, int revents);
+ev_io *write_cb_start(ksnTRUDPClass *tu);
+void write_cb_stop(ksnTRUDPClass *tu);
+//
 int ksnTRUDPreceiveHeapCompare(const void* prev, const void* next);
 int ksnTRUDPreceiveHeapAdd(ksnTRUDPClass *tu, PblHeap *receive_heap,
         uint32_t id, void *data,

@@ -25,6 +25,8 @@ AM_SILENT_RULES([yes])
 
 AC_USE_SYSTEM_EXTENSIONS
 
+m4_include([libev.m4])
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_AWK

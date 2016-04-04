@@ -32,7 +32,8 @@ AM_CFLAGS = \
 	 $(DRELEASE_TEONET) \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
-	 -I/usr/include/libev
+	 -I/usr/include/libev \	
+	 -DEV_USE_EPOLL=1
 
 if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD
