@@ -90,6 +90,7 @@ int ksnetArpGetAllH(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, c
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr);
 ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka);
 size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);
+char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data, size_t *peers_data_json_len);
 char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data);
 char *ksnetArpShowHeader(int header_f);
 
