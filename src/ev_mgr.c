@@ -123,14 +123,21 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     
     // KSNet parameters
     const int app_argc = options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1 ? ((ksnetEvMgrAppParam*)user_data)->app_argc : 1; // number of application arguments
+    char *app_argv_descr[app_argc];     // array for argument names description
     char *app_argv[app_argc];           // array for argument names
-    app_argv[0] = (char*)"host_name";   // host name argument name
+    app_argv[0] = (char* )"host_name";  // host name argument name
+    app_argv_descr[0] = (char*) "This host name";   // host name argument name description
     //app_argv[1] = (char*)"file_name";   // file name argument name
     if(options&APP_PARAM && user_data != NULL) {
         if(((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
             int i;
             for(i = 1; i < ((ksnetEvMgrAppParam*)user_data)->app_argc; i++) {
                 app_argv[i] = ((ksnetEvMgrAppParam*)user_data)->app_argv[i];
+                
+                if(((ksnetEvMgrAppParam*)user_data)->app_descr != NULL) {
+                    app_argv_descr[i] = ((ksnetEvMgrAppParam*)user_data)->app_descr[i];
+                }
+                else app_argv_descr[i] = NULL;
             }
         }
     }
@@ -140,9 +147,9 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     if(port) ke->ksn_cfg.port = port; // Set port default
     char **argv_ret = NULL;
     ksnet_optSetApp(&ke->ksn_cfg, basename(argv[0]), basename(argv[0]), null_str);
-    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 1); // Read command line parameters (to use it as default)
+    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, app_argv_descr, 1); // Read command line parameters (to use it as default)
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
-    if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, 0); // Read command line parameters (to replace configuration file)
+    if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, app_argv_descr, 0); // Read command line parameters (to replace configuration file)
 
     ke->ksn_cfg.app_argc = app_argc;
     ke->ksn_cfg.app_argv = argv_ret;

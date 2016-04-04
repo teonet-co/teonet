@@ -145,7 +145,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
-                            const socklen_t addrlen = sizeof(remaddr); // length of addresses
+                            socklen_t addrlen = sizeof(remaddr); // length of addresses
 //                            memset((char *) &remaddr, 0, addrlen);
 //                            remaddr.sin_family = AF_INET;
 //                            remaddr.sin_port = htons(arp->port);
@@ -180,7 +180,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         if(arp != NULL) {
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
-                            const socklen_t addrlen = sizeof(remaddr); // length of addresses
+                            socklen_t addrlen = sizeof(remaddr); // length of addresses
                             if(!make_addr(arp->addr, arp->port, 
                                     (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
@@ -341,6 +341,7 @@ int main(int argc, char** argv) {
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 2;
     app_param.app_argv = app_argv;
+    app_param.app_descr = NULL;
     
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb,

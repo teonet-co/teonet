@@ -41,7 +41,7 @@ endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
 	  teoack teoackm teocque teodb_ex teostream teol0cli teol0cli_n teol0cli_n \
-	  teol0cli_ns teosscr
+	  teol0cli_ns teosscr teotru_load
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
@@ -59,11 +59,14 @@ teol0cli_SOURCES = teol0cli.c
 teol0cli_n_SOURCES = ../embedded/teocli/main.c
 teol0cli_ns_SOURCES = ../embedded/teocli/main_select.c
 teosscr_SOURCES = teosscr.c
+teotru_load_SOURCES = teotru_load.c
 
 exampledir = $(datarootdir)/doc/@PACKAGE@/examples
 example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \
 	       teosend.c teotcp.c teoterm.c teotun.c teostream.c teol0cli.c \
-	       teol0cli.py
+	       teol0cli.py teosscr.c teotru_load.c 
+	
+teotru_load_CFLAGS = $(AM_CFLAGS) -std=c11	
 
 teomulti_t_LDFLAGS = $(AM_LDFLAGS) -pthread
 teoackm_LDFLAGS = $(AM_LDFLAGS) -lev

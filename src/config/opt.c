@@ -37,13 +37,14 @@ void opt_usage(char *app_name, int app_argc, char** app_argv);
  * @param conf Pointer to ksnet_cfg structure to read configuration and
  *             command line parameters to
  * @param app_argc Number of application arguments
- * @param app_argv String array with application argument names
+ * @param app_argv String array with application arguments names
+ * @param app_argv_descr String array with application arguments descriptions
  * @param show_arg Show arguments 
  *
  * @return Entered application arguments
  */
 char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
-        int app_argc, char **app_argv, int show_arg) {
+        int app_argc, char **app_argv, char **app_argv_descr, int show_arg) {
 
     int option_index = 0, opt;
     struct option loptions[] = {
@@ -242,13 +243,30 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         int i;
 
-        fprintf(stderr, "Expected argument%s:",
+        fprintf(stderr, "\nExpected argument%s:",
                 ((app_argc - (argc - optind)) > 1 ? "s" : ""));
         // Show expected arguments
         for(i = argc - optind; i < app_argc; i++) {
             printf(" %s", app_argv[i]);
         }
         printf("\n\n");
+        
+        // Parameters description
+        if(app_argv_descr != NULL) {
+            
+            int number_of_parameters = 0;
+            char *descr_str = ksnet_formatMessage("where:\n\n");
+            for(i = argc - optind; i < app_argc; i++) {
+                if(app_argv_descr[i] != NULL) {
+                    descr_str = ksnet_sformatMessage(descr_str, 
+                            "%s  %s - %s\n", descr_str, app_argv[i], app_argv_descr[i]);
+                    number_of_parameters++;
+                }
+            }
+            descr_str = ksnet_sformatMessage(descr_str, "%s\n\n", descr_str);
+            if(number_of_parameters) printf(descr_str);
+            free(descr_str);
+        }
         opt_usage(argv[0], app_argc, app_argv);
         exit(EXIT_FAILURE);
     }
