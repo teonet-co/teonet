@@ -90,7 +90,7 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
 
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
-            "%d bytes packet was splitted to %d subpackets\n",
+            "%d bytes packet was split to %d subpackets\n",
             (int)packet_len, *num_subpackets);
         #endif
     }

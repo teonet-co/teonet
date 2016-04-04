@@ -1284,14 +1284,15 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
-                "%s" "timeout for message with id %d was happened%s, "
-                "resend %d bytes data to %s:%d\n",
-                ANSI_RED,
-                sl_t_data.id,
-                ANSI_NONE,
-                (int) sl_d->data_len,
-                inet_ntoa(((struct sockaddr_in *) &sl_t_data.addr)->sin_addr),
-                ntohs(((struct sockaddr_in *) &sl_t_data.addr)->sin_port)
+            _ANSI_BROWN 
+            "timeout at %.6f for message with id %d was happened" 
+            _ANSI_NONE ", "
+            "resend %d bytes data to %s:%d\n",
+            w->at,
+            sl_t_data.id,
+            (int) sl_d->data_len,
+            inet_ntoa(((struct sockaddr_in *) &sl_t_data.addr)->sin_addr),
+            ntohs(((struct sockaddr_in *) &sl_t_data.addr)->sin_port)
         );
         #endif
 

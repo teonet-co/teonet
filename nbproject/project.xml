@@ -31,9 +31,6 @@
             <word>app</word>
             <word>atoi</word>
             <word>autoconf</word>
-            <word>autogen</word>
-            <word>autoreconf</word>
-            <word>cd</word>
             <word>Cesanta</word>
             <word>changelog</word>
             <word>cmd</word>
@@ -46,19 +43,14 @@
             <word>execv</word>
             <word>fd</word>
             <word>gethostbyname</word>
-            <word>gitlab</word>
             <word>hotkey</word>
             <word>Hotkeys</word>
-            <word>http</word>
-            <word>https</word>
-            <word>init</word>
             <word>internet</word>
             <word>ip</word>
             <word>jsmt</word>
             <word>json</word>
             <word>kirill</word>
             <word>ksnet</word>
-            <word>ksproject</word>
             <word>len</word>
             <word>libev</word>
             <word>libteol</word>
@@ -72,7 +64,6 @@
             <word>name'</word>
             <word>namespace</word>
             <word>nonblock</word>
-            <word>org</word>
             <word>pc</word>
             <word>perror</word>
             <word>po</word>
@@ -83,7 +74,6 @@
             <word>segv</word>
             <word>sh</word>
             <word>src</word>
-            <word>SSL</word>
             <word>str</word>
             <word>strndup</word>
             <word>strtol</word>
@@ -96,10 +86,10 @@
             <word>teodb</word>
             <word>teodsp</word>
             <word>teogo</word>
-            <word>teogw</word>
             <word>teonet</word>
             <word>teostream</word>
             <word>teotproxy</word>
+            <word>teotru</word>
             <word>teoweb</word>
             <word>todo</word>
             <word>triptime</word>

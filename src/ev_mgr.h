@@ -151,6 +151,7 @@ typedef struct ksnetEvMgrAppParam {
     
     int app_argc;
     char **app_argv;
+    char **app_descr;
     
 } ksnetEvMgrAppParam;
 

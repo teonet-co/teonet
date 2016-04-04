@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 3;
     app_param.app_argv = app_argv;
+    app_param.app_descr = NULL;
     
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb,
