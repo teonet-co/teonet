@@ -353,7 +353,7 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
  * 
  * @param peers_data Pointer to ksnet_arp_data_ar
  * @param peers_data_json_len [out] Result json string length
- * @return 
+ * @return String with ARP table in JSON format. Should be free after use
  */
 char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data, 
         size_t *peers_data_json_len) {
@@ -384,7 +384,7 @@ char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data,
     }
     snprintf(data_str + ptr,  data_str_len - ptr, " ] }");
     
-    if(peers_data_json_len != NULL) *peers_data_json_len = strlen(data_str);
+    if(peers_data_json_len != NULL) *peers_data_json_len = strlen(data_str) + 1;
     
     return data_str;
 }

@@ -35,7 +35,7 @@ enum ksnCMD {
     CMD_STREAM,             ///< #69 Stream command
     CMD_L0,                 ///< #70 Command from L0 Client
     CMD_L0TO,               ///< #71 Command to L0 Client
-    CMD_PEERS,              ///< #72 Get peers
+    CMD_PEERS,              ///< #72 Get peers, allow JSON in request
     CMD_PEERS_ANSWER,       ///< #73 Get peers answer
     CMD_RESEND,             ///< #74 Resend command
     CMD_RECONNECT,          ///< #75 Reconnect command
@@ -47,13 +47,13 @@ enum ksnCMD {
     CMD_SUBSCRIBE,          ///< #81 Subscribe to event
     CMD_UNSUBSCRIBE,        ///< #82 UnSubscribe from event
     CMD_SUBSCRIBE_ANSWER,   ///< #83 Subscribe answer
-    CMD_L0_CLIENTS_N,       ///< #84 Request clients number
+    CMD_L0_CLIENTS_N,       ///< #84 Request clients number, allow JSON in request
     CMD_L0_CLIENTS_N_ANSWER,///< #85 Clients number
-    CMD_GET_NUM_PEERS,      ///< #86 Request number of peers
+    CMD_GET_NUM_PEERS,      ///< #86 Request number of peers, allow JSON in request
     CMD_GET_NUM_PEERS_ANSWER,///< #87 Number of peers answer
-    CMD_L0_STAT,            ///< #88 Get LO server statistic request
+    CMD_L0_STAT,            ///< #88 Get LO server statistic request, allow JSON in request
     CMD_L0_STAT_ANSWER,     ///< #89 LO server statistic 
-    CMD_HOST_INFO,          ///< #90 Request host info
+    CMD_HOST_INFO,          ///< #90 Request host info, allow JSON in request
     CMD_HOST_INFO_ANSWER,   ///< #91 Host info amswer
     CMD_L0_INFO,            ///< #92 L0 server info request
     CMD_L0_INFO_ANSWER,     ///< #93 L0 server info answer
