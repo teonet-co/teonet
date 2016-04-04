@@ -194,7 +194,7 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 //                }
 //                sprintf(data_str + ptr, " ] }");
 //                data_len = strlen(data_str);
-                ksnetArpShowDataJson((ksnet_arp_data_ar *) data, &data_len);
+                data_str = ksnetArpShowDataJson((ksnet_arp_data_ar *) data, &data_len);
                 data_len--;
                 beg = end = ""; 
             }
