@@ -349,6 +349,47 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
 }
 
 /**
+ * Convert peers data to JSON
+ * 
+ * @param peers_data Pointer to ksnet_arp_data_ar
+ * @param peers_data_json_len [out] Result json string length
+ * @return 
+ */
+char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data, 
+        size_t *peers_data_json_len) {
+    
+    ksnet_arp_data_ar *arp_data_ar = (ksnet_arp_data_ar *) peers_data;
+    size_t data_str_len = sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length;
+    char *data_str = malloc(data_str_len);
+    int ptr = snprintf(data_str, data_str_len, "{ \"length\": %d, \"arp_data_ar\": [ ", arp_data_ar->length);
+    int i = 0;
+    for(i = 0; i < arp_data_ar->length; i++) {
+        ptr += snprintf(data_str + ptr, data_str_len - ptr,
+                "%s{ "
+                "\"name\": \"%s\", "
+                "\"mode\": %d, "
+                "\"addr\": \"%s\", "
+                "\"port\": %d, "
+                "\"triptime\": %.3f,"
+                "\"uptime\": %.3f"
+                " }", 
+                i ? ", " : "", 
+                arp_data_ar->arp_data[i].name,
+                arp_data_ar->arp_data[i].data.mode,
+                arp_data_ar->arp_data[i].data.addr,
+                arp_data_ar->arp_data[i].data.port,
+                arp_data_ar->arp_data[i].data.last_triptime,
+                arp_data_ar->arp_data[i].data.connected_time // uptime
+        );
+    }
+    snprintf(data_str + ptr,  data_str_len - ptr, " ] }");
+    
+    if(peers_data_json_len != NULL) *peers_data_json_len = strlen(data_str);
+    
+    return data_str;
+}
+
+/**
  * Return size of ksnet_arp_data_ar data
  * 
  * @param peers_data

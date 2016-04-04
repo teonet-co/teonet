@@ -165,35 +165,36 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             else beg = end = "";             
             
             char *data_str = data;
-            int data_len = cp->data_length;
+            size_t data_len = cp->data_length;
             if(cp->cmd == CMD_L_PEERS_ANSWER) {
                 
                 // Convert binary peer list data to json
-                ksnet_arp_data_ar *arp_data_ar = (ksnet_arp_data_ar *) data;
-                data_str = malloc(sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length);
-                int ptr = sprintf(data_str, "{ \"length\": %d, \"arp_data_ar\": [ ", arp_data_ar->length);
-                int i = 0;
-                for(i = 0; i < arp_data_ar->length; i++) {
-                    ptr += sprintf(data_str + ptr, 
-                            "%s{ "
-                            "\"name\": \"%s\", "
-                            "\"mode\": %d, "
-                            "\"addr\": \"%s\", "
-                            "\"port\": %d, "
-                            "\"triptime\": %.3f,"
-                            "\"uptime\": %.3f"
-                            " }", 
-                            i ? ", " : "", 
-                            arp_data_ar->arp_data[i].name,
-                            arp_data_ar->arp_data[i].data.mode,
-                            arp_data_ar->arp_data[i].data.addr,
-                            arp_data_ar->arp_data[i].data.port,
-                            arp_data_ar->arp_data[i].data.last_triptime,
-                            arp_data_ar->arp_data[i].data.connected_time // uptime
-                    );
-                }
-                sprintf(data_str + ptr, " ] }");
-                data_len = strlen(data_str);
+//                ksnet_arp_data_ar *arp_data_ar = (ksnet_arp_data_ar *) data;
+//                data_str = malloc(sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length);
+//                int ptr = sprintf(data_str, "{ \"length\": %d, \"arp_data_ar\": [ ", arp_data_ar->length);
+//                int i = 0;
+//                for(i = 0; i < arp_data_ar->length; i++) {
+//                    ptr += sprintf(data_str + ptr, 
+//                            "%s{ "
+//                            "\"name\": \"%s\", "
+//                            "\"mode\": %d, "
+//                            "\"addr\": \"%s\", "
+//                            "\"port\": %d, "
+//                            "\"triptime\": %.3f,"
+//                            "\"uptime\": %.3f"
+//                            " }", 
+//                            i ? ", " : "", 
+//                            arp_data_ar->arp_data[i].name,
+//                            arp_data_ar->arp_data[i].data.mode,
+//                            arp_data_ar->arp_data[i].data.addr,
+//                            arp_data_ar->arp_data[i].data.port,
+//                            arp_data_ar->arp_data[i].data.last_triptime,
+//                            arp_data_ar->arp_data[i].data.connected_time // uptime
+//                    );
+//                }
+//                sprintf(data_str + ptr, " ] }");
+//                data_len = strlen(data_str);
+                ksnetArpShowDataJson((ksnet_arp_data_ar *) data, &data_len);
                 beg = end = ""; 
             }
             else if(cp->cmd == CMD_L_L0_CLIENTS_ANSWER) {
@@ -303,7 +304,7 @@ static void read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             data_json_len = snprintf(data_json, data_json_len, 
                 "{ \"cmd\": %d, \"from\": \"%s\", \"data\": %s%.*s%s }",
                 cp->cmd, cp->peer_name, 
-                beg, data_len, data_str, end
+                beg, (int)data_len, data_str, end
             );
             
             #ifdef DEBUG_KSNET
