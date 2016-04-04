@@ -1,3 +1,12 @@
+Version 0.1.56 at 2016-04-04 13:23
+============== 
+
+  - JSON format added to the peers_answer command
+  - the ksnetArpShowDataJson() function was created to the ARP module to convert 
+    peers answer to JSON format
+
+
+Version 0.1.55,
 Version 0.1.54
 ============== 
 
@@ -13,8 +22,8 @@ Version 0.1.53
   - add non_block mode to UDP sockets
   - set idle activity interval to 11.5/8 sec to quick reconnect to r-host 
   - fix an error in cque test
-  - reset TR-UDP if max_count = max_value (2.000 sec) and attempt > max_attempts (5) 
-    or attempt > 5*10  
+  - reset TR-UDP if max_count = max_value (2.000 sec) and attempt > max_attempts
+    (5) or attempt > 5*10  
   - set core minimal and maximal delay to reconnect TR-UDP peers
   - submodules definition changed
   - README.md updated

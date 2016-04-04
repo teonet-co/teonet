@@ -320,6 +320,20 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnet_arp_data_ar *peers_data = ksnetArpShowData(((ksnCoreClass*)kco->kc)->ka);
     size_t peers_data_length = ksnetArpShowDataLength(peers_data);
     
+    // Get type of request: 0 - binary; 1 - JSON
+    const int data_type = rd->data_len && !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;   
+    
+    // Convert data to JSON format
+    if(data_type == 1) {
+        
+        size_t peers_json_len;
+        char *peers_json = ksnetArpShowDataJson(peers_data, &peers_json_len);
+        
+        free(peers_data);
+        peers_data = (ksnet_arp_data_ar *)peers_json;
+        peers_data_length = peers_json_len;
+    }
+    
     // Send PEERS_ANSWER to L0 user
     if(rd->l0_f)
         ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
@@ -330,6 +344,8 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     else
         ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_PEERS_ANSWER,
                 peers_data, peers_data_length);
+    
+    free(peers_data);
     
     return 1; // Command processed
 }
@@ -346,9 +362,10 @@ static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     void *peers_data;
     size_t peers_data_length = 0;
             
-    // Get peers number data
     // Get type of request: 0 - binary; 1 - JSON
     const int data_type = rd->data_len && !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
+
+    // Get peers number data
     uint32_t peers_number = ksnetArpSize(((ksnCoreClass*)kco->kc)->ka); // Get peers number
     
     // JSON data type
