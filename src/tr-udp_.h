@@ -15,7 +15,7 @@
 
 
 #define TR_UDP_PROTOCOL_VERSION 1
-#define MIN_ACK_WAIT 0.006  // 6 MS
+#define MIN_ACK_WAIT 0.025  // 025 MS
 #define MAX_ACK_WAIT 0.500  // 500 MS
 #define MAX_MAX_ACK_WAIT MAX_ACK_WAIT * 20 // 10 sec
 #define MAX_ATTEMPT 5 // maximum attempt with MAX_MAX_ACK_WAIT wait value
@@ -29,6 +29,7 @@ typedef struct ip_map_data {
     uint32_t expected_id; ///< Receive message expected ID 
     PblMap *send_list; ///< Send messages list
     PblHeap *receive_heap; ///< Received messages heap
+    PblPriorityQueue *write_queue; ///< Write queue
     ksnet_arp_data *arp;
     
     #define LAST10_SIZE 10
@@ -135,6 +136,20 @@ enum ksnTRUDP_type {
 
 };
 
+/**
+ * Write Queue data
+ */
+typedef struct write_queue_data {
+
+    int fd;
+    void *data;
+    size_t data_len;
+    int flags;
+    __CONST_SOCKADDR_ARG addr;
+    socklen_t addr_len;
+
+} write_queue_data;
+
 
 // Local methods
 size_t ksnTRUDPkeyCreate(ksnTRUDPClass* tu, __CONST_SOCKADDR_ARG addr, char* key,
@@ -168,6 +183,12 @@ PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
 sl_data *ksnTRUDPsendListGetData(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr);
 void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list);
+int ksnTRUDPwriteQueueFree(write_queue_data *wq);
+void ksnTRUDPwriteQueueRemoveAll(ksnTRUDPClass *tu, PblPriorityQueue *write_queue);
+void ksnTRUDPwriteQueueDestroyAll(ksnTRUDPClass *tu);
+int ksnTRUDPwriteQueueAdd(ksnTRUDPClass *tu, int fd, const void *data, 
+        size_t data_len, int flags, __CONST_SOCKADDR_ARG addr, 
+        socklen_t addr_len);
 //
 ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *, uint32_t id, int fd,
         int cmd, int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len, 
@@ -176,6 +197,7 @@ void sl_timer_stop(EV_P_ ev_timer *w);
 void sl_timer_cb(EV_P_ ev_timer *w, int revents);
 //
 void write_cb(EV_P_ ev_io *w, int revents);
+ev_io *write_cb_init(ksnTRUDPClass *tu);
 ev_io *write_cb_start(ksnTRUDPClass *tu);
 void write_cb_stop(ksnTRUDPClass *tu);
 //

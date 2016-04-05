@@ -27,6 +27,7 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
 
 //#define VERSION_MAJOR 0
 //#define VERSION_MINOR 0
+#define DEFAULT_PRIORITY 10
 
 #define kev ((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke))
 
@@ -54,8 +55,7 @@ ksnTRUDPClass *ksnTRUDPinit(void *kc) {
     tu->ip_map = pblMapNewHashMap();
     ksnTRUDPregisterProcessPacket(tu, ksnCoreProcessPacket);
     ksnTRUDPstatInit(tu);
-    tu->write_w.data = tu;
-//    write_cb_start(tu);
+    write_cb_init(tu);
 
     return tu;
 }
@@ -69,8 +69,9 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu) {
 
     if (tu != NULL) {
 
-//        write_cb_stop(tu);
+        write_cb_stop(tu);
         ksnTRUDPsendListDestroyAll(tu); // Destroy all send lists
+        ksnTRUDPwriteQueueDestroyAll(tu); // Destroy all write queue
         ksnTRUDPreceiveHeapDestroyAll(tu); // Destroy all receive heap
         pblMapFree(tu->ip_map); // Free IP map
 
@@ -87,8 +88,19 @@ void ksnTRUDPremoveAll(ksnTRUDPClass *tu) {
 
     if (tu != NULL) {
 
-        ksnTRUDPsendListDestroyAll(tu); // Destroy all send lists
-        ksnTRUDPreceiveHeapDestroyAll(tu); // Destroy all receive heap
+        PblIterator *it = pblMapIteratorReverseNew(tu->ip_map);
+        if (it != NULL) {
+            while (pblIteratorHasPrevious(it)) {
+
+                void *entry = pblIteratorPrevious(it);
+                ip_map_data *ip_map_d = pblMapEntryValue(entry);
+
+                ksnTRUDPsendListRemoveAll(tu, ip_map_d->send_list); // Remove all send lists
+                ksnTRUDPwriteQueueRemoveAll(tu, ip_map_d->write_queue); // Remove all write queue
+                ksnTRUDPreceiveHeapRemoveAll(tu, ip_map_d->receive_heap); // Remove all receive heap
+            }
+            pblIteratorFree(it);
+        }
         pblMapClear(tu->ip_map); // Clear IP map
     }
 }
@@ -124,8 +136,8 @@ void ksnTRUDPremoveAll(ksnTRUDPClass *tu) {
  * @return Number of bytes sent to UDP
  */
 ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
-        int attempt, int cmd, int fd, const void *buf, size_t buf_len, int flags,
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
+        int attempt, int cmd, int fd, const void *buf, size_t buf_len,
+        int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
@@ -182,6 +194,10 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
 
         // Set statistic send list size
         if(!resend_flg) ksnTRUDPstatSendListAdd(tu);
+
+        // Add value to Write Queue and start write queue watcher
+        ksnTRUDPwriteQueueAdd(tu, fd, buf, buf_len, flags, addr, addr_len);
+        buf_len = 0;
     }
 
     // Not TR-UDP
@@ -294,7 +310,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                 recvlen = 0; // \todo: The received message is not processed
             }
-            
+
             // Process TR-UDP request
             else  {
 
@@ -357,7 +373,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             while ((num = pblHeapSize(ip_map_d->receive_heap))) {
 
                                 if(!(idx < num)) break;
-                                
+
                                 rh_data *rh_d = ksnTRUDPreceiveHeapGet(
                                         ip_map_d->receive_heap, idx);
 
@@ -386,12 +402,12 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
                                     // Change Expected ID
                                     ip_map_d->expected_id++;
-                                    
+
                                     // Continue check from beginning of head
                                     idx = 0;
                                 }
 
-                                // Remove already processed... in real world we 
+                                // Remove already processed... in real world we
                                 // never will be here
                                 else if (rh_d->id < ip_map_d->expected_id) {
 
@@ -633,6 +649,7 @@ ip_map_data *ksnTRUDPipMapData(ksnTRUDPClass *tu,
         memset(&ip_map_d_new, 0, sizeof(ip_map_data));
         ip_map_d_new.send_list = pblMapNewHashMap();
         ip_map_d_new.receive_heap = pblHeapNew();
+        ip_map_d_new.write_queue = pblPriorityQueueNew();
         ip_map_d_new.arp = ksnetArpFindByAddr(kev->kc->ka, addr);
         pblHeapSetCompareFunction(ip_map_d_new.receive_heap,
                 ksnTRUDPreceiveHeapCompare);
@@ -761,14 +778,14 @@ uint32_t ksnTRUDPtimestamp() {
 }
 
 /**
- * Make address from the IPv4 numbers-and-dots notation and integer port number 
+ * Make address from the IPv4 numbers-and-dots notation and integer port number
  * into binary form
- * 
+ *
  * @param addr
  * @param port
  * @param remaddr
  * @param addr_len
- * @return 
+ * @return
  */
 int make_addr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *addr_len) {
 
@@ -885,6 +902,13 @@ void ksnTRUDPresetKey(ksnTRUDPClass *tu, char *key, size_t key_len, int options)
             ip_map_d->send_list = NULL; // Clear Send List pointer
         }
         ip_map_d->id = 0; // Reset send message ID
+
+        // Reset or remove Write queue
+        ksnTRUDPwriteQueueRemoveAll(tu, ip_map_d->write_queue); // Remove all elements from Write Queue
+        if (options) {
+            pblPriorityQueueFree(ip_map_d->write_queue); // Free Write Queue
+            ip_map_d->write_queue = NULL; // Clear Write Queue pointer
+        }
 
         // Reset or remove Receive Heap
         ksnTRUDPreceiveHeapRemoveAll(tu, ip_map_d->receive_heap); // Remove all elements from Receive Heap
@@ -1056,7 +1080,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     // Start ACK timer watcher
     double ack_wait;
     size_t valueLength;
-    sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);    
+    sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
     if(sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags,
             addr, addr_len, attempt, &ack_wait) != NULL) {
 
@@ -1116,17 +1140,19 @@ void ksnTRUDPsendListRemoveAll(ksnTRUDPClass *tu, PblMap *send_list) {
     ksn_puts(kev, MODULE, DEBUG_VV, "sent message lists remove all");
     #endif
 
-    PblIterator *it = pblMapIteratorReverseNew(send_list);
-    if (it != NULL) {
-        while (pblIteratorHasPrevious(it)) {
-            void *entry = pblIteratorPrevious(it);
-            sl_data *sl_d = pblMapEntryValue(entry);
-            sl_timer_stop(kev->ev_loop, &sl_d->w);
-            ksnTRUDPstatSendListRemove(tu);
+    if(send_list != NULL) {
+        PblIterator *it = pblMapIteratorReverseNew(send_list);
+        if (it != NULL) {
+            while (pblIteratorHasPrevious(it)) {
+                void *entry = pblIteratorPrevious(it);
+                sl_data *sl_d = pblMapEntryValue(entry);
+                sl_timer_stop(kev->ev_loop, &sl_d->w);
+                ksnTRUDPstatSendListRemove(tu);
+            }
+            pblIteratorFree(it);
         }
-        pblIteratorFree(it);
+        pblMapClear(send_list);
     }
-    pblMapClear(send_list);
 }
 
 /**
@@ -1159,7 +1185,7 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
 
 /*******************************************************************************
  *
- * Send list timer & write watcher functions
+ * Send list timer functions
  *
  ******************************************************************************/
 
@@ -1187,17 +1213,17 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // max last 10 triptime
     if(max_ack_wait > 0) {
-        
+
         // Set timer value based on max last 10 triptime
         max_ack_wait += 1 * max_ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
-        
+
         // Check minimum and maximum timer value
         if(max_ack_wait < MIN_ACK_WAIT*1000) max_ack_wait = MIN_ACK_WAIT*1000;
         else if(max_ack_wait > MAX_MAX_ACK_WAIT*1000) max_ack_wait = MAX_MAX_ACK_WAIT*1000;
     }
     // Set default start timer value
-    else max_ack_wait = MAX_ACK_WAIT*1000; 
-    
+    else max_ack_wait = MAX_ACK_WAIT*1000;
+
     // Save send repeat timer wait time value to statistic
     ip_map_d->stat.wait = max_ack_wait;
 
@@ -1206,7 +1232,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
 
     // Check for "reset TR-UDP if max_count = max_value and attempt > max_attempt"
     if(/*attempt > MAX_ATTEMPT * 10 ||*/
-      (attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT*1000)) 
+      (attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT*1000))
         return NULL;
 
     #ifdef DEBUG_KSNET
@@ -1285,8 +1311,8 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
-            _ANSI_BROWN 
-            "timeout at %.6f for message with id %d was happened" 
+            _ANSI_BROWN
+            "timeout at %.6f for message with id %d was happened"
             _ANSI_NONE ", "
             "resend %d bytes data to %s:%d\n",
             w->at,
@@ -1328,30 +1354,215 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     }
 }
 
+
+/*****************************************************************************
+ *
+ *  Write Queue functions
+ *
+ *****************************************************************************/
+
 /**
- * Start write watcher
+ * Free write_queue_data struct data
+ * 
+ * @param wq
+ * @return 
+ */
+int ksnTRUDPwriteQueueFree(write_queue_data *wq) {
+    
+    int rc = 0;
+    
+    if(wq != (void*)-1 && wq != NULL) {
+        
+        // Free sent queue data
+        if(wq->data != NULL) free(wq->data);
+        if(wq->addr != NULL) free((void*)wq->addr);
+        free(wq);
+        
+        rc = 1;
+    }
+
+    return rc;
+}
+
+/**
+ * Remove all elements from Write Queue
+ *
+ * @param tu
+ * @param write_queue
+ */
+void ksnTRUDPwriteQueueRemoveAll(ksnTRUDPClass *tu,
+        PblPriorityQueue *write_queue) {
+
+    #ifdef DEBUG_KSNET
+    ksn_puts(kev, MODULE, DEBUG_VV, "write queue remove all");
+    #endif
+
+    if(write_queue != NULL) {
+        
+        for(;;) {
+            
+            int priority;
+            write_queue_data *wq = pblPriorityQueueRemoveFirst(
+                    write_queue, &priority);
+            
+            if(!ksnTRUDPwriteQueueFree(wq)) break;
+        }
+        pblPriorityQueueClear(write_queue);
+    }
+}
+
+/**
+ * Free all elements and free all Write Queues
+ *
+ * @param tu
+ * @return
+ */
+void ksnTRUDPwriteQueueDestroyAll(ksnTRUDPClass *tu) {
+
+    #ifdef DEBUG_KSNET
+    ksn_puts(kev, MODULE, DEBUG_VV, "write queue destroy all");
+    #endif
+
+    PblIterator *it = pblMapIteratorReverseNew(tu->ip_map);
+    if (it != NULL) {
+        while (pblIteratorHasPrevious(it)) {
+            void *entry = pblIteratorPrevious(it);
+            ip_map_data *ip_map_d = pblMapEntryValue(entry);
+            if(ip_map_d->write_queue != NULL) {
+                ksnTRUDPwriteQueueRemoveAll(tu, ip_map_d->write_queue);
+                pblPriorityQueueFree(ip_map_d->write_queue);
+                ip_map_d->write_queue = NULL;
+            }
+        }
+        pblIteratorFree(it);
+    }
+}
+
+/**
+ * Add element to Write Queue
+ * 
+ * @param tu
+ * @param fd
+ * @param data
+ * @param data_len
+ * @param flags
+ * @param addr
+ * @param addr_len
+ * @return int rc >= 0: The size of the queue.
+ * @return int rc <  0: An error, see pbl_errno:
+ */
+int ksnTRUDPwriteQueueAdd(ksnTRUDPClass *tu, int fd, const void *data,
+        size_t data_len, int flags, __CONST_SOCKADDR_ARG addr,
+        socklen_t addr_len) {
+
+    int rc = -1;
+    
+    size_t val_len;
+    char key[KSN_BUFFER_SM_SIZE];
+    size_t key_len = ksnTRUDPkeyCreate(0, addr, key, KSN_BUFFER_SM_SIZE);
+    ip_map_data *ip_map_d = pblMapGet(tu->ip_map, key, key_len, &val_len);
+    if (ip_map_d != NULL) {
+        write_queue_data *wq = malloc(sizeof(write_queue_data));
+        wq->fd = fd;
+        wq->data_len = data_len;
+        wq->data = memdup(data, wq->data_len);
+        wq->flags = flags;
+        wq->addr_len = addr_len;
+        wq->addr = memdup(addr, wq->addr_len);
+        rc = pblPriorityQueueAddLast(ip_map_d->write_queue, DEFAULT_PRIORITY, wq);
+    }
+    
+    // Start write queue
+    write_cb_start(tu);
+    
+    return rc;
+}
+
+/**
+ * Send first element from all Write Queue
  * 
  * @param tu
  * @return 
  */
-ev_io *write_cb_start(ksnTRUDPClass *tu) {
+int ksnTRUDPwriteQueueSendAll(ksnTRUDPClass *tu) {
     
+    int rc = 0;
+        
+    PblIterator *it = pblMapIteratorReverseNew(tu->ip_map);
+    if (it != NULL) {
+        while (pblIteratorHasPrevious(it)) {
+            
+            int priority = DEFAULT_PRIORITY;
+            void *entry = pblIteratorPrevious(it);
+            ip_map_data *ip_map_d = pblMapEntryValue(entry);
+            if(ip_map_d->write_queue != NULL) {
+    
+                write_queue_data *wq = pblPriorityQueueRemoveFirst(
+                        ip_map_d->write_queue, &priority);
+
+                if(wq != (void*)-1 && wq != NULL) {            
+                    teo_sendto(kev, wq->fd, wq->data, wq->data_len, wq->flags, 
+                            wq->addr, wq->addr_len);
+                    
+                    // Free sent queue data
+                    ksnTRUDPwriteQueueFree(wq);
+                    
+                    rc++;
+                }
+            }
+        }
+        pblIteratorFree(it);
+    }
+        
+    return rc;
+}
+
+/*******************************************************************************
+ *
+ * Write Queue watcher functions
+ *
+ ******************************************************************************/
+
+
+/**
+ * Start write watcher
+ *
+ * @param tu
+ * @return
+ */
+ev_io *write_cb_init(ksnTRUDPClass *tu) {
+
     ev_io_init(&tu->write_w, write_cb, kev->kc->fd, EV_WRITE);
+    tu->write_w_init_f = 1;
+    tu->write_w.data = tu;
+    write_cb_start(tu);
+
+    return &tu->write_w;
+}
+
+/**
+ * Start write watcher
+ *
+ * @param tu
+ * @return
+ */
+ev_io *write_cb_start(ksnTRUDPClass *tu) {
+
     ev_io_start(kev->ev_loop, &tu->write_w);
-    
+
     return &tu->write_w;
 }
 
 /**
  * Stop write watcher
- * 
+ *
  * @param tu
  */
-void write_cb_stop(ksnTRUDPClass *tu) {        
-    
-    // Stop timer
+void write_cb_stop(ksnTRUDPClass *tu) {
+
+    // Stop watcher
     ev_io_stop(kev->ev_loop, &tu->write_w);
-    tu->write_w.data = NULL;
+    //tu->write_w.data = NULL;
 }
 
 /**
@@ -1363,18 +1574,26 @@ void write_cb_stop(ksnTRUDPClass *tu) {
  * @param revents Events (not used, reserved)
  */
 void write_cb(EV_P_ ev_io *w, int revents) {
-    
+
     ksnTRUDPClass *tu = w->data;
+    const int write_delay = 0; // skip all tick except this (every 5-th)
+    static int write_idx = 0;
     
-    #ifdef DEBUG_KSNET
-    ksn_puts(kev, MODULE, DEBUG,
-            "ready to write"
-    );
-    #endif
-    
-    //ev_io_stop(kev->ev_loop, &tu->write_w);
-    //ev_io_start(kev->ev_loop, &tu->write_w);
+    if(!write_delay || !(write_idx % write_delay)) {
+
+        #ifdef DEBUG_KSNET
+        ksn_puts(kev, MODULE, (!tu->write_w_init_f ? DEBUG_VV : DEBUG) ,
+                _ANSI_LIGHTMAGENTA"ready to write"_ANSI_NONE
+        );
+        #endif
+        if(tu->write_w_init_f) tu->write_w_init_f = 0;
+
+        // Send one element of write queue and Stop this watcher if all is sent
+        if(!ksnTRUDPwriteQueueSendAll(tu)) write_cb_stop(tu);        
+    }
+    write_idx++;
 }
+
 
 /*******************************************************************************
  *
@@ -1490,7 +1709,7 @@ int ksnTRUDPreceiveHeapElementFree(rh_data *rh_d) {
  *
  * @return 1 if element removed or 0 heap was empty
  */
-inline int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu, 
+inline int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu,
         PblHeap *receive_heap) {
 
     // Statistic
@@ -1508,7 +1727,7 @@ inline int ksnTRUDPreceiveHeapRemoveFirst(ksnTRUDPClass *tu,
  *
  * @return 1 if element removed or 0 heap was empty
  */
-inline int ksnTRUDPreceiveHeapRemove(ksnTRUDPClass *tu, PblHeap *receive_heap, 
+inline int ksnTRUDPreceiveHeapRemove(ksnTRUDPClass *tu, PblHeap *receive_heap,
         int index) {
 
     // Statistic

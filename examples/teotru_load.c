@@ -22,26 +22,29 @@
 #define TUDPL_VERSION "0.0.1"    
 
 int start_test_01 = 0;
+int app_mode = 0; // 0 -client mode; 1- server mode
 
 void test_01(ksnetEvMgrClass *ke, char *server_peer) {
     
+    const size_t BUF_LEN = 1024;
+    const size_t NUM_RECORDS = 1024;
+
     printf("\nTest 01: ");
-    printf("Send 1024*10 small messages ... ");
+    printf("Send %d records of %d bytes each messages ... ", NUM_RECORDS, BUF_LEN);
     fflush(stdout);
     
     ksnCoreSendCmdto(ke->kc, server_peer, CMD_USER + 1, "Test 01", 8);
     
-    const size_t BUF_LEN = 1024;
     char buffer[BUF_LEN];
-    for(int i = 0; i < 1024*10; i++) {
+    for(int i = 0; i < NUM_RECORDS; i++) {
         snprintf(buffer, BUF_LEN, "%d", i);
         ksnCoreSendCmdto(ke->kc, server_peer, CMD_USER, buffer, 
-                            /*BUF_LEN*/ strlen(buffer)+1);
+                            BUF_LEN /*strlen(buffer)+1*/);
     }
     
     ksnCoreSendCmdto(ke->kc, server_peer, CMD_USER + 2, "Test 01", 8);
     printf("done\n");
-    //start_test_01 = 1;
+    start_test_01 = 1;
 }
 
 /**
@@ -60,18 +63,20 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
         case EV_K_STARTED:
         {
-            // Client mode
+            // Server mode
             if(!ke->ksn_cfg.app_argv[1][0] || !strcmp(ke->ksn_cfg.app_argv[1], "server")) {
             
                 printf("Server mode application started\n");
                 printf("Wait for client connected ...\n");
+                app_mode = 1;
             }
             
-            // Server mode
+            // Client mode
             else {
                 
                 printf("Client mode application started ...\n");
                 printf("Wait connection to server \"%s\" ...\n", ke->ksn_cfg.app_argv[1]);
+                app_mode = 0;
             }
             
         } break;
@@ -79,9 +84,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Send by timer
         case EV_K_TIMER:
         {
-            if(start_test_01) {
-                start_test_01 = 0;
-                test_01(ke, ke->ksn_cfg.app_argv[1]);
+            if(app_mode == 0) {                
+                if(start_test_01) {
+                    start_test_01 = 0;
+                    test_01(ke, ke->ksn_cfg.app_argv[1]);
+                }
             }
         } break;        
         
@@ -94,10 +101,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             
             // Client mode
             if(!strcmp(rd->from, ke->ksn_cfg.app_argv[1])) {
-                printf("Connected to server \"%s\" ...\n", 
+                printf("Connected to server \"%s\" ...\n\n"
+                       "Press A to start test\n\n", 
                         ke->ksn_cfg.app_argv[1]);
                 
-                start_test_01 = 1;
+                //start_test_01 = 1;
             }
             
         } break;
@@ -146,7 +154,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             num_data_cmds, (char*)rd->data, rd->from);
                     num_data_cmds = 0;
                     
-                    
                     break;
                 
             }
@@ -158,6 +165,24 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             //printf("*");
             //fflush(stdout);
         } break;
+        
+        // 'A' key was pressed in application hotkey monitor
+        case EV_K_USER:
+        {    
+            if(app_mode == 0) {
+//              roomMenuShow(room);
+//              processed = 1;
+              start_test_01 = 1;
+            }  
+        } break;
+
+//        // Application hotkey pressed
+//        case EV_K_HOTKEY:
+//        {
+//            if(room->app_state == STATE_WAIT_KEY) {        
+//                
+//            }
+//        }
         
         default:
             break; 
@@ -191,7 +216,7 @@ int main(int argc, char** argv) {
             READ_OPTIONS|READ_CONFIGURATION|APP_PARAM, 0, &app_param);
     
     // Set custom timer interval
-    ksnetEvMgrSetCustomTimer(ke, 1.00);
+    ksnetEvMgrSetCustomTimer(ke, 5.00);
     
     // Start teonet
     ksnetEvMgrRun(ke);

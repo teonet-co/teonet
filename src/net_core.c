@@ -115,7 +115,6 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     kc->last_check_event = 0;
 
     ((ksnetEvMgrClass*)ke)->kc = kc;
-    kc->ku = ksnTRUDPinit(kc);
     kc->ka = ksnetArpInit(ke);
     kc->kco = ksnCommandInit(kc);
     #if KSNET_CRYPT
@@ -127,6 +126,9 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
 
         return NULL;
     }
+    
+    // TR-UDP initialize
+    kc->ku = ksnTRUDPinit(kc);
 
     // Change this host port number to port changed in ksnCoreBind function
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);

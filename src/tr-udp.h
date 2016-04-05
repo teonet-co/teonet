@@ -58,6 +58,7 @@ typedef struct ksnTRUDPClass {
     ksnTRUDPprocessPacketCb process_packet; ///< TR-UDP recvfrom Process Packet function
     double started; ///< Start module time
     ev_io write_w; ///< Write watcher
+    int write_w_init_f; ///< Set to true after initialize
 
 } ksnTRUDPClass;
 
