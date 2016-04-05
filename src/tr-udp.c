@@ -171,32 +171,33 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
         memcpy(tru_buf + tru_ptr, buf, buf_len);
 
         // Add (or update) record to send list
-        ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags,
-                attempt, addr, addr_len);
+        if(ksnTRUDPsendListAdd(tu, tru_header.id, fd, cmd, buf, buf_len, flags,
+                attempt, addr, addr_len)) {
 
-        // New buffer length
-        buf_len += tru_ptr;
-        buf = tru_buf;
+            // New buffer length
+            buf_len += tru_ptr;
+            buf = tru_buf;
 
-        #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
-                ">> send %d bytes message of type: %d "
-                "with %d bytes data payload to %s:%d\n",
-                buf_len, tru_header.message_type,
-                tru_header.payload_length,
-                inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-                ntohs(((struct sockaddr_in *) addr)->sin_port)
-        );
-        #endif
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV,
+                    ">> send %d bytes message of type: %d "
+                    "with %d bytes data payload to %s:%d\n",
+                    buf_len, tru_header.message_type,
+                    tru_header.payload_length,
+                    inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                    ntohs(((struct sockaddr_in *) addr)->sin_port)
+            );
+            #endif
 
-        // Set packets time statistics
-        ksnTRUDPsetDATAsendTime(tu, addr);
+            // Set packets time statistics
+            ksnTRUDPsetDATAsendTime(tu, addr);
 
-        // Set statistic send list size
-        if(!resend_flg) ksnTRUDPstatSendListAdd(tu);
+            // Set statistic send list size
+            if(!resend_flg) ksnTRUDPstatSendListAdd(tu);
 
-        // Add value to Write Queue and start write queue watcher
-        ksnTRUDPwriteQueueAdd(tu, fd, buf, buf_len, flags, addr, addr_len);
+            // Add value to Write Queue and start write queue watcher
+            ksnTRUDPwriteQueueAdd(tu, fd, buf, buf_len, flags, addr, addr_len, tru_header.id);
+        }
         buf_len = 0;
     }
 
@@ -1064,6 +1065,8 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         const void *data, size_t data_len, int flags, int attempt,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
+    int rc = 0;
+    
     // Get Send List by address from ip_map (or create new)
     char key[KSN_BUFFER_SM_SIZE];
     PblMap *sl = ksnTRUDPsendListGet(tu, addr, key, KSN_BUFFER_SM_SIZE);
@@ -1081,7 +1084,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
     double ack_wait;
     size_t valueLength;
     sl_data *sl_d_get = pblMapGet(sl, &id, sizeof (id), &valueLength);
-    if(sl_timer_start(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags,
+    if(sl_timer_init(&sl_d_get->w, &sl_d_get->w_data, tu, id, fd, cmd, flags,
             addr, addr_len, attempt, &ack_wait) != NULL) {
 
         #ifdef DEBUG_KSNET
@@ -1091,6 +1094,8 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
                 id, cmd, key, pblMapSize(sl)
         );
         #endif
+
+        rc = 1;
     }
 
     // Reset this TR-UDP channel
@@ -1112,7 +1117,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         ksnTRUDPstatReset(tu);
     }
 
-    return 1;
+    return rc;
 }
 
 /**
@@ -1190,6 +1195,41 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
  ******************************************************************************/
 
 /**
+ * Calculate ACK wait time
+ * 
+ * @param tu
+ * @param ack_wait_save
+ * @param addr
+ * @return 
+ */
+double sl_timer_ack_time(ksnTRUDPClass *tu, double *ack_wait_save, 
+        __CONST_SOCKADDR_ARG addr) {
+    
+    // Calculate timer value (in milliseconds)
+    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
+    double ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // max last 10 triptime
+    if(ack_wait > 0) {
+
+        // Set timer value based on max last 10 triptime
+        ack_wait += 1 * ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
+
+        // Check minimum and maximum timer value
+        if(ack_wait < MIN_ACK_WAIT*1000) ack_wait = MIN_ACK_WAIT*1000;
+        else if(ack_wait > MAX_MAX_ACK_WAIT*1000) ack_wait = MAX_MAX_ACK_WAIT*1000;
+    }
+    // Set default start timer value
+    else ack_wait = MAX_ACK_WAIT*1000;
+
+    // Save send repeat timer wait time value to statistic
+    ip_map_d->stat.wait = ack_wait;
+
+    // Save calculated timer value to output function parameter
+    if(ack_wait_save != NULL) *ack_wait_save = ack_wait;
+    
+    return ack_wait;
+}
+
+/**
  * Start list timer watcher
  *
  * @param w
@@ -1202,50 +1242,33 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
  * @param addr
  * @param addr_len
  * @param attempt
- * @param ack_wait
+ * @param ack_wait_save
+ * 
  * @return
  */
-ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
+ev_timer *sl_timer_init(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
         uint32_t id, int fd, int cmd, int flags, __CONST_SOCKADDR_ARG addr,
-        socklen_t addr_len, int attempt, double *ack_wait) {
+        socklen_t addr_len, int attempt, double *ack_wait_save) {
 
-    // Calculate timer value (in milliseconds)
-    ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
-    double max_ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // max last 10 triptime
-    if(max_ack_wait > 0) {
-
-        // Set timer value based on max last 10 triptime
-        max_ack_wait += 1 * max_ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
-
-        // Check minimum and maximum timer value
-        if(max_ack_wait < MIN_ACK_WAIT*1000) max_ack_wait = MIN_ACK_WAIT*1000;
-        else if(max_ack_wait > MAX_MAX_ACK_WAIT*1000) max_ack_wait = MAX_MAX_ACK_WAIT*1000;
-    }
-    // Set default start timer value
-    else max_ack_wait = MAX_ACK_WAIT*1000;
-
-    // Save send repeat timer wait time value to statistic
-    ip_map_d->stat.wait = max_ack_wait;
-
-    // Save calculated timer value to output function parameter
-    if(ack_wait != NULL) *ack_wait = max_ack_wait;
+    // Calculate ACK wait time
+    double ack_wait = sl_timer_ack_time(tu, ack_wait_save, addr);
 
     // Check for "reset TR-UDP if max_count = max_value and attempt > max_attempt"
     if(/*attempt > MAX_ATTEMPT * 10 ||*/
-      (attempt > MAX_ATTEMPT && max_ack_wait == MAX_MAX_ACK_WAIT*1000))
+      (attempt > MAX_ATTEMPT && ack_wait == MAX_MAX_ACK_WAIT*1000))
         return NULL;
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
         "send list timer start, message id %d, " _ANSI_BROWN  "timer value: %f"
-        _ANSI_NONE "\n", id, max_ack_wait
+        _ANSI_NONE "\n", id, ack_wait
     );
     #endif
     // \todo Add this test operator if you want to stop debug_vv output
     // kev->ksn_cfg.show_debug_vv_f = 0;
 
     // Initialize, set user data and start the timer
-    ev_timer_init(w, sl_timer_cb, max_ack_wait / 1000.00, 0.0);
+    ev_timer_init(w, sl_timer_cb, ack_wait / 1000.00, 0.0);
     sl_timer_cb_data *sl_t_data = w_data;
     sl_t_data->tu = tu;
     sl_t_data->id = id;
@@ -1255,7 +1278,7 @@ ev_timer *sl_timer_start(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
     memcpy(&sl_t_data->addr, addr, addr_len);
     sl_t_data->addr_len = addr_len;
     w->data = sl_t_data;
-    ev_timer_start(kev->ev_loop, w);
+    //ev_timer_start(kev->ev_loop, w);
 
     return w;
 }
@@ -1448,12 +1471,14 @@ void ksnTRUDPwriteQueueDestroyAll(ksnTRUDPClass *tu) {
  * @param flags
  * @param addr
  * @param addr_len
+ * @param id
+ * 
  * @return int rc >= 0: The size of the queue.
  * @return int rc <  0: An error, see pbl_errno:
  */
 int ksnTRUDPwriteQueueAdd(ksnTRUDPClass *tu, int fd, const void *data,
         size_t data_len, int flags, __CONST_SOCKADDR_ARG addr,
-        socklen_t addr_len) {
+        socklen_t addr_len, uint32_t id) {
 
     int rc = -1;
     
@@ -1464,6 +1489,7 @@ int ksnTRUDPwriteQueueAdd(ksnTRUDPClass *tu, int fd, const void *data,
     if (ip_map_d != NULL) {
         write_queue_data *wq = malloc(sizeof(write_queue_data));
         wq->fd = fd;
+        wq->id = id;
         wq->data_len = data_len;
         wq->data = memdup(data, wq->data_len);
         wq->flags = flags;
@@ -1500,10 +1526,22 @@ int ksnTRUDPwriteQueueSendAll(ksnTRUDPClass *tu) {
                 write_queue_data *wq = pblPriorityQueueRemoveFirst(
                         ip_map_d->write_queue, &priority);
 
-                if(wq != (void*)-1 && wq != NULL) {            
-                    teo_sendto(kev, wq->fd, wq->data, wq->data_len, wq->flags, 
-                            wq->addr, wq->addr_len);
+                if(wq != (void*)-1 && wq != NULL) {   
                     
+                    // Calculate ACK wait time and start Send List timer
+                    size_t valueLength;
+                    sl_data *sl_d_get = pblMapGet(ip_map_d->send_list, &wq->id, 
+                            sizeof (wq->id), &valueLength);
+                    if(sl_d_get != NULL) {
+                        double ack_wait = sl_timer_ack_time(tu, NULL, wq->addr);
+                        sl_d_get->w.at = ack_wait / 1000.00;
+                        //ev_timer_again (kev->ev_loop, &sl_d_get->w);
+                        ev_timer_start(kev->ev_loop, &sl_d_get->w);
+
+                        // Send message
+                        teo_sendto(kev, wq->fd, wq->data, wq->data_len, wq->flags, 
+                                wq->addr, wq->addr_len);
+                    }
                     // Free sent queue data
                     ksnTRUDPwriteQueueFree(wq);
                     
