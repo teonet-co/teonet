@@ -1006,6 +1006,8 @@ int ksnetEvMgrRestart(int argc, char **argv) {
             else break;
         }
         puts("\n");
+        
+        usleep(950000);
 
         //#define USE_SYSTEM
         #ifdef USE_SYSTEM
