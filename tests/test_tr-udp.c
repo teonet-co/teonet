@@ -315,7 +315,7 @@ void test_2_5() {
 
     // 6 ksnTRUDPsendListAdd: Add packet to Sent message list
     id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
-    ksnTRUDPsendListAdd(tu, id, 0, 0, "Some data 4", 12, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    ksnTRUDPsendListAdd(tu, id, 0, 0, "Some data 4", 12, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr), NULL);
     sl_d_get = ksnTRUDPsendListGetData(tu, id, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl_d_get);
     CU_ASSERT_STRING_EQUAL(sl_d_get->data_buf, "Some data 4");
@@ -368,7 +368,7 @@ void test_2_6() {
     uint32_t id = ksnTRUDPsendListNewID(tu, (__CONST_SOCKADDR_ARG) &addr);
     CU_ASSERT(id == 0);
     // Add message to send list and start the send list timer
-    ksnTRUDPsendListAdd(tu, id, 0, CMD_TUN, "Some data 1", 12, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr));
+    ksnTRUDPsendListAdd(tu, id, 0, CMD_TUN, "Some data 1", 12, 0, 0, (__CONST_SOCKADDR_ARG) &addr, sizeof(addr), NULL);
     CU_ASSERT(pblMapSize(sl) == 1); // Number of records in send list
     
     // 2) sl_timer_cb: Process send list timer callback       
