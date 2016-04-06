@@ -79,18 +79,8 @@ typedef struct sl_timer_cb_data {
 
 } sl_timer_cb_data;
 
-/**
- * Send list data structure
- */
-typedef struct sl_data {
-    
-    ev_timer w; ///< Watcher
-    sl_timer_cb_data w_data; ///< Watcher data
-    size_t attempt; ///< Number of attempt
-    size_t data_len; ///< Data buffer length
-    char data_buf[]; ///< Data buffer
-
-} sl_data;
+#pragma pack(push)
+#pragma pack(1)
 
 /**
  * TR-UDP message header structure
@@ -122,6 +112,22 @@ typedef struct ksnTRUDP_header {
 
 } ksnTRUDP_header;
 
+#pragma pack(pop)
+
+/**
+ * Send list data structure
+ */
+typedef struct sl_data {
+    
+    ev_timer w; ///< Watcher
+    sl_timer_cb_data w_data; ///< Watchers data
+    size_t attempt; ///< Number of attempt
+    size_t data_len; ///< Data buffer length
+    char header[sizeof (ksnTRUDP_header)]; ///< TR-UDP header
+    char data_buf[]; ///< Data buffer
+
+} sl_data;
+
 /**
  * TR-UDP message type
  */
@@ -141,13 +147,7 @@ enum ksnTRUDP_type {
  */
 typedef struct write_queue_data {
 
-    int fd;
-    int id;
-    void *data;
-    size_t data_len;
-    int flags;
-    __CONST_SOCKADDR_ARG addr;
-    socklen_t addr_len;
+    uint32_t id;
 
 } write_queue_data;
 
@@ -176,7 +176,7 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         __CONST_SOCKADDR_ARG addr);
 int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
         const void *data, size_t data_len, int flags, int attempt,
-        __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+        __CONST_SOCKADDR_ARG addr, socklen_t addr_len, void *header);
 uint32_t ksnTRUDPsendListNewID(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
 void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu);
 PblMap *ksnTRUDPsendListGet(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
