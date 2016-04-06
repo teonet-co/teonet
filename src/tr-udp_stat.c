@@ -160,8 +160,8 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
             packets_dropped += ip_map_d->stat.packets_receive_dropped;
             
             tbl_str = ksnet_sformatMessage(tbl_str,  
-                "%s%3d "_ANSI_BROWN"%20.*s"_ANSI_NONE" %8d %8.3f %8d %8d %8d %8d %6d %6d\n", 
-                tbl_str, i, 
+                "%s%3d "_ANSI_BROWN"%-20.*s"_ANSI_NONE" %8d %8.3f %8d %8d %8d %8d %6d %6d\n", 
+                tbl_str, i + 1, 
                 key_len, key, 
                 ip_map_d->stat.packets_send, 
                 ip_map_d->stat.wait,    
@@ -177,9 +177,11 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
     }
     
     char *ret_str = ksnet_formatMessage(
-        "----------------------------------------\n"
+        _ANSI_CLS"\033[0;0H"
+        "\n"
+        "----------------------------------------------------------------------------------------------\n"
         "TR-UDP statistics:\n"
-        "----------------------------------------\n"
+        "----------------------------------------------------------------------------------------------\n"
         "Run time: %f sec\n"
         "\n"
         "Packets sent: %d\n"
@@ -197,10 +199,20 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         "  size_current: %d\n"
         "\n"
         "----------------------------------------------------------------------------------------------\n"
-        "  # Key\t\t\t     Send     Wait     Recv      ACK   Repeat     Drop     SL     RH  \n"
+        "  # Key\t\t\t     Send  Wait ms     Recv      ACK   Repeat     Drop     SQ     RQ  \n"
         "----------------------------------------------------------------------------------------------\n"
         "%s"
         "----------------------------------------------------------------------------------------------\n"
+        "  "
+        _ANSI_GREEN"send:"_ANSI_NONE" send packets,      "
+        _ANSI_GREEN"wait:"_ANSI_NONE" time to wait ACK,  "
+        _ANSI_GREEN"recv:"_ANSI_NONE" receive packets,   "
+        _ANSI_GREEN"ACK:"_ANSI_NONE" receive ACK \n"
+        "  "
+        _ANSI_GREEN"repeat:"_ANSI_NONE" resend packets,  "
+        _ANSI_GREEN"drop:"_ANSI_NONE" receive duplicate, "
+        _ANSI_GREEN"SQ:"_ANSI_NONE" send queue,          "
+        _ANSI_GREEN"RQ:"_ANSI_NONE" receive queue \n"
         , ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke) - tu->started
         , packets_send
         , ack_receive
@@ -234,7 +246,8 @@ inline int ksnTRUDPstatShow(ksnTRUDPClass *tu) {
     int num_line = 0;
     char *str = ksnTRUDPstatShowStr(tu);
 
-    ksn_printf(((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke)), MODULE, DISPLAY_M, 
+    ksn_printf(((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke)), MODULE, 
+            DISPLAY_M, 
             "%s", str);
     
     num_line = calculate_lines(str);
@@ -329,10 +342,14 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         else ip_map_d->stat.idx = 0;
 
         // Calculate max in last 10 packet
-        ip_map_d->stat.triptime_last_max = 0;
-        for(i = 0; i < LAST10_SIZE; i++) {
-            if(ip_map_d->stat.triptime_last_ar[i] > ip_map_d->stat.triptime_last_max)
-                ip_map_d->stat.triptime_last_max = ip_map_d->stat.triptime_last_ar[i];
+        {
+            uint32_t triptime_last_max = 0;
+            for(i = 0; i < LAST10_SIZE; i++) {
+                if(ip_map_d->stat.triptime_last_ar[i] > triptime_last_max)
+                    triptime_last_max = ip_map_d->stat.triptime_last_ar[i];
+            }
+            ip_map_d->stat.triptime_last_max = 
+                (ip_map_d->stat.triptime_last_max + 2 * triptime_last_max) / 3;
         }
     }
 }

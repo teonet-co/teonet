@@ -901,7 +901,7 @@ void tr_udp_idle_cb(EV_P_ ev_idle *iw, int revents) {
     ev_idle_stop(pet->loop, iw);
 
     // Clear previous shown lines
-    if(pet->num_lines) printf("\033[%dA\r\033[J\n", pet->num_lines + 3);
+    //if(pet->num_lines) printf("\033[%dA\r\033[J\n", pet->num_lines + 3);
 
     // Show TR-UDP
     pet->num_lines = ksnTRUDPstatShow(pet->kn->ku);
