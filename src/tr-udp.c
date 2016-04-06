@@ -196,7 +196,8 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
             if(!resend_flg) ksnTRUDPstatSendListAdd(tu);
 
             // Add value to Write Queue and start write queue watcher
-            ksnTRUDPwriteQueueAdd(tu, fd, buf, buf_len, flags, addr, addr_len, tru_header.id);
+            ksnTRUDPwriteQueueAdd(tu, fd, buf, buf_len, flags, addr, addr_len, 
+                    tru_header.id);
         }
         buf_len = 0;
     }
@@ -256,7 +257,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
     const size_t tru_ptr = sizeof (ksnTRUDP_header); // Header size
 
     // Get data
-    ssize_t recvlen = teo_recvfrom(kev, fd, buffer, buffer_len, flags, addr, addr_len);
+    ssize_t recvlen = teo_recvfrom(kev, fd, buffer, buffer_len, flags, addr, 
+            addr_len);
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
@@ -483,22 +485,28 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         // Send event to application
                         if(kev->event_cb != NULL) {
 
-                            sl_data *sl_d = ksnTRUDPsendListGetData(tu, tru_header->id, addr);
+                            sl_data *sl_d = ksnTRUDPsendListGetData(tu, 
+                                    tru_header->id, addr);
                             if(sl_d != NULL) {
 
                                 char *data = sl_d->data_buf;
                                 size_t data_len = sl_d->data_len;
                                 #if KSNET_CRYPT
-                                if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(data, data_len)) {
-                                    data = ksnDecryptPackage(kev->kc->kcr, data, data_len, &data_len);
+                                if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(
+                                        data, data_len)) {
+                                    
+                                    data = ksnDecryptPackage(kev->kc->kcr, data, 
+                                            data_len, &data_len);
                                 }
                                 #endif
                                 ksnCorePacketData rd;
                                 memset(&rd, 0, sizeof(rd));
 
                                 // Remote peer address and port
-                                rd.addr = strdup(inet_ntoa(((struct sockaddr_in*)addr)->sin_addr)); // IP to string
-                                rd.port = ntohs(((struct sockaddr_in*)addr)->sin_port); // Port to integer
+                                rd.addr = strdup(inet_ntoa(
+                                        ((struct sockaddr_in*)addr)->sin_addr)); // IP to string
+                                rd.port = ntohs(
+                                        ((struct sockaddr_in*)addr)->sin_port); // Port to integer
 
                                 // Parse packet and check if it valid
                                 if(ksnCoreParsePacket(data, data_len, &rd)) {
@@ -788,7 +796,8 @@ uint32_t ksnTRUDPtimestamp() {
  * @param addr_len
  * @return
  */
-int make_addr(const char *addr, int port, __SOCKADDR_ARG remaddr, socklen_t *addr_len) {
+int make_addr(const char *addr, int port, __SOCKADDR_ARG remaddr, 
+        socklen_t *addr_len) {
 
     if(*addr_len < sizeof(struct sockaddr_in)) return -3;
     *addr_len = sizeof(struct sockaddr_in); // length of addresses
@@ -860,7 +869,8 @@ void ksnTRUDPreset(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr, int options) {
  *          1 - remove mode: clear send list and receive heap,
  *                           and remove record from IP Map
  */
-void ksnTRUDPresetAddr(ksnTRUDPClass *tu, const char *addr, int port, int options) {
+void ksnTRUDPresetAddr(ksnTRUDPClass *tu, const char *addr, int port, 
+        int options) {
 
     // Create key from address
     char key[KSN_BUFFER_SM_SIZE];
@@ -1351,8 +1361,8 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
 
             // Resend message
             ksnTRUDPsendto(tu, 1, sl_t_data.id, sl_d->attempt+1, sl_t_data.cmd,
-                    sl_t_data.fd, sl_d->data_buf, sl_d->data_len, sl_t_data.flags,
-                    &sl_t_data.addr, sl_t_data.addr_len);
+                    sl_t_data.fd, sl_d->data_buf, sl_d->data_len, 
+                    sl_t_data.flags, &sl_t_data.addr, sl_t_data.addr_len);
 
             // Statistic
             ksnTRUDPstatSendListAttempt(tu, &sl_t_data.addr);
