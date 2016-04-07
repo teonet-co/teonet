@@ -344,11 +344,11 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         // or save to message Heap sorted by ID
                         // ksnTRUDPReceiveHeapAdd();
 
-                        // Calculate times statistic
-                        ksnTRUDPsetDATAreceiveTime(tu, addr);
+                        // Read IP Map & Calculate times statistic
+                        ip_map_data *ip_map_d = ksnTRUDPsetDATAreceiveTime(tu, addr, tru_header);
 
                         // Read IP Map
-                        ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
+                        //ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
 
                         // Send to core if ID Equals to Expected ID
                         if (tru_header->id == ip_map_d->expected_id) {

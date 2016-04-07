@@ -32,6 +32,34 @@ typedef struct last10_data {
 } last10_data;    
 
 /**
+ * TR-UDP channel statistic data
+ */
+typedef struct channel_stat {
+    
+    #define LAST10_SIZE 10
+    uint32_t triptime_last; ///< Last trip time
+    uint32_t triptime_max; ///< Max trip time
+    uint32_t triptime_last_max; ///< Max trip time in last 10 packets
+    uint32_t triptime_min; ///< Min trip time
+    uint32_t triptime_avg; ///< Avr trip time
+    uint32_t packets_send; ///< Number of data or reset packets sent
+    uint32_t packets_attempt; ///< Number of attempt packets 
+    uint32_t packets_receive; ///< Number of data or reset packets receive
+    uint32_t packets_receive_dropped; ///< Number of dropped received package
+    uint32_t ack_receive; ///< Number of ACK packets received
+    uint32_t receive_speed; ///< Receive speed in bytes per second
+    double receive_total; ///< Receive total in megabytes 
+    uint32_t send_speed; ///< Send speed in bytes per second
+    double send_total; ///< Send total in megabytes 
+    double wait; ///< Send repeat timer wait time value
+    last10_data last_send_packets_ar[LAST10_SIZE]; ///< Last 10 send packets
+    size_t idx_snd; ///< Index of last_send_packet_ar
+    last10_data last_receive_packets_ar[LAST10_SIZE]; ///< Last 10 receive packets
+    size_t idx_rcv; ///< Index of last_receive_packets_ar    
+    
+} channel_stat;   
+
+/**
  * IP map records data
  */
 typedef struct ip_map_data {
@@ -43,26 +71,7 @@ typedef struct ip_map_data {
     PblPriorityQueue *write_queue; ///< Write queue
     ksnet_arp_data *arp;
     
-    #define LAST10_SIZE 10
-    struct {
-        uint32_t triptime_last; ///< Last trip time
-        uint32_t triptime_max; ///< Max trip time
-        uint32_t triptime_last_max; ///< Max trip time in last 10 packets
-        uint32_t triptime_min; ///< Min trip time
-        uint32_t triptime_avg; ///< Avr trip time
-        uint32_t packets_send; ///< Number of data or reset packets sent
-        uint32_t packets_attempt; ///< Number of attempt packets 
-        uint32_t packets_receive; ///< Number of data or reset packets receive
-        uint32_t packets_receive_dropped; ///< Number of dropped received package
-        uint32_t ack_receive; ///< Number of ACK packets received
-        uint32_t send_speed; ///< Send speed in bytes per second
-        double send_total; ///< Send total in megabytes 
-        double wait; ///< Send repeat timer wait time value
-        last10_data last_send_packets_ar[LAST10_SIZE]; ///< Last 10 send packets
-        size_t idx_snd; ///< Index of last_send_packet_ar
-        last10_data last_receive_packets_ar[LAST10_SIZE]; ///< Last 10 receive packets
-        size_t idx_rcv; ///< Index of last_receive_packets_ar
-    } stat;
+    channel_stat stat; ///< Channel statistic
     
 } ip_map_data;
 
