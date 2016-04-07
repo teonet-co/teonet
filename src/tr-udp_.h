@@ -58,8 +58,10 @@ typedef struct ip_map_data {
         uint32_t send_speed; ///< Send speed in bytes per second
         double send_total; ///< Send total in megabytes 
         double wait; ///< Send repeat timer wait time value
-        last10_data triptime_last_ar[LAST10_SIZE]; ///< Last 10 trip time
-        size_t idx; ///< Index in triptime_last_ar
+        last10_data last_send_packets_ar[LAST10_SIZE]; ///< Last 10 send packets
+        size_t idx_snd; ///< Index of last_send_packet_ar
+        last10_data last_receive_packets_ar[LAST10_SIZE]; ///< Last 10 receive packets
+        size_t idx_rcv; ///< Index of last_receive_packets_ar
     } stat;
     
 } ip_map_data;

@@ -331,6 +331,7 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
     
     if(ip_map_d != NULL) {
         
+        // Calculate triptime last, minimal and maximum
         ip_map_d->stat.triptime_last = ksnTRUDPtimestamp() - tru_header->timestamp;
         ip_map_d->stat.triptime_avg = 
                 ((uint64_t)ip_map_d->stat.ack_receive * 
@@ -342,25 +343,25 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         if(ip_map_d->stat.triptime_last > ip_map_d->stat.triptime_max) 
             ip_map_d->stat.triptime_max = ip_map_d->stat.triptime_last;
 
-        // Add to last 10 array
-        ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx].triptime = ip_map_d->stat.triptime_last;
+        // Add triptime to last 10 array
+        ip_map_d->stat.last_send_packets_ar[ip_map_d->stat.idx_snd].triptime = ip_map_d->stat.triptime_last;
         
-        // Add last data size
+        // Add last data size to last 10 array
         size_t val_len;
         sl_data *sl_d = pblMapGet(ip_map_d->send_list, &tru_header->id, sizeof(tru_header->id), &val_len);
         if(sl_d != NULL) {
-            ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx].size_b = sl_d->data_len + sizeof(ksnTRUDP_header);
+            ip_map_d->stat.last_send_packets_ar[ip_map_d->stat.idx_snd].size_b = sl_d->data_len + sizeof(ksnTRUDP_header);
             ip_map_d->stat.send_total += 1.0 * (sl_d->data_len + sizeof(ksnTRUDP_header)) / (1024.0 * 1024.0);
-            ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx].ts = tru_header->timestamp;
+            ip_map_d->stat.last_send_packets_ar[ip_map_d->stat.idx_snd].ts = tru_header->timestamp;
         }
         else {
-            ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx].size_b = 0;
-            ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx].ts = 0;
+            ip_map_d->stat.last_send_packets_ar[ip_map_d->stat.idx_snd].size_b = 0;
+            ip_map_d->stat.last_send_packets_ar[ip_map_d->stat.idx_snd].ts = 0;
         }
                 
         // Last 10 array next index
-        ip_map_d->stat.idx++;
-        if(ip_map_d->stat.idx >= LAST10_SIZE) ip_map_d->stat.idx = 0;
+        ip_map_d->stat.idx_snd++;
+        if(ip_map_d->stat.idx_snd >= LAST10_SIZE) ip_map_d->stat.idx_snd = 0;
         
 
         // Calculate max triptime & speed in bytes in sec in last 10 packet
@@ -369,12 +370,14 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
             uint32_t triptime_last_max = 0;
             for(i = 0; i < LAST10_SIZE; i++) {
                 
-                if(ip_map_d->stat.triptime_last_ar[i].triptime > triptime_last_max)
-                    triptime_last_max = ip_map_d->stat.triptime_last_ar[i].triptime;
+                // Last maximum triptime
+                if(ip_map_d->stat.last_send_packets_ar[i].triptime > triptime_last_max)
+                    triptime_last_max = ip_map_d->stat.last_send_packets_ar[i].triptime;
                 
-                size_b += ip_map_d->stat.triptime_last_ar[i].size_b;
-                if(ip_map_d->stat.triptime_last_ar[i].ts > max_ts) max_ts = ip_map_d->stat.triptime_last_ar[i].ts;
-                else if (ip_map_d->stat.triptime_last_ar[i].ts > 0 && ip_map_d->stat.triptime_last_ar[i].ts < min_ts) min_ts = ip_map_d->stat.triptime_last_ar[i].ts;
+                // Calculate size sum & define minimum and maximum timestamp
+                size_b += ip_map_d->stat.last_send_packets_ar[i].size_b;
+                if(ip_map_d->stat.last_send_packets_ar[i].ts > max_ts) max_ts = ip_map_d->stat.last_send_packets_ar[i].ts;
+                else if (ip_map_d->stat.last_send_packets_ar[i].ts > 0 && ip_map_d->stat.last_send_packets_ar[i].ts < min_ts) min_ts = ip_map_d->stat.last_send_packets_ar[i].ts;
             }
             
             // Last maximal triptime
