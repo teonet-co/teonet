@@ -56,9 +56,10 @@ typedef struct ip_map_data {
         uint32_t packets_receive_dropped; ///< Number of dropped received package
         uint32_t ack_receive; ///< Number of ACK packets received
         uint32_t send_speed; ///< Send speed in bytes per second
-        last10_data triptime_last_ar[LAST10_SIZE]; ///< Last 10 trip time
+        double send_total; ///< Send total in megabytes 
         double wait; ///< Send repeat timer wait time value
-        size_t   idx;
+        last10_data triptime_last_ar[LAST10_SIZE]; ///< Last 10 trip time
+        size_t idx; ///< Index in triptime_last_ar
     } stat;
     
 } ip_map_data;
