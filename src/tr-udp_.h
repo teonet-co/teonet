@@ -17,8 +17,19 @@
 #define TR_UDP_PROTOCOL_VERSION 1
 #define MIN_ACK_WAIT 0.000732  // 000.732 MS
 #define MAX_ACK_WAIT 0.500  // 500 MS
-#define MAX_MAX_ACK_WAIT MAX_ACK_WAIT * 20 // 10 sec
+#define MAX_MAX_ACK_WAIT (MAX_ACK_WAIT * 20.0) // 10 sec
 #define MAX_ATTEMPT 5 // maximum attempt with MAX_MAX_ACK_WAIT wait value
+
+/**
+ * Last 10 send statistic data
+ */
+typedef struct last10_data {
+    
+    uint32_t triptime; ///< Packet triptime
+    uint32_t size_b; ///< Size of backet in bites
+    uint32_t ts; ///< Packet time
+    
+} last10_data;    
 
 /**
  * IP map records data
@@ -44,7 +55,8 @@ typedef struct ip_map_data {
         uint32_t packets_receive; ///< Number of data or reset packets receive
         uint32_t packets_receive_dropped; ///< Number of dropped received package
         uint32_t ack_receive; ///< Number of ACK packets received
-        uint32_t triptime_last_ar[LAST10_SIZE]; ///< Last 10 trip time
+        uint32_t send_speed; ///< Send speed in bytes per second
+        last10_data triptime_last_ar[LAST10_SIZE]; ///< Last 10 trip time
         double wait; ///< Send repeat timer wait time value
         size_t   idx;
     } stat;
