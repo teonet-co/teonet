@@ -1217,24 +1217,28 @@ void ksnTRUDPsendListDestroyAll(ksnTRUDPClass *tu) {
 double sl_timer_ack_time(ksnTRUDPClass *tu, double *ack_wait_save,
         __CONST_SOCKADDR_ARG addr) {
 
+    double ack_wait = MAX_ACK_WAIT*1000;
+    
     // Calculate timer value (in milliseconds)
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
-    double ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // max last 10 triptime
-    if(ack_wait > 0) {
+    if(ip_map_d != NULL) {
+        ack_wait = ip_map_d->stat.triptime_last_max / 1000.0; // max last 10 triptime
+        if(ack_wait > 0.00) {
 
-        // Set timer value based on max last 10 triptime
-        ack_wait += 1 * ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
+            // Set timer value based on max last 10 triptime
+            ack_wait += 1 * ack_wait * (ip_map_d->stat.packets_attempt < 10 ? 0.5 : 0.75);
 
-        // Check minimum and maximum timer value
-        if(ack_wait < MIN_ACK_WAIT*1000) ack_wait = MIN_ACK_WAIT*1000;
-        else if(ack_wait > MAX_MAX_ACK_WAIT*1000) ack_wait = MAX_MAX_ACK_WAIT*1000;
+            // Check minimum and maximum timer value
+            if(ack_wait < MIN_ACK_WAIT*1000.0) ack_wait = MIN_ACK_WAIT*1000.0;
+            else if(ack_wait > MAX_MAX_ACK_WAIT*1000.0) ack_wait = MAX_MAX_ACK_WAIT*1000.0;
+        }
+        // Set default start timer value
+        else ack_wait = MAX_ACK_WAIT*1000;
+
+        // Save send repeat timer wait time value to statistic
+        ip_map_d->stat.wait = ack_wait;   
     }
-    // Set default start timer value
-    else ack_wait = MAX_ACK_WAIT*1000;
-
-    // Save send repeat timer wait time value to statistic
-    ip_map_d->stat.wait = ack_wait;
-
+    
     // Save calculated timer value to output function parameter
     if(ack_wait_save != NULL) *ack_wait_save = ack_wait;
 
