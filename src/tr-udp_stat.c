@@ -160,11 +160,12 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
             packets_dropped += ip_map_d->stat.packets_receive_dropped;
             
             tbl_str = ksnet_sformatMessage(tbl_str,  
-                "%s%3d "_ANSI_BROWN"%-20.*s"_ANSI_NONE" %8d %11.3f  %8.3f %8d %8d %8d %8d %6d %6d\n", 
+                "%s%3d "_ANSI_BROWN"%-20.*s"_ANSI_NONE" %8d %11.3f %10.3f %9.3f %8d %8d %8d %8d %6d %6d\n", 
                 tbl_str, i + 1, 
                 key_len, key, 
                 ip_map_d->stat.packets_send, 
                 (double)(1.0 * ip_map_d->stat.send_speed / 1024.0),    
+                ip_map_d->stat.send_total,    
                 ip_map_d->stat.wait, 
                 ip_map_d->stat.packets_receive, 
                 ip_map_d->stat.ack_receive, 
@@ -181,9 +182,9 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
     char *ret_str = ksnet_formatMessage(
         _ANSI_CLS"\033[0;0H"
         "\n"
-        "-----------------------------------------------------------------------------------------------------------\n"
+        "----------------------------------------------------------------------------------------------------------------------\n"
         "TR-UDP statistics:\n"
-        "-----------------------------------------------------------------------------------------------------------\n"
+        "----------------------------------------------------------------------------------------------------------------------\n"
         "Run time: %f sec\n"
         "\n"
         "Packets sent: %d\n"
@@ -200,24 +201,24 @@ inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
         "  size_max: %d\n"
         "  size_current: %d\n"
         "\n"
-        "-----------------------------------------------------------------------------------------------------------\n"
-        "  # Key                      Send  Speed(kb/s)  Wait(ms)    Recv      ACK   Repeat     Drop     SQ     RQ  \n"
-        "-----------------------------------------------------------------------------------------------------------\n"
+        "----------------------------------------------------------------------------------------------------------------------\n"
+        "  # Key                      Send  Speed(kb/s)  Total(mb)  Wait(ms)    Recv      ACK   Repeat     Drop     SQ     RQ  \n"
+        "----------------------------------------------------------------------------------------------------------------------\n"
         "%s"
-        "-----------------------------------------------------------------------------------------------------------\n"
+        "----------------------------------------------------------------------------------------------------------------------\n"
         "  "
-        _ANSI_GREEN"send:"_ANSI_NONE" send packets,      "
+        _ANSI_GREEN"send:"_ANSI_NONE" send packets, "
         _ANSI_GREEN"speed:"_ANSI_NONE" send speed(kb/s), "
-        _ANSI_GREEN"wait:"_ANSI_NONE" time to wait ACK,  "
-        _ANSI_GREEN"recv:"_ANSI_NONE" receive packets  \n"
+        _ANSI_GREEN"total:"_ANSI_NONE" send in megabytes, "
+        _ANSI_GREEN"wait:"_ANSI_NONE" time to wait ACK, "
+        _ANSI_GREEN"recv:"_ANSI_NONE" receive packets   \n"
         
         "  "
-        _ANSI_GREEN"ACK:"_ANSI_NONE" receive ACK,        "
+        _ANSI_GREEN"ACK:"_ANSI_NONE" receive ACK,   "
         _ANSI_GREEN"repeat:"_ANSI_NONE" resend packets,  "
-        _ANSI_GREEN"drop:"_ANSI_NONE" receive duplicate, "
-        _ANSI_GREEN"SQ:"_ANSI_NONE" send queue         \n"
-        "  "
-        _ANSI_GREEN"RQ:"_ANSI_NONE" receive queue      \n"
+        _ANSI_GREEN"drop:"_ANSI_NONE" receive duplicate,  "
+        _ANSI_GREEN"SQ:"_ANSI_NONE" send queue,         "
+        _ANSI_GREEN"RQ:"_ANSI_NONE" receive queue       \n"
         , ksnetEvMgrGetTime(((ksnCoreClass *)tu->kc)->ke) - tu->started
         , packets_send
         , ack_receive
@@ -349,6 +350,7 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
         sl_data *sl_d = pblMapGet(ip_map_d->send_list, &tru_header->id, sizeof(tru_header->id), &val_len);
         if(sl_d != NULL) {
             ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx].size_b = sl_d->data_len + sizeof(ksnTRUDP_header);
+            ip_map_d->stat.send_total += 1.0 * (sl_d->data_len + sizeof(ksnTRUDP_header)) / (1024.0 * 1024.0);
             ip_map_d->stat.triptime_last_ar[ip_map_d->stat.idx].ts = tru_header->timestamp;
         }
         else {
