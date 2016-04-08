@@ -37,6 +37,8 @@ typedef struct last10_data {
 typedef struct channel_stat {
     
     #define LAST10_SIZE 10
+    #define CS_KEY_LENGTH 21
+    char key[CS_KEY_LENGTH]; ///< Channel key 
     uint32_t triptime_last; ///< Last trip time
     uint32_t triptime_max; ///< Max trip time
     uint32_t triptime_last_max; ///< Max trip time in last 10 packets
