@@ -44,6 +44,11 @@ tr_udp_stat *ksnTRUDPstatInit(ksnTRUDPClass *tu) {
     return &tu->stat;
 }
 
+/**
+ * Reset TR-UDP statistic
+ * 
+ * @param tu
+ */
 inline void ksnTRUDPstatReset(ksnTRUDPClass *tu) {
 
     ksnTRUDPstatInit(tu);
@@ -127,7 +132,6 @@ inline size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu) {
     return --tu->stat.receive_heap.size_current;
 }
 
-
 /**
  * Show TR-UDP statistics
  *
@@ -137,7 +141,7 @@ inline size_t ksnTRUDPstatReceiveHeapRemove(ksnTRUDPClass *tu) {
  *
  * @return Pointer to allocated string with statistics
  */
-inline char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
+char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
 
 
     uint32_t packets_send = 0, packets_receive = 0, ack_receive = 0,
@@ -263,6 +267,158 @@ inline int ksnTRUDPstatShow(ksnTRUDPClass *tu) {
     free(str);
 
     return num_line;
+}
+
+/**
+ * TR-UDP statistic data
+ */
+typedef struct trudp_stat {
+    
+    uint32_t packets_send; ///< Total packets send
+    uint32_t ack_receive; ///< Total ACK reseived
+    uint32_t packets_receive; ///< Total packet reseived
+    uint32_t packets_dropped; ///< Total packet droped
+    
+    uint32_t cs_num; ///< Number of chanels
+    channel_stat cs[]; ///< Cannels statistic
+    
+} trudp_stat;
+
+/**
+ * Get TR-UDP statistic in binary or JSON format
+ * 
+ * @param tu Pointer to ksnTRUDPClass
+ * @param type Output type: 0 - binary structure trudp_stat; 1 - JSON string
+ * @param stat_len [out] Size of return buffer
+ * @return Binary structure or JSON string depend of type parameter or NULL at 
+ *         error, should be free after use
+ */
+void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
+            
+    if(stat_len != NULL) *stat_len = 0;
+    void *retval = NULL;
+    
+    // Binary output type
+    if(!type) {
+        
+        uint32_t cs_num = pblMapSize(tu->ip_map);
+        size_t ts_len = sizeof(trudp_stat) + cs_num * sizeof(channel_stat);
+
+        trudp_stat *ts = malloc(ts_len);
+        if(ts != NULL) {
+            
+            memset(ts, 0, ts_len);
+            ts->cs_num = cs_num;
+    
+            if(cs_num) {
+
+                PblIterator *it =  pblMapIteratorNew(tu->ip_map);
+                if(it != NULL) {
+
+                    int i = 0;
+                    while(pblIteratorHasNext(it)) {
+
+                        void *entry = pblIteratorNext(it);
+                        //char *key = pblMapEntryKey(entry);
+                        //size_t key_len = pblMapEntryKeyLength(entry);
+                        ip_map_data *ip_map_d = pblMapEntryValue(entry);
+
+                        // Common statistic
+                        ts->packets_send += ip_map_d->stat.packets_send;
+                        ts->ack_receive += ip_map_d->stat.ack_receive;
+                        ts->packets_receive += ip_map_d->stat.packets_receive;
+                        ts->packets_dropped += ip_map_d->stat.packets_receive_dropped;
+
+                        // Cannel statistic 
+                        memcpy(&ts->cs[i], &ip_map_d->stat, sizeof(ip_map_d->stat));
+                        i++;
+                    }
+
+                    free(it);
+                }
+            }
+            
+            // Set return values
+            if(stat_len != NULL) *stat_len = ts_len;            
+            retval = ts;
+        }
+    }
+    
+    // JSON string output type
+    else {
+        
+        size_t ts_len;
+        trudp_stat *ts = ksnTRUDPstatGet(tu, 1, &ts_len);
+        
+        if(ts != NULL) {
+            
+            int i;
+            char *cs = strdup("");
+            for(i = 0; i < ts->cs_num; i++) {
+                cs = ksnet_sformatMessage(cs,
+                    "%s%s"
+                    "{ "
+                    "\"ack_receive\": %d, "
+                    "\"packets_attempt\": %d, "
+                    "\"packets_receive\": %d, "
+                    "\"packets_receive_dropped\": %d, "
+                    "\"packets_send\": %d, "
+                    "\"receive_speed\": %11.3f, "
+                    "\"receive_total\": %10.3f, "
+                    "\"send_speed\": %11.3f, "
+                    "\"send_total\": %10.3f, " 
+                    "\"triptime_avg\": %d, "
+                    "\"triptime_last\": %d, "
+                    "\"triptime_last_max\": %d, "
+                    "\"triptime_max\": %d, "
+                    "\"triptime_min\": %d, "
+                    "\"wait\": %9.3f"
+                    " }",
+                    cs, i ? ", " : "", 
+                    ts->cs[i].ack_receive,
+                    ts->cs[i].packets_attempt,
+                    ts->cs[i].packets_receive,
+                    ts->cs[i].packets_receive_dropped,
+                    ts->cs[i].packets_send,
+                    (double)(1.0 * ts->cs[i].receive_speed / 1024.0),
+                    ts->cs[i].receive_total,
+                    (double)(1.0 * ts->cs[i].send_speed / 1024.0),
+                    ts->cs[i].send_total,
+                    ts->cs[i].triptime_avg,
+                    ts->cs[i].triptime_last,
+                    ts->cs[i].triptime_last_max,
+                    ts->cs[i].triptime_max,
+                    ts->cs[i].triptime_min,
+                    ts->cs[i].wait
+                );
+            }
+            
+            char *json_str = ksnet_formatMessage(
+                "{ "
+                "\"packets_send\": %d, "
+                "\"ack_receive\": %d, "
+                "\"packets_receive\": %d, "
+                "\"packets_dropped\": %d, "
+                "\"cs_num\": %d, "
+                "\"cs\": [ %s ]"
+                " }",
+                ts->packets_send,
+                ts->ack_receive,
+                ts->packets_receive,
+                ts->packets_dropped,
+                ts->cs_num,
+                cs    
+            );
+            free(cs);
+
+            // Set return values and free used memory
+            if(stat_len != NULL) *stat_len = strlen(json_str);
+            retval = json_str;
+            free(ts);
+        }
+    }
+    
+    return retval;
 }
 
 /******************************************************************************
@@ -454,6 +610,12 @@ ip_map_data *ksnTRUDPsetDATAreceiveTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG 
     return ip_map_d;
 }
 
+/**
+ * Increment TR-UDP received and dropped statistic
+ * 
+ * @param tu
+ * @param addr
+ */
 inline void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr) {
 
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);

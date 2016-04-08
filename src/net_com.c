@@ -15,6 +15,7 @@
 #include "net_recon.h"
 #include "utils/rlutil.h"
 #include "modules/subscribe.h"
+#include "tr-udp.h"
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -37,6 +38,7 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -187,6 +189,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_host_info_cb(kco, rd);
             break;
         
+        case CMD_TRUDP_INFO:
+            processed = cmd_trudp_info_cb(kco, rd);
+            break;
+                        
         case CMD_SUBSCRIBE:
         case CMD_UNSUBSCRIBE:
         case CMD_SUBSCRIBE_ANSWER:
@@ -662,6 +668,43 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         if(json_str != NULL) free(json_str);   
         free(hid);
     }
+                
+    return 1; // Command processed
+}
+
+/**
+ * Process CMD_TRUDP_INFO
+ * 
+ * @param kco
+ * @param rd
+ * @return 
+ */
+static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
+
+    // Get type of request: 0 - binary; 1 - JSON
+    const int data_type = rd->data_len && 
+                          !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
+
+    // Get TR-UDP info
+    size_t data_out_len;    
+    void *data_out = ksnTRUDPstatGet(ke->kc->ku, data_type, &data_out_len);
+    
+    // Send TRUDP_INFO_ANSWER to L0 user
+    if(rd->l0_f)
+        ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+                rd->addr, rd->port, rd->from, rd->from_len, 
+                CMD_TRUDP_INFO_ANSWER, 
+                data_out, data_out_len);
+
+    // Send TRUDP_INFO_ANSWER to peer
+    else
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, 
+                CMD_TRUDP_INFO_ANSWER,
+                data_out, data_out_len);    
+
+    if(data_out != NULL) free(data_out);
                 
     return 1; // Command processed
 }

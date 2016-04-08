@@ -83,6 +83,8 @@ void *ksnTRUDPregisterProcessPacket(ksnTRUDPClass *tu, ksnTRUDPprocessPacketCb p
 
 void ksnTRUDPresetAddr(ksnTRUDPClass *tu, const char *addr, int port, int options);
 
+void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len);
+
 
 #ifdef	__cplusplus
 }
