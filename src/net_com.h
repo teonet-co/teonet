@@ -57,6 +57,8 @@ enum ksnCMD {
     CMD_HOST_INFO_ANSWER,   ///< #91 Host info amswer
     CMD_L0_INFO,            ///< #92 L0 server info request
     CMD_L0_INFO_ANSWER,     ///< #93 L0 server info answer
+    CMD_TRUDP_INFO,         ///< #94 TR-UDP info request
+    CMD_TRUDP_INFO_ANSWER,  ///< #95 TR-UDP info answer
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
