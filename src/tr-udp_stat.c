@@ -278,7 +278,7 @@ typedef struct trudp_stat {
     uint32_t ack_receive; ///< Total ACK reseived
     uint32_t packets_receive; ///< Total packet reseived
     uint32_t packets_dropped; ///< Total packet droped
-    
+        
     uint32_t cs_num; ///< Number of chanels
     channel_stat cs[]; ///< Cannels statistic
     
@@ -319,8 +319,8 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
                     while(pblIteratorHasNext(it)) {
 
                         void *entry = pblIteratorNext(it);
-                        //char *key = pblMapEntryKey(entry);
-                        //size_t key_len = pblMapEntryKeyLength(entry);
+                        char *key = pblMapEntryKey(entry);
+                        size_t key_len = pblMapEntryKeyLength(entry);
                         ip_map_data *ip_map_d = pblMapEntryValue(entry);
 
                         // Common statistic
@@ -331,6 +331,7 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
 
                         // Cannel statistic 
                         memcpy(&ts->cs[i], &ip_map_d->stat, sizeof(ip_map_d->stat));
+                        memcpy(ts->cs[i].key, key, key_len < CS_KEY_LENGTH ? key_len : CS_KEY_LENGTH - 1);
                         i++;
                     }
 
