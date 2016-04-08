@@ -54,6 +54,8 @@ typedef struct channel_stat {
     uint32_t send_speed; ///< Send speed in bytes per second
     double send_total; ///< Send total in megabytes 
     double wait; ///< Send repeat timer wait time value
+    uint32_t sq; ///< Send queue
+    uint32_t rq; ///< Receive queue
     last10_data last_send_packets_ar[LAST10_SIZE]; ///< Last 10 send packets
     size_t idx_snd; ///< Index of last_send_packet_ar
     last10_data last_receive_packets_ar[LAST10_SIZE]; ///< Last 10 receive packets

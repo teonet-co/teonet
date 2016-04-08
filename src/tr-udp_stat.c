@@ -175,8 +175,8 @@ char * ksnTRUDPstatShowStr(ksnTRUDPClass *tu) {
                 (double)(1.0 * ip_map_d->stat.receive_speed / 1024.0),
                 ip_map_d->stat.receive_total,
                 ip_map_d->stat.ack_receive,
-                ip_map_d->stat.packets_receive_dropped,
                 ip_map_d->stat.packets_attempt,
+                ip_map_d->stat.packets_receive_dropped,
                 pblMapSize(ip_map_d->send_list),
                 pblHeapSize(ip_map_d->receive_heap)
             );
@@ -298,6 +298,9 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
     if(stat_len != NULL) *stat_len = 0;
     void *retval = NULL;
     
+    ksn_printf(((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke)), MODULE, DEBUG_VV,
+            "type: %d\n", type);
+    
     // Binary output type
     if(!type) {
         
@@ -331,7 +334,9 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
 
                         // Cannel statistic 
                         memcpy(&ts->cs[i], &ip_map_d->stat, sizeof(ip_map_d->stat));
-                        memcpy(ts->cs[i].key, key, key_len < CS_KEY_LENGTH ? key_len : CS_KEY_LENGTH - 1);
+                        memcpy(ts->cs[i].key, key, key_len < CS_KEY_LENGTH ? key_len : CS_KEY_LENGTH - 1);                                                
+                        ts->cs[i].sq = pblMapSize(ip_map_d->send_list);
+                        ts->cs[i].rq = pblHeapSize(ip_map_d->receive_heap);
                         i++;
                     }
 
@@ -349,7 +354,7 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
     else {
         
         size_t ts_len;
-        trudp_stat *ts = ksnTRUDPstatGet(tu, 1, &ts_len);
+        trudp_stat *ts = ksnTRUDPstatGet(tu, 0, &ts_len);
         
         if(ts != NULL) {
             
@@ -359,6 +364,7 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
                 cs = ksnet_sformatMessage(cs,
                     "%s%s"
                     "{ "
+                    "\"key\": \"%s\", "    
                     "\"ack_receive\": %d, "
                     "\"packets_attempt\": %d, "
                     "\"packets_receive\": %d, "
@@ -373,9 +379,12 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
                     "\"triptime_last_max\": %d, "
                     "\"triptime_max\": %d, "
                     "\"triptime_min\": %d, "
-                    "\"wait\": %9.3f"
+                    "\"wait\": %9.3f, "
+                    "\"sq\": %d, "
+                    "\"rq\": %d"
                     " }",
-                    cs, i ? ", " : "", 
+                    cs, i ? ", " : "",
+                    ts->cs[i].key,
                     ts->cs[i].ack_receive,
                     ts->cs[i].packets_attempt,
                     ts->cs[i].packets_receive,
@@ -390,7 +399,9 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
                     ts->cs[i].triptime_last_max,
                     ts->cs[i].triptime_max,
                     ts->cs[i].triptime_min,
-                    ts->cs[i].wait
+                    ts->cs[i].wait,
+                    ts->cs[i].sq,
+                    ts->cs[i].rq
                 );
             }
             
@@ -416,6 +427,9 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len) {
             if(stat_len != NULL) *stat_len = strlen(json_str);
             retval = json_str;
             free(ts);
+            
+            ksn_printf(((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke)), MODULE, DEBUG_VV,
+            "JSON created: %s\n", json_str);
         }
     }
     
