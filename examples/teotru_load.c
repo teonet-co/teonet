@@ -215,6 +215,10 @@ int main(int argc, char** argv) {
     ksnetEvMgrClass *ke = ksnetEvMgrInitPort(argc, argv, event_cb,
             READ_OPTIONS|READ_CONFIGURATION|APP_PARAM, 0, &app_param);
     
+    // Set application type
+    teoSetAppType(ke, "teo-example");
+    teoSetAppVersion(ke, TUDPL_VERSION);
+    
     // Set custom timer interval
     ksnetEvMgrSetCustomTimer(ke, 5.00);
     
