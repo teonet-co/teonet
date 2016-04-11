@@ -1,3 +1,13 @@
+Version 0.1.58 at 2016-04-11 12:06
+============== 
+
+  - TR-UDP controller added
+  - commands CMD_TRUDP_INFO & data->cmd == CMD_HOST_INFO_ANSWER created to get host TR-UDP statistic
+  - TR-UDP: receive speed and receive total statistic added
+  - TR-UDP: add comments and rename variables in send statistic
+  - TR-UDP send total in megabytes statistic created
+  - TR-UDP send speed statistic created
+
 Version 0.1.57 at 2016-04-04 02:33
 ============== 
 
