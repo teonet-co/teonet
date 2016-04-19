@@ -17,6 +17,7 @@
 #include "utils/rlutil.h"
 
 #define MODULE _ANSI_LIGHTCYAN "l0_server" _ANSI_NONE
+#define TEO_AUTH "teo-auth"
 
 // Local functions
 static int ksnLNullStart(ksnLNullClass *kl);
@@ -195,7 +196,12 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
                             pblMapAdd(kl->map_n, kld->name, kld->name_length, 
                                     &w->fd, sizeof(w->fd));
-
+                            
+                            // Send login to authentication application 
+                            // to check this client 
+                            ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER, 
+                                    kld->name, kld->name_length);
+                            
                             #ifdef DEBUG_KSNET
                             ksn_printf(kev, MODULE, DEBUG_VV, 
                                 "connection initialized, client name: %s ...\n", 
@@ -724,6 +730,30 @@ int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     }
 
     free(out_data);
+    
+    return retval;
+}
+
+/**
+ * Check l0 client answer from authentication application
+ * 
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return 
+ */
+int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    int retval = 0;
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
+    
+    // \todo: Got an answer from authentication application
+    if(!strcmp(rd->from, TEO_AUTH)) {
+        
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG, 
+            "got an answer from authentication application: %s\n", rd->data);
+        #endif
+    }
     
     return retval;
 }
