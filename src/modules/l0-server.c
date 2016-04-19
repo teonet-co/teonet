@@ -199,11 +199,13 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                             
                             // Send login to authentication application 
                             // to check this client 
+                            char *nq = ksnet_formatMessage("TEXT:%s", kld->name);
                             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER, 
-                                    kld->name, kld->name_length);
+                                    nq, strlen(nq) + 1 /* kld->name, kld->name_length*/);
+                            free(nq);
                             
                             #ifdef DEBUG_KSNET
-                            ksn_printf(kev, MODULE, DEBUG_VV, 
+                            ksn_printf(kev, MODULE, DEBUG, 
                                 "connection initialized, client name: %s ...\n", 
                                 kld->name);
                             #endif
@@ -751,7 +753,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG, 
-            "got an answer from authentication application: %s\n", rd->data);
+            "got %d bytes an answer from authentication application: %s\n", 
+            rd->data_len, rd->data);
         #endif
     }
     
