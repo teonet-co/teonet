@@ -39,6 +39,7 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -199,7 +200,9 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_subscribe_cb(kco, rd);
             break;
             
-        
+        case CMD_USER:
+            processed = cmd_l0_check_cb(kco, rd);
+            break;
 
         default:
             break;
