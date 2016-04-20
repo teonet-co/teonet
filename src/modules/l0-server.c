@@ -197,12 +197,10 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                             pblMapAdd(kl->map_n, kld->name, kld->name_length, 
                                     &w->fd, sizeof(w->fd));
                             
-                            // Send login to authentication application 
+                            // \todo: Send login to authentication application 
                             // to check this client 
-                            //char *nq = ksnet_formatMessage("%s", kld->name);
                             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER, 
-                                    /*nq, strlen(nq) + 1*/  kld->name, kld->name_length);
-                            //free(nq);
+                                    kld->name, kld->name_length);
                             
                             #ifdef DEBUG_KSNET
                             ksn_printf(kev, MODULE, DEBUG, 
