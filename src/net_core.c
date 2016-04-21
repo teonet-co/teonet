@@ -357,7 +357,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                                  void *data, size_t data_len) {
 
-    int *fd;
+    int fd;
     ksnet_arp_data *arp;
 
     // Send to peer in this network
@@ -380,8 +380,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     // Send this message to L0 client
     else if(cmd == CMD_L0 && 
             ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&            
-            (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, 
-                    to)) != NULL) {
+            (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, to))) {
         
         #ifdef DEBUG_KSNET
         ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV, 
@@ -402,7 +401,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                 cmd_l0_data->from, 
                 cmd_l0_data->from + cmd_l0_data->from_length, 
                 cmd_l0_data->data_length);
-        if((snd = write(*fd, buf, buf_length)) >= 0);
+        if((snd = write(fd, buf, buf_length)) >= 0);
         free(buf);
     }
         
