@@ -33,6 +33,7 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I/usr/include/libev \	
+	 -I../app/embedded/jsmn \
 	 -DEV_USE_EPOLL=1
 
 if TEO_THREAD
@@ -119,7 +120,8 @@ nobase_teonetinclude_HEADERS = \
     modules/vpn.h \
     utils/string_arr.h \
     utils/utils.h \
-    utils/rlutil.h
+    utils/rlutil.h \
+    ../app/embedded/jsmn/jsmn.h
 
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
@@ -156,7 +158,8 @@ libteonet_la_SOURCES = \
     utils/string_arr.c \
     utils/utils.c \
     utils/base64.c \
-    ../embedded/teocli/libteol0/teonet_l0_client.c
+    ../embedded/teocli/libteol0/teonet_l0_client.c \
+    ../app/embedded/jsmn/jsmn.c
 
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default

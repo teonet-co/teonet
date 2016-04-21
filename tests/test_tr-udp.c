@@ -575,11 +575,11 @@ void test_2_8() {
     // Prepare data to Read packet from socket
     struct sockaddr_in addr_recv;
     char buf_recv[KSN_BUFFER_SIZE];
-    size_t addr_recv_len = sizeof(addr_recv);
+    socklen_t addr_recv_len = sizeof(addr_recv);
     ksnTRUDP_header *tru_header = (ksnTRUDP_header *) buf_recv;
     //
     // b) Receive packet from socket
-    ssize_t recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    ssize_t recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, &addr_recv_len);
     if(recvlen < 0) printf(" recv = %d: %s ...", (int)recvlen, strerror(errno));
     // Check receive result
     CU_ASSERT_FATAL(recvlen == sent); // Receive length equal send length
@@ -593,11 +593,11 @@ void test_2_8() {
     CU_ASSERT_FATAL(sent > 0);
     //
     // d) Receive packet with next id = 1
-    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, &addr_recv_len);
     CU_ASSERT(tru_header->id == 1); // Packet id = 1
     //
     // e) Check send list - it should contain 2 records (with id = 0 and 1)
-    PblMap *sl = ksnTRUDPsendListGet(tu, (__CONST_SOCKADDR_ARG) &addr_r, NULL, 0);
+    PblMap *sl = ksnTRUDPsendListGet(tu, (__SOCKADDR_ARG) &addr_r, NULL, 0);
     CU_ASSERT_PTR_NOT_NULL_FATAL(sl);
     CU_ASSERT(pblMapSize(sl) == 2);
     // 
@@ -610,9 +610,9 @@ void test_2_8() {
     ev_run (ke.ev_loop, 0);
     //
     // g) The sent packets will be resend by send list timer
-    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, &addr_recv_len);
     CU_ASSERT(tru_header->id == 0); // Packet id = 0
-    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    recvlen = recvfrom(fd_r, buf_recv, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, &addr_recv_len);
     CU_ASSERT(tru_header->id == 1); // Packet id = 1
     // Check send list - it should contain 2 records (with id = 0 and 1 and attempt 1)
     CU_ASSERT(pblMapSize(sl) == 2); // Send list size = 2
@@ -634,7 +634,7 @@ void test_2_8() {
     tru_header->checksum = ksnTRUDPchecksumCalculate(tru_header);
     sent = sendto(fd_r, tru_header, tru_ptr, 0, (__CONST_SOCKADDR_ARG)&addr_s, addr_len);
     CU_ASSERT_FATAL(sent > 0);
-    recvlen = ksnTRUDPrecvfrom(tu, fd_s, buf_recv, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    recvlen = ksnTRUDPrecvfrom(tu, fd_s, buf_recv, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, &addr_recv_len);
     CU_ASSERT(recvlen == 0);
     CU_ASSERT(pblMapSize(sl) == 1); // Send list size = 1
     sl_d = ksnTRUDPsendListGetData(tu, 0, (__CONST_SOCKADDR_ARG)&addr_r); // Check id = 0
@@ -716,7 +716,7 @@ void test_2_9() {
      * Check ACK macro
      */
     #define check_ACK(ID) { \
-        recvlen = recvfrom(fd_s, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len); \
+        recvlen = recvfrom(fd_s, buf, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, &addr_recv_len); \
         CU_ASSERT(recvlen == sizeof(ksnTRUDP_header)); \
         ksnTRUDP_header *rh = (ksnTRUDP_header *) buf; \
         CU_ASSERT(rh->id == ID); \
