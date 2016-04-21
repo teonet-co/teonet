@@ -34,7 +34,7 @@ enum ksnCMD {
     CMD_SPLIT,              ///< #68 Group of packets (Splited packets)
     CMD_STREAM,             ///< #69 Stream command
     CMD_L0,                 ///< #70 Command from L0 Client
-    CMD_L0TO,               ///< #71 Command to L0 Client
+    CMD_L0_TO,              ///< #71 Command to L0 Client
     CMD_PEERS,              ///< #72 Get peers, allow JSON in request
     CMD_PEERS_ANSWER,       ///< #73 Get peers answer
     CMD_RESEND,             ///< #74 Resend command
