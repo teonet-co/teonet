@@ -378,7 +378,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
         "send command to L0 server for client \"%s\" ...\n",
         spacket->from);
     #endif
-    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0TO,
+    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0_TO,
             out_data, out_data_len);
 
     free(out_data);
@@ -657,13 +657,13 @@ int ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name) {
 }
 
 /**
- * Process CMD_L0TO teonet command
+ * Process CMD_L0_TO teonet command
  *
  * @param ke Pointer to ksnetEvMgrClass
  * @param rd Pointer to ksnCorePacketData data
  * @return If true - than command was processed by this function
  */
-int cmd_l0to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
+int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
     int retval = 1;
     ksnLNullSPacket *data = rd->data;
@@ -818,7 +818,7 @@ static int json_parse(char *data, json_param *jp) {
     for (i = 1; i < r && keys != ALL_KEYS; i++) {
 
         // Find USERID tag
-#define find_tag(VAR, KEY, TAG) \
+        #define find_tag(VAR, KEY, TAG) \
         if(!(keys & KEY) && jsoneq(data, &t[i], TAG) == 0) { \
             \
             VAR = strndup((char*)data + t[i+1].start, \
@@ -862,7 +862,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Parse request
         char *json_data_unesc = rd->data;
-        json_param jp = { null_str, null_str, null_str, null_str };
+        json_param jp = { (char *)null_str, (char *)null_str, (char *)null_str, (char *)null_str };
         json_parse(json_data_unesc, &jp);
 
         #ifdef DEBUG_KSNET
@@ -918,6 +918,21 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_NEW_VISIT,
                         vd, vd_length, 0);
                 free(vd);        
+                
+                // Create & Send websocket allow message
+                size_t snd;
+                char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\" }", kld->name);
+                size_t ALLOW_len = strlen(ALLOW) + 1;
+                // Create L0 packet
+                size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
+                        ALLOW_len;
+                char *out_data = malloc(out_data_len);
+                memset(out_data, 0, out_data_len);
+                size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+                        rd->cmd, rd->from, ALLOW, ALLOW_len);
+                // Send websocket allow message
+                if((snd = write(fd, out_data, packet_length)) >= 0);
+                free(out_data);
             }
             
             // Free tags
