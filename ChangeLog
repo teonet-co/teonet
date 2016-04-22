@@ -1,3 +1,9 @@
+Version 0.1.60 at 2016-04-22 15:39
+============== 
+
+  - Create & Send websocket allow message
+  - L0 server check connected clients accessToken at teo-auth peer
+
 Version 0.1.59 at 2016-04-20 18:34
 ============== 
 
