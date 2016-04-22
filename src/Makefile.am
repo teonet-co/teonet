@@ -120,12 +120,12 @@ nobase_teonetinclude_HEADERS = \
     modules/vpn.h \
     utils/string_arr.h \
     utils/utils.h \
-    utils/rlutil.h \
-    ../app/embedded/jsmn/jsmn.h
+    utils/rlutil.h
 
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
-    ../embedded/teocli/libteol0/teonet_l0_client.h
+    ../embedded/teocli/libteol0/teonet_l0_client.h \
+    ../app/embedded/jsmn/jsmn.h
 
 libteonet_la_SOURCES = \
     crypt.c \
