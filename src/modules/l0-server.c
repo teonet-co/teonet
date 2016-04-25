@@ -857,34 +857,35 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     int retval = 0;
     ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
 
-    // Got an answer from authentication application
-    if(!strcmp(rd->from, TEO_AUTH)) {
+    // Parse request
+    char *json_data_unesc = rd->data;
+    json_param jp;
+    json_parse(json_data_unesc, &jp);
 
-        // Parse request
-        char *json_data_unesc = rd->data;
-        json_param jp = { (char *)null_str, (char *)null_str, (char *)null_str, (char *)null_str };
-        json_parse(json_data_unesc, &jp);
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG,
+        "got %d bytes answer from %s authentication application,\n"
+            "accessToken: %s,\n"
+            "userId: %s,\n"
+            "username: %s,\n"
+            "clientId: %s,\n"
+            "all data: %s\n",
+        rd->data_len, TEO_AUTH, jp.accessToken, jp.userId, jp.username, 
+        jp.clientId, rd->data
+    );
+    #endif
 
-        #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG,
-            "got %d bytes answer from %s authentication application,\n"
-                "accessToken: %s,\n"
-                "userId: %s,\n"
-                "username: %s,\n"
-                "clientId: %s,\n"
-                "all data: %s\n",
-            rd->data_len, TEO_AUTH, jp.accessToken, jp.userId, jp.username, 
-            jp.clientId, rd->data
-        );
-        #endif
+    ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
+    int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
+    if(fd) {
 
-        ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
-        int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
-        if(fd) {
-            
-            size_t vl;
-            ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
-            if(kld != NULL) {
+        size_t vl;
+        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
+        if(kld != NULL) {
+
+            // Rename client
+            if(jp.userId != NULL && jp.clientId != NULL) {
+
                 // Remove existing name
                 if(kld->name != NULL) {
                     size_t vl;
@@ -895,53 +896,53 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 kld->name = ksnet_formatMessage("%s:%s", jp.userId, jp.clientId);        
                 kld->name_length = strlen(kld->name) + 1;
                 pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
-
-                #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, DEBUG,
-                    "connection initialized, client name is: %s ...\n",
-                    kld->name);
-                #endif
-
-                // Send Connected event to all subscribers
-                teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED,
-                        kld->name, kld->name_length, 0);
-
-                // Add connection to L0 statistic
-                kl->stat.visits++; // Increment number of visits
-
-                // Send "new visit" event to all subscribers
-                size_t vd_length = sizeof(ksnLNullSVisitsData) +
-                        kld->name_length;
-                ksnLNullSVisitsData *vd = malloc(vd_length);
-                vd->visits = kl->stat.visits;
-                memcpy(vd->client, kld->name, kld->name_length);
-                teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_NEW_VISIT,
-                        vd, vd_length, 0);
-                free(vd);        
-                
-                // Create & Send websocket allow message
-                size_t snd;
-                char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\" }", kld->name);
-                size_t ALLOW_len = strlen(ALLOW) + 1;
-                // Create L0 packet
-                size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
-                        ALLOW_len;
-                char *out_data = malloc(out_data_len);
-                memset(out_data, 0, out_data_len);
-                size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
-                        rd->cmd, rd->from, ALLOW, ALLOW_len);
-                // Send websocket allow message
-                if((snd = write(fd, out_data, packet_length)) >= 0);
-                free(out_data);
             }
-            
-            // Free tags
-            if(jp.accessToken != null_str) free(jp.accessToken);
-            if(jp.clientId != null_str) free(jp.clientId);
-            if(jp.userId != null_str) free(jp.userId);
-            if(jp.username != null_str) free(jp.username);
-        }        
-    }
+
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG,
+                "connection initialized, client name is: %s ...\n",
+                kld->name);
+            #endif
+
+            // Send Connected event to all subscribers
+            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED,
+                    kld->name, kld->name_length, 0);
+
+            // Add connection to L0 statistic
+            kl->stat.visits++; // Increment number of visits
+
+            // Send "new visit" event to all subscribers
+            size_t vd_length = sizeof(ksnLNullSVisitsData) +
+                    kld->name_length;
+            ksnLNullSVisitsData *vd = malloc(vd_length);
+            vd->visits = kl->stat.visits;
+            memcpy(vd->client, kld->name, kld->name_length);
+            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_NEW_VISIT,
+                    vd, vd_length, 0);
+            free(vd);        
+
+            // Create & Send websocket allow answer message
+            size_t snd;
+            char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\" }", kld->name);
+            size_t ALLOW_len = strlen(ALLOW) + 1;
+            // Create L0 packet
+            size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
+                    ALLOW_len;
+            char *out_data = malloc(out_data_len);
+            memset(out_data, 0, out_data_len);
+            size_t packet_length = teoLNullPacketCreate(out_data, 
+                    out_data_len, CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
+            // Send websocket allow message
+            if((snd = write(fd, out_data, packet_length)) >= 0);
+            free(out_data);
+        }
+
+        // Free tags
+        if(jp.accessToken != NULL) free(jp.accessToken);
+        if(jp.clientId != NULL) free(jp.clientId);
+        if(jp.userId != NULL) free(jp.userId);
+        if(jp.username != NULL) free(jp.username);
+    }        
 
     return retval;
 }

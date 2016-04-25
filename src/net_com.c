@@ -200,7 +200,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_subscribe_cb(kco, rd);
             break;
             
-        case CMD_USER + 1:
+        case CMD_L0_AUTH: // CMD_USER + 1:
             processed = cmd_l0_check_cb(kco, rd);
             break;
 
