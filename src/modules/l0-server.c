@@ -972,9 +972,11 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
                 void *entry = pblIteratorPrevious(it);
                 //int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullData *data = pblMapEntryValue(entry);
+                if(data != NULL) {
                 strncpy(data_ar->client_data[i].name, data->name,
                         sizeof(data_ar->client_data[i].name));
                 i++;
+                }
             }
             pblIteratorFree(it);
         }
