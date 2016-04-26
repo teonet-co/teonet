@@ -962,7 +962,7 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
         uint32_t length = pblMapSize(kl->map);
         data_ar = malloc(sizeof(teonet_client_data_ar) +
                 length * sizeof(data_ar->client_data[0]));
-        data_ar->length = length;
+        //data_ar->length = length;
         int i = 0;
 
         // Create clients list
@@ -973,13 +973,14 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
                 //int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullData *data = pblMapEntryValue(entry);
                 if(data != NULL) {
-                strncpy(data_ar->client_data[i].name, data->name,
-                        sizeof(data_ar->client_data[i].name));
-                i++;
+                    strncpy(data_ar->client_data[i].name, data->name,
+                            sizeof(data_ar->client_data[i].name));
+                    i++;
                 }
             }
             pblIteratorFree(it);
         }
+        data_ar->length = i;
     }
 
     return data_ar;
