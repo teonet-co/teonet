@@ -1,7 +1,14 @@
+Version 0.1.63 at 2016-04-22 12:18
+============== 
+
+  - authorization algorithm  debugging
+
+
 Version 0.1.62 at 2016-04-22 15:26
 ============== 
 
   - authorization algorithm updated
+
 
 Version 0.1.60 at 2016-04-22 15:39
 ============== 
@@ -9,10 +16,12 @@ Version 0.1.60 at 2016-04-22 15:39
   - Create & Send websocket allow message
   - L0 server check connected clients accessToken at teo-auth peer
 
+
 Version 0.1.59 at 2016-04-20 18:34
 ============== 
 
   - Check l0 clients login in authentication application
+
 
 Version 0.1.58 at 2016-04-11 12:06
 ============== 
@@ -23,6 +32,7 @@ Version 0.1.58 at 2016-04-11 12:06
   - TR-UDP: add comments and rename variables in send statistic
   - TR-UDP send total in megabytes statistic created
   - TR-UDP send speed statistic created
+
 
 Version 0.1.57 at 2016-04-04 02:33
 ============== 

@@ -962,7 +962,6 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
         uint32_t length = pblMapSize(kl->map);
         data_ar = malloc(sizeof(teonet_client_data_ar) +
                 length * sizeof(data_ar->client_data[0]));
-        //data_ar->length = length;
         int i = 0;
 
         // Create clients list
