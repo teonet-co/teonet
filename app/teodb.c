@@ -29,6 +29,10 @@
  *  - Namespace is a filename of PBL KEYFILE
  *  - key is a duplicate key in PBL KEYFILE
  *  - data is a data saved in PBL KEYFILE
+ * 
+ * Subscribe:
+ *   
+ *  EV_D_SET - #26 send event when database updated
  *
  * Created on August 20, 2015, 3:36 PM
  */
@@ -41,7 +45,7 @@
 #include "modules/teodb_com.h"
 #include "ev_mgr.h"
 
-#define TDB_VERSION "0.0.2"
+#define TDB_VERSION "0.0.3"
 #define APPNAME _ANSI_MAGENTA "teodb" _ANSI_NONE
 
 // Constants
@@ -389,6 +393,9 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                     "rv: %d ...\n", rv);
                         }
                     }
+                    
+                    // Send event to subscribers
+                    teoSScrSend(ke->kc->kco->ksscr, EV_D_SET, NULL, 0, 0);
                 }
                 break;
 

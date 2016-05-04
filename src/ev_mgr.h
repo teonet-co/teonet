@@ -142,6 +142,8 @@ typedef enum ksnetEvMgrEvents {
 
     EV_U_RECEIVED,                  ///< #25 UNIX socket received data event, data - data received from unix socket, user_data - pointer to the usock_class 
             
+    EV_D_SET,                       ///< #26 Database updated
+            
     EV_K_APP_USER = 0x8000          ///< #0x8000 Teonet based Applications events
 
 } ksnetEvMgrEvents;
