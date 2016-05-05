@@ -313,6 +313,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 {
                     // Get type of request JSON - 1 or BINARY - 0
                     const int data_type = get_data_type();
+                    void *updated_key = NULL;
+                    size_t updated_key_length = 0;
                     
                     // JSON data
                     if(data_type) {
@@ -339,12 +341,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                     strlen(jp.data) + 1);
                             // Remove key
                             else
-                                rv = ksnTDBdeleteStr(ke->kf, jp.key);
+                                rv = ksnTDBdeleteStr(ke->kf, jp.key);                                                        
                         }
-                        if(!rv)
+                        if(!rv) {
                             ksn_printf(ke, APPNAME, DEBUG, 
                                 "KEY: \"%s\", DATA: \"%s\", DB set status: %d\n", 
                                 jp.key, jp.data, rv);
+                            
+                            updated_key_length = strlen(jp.key) + 1;
+                            updated_key = memdup(jp.key, updated_key_length);
+                            
+                            //updated_key = ksnet_formatMessage("{ \"key\": \"%s\" }", jp.key);
+                            //updated_key_length = strlen(updated_key) + 1;
+                        }
                         else
                            ksn_printf(ke, APPNAME, DEBUG, 
                                 "An error happened during write to DB, "
@@ -376,11 +385,15 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 tdd->data_length
                             );
                             
-                            if(!rv)
+                            if(!rv) {
                                 ksn_printf(ke, APPNAME, DEBUG, 
                                     "KEY: %s, DATA: %s, DB set status: %d\n", 
                                     tdd->key_data, 
                                     tdd->key_data + tdd->key_length, rv);
+                                
+                                updated_key_length = tdd->key_length;
+                                updated_key = memdup(tdd->key_data, updated_key_length);
+                            }
                         }
                         else 
                             ksn_printf(ke, APPNAME, DEBUG, 
@@ -395,7 +408,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     }
                     
                     // Send event to subscribers
-                    teoSScrSend(ke->kc->kco->ksscr, EV_D_SET, NULL, 0, 0);
+                    if(updated_key != NULL) {
+                        if(updated_key_length) {
+                            teoSScrSend(ke->kc->kco->ksscr, EV_D_SET, 
+                                    updated_key, updated_key_length, 0);
+                        }
+                        free(updated_key);
+                    }
                 }
                 break;
 
