@@ -1,3 +1,10 @@
+Version 0.1.65 at 2016-05-05 13:05
+============== 
+
+  - subscribe event EV_D_SET (database updated) added 
+  - teo-db applications send event EV_D_SET when database updated
+
+
 Version 0.1.63 at 2016-04-22 12:18
 ============== 
 
