@@ -291,8 +291,10 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
         make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
         // Split large packet
-        int num_subpackets;
-        void **packets = ksnSplitPacket(kc->kco->ks, cmd, data, data_len, &num_subpackets);    
+        void **packets;
+        int num_subpackets = 0;
+        if(cmd != CMD_VPN)
+            packets = ksnSplitPacket(kc->kco->ks, cmd, data, data_len, &num_subpackets);    
 
         // Send large packet
         if(num_subpackets) {
