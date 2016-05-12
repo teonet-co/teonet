@@ -13,7 +13,7 @@
 
 #include "ev_mgr.h"
 
-#define TVPN_VERSION VERSION
+#define TVPN_VERSION "0.0.2"
 
 #ifdef TEO_THREAD
 volatile int teonet_run = 1;
