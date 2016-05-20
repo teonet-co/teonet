@@ -280,13 +280,17 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
 
             // Check if the sender peer is new one
             ip_map_data *ipm;
+            int new_sender = 0;
             ksnet_arp_data *arp = NULL;
             if((ipm = ksnTRUDPipMapDataTry(tu, addr, NULL, 0)) != NULL) {
-                if((arp = ipm->arp) == NULL)
+                if((arp = ipm->arp) == NULL) {
                     arp = ksnetArpFindByAddr(kev->kc->ka, addr);
+                    new_sender = 1;
+                }
             }
             else {
                 arp = ksnetArpFindByAddr(kev->kc->ka, addr);
+                new_sender = 1;
             }
 
             // Ignore TR-UDP request if application is not in test mode and
@@ -337,6 +341,49 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                     // or zero len message if this message was push to queue.
                     case TRU_DATA:
                     {
+                        // Auto-rest for existing connection                        
+                        if(new_sender) { // !new_sender && !tru_header->id
+                            
+                            #ifdef DEBUG_KSNET
+                            ksn_printf(kev, MODULE, DEBUG,
+                                "new sender %s:%d, received packet id = %u\n", 
+                                inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                                ntohs(((struct sockaddr_in *) addr)->sin_port),
+                                tru_header->id                                    
+                            );
+                            #endif
+                        }
+                        
+                        if(!new_sender && !tru_header->id) {
+                            
+                            #ifdef DEBUG_KSNET
+                            ksn_printf(kev, MODULE, DEBUG,
+                                "existing sender %s:%d, received packet id = %u, expected id = %u, this peer send id = %u",
+                                inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                                ntohs(((struct sockaddr_in *) addr)->sin_port),
+                                tru_header->id,
+                                ipm ? ipm->expected_id : -1,
+                                ipm ? ipm->id : -1
+                            );
+                            #endif
+                            
+                            if(ipm && ipm->expected_id) { 
+                                
+                                // Process RESET command
+                                ksnTRUDPreset(tu, addr, 0);
+                                ksnTRUDPstatReset(tu); //! \todo: Do we need reset it here?
+                                
+                                #ifdef DEBUG_KSNET
+                                printf("  - Reset TR-UDP ...\n");
+                                #endif
+                            }
+                            else {
+                                #ifdef DEBUG_KSNET
+                                printf("\n");
+                                #endif
+                            }
+                        }
+                        
                         // Send ACK to sender
                         ksnTRUDPSendACK();
 
