@@ -748,7 +748,7 @@ typedef struct json_param {
  */
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
     
-    if (tok->type == JSMN_STRING && 
+    if((tok->type == JSMN_STRING || tok->type == JSMN_ARRAY) && 
         (int) strlen(s) == tok->end - tok->start &&
         strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
         
@@ -806,7 +806,7 @@ static int json_parse(char *data, json_param *jp) {
         CLIENTID = 0x2, // 0x2
         USERNAME = 0x4, // 0x4
         ACCESSTOKEN = 0x8, // 0x8
-        NETWORKS = 0x16, // 0x8
+        NETWORKS = 0x16, // 0x16
 
         ALL_KEYS = USERID | CLIENTID | USERNAME | ACCESSTOKEN | NETWORKS
     };
