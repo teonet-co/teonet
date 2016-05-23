@@ -748,7 +748,7 @@ typedef struct json_param {
  */
 static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
     
-    if((tok->type == JSMN_STRING || tok->type == JSMN_ARRAY) && 
+    if(/*(tok->type == JSMN_STRING || tok->type == JSMN_ARRAY) && */
         (int) strlen(s) == tok->end - tok->start &&
         strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
         
