@@ -830,7 +830,7 @@ static int json_parse(char *data, json_param *jp) {
             i++; \
         }
 
-        printf("tag: %*.s\n", t[i].end - t[i].start,  (char*)data + t[i+1].start);
+        printf("tag: %.*s\n", t[i].end - t[i].start,  (char*)data + t[i+1].start);
         
         // Find USERID tag
         find_tag(jp->userId, USERID, USERID_TAG)
