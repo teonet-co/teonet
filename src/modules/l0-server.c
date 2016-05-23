@@ -929,7 +929,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             // Create & Send websocket allow answer message
             size_t snd;
-            char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\" }", kld->name);
+            char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\", \"networks\": %s }", 
+                    kld->name, jp.networks ? jp.networks : "undefined");
             size_t ALLOW_len = strlen(ALLOW) + 1;
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
