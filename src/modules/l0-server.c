@@ -806,7 +806,7 @@ static int json_parse(char *data, json_param *jp) {
         CLIENTID = 0x2, // 0x2
         USERNAME = 0x4, // 0x4
         ACCESSTOKEN = 0x8, // 0x8
-        NETWORKS = 0x16, // 0x16
+        NETWORKS = 0x10, // 0x10
 
         ALL_KEYS = USERID | CLIENTID | USERNAME | ACCESSTOKEN | NETWORKS
     };
