@@ -733,6 +733,7 @@ typedef struct json_param {
     char *clientId;
     char *username;
     char *accessToken;
+    char *networks;
 
 } json_param;
 
@@ -805,13 +806,15 @@ static int json_parse(char *data, json_param *jp) {
         CLIENTID = 0x2, // 0x2
         USERNAME = 0x4, // 0x4
         ACCESSTOKEN = 0x8, // 0x8
+        NETWORKS = 0x16, // 0x8
 
-        ALL_KEYS = USERID | CLIENTID | USERNAME | ACCESSTOKEN
+        ALL_KEYS = USERID | CLIENTID | USERNAME | ACCESSTOKEN | NETWORKS
     };
     const char *USERID_TAG = "userId";
     const char *CLIENTID_TAG = "clientId";
     const char *USERNAME_TAG = "username";
     const char *ACCESSTOKEN_TAG = "accessToken";
+    const char *NETWORKS_TAG = "networks";
     memset(jp, 0, sizeof(*jp)); // Set JSON parameters to NULL
     int i, keys = 0;
     // Loop over json keys of the root object and find needle: cmd, to, cmd_data
@@ -839,6 +842,8 @@ static int json_parse(char *data, json_param *jp) {
         // Find ACCESSTOKEN tag
         else find_tag(jp->accessToken, ACCESSTOKEN, ACCESSTOKEN_TAG)
                 
+        // Find NETWORKS tag
+        else find_tag(jp->networks, NETWORKS, NETWORKS_TAG)
     }
     free(t);
 
@@ -869,9 +874,10 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             "userId: %s,\n"
             "username: %s,\n"
             "clientId: %s,\n"
+            "networks: %s,\n"
             "all data: %s\n",
         rd->data_len, TEO_AUTH, jp.accessToken, jp.userId, jp.username, 
-        jp.clientId, rd->data
+        jp.clientId, jp.networks, rd->data
     );
     #endif
 
