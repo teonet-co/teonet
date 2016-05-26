@@ -65,6 +65,26 @@ typedef struct ksnCoreClass {
 #ifdef	__cplusplus
 extern "C" {
 #endif
+    
+/**
+ * Sent teonet command to peer or l0 client
+ *
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param rd
+ * @param name
+ * @param out_data
+ * @param out_data_len
+ *
+ * @return
+ */
+#define sendCmdAnswerTo(ke, rd, name, out_data, out_data_len) \
+    if(rd->l0_f) \
+        ksnLNullSendToL0(ke, \
+            rd->addr, rd->port, name, strlen(name) + 1, rd->cmd, \
+            out_data, out_data_len); \
+    else \
+        ksnCoreSendCmdto(ke->kc, name, rd->cmd, \
+            out_data, out_data_len)    
 
 ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr);
 void ksnCoreDestroy(ksnCoreClass *kc);
