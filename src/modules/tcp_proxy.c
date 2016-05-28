@@ -152,6 +152,14 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
                     addr, addr_len)) {
 
                 recvlen = ke->tp->packet.header->packet_length;
+                
+                #ifdef DEBUG_KSNET
+                ksn_printf(ke, MODULE, DEBUG_VV,
+                        "<< got %d bytes packet from TCP Proxy buffer, from %s:%d\n",
+                        (int)recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                        ntohs(((struct sockaddr_in *) addr)->sin_port)
+                );
+                #endif                
             }
             else recvlen = -3; // Wrong address error
         }
@@ -162,6 +170,14 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     else if(fd) {  
         
         recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
+        
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG_VV,
+                "<< got %d bytes packet by UDP, from %s:%d\n",
+                (int)recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                ntohs(((struct sockaddr_in *) addr)->sin_port)
+        );
+        #endif        
     }
     
     return recvlen;
@@ -191,8 +207,10 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
         
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, 
-            "send %d bytes to TCP Proxy server, fd %d\n", 
-            buffer_len, ke->tp->fd_client);
+            ">> send %d bytes to TCP Proxy server, fd %d, to (%s:%d)\n", 
+            buffer_len, ke->tp->fd_client, 
+            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+            ntohs(((struct sockaddr_in *) addr)->sin_port));
         #endif            
         
         // Send TCP package
@@ -200,7 +218,16 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     }
     
     // Sent data to UDP
-    else sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
+    else {
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG_VV, 
+            ">> send %d bytes by UDP, fd %d, to (%s:%d)\n", 
+            buffer_len, fd, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+            ntohs(((struct sockaddr_in *) addr)->sin_port));
+        #endif 
+
+        sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
+    }
     
     return sendlen;
 }
@@ -543,8 +570,8 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
-            "got something from UDP fd %d w->events = %d, received = %d ...\n", 
-            w->fd, w->events, (int)received);
+        ">> got something from UDP fd %d w->events = %d, received = %d ...\n", 
+        w->fd, w->events, (int)received);
     #endif
   
     // Resend UDP packet to TCP Proxy

@@ -250,7 +250,7 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     // Encrypt the package
     #ifdef DEBUG_KSNET
     ksn_printf(((ksnetEvMgrClass*)kcr->ke), MODULE, DEBUG_VV,
-                "encrypt %d bytes to %d bytes buffer ...\n",
+                "encrypt %d bytes to %d bytes buffer\n",
                 package_len, (int)(*encrypt_len));
     #endif
     *encrypt_len = _encrypt(package, package_len, kcr->key, kcr->iv,
@@ -282,7 +282,7 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     // Decrypt the package
     #ifdef DEBUG_KSNET
     ksn_printf(((ksnetEvMgrClass*)kcr->ke), MODULE, DEBUG_VV,
-                "decrypt %d bytes from %d bytes package ...\n",
+                "decrypt %d bytes from %d bytes package\n",
                 *decrypt_len, package_len - ptr);
     #endif
     *decrypt_len = _decrypt(kcr, package + ptr, package_len - ptr, kcr->key, kcr->iv,

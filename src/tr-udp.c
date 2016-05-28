@@ -140,7 +140,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
         int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
+    ksn_printf(kev, MODULE, DEBUG_VVV,
             "got %d bytes data to send, cmd %d\n", buf_len, cmd
     );
     #endif
@@ -180,7 +180,7 @@ ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_flg, uint32_t id,
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
-                    ">> send %d bytes message of type: %d "
+                    "send %d bytes message of type: %d "
                     "with %d bytes data payload to %s:%d\n",
                     buf_len, tru_header.message_type,
                     tru_header.payload_length,
@@ -260,13 +260,13 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
     ssize_t recvlen = teo_recvfrom(kev, fd, buffer, buffer_len, flags, addr,
             addr_len);
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
-            "<< got %d bytes packet, from %s:%d\n",
-            (int)recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-            ntohs(((struct sockaddr_in *) addr)->sin_port)
-    );
-    #endif
+//    #ifdef DEBUG_KSNET
+//    ksn_printf(kev, MODULE, DEBUG_VV,
+//            "<< got %d bytes packet by UDP, from %s:%d\n",
+//            (int)recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+//            ntohs(((struct sockaddr_in *) addr)->sin_port)
+//    );
+//    #endif
 
     // Data received
     if(recvlen > 0) {
@@ -298,7 +298,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
             if(!KSN_GET_TEST_MODE() && arp == NULL) {
 
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, MESSAGE, /* DEBUG_VV, */
+                ksn_printf(kev, MODULE, DEBUG, /* DEBUG_VV, */
                     "ignore message: %s:%d has not registered in "
                     "this host yet\n",
                     inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
@@ -322,7 +322,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
             else  {
 
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, DEBUG_VV,
+                ksn_printf(kev, MODULE, DEBUG_VVV,
                     "process %d bytes message of type %d, id %d, "
                     "with %d bytes data payload\n",
                     (int)recvlen, tru_header->message_type, tru_header->id,
@@ -404,7 +404,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                             ip_map_d->expected_id++;
 
                             #ifdef DEBUG_KSNET
-                            ksn_printf(kev, MODULE, DEBUG_VV,
+                            ksn_printf(kev, MODULE, DEBUG_VVV,
                                 "recvfrom: Processed id %d from %s:%d\n",
                                 tru_header->id,
                                 inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
@@ -428,7 +428,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                         ip_map_d->receive_heap, idx);
 
                                 #ifdef DEBUG_KSNET
-                                ksn_printf(kev, MODULE, DEBUG_VV,
+                                ksn_printf(kev, MODULE, DEBUG_VVV,
                                         "recvfrom: Check Receive Heap,"
                                         " len = %d, id = %d ... ",
                                         num, rh_d->id
@@ -439,7 +439,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                 if (rh_d->id == ip_map_d->expected_id) {
 
                                     #ifdef DEBUG_KSNET
-                                    ksn_puts(kev, MODULE, DEBUG_VV, "processed");
+                                    ksn_puts(kev, MODULE, DEBUG_VVV, "processed");
                                     #endif
 
                                     // Process packet
@@ -462,7 +462,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                 else if (rh_d->id < ip_map_d->expected_id) {
 
                                     #ifdef DEBUG_KSNET
-                                    ksn_puts(kev, MODULE, DEBUG_VV, "removed");
+                                    ksn_puts(kev, MODULE, DEBUG_VVV, "removed");
                                     #endif
 
                                     // Remove this record
@@ -474,7 +474,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                 else {
 
                                     #ifdef DEBUG_KSNET
-                                    ksn_puts(kev, MODULE, DEBUG_VV, "skipped");
+                                    ksn_puts(kev, MODULE, DEBUG_VVV, "skipped");
                                     #endif
 
                                     idx++;
@@ -486,7 +486,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         else if (tru_header->id < ip_map_d->expected_id) {
 
                             #ifdef DEBUG_KSNET
-                            ksn_printf(kev, MODULE, DEBUG_VV,
+                            ksn_printf(kev, MODULE, DEBUG_VVV,
                                 "recvfrom: Drop old (repeated) message "
                                 "with id %d\n",
                                 tru_header->id);
@@ -499,7 +499,7 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                         else {
 
                             #ifdef DEBUG_KSNET
-                            ksn_printf(kev, MODULE, DEBUG_VV,
+                            ksn_printf(kev, MODULE, DEBUG_VVV,
                                 "recvfrom: Add to receive heap, "
                                 "id = %d, len = %d, expected id = %d\n",
                                 tru_header->id, tru_header->payload_length,
@@ -1048,7 +1048,7 @@ int ksnTRUDPsendListRemove(ksnTRUDPClass *tu, uint32_t id,
         }
 
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
+        ksn_printf(kev, MODULE, DEBUG_VVV,
                 "message with id %d was removed from %s Send List (len %d)\n",
                 id, key, pblMapSize(ip_map_d->send_list)
         );
@@ -1147,7 +1147,7 @@ int ksnTRUDPsendListAdd(ksnTRUDPClass *tu, uint32_t id, int fd, int cmd,
             addr, addr_len, attempt, &ack_wait) != NULL) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
+        ksn_printf(kev, MODULE, DEBUG_VVV,
                 "message with id %d, command %d was added "
                 "to %s Send List (len %d)\n",
                 id, cmd, key, pblMapSize(sl)
@@ -1322,7 +1322,7 @@ ev_timer *sl_timer_init(ev_timer *w, void *w_data, ksnTRUDPClass *tu,
         return NULL;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
+    ksn_printf(kev, MODULE, DEBUG_VVV,
         "send list timer start, message id %d, " _ANSI_BROWN  "timer value: %f"
         _ANSI_NONE "\n", id, ack_wait
     );
@@ -1359,7 +1359,7 @@ inline void sl_timer_stop(EV_P_ ev_timer *w) {
 
         #ifdef DEBUG_KSNET
         ksnTRUDPClass *tu = ((sl_timer_cb_data *) w->data)->tu;
-        ksn_printf(kev, MODULE, DEBUG_VV,
+        ksn_printf(kev, MODULE, DEBUG_VVV,
                 "send list timer stop, message id %d\n",
                 ((sl_timer_cb_data *) w->data)->id
         );
@@ -1397,7 +1397,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     if (sl_d != NULL) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
+        ksn_printf(kev, MODULE, DEBUG_VVV,
             _ANSI_BROWN
             "timeout at %.6f for message with id %d was happened"
             _ANSI_NONE ", "
@@ -1423,7 +1423,7 @@ void sl_timer_cb(EV_P_ ev_timer *w, int revents) {
     else {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
+        ksn_printf(kev, MODULE, DEBUG_VVV,
             "timer for removed message with id %d was happened\n",
             sl_t_data.id
         );
@@ -1676,7 +1676,7 @@ void write_cb(EV_P_ ev_io *w, int revents) {
     if(!write_delay || !(write_idx % write_delay)) {
 
         #ifdef DEBUG_KSNET
-        ksn_puts(kev, MODULE, (!tu->write_w_init_f ? DEBUG_VV : DEBUG) ,
+        ksn_puts(kev, MODULE, (!tu->write_w_init_f ? DEBUG_VVV : DEBUG) ,
                 _ANSI_LIGHTMAGENTA"ready to write"_ANSI_NONE
         );
         #endif

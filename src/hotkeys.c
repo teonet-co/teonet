@@ -97,6 +97,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             #ifdef DEBUG_KSNET
             " "COLOR_DW"d"COLOR_END" - show/hide debug messages: %s\n"
             " "COLOR_DW"w"COLOR_END" - show/hide debug_vv messages: %s\n"
+            " "COLOR_DW"c"COLOR_END" - show/hide debug_vvv messages: %s\n"        
             #endif
             " "COLOR_DW"m"COLOR_END" - send message to peer\n"
             " "COLOR_DW"i"COLOR_END" - send ping to peer %s\n"
@@ -118,6 +119,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             #ifdef DEBUG_KSNET
             , (kev->ksn_cfg.show_debug_f ? SHOW : DONT_SHOW)
             , (kev->ksn_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
+            , (kev->ksn_cfg.show_debug_vvv_f ? SHOW : DONT_SHOW)
             #endif
             , (khv->pt != NULL ? "(running now, press i to stop)" : "")
             , (khv->mt != NULL ? "(running now, press M to stop)" : "")
@@ -182,16 +184,31 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
         // Show debug
         case 'd':
-            kev->ksn_cfg.show_debug_f = !kev->ksn_cfg.show_debug_f;
-            printf("Show debug messages switch %s\n",
-                   (kev->ksn_cfg.show_debug_f ? ON :OFF));
+            if(kev->ksn_cfg.show_debug_vv_f || kev->ksn_cfg.show_debug_vvv_f)
+                kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f = 0;
+            else {
+                kev->ksn_cfg.show_debug_f = !kev->ksn_cfg.show_debug_f;
+                printf("Show debug messages switch %s\n",
+                     (kev->ksn_cfg.show_debug_f ? ON :OFF));
+            }  
             break;
 
         // Show debug_vv
         case 'w':
-            kev->ksn_cfg.show_debug_vv_f = !kev->ksn_cfg.show_debug_vv_f;
+            if(!kev->ksn_cfg.show_debug_vvv_f) {
+              kev->ksn_cfg.show_debug_vv_f = !kev->ksn_cfg.show_debug_vv_f;
+            }  
+            kev->ksn_cfg.show_debug_vvv_f = 0;
             printf("Show debug_vv messages switch %s\n",
                    (kev->ksn_cfg.show_debug_vv_f ? ON :OFF));
+            break;
+
+        // Show debug_vvv
+        case 'c':
+            kev->ksn_cfg.show_debug_vvv_f = !kev->ksn_cfg.show_debug_vvv_f;
+            kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f;
+            printf("Show debug_vvv messages switch %s\n",
+                   (kev->ksn_cfg.show_debug_vvv_f ? ON :OFF));
             break;
 
         // Send message

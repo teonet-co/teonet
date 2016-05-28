@@ -51,6 +51,7 @@ typedef struct ksnet_cfg {
     int show_connect_f,    ///< Show connection message
         show_debug_f,     ///< Show debug messages
         show_debug_vv_f, ///< Show debug vv messages
+        show_debug_vvv_f, ///< Show debug vvv messages
         show_peers_f,   ///< Show peers at start up
         hot_keys_f,    ///< Show hotkeys when press h
         crypt_f,      ///< Encrypt/Decrypt packets

@@ -27,7 +27,8 @@ typedef enum ksnet_printf_type {
             MESSAGE,      ///< #3 Regular messages
             DEBUG,        ///< #4 Debug message (normal)
             DEBUG_VV,     ///< #5 Debug message (extra)
-            DISPLAY_M,    ///< #6 Regular messages (display only)
+            DEBUG_VVV,    ///< #6 Debug message (extra+)
+            DISPLAY_M,    ///< #7 Regular messages (display only)
                     
 } ksnet_printf_type;
 
@@ -36,9 +37,10 @@ typedef enum ksnet_printf_type {
     type == ERROR_M ? "ERROR" : \
     type == DEBUG ? "DEBUG" : \
     type == DEBUG_VV ? "DEBUG_VV" : \
+    type == DEBUG_VVV ? "DEBUG_VVV" : \
     type == CONNECT ? "CONNECT" : "DISPLAY")
 
-#define _ksn_printf_format_(format) "%s %s:" _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " format
+#define _ksn_printf_format_(format) "%s %s:" _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " _ANSI_GREEN format _ANSI_NONE
 
 #define ksn_printf(ke, module, type, format, ...) \
     ksnet_printf(&((ke)->ksn_cfg), type, \
