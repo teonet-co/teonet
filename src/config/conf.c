@@ -52,6 +52,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_connect_f = 1;
     ksn_cfg->show_debug_f = 1;
     ksn_cfg->show_debug_vv_f = 0;
+    ksn_cfg->show_debug_vvv_f = 0;
     ksn_cfg->show_peers_f = 0;
 
     // This host
@@ -153,6 +154,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("show_connect_f", &conf->show_connect_f),
         CFG_SIMPLE_BOOL("show_debug_f", &conf->show_debug_f),
         CFG_SIMPLE_BOOL("show_debug_vv_f", &conf->show_debug_vv_f),
+        CFG_SIMPLE_BOOL("show_debug_vvv_f", &conf->show_debug_vvv_f),
         CFG_SIMPLE_BOOL("show_peers_f", &conf->show_peers_f),
         CFG_SIMPLE_BOOL("show_tr_udp_f", &conf->show_tr_udp_f),
         CFG_SIMPLE_BOOL("hot_keys_f", &conf->hot_keys_f),
