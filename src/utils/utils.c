@@ -80,6 +80,12 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             priority = LOG_DEBUG;
             break;
 
+        case DEBUG_VVV:
+
+            if(ksn_cfg->show_debug_vvv_f) show_it = 1;
+            priority = LOG_DEBUG;
+            break;
+
         case MESSAGE:
             priority = LOG_NOTICE;
             show_it = 1;

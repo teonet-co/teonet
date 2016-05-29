@@ -300,6 +300,13 @@ static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return True if command is processed
  */
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_ECHO (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
          
     // Send ECHO to L0 user
     if(rd->l0_f)
@@ -325,6 +332,13 @@ static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_PEERS (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     // Get peers data
     ksnet_arp_data_ar *peers_data = ksnetArpShowData(((ksnCoreClass*)kco->kc)->ka);
     size_t peers_data_length = ksnetArpShowDataLength(peers_data);
@@ -368,6 +382,13 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_GET_NUM_PEERS (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     void *peers_data;
     size_t peers_data_length = 0;
             
@@ -423,6 +444,13 @@ static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_L0_CLIENTS (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     // Get l0 clients data
     teonet_client_data_ar *client_data = 
         ksnLNullClientsList(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
@@ -456,6 +484,13 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return True if command is processed
  */
 static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_L0_CLIENTS_N (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
     
     // Get l0 clients data
     teonet_client_data_ar *client_data = 
@@ -492,8 +527,6 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     return 1; // Command processed
 }
 
-
-
 /**
  * Process CMD_L0_INFO command
  *
@@ -502,6 +535,13 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return True if command is processed
  */
 static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_L0_INFO (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
     
     l0_info_data *info_d = NULL;
     size_t info_d_len = 0;
@@ -551,6 +591,13 @@ static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_L0_STAT (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     // Get l0 clients statistic
     ksnLNullSStat *stat_data = 
         ksnLNullStat(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
@@ -606,6 +653,13 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_HOST_INFO (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     // Get host info
     size_t hid_len;
     ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
@@ -684,6 +738,13 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_TRUDP_INFO (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
 
     // Get type of request: 0 - binary; 1 - JSON
@@ -725,6 +786,13 @@ static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_RESEND (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+    
     // Parse CMD_RESEND data
     size_t ptr = 0;
     char *to = rd->data + ptr; ptr += strlen(rd->data) + 1;
@@ -760,6 +828,13 @@ static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 inline int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_RECONNECT (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+    
     return ((ksnReconnectClass*)kco->kr)->process(kco->kr, rd); // Process reconnect command
 }
 
@@ -771,6 +846,13 @@ inline int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return True if command is processed
  */
 inline static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_RECONNECT_ANSWER (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
     
     return ((ksnReconnectClass*)kco->kr)->processAnswer(kco->kr, rd); // Process reconnect answer command
 }
@@ -784,6 +866,13 @@ inline static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketDat
  */
 static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_ECHO_ANSWER (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+    
     #define ke ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))
 
     double
@@ -885,6 +974,13 @@ int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
  */
 static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_CONNECT_R (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     // Replay to address we got from peer
     ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE,
                   NULL_STR, 1);
@@ -958,6 +1054,13 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_CONNECT (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     /**
      * KSNet CMD_PEER command data
      */
@@ -999,6 +1102,13 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_DISCONNECTED (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
     #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
     
     // Name of peer to disconnect
@@ -1038,6 +1148,13 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return True if command is processed
  */
 static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), 
+            MODULE, DEBUG_VV, 
+            "process CMD_SPLEET (cmd = %u) command, from %s (%s:%d)\n", 
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
 
     #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
 

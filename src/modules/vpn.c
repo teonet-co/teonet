@@ -268,8 +268,11 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
                 );
 
         #ifdef DEBUG_KSNET
-        if(((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg.show_debug_vv_f)
+        if(((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg.show_debug_vv_f || 
+           ((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg.show_debug_vvv_f)
+            
             ksnVpnListShow(kvpn);
+        
         #endif
     }
 

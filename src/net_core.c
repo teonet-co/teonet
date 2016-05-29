@@ -278,7 +278,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     #ifdef DEBUG_KSNET
     ksn_printf(((ksnetEvMgrClass*)kc->ke), MODULE, DEBUG_VV,
-                 "send %d bytes to %s:%d\n", data_len, addr, port);
+                 "send %d bytes data, cmd %u to %s:%d\n", data_len, cmd, addr, port);
     #endif
 
 
@@ -706,7 +706,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, 
-                "receive %d bytes from %s:%d\n", recvlen, addr, port);
+                "got %d bytes from %s:%d\n", recvlen, addr, port);
         #endif
 
         void *data; // Decrypted packet data
