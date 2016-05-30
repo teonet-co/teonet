@@ -378,6 +378,8 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             find_in_receive_heap = 1;
                                             break;
                                         }
+                                        
+                                        idx++;
                                     }
 
                                     // Reset this host TR-UDP if received id = 0, 
