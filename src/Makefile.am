@@ -154,6 +154,7 @@ libteonet_la_SOURCES = \
     modules/subscribe.c \
     modules/tcp_proxy.c \
     modules/teodb.c \
+    modules/teodb_com.c \
     modules/vpn.c \
     utils/string_arr.c \
     utils/utils.c \
