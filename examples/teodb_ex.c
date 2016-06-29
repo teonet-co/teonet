@@ -1,6 +1,6 @@
 /** 
- * /file   teodb_ex.c
- * /author Kirill Scherba <kirill@scherba.ru>
+ * \file   teodb_ex.c
+ * \author Kirill Scherba <kirill@scherba.ru>
  * 
  * \example teodb_ex.c
  *
@@ -108,13 +108,12 @@ void get_cb(uint32_t id, int type, void *data) {
 
     // Prepare data
     size_t tdd_len;
-    teo_db_data *tdd = prepare_request_data("", 1, NULL, 0, cq->id, &tdd_len);
+    #define KEY "teo_db_ex."
+    teo_db_data *tdd = prepare_request_data(KEY, sizeof(KEY), NULL, 0, cq->id, &tdd_len);
 
-    // Send GET command to DB peer
+    // Send CMD_D_LIST command to DB peer
     ksnCoreSendCmdto(ke->kc, TEODB_PEER, CMD_D_LIST, tdd, tdd_len);  
     free(tdd);
-    
-//    printf("Test finished ...\n");
     
     free(cqd);
     

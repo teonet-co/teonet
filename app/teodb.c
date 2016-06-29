@@ -550,6 +550,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Free JSON string
                         free(json_data_unesc);
                         if(jp.data != NULL) free(jp.data);                        
+                    } 
+                    
+                    // Binary
+                    else {
+                        teo_db_data *tdd = rd->data;
+                        key = tdd->key_length ? strdup(tdd->key_data) : NULL;
                     }
                     
                     // Process the data
