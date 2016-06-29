@@ -1,3 +1,47 @@
+
+Version 0.1.73 at 2016-06-29 14:25
+============== 
+
+  - teodb binary list request always return all keys fixed
+
+Version 0.1.72
+==============
+
+  - the teodb_com file added to the teonet library; 
+  - the teodb_ex added to the teonet library;
+
+Version 0.1.71
+==============
+  
+  - "check received id = 0 from existing connection to fix RESET error" updated
+
+Version 0.1.70
+==============
+  
+  - vvv debug level terminal command to filter log list created
+
+Version 0.1.69
+==============
+
+  - move sendCmdAnswerTo function from room controller to the libteonet core
+
+Version 0.1.68
+==============
+
+  - send networks parameter in L0 client login answer
+
+Version 0.1.67
+==============
+
+  - auto reset TR-UDP if host receive packet with id = 0 from existing peer and 
+    hosts expected id != 0
+
+Version 0.1.66
+==============
+
+  - set separate version number to teovpn application
+  - don't split the VPN packets (and don't send it using tr-udp)
+
 Version 0.1.65 at 2016-05-05 13:05
 ============== 
 
@@ -34,7 +78,8 @@ Version 0.1.58 at 2016-04-11 12:06
 ============== 
 
   - TR-UDP controller added
-  - commands CMD_TRUDP_INFO & data->cmd == CMD_HOST_INFO_ANSWER created to get host TR-UDP statistic
+  - commands CMD_TRUDP_INFO & data->cmd == CMD_HOST_INFO_ANSWER created to get 
+    host TR-UDP statistic
   - TR-UDP: receive speed and receive total statistic added
   - TR-UDP: add comments and rename variables in send statistic
   - TR-UDP send total in megabytes statistic created
@@ -222,7 +267,7 @@ Version 0.0.9
 Version 0.0.8
 ==============
 
-_Protocol not compatible with previous versions_
+Protocol not compatible with previous versions
 
   - the TR-UDP module, cUnit test and examples added
 
@@ -230,7 +275,7 @@ _Protocol not compatible with previous versions_
 Version 0.0.7
 ==============
 
-_First stable release_
+First stable release
 
   - master build system created 
 

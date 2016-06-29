@@ -1,6 +1,6 @@
 /** 
- * File:   teonet.h
- * Author: ka_scherba
+ * \file   teonet.h
+ * \author Kirill Scherba <kirill@scherba.ru>
  *
  * Created on June 30, 2015, 10:47 AM
  */
