@@ -6,11 +6,15 @@
  *
  * Created on August 11, 2015, 2:34 PM
  */
+
+#include "tr-udp_.h"
+
+#if TRUDV_VERSION == 1
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "ev_mgr.h"
-#include "tr-udp_.h"
 #include "tr-udp_stat.h"
 #include "utils/utils.h"
 
@@ -636,3 +640,5 @@ inline void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_AR
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     ip_map_d->stat.packets_receive_dropped++;
 }
+
+#endif

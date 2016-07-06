@@ -93,6 +93,25 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
 /**
+ * TR-UDP event callback
+ *
+ * @param tcd_pointer
+ * @param event
+ * @param data
+ * @param data_length
+ * @param user_data
+ */
+static void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length,
+        void *user_data) {
+
+//    trudpChannelData *tcd = (trudpChannelData *)tcd_pointer;
+
+    switch(event) {
+        
+    }
+}    
+
+/**
  * Initialize ksnet core. Create socket FD and Bind ksnet UDP client/server
  *
  * @param ke Pointer to ksnetEvMgrClass
@@ -128,7 +147,11 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     }
     
     // TR-UDP initialize
+    #if TRUDV_VERSION == 1
     kc->ku = ksnTRUDPinit(kc);
+    #elif TRUDV_VERSION == 2
+    trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
+    #endif
 
     // Change this host port number to port changed in ksnCoreBind function
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
@@ -171,7 +194,11 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
+        #if TRUDV_VERSION == 1
         ksnTRUDPDestroy(kc->ku);
+        #elif TRUDV_VERSION == 2         
+        trudpDestroy(kc->ku);
+        #endif        
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif
