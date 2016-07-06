@@ -153,8 +153,13 @@ ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
     if(arp != (void*)-1) {
         
         // Remove peer from TR-UDP module
-        ksnTRUDPresetAddr( ((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+        #if TRUDV_VERSION == 1
+        ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 1);
+        #elif TRUDV_VERSION == 2
+        trudpDestroyChannelAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+                arp->port, 0);               
+        #endif
         
         // Remove from Stream module
         ksnStreamClosePeer(((ksnetEvMgrClass*) ka->ke)->ks, peer_name);
@@ -183,7 +188,11 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
     ke->ksn_cfg.r_host_name[0] = '\0';
     ka->map = pblMapNewHashMap();    
     ksnetArpAddHost(ka);
+    #if TRUDV_VERSION == 1
     ksnTRUDPremoveAll(ke->kc->ku);
+    #elif TRUDV_VERSION == 2
+    trudpDestroyChannelAll(ke->kc->ku);
+    #endif
 }
 
 /**
@@ -509,6 +518,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                     data->last_triptime);
             
             // Get TR-UDP ip map data by key
+            #if TRUDV_VERSION == 1
             size_t val_len;
             size_t key_len = KSN_BUFFER_SM_SIZE;
             char key[key_len];
@@ -526,6 +536,12 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
             char *tcp_triptime_last10_max = ip_map_d != NULL ? 
                 ksnet_formatMessage("%.3f ms", 
                     ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
+            
+            #elif TRUDV_VERSION == 2
+            // \todo Set real values
+            char *tcp_last_triptime = strdup(null_str);
+            char *tcp_triptime_last10_max = strdup(null_str);
+            #endif
                         
             str = ksnet_sformatMessage(str, "%s"
                 "%3d %s%s%s\t %3d   %-15s  %5d   %7s %s  %s%s%s\n",

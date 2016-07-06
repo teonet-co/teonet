@@ -10,6 +10,10 @@
 #ifndef NET_TR_UDP_H
 #define	NET_TR_UDP_H
 
+#define TRUDV_VERSION 2
+
+#if TRUDV_VERSION == 1
+
 #ifdef HAVE_MINGW
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
@@ -88,6 +92,29 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len);
 
 #ifdef	__cplusplus
 }
+#endif
+
+#endif
+
+#if TRUDV_VERSION == 2
+
+#include "trudp.h"
+#include "trudp_stat.h"
+
+#define make_addr(addr_str, port, addr, addrlen) trudpUdpMakeAddr(addr_str, port, addr, addrlen)
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+ssize_t ksnTRUDPsendto(trudpData *tu, int resend_fl, uint32_t id, int attempt, 
+        int cmd, int fd, const void *buf, size_t buf_len, int flags, 
+        __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+
+#ifdef	__cplusplus
+}
+#endif
+
 #endif
 
 #endif	/* NET_TR_UDP_H */
