@@ -5,3 +5,7 @@
 [submodule "app/embedded/jsmn"]
 	path = app/embedded/jsmn
 	url = https://github.com/zserge/jsmn.git
+
+[submodule "embedded/libtrudp"]
+	path = embedded/libtrudp
+	url = git@gitlab.ksproject.org:teonet/trudp.git
