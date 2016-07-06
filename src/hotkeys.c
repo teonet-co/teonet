@@ -21,6 +21,7 @@
 #include "utils/utils.h"
 #include "tr-udp_stat.h"
 
+#undef MODULE
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
 
 /**

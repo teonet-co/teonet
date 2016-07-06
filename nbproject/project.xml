@@ -84,6 +84,7 @@
             <word>scherba</word>
             <word>segv</word>
             <word>sh</word>
+            <word>sockaddr</word>
             <word>src</word>
             <word>SSL</word>
             <word>str</word>
@@ -103,9 +104,11 @@
             <word>teostream</word>
             <word>teotproxy</word>
             <word>teotru</word>
+            <word>teovpn</word>
             <word>teoweb</word>
             <word>todo</word>
             <word>triptime</word>
+            <word>trudp</word>
             <word>ttl</word>
             <word>tuntap</word>
             <word>ubuntu</word>

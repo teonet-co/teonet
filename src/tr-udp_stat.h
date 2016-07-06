@@ -16,6 +16,8 @@
 extern "C" {
 #endif
 
+#if TRUDV_VERSION == 1
+    
 tr_udp_stat *ksnTRUDPstatInit(ksnTRUDPClass *tu);
 void ksnTRUDPstatReset(ksnTRUDPClass *tu);
 void ksnTRUDPstatAddrResetAll(ksnTRUDPClass *tu);
@@ -36,6 +38,42 @@ void ksnTRUDPsetACKtime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr,
 void ksnTRUDPsetDATAsendTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
 ip_map_data *ksnTRUDPsetDATAreceiveTime(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr, ksnTRUDP_header *tru_header);
 void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr);
+
+#elif TRUDV_VERSION == 2
+
+#define MODULE _ANSI_LIGHTGREEN "tr_udp_stat" _ANSI_NONE
+
+#include "trudp_stat.h"
+#include "ev_mgr.h"
+
+#define KE(tu) (ksnetEvMgrClass *)tu->user_data
+
+/**
+ * Show TR-UDP statistics on terminal
+ *
+ * Print string with statistics on terminal.
+ *
+ * @param tu
+ *
+ * @return Number if line in statistics text
+ */
+inline int ksnTRUDPstatShow(trudpData *tu) {
+
+    int num_line = 0;
+    char *str = ksnTRUDPstatShowStr(tu);
+    
+    ksn_printf(KE(tu), MODULE,
+            DISPLAY_M,
+            "%s", str);
+
+    num_line = calculate_lines(str);
+
+    free(str);
+
+    return num_line;
+}
+
+#endif
 
 #ifdef	__cplusplus
 }

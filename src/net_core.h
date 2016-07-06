@@ -49,7 +49,11 @@ typedef struct ksnCoreClass {
     double last_check_event; ///< Last time of check host event
     ksnetArpClass *ka;       ///< Arp table class object
     ksnCommandClass *kco;    ///< Command class object
+    #if TRUDV_VERSION == 1
     ksnTRUDPClass *ku;       ///< TR-UDP class object
+    #elif TRUDV_VERSION == 2
+    trudpData *ku;          ///< TR-UDP class object
+    #endif
     #if KSNET_CRYPT
     ksnCryptClass *kcr;      ///< Crypt class object
     #endif
