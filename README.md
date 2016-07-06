@@ -4,7 +4,7 @@
 
     git clone git@gitlab.ksproject.org:teonet/teonet.git
     cd teonet
-    git submodule update --init
+    git submodule update --init --recursive
 
 ## Update submodules
 
