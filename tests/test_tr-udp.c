@@ -716,7 +716,7 @@ void test_2_9() {
      * Check ACK macro
      */
     #define check_ACK(ID) { \
-        recvlen = recvfrom(fd_s, buf, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, &addr_recv_len); \
+        recvlen = recvfrom(fd_s, buf, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, (socklen_t*)&addr_recv_len); \
         CU_ASSERT(recvlen == sizeof(ksnTRUDP_header)); \
         ksnTRUDP_header *rh = (ksnTRUDP_header *) buf; \
         CU_ASSERT(rh->id == ID); \
@@ -767,9 +767,9 @@ void test_2_9() {
     // ID 0
     const char *send_str = "Hello world 0"; // Data to send
     size_t buf_len = strlen(send_str) + 1; // Size of send, data
-    ssize_t sent = test_sendto(fd_s, 0, TRU_DATA, send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
+    ssize_t sent = test_sendto(fd_s, 0, TRU_DATA, (void*)send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
     CU_ASSERT_FATAL(sent > 0);
-    ssize_t recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    ssize_t recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, (socklen_t*)&addr_recv_len);
     CU_ASSERT(recvlen == 0);
     // get ACK from receiver
     check_ACK(0);
@@ -777,18 +777,18 @@ void test_2_9() {
     // ID 2
     send_str = "Hello world 2  "; // Data to send
     buf_len = strlen(send_str) + 1; // Size of send, data
-    sent = test_sendto(fd_s, 2, TRU_DATA, send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
+    sent = test_sendto(fd_s, 2, TRU_DATA, (void*)send_str, buf_len, (__SOCKADDR_ARG) &addr_r, addr_len);
     CU_ASSERT_FATAL(sent > 0);
-    recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, (socklen_t*)&addr_recv_len);
     CU_ASSERT(recvlen == 0);
     // get ACK from receiver
     check_ACK(2);
     // ID 1
     send_str = "Hello world 1 "; // Data to send
     buf_len = strlen(send_str) + 1; // Size of send, data
-    sent = test_sendto(fd_s, 1, TRU_DATA, send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
+    sent = test_sendto(fd_s, 1, TRU_DATA, (void*)send_str, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
     CU_ASSERT_FATAL(sent > 0);
-    recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+    recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, (socklen_t*)&addr_recv_len);
     CU_ASSERT(recvlen == 0);
     // get ACK from receiver
     check_ACK(1);
@@ -803,7 +803,7 @@ void test_2_9() {
         buf_len = strlen(buf) + 1; // Size of send, data
         sent = test_sendto(fd_s, id, TRU_DATA, buf, buf_len, (__CONST_SOCKADDR_ARG) &addr_r, addr_len);
         CU_ASSERT_FATAL(sent > 0);
-        recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__CONST_SOCKADDR_ARG) &addr_recv, &addr_recv_len);
+        recvlen = ksnTRUDPrecvfrom(tu, fd_r, buf, KSN_BUFFER_SIZE, 0, (__SOCKADDR_ARG) &addr_recv, (socklen_t*)&addr_recv_len);
         CU_ASSERT(recvlen == 0);
         // get ACK from receiver
         check_ACK(id);

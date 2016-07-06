@@ -756,9 +756,13 @@ static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                           !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
 
     // Get TR-UDP info
-    size_t data_out_len;
+    size_t data_out_len;    
+    #if TRUDV_VERSION == 1
     void *data_out = ksnTRUDPstatGet(ke->kc->ku, data_type, &data_out_len);
-
+    #elif TRUDV_VERSION == 2
+    void *data_out = trudpStatGet(ke->kc->ku, data_type, &data_out_len);
+    #endif
+    
     // Send TRUDP_INFO_ANSWER to L0 user
     if(rd->l0_f)
         ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),

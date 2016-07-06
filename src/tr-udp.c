@@ -12,10 +12,8 @@
 
 #include "ev_mgr.h"
 #include "tr-udp.h"
-#include "tr-udp_stat.h"
-#include "config/conf.h"
-#include "utils/utils.h"
-#include "utils/rlutil.h"
+
+#define MODULE _ANSI_LIGHTGREEN "tr_udp" _ANSI_NONE
 
 // Teonet TCP proxy functions
 ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
@@ -25,6 +23,13 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
             int fd, const void *buffer, size_t buffer_len, int flags,
             __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 
+#if TRUDV_VERSION == 1
+
+#include "tr-udp_stat.h"
+#include "config/conf.h"
+#include "utils/utils.h"
+#include "utils/rlutil.h"
+
 //#define VERSION_MAJOR 0
 //#define VERSION_MINOR 0
 #define DEFAULT_PRIORITY 10
@@ -32,8 +37,6 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
 #define kev ((ksnetEvMgrClass*)(((ksnCoreClass*)tu->kc)->ke))
 
 #include "tr-udp_.h"
-
-#define MODULE _ANSI_LIGHTGREEN "tr_udp" _ANSI_NONE
 
 /*****************************************************************************
  *
@@ -1899,3 +1902,68 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 //! \todo: Expand source code documentation
 
 //! \todo:  Describe Reset and Reset with remove in WiKi
+
+#endif
+
+#if TRUDV_VERSION == 2
+
+#define kev ((ksnetEvMgrClass*)(td->user_data))
+
+/**
+ * Send to peer through TR-UDP transport
+ *
+ * @param tu Pointer to ksnTRUDPClass object
+ * @param resend_flg New message or resend sent before (0 - new, 1 -resend)
+ * @param id ID of resend message
+ * @param cmd Command to allow TR-UDP
+ * @param attempt Number of attempt of this message
+ * @param fd File descriptor of UDP connection
+ * @param buf Buffer with data
+ * @param buf_len Data length
+ * @param flags Flags (always 0, reserved)
+ * @param addr Peer address
+ * @param addr_len Peer address length
+ *
+ * @return Number of bytes sent to UDP
+ */
+ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
+        int attempt, int cmd, int fd, const void *buf, size_t buf_len,
+        int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
+
+    // Show debug messages
+    #ifdef DEBUG_KSNET
+    ksn_printf(kev, MODULE, DEBUG_VVV,
+            "got %d bytes data to send, cmd %d\n", buf_len, cmd
+    );
+    #endif
+
+    // TR-UDP: Check commands array
+    if(CMD_TRUDP_CHECK(cmd)) {
+        
+        trudpChannelData *tcd = trudpGetChannel(td, addr, 0);        
+        if(tcd == (void*)-1) {        
+            trudpSendData(tcd, (void *)buf, buf_len);
+        }
+        buf_len = 0;
+    }
+    
+    // Not TR-UDP
+    else {
+
+        // Show debug messages
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG_VV,
+                ">> skip this packet, "
+                "send %d bytes direct by UDP to: %s:%d\n",
+                buf_len,
+                inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+                ntohs(((struct sockaddr_in *) addr)->sin_port)
+        );
+        #endif
+    }
+
+    return buf_len > 0 ? teo_sendto(kev, fd, buf, buf_len, flags, addr, addr_len) :
+                         buf_len;
+}
+    
+#endif

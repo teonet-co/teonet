@@ -33,6 +33,7 @@ AM_CFLAGS = \
 	 $(DRELEASE_TEONET) \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
+	 -I../embedded/libtrudp/src \
 	 -I/usr/include/libev \
 	 -I../app/embedded/jsmn \
 	 -DEV_USE_EPOLL=1 \

@@ -114,22 +114,22 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
     }
 }
 
-/**
- * Sort list function
- * 
- * @param prev Previous element
- * @param next Next element
- * 
- * @return 
- */
-static int list_compare (const void* prev, const void* next) {
-    
-//    if(((teoSScrListData*)prev)->ev < ((teoSScrListData*)next)->ev ) return -1;
-//    else if(((teoSScrListData*)prev)->ev > ((teoSScrListData*)next)->ev ) return 1;
-//    else return 0;
-    
-    return strcmp(((teoSScrListData*)prev)->data, ((teoSScrListData*)next)->data);
-}
+///**
+// * Sort list function
+// * 
+// * @param prev Previous element
+// * @param next Next element
+// * 
+// * @return 
+// */
+//static int list_compare (const void* prev, const void* next) {
+//    
+////    if(((teoSScrListData*)prev)->ev < ((teoSScrListData*)next)->ev ) return -1;
+////    else if(((teoSScrListData*)prev)->ev > ((teoSScrListData*)next)->ev ) return 1;
+////    else return 0;
+//    
+//    return strcmp(((teoSScrListData*)prev)->data, ((teoSScrListData*)next)->data);
+//}
 
 /**
  * Find element with event and peer name in list
