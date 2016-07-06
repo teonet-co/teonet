@@ -64,6 +64,7 @@
             <word>libev</word>
             <word>libteol</word>
             <word>libteonet</word>
+            <word>libtrudp</word>
             <word>libtuntap</word>
             <word>linux</word>
             <word>localhost</word>
@@ -102,7 +103,6 @@
             <word>teostream</word>
             <word>teotproxy</word>
             <word>teotru</word>
-            <word>teovpn</word>
             <word>teoweb</word>
             <word>todo</word>
             <word>triptime</word>

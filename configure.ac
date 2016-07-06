@@ -262,7 +262,6 @@ AC_CACHE_SAVE
 
 LT_INIT
 
-
 AC_CONFIG_FILES([
     Makefile
     po/Makefile.in
@@ -276,4 +275,8 @@ AC_CONFIG_FILES([
     embedded/Makefile 
     embedded/teocli/linux/Makefile
 ])
+
+# Call libtrudp's ./configure script recursively.
+AC_CONFIG_SUBDIRS([embedded/libtrudp])
+
 AC_OUTPUT

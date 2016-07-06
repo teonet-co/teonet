@@ -5,7 +5,7 @@
 
     git clone git@gitlab.ksproject.org:teonet/teonet.git
     cd teonet
-    git submodule update --init
+    git submodule update --init --recursive
 
 * at error: "SSL certificate problem: unable to get local issuer 
 certificate while accessing https ..." execute git command:
