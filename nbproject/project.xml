@@ -84,7 +84,6 @@
             <word>scherba</word>
             <word>segv</word>
             <word>sh</word>
-            <word>sockaddr</word>
             <word>src</word>
             <word>SSL</word>
             <word>str</word>
@@ -113,6 +112,7 @@
             <word>tuntap</word>
             <word>ubuntu</word>
             <word>udp</word>
+            <word>uint</word>
             <word>unescaped</word>
             <word>unsubscribe</word>
             <word>unsubscribed</word>

@@ -93,25 +93,6 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_da
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
 /**
- * TR-UDP event callback
- *
- * @param tcd_pointer
- * @param event
- * @param data
- * @param data_length
- * @param user_data
- */
-static void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length,
-        void *user_data) {
-
-//    trudpChannelData *tcd = (trudpChannelData *)tcd_pointer;
-
-    switch(event) {
-        
-    }
-}    
-
-/**
  * Initialize ksnet core. Create socket FD and Bind ksnet UDP client/server
  *
  * @param ke Pointer to ksnetEvMgrClass
@@ -650,8 +631,8 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
     // Receive data
     recvlen = ksn_recvfrom(ke->kc->ku, 
-                revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
-                0, (struct sockaddr *)&remaddr, &addrlen);
+        revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
+        0, (struct sockaddr *)&remaddr, &addrlen);
 
     // Process package
     ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);
