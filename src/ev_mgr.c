@@ -811,7 +811,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     if(!kev->idle_count) {
         //! \todo: open_local_port(kev);
         // Set statistic start time
-        if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
+//        if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
         // Connect to R-Host
         connect_r_host_cb(kev);
         // Send event to application
