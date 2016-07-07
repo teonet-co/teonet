@@ -16,6 +16,8 @@
 #include "ev_mgr.h"
 #include "tr-udp_.h"
 
+#if TRUDV_VERSION == 1
+
 extern CU_pSuite pSuite;
 
 //! Emulate initialization of ksnCoreClass
@@ -843,3 +845,5 @@ int add_suite_2_tests(void) {
 
     return 0;
 }
+
+#endif

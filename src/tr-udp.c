@@ -381,12 +381,12 @@ ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buffer,
                                             find_in_receive_heap = 1;
                                             break;
                                         }
-                                        
+
                                         idx++;
                                     }
 
-                                    // Reset this host TR-UDP if received id = 0, 
-                                    // expected id != 0 and received heap does not 
+                                    // Reset this host TR-UDP if received id = 0,
+                                    // expected id != 0 and received heap does not
                                     // contain record with id = 0
                                     if(!find_in_receive_heap) {
                                         // Process RESET command
@@ -1939,14 +1939,14 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
 
     // TR-UDP: Check commands array
     if(CMD_TRUDP_CHECK(cmd)) {
-        
-        trudpChannelData *tcd = trudpGetChannel(td, addr, 0);        
-        if(tcd == (void*)-1) {        
+
+        trudpChannelData *tcd = trudpGetChannel(td, addr, 0);
+        if(tcd == (void*)-1) {
             trudpSendData(tcd, (void *)buf, buf_len);
         }
         buf_len = 0;
     }
-    
+
     // Not TR-UDP
     else {
 
@@ -1965,5 +1965,84 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     return buf_len > 0 ? teo_sendto(kev, fd, buf, buf_len, flags, addr, addr_len) :
                          buf_len;
 }
-    
+
+/**
+ * Get data from peer through TR-UDP transport
+ *
+ * @param td
+ * @param fd
+ * @param buffer
+ * @param buffer_len
+ * @param flags
+ * @param addr
+ * @param addr_len
+ *
+ * @return If return 0 than the packet is processed by tu->process_packet
+ *         function. In other case there is value returned by UDP recvfrom
+ *         function and the buffer contain received data
+ */
+ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
+                         size_t buffer_len, int flags, __SOCKADDR_ARG addr,
+                         socklen_t *addr_len) {
+
+    trudpSendEvent((void*)td, PROCESS_RECEIVE, buffer, buffer_len, 0);
+
+    return 0;
+}
+
+/**
+ * TR-UDP event callback
+ *
+ * @param tcd_pointer
+ * @param event
+ * @param data
+ * @param data_length
+ * @param user_data
+ */
+void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length,
+        void *user_data) {
+
+    trudpChannelData *tcd = (trudpChannelData *)tcd_pointer;
+
+    switch(event) {
+
+        // Process received data
+        // @param tcd Pointer to trudpData
+        // @param data Pointer to receive buffer
+        // @param data_length Receive buffer length
+        // @param user_data NULL
+        case PROCESS_RECEIVE: {
+
+            trudpData *td = (trudpData *)tcd;
+            trudpProcessReceive(td, data, data_length);
+
+        } break;
+
+        // Process received not TR-UDP data
+        // @param tcd Pointer to trudpData
+        // @param data Pointer to receive buffer
+        // @param data_length Receive buffer length
+        // @param user_data NULL
+
+        case PROCESS_RECEIVE_NO_TRUDP: {
+
+            // Process package
+            trudpData *td = TD(tcd);
+            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
+
+        } break;
+        
+        // Process send data
+        // @param data Pointer to send data
+        // @param data_length Length of send
+        // @param user_data NULL
+        case PROCESS_SEND: {
+
+            trudpData *td = TD(tcd);
+            teo_sendto(kev, td->fd, data, data_length, 0, (__CONST_SOCKADDR_ARG) &tcd->remaddr, tcd->addrlen);
+
+        } break;
+    }
+}
+
 #endif
