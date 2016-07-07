@@ -1912,7 +1912,7 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 /**
  * Send to peer through TR-UDP transport
  *
- * @param tu Pointer to ksnTRUDPClass object
+ * @param td Pointer to trudpData object
  * @param resend_flg New message or resend sent before (0 - new, 1 -resend)
  * @param id ID of resend message
  * @param cmd Command to allow TR-UDP
@@ -2019,7 +2019,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         } break;
 
         // Process received not TR-UDP data
-        // @param tcd Pointer to trudpData
+        // @param tcd Pointer to trudpChannelData
         // @param data Pointer to receive buffer
         // @param data_length Receive buffer length
         // @param user_data NULL
