@@ -2023,7 +2023,6 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param data Pointer to receive buffer
         // @param data_length Receive buffer length
         // @param user_data NULL
-
         case PROCESS_RECEIVE_NO_TRUDP: {
 
             // Process package
