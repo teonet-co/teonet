@@ -62,9 +62,8 @@ inline int ksnTRUDPstatShow(trudpData *tu) {
     int num_line = 0;
     char *str = ksnTRUDPstatShowStr(tu);
     
-    ksn_printf(KE(tu), MODULE,
-            DISPLAY_M,
-            "%s", str);
+    cls();
+    printf("%s", str);
 
     num_line = calculate_lines(str);
 
