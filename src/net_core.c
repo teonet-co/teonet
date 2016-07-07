@@ -131,7 +131,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     #if TRUDV_VERSION == 1
     kc->ku = ksnTRUDPinit(kc);
     #elif TRUDV_VERSION == 2
-    trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
+    kc->ku = trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
     #endif
 
     // Change this host port number to port changed in ksnCoreBind function
