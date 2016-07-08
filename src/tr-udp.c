@@ -2137,11 +2137,16 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             char *key = trudpMakeKeyChannel(tcd);
             if(data_length == sizeof(uint32_t)) {
+                
                 uint32_t last_received = *(uint32_t*)data;
                 fprintf(stderr,
                     "Disconnect channel %s, last received: %.6f sec\n",
                     key, last_received / 1000000.0);
-            }
+                
+                // Remove peer from ARP table
+                trudpData *td = TD(tcd);
+                remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr);
+             }
             else {
                 fprintf(stderr,
                     "Disconnect channel %s (no data sent)\n", 
