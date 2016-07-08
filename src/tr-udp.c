@@ -2036,14 +2036,15 @@ static void trudp_send_queue_destroy(trudpData *td) {
 static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
 
     process_send_queue_data *psd = (process_send_queue_data *) w->data;
+    //ev_timer_stop(psd->loop, &psd->process_send_queue_w);
 
     // Process send queue
 //    debug("process send queue ... \n");
     uint64_t next_expected_time;
-    trudpProcessSendQueue(psd->td, &next_expected_time);
+    int rv =trudpProcessSendQueue(psd->td, &next_expected_time);
 
     // Start new process_send_queue timer
-    if(next_expected_time)
+    if(rv && next_expected_time > 0)
         trudp_send_queue_start_cb(psd, next_expected_time);
 }
 
@@ -2119,6 +2120,70 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             
         } break;
         
+        // CONNECTED event
+        // @param data NULL
+        // @param user_data NULL
+        case CONNECTED: {
+
+            char *key = trudpMakeKeyChannel(tcd);
+            fprintf(stderr, "Connect channel %s\n", key);
+
+        } break;        
+        
+        // DISCONNECTED event
+        // @param data Last packet received
+        // @param user_data NULL
+        case DISCONNECTED: {
+
+            char *key = trudpMakeKeyChannel(tcd);
+            if(data_length == sizeof(uint32_t)) {
+                uint32_t last_received = *(uint32_t*)data;
+                fprintf(stderr,
+                    "Disconnect channel %s, last received: %.6f sec\n",
+                    key, last_received / 1000000.0);
+            }
+            else {
+                fprintf(stderr,
+                    "Disconnect channel %s (no data sent)\n", 
+                    key);
+            }
+
+            //connected_flag = 0;
+
+        } break;        
+        
+        // SEND_RESET event
+        // @param data Pointer to uint32_t id or NULL (data_size == 0)
+        // @param user_data NULL
+        case SEND_RESET: {
+
+
+            char *key = trudpMakeKeyChannel(tcd);
+            
+            if(!data)
+                fprintf(stderr,
+                  "Send reset: "
+                  "to channel %s\n",
+                  key);
+
+            else {
+            
+                uint32_t id = (data_length == sizeof(uint32_t)) ? *(uint32_t*)data:0;
+
+                if(!id)
+                    fprintf(stderr,
+                      "Send reset: "
+                      "Not expected packet with id = 0 received from channel %s\n",
+                      key);
+                else
+                    fprintf(stderr,
+                      "Send reset: "
+                      "High send packet number (%d) at channel %s\n",
+                      id, key);
+                }
+
+        } break;
+        
         // Got ACK event
         // @param tcd Pointer to trudpChannelData
         // @param data Pointer to ACK packet
@@ -2159,7 +2224,6 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             trudpData *td = (trudpData *)tcd;
             trudpProcessReceive(td, data, data_length);
-            trudp_send_queue_start_cb(td->process_send_queue_data, 0);
 
         } break;
 
@@ -2186,7 +2250,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             trudpData *td = TD(tcd);
             teo_sendto(kev, td->fd, data, data_length, 0, 
                     (__CONST_SOCKADDR_ARG) &tcd->remaddr, tcd->addrlen);
-
+            
+            if(trudpPacketGetType(data) == TRU_DATA)
+                trudp_send_queue_start_cb(td->process_send_queue_data, 0);
+            
         } break;
     }
 }
