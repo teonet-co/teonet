@@ -268,6 +268,7 @@ typedef struct find_arp_data {
     
   __CONST_SOCKADDR_ARG addr;
   ksnet_arp_data *arp_data;
+  char *peer_name;
     
 } find_arp_data;
 
@@ -282,6 +283,7 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
             arp_data->addr)) {
         
         fa->arp_data = arp_data;
+        fa->peer_name = peer_name;
         
         retval = 1;
     }
@@ -292,37 +294,29 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
 /**
  * Find ARP data by address
  * 
- * @param ka
- * @param addr
+ * @param ka Pointer to ksnetArpClass
+ * @param addr Address
+ * @param peer_name [out] Peer name (may be null)
  * 
- * @return  Pointer to ARP data
+ * @return  Pointer to ARP data or NULL if not found
  */
-ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr) {
+ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr, 
+        char **peer_name) {
 
     find_arp_data fa;
     fa.addr = addr;
     fa.arp_data = NULL;
+    fa.peer_name = NULL;
     
-    //char key[KSN_BUFFER_SM_SIZE];
-    //ksnTRUDPkeyCreate(NULL, addr, key, KSN_BUFFER_SM_SIZE);
+    ksnet_arp_data *retval = NULL;
     
     if(ka != NULL && ksnetArpGetAllH(ka, find_arp_by_addr_cb, (void*) &fa)) {
         
-        // ARP by address was found
-        //printf("ARP by address %s:%d was found\n", 
-        //            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-        //            ntohs(((struct sockaddr_in *) addr)->sin_port));
-        
-    } else {
-        
-        // ARP by address %s not found
-        //printf("ARP by address %s:%d not found\n", 
-        //            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-        //            ntohs(((struct sockaddr_in *) addr)->sin_port));
-        
+        retval = fa.arp_data;
+        if(peer_name) *peer_name = fa.peer_name;
     }
     
-    return fa.arp_data;
+    return retval;
 }
 
 /**
