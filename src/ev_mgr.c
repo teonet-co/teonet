@@ -742,9 +742,10 @@ void open_local_port(ksnetEvMgrClass *ke) {
 /**
  * Remove peer by name
  * 
+ * @param ke Pointer to ksnetEvMgrClass
  * @param peer_name
  */
-inline void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
+static void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
     
         // Disconnect dead peer from this host
         ksnCorePacketData rd;
@@ -756,13 +757,20 @@ inline void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
 /**
  * Remove peer by address
  * 
- * @param ke
+ * @param ke Pointer to ksnetEvMgrClass
  * @param addr
+ * @return 
  */
-inline void remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr) {
+int remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr) {
     
-    //ksnet_arp_data *arp = ksnetArpFindByAddr(ke->kc->ka, addr);    
-    // \todo  continue this function ...
+    int rv = 0;
+    char *peer_name;                
+    if(ksnetArpFindByAddr(ke->kc->ka, (__CONST_SOCKADDR_ARG) addr, &peer_name)) {
+        remove_peer(ke, peer_name);
+        rv = 1;
+    }
+
+    return rv;
 }
 
 /**
