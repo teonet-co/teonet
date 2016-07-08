@@ -740,6 +740,32 @@ void open_local_port(ksnetEvMgrClass *ke) {
 }
 
 /**
+ * Remove peer by name
+ * 
+ * @param peer_name
+ */
+inline void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
+    
+        // Disconnect dead peer from this host
+        ksnCorePacketData rd;
+        rd.from = peer_name;
+        rd.data = NULL;
+        cmd_disconnected_cb(ke->kc->kco, &rd);
+}
+
+/**
+ * Remove peer by address
+ * 
+ * @param ke
+ * @param addr
+ */
+inline void remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr) {
+    
+    //ksnet_arp_data *arp = ksnetArpFindByAddr(ke->kc->ka, addr);    
+    // \todo  continue this function ...
+}
+
+/**
  * Check connected peers, send trip time request and disconnect peer at timeout
  *
  * @param ka
@@ -765,10 +791,11 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     else if(ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
         // Disconnect dead peer from this host
-        ksnCorePacketData rd;
-        rd.from = peer_name;
-        rd.data = NULL;
-        cmd_disconnected_cb(kev->kc->kco, &rd);
+//        ksnCorePacketData rd;
+//        rd.from = peer_name;
+//        rd.data = NULL;
+//        cmd_disconnected_cb(kev->kc->kco, &rd);
+        remove_peer(kev, peer_name);
         
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL,  arp_data, NULL);
