@@ -495,12 +495,12 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
 
     char *str;
     const char *div = "-------------------------------------------------------"
-                      "--------------------------\n";
+                      "----------------------------\n";
 
     str = ksnet_formatMessage(div);
 
     str = ksnet_sformatMessage(str, "%s"
-        "  # Peer \t Mod | IP \t\t| Port | Trip time | TR-UDP trip time\n", 
+        "  # Peer          | Mod | IP              | Port |  Trip time | TR-UDP trip time\n", 
         str);
 
     str = ksnet_sformatMessage(str, "%s%s", str, div);
@@ -544,7 +544,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
             #endif
                         
             str = ksnet_sformatMessage(str, "%s"
-                "%3d %s%s%s\t %3d   %-15s  %5d   %7s %s  %s%s%s\n",
+                "%3d %s%-15s%s %3d   %-15s  %5d   %7s %s  %s%s%s\n",
                 str,
 
                 // Number
