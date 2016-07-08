@@ -264,8 +264,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
                     number_of_parameters++;
                 }
             }
-            descr_str = ksnet_sformatMessage(descr_str, "%s\n\n", descr_str);
-            if(number_of_parameters) printf(descr_str);
+            descr_str = ksnet_sformatMessage(descr_str, "%s\n", descr_str);
+            if(number_of_parameters) /*printf*/ puts(descr_str);
             free(descr_str);
         }
         opt_usage(argv[0], app_argc, app_argv);

@@ -1907,6 +1907,10 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
 #if TRUDV_VERSION == 2
 
+// Local static function definition
+static void trudp_send_queue_start_cb(process_send_queue_data *psd, uint64_t next_expected_time);
+
+
 #define kev ((ksnetEvMgrClass*)(td->user_data))
 
 /**
@@ -1960,8 +1964,8 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
         #endif
     }
 
-    return buf_len > 0 ? teo_sendto(kev, fd, buf, buf_len, flags, addr, addr_len) :
-                         buf_len;
+    return buf_len > 0 ? 
+        teo_sendto(kev, fd, buf, buf_len, flags, addr, addr_len) : buf_len;
 }
 
 /**
@@ -1989,6 +1993,101 @@ ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
 }
 
 /**
+ * Send queue processing initialize
+ * 
+ * @param td
+ */
+static void trudp_send_queue_init(trudpData *td) {
+    
+    if(!td->process_send_queue_data) {
+        
+        td->process_send_queue_data = malloc(sizeof(process_send_queue_data));
+        process_send_queue_data *p = (process_send_queue_data*)td->process_send_queue_data;
+        p->inited = 0;
+        p->loop = kev->ev_loop;
+        p->td = td;
+    }    
+}
+
+/**
+ * Send queue processing destroy
+ * 
+ * @param td
+ */
+static void trudp_send_queue_destroy(trudpData *td) {
+    
+    if(td->process_send_queue_data) {
+        process_send_queue_data *p = (process_send_queue_data *)td->process_send_queue_data;
+        if(ev_is_active(&p->process_send_queue_w)) {
+                ev_timer_stop(p->loop, &p->process_send_queue_w);
+        }
+        free(td->process_send_queue_data);
+        td->process_send_queue_data = NULL;
+    }
+}
+
+/**
+ * Send queue processing timer libev callback
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
+
+    process_send_queue_data *psd = (process_send_queue_data *) w->data;
+
+    // Process send queue
+//    debug("process send queue ... \n");
+    uint64_t next_expected_time;
+    trudpProcessSendQueue(psd->td, &next_expected_time);
+
+    // Start new process_send_queue timer
+    if(next_expected_time)
+        trudp_send_queue_start_cb(psd, next_expected_time);
+}
+
+/**
+ * Start send queue timer
+ *
+ * @param psd Pointer to process_send_queue_data
+ * @param next_expected_time
+ */
+static void trudp_send_queue_start_cb(process_send_queue_data *psd,
+        uint64_t next_expected_time) {
+
+    uint64_t tt, next_et = UINT64_MAX;
+
+    // If next_expected_time selected (non nil)
+    if(next_expected_time) {
+        uint64_t ts = trudpGetTimestampFull();
+        next_et = ts > next_expected_time ? ts - next_expected_time : 0;
+    }
+
+    // If next_expected_time (net) or GetSendQueueTimeout
+    if((tt = (next_et != UINT64_MAX) ? 
+        next_et : trudpGetSendQueueTimeout(psd->td)) != UINT32_MAX) {
+
+        double tt_d = tt / 1000000.0;
+
+        if(!psd->inited) {
+            ev_timer_init(&psd->process_send_queue_w, trudp_send_queue_process_cb, tt_d, 0.0);
+            psd->process_send_queue_w.data = (void*)psd;
+            psd->inited = 1;
+        }
+        else {
+            
+            if(ev_is_active(&psd->process_send_queue_w)) 
+                ev_timer_stop(psd->loop, &psd->process_send_queue_w);
+            
+            ev_timer_set(&psd->process_send_queue_w, tt_d, 0.0);
+        }
+
+        ev_timer_start(psd->loop, &psd->process_send_queue_w);
+    }
+}
+
+/**
  * TR-UDP event callback
  *
  * @param tcd_pointer
@@ -2004,6 +2103,39 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
     switch(event) {
         
+        // Initialize TR-UDP event
+        // @param td Pointer to trudpData
+        case INITIALIZE: {
+            
+            trudp_send_queue_init((trudpData *)tcd);
+                    
+        } break;
+        
+        // Destroy TR-UDP event
+        // @param td Pointer to trudpData
+        case DESTROY: {
+            
+            trudp_send_queue_destroy((trudpData *)tcd);
+            
+        } break;
+        
+        // Got ACK event
+        // @param tcd Pointer to trudpChannelData
+        // @param data Pointer to ACK packet
+        // @param data_length Length of data
+        // @param user_data NULL
+        case GOT_ACK: {
+
+//            char *key = trudpMakeKeyChannel(tcd);
+//            debug("got ACK id=%u at channel %s, %.3f(%.3f) ms\n",
+//                  trudpPacketGetId(data/*trudpPacketGetPacket(data)*/),
+//                  key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
+
+            trudpData *td = TD(tcd);
+            trudp_send_queue_start_cb(td->process_send_queue_data, 0);
+
+        } break;        
+        
         // Got DATA event
         // @param tcd Pointer to trudpChannelData
         // @param data Pointer to data
@@ -2013,7 +2145,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             
             // Process package
             trudpData *td = TD(tcd);
-            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
+            ksnCoreProcessPacket(kev->kc, data, data_length, 
+                    (__SOCKADDR_ARG) &tcd->remaddr);
             
         } break;
 
@@ -2026,6 +2159,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             trudpData *td = (trudpData *)tcd;
             trudpProcessReceive(td, data, data_length);
+            trudp_send_queue_start_cb(td->process_send_queue_data, 0);
 
         } break;
 
@@ -2038,7 +2172,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             // Process package
             trudpData *td = TD(tcd);
-            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
+            ksnCoreProcessPacket(kev->kc, data, data_length, 
+                    (__SOCKADDR_ARG) &tcd->remaddr);
 
         } break;
         
@@ -2049,7 +2184,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case PROCESS_SEND: {
 
             trudpData *td = TD(tcd);
-            teo_sendto(kev, td->fd, data, data_length, 0, (__CONST_SOCKADDR_ARG) &tcd->remaddr, tcd->addrlen);
+            teo_sendto(kev, td->fd, data, data_length, 0, 
+                    (__CONST_SOCKADDR_ARG) &tcd->remaddr, tcd->addrlen);
 
         } break;
     }
