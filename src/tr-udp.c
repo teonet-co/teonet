@@ -2090,6 +2090,54 @@ static void trudp_send_queue_start_cb(process_send_queue_data *psd,
 }
 
 /**
+ * Send ACK event to teonet event loop
+ * 
+ * @param ke
+ * @param id
+ * @param data
+ * @param data_len
+ * @param addr
+ */
+void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id, 
+        void *data, size_t data_length, __CONST_SOCKADDR_ARG addr) {
+    
+    // Send event to application
+    if(ke->event_cb != NULL) {
+
+        #if KSNET_CRYPT
+        if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(
+                data, data_length)) {
+
+            data = ksnDecryptPackage(ke->kc->kcr, data,
+                    data_length, &data_length);
+        }
+        #endif
+        ksnCorePacketData rd;
+        memset(&rd, 0, sizeof(rd));
+
+        // Remote peer address and port
+        rd.addr = strdup(inet_ntoa(
+                ((struct sockaddr_in*)addr)->sin_addr)); // IP to string
+        rd.port = ntohs(
+                ((struct sockaddr_in*)addr)->sin_port); // Port to integer
+
+        // Parse packet and check if it valid
+        if(ksnCoreParsePacket(data, data_length, &rd)) {
+
+            // Send event for CMD for Application level TR-UDP mode: 128...191
+            //if(rd.cmd >= 128 && rd.cmd < 192) {
+
+                ke->event_cb(ke, EV_K_RECEIVED_ACK,
+                    (void*)&rd, // Pointer to ksnCorePacketData
+                    sizeof(rd), // Length of ksnCorePacketData
+                    &id);       // Pointer to packet ID
+            //}
+        }
+        free(rd.addr);
+    }    
+}
+
+/**
  * TR-UDP event callback
  *
  * @param tcd_pointer
@@ -2244,12 +2292,18 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_ACK: {
 
-//            char *key = trudpMakeKeyChannel(tcd);
-//            debug("got ACK id=%u at channel %s, %.3f(%.3f) ms\n",
-//                  trudpPacketGetId(data/*trudpPacketGetPacket(data)*/),
-//                  key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
-
             trudpData *td = TD(tcd);
+            char *key = trudpMakeKeyChannel(tcd);
+            
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV, 
+                "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms\n",
+                trudpPacketGetId(data/*trudpPacketGetPacket(data)*/),
+                key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
+            #endif
+
+            trudp_send_event_ack_to_app(kev, trudpPacketGetId(data), data, 
+                    data_length, (__CONST_SOCKADDR_ARG) &tcd->remaddr);
             trudp_send_queue_start_cb(td->process_send_queue_data, 0);
 
         } break;        
