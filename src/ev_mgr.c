@@ -751,6 +751,11 @@ static void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
         ksnCorePacketData rd;
         rd.from = peer_name;
         rd.data = NULL;
+        //
+        rd.cmd = 0;
+        rd.addr = "";
+        rd.port = 0;
+        //
         cmd_disconnected_cb(ke->kc->kco, &rd);
 }
 
