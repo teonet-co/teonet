@@ -2125,16 +2125,48 @@ void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id,
         if(ksnCoreParsePacket(data, data_length, &rd)) {
 
             // Send event for CMD for Application level TR-UDP mode: 128...191
-            //if(rd.cmd >= 128 && rd.cmd < 192) {
+            if(rd.cmd >= 128 && rd.cmd < 192) {
 
                 ke->event_cb(ke, EV_K_RECEIVED_ACK,
                     (void*)&rd, // Pointer to ksnCorePacketData
                     sizeof(rd), // Length of ksnCorePacketData
                     &id);       // Pointer to packet ID
-            //}
+            }
         }
         free(rd.addr);
     }    
+}
+
+/**
+ * Process read data from UDP
+ * 
+ * @param td
+ * @param data
+ * @param data_length
+ */
+void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
+
+    struct sockaddr_in remaddr; // remote address
+    socklen_t addr_len = sizeof(remaddr);
+    
+    // Read data using teonet 
+    ssize_t recvlen = teo_recvfrom(kev, 
+            td->fd, data, data_length, 0 /* int flags*/,
+            (__SOCKADDR_ARG)&remaddr, &addr_len);
+
+    // Process received packet
+    if(recvlen > 0) {
+        size_t data_length;
+        trudpChannelData *tcd = trudpCheckRemoteAddr(td, &remaddr, addr_len, 0);
+        if(tcd == (void *)-1 ||
+           trudpProcessChannelReceivedPacket(tcd, data, recvlen, &data_length) == (void *)-1) {
+
+            if(tcd == (void *)-1) 
+                fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");
+            else
+                trudpSendEvent(tcd, PROCESS_RECEIVE_NO_TRUDP, data, recvlen, NULL);
+        }
+    }
 }
 
 /**
@@ -2296,14 +2328,16 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             char *key = trudpMakeKeyChannel(tcd);
             
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV, 
+            ksn_printf(kev, MODULE, DEBUG, 
                 "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms\n",
                 trudpPacketGetId(data/*trudpPacketGetPacket(data)*/),
                 key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
             #endif
 
-            trudp_send_event_ack_to_app(kev, trudpPacketGetId(data), data, 
-                    data_length, (__CONST_SOCKADDR_ARG) &tcd->remaddr);
+            // \todo look for data
+            trudp_send_event_ack_to_app(kev, trudpPacketGetId(data), trudpPacketGetData(data), 
+                trudpPacketGetDataLength(data) /*data_length*/, (__CONST_SOCKADDR_ARG) &tcd->remaddr);
+            
             trudp_send_queue_start_cb(td->process_send_queue_data, 0);
 
         } break;        
@@ -2317,6 +2351,25 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             
             // Process package
             trudpData *td = TD(tcd);
+            char *key = trudpMakeKeyChannel(tcd);
+            
+            char *data_ptr = memdup(data, data_length), *data_de = data_ptr;            
+            #if KSNET_CRYPT
+            if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(
+                    data_ptr, data_length)) {
+
+                size_t decrypt_len;
+                data_de = ksnDecryptPackage(kev->kc->kcr, data_de,
+                        data_length, &decrypt_len);
+            }
+            #endif
+            fprintf(stderr,
+                "Got DATA packet at channel %s, data: \"%s\"\n",
+                key, 
+                (char*)data_de + 1
+            );
+            free(data_ptr);
+            
             ksnCoreProcessPacket(kev->kc, data, data_length, 
                     (__SOCKADDR_ARG) &tcd->remaddr);
             
@@ -2330,7 +2383,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case PROCESS_RECEIVE: {
 
             trudpData *td = (trudpData *)tcd;
-            trudpProcessReceive(td, data, data_length);
+            trudp_process_receive(td, data, data_length);
 
         } break;
 
