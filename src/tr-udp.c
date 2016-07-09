@@ -2044,8 +2044,9 @@ static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
     int rv =trudpProcessSendQueue(psd->td, &next_expected_time);
 
     // Start new process_send_queue timer
-    if(rv && next_expected_time > 0)
-        trudp_send_queue_start_cb(psd, next_expected_time);
+    if(rv && next_expected_time > 0 && 
+        !ev_is_active(&psd->process_send_queue_w))
+            trudp_send_queue_start_cb(psd, next_expected_time);
 }
 
 /**
@@ -2157,6 +2158,18 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
         } break;        
         
+        // GOT_RESET event
+        // @param data NULL
+        // @param user_data NULL
+        case GOT_RESET: {
+
+            char *key = trudpMakeKeyChannel(tcd);
+            fprintf(stderr,
+              "Got TRU_RESET packet from channel %s\n",
+              key);
+
+        } break;
+        
         // SEND_RESET event
         // @param data Pointer to uint32_t id or NULL (data_size == 0)
         // @param user_data NULL
@@ -2186,6 +2199,41 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                       "High send packet number (%d) at channel %s\n",
                       id, key);
                 }
+
+        } break;
+        
+        // GOT_ACK_RESET event: got ACK to reset command
+        // @param data NULL
+        // @param user_data NULL
+        case GOT_ACK_RESET: {
+
+            char *key = trudpMakeKeyChannel(tcd);
+            fprintf(stderr, "Got ACK to RESET packet at channel %s\n", key);
+
+        } break;
+        
+        // GOT_ACK_PING event: got ACK to ping command
+        // @param data Pointer to ping data (usually it is a string)
+        // @param user_data NULL
+        case GOT_ACK_PING: {
+
+            char *key = trudpMakeKeyChannel(tcd);
+            fprintf(stderr,
+              "Got ACK to PING packet at channel %s, data: %s, %.3f(%.3f) ms\n",
+              key, (char*)data,
+              (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
+
+        } break;
+        
+        // GOT_PING event: got PING packet, data
+        // @param data Pointer to ping data (usually it is a string)
+        // @param user_data NULL
+        case GOT_PING: {
+
+            char *key = trudpMakeKeyChannel(tcd);
+            fprintf(stderr,
+              "Got PING packet at channel %s, data: %s\n",
+              key, (char*)data);
 
         } break;
         
