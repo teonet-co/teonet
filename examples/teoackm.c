@@ -19,7 +19,7 @@
 #include "ev_mgr.h"
 #include "tr-udp_stat.h"
 
-#define TACKM_VERSION "0.0.1"    
+#define TACKM_VERSION "0.0.2"    
 
 // This application commands
 #define CMD_U_STAT  "stat"
@@ -305,7 +305,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }
         break;
             
-        // Send when ACK received
+        // Teo ACK received use ksnetAllowAckEvent to allow this event
         case EV_K_RECEIVED_ACK: 
         {
             // ACK event
@@ -351,6 +351,9 @@ int main(int argc, char** argv) {
     
     // Set custom timer interval
     ksnetEvMgrSetCustomTimer(ke, 1.00);
+    
+    // Allow ACK event
+    ksnetAllowAckEvent(ke, 1);
     
     // Start teonet
     ksnetEvMgrRun(ke);

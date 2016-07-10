@@ -54,6 +54,10 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_debug_vv_f = 0;
     ksn_cfg->show_debug_vvv_f = 0;
     ksn_cfg->show_peers_f = 0;
+    ksn_cfg->show_tr_udp_f = 0;
+    
+    // Other flags
+    ksn_cfg->send_ack_event_f = 0;
 
     // This host
     ksn_cfg->port = atoi(KSNET_PORT_DEFAULT);
