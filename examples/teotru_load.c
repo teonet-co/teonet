@@ -159,7 +159,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             }
         } break;
         
-        // Teo ACK received
+        // Teo ACK received use allow_ack_event to allow this event
         case EV_K_RECEIVED_ACK: 
         {
             //printf("*");

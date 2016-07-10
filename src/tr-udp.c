@@ -1914,6 +1914,20 @@ static void trudp_send_queue_start_cb(process_send_queue_data *psd, uint64_t nex
 #define kev ((ksnetEvMgrClass*)(td->user_data))
 
 /**
+ * Allow or disallow send ACK event (EV_K_RECEIVED_ACK) to teonet event loop
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param allow Allow if true or disallow (set by default)
+ * 
+ * @return Previous state
+ */
+inline int ksnetAllowAckEvent(ksnetEvMgrClass* ke, int allow) {
+    int rv = ke->ksn_cfg.send_ack_event_f;
+    ke->ksn_cfg.send_ack_event_f = allow;
+    return rv;
+}
+
+/**
  * Send to peer through TR-UDP transport
  *
  * @param td Pointer to trudpData object
@@ -2319,8 +2333,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         
         // Got ACK event
         // @param tcd Pointer to trudpChannelData
-        // @param data Pointer to ACK packet
-        // @param data_length Length of data
+        // @param data Pointer to packet which ACK received 
+        // @param data_length Length of packet
         // @param user_data NULL
         case GOT_ACK: {
 
@@ -2328,15 +2342,17 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             char *key = trudpMakeKeyChannel(tcd);
             
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG, 
+            ksn_printf(kev, MODULE, DEBUG_VV, 
                 "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms\n",
                 trudpPacketGetId(data/*trudpPacketGetPacket(data)*/),
                 key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
             #endif
 
-            // \todo look for data
-            trudp_send_event_ack_to_app(kev, trudpPacketGetId(data), trudpPacketGetData(data), 
-                trudpPacketGetDataLength(data) /*data_length*/, (__CONST_SOCKADDR_ARG) &tcd->remaddr);
+            // Send event ACK to teonet event loop
+            if(kev->ksn_cfg.send_ack_event_f)
+                trudp_send_event_ack_to_app(kev, trudpPacketGetId(data), 
+                    trudpPacketGetData(data), trudpPacketGetDataLength(data),
+                    (__CONST_SOCKADDR_ARG) &tcd->remaddr);
             
             trudp_send_queue_start_cb(td->process_send_queue_data, 0);
 
@@ -2344,8 +2360,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         
         // Got DATA event
         // @param tcd Pointer to trudpChannelData
-        // @param data Pointer to data
-        // @param data_length Length of data
+        // @param data Pointer to packets data
+        // @param data_length Length of packets data
         // @param user_data NULL
         case GOT_DATA: {
             
@@ -2353,22 +2369,24 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             trudpData *td = TD(tcd);
             char *key = trudpMakeKeyChannel(tcd);
             
-            char *data_ptr = memdup(data, data_length), *data_de = data_ptr;            
-            #if KSNET_CRYPT
-            if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(
-                    data_ptr, data_length)) {
-
-                size_t decrypt_len;
-                data_de = ksnDecryptPackage(kev->kc->kcr, data_de,
-                        data_length, &decrypt_len);
-            }
-            #endif
-            fprintf(stderr,
-                "Got DATA packet at channel %s, data: \"%s\"\n",
-                key, 
-                (char*)data_de + 1
+//            char *data_ptr = memdup(data, data_length), *data_de = data_ptr;            
+//            #if KSNET_CRYPT
+//            if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(
+//                    data_ptr, data_length)) {
+//
+//                size_t decrypt_len;
+//                data_de = ksnDecryptPackage(kev->kc->kcr, data_de,
+//                        data_length, &decrypt_len);
+//            }
+//            #endif
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV,
+                "got %d bytes DATA packet from channel %s\n",
+                data_length,
+                key //,(char*)data_de + 1
             );
-            free(data_ptr);
+            #endif
+//            free(data_ptr);
             
             ksnCoreProcessPacket(kev->kc, data, data_length, 
                     (__SOCKADDR_ARG) &tcd->remaddr);
