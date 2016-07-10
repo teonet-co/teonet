@@ -40,7 +40,7 @@ typedef enum ksnet_printf_type {
     type == DEBUG_VVV ? "DEBUG_VVV" : \
     type == CONNECT ? "CONNECT" : "DISPLAY")
 
-#define _ksn_printf_format_(format) "%s %s:" _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " _ANSI_GREEN format _ANSI_NONE
+#define _ksn_printf_format_(format) "%s %s: " _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " _ANSI_GREEN format _ANSI_NONE
 
 #define ksn_printf(ke, module, type, format, ...) \
     ksnet_printf(&((ke)->ksn_cfg), type, \

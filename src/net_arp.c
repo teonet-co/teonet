@@ -596,7 +596,7 @@ int ksnetArpShow(ksnetArpClass *ka) {
     int num_line = 0;
     char *str = ksnetArpShowStr(ka);
 
-    ksnet_printf(&((ksnetEvMgrClass*)ka->ke)->ksn_cfg, DISPLAY_M, "%s", str);
+    ksnet_printf(&((ksnetEvMgrClass*)ka->ke)->ksn_cfg, DISPLAY_M, _ANSI_CLS"\033[0;0H""%s", str);
     num_line = calculate_lines(str);
 
     free(str);
