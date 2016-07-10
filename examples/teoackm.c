@@ -165,6 +165,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 ksnTRUDPreset(ke->kc->ku, 
                                         (__CONST_SOCKADDR_ARG) &remaddr, 0);
                                 ksnTRUDPstatReset(ke->kc->ku);
+                                #else
+                                trudpChannelData *tcd;
+                                if((tcd = trudpGetChannel(
+                                    ke->kc->ku, (__CONST_SOCKADDR_ARG)&remaddr, 0)) != (void*)-1)
+                                        trudpSendResetChannel(tcd);
                                 #endif
                             }
                         }
