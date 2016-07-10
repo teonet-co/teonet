@@ -532,9 +532,23 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                     ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
             
             #elif TRUDV_VERSION == 2
-            // \todo Set real values
-            char *tcp_last_triptime = strdup(null_str);
-            char *tcp_triptime_last10_max = strdup(null_str);
+            // Get TR-UDP by address and port
+            trudpChannelData *tcd = trudpGetChannelAddr(
+                    ((ksnetEvMgrClass*)ka->ke)->kc->ku, 
+                    data->addr, data->port, 0
+            );
+            // Set Last and Middle trip time
+            char *tcp_last_triptime, *tcp_triptime_last10_max; 
+            if(tcd != (void*)-1) {
+                tcp_last_triptime = ksnet_formatMessage("%7.3f / ", 
+                    tcd->triptime/1000.0);
+                tcp_triptime_last10_max = ksnet_formatMessage("%.3f ms", 
+                    tcd->triptimeMiddle/1000.0);
+            }
+            else {   
+                tcp_last_triptime = strdup(null_str);
+                tcp_triptime_last10_max = strdup(null_str);
+            }
             #endif
                         
             str = ksnet_sformatMessage(str, "%s"

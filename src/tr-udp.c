@@ -1959,7 +1959,7 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     if(CMD_TRUDP_CHECK(cmd)) {
 
         trudpChannelData *tcd = trudpGetChannel(td, addr, 0);
-        if(tcd != (void*)-1)  trudpSendData(tcd, (void *)buf, buf_len);
+        if(tcd != (void*)-1) trudpSendData(tcd, (void *)buf, buf_len);
         buf_len = 0;
     }
 
