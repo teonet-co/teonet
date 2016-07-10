@@ -56,6 +56,9 @@ typedef struct ksnet_cfg {
         hot_keys_f,    ///< Show hotkeys when press h
         crypt_f,      ///< Encrypt/Decrypt packets
         vpn_connect_f,  ///< Start VPN flag
+        show_tr_udp_f, ///< Show TR-UDP statistic at start up 
+        send_ack_event_f, ///< Send TR-UDP ACK event (EV_K_RECEIVED_ACK) to the teonet event loop
+        sig_segv_f; ///< SIGSEGV processing
         show_tr_udp_f, ///< Show TR-UDP statistic at start up   
         sig_segv_f, ///< SIGSEGV processing
         block_cli_input_f; ///< Block teonet CLI input (for using in GUI application)
