@@ -1958,7 +1958,8 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     // TR-UDP: Check commands array
     if(CMD_TRUDP_CHECK(cmd)) {
 
-        trudpChannelData *tcd = trudpGetChannel(td, addr, 0);
+        //trudpChannelData *tcd = trudpGetChannel(td, addr, 0); 
+        trudpChannelData *tcd = trudpCheckRemoteAddr(td, addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
         if(tcd != (void*)-1) trudpSendData(tcd, (void *)buf, buf_len);
         buf_len = 0;
     }
@@ -2171,7 +2172,7 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
     // Process received packet
     if(recvlen > 0) {
         size_t data_length;
-        trudpChannelData *tcd = trudpCheckRemoteAddr(td, &remaddr, addr_len, 0);
+        trudpChannelData *tcd = trudpCheckRemoteAddr(td, &remaddr, 0);
         if(tcd == (void *)-1 ||
            trudpProcessChannelReceivedPacket(tcd, data, recvlen, &data_length) == (void *)-1) {
 
