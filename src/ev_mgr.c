@@ -850,7 +850,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     // Idle count startup (first time run)
     if(!kev->idle_count) {
         //! \todo: open_local_port(kev);
-        #if TRUDV_VERSION == 1
+        #if TRUDP_VERSION == 1
         // Set statistic start time
         if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
         #endif

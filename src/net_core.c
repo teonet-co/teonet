@@ -23,9 +23,9 @@ typedef int socklen_t;
 #include "ev_mgr.h"
 #include "net_split.h"
 #include "net_multi.h"
-#include "tr-udp.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
+#include "tr-udp.h"
 #include "tr-udp_.h"
 
 // Constants
@@ -128,9 +128,9 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     }
     
     // TR-UDP initialize
-    #if TRUDV_VERSION == 1
+    #if TRUDP_VERSION == 1
     kc->ku = ksnTRUDPinit(kc);
-    #elif TRUDV_VERSION == 2
+    #elif TRUDP_VERSION == 2
     kc->ku = trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
     #endif
 
@@ -175,9 +175,9 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        #if TRUDV_VERSION == 1
+        #if TRUDP_VERSION == 1
         ksnTRUDPDestroy(kc->ku);
-        #elif TRUDV_VERSION == 2         
+        #elif TRUDP_VERSION == 2         
         trudpDestroy(kc->ku);
         #endif        
         #if KSNET_CRYPT

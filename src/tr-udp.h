@@ -10,9 +10,9 @@
 #ifndef NET_TR_UDP_H
 #define	NET_TR_UDP_H
 
-#define TRUDV_VERSION 2
+#define TRUDP_VERSION 2
 
-#if TRUDV_VERSION == 1
+#if TRUDP_VERSION == 1
 
 #ifdef HAVE_MINGW
 #define WIN32_LEAN_AND_MEAN
@@ -96,7 +96,9 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len);
 
 #endif
 
-#if TRUDV_VERSION == 2
+#if TRUDP_VERSION == 2
+
+#include "trudp.h"
 
 #define make_addr(addr_str, port, addr, addrlen) trudpUdpMakeAddr(addr_str, port, addr, addrlen)
 
@@ -104,11 +106,11 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len);
 extern "C" {
 #endif
 
-ssize_t ksnTRUDPrecvfrom(void *td, int fd, void *buffer,
+ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr,
                          socklen_t *addr_len);
 
-ssize_t ksnTRUDPsendto(void *td, int resend_fl, uint32_t id, int attempt,
+ssize_t ksnTRUDPsendto(trudpData *td, int resend_fl, uint32_t id, int attempt,
         int cmd, int fd, const void *buf, size_t buf_len, int flags,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 

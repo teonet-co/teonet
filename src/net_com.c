@@ -15,7 +15,7 @@
 #include "net_recon.h"
 #include "utils/rlutil.h"
 #include "modules/subscribe.h"
-#if TRUDV_VERSION == 2
+#if TRUDP_VERSION == 2
 #include "trudp_stat.h"
 #endif
 
@@ -759,9 +759,9 @@ static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Get TR-UDP info
     size_t data_out_len;    
-    #if TRUDV_VERSION == 1
+    #if TRUDP_VERSION == 1
     void *data_out = ksnTRUDPstatGet(ke->kc->ku, data_type, &data_out_len);
-    #elif TRUDV_VERSION == 2
+    #elif TRUDP_VERSION == 2
     void *data_out = trudpStatGet(ke->kc->ku, data_type, &data_out_len);
     #endif
     

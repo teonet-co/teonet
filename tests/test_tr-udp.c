@@ -16,7 +16,7 @@
 #include "ev_mgr.h"
 #include "tr-udp_.h"
 
-#if TRUDV_VERSION == 1
+#if TRUDP_VERSION == 1
 
 extern CU_pSuite pSuite;
 

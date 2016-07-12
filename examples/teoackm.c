@@ -159,7 +159,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             if(!make_addr(arp->addr, arp->port, 
                                     (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
-                                #if TRUDV_VERSION == 1
+                                #if TRUDP_VERSION == 1
                                 ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, 
                                         (__CONST_SOCKADDR_ARG) &remaddr);
                                 ksnTRUDPreset(ke->kc->ku, 
