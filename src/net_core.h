@@ -30,6 +30,9 @@
 #include "crypt.h"
 #endif
 #include "tr-udp.h"
+#if TRUDV_VERSION == 2
+#include "trudp.h"
+#endif
 
 // External constants
 extern const char *localhost;
