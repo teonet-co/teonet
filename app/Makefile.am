@@ -8,6 +8,7 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/libtrudp/src \
+	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev
 	
 ## Debug info

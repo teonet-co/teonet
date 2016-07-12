@@ -98,32 +98,17 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len);
 
 #if TRUDV_VERSION == 2
 
-#include "trudp.h"
-#include "trudp_stat.h"
-
 #define make_addr(addr_str, port, addr, addrlen) trudpUdpMakeAddr(addr_str, port, addr, addrlen)
-
-/**
- * Send queue processing data definition
- */
-typedef struct process_send_queue_data {
-
-    int inited;
-    trudpData *td;
-    struct ev_loop *loop;
-    ev_timer process_send_queue_w;
-
-} process_send_queue_data;
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
+ssize_t ksnTRUDPrecvfrom(void *td, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr,
                          socklen_t *addr_len);
 
-ssize_t ksnTRUDPsendto(trudpData *td, int resend_fl, uint32_t id, int attempt,
+ssize_t ksnTRUDPsendto(void *td, int resend_fl, uint32_t id, int attempt,
         int cmd, int fd, const void *buf, size_t buf_len, int flags,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 
