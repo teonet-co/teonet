@@ -33,8 +33,8 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/libtrudp/src \
-	 -I/usr/include/libev \
 	 -I../app/embedded/jsmn \
+	 -I/usr/include/libev \
 	 -DEV_USE_EPOLL=1 \
 	 -fno-strict-aliasing
 
