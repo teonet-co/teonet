@@ -15,7 +15,9 @@
 #include "net_recon.h"
 #include "utils/rlutil.h"
 #include "modules/subscribe.h"
-#include "tr-udp.h"
+#if TRUDV_VERSION == 2
+#include "trudp_stat.h"
+#endif
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
