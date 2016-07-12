@@ -23,7 +23,7 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
             int fd, const void *buffer, size_t buffer_len, int flags,
             __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 
-#if TRUDV_VERSION == 1
+#if TRUDP_VERSION == 1
 
 #include "tr-udp_stat.h"
 #include "config/conf.h"
@@ -1905,7 +1905,7 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
 #endif
 
-#if TRUDV_VERSION == 2
+#if TRUDP_VERSION == 2
 
 /**
  * Send queue processing data definition
@@ -1956,7 +1956,7 @@ inline int ksnetAllowAckEvent(ksnetEvMgrClass* ke, int allow) {
  *
  * @return Number of bytes sent to UDP
  */
-ssize_t ksnTRUDPsendto(void *td, int resend_flg, uint32_t id,
+ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
         int attempt, int cmd, int fd, const void *buf, size_t buf_len,
         int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
@@ -2010,7 +2010,7 @@ ssize_t ksnTRUDPsendto(void *td, int resend_flg, uint32_t id,
  *         function. In other case there is value returned by UDP recvfrom
  *         function and the buffer contain received data
  */
-ssize_t ksnTRUDPrecvfrom(void *td, int fd, void *buffer,
+ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr,
                          socklen_t *addr_len) {
 

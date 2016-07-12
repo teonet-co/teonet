@@ -8,4 +8,4 @@
 
 [submodule "embedded/libtrudp"]
 	path = embedded/libtrudp
-	url = git@gitlab.ksproject.org:teonet/trudp.git
+	url = https://gitlab.ksproject.org/teonet/trudp.git
