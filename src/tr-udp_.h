@@ -11,7 +11,7 @@
 #ifndef NET_TR_UDP__H
 #define	NET_TR_UDP__H
 
-#if TRUDV_VERSION == 1
+#if TRUDP_VERSION == 1
 
 #include "config/conf.h"
 
@@ -258,7 +258,7 @@ void ksnTRUDPresetSend(ksnTRUDPClass *tu, int fd, __CONST_SOCKADDR_ARG addr);
 
 #endif
 
-#if TRUDV_VERSION == 2
+#if TRUDP_VERSION == 2
 #endif
 
 #endif	/* NET_TR_UDP__H */

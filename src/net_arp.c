@@ -153,10 +153,10 @@ ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
     if(arp != (void*)-1) {
         
         // Remove peer from TR-UDP module
-        #if TRUDV_VERSION == 1
+        #if TRUDP_VERSION == 1
         ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 1);
-        #elif TRUDV_VERSION == 2
+        #elif TRUDP_VERSION == 2
         trudpDestroyChannelAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 0);               
         #endif
@@ -188,9 +188,9 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
     ke->ksn_cfg.r_host_name[0] = '\0';
     ka->map = pblMapNewHashMap();    
     ksnetArpAddHost(ka);
-    #if TRUDV_VERSION == 1
+    #if TRUDP_VERSION == 1
     ksnTRUDPremoveAll(ke->kc->ku);
-    #elif TRUDV_VERSION == 2
+    #elif TRUDP_VERSION == 2
     trudpDestroyChannelAll(ke->kc->ku);
     #endif
 }
@@ -512,7 +512,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                     data->last_triptime);
             
             // Get TR-UDP ip map data by key
-            #if TRUDV_VERSION == 1
+            #if TRUDP_VERSION == 1
             size_t val_len;
             size_t key_len = KSN_BUFFER_SM_SIZE;
             char key[key_len];
@@ -531,7 +531,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                 ksnet_formatMessage("%.3f ms", 
                     ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
             
-            #elif TRUDV_VERSION == 2
+            #elif TRUDP_VERSION == 2
             // Get TR-UDP by address and port
             trudpChannelData *tcd = trudpGetChannelAddr(
                     ((ksnetEvMgrClass*)ka->ke)->kc->ku, 
