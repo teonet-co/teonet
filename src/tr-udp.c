@@ -1907,11 +1907,23 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
 #if TRUDV_VERSION == 2
 
+/**
+ * Send queue processing data definition
+ */
+typedef struct process_send_queue_data {
+
+    int inited;
+    trudpData *td;
+    struct ev_loop *loop;
+    ev_timer process_send_queue_w;
+
+} process_send_queue_data;
+
 // Local static function definition
 static void trudp_send_queue_start_cb(process_send_queue_data *psd, uint64_t next_expected_time);
 
 
-#define kev ((ksnetEvMgrClass*)(td->user_data))
+#define kev ((ksnetEvMgrClass*)(((trudpData *)td)->user_data))
 
 /**
  * Allow or disallow send ACK event (EV_K_RECEIVED_ACK) to teonet event loop
@@ -1944,7 +1956,7 @@ inline int ksnetAllowAckEvent(ksnetEvMgrClass* ke, int allow) {
  *
  * @return Number of bytes sent to UDP
  */
-ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
+ssize_t ksnTRUDPsendto(void *td, int resend_flg, uint32_t id,
         int attempt, int cmd, int fd, const void *buf, size_t buf_len,
         int flags, __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
 
@@ -1959,7 +1971,7 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     if(CMD_TRUDP_CHECK(cmd)) {
 
         //trudpChannelData *tcd = trudpGetChannel(td, addr, 0); 
-        trudpChannelData *tcd = trudpCheckRemoteAddr(td, addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
+        trudpChannelData *tcd = trudpCheckRemoteAddr(TD_P(td), (struct sockaddr_in *)addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
         if(tcd != (void*)-1) trudpSendData(tcd, (void *)buf, buf_len);
         buf_len = 0;
     }
@@ -1998,7 +2010,7 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
  *         function. In other case there is value returned by UDP recvfrom
  *         function and the buffer contain received data
  */
-ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
+ssize_t ksnTRUDPrecvfrom(void *td, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr,
                          socklen_t *addr_len) {
 

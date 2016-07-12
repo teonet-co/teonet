@@ -30,7 +30,7 @@ void test_01(ksnetEvMgrClass *ke, char *server_peer) {
     const size_t NUM_RECORDS = 1024;
 
     printf("\nTest 01: ");
-    printf("Send %d records of %d bytes each messages ... ", NUM_RECORDS, BUF_LEN);
+    printf("Send %d records of %d bytes each messages ... ", (int)NUM_RECORDS, (int)BUF_LEN);
     fflush(stdout);
     
     ksnCoreSendCmdto(ke->kc, server_peer, CMD_USER + 1, "Test 01", 8);
