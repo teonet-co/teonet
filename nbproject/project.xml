@@ -31,6 +31,7 @@
             <word>app</word>
             <word>atoi</word>
             <word>auth</word>
+            <word>authasst</word>
             <word>autoconf</word>
             <word>autogen</word>
             <word>autoreconf</word>
@@ -52,9 +53,11 @@
             <word>Hotkeys</word>
             <word>http</word>
             <word>https</word>
+            <word>hws</word>
             <word>init</word>
             <word>internet</word>
             <word>ip</word>
+            <word>js</word>
             <word>jsmt</word>
             <word>json</word>
             <word>kirill</word>
@@ -100,7 +103,11 @@
             <word>teodsp</word>
             <word>teogo</word>
             <word>teogw</word>
+            <word>teohws</word>
+            <word>teomm</word>
             <word>teonet</word>
+            <word>teonode</word>
+            <word>teoroom</word>
             <word>teostream</word>
             <word>teotproxy</word>
             <word>teotru</word>
