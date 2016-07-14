@@ -2063,16 +2063,14 @@ static void trudp_send_queue_destroy(trudpData *td) {
 static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
 
     process_send_queue_data *psd = (process_send_queue_data *) w->data;
-    //ev_timer_stop(psd->loop, &psd->process_send_queue_w);
 
     // Process send queue
-//    debug("process send queue ... \n");
     uint64_t next_expected_time;
-    int rv =trudpProcessSendQueue(psd->td, &next_expected_time);
+    int rv = trudpProcessSendQueue(psd->td, &next_expected_time);
 
     // Start new process_send_queue timer
     if(rv && next_expected_time > 0 &&
-        !ev_is_active(&psd->process_send_queue_w))
+        !ev_is_active(&w))
             trudp_send_queue_start_cb(psd, next_expected_time);
 }
 
