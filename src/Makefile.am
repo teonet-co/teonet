@@ -162,7 +162,9 @@ libteonet_la_SOURCES = \
     utils/utils.c \
     utils/base64.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
-    ../app/embedded/jsmn/jsmn.c
+    ../app/embedded/jsmn/jsmn.c \
+    ../embedded/libtrudp/src/libtrudp.la
+    
 
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default
