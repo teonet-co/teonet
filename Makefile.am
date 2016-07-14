@@ -51,12 +51,11 @@ uninstall-local:
 	-rm -r $(teonetdocdir)
 	-rm -r $(teonetsysconfdir)
 
-run:	src/app/teovpn
-	src/app/teovpn just-make --port=9057
+run:	app/teovpn
+	app/teovpn just-make --port=9057
 
-build-tests: tests/test_teonet
-	
-build-tests: tests/test_teonet
+build-tests: 
+	tests/test_teonet
 	
 test:	tests/test_teonet
 	tests/test_teonet
