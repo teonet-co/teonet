@@ -2062,15 +2062,15 @@ static void trudp_send_queue_destroy(trudpData *td) {
 static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
 
     process_send_queue_data *psd = (process_send_queue_data *) w->data;
-
+    ev_timer_stop(psd->loop, w);
+    
     // Process send queue
     uint64_t next_expected_time;
     int rv = trudpProcessSendQueue(psd->td, &next_expected_time);
 
     // Start new process_send_queue timer
-    if(rv && next_expected_time > 0 &&
-        !ev_is_active(&w))
-            trudp_send_queue_start_cb(psd, next_expected_time);
+//    if(rv && next_expected_time > 0)
+//        trudp_send_queue_start_cb(psd, next_expected_time);
 }
 
 /**
@@ -2082,17 +2082,16 @@ static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
 static void trudp_send_queue_start_cb(process_send_queue_data *psd,
         uint64_t next_expected_time) {
 
-    uint64_t tt, next_et = UINT64_MAX;
+    uint64_t tt, next_et = UINT64_MAX, ts = trudpGetTimestampFull();
 
     // If next_expected_time selected (non nil)
     if(next_expected_time) {
-        uint64_t ts = trudpGetTimestampFull();
-        next_et = ts > next_expected_time ? ts - next_expected_time : 0;
+        next_et = next_expected_time > ts ? next_expected_time - ts : 0;
     }
 
     // If next_expected_time (net) or GetSendQueueTimeout
     if((tt = (next_et != UINT64_MAX) ?
-        next_et : trudpGetSendQueueTimeout(psd->td)) != UINT32_MAX) {
+        next_et : trudpGetSendQueueTimeout(psd->td, ts)) != UINT32_MAX) {
 
         double tt_d = tt / 1000000.0;
 
