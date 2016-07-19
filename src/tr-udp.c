@@ -2066,7 +2066,7 @@ static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
     
     // Process send queue
     uint64_t next_expected_time;
-    int rv = trudpProcessSendQueue(psd->td, &next_expected_time);
+    /*int rv =*/ trudpProcessSendQueue(psd->td, &next_expected_time);
 
     // Start new process_send_queue timer
 //    if(rv && next_expected_time > 0)
