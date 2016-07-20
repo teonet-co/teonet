@@ -78,6 +78,7 @@
             <word>namespace</word>
             <word>nonblock</word>
             <word>org</word>
+            <word>outrunning</word>
             <word>pc</word>
             <word>perror</word>
             <word>po</word>
@@ -90,6 +91,7 @@
             <word>sockaddr</word>
             <word>src</word>
             <word>SSL</word>
+            <word>std</word>
             <word>str</word>
             <word>strndup</word>
             <word>strtol</word>
