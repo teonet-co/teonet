@@ -40,6 +40,7 @@
             <word>changelog</word>
             <word>cmd</word>
             <word>config</word>
+            <word>const</word>
             <word>cque</word>
             <word>ctrl</word>
             <word>deinitialize</word>
@@ -127,6 +128,7 @@
             <word>unsubscribe</word>
             <word>unsubscribed</word>
             <word>usleep</word>
+            <word>utils</word>
             <word>uuid</word>
             <word>ver</word>
             <word>vpn</word>
