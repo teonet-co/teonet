@@ -1,4 +1,3 @@
-
 # Build Teonet library from sources
 
 ## Clone git repository  to get code
@@ -52,9 +51,21 @@ MYSQL - MariaDB or MySQL connector (used in teoweb application)
 
 #### Add repository
 
+Add repository key:  
+
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
+    
+Add repository:    
+
     sudo apt-get install -y software-properties-common
     sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
+    
+or add the following line to your /etc/apt/sources.list:  
+
+    deb http://repo.ksproject.org/ubuntu/ teonet main
+    
+Update repositories database:    
+    
     sudo apt-get update
 
 #### Install
