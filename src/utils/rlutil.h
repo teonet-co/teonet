@@ -518,7 +518,10 @@ static RLUTIL_INLINE void msleep(unsigned int ms) {
 #else
 	// usleep argument must be under 1 000 000
 	if (ms > 1000) sleep(ms/1000000);
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 	usleep((ms % 1000000) * 1000);
+        #pragma GCC diagnostic pop
 #endif
 }
 
