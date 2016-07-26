@@ -32,9 +32,11 @@ AM_CFLAGS = \
 	 $(DRELEASE_TEONET) \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
-	 -I/usr/include/libev \	
+	 -I../embedded/libtrudp/src \
 	 -I../app/embedded/jsmn \
-	 -DEV_USE_EPOLL=1
+	 -I/usr/include/libev \
+	 -DEV_USE_EPOLL=1 \
+	 -fno-strict-aliasing
 
 if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD
@@ -55,7 +57,7 @@ AM_CXXFLAGS = \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -lcrypt -ltuntap ../embedded/libpbl/src/libpbl.a
+LIBS = -lev -lcrypt -ltuntap ../embedded/libpbl/src/libpbl.a ../embedded/libtrudp/src/.libs/libtrudp.a
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -86,7 +88,7 @@ DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 #nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
 
-#teonetinclude_HEADERS = 
+#teonetinclude_HEADERS =
 nobase_teonetinclude_HEADERS = \
     crypt.h \
     daemon.h \
@@ -160,7 +162,9 @@ libteonet_la_SOURCES = \
     utils/utils.c \
     utils/base64.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
-    ../app/embedded/jsmn/jsmn.c
+    ../app/embedded/jsmn/jsmn.c \
+    ../embedded/libtrudp/src/libtrudp.la
+    
 
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default
@@ -178,7 +182,7 @@ endif
 #lexer.c: lexer.l
 
 libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBRARY_MAJOR_VERSION):0:0
-#49:0:0 
+#49:0:0
 
 uninstall-local:
 	-rm -r $(teonetincludedir)

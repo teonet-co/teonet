@@ -219,14 +219,15 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     
     // Sent data to UDP
     else {
+        sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
+        
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, 
-            ">> send %d bytes by UDP, fd %d, to (%s:%d)\n", 
-            buffer_len, fd, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+            ">> send %d (of %d) bytes by UDP, fd %d, to (%s:%d)\n", 
+            sendlen, buffer_len, fd, 
+            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
             ntohs(((struct sockaddr_in *) addr)->sin_port));
         #endif 
-
-        sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
     }
     
     return sendlen;

@@ -740,6 +740,45 @@ void open_local_port(ksnetEvMgrClass *ke) {
 }
 
 /**
+ * Remove peer by name
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param peer_name
+ */
+static void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
+    
+        // Disconnect dead peer from this host
+        ksnCorePacketData rd;
+        rd.from = peer_name;
+        rd.data = NULL;
+        //
+        rd.cmd = 0;
+        rd.addr = "";
+        rd.port = 0;
+        //
+        cmd_disconnected_cb(ke->kc->kco, &rd);
+}
+
+/**
+ * Remove peer by address
+ * 
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param addr
+ * @return 
+ */
+int remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr) {
+    
+    int rv = 0;
+    char *peer_name;                
+    if(ksnetArpFindByAddr(ke->kc->ka, (__CONST_SOCKADDR_ARG) addr, &peer_name)) {
+        remove_peer(ke, peer_name);
+        rv = 1;
+    }
+
+    return rv;
+}
+
+/**
  * Check connected peers, send trip time request and disconnect peer at timeout
  *
  * @param ka
@@ -765,10 +804,11 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     else if(ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
         // Disconnect dead peer from this host
-        ksnCorePacketData rd;
-        rd.from = peer_name;
-        rd.data = NULL;
-        cmd_disconnected_cb(kev->kc->kco, &rd);
+//        ksnCorePacketData rd;
+//        rd.from = peer_name;
+//        rd.data = NULL;
+//        cmd_disconnected_cb(kev->kc->kco, &rd);
+        remove_peer(kev, peer_name);
         
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL,  arp_data, NULL);
@@ -807,8 +847,10 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     // Idle count startup (first time run)
     if(!kev->idle_count) {
         //! \todo: open_local_port(kev);
+        #if TRUDP_VERSION == 1
         // Set statistic start time
         if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
+        #endif
         // Connect to R-Host
         connect_r_host_cb(kev);
         // Send event to application

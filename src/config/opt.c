@@ -72,7 +72,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "show_debug_vvv", no_argument,       &conf->show_debug_vvv_f, 1 },
         { "show_connect",   no_argument,       &conf->show_connect_f, 1 },
         { "show_peers",     no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
-        { "show_TR-UDP",    no_argument,       &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
+        { "show_trudp",     no_argument,       &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
         #if M_ENAMBE_VPN
         { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
         { "vpn_ip",         required_argument, 0, 'i' },
@@ -264,8 +264,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
                     number_of_parameters++;
                 }
             }
-            descr_str = ksnet_sformatMessage(descr_str, "%s\n\n", descr_str);
-            if(number_of_parameters) printf(descr_str);
+            descr_str = ksnet_sformatMessage(descr_str, "%s\n", descr_str);
+            if(number_of_parameters) /*printf*/ puts(descr_str);
             free(descr_str);
         }
         opt_usage(argv[0], app_argc, app_argv);
@@ -369,7 +369,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     "       --show_connect       Show connection messages\n"
     "       --show_peers         Show peers screen after connection\n"
-    "       --show_TR-UDP        Show TR-UDP statistic after connection\n"
+    "       --show_trudp         Show TR-UDP statistic after connection\n"
     #if M_ENAMBE_VPN
     "       --vpn_start          Start VPN\n"
     "       --vpn_ip             VPN IP\n"

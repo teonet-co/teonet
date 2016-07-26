@@ -23,9 +23,9 @@ typedef int socklen_t;
 #include "ev_mgr.h"
 #include "net_split.h"
 #include "net_multi.h"
-#include "tr-udp.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
+#include "tr-udp.h"
 #include "tr-udp_.h"
 
 // Constants
@@ -128,7 +128,11 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     }
     
     // TR-UDP initialize
+    #if TRUDP_VERSION == 1
     kc->ku = ksnTRUDPinit(kc);
+    #elif TRUDP_VERSION == 2
+    kc->ku = trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
+    #endif
 
     // Change this host port number to port changed in ksnCoreBind function
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
@@ -171,7 +175,11 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
+        #if TRUDP_VERSION == 1
         ksnTRUDPDestroy(kc->ku);
+        #elif TRUDP_VERSION == 2         
+        trudpDestroy(kc->ku);
+        #endif        
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif
@@ -623,8 +631,8 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
     // Receive data
     recvlen = ksn_recvfrom(ke->kc->ku, 
-                revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
-                0, (struct sockaddr *)&remaddr, &addrlen);
+        revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
+        0, (struct sockaddr *)&remaddr, &addrlen);
 
     // Process package
     ksnCoreProcessPacket(kc, buf, recvlen, (__SOCKADDR_ARG) &remaddr);
