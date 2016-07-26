@@ -17,7 +17,7 @@
 
 #include "ev_mgr.h"
 
-#define TACK_VERSION "0.0.1"    
+#define TACK_VERSION "0.0.2"    
 
 /**
  * Teonet Events callback
@@ -60,7 +60,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }
         break;            
             
-        // Send when ACK received
+        // Teo ACK received use ksnetAllowAckEvent to allow this event
         case EV_K_RECEIVED_ACK: 
         {
             // Got ACK event
@@ -105,6 +105,9 @@ int main(int argc, char** argv) {
     
     // Set custom timer interval
     ksnetEvMgrSetCustomTimer(ke, 1.00);
+    
+    // Allow ACK event
+    ksnetAllowAckEvent(ke, 1);
     
     // Start teonet
     ksnetEvMgrRun(ke);

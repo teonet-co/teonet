@@ -51,7 +51,7 @@ typedef struct monitor_timer_data {
 typedef struct tr_udp_timer_data {
 
     struct ev_loop *loop;
-    ksnCoreClass *kn;
+    ksnCoreClass *kc;
     int num_lines;
     ev_timer tw;
     ev_idle iw;

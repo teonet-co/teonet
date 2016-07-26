@@ -6,11 +6,17 @@
  *
  * Created on August 11, 2015, 2:34 PM
  */
+
+#include "tr-udp.h"
+#include "tr-udp_.h"
+#include "tr-udp_stat.h"
+
+#if TRUDP_VERSION == 1
+
 #include <stdlib.h>
 #include <string.h>
 
 #include "ev_mgr.h"
-#include "tr-udp_.h"
 #include "tr-udp_stat.h"
 #include "utils/utils.h"
 
@@ -636,3 +642,33 @@ inline void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_AR
     ip_map_data *ip_map_d = ksnTRUDPipMapData(tu, addr, NULL, 0);
     ip_map_d->stat.packets_receive_dropped++;
 }
+
+#elif TRUDP_VERSION == 2
+
+#include <stdlib.h>
+
+/**
+ * Show TR-UDP statistics on terminal
+ *
+ * Print string with statistics on terminal.
+ *
+ * @param tu
+ *
+ * @return Number if line in statistics text
+ */
+inline int ksnTRUDPstatShow(trudpData *tu) {
+
+    int num_line = 0;
+    char *str = ksnTRUDPstatShowStr(tu);
+    
+    cls();
+    printf("%s", str);
+
+    num_line = calculate_lines(str);
+
+    free(str);
+
+    return num_line;
+}
+
+#endif

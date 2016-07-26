@@ -1,7 +1,7 @@
-/** 
+/**
  * File:   tr-udp.h
  * Author: Kirill Scherba <kirill@scherba.ru>
- * 
+ *
  * Teonet Real time communications over UDP protocol (TR-UDP)
  *
  * Created on August 4, 2015, 12:16 AM
@@ -9,6 +9,10 @@
 
 #ifndef NET_TR_UDP_H
 #define	NET_TR_UDP_H
+
+#define TRUDP_VERSION 2
+
+#if TRUDP_VERSION == 1
 
 #ifdef HAVE_MINGW
 #define WIN32_LEAN_AND_MEAN
@@ -26,32 +30,32 @@ typedef int socklen_t;
 /**
  * registerProcessPacket callback function type definition
  */
-typedef void (*ksnTRUDPprocessPacketCb) (void *kc, void *buf, size_t recvlen, 
+typedef void (*ksnTRUDPprocessPacketCb) (void *kc, void *buf, size_t recvlen,
               __SOCKADDR_ARG remaddr);
 
 /**
  * TR-UDP Statistic data
  */
 typedef struct tr_udp_stat {
-    
+
     struct send_list {
         size_t size_max;
         size_t size_current;
         size_t attempt;
     } send_list;
-    
+
     struct receive_heap {
         size_t size_max;
         size_t size_current;
     } receive_heap;
-    
+
 } tr_udp_stat;
 
 /**
  * Teonet TR-UDP class data
  */
 typedef struct ksnTRUDPClass {
-    
+
     void *kc; ///< Pointer to KSNet core class object
     PblMap *ip_map; ///< IP:port map
     tr_udp_stat stat; ///< TR-UDP Common statistic data
@@ -73,8 +77,8 @@ void ksnTRUDPDestroy(ksnTRUDPClass *tu);
 
 void ksnTRUDPremoveAll(ksnTRUDPClass *tu);
 
-ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_fl, uint32_t id, int attempt, 
-        int cmd, int fd, const void *buf, size_t buf_len, int flags, 
+ssize_t ksnTRUDPsendto(ksnTRUDPClass *tu, int resend_fl, uint32_t id, int attempt,
+        int cmd, int fd, const void *buf, size_t buf_len, int flags,
         __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
 ssize_t ksnTRUDPrecvfrom(ksnTRUDPClass *tu, int fd, void *buf, size_t buf_len,
         int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
@@ -88,6 +92,35 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len);
 
 #ifdef	__cplusplus
 }
+#endif
+
+#endif
+
+#if TRUDP_VERSION == 2
+
+#include "trudp.h"
+
+#define make_addr(addr_str, port, addr, addrlen) trudpUdpMakeAddr(addr_str, port, addr, addrlen)
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
+ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
+                         size_t buffer_len, int flags, __SOCKADDR_ARG addr,
+                         socklen_t *addr_len);
+
+ssize_t ksnTRUDPsendto(trudpData *td, int resend_fl, uint32_t id, int attempt,
+        int cmd, int fd, const void *buf, size_t buf_len, int flags,
+        __CONST_SOCKADDR_ARG addr, socklen_t addr_len);
+
+void trudp_event_cb(void *tcd_pointer, int event, void *data,
+        size_t data_length, void *user_data);
+
+#ifdef	__cplusplus
+}
+#endif
+
 #endif
 
 #endif	/* NET_TR_UDP_H */

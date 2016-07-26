@@ -21,6 +21,7 @@
 #include "utils/utils.h"
 #include "tr-udp_stat.h"
 
+#undef MODULE
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
 
 /**
@@ -921,7 +922,7 @@ void tr_udp_idle_cb(EV_P_ ev_idle *iw, int revents) {
     //if(pet->num_lines) printf("\033[%dA\r\033[J\n", pet->num_lines + 3);
 
     // Show TR-UDP
-    pet->num_lines = ksnTRUDPstatShow(pet->kn->ku);
+    pet->num_lines = ksnTRUDPstatShow(pet->kc->ku);
     // Show moving line
     printf("%c", "|/-\\"[pet->num]);
     if( (++(pet->num)) > 3) pet->num = 0;        
@@ -961,7 +962,7 @@ void tr_udp_timer_cb(EV_P_ ev_timer *tw, int revents) {
 tr_udp_timer_data *tr_udp_timer_init(ksnCoreClass *kn) {
 
     tr_udp_timer_data *pet = malloc(sizeof(tr_udp_timer_data));
-    pet->kn = kn;
+    pet->kc = kn;
     pet->num = 0;
 
     // Initialize and start main timer watcher, it is a repeated timer

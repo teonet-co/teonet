@@ -153,8 +153,13 @@ ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
     if(arp != (void*)-1) {
         
         // Remove peer from TR-UDP module
-        ksnTRUDPresetAddr( ((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+        #if TRUDP_VERSION == 1
+        ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 1);
+        #elif TRUDP_VERSION == 2
+        trudp_ChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+                arp->port, 0);               
+        #endif
         
         // Remove from Stream module
         ksnStreamClosePeer(((ksnetEvMgrClass*) ka->ke)->ks, peer_name);
@@ -183,7 +188,11 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
     ke->ksn_cfg.r_host_name[0] = '\0';
     ka->map = pblMapNewHashMap();    
     ksnetArpAddHost(ka);
+    #if TRUDP_VERSION == 1
     ksnTRUDPremoveAll(ke->kc->ku);
+    #elif TRUDP_VERSION == 2
+    trudp_ChannelDestroyAll(ke->kc->ku);
+    #endif
 }
 
 /**
@@ -259,6 +268,7 @@ typedef struct find_arp_data {
     
   __CONST_SOCKADDR_ARG addr;
   ksnet_arp_data *arp_data;
+  char *peer_name;
     
 } find_arp_data;
 
@@ -273,6 +283,7 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
             arp_data->addr)) {
         
         fa->arp_data = arp_data;
+        fa->peer_name = peer_name;
         
         retval = 1;
     }
@@ -283,37 +294,29 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
 /**
  * Find ARP data by address
  * 
- * @param ka
- * @param addr
+ * @param ka Pointer to ksnetArpClass
+ * @param addr Address
+ * @param peer_name [out] Peer name (may be null)
  * 
- * @return  Pointer to ARP data
+ * @return  Pointer to ARP data or NULL if not found
  */
-ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr) {
+ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr, 
+        char **peer_name) {
 
     find_arp_data fa;
     fa.addr = addr;
     fa.arp_data = NULL;
+    fa.peer_name = NULL;
     
-    //char key[KSN_BUFFER_SM_SIZE];
-    //ksnTRUDPkeyCreate(NULL, addr, key, KSN_BUFFER_SM_SIZE);
+    ksnet_arp_data *retval = NULL;
     
     if(ka != NULL && ksnetArpGetAllH(ka, find_arp_by_addr_cb, (void*) &fa)) {
         
-        // ARP by address was found
-        //printf("ARP by address %s:%d was found\n", 
-        //            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-        //            ntohs(((struct sockaddr_in *) addr)->sin_port));
-        
-    } else {
-        
-        // ARP by address %s not found
-        //printf("ARP by address %s:%d not found\n", 
-        //            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-        //            ntohs(((struct sockaddr_in *) addr)->sin_port));
-        
+        retval = fa.arp_data;
+        if(peer_name) *peer_name = fa.peer_name;
     }
     
-    return fa.arp_data;
+    return retval;
 }
 
 /**
@@ -486,12 +489,12 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
 
     char *str;
     const char *div = "-------------------------------------------------------"
-                      "--------------------------\n";
+                      "----------------------------\n";
 
     str = ksnet_formatMessage(div);
 
     str = ksnet_sformatMessage(str, "%s"
-        "  # Peer \t Mod | IP \t\t| Port | Trip time | TR-UDP trip time\n", 
+        "  # Peer          | Mod | IP              | Port |  Trip time | TR-UDP trip time\n", 
         str);
 
     str = ksnet_sformatMessage(str, "%s%s", str, div);
@@ -509,6 +512,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                     data->last_triptime);
             
             // Get TR-UDP ip map data by key
+            #if TRUDP_VERSION == 1
             size_t val_len;
             size_t key_len = KSN_BUFFER_SM_SIZE;
             char key[key_len];
@@ -526,9 +530,29 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
             char *tcp_triptime_last10_max = ip_map_d != NULL ? 
                 ksnet_formatMessage("%.3f ms", 
                     ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
+            
+            #elif TRUDP_VERSION == 2
+            // Get TR-UDP by address and port
+            trudpChannelData *tcd = trudpGetChannelAddr(
+                    ((ksnetEvMgrClass*)ka->ke)->kc->ku, 
+                    data->addr, data->port, 0
+            );
+            // Set Last and Middle trip time
+            char *tcp_last_triptime, *tcp_triptime_last10_max; 
+            if(tcd != (void*)-1) {
+                tcp_last_triptime = ksnet_formatMessage("%7.3f / ", 
+                    tcd->triptime/1000.0);
+                tcp_triptime_last10_max = ksnet_formatMessage("%.3f ms", 
+                    tcd->triptimeMiddle/1000.0);
+            }
+            else {   
+                tcp_last_triptime = strdup(null_str);
+                tcp_triptime_last10_max = strdup(null_str);
+            }
+            #endif
                         
             str = ksnet_sformatMessage(str, "%s"
-                "%3d %s%s%s\t %3d   %-15s  %5d   %7s %s  %s%s%s\n",
+                "%3d %s%-15s%s %3d   %-15s  %5d   %7s %s  %s%s%s\n",
                 str,
 
                 // Number
@@ -586,7 +610,7 @@ int ksnetArpShow(ksnetArpClass *ka) {
     int num_line = 0;
     char *str = ksnetArpShowStr(ka);
 
-    ksnet_printf(&((ksnetEvMgrClass*)ka->ke)->ksn_cfg, DISPLAY_M, "%s", str);
+    ksnet_printf(&((ksnetEvMgrClass*)ka->ke)->ksn_cfg, DISPLAY_M, _ANSI_CLS"\033[0;0H""%s", str);
     num_line = calculate_lines(str);
 
     free(str);
