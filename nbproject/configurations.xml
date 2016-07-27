@@ -67,7 +67,12 @@
             <in>packet_queue.c</in>
             <in>queue.c</in>
             <in>trudp.c</in>
+            <in>trudp_channel.c</in>
+            <in>trudp_ev.c</in>
+            <in>trudp_receive_queue.c</in>
+            <in>trudp_send_queue.c</in>
             <in>trudp_stat.c</in>
+            <in>trudp_utils.c</in>
             <in>udp.c</in>
             <in>utils.c</in>
             <in>write_queue.c</in>
@@ -1621,17 +1626,15 @@
       </toolsSet>
       <flagsDictionary>
         <element flagsID="0" commonFlags="-O3 -fPIC"/>
-        <element flagsID="1" commonFlags="-fPIC -O2 -fPIC -g -O2"/>
-        <element flagsID="2" commonFlags="-fPIC -O2 -fPIC -std=c11 -g -O2"/>
-        <element flagsID="3" commonFlags="-fPIC -O2 -g -O2"/>
-        <element flagsID="4" commonFlags="-fPIC -O2 -g -O2 -fPIC"/>
-        <element flagsID="5" commonFlags="-fPIC -g -fPIC -g -O2"/>
-        <element flagsID="6" commonFlags="-g -O2"/>
-        <element flagsID="7" commonFlags="-g -O2 -g -O2"/>
-        <element flagsID="8" commonFlags="-g -fPIC -O2 -g -O2 -fPIC"/>
-        <element flagsID="9" commonFlags="-g -g -O2"/>
-        <element flagsID="10"
+        <element flagsID="1" commonFlags="-g -fPIC -g -O2 -fPIC"/>
+        <element flagsID="2" commonFlags="-mtune=generic -march=x86-64 -g -O2"/>
+        <element flagsID="3" commonFlags="-mtune=generic -march=x86-64 -g -O2 -fPIC"/>
+        <element flagsID="4"
+                 commonFlags="-mtune=generic -march=x86-64 -g -O2 -std=c11 -fPIC"/>
+        <element flagsID="5"
                  commonFlags="-mtune=generic -march=x86-64 -g -fPIC -fstack-protector"/>
+        <element flagsID="6" commonFlags="-mtune=generic -march=x86-64 -g -g -O2"/>
+        <element flagsID="7" commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fPIC"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -1641,7 +1644,7 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath></executablePath>
-          <cTool flags="-mtune=generic -march=x86-64 -g -O2 -fPIC -fstack-protector">
+          <cTool flags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -fPIC">
           </cTool>
         </makeTool>
         <preBuild>
@@ -1650,7 +1653,7 @@
         </preBuild>
       </makefileType>
       <item path="app/embedded/jsmn/jsmn.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
         </cTool>
       </item>
       <item path="app/embedded/mongoose/mongoose.c" ex="false" tool="0" flavor2="2">
@@ -1663,79 +1666,149 @@
       </item>
       <item path="app/modules/teo_web/teo_web.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
+          <incDir>
+            <pElem>src/utils</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>app/embedded/mongoose</pElem>
+            <pElem>app/modules/teo_auth</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="app/modules/teo_web/teo_web_conf.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
+          <incDir>
+            <pElem>src/utils</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="app/modules/teo_web/teo_ws.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
+          <incDir>
+            <pElem>app/embedded/jsmn</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>app/embedded/mongoose</pElem>
+            <pElem>app/modules/teo_auth</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="app/teodb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
           <incDir>
-            <pElem>app</pElem>
+            <pElem>app/embedded/jsmn</pElem>
+            <pElem>src/modules</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>app</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="app/teodsp.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
           <incDir>
-            <pElem>app</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>app</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="app/teogw.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
           <incDir>
-            <pElem>app</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>app</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="app/teovpn.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
           <incDir>
-            <pElem>app</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>app</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="app/teoweb.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
           <incDir>
-            <pElem>app</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>app/modules/teo_web</pElem>
+            <pElem>app/embedded/mongoose</pElem>
+            <pElem>app/modules/teo_auth</pElem>
+            <pElem>app</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libpbl/src/pbl.c" ex="false" tool="0" flavor2="2">
@@ -1834,396 +1907,643 @@
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="9">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/libtrudp/examples/snake.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/libtrudp/examples/trudpcat_ev.c"
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/hash.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/map.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/packet.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/packet_queue.c"
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/queue.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="embedded/libtrudp/src/trudp_channel.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool flags="1">
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>PIC</Elem>
+            <Elem>USE_LIBEV</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="embedded/libtrudp/src/trudp_ev.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="embedded/libtrudp/src/trudp_receive_queue.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="embedded/libtrudp/src/trudp_send_queue.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_stat.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="embedded/libtrudp/src/trudp_utils.c"
+            ex="false"
+            tool="0"
+            flavor2="2">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/udp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/utils.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/write_queue.c"
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="8">
+        <cTool flags="7">
+          <preprocessorList>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/map_t.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/packet_queue_t.c"
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/packet_t.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/queue_t.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/tr-udp_t.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="embedded/teocli/libteol0/teonet_l0_client.c"
             ex="false"
             tool="0"
             flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
         </cTool>
       </item>
       <item path="embedded/teocli/main.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>examples</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="embedded/teocli/main_select.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>examples</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="examples/fossa/fossa.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
+        <cTool flags="7">
+          <incDir>
+            <pElem>examples/fossa</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="5">
+        <cTool flags="7">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples/fossa</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="examples/go/teogo_lib.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="10">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="examples/teoack.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teoackm.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teocque.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teodb_ex.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teol0cli.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teolarge.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teomulti.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teomulti_t.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teosend.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teosscr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teostream.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teotcp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teoterm.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
-      <item path="examples/teotru_load.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="2">
+      <item path="examples/teotru_load.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="4">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__GNUC_STDC_INLINE__=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__STDC_UTF_16__=1</Elem>
+            <Elem>__STDC_UTF_32__=1</Elem>
+            <Elem>__STDC_VERSION__=201112L</Elem>
+            <Elem>__STRICT_ANSI__=1</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <item path="examples/teotun.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
           <incDir>
-            <pElem>examples</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
+            <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
       </item>
       <folder path="0/app">
-        <cTool>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
         <ccTool>
           <incDir>
             <pElem>app</pElem>
@@ -2242,36 +2562,26 @@
       <folder path="0/app/embedded/jsmn">
         <cTool>
           <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
             <pElem>app/embedded/jsmn</pElem>
-            <pElem>../confuse-2.7/src</pElem>
+            <pElem>src</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>EV_USE_EPOLL=1</Elem>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/app/embedded/mongoose">
         <cTool>
           <incDir>
+            <pElem>app/embedded/mongoose</pElem>
             <pElem>app</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/app/modules">
@@ -2283,7 +2593,37 @@
             <pElem>src</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
             <pElem>/usr/include/libev</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
+        </cTool>
+      </folder>
+      <folder path="0/app/modules/teo_auth">
+        <cTool>
+          <incDir>
+            <pElem>/usr/include/curl</pElem>
+            <pElem>app/modules/teo_auth</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>app/modules/teo_web</pElem>
+            <pElem>app/embedded/mongoose</pElem>
+            <pElem>src/modules</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/app/modules/teo_web">
+        <cTool>
+          <incDir>
+            <pElem>app/modules/teo_web</pElem>
           </incDir>
         </cTool>
       </folder>
@@ -2299,8 +2639,13 @@
       </folder>
       <folder path="0/embedded/libtrudp">
         <cTool>
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>embedded/libtrudp</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+          </incDir>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -2308,8 +2653,6 @@
         <cTool>
           <incDir>
             <pElem>embedded/libtrudp/ci-build</pElem>
-            <pElem>embedded/libtrudp</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </folder>
@@ -2317,72 +2660,51 @@
         <cTool>
           <incDir>
             <pElem>embedded/libtrudp/examples</pElem>
-            <pElem>embedded/libtrudp</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
             <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
             <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
           </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/embedded/libtrudp/src">
         <cTool>
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>embedded/libtrudp</pElem>
-          </incDir>
           <preprocessorList>
             <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
             <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
             <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>USE_LIBEV=1</Elem>
           </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/embedded/libtrudp/tests">
         <cTool>
           <incDir>
+            <pElem>/usr/include/CUnit</pElem>
             <pElem>embedded/libtrudp/tests</pElem>
-            <pElem>embedded/libtrudp</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
             <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
             <Elem>PACKAGE_SRC_DIR="."</Elem>
-          </preprocessorList>
-        </cTool>
-      </folder>
-      <folder path="0/embedded/teocli">
-        <cTool>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
           </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/embedded/teocli/libteol0">
         <cTool>
           <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-            <pElem>app/embedded/jsmn</pElem>
-            <pElem>../confuse-2.7/src</pElem>
+            <pElem>src</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>EV_USE_EPOLL=1</Elem>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/examples">
@@ -2393,21 +2715,6 @@
         </ccTool>
       </folder>
       <folder path="0/examples/fossa">
-        <cTool>
-          <incDir>
-            <pElem>examples/fossa</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
         <ccTool>
           <incDir>
             <pElem>examples/fossa</pElem>
@@ -2423,6 +2730,9 @@
       <folder path="0/examples/go">
         <cTool>
           <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>embedded/libtrudp</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
             <pElem>src/config</pElem>
             <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
@@ -2431,42 +2741,24 @@
             <pElem>src/modules</pElem>
             <pElem>examples/go</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
+            <Elem>USE_LIBEV</Elem>
+          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/sh">
         <cTool>
           <incDir>
             <pElem>sh</pElem>
-            <pElem>src/config</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/src">
-        <cTool>
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
-            <pElem>app/embedded/jsmn</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>EV_USE_EPOLL=1</Elem>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
-        </cTool>
         <ccTool>
           <incDir>
             <pElem>src</pElem>
@@ -2487,20 +2779,37 @@
           </preprocessorList>
         </ccTool>
       </folder>
-      <folder path="0/tests">
+      <folder path="0/src/config">
         <cTool>
           <incDir>
-            <pElem>tests</pElem>
             <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>/usr/include/libev</pElem>
           </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/src/modules">
+        <cTool>
+          <incDir>
+            <pElem>src/modules</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/src/utils">
+        <cTool>
+          <incDir>
+            <pElem>src/utils</pElem>
+          </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/tests">
+        <cTool>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
             <Elem>TEONE_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
           </preprocessorList>
         </cTool>
         <ccTool>
@@ -2519,163 +2828,700 @@
         </ccTool>
       </folder>
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="6">
+        <cTool flags="2">
         </cTool>
       </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/config/opt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/uuid</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/crypt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/openssl</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>/usr/include/x86_64-linux-gnu/openssl</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/daemon.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/ev_mgr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/hotkeys.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/l0-server.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>app/embedded/jsmn</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_tcp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/stream.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/teodb_com.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/net_com.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/net_core.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/net_multi.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/net_recon.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/net_split.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/pidfile.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/utils</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/tr-udp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/tr-udp_stat.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV=1</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/utils/base64.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/utils/string_arr.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/utils/utils.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="4">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/test_cque.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/test_crypt.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/test_subscribe.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/test_tcp_proxy.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/test_teodb.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/test_teonet.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="tests/test_tr-udp.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="1">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/utils</pElem>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>tests</pElem>
+          </incDir>
         </cTool>
       </item>
     </conf>
