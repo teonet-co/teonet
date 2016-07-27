@@ -127,35 +127,42 @@ Update repositories database:
 
 # Teonet local net configuration (run from sources folder)
 
-```
-# Build teonet
-cd /$HOME/Projects/teonet
-make clean && make
+    # Build teonet
+    cd /$HOME/Projects/teonet
+    make clean && make
 
-# Copy teonet library to bin folder for use with node applications
-sh/libteonet_copy.sh
+    # Copy teonet library to bin folder for use with node applications
+    sh/libteonet_copy.sh
 
-# L0 and websocket server
-cd /$HOME/Projects/teohws
-make clean && make
-src/teohws teo-hws -p 9009 --l0_allow --l0_tcp_port 9009
+    # L0 and websocket server
+    cd /$HOME/Projects/teohws
+    make clean && make
+    src/teohws teo-hws -p 9009 --l0_allow --l0_tcp_port 9009
 
-# Auth helper server
-cd /$HOME/Projects/teonode
-node app/authasst/index.js teo-auth -a 127.0.0.1 -P 9009
+    # L0 server web config file
+    #
+    # document_root = "/var/www"
+    # http_port = 8082
+    # l0_server_name = "127.0.0.1"
+    # l0_server_port = 9009
+    # auth_server_url = "http://teomac.ksproject.org:1234/api/auth/"
 
-# Teonet room controller
-cd /$HOME/Projects/teoroom
-make clean && make
-src/teoroom teo-room -a 127.0.0.1 -P 9009
+    # Auth helper server
+    cd /$HOME/Projects/teonode
+    node app/authasst/index.js teo-auth -a 127.0.0.1 -P 9009
 
-# Teonet match making controller
-cd /$HOME/Projects/teomm
-make clean && make
-src/teomm teo-mm -a 127.0.0.1 -P 9009
+    # Teonet room controller
+    cd /$HOME/Projects/teoroom
+    make clean && make
+    src/teoroom teo-room -a 127.0.0.1 -P 9009
 
-# Teonet db
-cd /$HOME/Projects/teodb
-make clean && make
-src/teodb teo-db -a 127.0.0.1 -P 9009
-```
+    # Teonet match making controller
+    cd /$HOME/Projects/teomm
+    make clean && make
+    src/teomm teo-mm -a 127.0.0.1 -P 9009
+
+    # Teonet db
+    cd /$HOME/Projects/teodb
+    make clean && make
+    src/teodb teo-db -a 127.0.0.1 -P 9009
+
