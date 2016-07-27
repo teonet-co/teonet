@@ -28,6 +28,7 @@ AM_CPPFLAGS = \
 AM_CFLAGS = \
 	 -Wall \
 	 -I/opt/local/include \
+	 -DUSE_LIBEV \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
 	 -I../embedded/libpbl/src \
