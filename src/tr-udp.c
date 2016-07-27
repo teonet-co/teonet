@@ -2066,11 +2066,11 @@ static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
     
     // Process send queue
     uint64_t next_expected_time;
-    /*int rv =*/ trudp_SendQueueProcess(psd->td, &next_expected_time);
+    trudp_SendQueueProcess(psd->td, &next_expected_time);
 
     // Start new process_send_queue timer
-//    if(rv && next_expected_time > 0)
-//        trudp_send_queue_start_cb(psd, next_expected_time);
+    if(next_expected_time)
+        trudp_send_queue_start_cb(psd, next_expected_time);
 }
 
 /**
@@ -2094,17 +2094,17 @@ static void trudp_send_queue_start_cb(process_send_queue_data *psd,
         next_et : trudp_SendQueueGetTimeout(psd->td, ts)) != UINT32_MAX) {
 
         double tt_d = tt / 1000000.0;
+        if(tt_d == 0.0) tt_d = 0.0001;
 
         if(!psd->inited) {
             ev_timer_init(&psd->process_send_queue_w, trudp_send_queue_process_cb, tt_d, 0.0);
             psd->process_send_queue_w.data = (void*)psd;
             psd->inited = 1;
         }
-        else {
-
+        else 
+        {
             if(ev_is_active(&psd->process_send_queue_w))
-                ev_timer_stop(psd->loop, &psd->process_send_queue_w);
-
+            ev_timer_stop(psd->loop, &psd->process_send_queue_w);
             ev_timer_set(&psd->process_send_queue_w, tt_d, 0.0);
         }
 
