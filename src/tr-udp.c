@@ -1907,21 +1907,19 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
 #if TRUDP_VERSION == 2
 
-/**
- * Send queue processing data definition
- */
-typedef struct process_send_queue_data {
+#include "trudp_ev.h"
 
-    int inited;
-    trudpData *td;
-    struct ev_loop *loop;
-    ev_timer process_send_queue_w;
-
-} process_send_queue_data;
-
-// Local static function definition
-static void trudp_send_queue_start_cb(process_send_queue_data *psd, uint64_t next_expected_time);
-
+///**
+// * Send queue processing data definition
+// */
+//typedef struct process_send_queue_data {
+//
+//    int inited;
+//    trudpData *td;
+//    struct ev_loop *loop;
+//    ev_timer process_send_queue_w;
+//
+//} process_send_queue_data;
 
 #define kev ((ksnetEvMgrClass*)(((trudpData *)td)->user_data))
 
@@ -2025,10 +2023,10 @@ ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
  */
 static void trudp_send_queue_init(trudpData *td) {
 
-    if(!td->process_send_queue_data) {
+    if(!td->psq_data) {
 
-        td->process_send_queue_data = malloc(sizeof(process_send_queue_data));
-        process_send_queue_data *p = (process_send_queue_data*)td->process_send_queue_data;
+        td->psq_data = malloc(sizeof(trudpProcessSendQueueData));
+        trudpProcessSendQueueData *p = (trudpProcessSendQueueData*)td->psq_data;
         p->inited = 0;
         p->loop = kev->ev_loop;
         p->td = td;
@@ -2042,75 +2040,75 @@ static void trudp_send_queue_init(trudpData *td) {
  */
 static void trudp_send_queue_destroy(trudpData *td) {
 
-    if(td->process_send_queue_data) {
-        process_send_queue_data *p = (process_send_queue_data *)td->process_send_queue_data;
+    if(td->psq_data) {
+        trudpProcessSendQueueData *p = (trudpProcessSendQueueData *)td->psq_data;
         if(ev_is_active(&p->process_send_queue_w)) {
                 ev_timer_stop(p->loop, &p->process_send_queue_w);
         }
-        free(td->process_send_queue_data);
-        td->process_send_queue_data = NULL;
+        free(td->psq_data);
+        td->psq_data = NULL;
     }
 }
 
-/**
- * Send queue processing timer libev callback
- *
- * @param loop
- * @param w
- * @param revents
- */
-static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
-
-    process_send_queue_data *psd = (process_send_queue_data *) w->data;
-    ev_timer_stop(psd->loop, w);
-    
-    // Process send queue
-    uint64_t next_expected_time;
-    trudp_SendQueueProcess(psd->td, &next_expected_time);
-
-    // Start new process_send_queue timer
-    if(next_expected_time)
-        trudp_send_queue_start_cb(psd, next_expected_time);
-}
-
-/**
- * Start send queue timer
- *
- * @param psd Pointer to process_send_queue_data
- * @param next_expected_time
- */
-static void trudp_send_queue_start_cb(process_send_queue_data *psd,
-        uint64_t next_expected_time) {
-
-    uint64_t tt, next_et = UINT64_MAX, ts = trudpGetTimestampFull();
-
-    // If next_expected_time selected (non nil)
-    if(next_expected_time) {
-        next_et = next_expected_time > ts ? next_expected_time - ts : 0;
-    }
-
-    // If next_expected_time (net) or GetSendQueueTimeout
-    if((tt = (next_et != UINT64_MAX) ?
-        next_et : trudp_SendQueueGetTimeout(psd->td, ts)) != UINT32_MAX) {
-
-        double tt_d = tt / 1000000.0;
-        if(tt_d == 0.0) tt_d = 0.0001;
-
-        if(!psd->inited) {
-            ev_timer_init(&psd->process_send_queue_w, trudp_send_queue_process_cb, tt_d, 0.0);
-            psd->process_send_queue_w.data = (void*)psd;
-            psd->inited = 1;
-        }
-        else 
-        {
-            if(ev_is_active(&psd->process_send_queue_w))
-            ev_timer_stop(psd->loop, &psd->process_send_queue_w);
-            ev_timer_set(&psd->process_send_queue_w, tt_d, 0.0);
-        }
-
-        ev_timer_start(psd->loop, &psd->process_send_queue_w);
-    }
-}
+///**
+// * Send queue processing timer libev callback
+// *
+// * @param loop
+// * @param w
+// * @param revents
+// */
+//static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
+//
+//    process_send_queue_data *psd = (process_send_queue_data *) w->data;
+//    ev_timer_stop(psd->loop, w);
+//    
+//    // Process send queue
+//    uint64_t next_expected_time;
+//    trudp_SendQueueProcess(psd->td, &next_expected_time);
+//
+//    // Start new process_send_queue timer
+//    if(next_expected_time)
+//        trudp_send_queue_start_cb(psd, next_expected_time);
+//}
+//
+///**
+// * Start send queue timer
+// *
+// * @param psd Pointer to process_send_queue_data
+// * @param next_expected_time
+// */
+//static void trudp_send_queue_start_cb(process_send_queue_data *psd,
+//        uint64_t next_expected_time) {
+//
+//    uint64_t tt, next_et = UINT64_MAX, ts = trudpGetTimestampFull();
+//
+//    // If next_expected_time selected (non nil)
+//    if(next_expected_time) {
+//        next_et = next_expected_time > ts ? next_expected_time - ts : 0;
+//    }
+//
+//    // If next_expected_time (net) or GetSendQueueTimeout
+//    if((tt = (next_et != UINT64_MAX) ?
+//        next_et : trudp_SendQueueGetTimeout(psd->td, ts)) != UINT32_MAX) {
+//
+//        double tt_d = tt / 1000000.0;
+//        if(tt_d == 0.0) tt_d = 0.0001;
+//
+//        if(!psd->inited) {
+//            ev_timer_init(&psd->process_send_queue_w, trudp_send_queue_process_cb, tt_d, 0.0);
+//            psd->process_send_queue_w.data = (void*)psd;
+//            psd->inited = 1;
+//        }
+//        else 
+//        {
+//            if(ev_is_active(&psd->process_send_queue_w))
+//            ev_timer_stop(psd->loop, &psd->process_send_queue_w);
+//            ev_timer_set(&psd->process_send_queue_w, tt_d, 0.0);
+//        }
+//
+//        ev_timer_start(psd->loop, &psd->process_send_queue_w);
+//    }
+//}
 
 /**
  * Send ACK event to teonet event loop
@@ -2412,7 +2410,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                     (__CONST_SOCKADDR_ARG) &tcd->remaddr);
 
             // Start send queue
-            trudp_send_queue_start_cb(td->process_send_queue_data, 0);
+            trudp_start_send_queue_cb(td->psq_data, 0);
 
         } break;
 
@@ -2514,7 +2512,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             // Start send queue timer
             if(trudpPacketGetType(data) == TRU_DATA)
-                trudp_send_queue_start_cb(td->process_send_queue_data, 0);
+                trudp_start_send_queue_cb(td->psq_data, 0);
 
         } break;
     }
