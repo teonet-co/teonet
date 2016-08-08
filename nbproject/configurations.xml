@@ -52,38 +52,6 @@
             <in>pblkftst.c</in>
           </df>
         </df>
-        <df name="libtrudp">
-          <df name="ci-build">
-            <in>make_package.c</in>
-          </df>
-          <df name="examples">
-            <in>snake.c</in>
-            <in>trudpcat_ev.c</in>
-          </df>
-          <df name="src">
-            <in>hash.c</in>
-            <in>map.c</in>
-            <in>packet.c</in>
-            <in>packet_queue.c</in>
-            <in>queue.c</in>
-            <in>trudp.c</in>
-            <in>trudp_channel.c</in>
-            <in>trudp_receive_queue.c</in>
-            <in>trudp_send_queue.c</in>
-            <in>trudp_stat.c</in>
-            <in>trudp_utils.c</in>
-            <in>udp.c</in>
-            <in>utils.c</in>
-            <in>write_queue.c</in>
-          </df>
-          <df name="tests">
-            <in>map_t.c</in>
-            <in>packet_queue_t.c</in>
-            <in>packet_t.c</in>
-            <in>queue_t.c</in>
-            <in>tr-udp_t.c</in>
-          </df>
-        </df>
         <df name="teocli">
           <df name="libteol0">
             <in>teonet_l0_client.c</in>
@@ -196,15 +164,9 @@
         <element flagsID="3"
                  commonFlags="-mtune=generic -march=x86-64 -g -O2 -fstack-protector-strong"/>
         <element flagsID="4"
-                 commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -fPIC -fstack-protector-strong"/>
-        <element flagsID="5"
-                 commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -fstack-protector-strong"/>
-        <element flagsID="6"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fPIC -fstack-protector"/>
-        <element flagsID="7"
+        <element flagsID="5"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fPIC -fstack-protector-strong"/>
-        <element flagsID="8"
-                 commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fstack-protector-strong"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -434,185 +396,6 @@
         <cTool flags="0">
         </cTool>
       </item>
-      <item path="embedded/libtrudp/ci-build/make_package.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="8">
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/examples/snake.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/examples/trudpcat_ev.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="5">
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/hash.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/map.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/packet.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/packet_queue.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/queue.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/trudp.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/trudp_channel.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/trudp_receive_queue.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="4">
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/trudp_send_queue.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/trudp_stat.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/trudp_utils.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/udp.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/utils.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/src/write_queue.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="4">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/tests/map_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>/usr/include/CUnit</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>embedded/libtrudp/tests</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/tests/packet_queue_t.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>/usr/include/CUnit</pElem>
-            <pElem>embedded/libtrudp/tests</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/tests/packet_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>/usr/include/CUnit</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>embedded/libtrudp/tests</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/tests/queue_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>/usr/include/CUnit</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>embedded/libtrudp/tests</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/tests/tr-udp_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>/usr/include/CUnit</pElem>
-            <pElem>embedded/libtrudp/tests</pElem>
-          </incDir>
-        </cTool>
-      </item>
       <item path="embedded/teocli/libteol0/teonet_l0_client.c"
             ex="false"
             tool="0"
@@ -639,14 +422,14 @@
         </cTool>
       </item>
       <item path="examples/fossa/fossa.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="7">
+        <cTool flags="5">
           <incDir>
             <pElem>examples/fossa</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="7">
+        <cTool flags="5">
           <incDir>
             <pElem>src/config</pElem>
             <pElem>src/utils</pElem>
@@ -963,21 +746,6 @@
             <Elem>HAVE_CONFIG_H</Elem>
             <Elem>PBLTEST</Elem>
           </preprocessorList>
-        </cTool>
-      </folder>
-      <folder path="0/embedded/libtrudp/ci-build">
-        <cTool>
-          <incDir>
-            <pElem>embedded/libtrudp/ci-build</pElem>
-          </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/embedded/libtrudp/examples">
-        <cTool>
-          <incDir>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>embedded/libtrudp/examples</pElem>
-          </incDir>
         </cTool>
       </folder>
       <folder path="0/examples">
@@ -1340,7 +1108,7 @@
         </cTool>
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="6">
+        <cTool flags="4">
           <incDir>
             <pElem>src</pElem>
             <pElem>src/config</pElem>
