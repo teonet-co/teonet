@@ -57,7 +57,8 @@ typedef struct ksnet_cfg {
         crypt_f,      ///< Encrypt/Decrypt packets
         vpn_connect_f,  ///< Start VPN flag
         show_tr_udp_f, ///< Show TR-UDP statistic at start up   
-        sig_segv_f; ///< SIGSEGV processing
+        sig_segv_f, ///< SIGSEGV processing
+        block_cli_input_f; ///< Block teonet CLI input (for using in GUI application)
     
     // Daemon mode flags
     int dflag,  ///< Start application in Daemon mode

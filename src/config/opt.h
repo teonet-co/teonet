@@ -18,7 +18,8 @@ enum ksnetEvMgrOpts {
     READ_OPTIONS = 01,
     READ_CONFIGURATION,
     READ_ALL = READ_OPTIONS|READ_CONFIGURATION,
-    APP_PARAM
+    APP_PARAM,
+    BLOCK_CLI_INPUT = 0x08
 };
 
 #ifdef	__cplusplus
