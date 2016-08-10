@@ -148,6 +148,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     char **argv_ret = NULL;
     ksnet_optSetApp(&ke->ksn_cfg, basename(argv[0]), basename(argv[0]), null_str);
     if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, app_argv_descr, 1); // Read command line parameters (to use it as default)
+    if(options&BLOCK_CLI_INPUT) ke->ksn_cfg.block_cli_input_f = 1; // Set Block CLI Input from options
     if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
     if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, app_argv_descr, 0); // Read command line parameters (to replace configuration file)
 
@@ -1120,7 +1121,9 @@ int modules_init(ksnetEvMgrClass *ke) {
     if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;
     
     // Hotkeys
-    if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
+    if(!ke->ksn_cfg.block_cli_input_f) {
+        if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
+    }
     
     // Callback QUEUE
     #if M_ENAMBE_CQUE

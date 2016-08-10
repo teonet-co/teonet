@@ -54,6 +54,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_debug_vv_f = 0;
     ksn_cfg->show_debug_vvv_f = 0;
     ksn_cfg->show_peers_f = 0;
+    ksn_cfg->block_cli_input_f = 0;
 
     // This host
     ksn_cfg->port = atoi(KSNET_PORT_DEFAULT);
@@ -160,6 +161,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("hot_keys_f", &conf->hot_keys_f),
         CFG_SIMPLE_BOOL("daemon_mode_f", &conf->dflag),
         CFG_SIMPLE_BOOL("sig_segv_f", &conf->sig_segv_f),
+        CFG_SIMPLE_BOOL("block_cli_input_f", &conf->block_cli_input_f),
 
         #if M_ENAMBE_VPN
         CFG_SIMPLE_BOOL("vpn_connect_f", &conf->vpn_connect_f),
