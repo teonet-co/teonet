@@ -613,6 +613,8 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
 /**
  * Get KSNet event manager time
  *
+ * @param ke Pointer to ksnetEvMgrClass
+ * 
  * @return
  */
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
@@ -623,7 +625,7 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
 /**
  * Connect to remote host
  *
- * @param ke
+ * @param ke Pointer to ksnetEvMgrClass
  */
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
     
