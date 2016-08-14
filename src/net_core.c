@@ -363,7 +363,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     ksnet_arp_data *arp;
 
     // Send to peer in this network
-    if((arp = ksnetArpGet(kc->ka, to)) != NULL && arp->mode != -1) {
+    if((arp = ksnetArpGet(kc->ka, to)) != NULL/* && arp->mode != -1*/) {
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
