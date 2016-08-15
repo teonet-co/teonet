@@ -51,11 +51,11 @@ inline int KSN_GET_TEST_MODE() {
 int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
     static int log_opened = 0;
-    int show_it = 0, 
-        show_log = 1, 
-        priority = LOG_USER, 
+    int show_it = 0,
+        show_log = 1,
+        priority = LOG_USER,
         ret_val = 0;
-    
+
     // Skip execution in tests
     if(KSN_GET_TEST_MODE()) return ret_val;
 
@@ -90,33 +90,33 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             priority = LOG_NOTICE;
             show_it = 1;
             break;
-            
+
         case DISPLAY_M:
             priority = LOG_NOTICE;
             show_it = 1;
             show_log = 0;
             break;
-            
+
         case ERROR_M:
             priority = LOG_ERR;
             show_it = 1;
             break;
-            
+
         default:
             priority = LOG_INFO;
             show_it = 1;
             break;
     }
-    
+
     show_log = show_log && (ksn_cfg->log_priority >= type);
 
     if(show_it || show_log) {
-        
+
         va_list args;
         va_start(args, format);
         char *p = ksnet_vformatMessage(format, args);
         va_end(args);
-        
+
         // Show message
         if(show_it) {
 
@@ -147,7 +147,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
                 // Open log
                 setlogmask (LOG_UPTO (LOG_INFO));
-                openlog (prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);            
+                openlog (prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
                 log_opened = 1;
             }
 
@@ -159,27 +159,27 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         }
         free(p);
     }
-    
+
     return ret_val;
 }
 
 
 /**
  * Remove terminal escape substrings from string
- * 
+ *
  * @param str
- * @return 
+ * @return
  */
 char *removeTEsc(char *str) {
-    
+
     int i, j = 0, skip_esc = 0, len = strlen(str);
     for(i = 0; i <= len; i++) {
-        
+
         if(skip_esc && str[i] == 'm') skip_esc = 0;
         else if(!skip_esc && str[i] == '\033') skip_esc = 1;
         else if(!skip_esc) str[j++] = str[i];
     }
-    
+
     return str;
 }
 
@@ -308,16 +308,16 @@ char *trim(char *str) {
 
 /**
  * Duplicate memory \todo move this function to teonet library
- * 
+ *
  * Allocate memory and copy selected value to it
- * 
+ *
  * @param d Pointer to value to copy
  * @param s Length of value
- * @return 
+ * @return
  */
-void *memdup(const void* d, size_t s) { 
-    
-    void* p; 
+void *memdup(const void* d, size_t s) {
+
+    void* p;
     return ((p = malloc(s))?memcpy(p, d, s):NULL);
 }
 
@@ -355,7 +355,7 @@ int calculate_lines(char *str) {
 
 /**
  * Get random host name
- * 
+ *
  * Create random host name. Should be free after use.
  *
  * @return String with random host name. Should be free after use.
@@ -517,12 +517,12 @@ char *getExecPath (char *path, size_t dest_len, char *argv0) {
 
 /**
  * Make socket reusable
- * 
+ *
  * @param sd
- * @return 
+ * @return
  */
 int set_reuseaddr(int sd) {
-    
+
     // Make socket reusable
     int yes = 1;
     if (setsockopt(sd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
@@ -557,15 +557,15 @@ const char *ksnet_getSysConfigDir(void) {
 
 /**
  * Check if a value exist in a array
- * 
+ *
  * @param val Integer value
  * @param arr Integer array
  * @param size Array size
- * 
- * @return 
+ *
+ * @return
  */
 int inarray(int val, const int *arr, int size) {
-    
+
     int i;
     for (i=0; i < size; i++) {
         if (arr[i] == val)
@@ -587,7 +587,7 @@ int inarray(int val, const int *arr, int size) {
 
 /**
  * Get IPs
- * 
+ *
  * Get IP address of this host
  *
  * @return Pointer to ksnet_stringArr
@@ -685,25 +685,21 @@ int ip_is_private(char *ip) {
 
 /**
  * Calculate number of tags in json string
- * 
+ *
  * @param data
  * @param data_length
- * @return 
+ * @return
  */
 size_t get_num_of_tags(char *data, size_t data_length) {
-    
+
     int i = 0;
     size_t num_of_tags = 0;
-    
-    for(i = 0; i < data_length; i++) 
-        if(data[i] == ':') 
-            num_of_tags++;
-    
-//    printf("number of json tags in request: %d, request: %s\n", 
-//            (int) num_of_tags, data);
 
-    //if(num_of_tags) 
-        num_of_tags++;
-    
+    for(i = 0; i < data_length; i++)
+        if(data[i] == ':')
+            num_of_tags++;
+
+    num_of_tags++;
+
     return num_of_tags * 4;
 }
