@@ -16,16 +16,24 @@
  */
 enum CMD_D {
 
-                        ///< The TYPE_OF_REQUEST field: "JSON:" or empty
-                        ///< The ID field:  id of reques, it resend to user in answer
-    CMD_D_SET = 129,    ///< #129 Set data request:  TYPE_OF_REQUEST: { namespace, key, data, data_len } }
-    CMD_D_GET,          ///< #130 Get data request:  TYPE_OF_REQUEST: { namespace, key, ID } }
-    CMD_D_LIST,         ///< #131 List request:  TYPE_OF_REQUEST: { ID, namespace } }
-    CMD_D_GET_ANSWER,   ///< #132 Get data response: { namespace, key, data, data_len, ID } }
-    CMD_D_LIST_ANSWER,  ///< #133 List response:  [ key, key, ... ]
+                                ///< The TYPE_OF_REQUEST field: "JSON:" or empty
+                                ///< The ID field:  id of reques, it resend to user in answer
+    CMD_D_SET = 129,            ///< #129 Set data request:  TYPE_OF_REQUEST: { namespace, key, data, data_len } }
+    CMD_D_GET,                  ///< #130 Get data request:  TYPE_OF_REQUEST: { namespace, key, ID } }
+    CMD_D_LIST,                 ///< #131 List request:  TYPE_OF_REQUEST: { key, ID, namespace } }
+    CMD_D_GET_ANSWER,           ///< #132 Get data response: { namespace, key, data, data_len, ID } }
+    CMD_D_LIST_ANSWER,          ///< #133 List response:  [ key, key, ... ]
+    
+    CMD_D_LIST_LENGTH,          ///< #134 List length request:  TYPE_OF_REQUEST: { ID, namespace } }
+    CMD_D_LIST_LENGTH_ANSWER,   ///< #135 List response:  { listLength, key, ID }
+    
+    CMD_D_LIST_RANGE,           ///< #136 List length request:  TYPE_OF_REQUEST: { ID, namespace } }
+    CMD_D_LIST_RANGE_ANSWER,    ///< #137 List response:  { listLength, key, ID }
+    
+    CMD_D_ERROR_ANSWER,         ///< #138 Bad request answer
     
     // Reserved
-    CMD_R_NONE          ///< Reserved
+    CMD_R_NONE                  ///< Reserved
 };
 
 #pragma pack(push)
@@ -42,6 +50,15 @@ typedef struct teo_db_data {
     char key_data[]; ///< Key and Value buffer     
     
 } teo_db_data;
+
+/**
+ * CMD_D_GET_LIST_RANGE extended Data structure
+ */
+typedef struct teo_db_data_range {
+    
+    uint32_t from; ///< From index (begin from zero)
+    uint32_t to; ///< To index (not include))
+};
 
 #pragma pack(pop)
 
