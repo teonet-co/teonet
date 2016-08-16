@@ -692,11 +692,14 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             teo_db_data *tdd = rd->data;
                             
                             // CMD_D_LIST_RANGE extended data: { UIND32_t, UIND32_t }
-                            size_t ptr = tdd->key_length;
-                            from = *(uint32_t*)(tdd->key_data + ptr); ptr += sizeof(uint32_t);
-                            to = *(uint32_t*)(tdd->key_data + ptr); ptr += sizeof(uint32_t);
-                            if(from > list_len) from = list_len;
-                            if(to > list_len) to = list_len;
+                            if(rd->cmd == CMD_D_LIST_RANGE) {
+                                size_t ptr = tdd->key_length;
+                                from = *(uint32_t*)(tdd->key_data + ptr); ptr += sizeof(uint32_t);
+                                to = *(uint32_t*)(tdd->key_data + ptr); ptr += sizeof(uint32_t);
+                                if(from > list_len) from = list_len;
+                                if(to > list_len) to = list_len;
+                                cmd_answer = CMD_D_LIST_RANGE_ANSWER;
+                            }
 
                             // Prepare ANSWER data
                             size_t ar_bin_len = sizeof(uint32_t); 
