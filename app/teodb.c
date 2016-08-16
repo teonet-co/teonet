@@ -690,10 +690,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             
                             // Parse Binary data structure
                             teo_db_data *tdd = rd->data;
+                            size_t ptr;
                             
                             // CMD_D_LIST_RANGE extended data: { UIND32_t, UIND32_t }
-                            if(rd->cmd == CMD_D_LIST_RANGE) {
-                                size_t ptr = tdd->key_length;
+                            if(rd->cmd == CMD_D_LIST_RANGE) {                                
+                                ptr = tdd->key_length;
                                 from = *(uint32_t*)(tdd->key_data + ptr); ptr += sizeof(uint32_t);
                                 to = *(uint32_t*)(tdd->key_data + ptr); ptr += sizeof(uint32_t);
                                 if(from > list_len) from = list_len;
@@ -705,7 +706,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             size_t ar_bin_len = sizeof(uint32_t); 
                             void *ar_bin = malloc(ar_bin_len);
                             // Number of keys
-                            *(uint32_t *)ar_bin = list_len; ptr = ar_bin_len;
+                            *(uint32_t *)ar_bin = to - from; ptr = ar_bin_len;
                             // List of keys with 0 at and
                             int i; for(i = from; i < to; i++) {
                                 size_t len = strlen(argv[i]) + 1;
