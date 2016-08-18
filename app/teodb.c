@@ -511,7 +511,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             data != NULL ? data : "",
                             jp.id != NULL ? jp.id : ""
                         );
-                        size_t data_out_len = strlen(data_out);
+                        size_t data_out_len = strlen(data_out) + 1;
 
                         // Free DB data
                         free(data);
@@ -644,7 +644,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 id_str != NULL ? id_str : "",
                                 list_len
                             );
-                            out_data_len = strlen(out_data);
+                            out_data_len = strlen(out_data) + 1;
                         }
                         
                         // Binary
@@ -685,13 +685,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             int i; for(i = from; i < to; i++) {
                                 ar_str = ksnet_sformatMessage(ar_str,
                                     "%s%s{ \"key\":\"%s\", \"id\": \"%s\" }",
-                                    ar_str, i ? ", " : "", argv[i],
+                                    ar_str, i>from ? ", " : "", argv[i],
                                     id_str != NULL ? id_str : "");
                             }
                             ar_str = ksnet_sformatMessage(ar_str, "%s ]", ar_str);
 
                             out_data = ar_str;
-                            out_data_len = strlen(ar_str);
+                            out_data_len = strlen(ar_str) + 1;
                         }
 
                         // Binary
