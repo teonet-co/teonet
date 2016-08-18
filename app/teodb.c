@@ -32,22 +32,22 @@
  *
  * API:
  *
- *    CMD_D_SET = 129,              ///< #129 Set data request:  TYPE_OF_REQUEST: { key, data, data_len,  id } }
- *    CMD_D_GET,                    ///< #130 Get data request:  TYPE_OF_REQUEST: { key, id } }
- *    CMD_D_LIST,                   ///< #131 List request:  TYPE_OF_REQUEST: { key, id } }
- *    CMD_D_GET_ANSWER,             ///< #132 Get data response: { key, data, data_len, id } }
- *    CMD_D_LIST_ANSWER,            ///< #133 List response:  [ { key, id }, ... ]
+ *    CMD_D_SET = 129,              ///< #129 Set data request:     { key, data, data_len,  id } }
+ *    CMD_D_GET,                    ///< #130 Get data request:     { key, id } }
+ *    CMD_D_LIST,                   ///< #131 List request:         { key, id } }
+ *    CMD_D_GET_ANSWER,             ///< #132 Get data response:    { key, data, data_len, id } }
+ *    CMD_D_LIST_ANSWER,            ///< #133 List response:        [ { key, id }, ... ]
  * 
- *    CMD_D_LIST_LENGTH,            ///< #134 List length request:  TYPE_OF_REQUEST: { key, id } }
- *    CMD_D_LIST_LENGTH_ANSWER,     ///< #135 List response:  { listLength, key, id }
+ *    CMD_D_LIST_LENGTH,            ///< #134 List length request:  { key, id } }
+ *    CMD_D_LIST_LENGTH_ANSWER,     ///< #135 List response:        { listLength, key, id }
  * 
- *    CMD_D_LIST_RANGE,             ///< #136 List length request:  TYPE_OF_REQUEST: { id, key, from, to } }
+ *    CMD_D_LIST_RANGE,             ///< #136 List length request:  { id, key, from, to } }
  *                                  ///< bynary data structure: 
- *                                     typedef struct teo_db_data_range {   
- *                                         uint32_t from; ///< From index (begin from zero)
- *                                         uint32_t to; ///< To index (not include))
- *                                     };
- *    CMD_D_LIST_RANGE_ANSWER,      ///< #137 List response:  { listLength, key, ID }
+ *                                        typedef struct teo_db_data_range {   
+ *                                            uint32_t from; ///< From index (begin from zero)
+ *                                            uint32_t to;   ///< To index (not include))
+ *                                        };
+ *    CMD_D_LIST_RANGE_ANSWER,      ///< #137 List response:        { listLength, key, ID }
  * 
  *
  * Subscribe:
@@ -65,7 +65,7 @@
 #include "modules/teodb_com.h"
 #include "ev_mgr.h"
 
-#define TDB_VERSION "0.0.4"
+#define TDB_VERSION "0.0.5"
 #define APPNAME _ANSI_MAGENTA "teodb" _ANSI_NONE
 
 // Constants
@@ -276,7 +276,7 @@ static int json_parse(char *data, json_param *jp) {
         // Find FROM tag
         else if(!(keys & FROM) && jsoneq(data, &t[i], FROM_TAG) == 0) {
 
-            jp->id = strndup((char*)data + t[i+1].start,
+            jp->from = strndup((char*)data + t[i+1].start,
                     t[i+1].end-t[i+1].start);
             keys |= FROM;
             i++;
@@ -285,7 +285,7 @@ static int json_parse(char *data, json_param *jp) {
         // Find TO tag
         else if(!(keys & TO) && jsoneq(data, &t[i], TO_TAG) == 0) {
 
-            jp->id = strndup((char*)data + t[i+1].start,
+            jp->to = strndup((char*)data + t[i+1].start,
                     t[i+1].end-t[i+1].start);
             keys |= TO;
             i++;
@@ -295,6 +295,21 @@ static int json_parse(char *data, json_param *jp) {
 
     return 1;
 }
+
+/**
+ * Free json parameters data
+ * 
+ * @param jp
+ */
+static void json_free(json_param *jp) {
+    
+    if(jp->id != NULL) free(jp->id);
+    if(jp->key != NULL) free(jp->key);
+    if(jp->data != NULL) free(jp->data);
+    if(jp->from != NULL) free(jp->from);
+    if(jp->to != NULL) free(jp->to);
+}
+
 
 /**
  * Send answer command
@@ -399,15 +414,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             //updated_key_length = strlen(updated_key) + 1;
                         }
                         else
-                           ksn_printf(ke, APPNAME, DEBUG,
+                            ksn_printf(ke, APPNAME, DEBUG,
                                 "An error happened during write to DB, "
                                 "KEY: \"%s\", DATA: \"%s\", "
                                 "rv: %d ...\n", jp.key, jp.data, rv);
 
                         // Free parameters data
-                        if(jp.id != NULL) free(jp.id);
-                        if(jp.key != NULL) free(jp.key);
-                        if(jp.data != NULL) free(jp.data);
+                        json_free(&jp);
                     }
 
                     // BINARY data
@@ -511,9 +524,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         free(data_out);
 
                         // Free parameters data
-                        if(jp.id != NULL) free(jp.id);
-                        if(jp.key != NULL) free(jp.key);
-                        if(jp.data != NULL) free(jp.data);
+                        json_free(&jp);
                     }
 
                     // BINARY data
@@ -745,8 +756,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }
         break;
 
-        default:
-            break;
+        default: break;
     }
 }
 

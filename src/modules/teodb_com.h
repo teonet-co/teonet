@@ -58,7 +58,7 @@ typedef struct teo_db_data_range {
     
     uint32_t from; ///< From index (begin from zero)
     uint32_t to; ///< To index (not include))
-};
+} teo_db_data_range;
 
 #pragma pack(pop)
 
