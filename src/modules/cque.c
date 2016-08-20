@@ -108,6 +108,29 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
 }
 
 /**
+ * Set callback queue data, update data set in ksnCQueAdd
+ * 
+ * @param kq Pointer to ksnCQueClass
+ * @param id Existing callback queue ID
+ * @param data Pointer to callback queue records data 
+ * 
+ * @return return 0: if callback executed OK; !=0 some error occurred
+ */
+int ksnCQueSetData(ksnCQueClass *kq, uint32_t id, void *data) {
+    
+    int retval = -1;
+    size_t data_len;
+    ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
+    if(cq != NULL) {
+        
+        cq->data = data;
+        retval = 0;
+    }
+    
+    return retval;
+}
+
+/**
  * Callback Queue timeout timer callback
  * 
  * @param w Event manager loop and watcher
