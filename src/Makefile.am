@@ -26,6 +26,7 @@ AM_CPPFLAGS = \
 	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\"
 
 AM_CFLAGS = \
+	 -std=gnu11 \
 	 -Wall \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
@@ -48,7 +49,7 @@ endif
 
 AM_CXX = clang++
 AM_CXXFLAGS = \
-	-std=c++11 \
+	-std=gnu++14 \
 	-fPIC \
 	-Wall \
 	-I/opt/local/include
