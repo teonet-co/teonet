@@ -38,7 +38,7 @@ void test_3_1() {
     // Initialize module
     ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
-    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->defNameSpace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Destroy module
@@ -55,7 +55,7 @@ void test_3_2() {
     // Initialize module
     ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
-    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->defNameSpace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Remove namespace if exist
@@ -63,7 +63,7 @@ void test_3_2() {
     
     // Set default namespace - the file at disk should be created
     ksnTDBnamespaceSet(kf, "test");
-    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_STRING_EQUAL(kf->defNameSpace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     //if(kf->k == NULL) printf("pbl_errno: %d ...", pbl_errno);
     
@@ -73,12 +73,12 @@ void test_3_2() {
     
     // Set NULL namespace - the file should be flashed and closed
     ksnTDBnamespaceSet(kf, NULL);
-    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->defNameSpace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Set default namespace again - the file at disk should be opened
     ksnTDBnamespaceSet(kf, "test");
-    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_STRING_EQUAL(kf->defNameSpace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     
     // Read test data
@@ -110,7 +110,7 @@ void test_3_3() {
 
     // Set default namespace - the file at disk should be created
     ksnTDBnamespaceSet(kf, "test");
-    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_STRING_EQUAL(kf->defNameSpace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     
     // Set test data
@@ -179,7 +179,7 @@ void test_3_4() {
     // Initialize module
     ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
-    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->defNameSpace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Remove namespace if exist
@@ -230,7 +230,7 @@ void test_3_5() {
     // Initialize module
     ksnTDBClass *kf = ksnTDBinit(ke);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kf);
-    CU_ASSERT_PTR_NULL(kf->namespace);
+    CU_ASSERT_PTR_NULL(kf->defNameSpace);
     CU_ASSERT_PTR_NULL(kf->k);
     
     // Remove namespace if exist
@@ -238,7 +238,7 @@ void test_3_5() {
     
     // Set default namespace - the file at disk should be created
     ksnTDBnamespaceSet(kf, "test");
-    CU_ASSERT_STRING_EQUAL(kf->namespace, "test");
+    CU_ASSERT_STRING_EQUAL(kf->defNameSpace, "test");
     CU_ASSERT_PTR_NOT_NULL(kf->k);
     
     // Set three keys
