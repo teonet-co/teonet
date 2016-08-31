@@ -35,7 +35,7 @@
 ksnTDBClass *ksnTDBinit(void *ke) {
 
     ksnTDBClass *kf = malloc(sizeof(ksnTDBClass));
-    kf->namespace = NULL;
+    kf->defNameSpace = NULL;
     kf->k = NULL;
     kf->ke = ke;
 
@@ -74,7 +74,7 @@ inline void ksnTDBdestroy(ksnTDBClass *kf) {
 void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace) {
 
     // Free current namespace and close PBL KeyFile
-    if(kf->namespace != NULL) free(kf->namespace);
+    if(kf->defNameSpace != NULL) free(kf->defNameSpace);
     if(kf->k != NULL) {
         pblKfClose(kf->k);
         kf->k = NULL;
@@ -83,7 +83,7 @@ void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace) {
     // Set namespace and open (or create) PBL KeyFile
     if(namespace != NULL) {
 
-        kf->namespace = strdup(namespace);
+        kf->defNameSpace = strdup(namespace);
 
         // File path name
         get_file_path(namespace);
@@ -101,7 +101,7 @@ void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace) {
         }
 
     }
-    else kf->namespace = NULL;
+    else kf->defNameSpace = NULL;
 }
 
 /**
@@ -114,7 +114,7 @@ void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace) {
  */
 inline char *ksnTDBnamespaceGet(ksnTDBClass *kf) {
 
-    return kf->namespace != NULL ? strdup(kf->namespace) : NULL;
+    return kf->defNameSpace != NULL ? strdup(kf->defNameSpace) : NULL;
 }
 
 /**

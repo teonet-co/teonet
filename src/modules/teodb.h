@@ -18,7 +18,7 @@
 typedef struct ksnTDBClass {
     
     void *ke; ///< Pointer to the ksnEvMgrClass
-    char* namespace; ///< Default namespace
+    char* defNameSpace; ///< Default namespace
     pblKeyFile_t* k; ///< Opened key file or NULL;
     
 } ksnTDBClass;
@@ -31,9 +31,9 @@ extern "C" {
 ksnTDBClass *ksnTDBinit(void *ke);
 void ksnTDBdestroy(ksnTDBClass *kf);
 
-void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* namespace);
+void ksnTDBnamespaceSet(ksnTDBClass *kf, const char* ns);
 char *ksnTDBnamespaceGet(ksnTDBClass *kf);
-void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* namespace);
+void ksnTDBnamespaceRemove(ksnTDBClass *kf, const char* ns);
 
 void *ksnTDBgetStr(ksnTDBClass *kf, const char *key, size_t *data_len);
 void *ksnTDBget(ksnTDBClass *kf, const void *key, size_t key_len, 
@@ -44,16 +44,16 @@ int ksnTDBset(ksnTDBClass *kf, const void *key, size_t key_len, void *data,
 int ksnTDBdeleteStr(ksnTDBClass *kf, const char *key);
 int ksnTDBdelete(ksnTDBClass *kf, const void *key, size_t key_len);
 
-void *ksnTDBgetNsStr(ksnTDBClass *kf, const char *namespace, const char *key, 
+void *ksnTDBgetNsStr(ksnTDBClass *kf, const char *ns, const char *key, 
         size_t *data_len);
-void *ksnTDBgetNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+void *ksnTDBgetNs(ksnTDBClass *kf, const char *ns, const void *key, 
         size_t key_len, size_t *data_len);
-int ksnTDBsetNsStr(ksnTDBClass *kf, const char *namespace, const char *key, 
+int ksnTDBsetNsStr(ksnTDBClass *kf, const char *ns, const char *key, 
         void *data, size_t data_len);
-int ksnTDBsetNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+int ksnTDBsetNs(ksnTDBClass *kf, const char *ns, const void *key, 
         size_t key_len, void *data, size_t data_len);
-int ksnTDBdeleteNsStr(ksnTDBClass *kf, const char *namespace, const char *key);
-int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key, 
+int ksnTDBdeleteNsStr(ksnTDBClass *kf, const char *ns, const char *key);
+int ksnTDBdeleteNs(ksnTDBClass *kf, const char *ns, const void *key, 
         size_t key_len);
 int ksnTDBkeyList(ksnTDBClass *kf, const char *key, ksnet_stringArr *argv);
 
