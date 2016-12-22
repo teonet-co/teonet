@@ -71,4 +71,4 @@ print "Receive 24 bytes:", len(data), "bytes data from L0 server, from peer", fr
 # Close connection
 #
 s.close()
-print ""
+print "done"
