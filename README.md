@@ -6,6 +6,10 @@
     cd teonet
     git submodule update --init
 
+## Update submodules
+
+    git submodule update --remote --merge
+
 * at error: "SSL certificate problem: unable to get local issuer 
 certificate while accessing https ..." execute git command:
 
