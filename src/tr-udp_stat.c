@@ -659,7 +659,7 @@ inline void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_AR
 inline int ksnTRUDPstatShow(trudpData *tu) {
 
     int num_line = 0;
-    char *str = ksnTRUDPstatShowStr(tu);
+    char *str = ksnTRUDPstatShowStr(tu, 0);
     
     cls();
     printf("%s", str);

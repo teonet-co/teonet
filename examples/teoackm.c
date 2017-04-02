@@ -273,7 +273,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Send statistic back
                     if(!strcmp((char*)rd->data, CMD_U_STAT)) {
                         
-                        char *stat = ksnTRUDPstatShowStr(ke->kc->ku);
+                        char *stat = ksnTRUDPstatShowStr(ke->kc->ku, 0);
                         ksnCoreSendCmdto(ke->kc, rd->from, 
                                 CMD_USER + 2, stat, strlen(stat)+1);
                         free(stat);
