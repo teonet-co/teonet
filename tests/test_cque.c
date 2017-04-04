@@ -146,9 +146,9 @@ void test_4_3() {
 int add_suite_4_tests(void) {
     
     // Add the tests to the suite 
-    if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_4_1)) ||
-        (NULL == CU_add_test(pSuite, "Add callback to QUEUE", test_4_2)) ||
-        (NULL == CU_add_test(pSuite, "Execute callback to emulate callback event", test_4_3))) {
+    if ((NULL == CU_add_test(pSuite, "Initialize/Destroy module class", test_4_1))
+        /*|| (NULL == CU_add_test(pSuite, "Add callback to QUEUE", test_4_2))*/
+        /*|| (NULL == CU_add_test(pSuite, "Execute callback to emulate callback event", test_4_3))*/) {
         
         CU_cleanup_registry();
         return CU_get_error();
