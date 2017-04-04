@@ -2410,7 +2410,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                     (__CONST_SOCKADDR_ARG) &tcd->remaddr);
 
             // Start send queue \todo test and remove it (if tested better)
-            trudp_start_send_queue_cb(td->psq_data, 0);
+            //trudp_start_send_queue_cb(td->psq_data, 0);
 
         } break;
 
