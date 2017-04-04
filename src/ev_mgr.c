@@ -1144,6 +1144,9 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
         if(kev->idle_activity_count == UINT32_MAX) kev->idle_activity_count = 0;
         kev->idle_activity_count++;
     }
+    
+    // Check TR-UDP activity
+    trudpProcessKeepConnection(kev->kc->ku);
 
     #undef kev
 }
