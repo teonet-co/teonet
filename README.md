@@ -6,7 +6,7 @@
     cd teonet
     git submodule update --init --recursive
 
-## Update submodules
+## Update submodules to latest version
 
     git submodule update --remote --merge
 
