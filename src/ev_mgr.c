@@ -768,14 +768,21 @@ static void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
  * @param ke Pointer to ksnetEvMgrClass
  * @param addr
  * @return 
+ * @retval 0  peer not found
+ * @retval 1  peer removed
+ * @retval -1 peer not removed, this is this host
  */
 int remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr) {
     
     int rv = 0;
-    char *peer_name;                
-    if(ksnetArpFindByAddr(ke->kc->ka, (__CONST_SOCKADDR_ARG) addr, &peer_name)) {
-        remove_peer(ke, peer_name);
-        rv = 1;
+    char *peer_name;   
+    ksnet_arp_data *arp;
+    if((arp = ksnetArpFindByAddr(ke->kc->ka, (__CONST_SOCKADDR_ARG) addr, &peer_name))) {
+        if(arp->mode >= 0) {
+            remove_peer(ke, peer_name);
+            rv = 1;
+        }
+        else rv = arp->mode;
     }
 
     return rv;

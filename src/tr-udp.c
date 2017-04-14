@@ -2267,13 +2267,15 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                     key, last_received / 1000000.0);
                 #endif
 
-                // Remove TR-UDP channel
-                trudp_ChannelDestroy(tcd);
-
+                
                 // Remove peer from ARP table
-//                trudpData *td = TD(tcd);
-//                remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr);
-             }
+                trudpData *td = TD(tcd);
+                if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
+                
+                    // Remove TR-UDP channel
+                    trudp_ChannelDestroy(tcd);
+                }
+            }
             else {
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, CONNECT,
