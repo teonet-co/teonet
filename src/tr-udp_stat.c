@@ -671,4 +671,46 @@ inline int ksnTRUDPstatShow(trudpData *tu) {
     return num_line;
 }
 
+/**
+ * Show TR-UDP queues list on terminal
+ *
+ * Print string with queues list on terminal.
+ *
+ * @param td Pointer to trudpData
+ *
+ * @return Number if line in statistics text
+ */
+inline int ksnTRUDPqueuesShow(trudpData *td) {
+
+    int num_line = 0;
+    
+    trudpChannelData *tcd = (trudpChannelData*)trudpMapGetFirst(td->map, 0);
+    if(tcd != (void*)-1) {
+
+        char *stat_sq_str = trudpStatShowQueueStr(tcd, 0);
+        if(stat_sq_str) {
+            cls();
+            
+            int port; //,type;
+            //uint32_t id = trudpPacketGetId(data);
+            char *addr = trudpUdpGetAddr((__CONST_SOCKADDR_ARG)&tcd->remaddr, &port);
+            printf("--------------------------------------------------------------\n" 
+                   "TR-UDP channel "_ANSI_BROWN"%s:%d:%d"_ANSI_NONE" queues:\n\n", 
+                   addr, port, tcd->channel);
+            puts(stat_sq_str);
+            free(stat_sq_str);
+        }
+        else cls();
+
+        char *stat_rq_str = trudpStatShowQueueStr(tcd, 1);
+        if(stat_rq_str) {
+            puts(stat_rq_str);
+            free(stat_rq_str);
+        }
+    }
+    else { cls(); puts("Queues have not been created..."); }
+
+    return num_line;
+}
+
 #endif

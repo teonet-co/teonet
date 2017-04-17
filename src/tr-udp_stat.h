@@ -50,6 +50,7 @@ void ksnTRUDPsetDATAreceiveDropped(ksnTRUDPClass *tu, __CONST_SOCKADDR_ARG addr)
 #define KE(tu) (ksnetEvMgrClass *)tu->user_data
 
 int ksnTRUDPstatShow(trudpData *tu);
+int ksnTRUDPqueuesShow(trudpData *td);
 
 #endif
 

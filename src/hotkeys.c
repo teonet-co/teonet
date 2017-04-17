@@ -108,6 +108,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 //            " "COLOR_DW"A"COLOR_END" - direct connect to all peers\n"
             "%s"
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
+            " "COLOR_DW"Q"COLOR_END" - TR-UDP queues\n"
             " "COLOR_DW"a"COLOR_END" - show application menu\n"
             " "COLOR_DW"r"COLOR_END" - restart application\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
@@ -146,8 +147,31 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             }
             printf("Press u to %s continuously refresh\n",
                    (khv->tr_udp_m ? STOP : START));
-        }
-            break;
+        } break;
+        
+        // Show UDP send/receive queue list
+        case 'Q': {
+            
+            //ksnTRUDPqueuesShow(kc->ku);     
+            
+            if(khv->put == NULL) {
+                int num_lines = ksnTRUDPqueuesShow(kc->ku);
+                if(khv->last_hotkey == hotkey) khv->tr_udp_queues_m = !khv->tr_udp_queues_m;
+                if(khv->tr_udp_queues_m) {
+                    khv->put = tr_udp_timer_init(kc);
+                    khv->put->num_lines = num_lines;
+                }
+                printf("\n");
+            }
+            else if(khv->tr_udp_queues_m) {
+                khv->tr_udp_queues_m = 0;
+                tr_udp_timer_stop(&khv->put);
+                printf("TR-UDP timer stopped\n");
+            }
+            printf("Press Q to %s continuously refresh\n",
+                   (khv->tr_udp_queues_m ? STOP : START));
+            
+        } break;
             
         // Send User event to Application
         case 'a':
@@ -516,6 +540,7 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->wait_y = Y_NONE;
     kh->peer_m = 0;
     kh->tr_udp_m = 0;
+    kh->tr_udp_queues_m = 0;
     kh->pt = NULL;
     kh->mt = NULL;
     kh->pet = NULL;
@@ -922,13 +947,20 @@ void tr_udp_idle_cb(EV_P_ ev_idle *iw, int revents) {
     //if(pet->num_lines) printf("\033[%dA\r\033[J\n", pet->num_lines + 3);
 
     // Show TR-UDP
-    pet->num_lines = ksnTRUDPstatShow(pet->kc->ku);
-    // Show moving line
-    printf("%c", "|/-\\"[pet->num]);
-    if( (++(pet->num)) > 3) pet->num = 0;        
+    if(((ksnetEvMgrClass*)pet->kc->ke)->kh->tr_udp_m) {
+        pet->num_lines = ksnTRUDPstatShow(pet->kc->ku);
+        // Show moving line
+        printf("%c", "|/-\\"[pet->num]);
+        if( (++(pet->num)) > 3) pet->num = 0;        
 
-    if(pet->num_lines)
-    printf("\nPress u to %s continuously refresh\n", STOP);
+        if(pet->num_lines)
+        printf("\nPress u to %s continuously refresh\n", STOP);
+    }
+    else {
+        pet->num_lines = ksnTRUDPqueuesShow(pet->kc->ku);
+        
+        printf("\nPress Q to %s continuously refresh\n", STOP);
+    }
 
     // Start timer watcher
     ev_timer_start(pet->loop, &(pet->tw));
