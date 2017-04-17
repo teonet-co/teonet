@@ -89,6 +89,7 @@ typedef struct ksnetHotkeysClass  {
     int wait_y; ///< Wait y (yes) mode
     int peer_m; ///< Show peer mode: 0 - single; 1 - continously
     int tr_udp_m; ///< Show tr-udp mode: 0 - single; 1 - continously
+    int tr_udp_queues_m; ///< Show tr-udp queues mode: 0 - single; 1 - continously
     int last_hotkey; ///< Last hotkey
     int str_number; ///< Nuber of current string
     char str[4][KSN_BUFFER_SM_SIZE]; ///< Strings
