@@ -2028,6 +2028,7 @@ static void trudp_send_queue_init(trudpData *td) {
         td->psq_data = malloc(sizeof(trudpProcessSendQueueData));
         trudpProcessSendQueueData *p = (trudpProcessSendQueueData*)td->psq_data;
         p->inited = 0;
+        p->started = 0;
         p->loop = kev->ev_loop;
         p->td = td;
     }

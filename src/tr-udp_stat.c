@@ -683,8 +683,29 @@ inline int ksnTRUDPstatShow(trudpData *tu) {
 inline int ksnTRUDPqueuesShow(trudpData *td) {
 
     int num_line = 0;
+    int max_q_size = -1;
+    trudpChannelData *tcd = (void*)-1;
     
-    trudpChannelData *tcd = (trudpChannelData*)trudpMapGetFirst(td->map, 0);
+    // Get first queues element
+//    trudpChannelData *tcd = (trudpChannelData*)trudpMapGetFirst(td->map, 0);
+    
+    // Loop all channel maps
+    trudpMapElementData *el;
+    trudpMapIterator *it;
+    if((it = trudpMapIteratorNew(td->map))) {
+        while((el = trudpMapIteratorNext(it))) {
+            
+            trudpChannelData *_tcd = (trudpChannelData *)
+                    trudpMapIteratorElementData(el, NULL);
+            
+            // Get element with max queue size
+            int sqs = trudpSendQueueSize(_tcd->sendQueue), rqs = trudpReceiveQueueSize(_tcd->receiveQueue);
+            if(sqs > max_q_size) { max_q_size = sqs; tcd = _tcd; }
+            if(rqs > max_q_size) { max_q_size = rqs; tcd = _tcd; }
+        }
+        trudpMapIteratorDestroy(it);
+    }
+    
     if(tcd != (void*)-1) {
 
         char *stat_sq_str = trudpStatShowQueueStr(tcd, 0);
