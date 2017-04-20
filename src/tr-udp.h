@@ -106,9 +106,8 @@ void *ksnTRUDPstatGet(ksnTRUDPClass *tu, int type, size_t *stat_len);
 extern "C" {
 #endif
 
-ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
-                         size_t buffer_len, int flags, __SOCKADDR_ARG addr,
-                         socklen_t *addr_len);
+ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer, size_t buffer_len, 
+        int flags, __SOCKADDR_ARG addr, socklen_t *addr_len);
 
 ssize_t ksnTRUDPsendto(trudpData *td, int resend_fl, uint32_t id, int attempt,
         int cmd, int fd, const void *buf, size_t buf_len, int flags,
