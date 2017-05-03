@@ -7,6 +7,6 @@
 #
 
 swig -perl teonet.i
-gcc -fpic -c `perl -MExtUtils::Embed -e ccopts -e ldopts` -I../../../src -I../../../embedded/libpbl/src -I../../../embedded/teocli/libteol0/ -I../../../embedded/libtrudp/src teonet_wrap.c
+gcc -fpic -c `perl -MExtUtils::Embed -e ccopts -e ldopts` -I../../src -I../../embedded/libpbl/src -I../../embedded/teocli/libteol0/ -I../../embedded/libtrudp/src teonet_wrap.c
 gcc -shared teonet_wrap.o -lteonet -o teonet.so
 
