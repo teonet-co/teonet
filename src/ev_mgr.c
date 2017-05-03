@@ -1175,7 +1175,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;
     
     // Hotkeys
-    if(!ke->ksn_cfg.block_cli_input_f) {
+    if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
         if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
     }
     
