@@ -138,3 +138,5 @@ examples/go/teogo/teogo
 /app/teogw
 /examples/teotru_load
 /tmp/
+/examples/perl/teonet_wrap.c
+/examples/perl/teonet.pm
