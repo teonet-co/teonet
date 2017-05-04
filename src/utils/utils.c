@@ -70,13 +70,13 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
         case DEBUG:
 
-            if(ksn_cfg->show_debug_f) show_it = 1;
+            if(ksn_cfg->show_debug_f || ksn_cfg->show_debug_vv_f || ksn_cfg->show_debug_vvv_f) show_it = 1;
             priority = LOG_INFO;
             break;
 
         case DEBUG_VV:
 
-            if(ksn_cfg->show_debug_vv_f) show_it = 1;
+            if(ksn_cfg->show_debug_vv_f || ksn_cfg->show_debug_vvv_f) show_it = 1;
             priority = LOG_DEBUG;
             break;
 
@@ -154,8 +154,8 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 //            va_list args;
 //            va_start(args, format);
 //            vsyslog(priority, format, args);
-//            va_end(args);
-            syslog(priority, "%s", trimlf(removeTEsc(p)));
+//            va_end(args);            
+            syslog(priority < LOG_DEBUG ? priority : LOG_INFO, "%s", trimlf(removeTEsc(p)));
         }
         free(p);
     }

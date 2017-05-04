@@ -19,7 +19,7 @@
 #include "ev_mgr.h"
 #include "tr-udp_stat.h"
 
-#define TACKM_VERSION "0.0.1"    
+#define TACKM_VERSION "0.0.2"    
 
 // This application commands
 #define CMD_U_STAT  "stat"
@@ -159,11 +159,18 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             if(!make_addr(arp->addr, arp->port, 
                                     (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
+                                #if TRUDP_VERSION == 1
                                 ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, 
                                         (__CONST_SOCKADDR_ARG) &remaddr);
                                 ksnTRUDPreset(ke->kc->ku, 
                                         (__CONST_SOCKADDR_ARG) &remaddr, 0);
                                 ksnTRUDPstatReset(ke->kc->ku);
+                                #else
+                                trudpChannelData *tcd;
+                                if((tcd = trudpGetChannel(
+                                    ke->kc->ku, (__CONST_SOCKADDR_ARG)&remaddr, 0)) != (void*)-1)
+                                        trudp_ChannelSendReset(tcd);
+                                #endif
                             }
                         }
                         
@@ -266,7 +273,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Send statistic back
                     if(!strcmp((char*)rd->data, CMD_U_STAT)) {
                         
-                        char *stat = ksnTRUDPstatShowStr(ke->kc->ku);
+                        char *stat = ksnTRUDPstatShowStr(ke->kc->ku, 0);
                         ksnCoreSendCmdto(ke->kc, rd->from, 
                                 CMD_USER + 2, stat, strlen(stat)+1);
                         free(stat);
@@ -303,7 +310,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         }
         break;
             
-        // Send when ACK received
+        // Teo ACK received use ksnetAllowAckEvent to allow this event
         case EV_K_RECEIVED_ACK: 
         {
             // ACK event
@@ -349,6 +356,9 @@ int main(int argc, char** argv) {
     
     // Set custom timer interval
     ksnetEvMgrSetCustomTimer(ke, 1.00);
+    
+    // Allow ACK event
+    ksnetAllowAckEvent(ke, 1);
     
     // Start teonet
     ksnetEvMgrRun(ke);

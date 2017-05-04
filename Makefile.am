@@ -13,7 +13,7 @@ DX_CLEANFILES = -rf @DX_DOCDIR@/*
 
 endif
 
-SUBDIRS = embedded/libpbl/src embedded src po tests examples app sh
+SUBDIRS = embedded/libpbl/src embedded/libtrudp embedded src po tests examples app sh
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
@@ -51,12 +51,11 @@ uninstall-local:
 	-rm -r $(teonetdocdir)
 	-rm -r $(teonetsysconfdir)
 
-run:	src/app/teovpn
-	src/app/teovpn just-make --port=9057
+run:	app/teovpn
+	app/teovpn just-make --port=9057
 
-build-tests: tests/test_teonet
-	
-build-tests: tests/test_teonet
+build-tests: 
+	tests/test_teonet
 	
 test:	tests/test_teonet
 	tests/test_teonet

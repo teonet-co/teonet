@@ -29,13 +29,16 @@ AM_CFLAGS = \
 	 -std=gnu11 \
 	 -Wall \
 	 -I/opt/local/include \
+	 -DUSE_LIBEV \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
-	 -I/usr/include/libev \	
+	 -I../embedded/libtrudp/src \
 	 -I../app/embedded/jsmn \
-	 -DEV_USE_EPOLL=1
+	 -I/usr/include/libev \
+	 -DEV_USE_EPOLL=1 \
+	 -fno-strict-aliasing
 
 if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD
@@ -56,7 +59,7 @@ AM_CXXFLAGS = \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -lcrypt -ltuntap ../embedded/libpbl/src/libpbl.a
+LIBS = -lev -lcrypt -ltuntap ../embedded/libpbl/src/libpbl.a ../embedded/libtrudp/src/.libs/libtrudp.a
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -87,7 +90,7 @@ DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 #nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
 
-#teonetinclude_HEADERS = 
+#teonetinclude_HEADERS =
 nobase_teonetinclude_HEADERS = \
     crypt.h \
     daemon.h \
@@ -126,7 +129,18 @@ nobase_teonetinclude_HEADERS = \
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
-    ../app/embedded/jsmn/jsmn.h
+    ../app/embedded/jsmn/jsmn.h \
+    \
+    ../embedded/libtrudp/src/packet_queue.h \
+    ../embedded/libtrudp/src/queue.h \
+    ../embedded/libtrudp/src/write_queue.h \
+    ../embedded/libtrudp/src/packet.h \
+    ../embedded/libtrudp/src/map.h \
+    ../embedded/libtrudp/src/udp.h \
+    ../embedded/libtrudp/src/trudp_channel.h \
+    ../embedded/libtrudp/src/trudp_const.h \
+    ../embedded/libtrudp/src/trudp_send_queue.h \
+    ../embedded/libtrudp/src/trudp_receive_queue.h
 
 libteonet_la_SOURCES = \
     crypt.c \
@@ -161,7 +175,9 @@ libteonet_la_SOURCES = \
     utils/utils.c \
     utils/base64.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
-    ../app/embedded/jsmn/jsmn.c
+    ../app/embedded/jsmn/jsmn.c \
+    ../embedded/libtrudp/src/libtrudp.la
+    
 
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default
@@ -179,7 +195,7 @@ endif
 #lexer.c: lexer.l
 
 libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBRARY_MAJOR_VERSION):0:0
-#49:0:0 
+#49:0:0
 
 uninstall-local:
 	-rm -r $(teonetincludedir)
