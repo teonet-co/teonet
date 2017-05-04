@@ -32,7 +32,7 @@ check_param $1 $2 $3 $4 $5 $6 $7 $8
 # PACKET_DESCRIPTION=$8
 
 # Set Variables
-DEPENDS="libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4), libtuntap-dev, libcurl4-openssl-dev, libtrudp-dev (>= 0.2.0)"
+DEPENDS="libssl-dev (>= 1.0.1f-1ubuntu2.15), libev-dev (>= 4.15-3), libconfuse-dev (>= 2.7-4ubuntu1), uuid-dev (>= 2.20.1-5.1ubuntu20.4), libtuntap-dev, libcurl4-openssl-dev"
     # Note: Add this to Depends if test will be added to distributive:
     # libcunit1-dev (>= 2.1-2.dfsg-1)
 MAINTAINER="Kirill Scherba <kirill@scherba.ru>"
