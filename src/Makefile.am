@@ -129,7 +129,18 @@ nobase_teonetinclude_HEADERS = \
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
-    ../app/embedded/jsmn/jsmn.h
+    ../app/embedded/jsmn/jsmn.h \
+    \
+    ../embedded/libtrudp/src/packet_queue.h \
+    ../embedded/libtrudp/src/queue.h \
+    ../embedded/libtrudp/src/write_queue.h \
+    ../embedded/libtrudp/src/packet.h \
+    ../embedded/libtrudp/src/map.h \
+    ../embedded/libtrudp/src/udp.h \
+    ../embedded/libtrudp/src/trudp_channel.h \
+    ../embedded/libtrudp/src/trudp_const.h \
+    ../embedded/libtrudp/src/trudp_send_queue.h \
+    ../embedded/libtrudp/src/trudp_receive_queue.h
 
 libteonet_la_SOURCES = \
     crypt.c \
