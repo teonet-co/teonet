@@ -84,14 +84,22 @@ RPM_FILES="/usr/bin/teovpn
    /usr/bin/teoweb
    /usr/bin/teodsp
    /usr/doc/teonet/
+   /usr/doc/libtrudp/
    /usr/etc/teonet/teonet.conf.default
    /usr/include/teonet/
+   /usr/include/trudp.h
    /usr/lib/libteonet.a
    /usr/lib/libteonet.la
    /usr/lib/libteonet.so
    /usr/lib/libteonet.so.$LIBRARY_HI_VERSION
    /usr/lib/libteonet.so.$LIBRARY_VERSION
+   /usr/lib/libtrudp.a
+   /usr/lib/libtrudp.la
+   /usr/lib/libtrudp.so
+   /usr/lib/libtrudp.so.1
+   /usr/lib/libtrudp.so.1.0.0
    /usr/share/doc/teonet/examples/
+   /usr/share/doc/libtrudp/
 "
 create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
