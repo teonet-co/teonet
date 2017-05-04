@@ -8,6 +8,6 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
 RUN printf "\ndeb http://repo.ksproject.org/ubuntu/ teonet main\n" >> /etc/apt/sources.list
 
 # Install teonet
-RUN apt-get update && sudo apt-get install -y \
+RUN apt-get update && apt-get install -y \
     libteonet-dev \
     && ldconfig
