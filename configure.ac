@@ -12,9 +12,9 @@ AC_SUBST([$1], ['$2'])
 # END
 
 AC_PREREQ([2.69])
-AC_INIT([teonet], [0.1.83], [kirill@scherba.ru])
-AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 95, [Teonet dynamic library version])
-AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2016"], [Teonet library copyright])
+AC_INIT([teonet], [0.2.0], [kirill@scherba.ru])
+AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 96, [Teonet dynamic library version])
+AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2017"], [Teonet library copyright])
 
 AC_CONFIG_HEADERS([src/config/config.h])
 AC_CONFIG_SRCDIR([src/teonet.c])
@@ -238,10 +238,10 @@ if test $HAVE_DOXYGEN = "false"; then
     AC_MSG_WARN([*** doxygen not found, docs will not be built])
 else
 
-DX_HTML_FEATURE(ON)
+DX_HTML_FEATURE(OFF)
 DX_CHM_FEATURE(OFF)
 DX_CHI_FEATURE(OFF)
-DX_MAN_FEATURE(ON)
+DX_MAN_FEATURE(OFF)
 DX_RTF_FEATURE(OFF)
 DX_XML_FEATURE(OFF)
 DX_PDF_FEATURE(OFF)
@@ -262,7 +262,6 @@ AC_CACHE_SAVE
 
 LT_INIT
 
-
 AC_CONFIG_FILES([
     Makefile
     po/Makefile.in
@@ -276,4 +275,8 @@ AC_CONFIG_FILES([
     embedded/Makefile 
     embedded/teocli/linux/Makefile
 ])
+
+# Call libtrudp's ./configure script recursively.
+AC_CONFIG_SUBDIRS([embedded/libtrudp])
+
 AC_OUTPUT

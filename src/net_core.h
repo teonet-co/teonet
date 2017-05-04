@@ -26,10 +26,15 @@
 
 #include "net_arp.h"
 #include "net_com.h"
+#include "tr-udp.h"
+
 #if KSNET_CRYPT
 #include "crypt.h"
 #endif
-#include "tr-udp.h"
+
+#if TRUDP_VERSION == 2
+#include "trudp.h"
+#endif
 
 // External constants
 extern const char *localhost;
@@ -49,7 +54,11 @@ typedef struct ksnCoreClass {
     double last_check_event; ///< Last time of check host event
     ksnetArpClass *ka;       ///< Arp table class object
     ksnCommandClass *kco;    ///< Command class object
+    #if TRUDP_VERSION == 1
     ksnTRUDPClass *ku;       ///< TR-UDP class object
+    #elif TRUDP_VERSION == 2
+    trudpData *ku;          ///< TR-UDP class object
+    #endif
     #if KSNET_CRYPT
     ksnCryptClass *kcr;      ///< Crypt class object
     #endif

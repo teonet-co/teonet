@@ -670,51 +670,64 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV,
-        "Got command No %d to \"%s\" L0 client from peer \"%s\" "
+        "got command No %d to \"%s\" L0 client from peer \"%s\" "
         "with %d bytes data\n",
         data->cmd, data->from, rd->from, data->data_length);
     #endif
 
-    // Create L0 packet
-    size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
-            data->data_length;
-    char *out_data = malloc(out_data_len);
-    memset(out_data, 0, out_data_len);
-    size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
-            data->cmd, rd->from, data->from + data->from_length,
-            data->data_length);
+    // If l0 module is initialized
+    if(ke->kl) {
 
-    // Send command to L0 client
-    int *fd;
-    size_t snd;
-    size_t valueLength;
-    fd = pblMapGet(ke->kl->map_n, data->from, data->from_length, &valueLength);
-    if(fd != NULL) {
+        // Create L0 packet
+        size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
+                data->data_length;
+        char *out_data = malloc(out_data_len);
+        memset(out_data, 0, out_data_len);
+        size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+                data->cmd, rd->from, data->from + data->from_length,
+                data->data_length);
 
-        if((snd = write(*fd, out_data, packet_length)) >= 0);
+        // Send command to L0 client
+        int *fd;
+        size_t snd;
+        size_t valueLength;
+        fd = pblMapGet(ke->kl->map_n, data->from, data->from_length, &valueLength);
+        if(fd != NULL) {
 
-        #ifdef DEBUG_KSNET
-        teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
-        //void *packet_data = packet->peer_name + packet->peer_name_length;
-        ksn_printf(ke, MODULE, DEBUG_VV,
-            "send %d bytes to \"%s\" L0 client: %d bytes data, "
-            "from peer \"%s\"\n",
-            (int)snd, data->from,
-            packet->data_length, packet->peer_name);
-        #endif
+            if((snd = write(*fd, out_data, packet_length)) >= 0);
+
+            #ifdef DEBUG_KSNET
+            teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
+            //void *packet_data = packet->peer_name + packet->peer_name_length;
+            ksn_printf(ke, MODULE, DEBUG_VV,
+                "send %d bytes to \"%s\" L0 client: %d bytes data, "
+                "from peer \"%s\"\n",
+                (int)snd, data->from,
+                packet->data_length, packet->peer_name);
+            #endif
+        }
+
+        // The L0 client was disconnected
+        else {
+
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG_VV,
+                "%s" "the \"%s\" L0 client has not connected to the server%s\n",
+                ANSI_RED, data->from, ANSI_NONE);
+            #endif
+        }
+
+        free(out_data);
     }
-
-    // The L0 client was disconnected
+    
+    // If l0 server is no initialized
     else {
-
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG_VV,
-            "%s" "the \"%s\" L0 client has not connected to the server%s\n",
-            ANSI_RED, data->from, ANSI_NONE);
+            ksn_printf(ke, MODULE, ERROR_M,
+                "can't resend command %d to L0 client \"%s\" from peer \"%s\": " "%s" "the L0 module has not been initialized at this host%s\n",
+                data->cmd, data->from, rd->from, ANSI_RED, ANSI_NONE);
         #endif
     }
-
-    free(out_data);
 
     return retval;
 }
