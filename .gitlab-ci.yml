@@ -147,10 +147,10 @@ build_teonet_image:
     - docker build -t kscherba/teonet .
     - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
     - docker push kscherba/teonet
-    - docker tag -f kscherba/teonet gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG
+    - docker tag kscherba/teonet gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG
     - docker push gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG
     # update latest
-    - docker tag -f gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG gitlab.ksproject.org:5000/teonet/teonet:latest
+    - docker tag gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG gitlab.ksproject.org:5000/teonet/teonet:latest
     - docker push gitlab.ksproject.org:5000/teonet/teonet:latest
   only:
     - tags  
