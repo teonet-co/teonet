@@ -18,7 +18,7 @@
  * 
  * @param md Pointer to ksnMultiData
  */
-ksnMultiClass *ksnMultiInit(ksnMultiData *md) {
+ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     
     int i;
     ksnMultiClass *km = malloc(sizeof(ksnMultiClass));
@@ -35,16 +35,17 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md) {
             // Initialize network
             ksnetEvMgrClass *ke = ksnetEvMgrInitPort(md->argc, md->argv, 
                 md->event_cb, READ_OPTIONS|READ_CONFIGURATION, md->ports[i], 
-                NULL);
+                user_data);
             
             // Set network parameters
             ke->km = km; // Pointer to multi net module
             ke->n_num = i; // Set network number
             ke->num_nets = md->num; // Set number of networks
             strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME); // Host name
-            if(md->networks != NULL && md->networks[i] != NULL)
+            if(md->networks != NULL && md->networks[i] != NULL) {
                 strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2); // Network name
-            
+                read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
+            }            
             
             // Add to network list
             pblListAdd(km->list, ke);
@@ -71,11 +72,16 @@ void ksnMultiDestroy(ksnMultiClass *km) {
     if(km != NULL) {
         
         int i;
+        int argc = 0;
+        char **argv = NULL;
         
         // Destroy networks
         for(i = km->num-1; i >= 0; i--) {
             
             ksnetEvMgrClass *ke = pblListGet(km->list, i);
+            ksnetEvMgrStop(ke);
+            argc = ke->argc;
+            argv = ke->argv;
             ksnetEvMgrFree(ke, 2);
         }
         
@@ -84,6 +90,9 @@ void ksnMultiDestroy(ksnMultiClass *km) {
         
         // Free class memory
         free(km);
+        
+        // Restart application if need it
+        ksnetEvMgrRestart(argc, argv);          
     }
 }
 

@@ -19,6 +19,7 @@
 
 
 #include "ev_mgr.h"
+#include "net_multi.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 
@@ -422,7 +423,6 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         if(ke->km == NULL || !ke->n_num) ev_loop_destroy(ke->ev_loop);
 
         #ifdef DEBUG_KSNET
-        //printf(MODULE " at port %d stopped.\n", (int)ke->ksn_cfg.port );
         ksn_printf(ke, MODULE, MESSAGE, 
                 "at port %d stopped.\n", (int)ke->ksn_cfg.port);
         #endif
@@ -438,11 +438,13 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         if(ke->app_type != NULL) free(ke->app_type);
         if(ke->app_version != NULL) free(ke->app_version);
         
+        int km = ke->km != NULL;
+        
         // Free memory
         free(ke);
         
         // Restart application if need it
-        ksnetEvMgrRestart(argc, argv);        
+        if(!km) ksnetEvMgrRestart(argc, argv);        
     }
     
     return 0;
@@ -988,7 +990,12 @@ void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents) {
         attempt++; // Calculate attempts 
         
         teoRestartApp_f = 1; // Set restart flag
-        ksnetEvMgrStop(ke); // Stop event manager and restart application before exit
+        if(ke->km != NULL) {
+            ksn_printf(ke, MODULE, DEBUG, "multi destroy %s ...\n", "");
+            ksnMultiDestroy(ke->km);
+        }
+        else ksnetEvMgrStop(ke); // Stop event manager and restart application before exit
+        
         #ifdef SHOW_DFL
         signal(w->signum, SIG_DFL);
         kill(getpid(), w->signum);     
@@ -1027,7 +1034,7 @@ static void sigsegv_cb_h(int signum, siginfo_t *si, void *unused) {
     usleep(250000);
     
     signal(signum, SIG_DFL); // Restore signal processing
-    if(system("reset")); // Rest terminal
+    if(system("reset"));     // Reset terminal
     
     teoRestartApp_f = 1;
     ksnetEvMgrRestart(teo_argc, teo_argv);
