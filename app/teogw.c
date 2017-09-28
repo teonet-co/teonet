@@ -5,10 +5,12 @@
  * 
  * ## Connect to multi networks with one call
  * 
- * Connect to and manage some teo-networks in one time (without using threads). 
- * The networks are divided by the host port number.
+ * Connect to and manage some teo-networks in at one time (without using threads). 
+ * The networks are divided by the host port number and (or) network name.
+ * Use config file to connect networks to it r-hosts.
  *
  * Created on Mart 27, 2015, 19:51 PM
+ * Updated on September 27, 2017, 21:41 PM
  */
 
 #include <stdio.h>
@@ -16,7 +18,7 @@
 
 #include "net_multi.h"
 
-#define TGW_VERSION "0.0.1"
+#define TGW_VERSION "0.0.2"
 
 #define TEONET_NUM 2
 const int TEONET_PORTS[] = { 9040, 9042 }; // Port numbers
@@ -41,6 +43,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         
         // Set default namespace
         case EV_K_STARTED:
+            
+            ksn_printf(ke, NULL, DEBUG, "Host '%s' started at network '%s'...\n", 
+                    ksnetEvMgrGetHostName(ke), ke->ksn_cfg.network);
+                    
             // Set application type
             teoSetAppType(ke, "teo-gw");
             teoSetAppVersion(ke, TGW_VERSION);            
@@ -77,7 +83,7 @@ int main(int argc, char** argv) {
     
     md.run = 1;
     
-    ksnMultiClass *km = ksnMultiInit(&md);
+    ksnMultiClass *km = ksnMultiInit(&md, NULL);
     
     ksnMultiDestroy(km);
     

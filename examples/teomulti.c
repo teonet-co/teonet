@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     
     md.run = 1;
     
-    ksnMultiClass *km = ksnMultiInit(&md);
+    ksnMultiClass *km = ksnMultiInit(&md, NULL);
     
     ksnMultiDestroy(km);
     

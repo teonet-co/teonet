@@ -43,7 +43,7 @@ typedef struct ksnMultiData {
 extern "C" {
 #endif
 
-ksnMultiClass *ksnMultiInit(ksnMultiData *md);
+ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
 void ksnMultiDestroy(ksnMultiClass *km);
 ksnetEvMgrClass *ksnMultiGet(ksnMultiClass *km, int num);
 char *ksnMultiShowListStr(ksnMultiClass *km);
