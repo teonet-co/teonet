@@ -1,4 +1,4 @@
-# version 0.0.2
+# version 0.0.3
 
 # Run before each script
 before_script:
@@ -145,7 +145,7 @@ build_teonet_image:
     #- sudo apt-get -y update
     - docker build --no-cache .
     - docker build -t kscherba/teonet .
-    - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD --email=kirill@scherba.ru
+    - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD #--email=kirill@scherba.ru
     - docker push kscherba/teonet
     - docker tag kscherba/teonet gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG
     - docker push gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG
