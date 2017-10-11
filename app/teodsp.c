@@ -39,7 +39,7 @@ static int usock_disconnect(usock_class *us);
 
 #define MODULE _ANSI_LIGHTBLUE "usock" _ANSI_NONE
 
-#define HTTP_SUF " HTTP/1.1\r\n\r\n"
+#define HTTP_SUF " HTTP/1.0\r\n\r\n"
 
 static usock_class *usock_init(ksnetEvMgrClass *ke) {
     
