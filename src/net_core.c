@@ -39,7 +39,7 @@ const char *localhost = "127.0.0.1";
 void host_cb(EV_P_ ev_io *w, int revents);
 int ksnCoreBind(ksnCoreClass *kc);
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, size_t *packet_len);
-void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd, char *from, size_t from_len, const void *data, 
+void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd, char *from, size_t from_len, const void *data,
         size_t data_len, size_t *packet_len);
 int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
@@ -126,7 +126,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
 
         return NULL;
     }
-    
+
     // TR-UDP initialize
     #if TRUDP_VERSION == 1
     kc->ku = ksnTRUDPinit(kc);
@@ -163,10 +163,10 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
 
         // Send disconnect from peer connected to TCP Proxy command to all
         ksnetArpGetAll(kc->ka, send_cmd_disconnect_peer_cb, NULL);
-        
+
         // Send disconnect to all
         ksnetArpGetAll(kc->ka, send_cmd_disconnect_cb, NULL);
-        
+
         // Stop watcher
         ev_io_stop(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
 
@@ -177,9 +177,9 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         ksnCommandDestroy(kc->kco);
         #if TRUDP_VERSION == 1
         ksnTRUDPDestroy(kc->ku);
-        #elif TRUDP_VERSION == 2         
+        #elif TRUDP_VERSION == 2
         trudpDestroy(kc->ku);
-        #endif        
+        #endif
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif
@@ -194,45 +194,45 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
 
 /**
  * Create and bind UDP socket for client/server
- * 
+ *
  * @param[in] ksn_cfg Pointer to teonet configuration: ksnet_cfg
  * @param[out] port Pointer to Port number
  * @return File descriptor or error if return value < 0
  */
 int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
-    
+
     int i, sd;
-    struct sockaddr_in addr;	// Our address 
-    
+    struct sockaddr_in addr;	// Our address
+
     // Create a UDP socket
     if((sd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("cannot create socket\n");
         return -1;
     }
-    
+
     memset((char *)&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    // Bind the socket to any valid IP address and a specific port, increment 
-    // port if busy 
+    // Bind the socket to any valid IP address and a specific port, increment
+    // port if busy
     for(i=0;;) {
-        
+
         addr.sin_port = htons(*port);
 
         if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
 
             ksn_printf(kev, MODULE, DEBUG,
-                    "can't bind on port %d, try next port number ...\n", 
+                    "can't bind on port %d, try next port number ...\n",
                     *port);
-                    
+
             (*port)++;
             if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
             else return -2;
         }
         else break;
     }
-    
+
     return sd;
 }
 
@@ -246,22 +246,22 @@ int ksnCoreBind(ksnCoreClass *kc) {
 
     int fd;
     ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
-    
+
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG, 
+    ksn_printf(kev, MODULE, DEBUG,
             "create UDP client/server at port %d ...\n", kc->port);
     #endif
-    
+
     if((fd = ksnCoreBindRaw(ksn_cfg, &kc->port)) > 0) {
 
         kc->fd = fd;
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)kc->ke), MODULE, MESSAGE, 
+        ksn_printf(((ksnetEvMgrClass*)kc->ke), MODULE, MESSAGE,
                 "start listen at port %d, socket fd %d\n", kc->port, kc->fd);
         #endif
 
         // Set non block mode
-        // \todo Test with "Set non block on" 
+        // \todo Test with "Set non block on"
         //       and set the set_nonblock if it work correct
         set_nonblock(fd);
     }
@@ -302,7 +302,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
         void **packets;
         int num_subpackets = 0;
         if(cmd != CMD_VPN)
-            packets = ksnSplitPacket(kc->kco->ks, cmd, data, data_len, &num_subpackets);    
+            packets = ksnSplitPacket(kc->kco->ks, cmd, data, data_len, &num_subpackets);
 
         // Send large packet
         if(num_subpackets) {
@@ -315,9 +315,9 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
                 // Create packet
                 size_t packet_len;
                 size_t data_len = *(uint16_t*)(packets[i]);
-                void *packet = ksnCoreCreatePacket(kc, CMD_SPLIT, 
-                        packets[i] + sizeof(uint16_t), 
-                        data_len + sizeof(uint16_t)*2, 
+                void *packet = ksnCoreCreatePacket(kc, CMD_SPLIT,
+                        packets[i] + sizeof(uint16_t),
+                        data_len + sizeof(uint16_t)*2,
                         &packet_len);
 
                 // Encrypt and send one spitted sub-packet
@@ -328,19 +328,19 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
                 free(packets[i]);
             }
             free(packets);
-        } 
-        
+        }
+
         // Send small packet
         else {
 
             // Create packet
             size_t packet_len;
-            void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len, 
+            void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len,
                     &packet_len);
 
             // Encrypt and send one not spitted packet
             sendto_encrypt(kc, cmd, packet, packet_len);
-            
+
             // Free packet
             free(packet);
         }
@@ -375,59 +375,60 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
-    
+
     // Send to peer at other network
-    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL && 
-        (arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data, 
+    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL &&
+        (arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data,
                 data_len))) {
-               
+
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG, 
+        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
                 "send to peer \"%s\" at other network\n", to);
         #endif
     }
-    
-    // Send this message to L0 client
-    else if(cmd == CMD_L0 && 
-            ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&            
-            (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, to))) {
-        
-        #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV, 
-                "send command to L0 client \"%s\" to r-host\n", to);
-        #endif                
 
-        ssize_t snd;                
+    // Send this message to L0 client
+    else if(cmd == CMD_L0 &&
+            ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&
+            (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, to))) {
+
+        #ifdef DEBUG_KSNET
+        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV,
+                "send command to L0 client \"%s\" to r-host\n", to);
+        #endif
+
+        ssize_t snd;
         ksnLNullSPacket *cmd_l0_data = data;
 
         const size_t buf_length = teoLNullBufferSize(
-                cmd_l0_data->from_length, 
+                cmd_l0_data->from_length,
                 cmd_l0_data->data_length
         );
 
         char *buf = malloc(buf_length);
-        teoLNullPacketCreate(buf, buf_length, 
-                cmd_l0_data->cmd, 
-                cmd_l0_data->from, 
-                cmd_l0_data->from + cmd_l0_data->from_length, 
+        teoLNullPacketCreate(buf, buf_length,
+                cmd_l0_data->cmd,
+                cmd_l0_data->from,
+                cmd_l0_data->from + cmd_l0_data->from_length,
                 cmd_l0_data->data_length);
-        if((snd = write(fd, buf, buf_length)) >= 0);
+        //if((snd = write(fd, buf, buf_length)) >= 0);
+        if((snd = ksnLNullPacketSend(((ksnetEvMgrClass*)(kc->ke))->kl, fd, buf, buf_length)) >= 0);
         free(buf);
     }
-        
+
     // Send to r-host
     else {
-        
+
         // If connected to r-host
         char *r_host = ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.r_host_name;
         if(r_host[0] && (arp = ksnetArpGet(kc->ka, r_host)) != NULL) {
-            
+
             #ifdef DEBUG_KSNET
-            ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV, 
+            ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV,
                     "resend command to peer \"%s\" to r-host\n", to);
             #endif
 
-            // Create resend command buffer and Send command to r-host 
+            // Create resend command buffer and Send command to r-host
             // Command data format: to, cmd, data, data_len
             size_t ptr = 0;
             const size_t to_len = strlen(to) + 1;
@@ -437,7 +438,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
             memcpy(buf + ptr, &cmd, sizeof(uint8_t)); ptr += sizeof(uint8_t);
             memcpy(buf + ptr, data, data_len); ptr += data_len;
             ksnCoreSendto(kc, arp->addr, arp->port, CMD_RESEND, buf, buf_len);
-            free(buf);                                           
+            free(buf);
         }
     }
 
@@ -472,15 +473,15 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 //}
 inline void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
                           size_t data_len, size_t *packet_len) {
-    
-    return ksnCoreCreatePacketFrom(kc, cmd, kc->name, kc->name_len, data, 
+
+    return ksnCoreCreatePacketFrom(kc, cmd, kc->name, kc->name_len, data,
             data_len, packet_len);
 }
 
 /**
  * Create ksnet packet with from field from another host (Resend)
- * 
- * This function created to resend messages between networks in multi network 
+ *
+ * This function created to resend messages between networks in multi network
  * application
  *
  * @param kc Pointer to ksnCore Class object
@@ -493,8 +494,8 @@ inline void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data
  *
  * @return Pointer to packet. Should be free after use.
  */
-void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd, 
-        char *from, size_t from_len, 
+void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd,
+        char *from, size_t from_len,
         const void *data, size_t data_len, size_t *packet_len) {
 
     size_t ptr = 0;
@@ -537,7 +538,7 @@ int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *rd) {
         rd->data_len = packet_len - ptr; // Data length
 
         packed_valid = 1;
-    } 
+    }
 
     return packed_valid;
 }
@@ -584,10 +585,10 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *child_peer,
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data) {
 
-    ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc, 
+    ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc,
             arp_data->addr,
-            arp_data->port, 
-            CMD_DISCONNECTED, 
+            arp_data->port,
+            CMD_DISCONNECTED,
             data, data != NULL ? strlen(data)+1 : 0
     );
 
@@ -604,11 +605,11 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
  */
 int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data) {
-    
+
     if(arp_data->mode == 2) {
         ksnetArpGetAll(ka, send_cmd_disconnect_cb, name);
     }
-            
+
     return 0;
 }
 
@@ -620,7 +621,7 @@ int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name,
  * @param revents
  */
 void host_cb(EV_P_ ev_io *w, int revents) {
-    
+
     ksnCoreClass *kc = w->data;             // ksnCore Class object
     ksnetEvMgrClass *ke = kc->ke;           // ksnetEvMgr Class object
 
@@ -630,8 +631,8 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     size_t recvlen;                         // # bytes received
 
     // Receive data
-    recvlen = ksn_recvfrom(ke->kc->ku, 
-        revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE, 
+    recvlen = ksn_recvfrom(ke->kc->ku,
+        revents == EV_NONE ? 0 : kc->fd, (char*)buf, KSN_BUFFER_DB_SIZE,
         0, (struct sockaddr *)&remaddr, &addrlen);
 
     // Process package
@@ -643,20 +644,20 @@ void host_cb(EV_P_ ev_io *w, int revents) {
 
 /**
  * Check new peer
- * 
+ *
  * @param kc
  * @param rd
- * @return 
+ * @return
  */
 void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
-    
+
     ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
-     
+
     // Check new peer connected
     if((rd->arp = ksnetArpGet(kc->ka, rd->from)) == NULL) {
 
         ksnet_arp_data arp;
-    
+
         rd->arp = &arp;
         int mode = 0;
 
@@ -686,7 +687,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         // Send event callback
         if(ke->event_cb != NULL)
             ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
-        
+
         // Send event to subscribers
         teoSScrSend(ke->kc->kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
     }
@@ -694,26 +695,26 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
 /**
  * Process ksnet packet
- * 
+ *
  * @param vkc Pointer to ksnCoreClass
  * @param buf Buffer with packet
  * @param recvlen Packet length
  * @param remaddr Address
  */
-void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, 
+void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         __SOCKADDR_ARG remaddr) {
-    
+
     ksnCoreClass *kc = vkc; // ksnCoreClass Class object
     ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
-            
-    // Data received    
+
+    // Data received
     if(recvlen > 0) {
-        
+
         char *addr = strdup(inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr)); // IP to string
         int port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
 
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG_VV, 
+        ksn_printf(ke, MODULE, DEBUG_VV,
                 "got %d bytes from %s:%d\n", recvlen, addr, port);
         #endif
 
@@ -725,7 +726,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
             data = ksnDecryptPackage(kc->kcr, buf, recvlen, &data_len);
         }
-        
+
         // Use packet without decryption
         else {
         #endif
@@ -761,18 +762,27 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
 
         // Parse packet and check if it valid
         if(!ksnCoreParsePacket(data, data_len, &rd)) {
-            event = EV_K_RECEIVED_WRONG;
+            rd.from = "";
+            rd.from_len = 1;
+            rd.data = data;
+            rd.data_len = data_len;
+            // Check TR-UDP L0 packet and process it if valid
+            if(!ksnLNulltrudpCheckPaket(ke->kl, &rd)) {
+                event = EV_K_RECEIVED_WRONG;
+            } else {
+                command_processed = 1;
+            }
         }
 
         // Check ARP Table and add peer if not present
         else {
-            
+
             #ifdef DEBUG_KSNET
-            ksn_printf(ke, MODULE, DEBUG_VV, 
+            ksn_printf(ke, MODULE, DEBUG_VV,
                 "got %d byte data, cmd = %d, from %s\n",
                 rd.data_len, rd.cmd, rd.from);
             #endif
-         
+
             // Check new peer connected
             ksnCoreCheckNewPeer(kc, &rd);
 
@@ -791,7 +801,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
                 ke->event_cb(ke, event, (void*)&rd, sizeof(rd), NULL);
 
         }
-        
+
         // Free address buffer
         free(addr);
     }
@@ -799,7 +809,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
 //    // Socket disconnected
 //    else {
 //        #ifdef DEBUG_KSNET
-//        ksnet_printf(&ke->ksn_cfg, DEBUG_VV, 
+//        ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
 //                "TR-UDP protocol data, dropped or disconnected ...\n");
 //        #endif
 //    }

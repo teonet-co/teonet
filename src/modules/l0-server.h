@@ -25,6 +25,10 @@ typedef struct ksnLNullData {
     size_t read_buffer_ptr;   ///< Pointer in read buffer
     size_t read_buffer_size;  ///< Read buffer size
     
+    char *t_addr;             ///< TR-UDP IP address
+    int t_port;               ///< TR-UDP port
+    int t_channel;            ///< TR-UDP channel
+
 } ksnLNullData;  
                    
 /**
@@ -70,6 +74,8 @@ int ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name);
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl);
 size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data);
 ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl);
+int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd);
+ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg, size_t pkg_length);
 
 #ifdef	__cplusplus
 }

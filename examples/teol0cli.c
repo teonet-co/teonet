@@ -142,7 +142,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 char *peer_name = ke->ksn_cfg.app_argv[3]; // Peer name 
                 pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, 
                         CMD_PEERS, peer_name, NULL, 0);
-                if((snd = write(fd, pkg, pkg_length)) >= 0);
+                //if((snd = write(fd, pkg, pkg_length)) >= 0);
+                if((snd = teoLNullPacketSend(fd, pkg, pkg_length)) >= 0);                
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
                     "Send %d bytes packet to L0 server to peer %s, cmd = %d\n", 
                     (int)snd, peer_name, CMD_PEERS);
@@ -152,7 +153,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 char *msg = ke->ksn_cfg.app_argv[4];    // Message
                 pkg_length = teoLNullPacketCreate(packet, KSN_BUFFER_SIZE, 
                         CMD_ECHO, peer_name, msg, strlen(msg) + 1);
-                if((snd = write(fd, pkg, pkg_length)) >= 0);
+                //if((snd = write(fd, pkg, pkg_length)) >= 0);
+                if((snd = teoLNullPacketSend(fd, pkg, pkg_length)) >= 0);                
                 ksnet_printf(&ke->ksn_cfg, DEBUG,
                     "Send %d bytes packet to L0 server to peer %s, cmd = %d, data: %s\n", 
                     (int)snd, peer_name, CMD_ECHO, msg);
