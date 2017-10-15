@@ -1158,6 +1158,9 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                     if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
                         int fd = 65536;
                         ksnLNullClientRegister(kl, fd, rd);
+                        // Add fd to tr-udp channel data
+                        trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+                        if(tcd) tcd->fd = fd;
                         retval = 1;
                     }
                 } break;
@@ -1166,6 +1169,15 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                 default:
                     // \TODO Process other L0 TR-UDP packets
                     printf("L0 packet received\n");
+                    // Send packet to peer
+                    size_t vl;
+                    trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+                    if(tcd) {
+                        ksnLNullData* kld = pblMapGet(kl->map, &tcd->fd, sizeof(tcd->fd), &vl);
+                        if(kld != NULL) {
+                            ksnLNullSendFromL0(kl, cp, kld->name, kld->name_length);
+                        }
+                    }
                     retval = 1;
                     break;
             }
