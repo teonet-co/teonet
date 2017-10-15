@@ -64,6 +64,7 @@ ksnLNullClass *ksnLNullInit(void *ke) {
             kl->map = pblMapNewHashMap(); // Create a new hash map
             kl->map_n = pblMapNewHashMap(); // Create a new hash map
             memset(&kl->stat, 0, sizeof(kl->stat)); // Clear statistic data
+            kl->fd_trudp = MAX_FD_NUMBER;
             ksnLNullStart(kl); // Start L0 Server
         }
     }
@@ -1156,7 +1157,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                 // Login packet
                 case 0: {
                     if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
-                        int fd = 65536;
+                        int fd = kl->fd_trudp++;
                         ksnLNullClientRegister(kl, fd, rd);
                         // Add fd to tr-udp channel data
                         trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);

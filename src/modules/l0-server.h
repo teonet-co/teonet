@@ -41,6 +41,7 @@ typedef struct  ksnLNullClass {
     PblMap *map_n;      ///< Pointer to the L0 FDs map (by name)
     int fd;             ///< L0 TCP Server FD
     ksnLNullSStat stat; ///< L0 server statistic
+    int fd_trudp;       ///< Last free TR-UDP L0 FD
     
 } ksnLNullClass;
 
