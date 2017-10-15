@@ -2268,6 +2268,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                     key, last_received / 1000000.0);
                 #endif
 
+                if(tcd->fd) {
+                    ksnLNullClientDisconnect(kev->kl, tcd->fd, 1);
+                }
                 
                 // Remove peer from ARP table
                 trudpData *td = TD(tcd);

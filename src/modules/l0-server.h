@@ -77,6 +77,7 @@ size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data);
 ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl);
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd);
 ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg, size_t pkg_length);
+void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
 
 #ifdef	__cplusplus
 }
