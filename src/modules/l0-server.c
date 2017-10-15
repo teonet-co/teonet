@@ -23,7 +23,6 @@
 // Local functions
 static int ksnLNullStart(ksnLNullClass *kl);
 static void ksnLNullStop(ksnLNullClass *kl);
-static void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
 static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
         char *cname, size_t cname_length);
 static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData *rd);
@@ -472,8 +471,13 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg, size_t pkg_leng
             trudpUdpMakeAddr(kld->t_addr, kld->t_port,
                 (__SOCKADDR_ARG) &remaddr, &addrlen);
             
-            printf("Send packet to L0 TR-UDP addr: %s:%d, cmd = %u, to peer: %s \n", 
-                    kld->t_addr, kld->t_port, (unsigned)packet->cmd, packet->peer_name);
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV,
+                    "send packet to TR-UDP addr: %s:%d, cmd = %u, from peer: %s, data: %s \n", 
+                    kld->t_addr, kld->t_port, (unsigned)packet->cmd, 
+                    packet->peer_name,
+                    (char*)(packet->peer_name + packet->peer_name_length));
+            #endif
             
             ksnTRUDPsendto(((ksnetEvMgrClass*)(kl->ke))->kc->ku , 0, 0, 0, 
                     packet->cmd, fd, pkg, pkg_length, 0, 
@@ -538,7 +542,7 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
  * @param remove_f If true than remove disconnected record from map
  *
  */
-static void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
+void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
 
     size_t valueLength;
 
@@ -1146,11 +1150,14 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         if(cp->header_checksum == header_checksum &&
            cp->checksum == checksum) {
         
-            printf("TR-UDP got L0 packet, from: %s:%d, cmd: %u, data_len: %u, data: %s\n",
-               rd->addr, rd->port,
-               (unsigned)cp->cmd,
-               (unsigned)cp->data_length,
-               (char*)(cp->peer_name + cp->peer_name_length));
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV,
+                "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
+                rd->addr, rd->port,
+                (unsigned)cp->cmd,
+                (char*) cp->peer_name,
+                (char*)(cp->peer_name + cp->peer_name_length));
+            #endif
             
             switch(cp->cmd) {
                 
@@ -1167,9 +1174,8 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                 } break;
                     
                 // Process other L0 packets
-                default:
-                    // \TODO Process other L0 TR-UDP packets
-                    printf("L0 packet received\n");
+                default: {
+                    // Process other L0 TR-UDP packets
                     // Send packet to peer
                     size_t vl;
                     trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
@@ -1178,9 +1184,12 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                         if(kld != NULL) {
                             ksnLNullSendFromL0(kl, cp, kld->name, kld->name_length);
                         }
+                        else {
+                            trudp_ChannelSendReset(tcd);
+                        }
                     }
                     retval = 1;
-                    break;
+                } break;
             }
         }
     }
