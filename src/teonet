@@ -26,6 +26,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <vector>
 
 #include "ev_mgr.h"
@@ -194,7 +195,7 @@ struct HostInfo {
             if(!i) name = host_info->string_ar + ptr;
             else if(i == host_info->string_ar_num) version = host_info->string_ar + ptr;
             else type.v.push_back(host_info->string_ar + ptr);
-            ptr += strlen(host_info->string_ar + ptr) + 1;
+            ptr += std::char_traits<char>::length(host_info->string_ar + ptr) + 1;
         }
     }
 };
