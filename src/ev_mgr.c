@@ -112,6 +112,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->n_prev = NULL;
     ke->n_next = NULL;
     ke->user_data = user_data;
+    ke->teo_class = NULL;
     ke->argc = argc;
     ke->argv = argv;
     

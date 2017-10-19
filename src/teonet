@@ -1,0 +1,201 @@
+/*
+ * Copyright (c) 1996-2017 Kirill Scherba <kirill@scherba.ru>
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/*
+ * File:   teonet
+ * Author: Kirill Scherba <kirill@scherba.ru>
+ *
+ * Created on October 18, 2017, 11:03 AM
+ *
+ * Teonet c++ wrapper
+ */
+
+#pragma once
+
+#include <iostream>
+#include <vector>
+
+#include "ev_mgr.h"
+
+namespace teo {
+
+typedef ksnetEvMgrEvents teoEvents;  //! Teonet Events
+typedef ksnCorePacketData teoPacket; //! Teonet Packet
+
+/**
+ * Teonet class.
+ *
+ * This is Teonet L0 client C++ wrapper
+ */
+class Teonet {
+
+public:
+
+    /**
+     * Teonet event callback
+     */
+    typedef void (*teoEventsCb)(Teonet &teo, teoEvents event, void *data,
+                         size_t data_len, void *user_data);
+
+private:
+
+    ksnetEvMgrClass *ke;                //! Pointer to ksnetEvMgrClass
+    teoEventsCb event_cb;               //! Pointer to c++ callback function
+    const char *classVersion = "0.0.1"; //! Teonet class version
+
+public:
+
+    ksnetEvMgrClass * getKe() const {
+        return ke;
+    }
+
+public:
+
+    /**
+     * Teonet constructor
+     *
+     * Initialize KSNet Event Manager and network and set new default port
+     *
+     * @param argc Number of applications arguments (from main)
+     * @param argv Applications arguments array (from main)
+     * @param event_cb Events callback function called when an event happens
+     * @param options Options set: \n
+     *                READ_OPTIONS - read options from command line parameters; \n
+     *                READ_CONFIGURATION - read options from configuration file
+     * @param port Set default port number if non 0
+     * @param user_data Pointer to user data or NULL if absent
+     *
+     */
+    Teonet(int argc, char** argv,
+            teoEventsCb event_cb = NULL,
+            int options = READ_ALL,
+            int port = 0,
+            void *user_data = NULL) {
+
+        this->event_cb = event_cb;
+        ke = ksnetEvMgrInitPort(argc, argv, [](ksnetEvMgrClass *ke, teoEvents e,
+            void *data, size_t data_len, void *user_data) {
+              ((Teonet*) ke->teo_class)->eventCb(e, data, data_len, user_data);
+            }, options, port, user_data);
+        if(ke) ke->teo_class = this;
+    }
+
+    /**
+     * Teonet simple destructor
+     */
+    virtual ~Teonet() { /*std::cout << "Destructor Teonet\n";*/ }
+
+    /**
+     * Set Teonet application type
+     *
+     * @param type Application type string
+     */
+    inline void setAppType(const char *type) {
+        teoSetAppType(ke, (char*)type);
+    }
+
+    /**
+     * Set Teonet application version
+     *
+     * @param version Application version string
+     */
+    inline void setAppVersion(const char *version) {
+        teoSetAppVersion(ke, (char*)version);
+    }
+
+    /**
+     * Start Teonet Event Manager and network communication
+     *
+     * @return Alway 0
+     */
+    inline int run() {
+        return ksnetEvMgrRun(ke);
+    }
+
+    /**
+     * Send command by name to peer
+     *
+     * @param kc Pointer to ksnCoreClass
+     * @param to Peer name to send to
+     * @param cmd Command
+     * @param data Commands data
+     * @param data_len Commands data length
+     * @return Pointer to ksnet_arp_data or NULL if to peer is absent
+     */
+    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, void *data,
+        size_t data_len) {
+
+        return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
+    }
+
+    /**
+     * Get this class version
+     *
+     * @return
+     */
+    inline const char* getClassVersion() const {
+        return classVersion;
+    }
+
+    inline teo::teoPacket *getPacket(void *data) {
+        return (teo::teoPacket*) data;
+    }
+    
+    virtual inline void eventCb(teo::teoEvents event, void *data, size_t data_len, 
+        void *user_data){
+        
+        if(event_cb) event_cb(*this, event, data, data_len, user_data);
+    };
+
+};
+
+struct HostInfo {
+
+    std::string name;
+    struct {
+        std::vector<std::string> v;
+        std::string to_string() {
+            std::string type_str = "";
+            for(auto i = 0; i < v.size(); i++) {
+                type_str += v[i] + (i < v.size() - 1 ? ",":"");
+            }
+            return type_str;
+        }
+    } type;
+    std::string version;
+    std::string teonetVersion;
+
+    void makeTeonetVersion(uint8_t *ver, int num_dig = DIG_IN_TEO_VER) {
+        teonetVersion = "";
+        for(auto i=0; i < num_dig; i++) {
+            teonetVersion += std::to_string(ver[i]) +
+                    (i < num_dig - 1 ? "." : "");
+        }
+    }
+
+    HostInfo(void *data) {
+        auto host_info = (host_info_data *) data;
+        makeTeonetVersion(host_info->ver);
+        size_t ptr = 0;
+        for(auto i = 0; i <= host_info->string_ar_num; i++)  {
+            if(!i) name = host_info->string_ar + ptr;
+            else if(i == host_info->string_ar_num) version = host_info->string_ar + ptr;
+            else type.v.push_back(host_info->string_ar + ptr);
+            ptr += strlen(host_info->string_ar + ptr) + 1;
+        }
+    }
+};
+}
