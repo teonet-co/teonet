@@ -10,6 +10,18 @@ AM_CFLAGS = \
 	 -I../embedded/libtrudp/src \
 	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev
+	
+AM_CXXFLAGS = \
+	 -std=c++14 \
+	 -I/opt/local/include \
+	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
+	 $(DRELEASE_TEONE) \
+	 -I../src \
+	 -I../embedded/libpbl/src \
+	 -I../embedded/teocli/libteol0 \
+	 -I../embedded/libtrudp/src \
+	 -I/usr/include/libtrudp \
+	 -I/usr/include/libev	
 
 ## Debug info
 if DEBUG
@@ -43,7 +55,7 @@ endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
 	  teoack teoackm teocque teodb_ex teostream teol0cli teol0cli_n teol0cli_n \
-	  teol0cli_ns teosscr teotru_load teodb_ex
+	  teol0cli_ns teosscr teotru_load teodb_ex teocpp teocpp_2
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
@@ -63,6 +75,8 @@ teol0cli_ns_SOURCES = ../embedded/teocli/main_select.c
 teosscr_SOURCES = teosscr.c
 teotru_load_SOURCES = teotru_load.c
 teodb_ex_SOURCES = teodb_ex.c
+teocpp_SOURCES = teocpp.cpp
+teocpp_2_SOURCES = teocpp_2.cpp
 
 exampledir = $(datarootdir)/doc/@PACKAGE@/examples
 example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \

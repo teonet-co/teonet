@@ -280,6 +280,7 @@ typedef struct ksnetEvMgrClass {
     #endif
     
     void *user_data; ///< Pointer to user data or NULL if absent
+    void *teo_class; ///< Pointer to Teonet c++ Class (in c++ wrapper)
     
     struct cli_def *cli;
     

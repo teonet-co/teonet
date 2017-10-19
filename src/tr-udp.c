@@ -2244,7 +2244,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             trudpData *td = TD(tcd);
             char *key = trudp_ChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, CONNECT,
+            ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
                     "connect channel %s\n", key
             );
             #endif
@@ -2263,7 +2263,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
                 uint32_t last_received = *(uint32_t*)data;
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, CONNECT,
+                ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
                     "disconnect channel %s, last received: %.6f sec\n",
                     key, last_received / 1000000.0);
                 #endif
@@ -2282,7 +2282,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             }
             else {
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, CONNECT,
+                ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
                     "disconnect channel %s (Channel destroyed)\n",
                     key);
                 #endif

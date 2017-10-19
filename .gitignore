@@ -140,3 +140,5 @@ examples/go/teogo/teogo
 /tmp/
 /examples/perl/teonet_wrap.c
 /examples/perl/teonet.pm
+/examples/teocpp
+/examples/teocpp_2

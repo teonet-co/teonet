@@ -643,7 +643,7 @@ typedef struct PblMapKey_s PblMapKey;
 /**
  * The heap.
  */
-typedef struct PblList PblHeap;
+typedef PblList PblHeap;
 
 /**
  * The priority queue entry struct.
@@ -663,7 +663,7 @@ typedef struct PblPriorityQueueEntry_s PblPriorityQueueEntry;
 /**
  * The priority queue.
  */
-typedef struct PblList PblPriorityQueue;
+typedef PblList PblPriorityQueue;
 
 /*****************************************************************************/
 /* variable declarations                                                     */

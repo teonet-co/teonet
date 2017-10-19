@@ -107,6 +107,7 @@ nobase_teonetinclude_HEADERS = \
     tr-udp_stat.h \
     pidfile.h \
     teonet.h \
+    teonet \
     config/config.h \
     config/conf.h \
     config/opt.h \
