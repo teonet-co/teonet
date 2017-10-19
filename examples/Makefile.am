@@ -12,7 +12,7 @@ AM_CFLAGS = \
 	 -I/usr/include/libev
 	
 AM_CXXFLAGS = \
-	 -std=c++14 \
+	 -std=c++11 \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONE) \
@@ -22,7 +22,7 @@ AM_CXXFLAGS = \
 	 -I../embedded/libtrudp/src \
 	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev	
-
+	
 ## Debug info
 if DEBUG
   AM_CFLAGS += -g3 -O0
