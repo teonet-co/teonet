@@ -55,7 +55,7 @@ private:
 
     ksnetEvMgrClass *ke;                //! Pointer to ksnetEvMgrClass
     teoEventsCb event_cb;               //! Pointer to c++ callback function
-    const char *classVersion = "0.0.1"; //! Teonet class version
+    const char *classVersion = "0.0.2"; //! Teonet class version
 
 public:
 
@@ -143,6 +143,16 @@ public:
     }
 
     /**
+     * Set custom timer interval
+     *
+     * @param time_interval
+     */
+    void setCustomTimer(double time_interval = 2.00) {
+
+        ksnetEvMgrSetCustomTimer(ke, time_interval);
+    }
+
+    /**
      * Get this class version
      *
      * @return
@@ -151,16 +161,97 @@ public:
         return classVersion;
     }
 
-    inline teo::teoPacket *getPacket(void *data) {
+    /**
+     * Stop Teonet event manager
+     *
+     */
+    inline void stop() {
+        ksnetEvMgrStop(ke);
+    }
+
+    /**
+     * Cast data to teo::teoPacket
+     *
+     * @param data Pointer to data
+     * @return Pointer to teo::teoPacket
+     */
+    inline teo::teoPacket *getPacket(void *data) const {
         return (teo::teoPacket*) data;
     }
-    
-    virtual inline void eventCb(teo::teoEvents event, void *data, size_t data_len, 
-        void *user_data){
-        
+
+    /**
+     * Virtual Teonet event callback
+     *
+     * @param event
+     * @param data
+     * @param data_len
+     * @param user_data
+     */
+    virtual inline void eventCb(teo::teoEvents event, void *data,
+        size_t data_len, void *user_data){
+
         if(event_cb) event_cb(*this, event, data, data_len, user_data);
     };
 
+};
+
+typedef ksnCQueData cqueData;        //! Teonet CQue data structure
+typedef ksnCQueCallback cqueCallback;//! Teonet CQue callback function
+
+class CQue {
+    
+typedef void (*cqueCallback2) (teo::CQue &cque, uint32_t id, int type, void *data);    
+
+private:
+
+    Teonet *teo;
+    ksnetEvMgrClass *ke;
+
+public:
+
+    CQue(Teonet *t) : teo(t), ke(teo->getKe()) {}
+    virtual ~CQue() {}
+
+    inline cqueData *add(cqueCallback cb, double timeout = 5.00,
+        void *user_data = NULL) {
+        return ksnCQueAdd(ke->kq, cb, timeout, user_data);
+    }
+
+    cqueData *add(cqueCallback2 cb, double timeout = 5.00,
+        void *user_data = NULL) {
+
+        struct UserData {
+            CQue *cque;
+            cqueCallback2 cb;
+            void *user_data;
+        };
+        
+        UserData *ud = new UserData { this, cb, user_data };
+        return ksnCQueAdd(ke->kq, [](uint32_t id, int type, void *data) {
+
+            UserData *ud = (UserData *) data;
+            ud->cb(*ud->cque, id, type, ud->user_data);
+            
+            delete(ud);
+
+        }, timeout, ud);
+    }
+
+    inline int exec(uint32_t id) {
+        return ksnCQueExec(ke->kq, id);
+    }
+
+    inline cqueData *getData(void *data) const {
+        return (cqueData *)data;
+    }
+
+    inline uint32_t getId(cqueData *cd) const {
+        return cd->id;
+    }
+    
+    inline Teonet* getTeonet() const {
+        return teo;
+    }
 };
 
 struct HostInfo {
@@ -199,4 +290,5 @@ struct HostInfo {
         }
     }
 };
+
 }
