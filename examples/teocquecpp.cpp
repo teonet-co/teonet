@@ -62,7 +62,7 @@ void kq_cb(uint32_t id, int type, void *data) {
 void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
               size_t data_len, void *user_data) {
 
-    static teo::CQue *cque;
+    static auto &cque = teo.getCQueR();
 
     // Check teonet event
     switch(event) {
@@ -70,20 +70,20 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
         // Teonet started
         case EV_K_STARTED: {
             
-            cque = new teo::CQue(&teo);
+            //cque = new teo::Teonet::CQue(&teo);
             
         } break;
         
         // Teonet started
         case EV_K_STOPPED: {
             
-            delete(cque);
+            //delete(cque);
             
         } break;
 
         // Send by timer
-        case EV_K_TIMER:
-        {
+        case EV_K_TIMER: {
+            
             static int num = 0,     // Timer event counter
                    success_id = -1; // Success ID number
 
@@ -95,8 +95,8 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
                 case 1: {
 
                     // Add lambda callback to queue and wait timeout after 5 sec ...
-                    teo::cqueData *cq = cque->add(
-                        [](teo::CQue &cque, uint32_t id, int type, void *data) {
+                    auto cq = cque.add(
+                        [](teo::Teonet::CQue &cque, uint32_t id, int type, void *data) {
                             
                             std::cout
                                 << "Got lambda Callback Queue callback with"
@@ -109,55 +109,51 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
 
                         }, 5.000, (void*)(const char*)"Hello");
 
-                    std::cout << "Register callback id " << cque->getId(cq) << "\n";
-                }
-                break;
+                    std::cout << "Register callback id " << cque.getId(cq) << "\n";
+                } break;
 
                 // After 25 sec
                 case 5: {
 
                     // Add callback to queue and wait success result ...
-                    teo::cqueData *cq = cque->add(kq_cb, 5.000, (void*)(const char*)"Hello2");
-                    std::cout << "Register callback id " << cque->getId(cq) << " \n";
-                    success_id = cque->getId(cq);
-                }
-                break;
+                    auto cq = cque.add(kq_cb, 5.000, (void*)(const char*)"Hello2");
+                    std::cout << "Register callback id " << cque.getId(cq) << " \n";
+                    success_id = cque.getId(cq);
+                } break;
 
                 // After 35 sec
                 case 7: {
 
                     // Execute callback queue to make success result
-                    cque->exec(success_id);
-                }
-                break;
+                    cque.exec(success_id);
+                } break;
 
                 // After 50 sec
-                case 10:
+                case 10: {
 
                     // Stop teonet to finish this Example
                     std::cout << "\nExample stopped...\n\n";
                     teo.stop();
-                    break;
+                } break;
 
                 default: break;
             }
-        }
-        break;
+            
+        } break;
 
         // Callback QUEUE event (the same as callback queue callback). This
         // event send at timeout or after ksnCQueExec calls
-        case EV_K_CQUE_CALLBACK:
-        {
+        case EV_K_CQUE_CALLBACK: {
+        
             int type = *(int*) user_data; // Callback type: 1 - success; 0 - timeout
-            teo::cqueData *cq = cque->getData(data); // Pointer to Callback QUEUE data
+            teo::Teonet::cqueData *cq = cque.getData(data); // Pointer to Callback QUEUE data
 
-            std::cout << "Got Callback Queue event with id: " << cque->getId(cq)
+            std::cout << "Got Callback Queue event with id: " << cque.getId(cq)
                       << ", type: " << type
                       << " => " << (type ? "success" : "timeout") 
-                      << ", data: " << (const char*)cq->data
+                      //<< ", data: " << (const char*)cq->data
                       << "\n";
-        }
-        break;
+        } break;
 
         // Other events
         default: break;

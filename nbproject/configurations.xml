@@ -107,6 +107,7 @@
         <in>teocpp_2.cpp</in>
         <in>teocque.c</in>
         <in>teocquecpp.cpp</in>
+        <in>teocquecpp_2.cpp</in>
         <in>teodb_ex.c</in>
         <in>teol0cli.c</in>
         <in>teolarge.c</in>
@@ -684,6 +685,25 @@
         </cTool>
       </item>
       <item path="examples/teocquecpp.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="12">
+          <incDir>
+            <pElem>examples</pElem>
+            <pElem>src/config</pElem>
+            <pElem>/opt/local/include</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+          </preprocessorList>
+        </ccTool>
+      </item>
+      <item path="examples/teocquecpp_2.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="12">
           <incDir>
             <pElem>examples</pElem>
@@ -2208,6 +2228,8 @@
         </cTool>
       </item>
       <item path="examples/teocquecpp.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="examples/teocquecpp_2.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="examples/teodb_ex.c" ex="false" tool="0" flavor2="2">
         <cTool flags="3">

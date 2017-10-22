@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "ev_mgr.h"
 
@@ -148,7 +149,6 @@ public:
      * @param time_interval
      */
     void setCustomTimer(double time_interval = 2.00) {
-
         ksnetEvMgrSetCustomTimer(ke, time_interval);
     }
 
@@ -188,19 +188,25 @@ public:
      * @param user_data
      */
     virtual inline void eventCb(teo::teoEvents event, void *data,
-        size_t data_len, void *user_data){
+        size_t data_len, void *user_data) {
 
         if(event_cb) event_cb(*this, event, data, data_len, user_data);
     };
 
-};
+//};
 
-typedef ksnCQueData cqueData;        //! Teonet CQue data structure
-typedef ksnCQueCallback cqueCallback;//! Teonet CQue callback function
+typedef ksnCQueData cqueData;           //! Teonet CQue data structure
+typedef ksnCQueCallback cqueCallback;   //! Teonet CQue callback function
 
+/**
+ * Teonet CQue class
+ */
 class CQue {
     
-typedef void (*cqueCallback2) (teo::CQue &cque, uint32_t id, int type, void *data);    
+public:
+    
+typedef void (*cqueCallback2) (teo::Teonet::CQue &cque, uint32_t id, int type, void *data);    
+typedef std::unique_ptr<CQue> CQuePtr;
 
 private:
 
@@ -209,9 +215,20 @@ private:
 
 public:
 
-    CQue(Teonet *t) : teo(t), ke(teo->getKe()) {}
-    virtual ~CQue() {}
+    CQue(Teonet *t) : teo(t), ke(teo->getKe()) { /*std::cout << "CQue::CQue\n";*/  }
+    CQue(const CQue &obj) : teo(obj.teo), ke(obj.ke) { /*std::cout << "CQue::CQue copy\n";*/ }
+    virtual ~CQue() { /*std::cout << "~CQue::CQue\n";*/ }
 
+    /**
+     * Add callback to queue
+     * 
+     * @param cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event 
+     *           EV_K_CQUE_CALLBACK should be send at the same time.
+     * @param timeout Callback timeout. If equal to 0 than timeout sets automatically
+     * @param data The user data which should be send to the Callback function
+     * 
+     * @return Pointer to added ksnCQueData or NULL if error occurred
+     */    
     inline cqueData *add(cqueCallback cb, double timeout = 5.00,
         void *user_data = NULL) {
         return ksnCQueAdd(ke->kq, cb, timeout, user_data);
@@ -237,23 +254,85 @@ public:
         }, timeout, ud);
     }
 
+    /**
+     * Execute callback queue record 
+     * 
+     * Execute callback queue record and remove it from queue
+     * 
+     * @param id Required ID
+     * 
+     * @return return 0: if callback executed OK; !=0 some error occurred
+     */    
     inline int exec(uint32_t id) {
         return ksnCQueExec(ke->kq, id);
     }
 
+    /**
+     * Get pointer to CQue data structure
+     * 
+     * @param data Pointer to data at EV_K_CQUE_CALLBACK event
+     * 
+     * @return Pointer to CQue data structure 
+     */
     inline cqueData *getData(void *data) const {
         return (cqueData *)data;
     }
 
+    /**
+     * Get CQue data id
+     * 
+     * @param cd Pointer to CQue data structure
+     * @return CQue id
+     */
     inline uint32_t getId(cqueData *cd) const {
         return cd->id;
     }
     
+    /**
+     * Get pointer to teonet class object
+     * 
+     * @return Pointer to teonet class object
+     */
     inline Teonet* getTeonet() const {
         return teo;
     }
 };
 
+/**
+ * CQue class factory(maker)
+ * 
+ * @return Unique pointer to CQue object
+ */
+inline CQue::CQuePtr getCQueP() {
+    return getCQue<std::unique_ptr<teo::Teonet::CQue>>();
+}
+
+/**
+ * CQue class factory(maker)
+ * 
+ * @return Reference to CQue object
+ */
+inline CQue &getCQueR() {
+    static auto cque = getCQueP();
+    return *cque;
+}
+
+/**
+ * * CQue class factory(maker)
+ * 
+ * @return T
+ */
+template<typename T> T getCQue() {   
+    T cque(new CQue(this));
+    return cque;
+}
+
+
+};
+
+/**
+ * Teonet host info processing class
+ */
 struct HostInfo {
 
     std::string name;
