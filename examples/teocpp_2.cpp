@@ -11,13 +11,13 @@
 
 #define TCPP_VERSION "0.0.2"
 
-class myTeonet : public teo::Teonet {
+class MyTeonet : public teo::Teonet {
 
 // Constructor & destructor
 public:
 
-    myTeonet(int argc, char** argv) : teo::Teonet(argc, argv) { }
-    virtual ~myTeonet() { /*std::cout << "Destructor myTeonet\n";*/  }
+    MyTeonet(int argc, char** argv) : teo::Teonet(argc, argv) { }
+    virtual ~MyTeonet() { /*std::cout << "Destructor myTeonet\n";*/  }
 
 // Own class methods and data
 public:
@@ -120,7 +120,7 @@ int main(int argc, char** argv) {
               << teoGetLibteonetVersion() << "\n";
 
     // Initialize teonet event manager and Read configuration
-    auto teo = new myTeonet(argc, argv);
+    auto teo = new MyTeonet(argc, argv);
 
     // Set application type
     teo->setAppType("teo-cpp");

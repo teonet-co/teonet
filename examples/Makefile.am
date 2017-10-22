@@ -55,12 +55,13 @@ endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
 	  teoack teoackm teocque teodb_ex teostream teol0cli teol0cli_n teol0cli_n \
-	  teol0cli_ns teosscr teotru_load teocpp teocpp_2 teocquecpp
+	  teol0cli_ns teosscr teotru_load teocpp teocpp_2 teocquecpp teocquecpp_2
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
 teocque_SOURCES = teocque.c
 teocquecpp_SOURCES = teocquecpp.cpp
+teocquecpp_2_SOURCES = teocquecpp_2.cpp
 teodb_ex_SOURCES = teodb_ex.c ../src/modules/teodb_com.c
 teolarge_SOURCES = teolarge.c
 teomulti_SOURCES = teomulti.c
@@ -81,7 +82,8 @@ teocpp_2_SOURCES = teocpp_2.cpp
 exampledir = $(datarootdir)/doc/@PACKAGE@/examples
 example_DATA = teoack.c teoackm.c teocque.c teolarge.c teomulti.c teomulti_t.c \
 	       teosend.c teotcp.c teoterm.c teotun.c teostream.c teol0cli.c \
-	       teol0cli.py teosscr.c teotru_load.c teodb_ex.c teocpp.cpp teocpp_2.cpp
+	       teol0cli.py teosscr.c teotru_load.c teodb_ex.c teocpp.cpp teocpp_2.cpp \
+	       teocquecpp teocquecpp_2
 
 teotru_load_CFLAGS = $(AM_CFLAGS) -std=c11
 
