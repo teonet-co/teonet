@@ -109,6 +109,7 @@
         <in>teocquecpp.cpp</in>
         <in>teocquecpp_2.cpp</in>
         <in>teodb_ex.c</in>
+        <in>teodb_ex_cpp.cpp</in>
         <in>teol0cli.c</in>
         <in>teolarge.c</in>
         <in>teomulti.c</in>
@@ -220,8 +221,7 @@
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fPIC -fstack-protector-strong"/>
         <element flagsID="11"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fstack-protector-strong"/>
-        <element flagsID="12" commonFlags="-std=c++11 -O2"/>
-        <element flagsID="13" commonFlags="-std=gnu11 -fPIC -O2 -g -O2 -fPIC"/>
+        <element flagsID="12" commonFlags="-std=gnu11 -fPIC -O2 -g -O2 -fPIC"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -235,6 +235,16 @@
           </cTool>
           <ccTool>
             <standard>8</standard>
+            <incDir>
+              <pElem>src</pElem>
+              <pElem>src/utils</pElem>
+              <pElem>src/config</pElem>
+              <pElem>embedded/libpbl/src</pElem>
+              <pElem>embedded/teocli/libteol0</pElem>
+              <pElem>embedded/libtrudp/src</pElem>
+              <pElem>src/modules</pElem>
+              <pElem>examples</pElem>
+            </incDir>
           </ccTool>
         </makeTool>
         <preBuild>
@@ -257,10 +267,16 @@
       <item path="app/modules/teo_web/teo_web.c" ex="false" tool="0" flavor2="3">
         <cTool flags="2">
           <incDir>
+            <pElem>src/config</pElem>
             <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
             <pElem>src/modules</pElem>
             <pElem>app/embedded/mongoose</pElem>
             <pElem>app/modules/teo_auth</pElem>
+            <pElem>app</pElem>
           </incDir>
         </cTool>
       </item>
@@ -268,6 +284,8 @@
         <cTool flags="2">
           <incDir>
             <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+            <pElem>app</pElem>
           </incDir>
         </cTool>
       </item>
@@ -276,9 +294,15 @@
           <incDir>
             <pElem>app/embedded/jsmn</pElem>
             <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
             <pElem>src/modules</pElem>
             <pElem>app/embedded/mongoose</pElem>
             <pElem>app/modules/teo_auth</pElem>
+            <pElem>app</pElem>
           </incDir>
         </cTool>
       </item>
@@ -467,14 +491,23 @@
       </item>
       <item path="embedded/libtrudp/src/hash.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/map.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/packet.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/packet_queue.c"
@@ -482,14 +515,23 @@
             tool="0"
             flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/queue.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_channel.c"
@@ -497,10 +539,16 @@
             tool="0"
             flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_ev.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_receive_queue.c"
@@ -515,10 +563,16 @@
             tool="0"
             flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_stat.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_utils.c"
@@ -526,14 +580,23 @@
             tool="0"
             flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/udp.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/utils.c" ex="false" tool="0" flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/write_queue.c"
@@ -541,10 +604,18 @@
             tool="0"
             flavor2="3">
         <cTool flags="8">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/map_t.c" ex="false" tool="0" flavor2="3">
         <cTool flags="7">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>embedded/libtrudp/tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/packet_queue_t.c"
@@ -552,18 +623,38 @@
             tool="0"
             flavor2="3">
         <cTool flags="7">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>embedded/libtrudp/tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/packet_t.c" ex="false" tool="0" flavor2="3">
         <cTool flags="7">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>embedded/libtrudp/tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/queue_t.c" ex="false" tool="0" flavor2="3">
         <cTool flags="7">
+          <incDir>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>embedded/libtrudp/tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/tr-udp_t.c" ex="false" tool="0" flavor2="3">
         <cTool flags="7">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>/usr/include/CUnit</pElem>
+            <pElem>embedded/libtrudp/tests</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="embedded/teocli/libteol0/teonet_l0_client.c"
@@ -577,6 +668,7 @@
         <cTool flags="2">
           <incDir>
             <pElem>embedded/teocli</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
             <pElem>examples</pElem>
           </incDir>
         </cTool>
@@ -585,6 +677,7 @@
         <cTool flags="2">
           <incDir>
             <pElem>embedded/teocli</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
             <pElem>examples</pElem>
           </incDir>
         </cTool>
@@ -644,30 +737,10 @@
       </item>
       <item path="examples/teocpp.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="1">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>src/config</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>src/modules</pElem>
-            <pElem>examples</pElem>
-          </incDir>
         </ccTool>
       </item>
       <item path="examples/teocpp_2.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="1">
-          <incDir>
-            <pElem>src</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>src/config</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>src/modules</pElem>
-            <pElem>examples</pElem>
-          </incDir>
         </ccTool>
       </item>
       <item path="examples/teocque.c" ex="false" tool="0" flavor2="3">
@@ -685,41 +758,11 @@
         </cTool>
       </item>
       <item path="examples/teocquecpp.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="12">
-          <incDir>
-            <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>/usr/include/libtrudp</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
+        <ccTool flags="1">
         </ccTool>
       </item>
       <item path="examples/teocquecpp_2.cpp" ex="false" tool="1" flavor2="8">
-        <ccTool flags="12">
-          <incDir>
-            <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>/usr/include/libtrudp</pElem>
-            <pElem>/usr/include/libev</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
+        <ccTool flags="1">
         </ccTool>
       </item>
       <item path="examples/teodb_ex.c" ex="false" tool="0" flavor2="3">
@@ -735,6 +778,10 @@
             <pElem>examples</pElem>
           </incDir>
         </cTool>
+      </item>
+      <item path="examples/teodb_ex_cpp.cpp" ex="false" tool="1" flavor2="8">
+        <ccTool flags="1">
+        </ccTool>
       </item>
       <item path="examples/teol0cli.c" ex="false" tool="0" flavor2="3">
         <cTool flags="2">
@@ -919,10 +966,6 @@
             <pElem>/usr/include/libtrudp</pElem>
             <pElem>/usr/include/libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/app/modules/teo_auth">
@@ -976,6 +1019,8 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -990,14 +1035,6 @@
         <cTool>
           <incDir>
             <pElem>embedded/libtrudp/examples</pElem>
-          </incDir>
-        </cTool>
-      </folder>
-      <folder path="0/embedded/libtrudp/tests">
-        <cTool>
-          <incDir>
-            <pElem>/usr/include/CUnit</pElem>
-            <pElem>embedded/libtrudp/tests</pElem>
           </incDir>
         </cTool>
       </folder>
@@ -1367,7 +1404,7 @@
         </cTool>
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="13">
+        <cTool flags="12">
           <incDir>
             <pElem>src</pElem>
             <pElem>src/config</pElem>
@@ -2232,6 +2269,29 @@
       <item path="examples/teocquecpp_2.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="examples/teodb_ex.c" ex="false" tool="0" flavor2="2">
+        <cTool flags="3">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>examples</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>__OPTIMIZE__=1</Elem>
+            <Elem>__PIC__=2</Elem>
+            <Elem>__REGISTER_PREFIX__=</Elem>
+            <Elem>__USER_LABEL_PREFIX__=</Elem>
+            <Elem>__pic__=2</Elem>
+          </preprocessorList>
+        </cTool>
+      </item>
+      <item path="examples/teodb_ex_cpp.cpp" ex="false" tool="0" flavor2="2">
         <cTool flags="3">
           <incDir>
             <pElem>src/config</pElem>

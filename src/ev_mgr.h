@@ -218,8 +218,8 @@ typedef enum ksnetEvMgrEvents {
 typedef struct ksnetEvMgrAppParam {
     
     int app_argc;
-    char **app_argv;
-    char **app_descr;
+    const char **app_argv;
+    const char **app_descr;
     
 } ksnetEvMgrAppParam;
 
