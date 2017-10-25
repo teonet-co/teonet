@@ -65,7 +65,7 @@
 #include "modules/teodb_com.h"
 #include "ev_mgr.h"
 
-#define TDB_VERSION "0.0.5"
+#define TDB_VERSION "0.0.6"
 #define APPNAME _ANSI_MAGENTA "teodb" _ANSI_NONE
 
 // Constants
@@ -435,12 +435,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                            tdd->key_length + tdd->data_length +
                                 sizeof(teo_db_data) == rd->data_len) {
 
-                            rv = ksnTDBset(ke->kf,
-                                tdd->key_data,
-                                tdd->key_length,
-                                tdd->key_data + tdd->key_length,
-                                tdd->data_length
-                            );
+                            // Add or update key
+                            if(tdd->data_length)
+                                rv = ksnTDBset(ke->kf,
+                                    tdd->key_data,
+                                    tdd->key_length,
+                                    tdd->key_data + tdd->key_length,
+                                    tdd->data_length
+                                );
+                            // Remove key
+                            else
+                                rv = ksnTDBdelete(ke->kf, tdd->key_data,
+                                    tdd->key_length
+                                );
 
                             if(!rv) {
                                 ksn_printf(ke, APPNAME, DEBUG,

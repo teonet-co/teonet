@@ -31,11 +31,13 @@
 #include <memory>
 
 #include "ev_mgr.h"
+#include "modules/teodb_com.h"
 
 namespace teo {
 
-typedef ksnetEvMgrEvents teoEvents;  //! Teonet Events
-typedef ksnCorePacketData teoPacket; //! Teonet Packet
+typedef ksnetEvMgrEvents teoEvents;     //! Teonet Events
+typedef ksnCorePacketData teoPacket;    //! Teonet Packet
+typedef ksnetEvMgrAppParam teoAppParam; //! Teonet App parameters
 
 /**
  * Teonet class.
@@ -94,7 +96,7 @@ public:
             }, options, port, user_data);
         if(ke) ke->teo_class = this;
     }
-
+    
     /**
      * Teonet simple destructor
      */
@@ -206,7 +208,7 @@ class CQue {
 public:
     
 typedef void (*cqueCallback2) (teo::Teonet::CQue &cque, uint32_t id, int type, void *data);    
-typedef std::unique_ptr<CQue> CQuePtr;
+typedef std::unique_ptr<CQue> cquePtr;
 
 private:
 
@@ -303,7 +305,7 @@ public:
  * 
  * @return Unique pointer to CQue object
  */
-inline CQue::CQuePtr getCQueP() {
+inline CQue::cquePtr getCQueP() {
     return getCQue<std::unique_ptr<teo::Teonet::CQue>>();
 }
 
@@ -318,7 +320,7 @@ inline CQue &getCQueR() {
 }
 
 /**
- * * CQue class factory(maker)
+ * CQue class factory(maker)
  * 
  * @return T
  */
@@ -327,6 +329,146 @@ template<typename T> T getCQue() {
     return cque;
 }
 
+class TeoDB {
+    
+public:    
+    
+    typedef teo_db_data teoDbData;
+    typedef teo_db_data_range teoDbDataRange;
+    typedef struct teoDbCQueData {
+
+        TeoDB *teoDb;
+        teoDbData **tdd;
+
+        teoDbCQueData(TeoDB *teoDb, teoDbData **tdd) : teoDb(teoDb), tdd(tdd) {}
+        
+        inline void *getKey() const {
+            return (*tdd)->key_data;
+        }
+        inline char *getKeyStr() const {
+            return (char*) getKey();
+        }
+        
+        inline void *getValue() const {
+            return (*tdd)->key_data + (*tdd)->key_length;
+        }
+        inline char *getValueStr() const {
+            return (char*) getValue();
+        }
+
+    } teoDbCQueData;
+    
+private:
+
+    Teonet *teo;
+    teoDbData **tdd;
+    std::string peer;
+    CQue cque = CQue(teo);
+
+public:
+
+    TeoDB(Teonet *t, const std::string peer, teoDbData **tdd) : teo(t), peer(peer), tdd(tdd) { /*std::cout << "TeoDB::TeoDB\n";*/  }
+    TeoDB(const TeoDB &obj) : teo(obj.teo), peer(obj.peer), tdd(obj.tdd) { /*std::cout << "TeoDB::TeoDB copy\n";*/ }
+    virtual ~TeoDB() { /*std::cout << "~TeoDB::TeoDB\n";*/ }
+    
+    /**
+     * Get pointer to teonet class object
+     * 
+     * @return Pointer to teonet class object
+     */
+    inline Teonet* getTeonet() const {
+        return teo;
+    }
+    
+    inline const char* getPeer() const {
+        return peer.c_str();
+    }
+    
+    inline bool checkPeer(const char *peer_name) {
+        return !strcmp(peer.c_str(), peer_name);
+    }
+
+    inline std::unique_ptr<teoDbData> prepareRequest(const void *key, size_t key_len,
+        const void *data, size_t data_len, uint32_t id, size_t *tdd_len)    {
+        
+        return (std::unique_ptr<teoDbData>) prepare_request_data(key, key_len, data, data_len, id, tdd_len);
+    }
+    
+    static inline teoDbData* getData(teo::teoPacket *rd) {
+        return (teoDbData*) (rd ? rd->data : NULL);
+    }
+
+    ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len, 
+        const void *data, size_t data_len) {
+        return _send(cmd, key, key_len, data, data_len);
+    }
+    
+    ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
+        cqueCallback cb = NULL, double timeout = 5.00, teoDbData **tdd = NULL, void *user_data = NULL) {
+        return _send(cmd, key, key_len, NULL, 0, cb, timeout, tdd, user_data);
+    }
+    
+    inline int  exec(uint32_t id) {
+        return cque.exec(id);
+    }
+    
+    bool process(teoEvents event, void *data) {
+        
+        bool processed = false;
+        auto rd = teo->getPacket(data);
+        auto tdd = getData(rd);
+        
+        // Check teonet event
+        switch(event) {
+            
+            case EV_K_RECEIVED:
+        
+                // DATA event            
+                if(rd && checkPeer(rd->from)) {
+                    
+                    switch(rd->cmd) {
+                        
+                        // Get data response #132
+                        case CMD_D_GET_ANSWER: 
+                        // Get list response #133
+                        case CMD_D_LIST_ANSWER: 
+                            
+                            if(tdd && tdd->id && !exec(tdd->id)) processed = true;
+                            break;
+                    }
+                }
+                break;            
+        }
+            
+        return processed;    
+    }
+    
+private:
+    
+    ksnet_arp_data *_send(uint8_t cmd, const void *key, size_t key_len, 
+        const void *data = NULL, size_t data_len = 0, 
+        cqueCallback cb = NULL, double timeout = 5.00, teoDbData **tdd = NULL, void *user_data = NULL) {
+        
+        uint32_t id = 0;
+        
+        // Add callback to queue and wait timeout after 5 sec ...
+        if(cb) {
+            if(!user_data) {
+                // Add callback to queue and wait timeout after 5 sec ...
+                if(!tdd) tdd = this->tdd;
+                user_data = new teoDbCQueData(this, tdd);
+            }
+            auto cq = cque.add(cb, timeout, user_data);
+            std::cout << "... Register callback id " << cq->id << "\n";
+            id = cq->id;
+        }
+        
+        size_t tdd_len;
+        auto tddr = prepareRequest(key, key_len, data, data_len, id, &tdd_len);
+        //auto tddr = prepare_request_data(key, key_len, data, data_len, id, &tdd_len);
+        return teo->sendTo(peer.c_str(), cmd, tddr.get(), tdd_len);
+    }        
+};
 
 };
 

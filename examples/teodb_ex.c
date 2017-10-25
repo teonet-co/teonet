@@ -260,7 +260,7 @@ int main(int argc, char** argv) {
            "based on teonet ver. " VERSION "\n");
     
     // Application parameters
-    char *app_argv[] = { "", "teodb_peer"}; 
+    const char *app_argv[] = { "", "teodb_peer" }; 
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 2;
     app_param.app_argv = app_argv;
@@ -272,9 +272,6 @@ int main(int argc, char** argv) {
 
     // Set application type
     teoSetAppType(ke, "teo-db-ex");
-    
-//    // Set custom timer interval. See "case EV_K_TIMER" to continue this example
-//    ksnetEvMgrSetCustomTimer(ke, 2.00);
     
     // Show Hello message
     ksn_puts(ke, APPNAME, MESSAGE, "started ...\n");
