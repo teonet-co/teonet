@@ -235,6 +235,8 @@
               <pElem>embedded/libpbl/src</pElem>
               <pElem>embedded/teocli/libteol0</pElem>
               <pElem>embedded/libtrudp/src</pElem>
+              <pElem>/usr/include/libtrudp</pElem>
+              <pElem>/usr/include/libev</pElem>
             </incDir>
             <preprocessorList>
               <Elem>HAVE_CONFIG_H</Elem>
@@ -574,11 +576,6 @@
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>../libtrudp</pElem>
             <pElem>../libev</pElem>
@@ -589,11 +586,6 @@
         <cTool flags="1">
           <incDir>
             <pElem>examples</pElem>
-            <pElem>src/config</pElem>
-            <pElem>/opt/local/include</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>../libtrudp</pElem>
             <pElem>../libev</pElem>
@@ -1016,6 +1008,8 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -1034,8 +1028,6 @@
             <pElem>embedded/libtrudp/examples</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
             <Elem>USE_LIBEV</Elem>
           </preprocessorList>
         </cTool>
@@ -1046,8 +1038,6 @@
             <pElem>/usr/include/libtrudp</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
             <Elem>PIC</Elem>
             <Elem>USE_LIBEV</Elem>
           </preprocessorList>
@@ -1058,10 +1048,6 @@
           <incDir>
             <pElem>embedded/libtrudp/tests</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/embedded/teocli">
@@ -1089,14 +1075,6 @@
             <Elem>USE_LIBEV</Elem>
           </preprocessorList>
         </cTool>
-      </folder>
-      <folder path="0/examples">
-        <ccTool>
-          <incDir>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
-          </incDir>
-        </ccTool>
       </folder>
       <folder path="0/examples/fossa">
         <cTool>
@@ -1173,8 +1151,6 @@
         </cTool>
         <ccTool>
           <incDir>
-            <pElem>/usr/include/libtrudp</pElem>
-            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
           <preprocessorList>
