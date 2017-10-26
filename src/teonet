@@ -367,8 +367,8 @@ private:
 
 public:
 
-    TeoDB(Teonet *t, const std::string peer, teoDbData **tdd) : teo(t), peer(peer), tdd(tdd) { /*std::cout << "TeoDB::TeoDB\n";*/  }
-    TeoDB(const TeoDB &obj) : teo(obj.teo), peer(obj.peer), tdd(obj.tdd) { /*std::cout << "TeoDB::TeoDB copy\n";*/ }
+    TeoDB(Teonet *t, const std::string peer, teoDbData **tdd) : teo(t), tdd(tdd), peer(peer) { /*std::cout << "TeoDB::TeoDB\n";*/  }
+    TeoDB(const TeoDB &obj) : teo(obj.teo), tdd(obj.tdd), peer(obj.peer) { /*std::cout << "TeoDB::TeoDB copy\n";*/ }
     virtual ~TeoDB() { /*std::cout << "~TeoDB::TeoDB\n";*/ }
     
     /**
@@ -437,7 +437,10 @@ public:
                             break;
                     }
                 }
-                break;            
+                break;
+                
+            default:
+                break;
         }
             
         return processed;    
@@ -476,13 +479,14 @@ private:
  * Teonet host info processing class
  */
 struct HostInfo {
+    
 
     std::string name;
     struct {
         std::vector<std::string> v;
         std::string to_string() {
             std::string type_str = "";
-            for(auto i = 0; i < v.size(); i++) {
+            for(size_t i = 0; i < v.size(); i++) {
                 type_str += v[i] + (i < v.size() - 1 ? ",":"");
             }
             return type_str;

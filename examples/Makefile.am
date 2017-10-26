@@ -12,6 +12,7 @@ AM_CFLAGS = \
 	 -I/usr/include/libev
 
 AM_CXXFLAGS = \
+	 -g -Wall \
 	 -std=c++11 \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
@@ -26,10 +27,10 @@ AM_CXXFLAGS = \
 ## Debug info
 if DEBUG
   AM_CFLAGS += -g3 -O0
-#  AM_CXXFLAGS += -g3 -O0
+ AM_CXXFLAGS += -g3 -O0
 else
   AM_CFLAGS += -O2
-#  AM_CXXFLAGS += -O2
+  AM_CXXFLAGS += -O2
 endif
 
 if TEO_THREAD

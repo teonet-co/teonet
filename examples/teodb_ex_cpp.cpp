@@ -17,7 +17,6 @@
 #include <condition_variable>
 
 #include "teonet"
-#include "modules/teodb_com.h"
 
 #define TDB_VERSION "0.0.2"
 #define APPNAME _ANSI_MAGENTA "teodb_ex" _ANSI_NONE
@@ -120,7 +119,7 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
                                 std::cout << "Key: \"" << cqd->getKeyStr() << "\"\n";
 
                                 std::cout << "Number of records in list: " << ar_data_num << "\n";
-                                int i = 0; for(i = 0; i < ar_data_num; i++) {
+                                for(uint32_t i = 0; i < ar_data_num; i++) {
                                     size_t len = strlen((char*)ar_data + ptr) + 1;
                                     std::cout << i + 1 << " " << (char*)ar_data + ptr << "\n";
                                     ptr += len;
