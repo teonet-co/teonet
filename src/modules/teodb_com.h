@@ -25,10 +25,10 @@ enum CMD_D {
     CMD_D_LIST_ANSWER,          ///< #133 List response:  [ key, key, ... ]
     
     CMD_D_LIST_LENGTH,          ///< #134 List length request:  TYPE_OF_REQUEST: { ID, namespace } }
-    CMD_D_LIST_LENGTH_ANSWER,   ///< #135 List response:  { listLength, key, ID }
+    CMD_D_LIST_LENGTH_ANSWER,   ///< #135 List length response:  { listLength, key, ID }
     
-    CMD_D_LIST_RANGE,           ///< #136 List length request:  TYPE_OF_REQUEST: { ID, namespace } }
-    CMD_D_LIST_RANGE_ANSWER,    ///< #137 List response:  { listLength, key, ID }
+    CMD_D_LIST_RANGE,           ///< #136 List range request:  TYPE_OF_REQUEST: { ID, namespace } }
+    CMD_D_LIST_RANGE_ANSWER,    ///< #137 List range response:  { listLength, key, ID }
     
     CMD_D_ERROR_ANSWER,         ///< #138 Bad request answer
     
@@ -42,7 +42,7 @@ enum CMD_D {
 /**
  * Teo DB binary network structure
  */
-typedef struct teo_db_data {
+typedef struct  {
     
     uint8_t key_length; ///< Key length
     uint32_t data_length; ///< Data length

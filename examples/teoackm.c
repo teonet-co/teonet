@@ -344,7 +344,7 @@ int main(int argc, char** argv) {
     
     
     // Application parameters
-    char *app_argv[] = { "", "peer_to"}; 
+    const char *app_argv[] = { "", "peer_to"}; 
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 2;
     app_param.app_argv = app_argv;

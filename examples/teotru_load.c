@@ -204,8 +204,8 @@ int main(int argc, char** argv) {
     
     
     // Application parameters
-    char *app_argv[] = { "", "server_peer"}; 
-    char *app_argv_descr[] = { "", "Server peer name to connect this host to in client mode; or \"\" or \"server\" in server mode" }; 
+    const char *app_argv[] = { "", "server_peer"}; 
+    const char *app_argv_descr[] = { "", "Server peer name to connect this host to in client mode; or \"\" or \"server\" in server mode" }; 
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 2;
     app_param.app_argv = app_argv;

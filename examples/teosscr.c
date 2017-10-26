@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
            "based on teonet ver. " VERSION "\n");
 
     // Application parameters
-    char *app_argv[] = { "", "remote_peer"}; 
+    const char *app_argv[] = { "", "remote_peer"}; 
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 2;
     app_param.app_argv = app_argv;

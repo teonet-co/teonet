@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
     printf("Teostream example ver " TSTR_VERSION ", based on teonet ver. " VERSION "\n");
     
     // Application parameters
-    char *app_argv[] = { "", "peer_to", "stream_name"}; 
+    const char *app_argv[] = { "", "peer_to", "stream_name"}; 
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 3;
     app_param.app_argv = app_argv;
