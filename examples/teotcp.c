@@ -181,7 +181,7 @@ int main(int argc, char** argv) {
     printf("Teotcp example ver " TTCP_VERSION ", based on teonet ver. " VERSION "\n");
     
     // Application parameters
-    char *app_argv[] = { "", "app_type"}; 
+    const char *app_argv[] = { "", "app_type"}; 
     ksnetEvMgrAppParam app_param;
     app_param.app_argc = 2;
     app_param.app_argv = app_argv;

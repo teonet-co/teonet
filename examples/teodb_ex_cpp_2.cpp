@@ -70,12 +70,11 @@ public:
     void eventCb(teo::teoEvents event, void *data, size_t data_len,
             void *user_data) override {        
         
-        auto rd = getPacket(data);
-        tdd = teo::Teonet::TeoDB::getData(rd);
-        
         // Process TeoDb
         if(teoDb && teoDb->process(event, data)) return;
 
+        auto rd = getPacket(data);
+        
         // Send commands when teo-db server connected
         if(event == EV_K_CONNECTED && teoDb->checkPeer(rd->from)) {
 
@@ -121,7 +120,7 @@ public:
                         std::cout << "4) Send LIST request to the TeoDB using cQueue\n";
 
                         // Send CMD_D_LIST command to DB peer and wait answer in lambda function
-                        cqd->teoDb->send(CMD_D_LIST, TEODB_EX_KEY ".", sizeof(TEODB_EX_KEY) + 1,
+                        cqd->teodb->send(CMD_D_LIST, TEODB_EX_KEY ".", sizeof(TEODB_EX_KEY) + 1,
                             [](uint32_t id, int type, void *data) {
 
                                 auto cqd = (teo::Teonet::TeoDB::teoDbCQueData*) data;
@@ -154,7 +153,7 @@ public:
                                     const size_t key_len = strlen(key) + 1;
                                     std::cout << "6) Remove test key: " << key
                                               << "\n";
-                                    cqd->teoDb->send(CMD_D_SET, key, key_len);
+                                    cqd->teodb->send(CMD_D_SET, key, key_len);
                                 }
                                 std::cout << "\nTest finished ...\n";
                                 delete(cqd);

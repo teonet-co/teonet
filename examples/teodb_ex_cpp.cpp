@@ -51,7 +51,7 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
     static teo::Teonet::TeoDB::teoDbData *tdd;
     static auto teoDb = teo::Teonet::TeoDB(&teo, TEODB_PEER, &tdd);
     auto rd = teo.getPacket(data);
-    tdd = teo::Teonet::TeoDB::getData(rd);   // !!! ttd should be defined before teoDb.process call
+    //tdd = teo::Teonet::TeoDB::getData(rd);   // !!! ttd should be defined before teoDb.process call
 
     if(teoDb.process(event, data)) return;
 
@@ -100,7 +100,7 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
                     std::cout << "4) Send LIST request to the TeoDB using cQueue\n";
 
                     // Send CMD_D_LIST command to DB peer and wait answer in lambda function
-                    cqd->teoDb->send(CMD_D_LIST, TEODB_EX_KEY ".", sizeof(TEODB_EX_KEY) + 1, 
+                    cqd->teodb->send(CMD_D_LIST, TEODB_EX_KEY ".", sizeof(TEODB_EX_KEY) + 1, 
                         [](uint32_t id, int type, void *data) {
 
                             auto cqd = (teo::Teonet::TeoDB::teoDbCQueData*) data;
@@ -133,7 +133,7 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
                                 const size_t key_len = strlen(key) + 1;
                                 std::cout << "6) Remove test key: " << key
                                           << "\n";
-                                cqd->teoDb->send(CMD_D_SET, key, key_len);
+                                cqd->teodb->send(CMD_D_SET, key, key_len);
                             }
                             std::cout << "\nTest finished ...\n";
                             delete(cqd);

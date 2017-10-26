@@ -134,10 +134,10 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
         if(((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
             int i;
             for(i = 1; i < ((ksnetEvMgrAppParam*)user_data)->app_argc; i++) {
-                app_argv[i] = ((ksnetEvMgrAppParam*)user_data)->app_argv[i];
+                app_argv[i] = (char*)((ksnetEvMgrAppParam*)user_data)->app_argv[i];
                 
                 if(((ksnetEvMgrAppParam*)user_data)->app_descr != NULL) {
-                    app_argv_descr[i] = ((ksnetEvMgrAppParam*)user_data)->app_descr[i];
+                    app_argv_descr[i] = (char*)((ksnetEvMgrAppParam*)user_data)->app_descr[i];
                 }
                 else app_argv_descr[i] = NULL;
             }
