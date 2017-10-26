@@ -166,7 +166,9 @@ public:
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
 
-    #define sendAnswerTo(rd, name, out_data, out_data_len) sendCmdAnswerTo(getKe(), rd, name, out_data, out_data_len)
+    inline void sendAnswerTo(teo::teoPacket *rd, char *name, void *out_data, size_t out_data_len) {
+        sendCmdAnswerTo(getKe(), rd, name, out_data, out_data_len);
+    }
 
     /**
      * Send data to L0 client. Usually it is an answer to request from L0 client
