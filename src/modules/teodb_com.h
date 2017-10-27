@@ -44,10 +44,10 @@ enum CMD_D {
  */
 typedef struct  {
     
-    uint8_t key_length; ///< Key length
-    uint32_t data_length; ///< Data length
-    uint32_t id; ///< Request ID
-    char key_data[]; ///< Key and Value buffer     
+    uint8_t key_length;     ///< Key length
+    uint32_t data_length;   ///< Data length
+    uint32_t id;            ///< Request ID
+    char key_data[];        ///< Key and Value buffer     
     
 } teo_db_data;
 
