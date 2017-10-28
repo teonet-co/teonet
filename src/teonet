@@ -282,7 +282,6 @@ class CQue {
 
 public:
 
-typedef void (*cqueCallback2) (teo::Teonet::CQue &cque, uint32_t id, int type, void *data);
 typedef std::unique_ptr<CQue> cquePtr;
 
 private:
@@ -306,29 +305,26 @@ public:
      *
      * @return Pointer to added ksnCQueData or NULL if error occurred
      */
-    inline cqueData *add(cqueCallback cb, double timeout = 5.00,
-        void *user_data = NULL) {
-        return ksnCQueAdd(ke->kq, cb, timeout, user_data);
-    }
 
-    cqueData *add(cqueCallback2 cb, double timeout = 5.00,
+    template<typename Callback>
+    cqueData *add(Callback cb, double timeout = 5.00,
         void *user_data = NULL) {
 
-        struct UserData {
-            CQue *cque;
-            cqueCallback2 cb;
-            void *user_data;
-        };
-
-        UserData *ud = new UserData { this, cb, user_data };
+        struct userData { void *user_data; Callback cb; };
+        userData *ud = new userData { user_data, cb };
         return ksnCQueAdd(ke->kq, [](uint32_t id, int type, void *data) {
 
-            UserData *ud = (UserData *) data;
-            ud->cb(*ud->cque, id, type, ud->user_data);
-
+            auto ud = (userData*) data;
+            ud->cb(id, type, ud->user_data);
             delete(ud);
 
         }, timeout, ud);
+    }
+    
+    inline cqueData * add(cqueCallback cb, double timeout = 5.00,
+        void *user_data = NULL) {
+        
+        return ksnCQueAdd(ke->kq, cb, timeout, user_data);
     }
 
     /**
@@ -510,15 +506,16 @@ public:
     }
 
     ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
-        const void *data, size_t data_len) {
+        const void *data = NULL, size_t data_len = 0) {
         return _send<cqueCallback>(cmd, key, key_len, data, data_len);
     }
 
+    template<typename Callback>
     ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
-        cqueCallback cb = NULL, double timeout = 5.00,
-        uint8_t cb_type = 0, teo::teoPacket *rd = NULL,
+        Callback cb, double timeout,
+        uint8_t cb_type, teo::teoPacket *rd = NULL,
         teoDbData **tdd = NULL, void *user_data = NULL) {
-        return _send<cqueCallback>(cmd, key, key_len, NULL, 0, cb_type,
+        return _send<Callback>(cmd, key, key_len, NULL, 0, cb_type,
                 teoDbCQueData::setl0Cli(rd), cb, timeout, tdd, user_data);
     }
 
@@ -563,33 +560,50 @@ public:
 
         return processed;
     }
-
+    
 private:
 
-    template<typename T>
+    template<typename Callback>
     ksnet_arp_data *_send(uint8_t cmd, const void *key, size_t key_len,
         const void *data = NULL, size_t data_len = 0,
         uint8_t cb_type = 0, teoL0Client *l0Cli = NULL,
-        T cb = NULL, double timeout = 5.00, teoDbData **tdd = NULL, void *user_data = NULL) {
+        Callback cb = NULL, double timeout = 5.00, teoDbData **tdd = NULL, 
+        void *user_data = NULL) {
 
         uint32_t id = 0;
 
         // Add callback to queue and wait timeout after 5 sec ...
-        if(cb) {
+        if(cb != NULL) {
             if(!user_data) {
                 // Add callback to queue and wait timeout after 5 sec ...
                 if(!tdd) tdd = this->tdd;
                 user_data = new teoDbCQueData(this, tdd, l0Cli, cb_type);
             }
-            auto cq = cque.add(cb, timeout, user_data);            
+            // Add callback to queue and wait timeout after 5 sec ...
+            cqueData *cq;
+            if(!std::is_same<Callback, cqueCallback>::value) {
+                struct userData { void *user_data; Callback cb; };            
+                auto ud = new userData { user_data, cb };
+                cq = cque.add([](uint32_t id, int type, void *data) {
+                    auto ud = (userData *) data;
+                    ud->cb(id, type, ud->user_data);
+                    delete(ud);                                
+                }, timeout, ud);     
+            }
+            else {
+                cq = cque.add(cb, timeout, user_data);
+            }
             teo_printf(NULL, DEBUG, "Register callback id %u\n", cq->id);
             id = cq->id;
         }
 
         size_t tdd_len;
         auto tddr = prepareRequest(key, key_len, data, data_len, id, &tdd_len);
-        //auto tddr = prepare_request_data(key, key_len, data, data_len, id, &tdd_len);
         return teo->sendTo(peer.c_str(), cmd, tddr.get(), tdd_len);
+//        auto tddr = prepare_request_data(key, key_len, data, data_len, id, &tdd_len);
+//        auto retval = teo->sendTo(peer.c_str(), cmd, tddr, tdd_len);
+//        free(tddr);
+//        return retval;
     }
 };
 
