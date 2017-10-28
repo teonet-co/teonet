@@ -504,10 +504,11 @@ public:
     static inline teoDbData* getData(teo::teoPacket *rd) {
         return (teoDbData*) (rd ? rd->data : NULL);
     }
-
-    ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
+    
+    inline ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
         const void *data = NULL, size_t data_len = 0) {
-        return _send<cqueCallback>(cmd, key, key_len, data, data_len);
+        
+        return sendTDD(cmd, key, key_len, data, data_len);
     }
 
     template<typename Callback>
@@ -515,8 +516,42 @@ public:
         Callback cb, double timeout,
         uint8_t cb_type, teo::teoPacket *rd = NULL,
         teoDbData **tdd = NULL, void *user_data = NULL) {
-        return _send<Callback>(cmd, key, key_len, NULL, 0, cb_type,
-                teoDbCQueData::setl0Cli(rd), cb, timeout, tdd, user_data);
+        
+        // Create user data if it  is NULL
+        if(!user_data) {
+            if(!tdd) tdd = this->tdd;
+            user_data = new teoDbCQueData(this, tdd, teoDbCQueData::setl0Cli(rd), cb_type);
+        }
+        
+        // Add callback to queue and wait timeout after 5 sec ...
+        struct userData { void *user_data; Callback cb; };            
+        auto ud = new userData { user_data, cb };
+        auto cq = cque.add([](uint32_t id, int type, void *data) {
+            auto ud = (userData *) data;
+            ud->cb(id, type, ud->user_data);
+            delete((TeoDB::teoDbCQueData*)ud->user_data);
+            delete(ud);                                
+        }, timeout, ud);     
+        teo_printf(NULL, DEBUG, "Register callback id %u\n", cq->id);
+        return sendTDD(cmd, key, key_len, NULL, 0, cq->id);
+    }
+    
+    ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
+        cqueCallback cb, double timeout,
+        uint8_t cb_type, teo::teoPacket *rd = NULL,
+        teoDbData **tdd = NULL, void *user_data = NULL) {
+        
+        // Create user data if it  is NULL
+        if(!user_data) {
+            if(!tdd) tdd = this->tdd;
+            user_data = new teoDbCQueData(this, tdd, teoDbCQueData::setl0Cli(rd), cb_type);
+        }
+        
+        // Add callback to queue and wait timeout after 5 sec ...
+        std::cout << "!!! cqueCallback !!!\n";
+        auto cq = cque.add(cb, timeout, user_data);
+        teo_printf(NULL, DEBUG, "Register simple callback id %u\n", cq->id);
+        return sendTDD(cmd, key, key_len, NULL, 0, cq->id);
     }
 
     inline int exec(uint32_t id) {
@@ -563,47 +598,16 @@ public:
     
 private:
 
-    template<typename Callback>
-    ksnet_arp_data *_send(uint8_t cmd, const void *key, size_t key_len,
-        const void *data = NULL, size_t data_len = 0,
-        uint8_t cb_type = 0, teoL0Client *l0Cli = NULL,
-        Callback cb = NULL, double timeout = 5.00, teoDbData **tdd = NULL, 
-        void *user_data = NULL) {
-
-        uint32_t id = 0;
-
-        // Add callback to queue and wait timeout after 5 sec ...
-        if(cb != NULL) {
-            if(!user_data) {
-                // Add callback to queue and wait timeout after 5 sec ...
-                if(!tdd) tdd = this->tdd;
-                user_data = new teoDbCQueData(this, tdd, l0Cli, cb_type);
-            }
-            // Add callback to queue and wait timeout after 5 sec ...
-            cqueData *cq;
-            if(!std::is_same<Callback, cqueCallback>::value) {
-                struct userData { void *user_data; Callback cb; };            
-                auto ud = new userData { user_data, cb };
-                cq = cque.add([](uint32_t id, int type, void *data) {
-                    auto ud = (userData *) data;
-                    ud->cb(id, type, ud->user_data);
-                    delete(ud);                                
-                }, timeout, ud);     
-            }
-            else {
-                cq = cque.add(cb, timeout, user_data);
-            }
-            teo_printf(NULL, DEBUG, "Register callback id %u\n", cq->id);
-            id = cq->id;
-        }
-
+    ksnet_arp_data *sendTDD(uint8_t cmd, const void *key, size_t key_len,
+        const void *data = NULL, size_t data_len = 0, uint32_t id = 0) {
+        
         size_t tdd_len;
         auto tddr = prepareRequest(key, key_len, data, data_len, id, &tdd_len);
         return teo->sendTo(peer.c_str(), cmd, tddr.get(), tdd_len);
-//        auto tddr = prepare_request_data(key, key_len, data, data_len, id, &tdd_len);
-//        auto retval = teo->sendTo(peer.c_str(), cmd, tddr, tdd_len);
-//        free(tddr);
-//        return retval;
+        /*auto tddr = prepare_request_data(key, key_len, data, data_len, id, &tdd_len);
+        auto retval = teo->sendTo(peer.c_str(), cmd, tddr, tdd_len);
+        free(tddr);
+        return retval;*/
     }
 };
 

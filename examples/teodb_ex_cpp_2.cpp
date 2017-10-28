@@ -156,11 +156,11 @@ public:
                                     cqd->teodb->send(CMD_D_SET, key, key_len);
                                 }
                                 std::cout << "\nTest finished ...\n";
-                                delete(cqd);
+                                //delete(cqd);
                             }
                         , 5.000, 0);
                     }
-                    delete(cqd);
+                    //delete(cqd);
                 }
             , 5.000, 0);
         }
