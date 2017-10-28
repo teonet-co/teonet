@@ -96,7 +96,7 @@ void event_cb(teo::Teonet &teo, teo::teoEvents event, void *data,
 
                     // Add lambda callback to queue and wait timeout after 5 sec ...
                     auto cq = cque.add(
-                        [](teo::Teonet::CQue &cque, uint32_t id, int type, void *data) {
+                        [&](uint32_t id, int type, void *data) {
                             
                             std::cout
                                 << "Got lambda Callback Queue callback with"

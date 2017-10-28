@@ -12,8 +12,8 @@ AC_SUBST([$1], ['$2'])
 # END
 
 AC_PREREQ([2.69])
-AC_INIT([teonet], [0.2.4], [kirill@scherba.ru])
-AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 100, [Teonet dynamic library version])
+AC_INIT([teonet], [0.2.5], [kirill@scherba.ru])
+AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 101, [Teonet dynamic library version])
 AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2017"], [Teonet library copyright])
 
 AC_CONFIG_HEADERS([src/config/config.h])
