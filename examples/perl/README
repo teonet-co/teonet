@@ -16,8 +16,8 @@ INSTALLATION
 
 To install this module type the following:
 
-   ./teonet.sh
    perl Makefile.PL
+   ./teonet.sh
    make
    make test
    make install
