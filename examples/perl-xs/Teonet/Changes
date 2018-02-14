@@ -1,6 +1,0 @@
-Revision history for Perl extension Teonet.
-
-0.01  Sun Feb  4 00:40:56 2018
-	- original version; created by h2xs 1.23 with options
-		-A -n Teonet
-

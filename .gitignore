@@ -146,3 +146,11 @@ examples/go/teogo/teogo
 /examples/teocquecpp_2
 /examples/teodb_ex_cpp
 /examples/teodb_ex_cpp_2
+/examples/perl/MYMETA.yml
+/examples/perl/Makefile
+/examples/perl/MYMETA.json
+/examples/perl/teonet.bs
+/examples/perl/pm_to_blib
+/examples/perl/blib/
+/examples/perl/Makefile.old
+/examples/perl/Teonet.pm

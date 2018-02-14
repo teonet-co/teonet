@@ -1,8 +1,0 @@
-Changes
-Makefile.PL
-MANIFEST
-ppport.h
-README
-Teonet.xs
-t/Teonet.t
-lib/Teonet.pm
