@@ -80,13 +80,26 @@ ksnetEvMgrClass *ksnetEvMgrInitP(int argc, char** argv,
     else SvSetSV(callback, pFcn);
 
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb, READ_ALL);
+    //ke->n_num = 1;
     return ke;
+}
+
+// Teonet async event send
+void ksnetEvMgrAsyncP(ksnetEvMgrClass *ke, char *data) {
+    size_t len = strlen(data) + 1;
+    ksnetEvMgrAsync(ke, (void *)data, len, NULL);
 }
 
 // Get `from peer` from data
 const char* rdFrom(void *data) {
     ksnCorePacketData *rd = data;
     return rd ? rd->from : "";
+}
+
+// Transfer to string
+const char* rdToString(void *data) {
+    char *txt = data;
+    return txt ? txt : "";
 }
 
 %}
@@ -97,3 +110,5 @@ void teoSetAppType(ksnetEvMgrClass *ke, char *type);
 void teoSetAppVersion(ksnetEvMgrClass *ke, char *version);
 int ksnetEvMgrRun(ksnetEvMgrClass *ke);
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
+
+//void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data);
