@@ -28,9 +28,9 @@ sub print_time {
 
 # Mojolicious proccess
 sub mojo {
-    
+
 #    my($any, $ke) = @_;
-    
+
     # Route with placeholder
     get '/teo/:command' => sub {
       my $c = shift;
