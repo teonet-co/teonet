@@ -22,16 +22,27 @@ To install this module type the following:
    make test
    make install
 
+
 APPLICATIONS
-    
-   teonet.pl -- simple teonet loop
+
+   teonet.pl -- simple teonet loop application
+   teoberl   -- bash script helper to run teonet.pl
 
    teomojo.pl -- teonet + mojolicious two process connected through pipe
-
-        mojo create http://localhost:3000
+ 
+        The mojo create http://localhost:3000 HTTP web server
         The http://localhost:3000/teo/echo send word `echo` to teonet through 
         pipe and teoAsync call.
-        Use the teomojo-read.pl to read this URL in loop
+
+        Use next command line to start server:
+            perl teomojo.pl daemon teo-perl -a gt1.kekalan.net -P 9010 -n teonet
+ 
+        Use next command line the to read /teo/echo URL in loop:
+            perl teomojo-read.pl
+
+    pipe.pl -- simple pipe test
+
+
 
 DEPENDENCIES
 
@@ -60,6 +71,7 @@ This module requires these other modules and libraries:
 
         sudo apt-get install -y libteonet-dev
 
+
 COPYRIGHT AND LICENCE
 
 Put the correct copyright and licence information here.
@@ -69,4 +81,3 @@ Copyright (C) 2018 Teonet team by Kirill Scherba
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.22.1 or,
 at your option, any later version of Perl 5 you may have available.
-

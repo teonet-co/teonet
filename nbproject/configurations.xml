@@ -104,11 +104,6 @@
         <df name="perl">
           <in>teomojo.pl</in>
         </df>
-        <df name="perl-xs">
-          <df name="Teonet">
-            <in>Teonet.c</in>
-          </df>
-        </df>
         <in>teoack.c</in>
         <in>teoackm.c</in>
         <in>teocpp.cpp</in>
@@ -217,23 +212,21 @@
         <element flagsID="4"
                  commonFlags="-mtune=generic -march=x86-64 -g -O2 -O2 -std=gnu11 -fPIC -fstack-protector-strong"/>
         <element flagsID="5"
-                 commonFlags="-mtune=generic -march=x86-64 -g -O2 -fPIC -fstack-protector-strong"/>
-        <element flagsID="6"
                  commonFlags="-mtune=generic -march=x86-64 -g -O2 -fstack-protector-strong"/>
-        <element flagsID="7"
+        <element flagsID="6"
                  commonFlags="-mtune=generic -march=x86-64 -g -fPIC -fstack-protector"/>
-        <element flagsID="8"
+        <element flagsID="7"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -fstack-protector-strong"/>
-        <element flagsID="9"
+        <element flagsID="8"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -std=gnu11 -fPIC -fstack-protector-strong"/>
-        <element flagsID="10"
+        <element flagsID="9"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -std=gnu11 -fstack-protector-strong"/>
-        <element flagsID="11"
+        <element flagsID="10"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fPIC -fstack-protector-strong"/>
-        <element flagsID="12"
+        <element flagsID="11"
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -fstack-protector-strong"/>
-        <element flagsID="13" commonFlags="-std=c++11"/>
-        <element flagsID="14" commonFlags="-std=gnu11 -fPIC -O2 -g -O2 -fPIC"/>
+        <element flagsID="12" commonFlags="-std=c++11"/>
+        <element flagsID="13" commonFlags="-std=gnu11 -fPIC -O2 -g -O2 -fPIC"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -477,36 +470,36 @@
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="12">
+        <cTool flags="11">
         </cTool>
       </item>
       <item path="embedded/libtrudp/examples/snake.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="10">
+        <cTool flags="9">
         </cTool>
       </item>
       <item path="embedded/libtrudp/examples/trudpcat_ev.c"
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="10">
+        <cTool flags="9">
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/hash.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/map.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/packet.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
@@ -516,21 +509,21 @@
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/queue.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
@@ -540,14 +533,14 @@
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_ev.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
@@ -557,21 +550,21 @@
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_send_queue.c"
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/trudp_stat.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
@@ -581,21 +574,21 @@
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/udp.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/src/utils.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
@@ -605,14 +598,14 @@
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="9">
+        <cTool flags="8">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/map_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="8">
+        <cTool flags="7">
           <incDir>
             <pElem>/usr/include/CUnit</pElem>
             <pElem>embedded/libtrudp/src</pElem>
@@ -624,7 +617,7 @@
             ex="false"
             tool="0"
             flavor2="3">
-        <cTool flags="8">
+        <cTool flags="7">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>/usr/include/CUnit</pElem>
@@ -633,7 +626,7 @@
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/packet_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="8">
+        <cTool flags="7">
           <incDir>
             <pElem>/usr/include/CUnit</pElem>
             <pElem>embedded/libtrudp/src</pElem>
@@ -642,7 +635,7 @@
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/queue_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="8">
+        <cTool flags="7">
           <incDir>
             <pElem>/usr/include/CUnit</pElem>
             <pElem>embedded/libtrudp/src</pElem>
@@ -651,7 +644,7 @@
         </cTool>
       </item>
       <item path="embedded/libtrudp/tests/tr-udp_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="8">
+        <cTool flags="7">
           <incDir>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>/usr/include/CUnit</pElem>
@@ -685,14 +678,14 @@
         </cTool>
       </item>
       <item path="examples/fossa/fossa.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="11">
+        <cTool flags="10">
           <incDir>
             <pElem>examples/fossa</pElem>
           </incDir>
         </cTool>
       </item>
       <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="11">
+        <cTool flags="10">
           <incDir>
             <pElem>src/config</pElem>
             <pElem>src/utils</pElem>
@@ -706,11 +699,7 @@
         </cTool>
       </item>
       <item path="examples/go/teogo_lib.c" ex="false" tool="0" flavor2="2">
-        <cTool flags="7">
-        </cTool>
-      </item>
-      <item path="examples/perl-xs/Teonet/Teonet.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
+        <cTool flags="6">
         </cTool>
       </item>
       <item path="examples/teoack.c" ex="false" tool="0" flavor2="3">
@@ -1080,21 +1069,6 @@
           </incDir>
         </cTool>
       </folder>
-      <folder path="0/examples/perl-xs">
-        <cTool>
-          <incDir>
-            <pElem>/usr/lib/x86_64-linux-gnu/perl/5.22/CORE</pElem>
-            <pElem>src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>src/modules</pElem>
-            <pElem>examples/perl-xs/Teonet</pElem>
-          </incDir>
-        </cTool>
-      </folder>
       <folder path="0/sh">
         <cTool>
           <incDir>
@@ -1159,7 +1133,7 @@
         </ccTool>
       </folder>
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="6">
+        <cTool flags="5">
         </cTool>
       </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="3">
@@ -1452,11 +1426,11 @@
         </cTool>
       </item>
       <item path="src/teonet" ex="false" tool="1" flavor2="8">
-        <ccTool flags="13">
+        <ccTool flags="12">
         </ccTool>
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="14">
+        <cTool flags="13">
           <incDir>
             <pElem>src</pElem>
             <pElem>src/config</pElem>
