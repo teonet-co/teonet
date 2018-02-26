@@ -301,7 +301,7 @@ public:
      * @param cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event
      *           EV_K_CQUE_CALLBACK should be send at the same time.
      * @param timeout Callback timeout. If equal to 0 than timeout sets automatically
-     * @param data The user data which should be send to the Callback function
+     * @param user_data The user data which should be send to the Callback function
      *
      * @return Pointer to added ksnCQueData or NULL if error occurred
      */
@@ -368,6 +368,25 @@ public:
      */
     inline Teonet* getTeonet() const {
         return teo;
+    }
+
+    /**
+     * Set callback queue data, update data set in ksnCQueAdd
+     * 
+     * @param id Existing callback queue ID
+     * @param data Pointer to new user data
+     * 
+     * @return return 0: if data set OK; !=0 some error occurred
+     */
+    int setUserData(uint32_t id, void *data) {
+      int retval = -1;
+      struct userData { void *user_data; void *cb; };
+      auto ud = (userData *) ksnCQueGetData(ke->kq, id);
+      if(ud) { 
+        ud->user_data = data;
+        retval = 0;
+      }  
+      return retval;
     }
 };
 
