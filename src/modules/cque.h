@@ -56,6 +56,7 @@ ksnCQueClass *ksnCQueInit(void *ke);
 void ksnCQueDestroy(ksnCQueClass *kq);
 
 int ksnCQueExec(ksnCQueClass *kq, uint32_t id);
+void * ksnCQueGetData(ksnCQueClass *kq, uint32_t id);
 int ksnCQueSetData(ksnCQueClass *kq, uint32_t id, void *data);
 ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
         void *data);

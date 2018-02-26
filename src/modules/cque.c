@@ -123,8 +123,29 @@ int ksnCQueSetData(ksnCQueClass *kq, uint32_t id, void *data) {
     ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
     if(cq != NULL) {
         
-        cq->data = data;
+       cq->data = data;
         retval = 0;
+    }
+    
+    return retval;
+}
+
+/**
+ * Get callback queue data
+ * 
+ * @param kq Pointer to ksnCQueClass
+ * @param id Existing callback queue ID
+ * 
+ * @return return Pointer to callback queue records data
+ */
+void * ksnCQueGetData(ksnCQueClass *kq, uint32_t id) {
+    
+    void * retval = NULL;
+    size_t data_len;
+    ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
+    if(cq != NULL) {
+        
+       retval = cq->data;
     }
     
     return retval;
