@@ -374,7 +374,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 }
 
 /**
- * Send data to L0 client. Usually it is an answer to request from L0 client
+ * Send echo to L0 client. 
  *
  * @param ke Pointer to ksnetEvMgrClass
  * @param addr IP address of remote peer
