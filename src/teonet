@@ -165,6 +165,21 @@ public:
     inline void sendAnswerTo(teo::teoPacket *rd, char *name, void *out_data, size_t out_data_len) {
         sendCmdAnswerTo(getKe(), rd, name, out_data, out_data_len);
     }
+    
+    /**
+     * Send ECHO command to peer
+     * 
+     * @param to Peer name to send to
+     * @param cmd Command
+     * @param data Commands data
+     * @param data_len Commands data length
+     * @return True at success
+     */
+    inline int sendEchoTo(const char *to, uint8_t cmd, void *data, 
+      size_t data_len) {
+
+      return ksnCommandSendCmdEcho(ke->kc->kco, (char*)to, data, data_len);
+    }
 
     /**
      * Send data to L0 client. Usually it is an answer to request from L0 client
@@ -186,10 +201,58 @@ public:
                 cmd, data, data_len);
     }
 
-    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data, size_t data_len) {
-        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len, cmd, data, data_len);
+    /**
+     * Send data to L0 client with the teoL0Client structure.
+     * 
+     * @param l0cli Pointer to teoL0Client
+     * @param cmd Command
+     * @param data Data
+     * @param data_len Data length
+     *
+     * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+     */
+    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data, 
+        size_t data_len) {
+      
+        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len, 
+                cmd, data, data_len);
+    }
+    
+    /**
+     * Send ECHO command to L0 client
+     * 
+     * @param addr IP address of remote peer
+     * @param port Port of remote peer
+     * @param cname L0 client name (include trailing zero)
+     * @param cname_length Length of the L0 client name
+     * @param cmd Command
+     * @param data Data
+     * @param data_len Data length
+     *
+     * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+     */
+    inline int sendEchoToL0(char *addr, int port, char *cname, size_t cname_length,
+        void *data, size_t data_len) {
+
+      return ksnLNullSendEchoToL0(ke, addr, port, cname, cname_length,
+                data, data_len);
     }
 
+    /**
+     * Send ECHO command to L0 client with teoL0Client structure 
+     * 
+     * @param l0cli Pointer to teoL0Client
+     * @param data Data
+     * @param data_len Data length
+     *
+     * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+     */
+    inline int sendEchoToL0(teoL0Client* l0cli, void *data, size_t data_len) {
+
+      return sendEchoToL0(l0cli->addr, l0cli->port, l0cli->name, 
+                l0cli->name_len, data, data_len);
+    }
+    
     /**
      * Set custom timer interval
      *
