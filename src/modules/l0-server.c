@@ -379,34 +379,34 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 
 /**
  * Register new client in clients map
- * 
+ *
  * @param kl Pointer to ksnLNullClass
  * @param fd TCP client connection file descriptor
  * @param rd pointer to ksnCorePacketData
- */ 
+ */
 static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData *rd) {
 
-    
+
     teoLNullCPacket *packet = rd ? (teoLNullCPacket*) rd->data:NULL;
-    
+
     ksnLNullData data;
     data.name = NULL;
     data.name_length = 0;
     data.read_buffer = NULL;
     data.read_buffer_ptr = 0;
     data.read_buffer_size = 0;
-    if (rd && fd >= MAX_FD_NUMBER ) {        
+    if (rd && fd >= MAX_FD_NUMBER ) {
         data.t_addr = strdup(rd->addr);
         data.t_port = rd->port;
-        data.t_channel = 0;        
+        data.t_channel = 0;
     }
     else {
        data.t_addr = NULL;
        data.t_port = 0;
-       data.t_channel = 0; 
+       data.t_channel = 0;
     }
-    pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));    
-    
+    pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));
+
     if(packet) {
         size_t vl;
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
@@ -418,15 +418,15 @@ static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData 
 
 /**
  * Set client name and check it in auth server
- * 
+ *
  * @param kl Pointer to ksnLNullClass
  * @param kld Pointer to ksnLNullData
  * @param fd TCP client connection file descriptor
  * @param packet Pointer to teoLNullCPacket
  */
-static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, 
+static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
-    
+
     kld->name = strdup(packet->peer_name + packet->peer_name_length);
     kld->name_length = strlen(kld->name) + 1;
     pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
@@ -454,12 +454,12 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
  * @return Length of send data or -1 at error
  */
 ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg, size_t pkg_length) {
-    
+
     ssize_t snd = -1;
-    
+
     // Send by TCP
     if(fd < MAX_FD_NUMBER) snd = teoLNullPacketSend(fd, pkg, pkg_length);
-    
+
     // Send by TR-UDP
     else {
         size_t vl;
@@ -470,21 +470,21 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg, size_t pkg_leng
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
             trudpUdpMakeAddr(kld->t_addr, kld->t_port,
                 (__SOCKADDR_ARG) &remaddr, &addrlen);
-            
+
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
-                    "send packet to TR-UDP addr: %s:%d, cmd = %u, from peer: %s, data: %s \n", 
-                    kld->t_addr, kld->t_port, (unsigned)packet->cmd, 
+                    "send packet to TR-UDP addr: %s:%d, cmd = %u, from peer: %s, data: %s \n",
+                    kld->t_addr, kld->t_port, (unsigned)packet->cmd,
                     packet->peer_name,
                     (char*)(packet->peer_name + packet->peer_name_length));
             #endif
-            
-            ksnTRUDPsendto(((ksnetEvMgrClass*)(kl->ke))->kc->ku , 0, 0, 0, 
-                    packet->cmd, fd, pkg, pkg_length, 0, 
+
+            ksnTRUDPsendto(((ksnetEvMgrClass*)(kl->ke))->kc->ku , 0, 0, 0,
+                    packet->cmd, fd, pkg, pkg_length, 0,
                     (__CONST_SOCKADDR_ARG) &remaddr, addrlen);
         }
     }
-    
+
     return snd;
 }
 
@@ -576,7 +576,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             kld->name = NULL;
             kld->name_length = 0;
         }
-        
+
         // Free TR-UDP addr
         if(kld->t_addr != NULL) {
             free(kld->t_addr);
@@ -1126,10 +1126,10 @@ inline size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data) {
 
 /**
  * Check and process L0 packet received through TR-UDP
- * 
+ *
  * @param data
  * @param data_len
- * @return 
+ * @return
  */
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
@@ -1146,10 +1146,10 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                 sizeof(cp->header_checksum));
         uint8_t checksum = get_byte_checksum(cp->peer_name,
                 cp->peer_name_length + cp->data_length);
-        
+
         if(cp->header_checksum == header_checksum &&
            cp->checksum == checksum) {
-        
+
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
@@ -1158,9 +1158,9 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                 (char*) cp->peer_name,
                 (char*)(cp->peer_name + cp->peer_name_length));
             #endif
-            
+
             switch(cp->cmd) {
-                
+
                 // Login packet
                 case 0: {
                     if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
@@ -1172,7 +1172,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                         retval = 1;
                     }
                 } break;
-                    
+
                 // Process other L0 packets
                 default: {
                     // Process other L0 TR-UDP packets

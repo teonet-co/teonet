@@ -272,7 +272,7 @@ AC_CONFIG_FILES([
     tests/Makefile
     app/Makefile
     sh/Makefile
-    embedded/Makefile 
+    embedded/Makefile
     embedded/teocli/linux/Makefile
 ])
 
