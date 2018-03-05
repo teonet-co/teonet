@@ -373,6 +373,32 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     return rv;
 }
 
+/**
+ * Send data to L0 client. Usually it is an answer to request from L0 client
+ *
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param addr IP address of remote peer
+ * @param port Port of remote peer
+ * @param cname L0 client name (include trailing zero)
+ * @param cname_length Length of the L0 client name
+ * @param data Data
+ * @param data_len Data length
+ *
+ * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+ */
+int ksnLNullSendEchoToL0(void *ke, char *addr, int port, char *cname,
+        size_t cname_length, void *data, size_t data_len) {
+    
+    size_t data_e_length;
+    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, 
+            data_len, &data_e_length);
+            
+    int retval = ksnLNullSendToL0(ke, addr, port, cname, cname_length, CMD_ECHO, 
+            data_e, data_e_length);
+    free(data_e);
+    return retval;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
@@ -696,11 +722,12 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksnLNullSPacket *data = rd->data;
 
     // Process command
-    if(data->cmd == CMD_ECHO || data->cmd == CMD_ECHO_ANSWER || data->cmd == CMD_PEERS ||
-       data->cmd == CMD_L0_CLIENTS || data->cmd == CMD_RESET ||
-       data->cmd == CMD_SUBSCRIBE || data->cmd == CMD_L0_CLIENTS_N ||
-       data->cmd == CMD_L0_STAT || data->cmd == CMD_HOST_INFO ||
-       data->cmd == CMD_GET_NUM_PEERS || data->cmd == CMD_TRUDP_INFO ||
+    if(data->cmd == CMD_ECHO || data->cmd == CMD_ECHO_ANSWER || 
+       data->cmd == CMD_PEERS || data->cmd == CMD_L0_CLIENTS || 
+       data->cmd == CMD_RESET || data->cmd == CMD_SUBSCRIBE || 
+       data->cmd == CMD_L0_CLIENTS_N || data->cmd == CMD_L0_STAT || 
+       data->cmd == CMD_HOST_INFO || data->cmd == CMD_GET_NUM_PEERS || 
+       data->cmd == CMD_TRUDP_INFO || 
        (data->cmd >= CMD_USER && data->cmd < CMD_192_RESERVED) ||
        (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {
 
