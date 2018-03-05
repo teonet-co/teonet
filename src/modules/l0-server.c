@@ -696,7 +696,7 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksnLNullSPacket *data = rd->data;
 
     // Process command
-    if(data->cmd == CMD_ECHO || data->cmd == CMD_PEERS ||
+    if(data->cmd == CMD_ECHO || CMD_ECHO_ANSWER || data->cmd == CMD_PEERS ||
        data->cmd == CMD_L0_CLIENTS || data->cmd == CMD_RESET ||
        data->cmd == CMD_SUBSCRIBE || data->cmd == CMD_L0_CLIENTS_N ||
        data->cmd == CMD_L0_STAT || data->cmd == CMD_HOST_INFO ||
