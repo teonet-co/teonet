@@ -216,29 +216,51 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
 }
 
 /**
+ * Create ECHO command buffer
+ * 
+ * @param kco Pointer to ksnCommandClass
+ * @param data Echo data
+ * @param data_len Echo data length
+ * @param data_t_len Pointer to hold ECHO buffer size
+ * 
+ * @return Pointer to ECHO command buffer. SHould be free after use.
+ */
+void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, 
+        size_t *data_t_len) {
+    
+    double ct = ksnetEvMgrGetTime(((ksnCoreClass *) kco->kc)->ke);;
+    *data_t_len = data_len + sizeof(double);
+    void *data_t = malloc(*data_t_len);
+    
+    memcpy(data_t, data, data_len);
+    *((double*)(data_t + data_len)) = ct;
+
+    return data_t;
+}
+
+/**
  * Send ECHO command to peer
  *
  * @param kco Pointer to ksnCommandClass
  * @param to Send command to peer name
  * @param data Echo data
  * @param data_len Echo data length
- * @return
+ * 
+ * @return True at success
  */
 int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data,
                           size_t data_len) {
 
-    double ct = ksnetEvMgrGetTime(((ksnCoreClass *) kco->kc)->ke);;
-    size_t data_t_len = data_len + sizeof(double);
-    void *data_t = malloc(data_t_len);
-
-    memcpy(data_t, data, data_len);
-    *((double*)(data_t + data_len)) = ct;
+    size_t data_t_len;
+    void *data_t = ksnCommandEchoBuffer(kco, data, data_len, &data_t_len);
 
     ksnet_arp_data * arp = ksnCoreSendCmdto(kco->kc, to, CMD_ECHO, data_t,
                                             data_t_len);
-    if(arp != NULL) arp->last_triptime_send = ct;
+    
+    if(arp != NULL) arp->last_triptime_send = ksnetEvMgrGetTime(
+            ((ksnCoreClass *) kco->kc)->ke);
+    
     free(data_t);
-
     return arp != NULL;
 }
 
