@@ -41,17 +41,17 @@ typedef ksnCorePacketData teoPacket;    //! Teonet Packet
 typedef ksnetEvMgrAppParam teoAppParam; //! Teonet App parameters
 typedef struct teoL0Client {            //! Teonet L0 Client address
 
-    char *name;
+    const char *name;
     uint8_t name_len;
-    char *addr;
+    const char *addr;
     int port;
 
-    teoL0Client(char *name, uint8_t name_len, char *addr, int port) :
+    teoL0Client(const char *name, uint8_t name_len, const char *addr, int port) :
     name(strdup(name)), name_len(name_len), addr(strdup(addr)), port(port) {}
 
     virtual ~teoL0Client() {
-        free(name);
-        free(addr);
+        free((void*)name);
+        free((void*)addr);
     }
 
 } teoL0Client;
@@ -162,8 +162,8 @@ public:
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
 
-    inline void sendAnswerTo(teo::teoPacket *rd, char *name, void *out_data, size_t out_data_len) {
-        sendCmdAnswerTo(getKe(), rd, name, out_data, out_data_len);
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) {
+        sendCmdAnswerTo(getKe(), rd, (char *)name, out_data, out_data_len);
     }
     
     /**
@@ -194,11 +194,11 @@ public:
      *
      * @return Return 0 if success; -1 if data length is too lage (more than 32319)
      */
-    inline int sendToL0(char *addr, int port, char *cname, size_t cname_length,
-        uint8_t cmd, void *data, size_t data_len) {
+    inline int sendToL0(const char *addr, int port, const char *cname, 
+        size_t cname_length, uint8_t cmd, void *data, size_t data_len) {
 
-        return ksnLNullSendToL0(ke, addr, port, cname, cname_length,
-                cmd, data, data_len);
+        return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname, 
+          cname_length, cmd, data, data_len);
     }
 
     /**
@@ -231,11 +231,11 @@ public:
      *
      * @return Return 0 if success; -1 if data length is too lage (more than 32319)
      */
-    inline int sendEchoToL0(char *addr, int port, char *cname, size_t cname_length,
-        void *data, size_t data_len) {
+    inline int sendEchoToL0(const char *addr, int port, const char *cname, 
+        size_t cname_length, void *data, size_t data_len) {
 
-      return ksnLNullSendEchoToL0(ke, addr, port, cname, cname_length,
-                data, data_len);
+      return ksnLNullSendEchoToL0(ke, (char*)addr, port, (char*)cname, 
+        cname_length, data, data_len);
     }
 
     /**
@@ -497,14 +497,16 @@ public:
         void *user_data;
 
         teoDbCQueData(TeoDB *teoDb, teoDbData **tdd, teoL0Client * l0client = NULL,
-            uint8_t cb_type = 0) : teodb(teoDb), tdd(tdd), l0client(l0client), cb_type(cb_type) {}
+            uint8_t cb_type = 0) : teodb(teoDb), tdd(tdd), l0client(l0client), 
+            cb_type(cb_type) {}
 
         virtual ~teoDbCQueData() {
             if(l0client) delete(l0client);
         }
 
-        static inline teoL0Client* setl0Cli(char *name, uint8_t name_len, char *addr, int port) {
-            return new teoL0Client(name, name_len, addr, port);
+        static inline teoL0Client* setl0Cli(const char *name, uint8_t name_len, 
+          const char *addr, int port) {
+            return new teoL0Client((char*)name, name_len, (char*)addr, port);
         }
         static inline teoL0Client* setl0Cli(teo::teoPacket* rd) {
             return rd ? setl0Cli(rd->from, rd->from_len, rd->addr, rd->port) : NULL;
