@@ -154,3 +154,4 @@ examples/go/teogo/teogo
 /examples/perl/blib/
 /examples/perl/Makefile.old
 /examples/perl/Teonet.pm
+/embedded/libpbl/src/package-lock.json

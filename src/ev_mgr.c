@@ -1061,9 +1061,8 @@ int ksnetEvMgrRestart(int argc, char **argv) {
         int i = 1;
         puts("");
         printf("Restart application: %s", argv[0]);
-        for(;;i++) {
-            if(argv[i] != NULL) printf(" %s", argv[i]);
-            else break;
+        for(;i < argc; i++) {
+            printf(" %s", argv[i]);
         }
         puts("\n");
         
@@ -1073,13 +1072,28 @@ int ksnetEvMgrRestart(int argc, char **argv) {
         #ifdef USE_SYSTEM
         // Execute application
         char *app = ksnet_formatMessage("%s", argv[0]);
-        for(i = 1; argv[i] != NULL; i++) {
+        for(i = 1; i < argc; i++) {
             app = ksnet_formatMessage("%s %s", app, argv[i]);
         }            
         if(system(app));
         free(app);
         exit(0);
         #else
+        // Execute application with changed parameters
+        char *s = strstr(argv[0], " ");
+        if(s != NULL) {
+            char *app = ksnet_formatMessage("%s", argv[0]);
+            for(i = 1; i < argc; i++) {
+                app = ksnet_formatMessage("%s %s", app, argv[i]);
+            }
+            puts(app);
+            ksnet_stringArr argvv = ksnet_stringArrSplit(app, " ", 0, 0);
+            if(execv(argvv[0], argvv) == -1) {
+                fprintf(stderr, "Can't execute application %s: %s\n", 
+                        argv[0], strerror(errno));
+                exit(-1);
+            }
+        } else
         // Execute application
         if(execvp(argv[0], argv) == -1) {
             fprintf(stderr, "Can't execute application %s: %s\n", 
