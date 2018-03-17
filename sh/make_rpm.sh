@@ -96,8 +96,8 @@ RPM_FILES="/usr/bin/teovpn
    /usr/lib/libtrudp.a
    /usr/lib/libtrudp.la
    /usr/lib/libtrudp.so
-   /usr/lib/libtrudp.so.2
-   /usr/lib/libtrudp.so.2.0.0
+   /usr/lib/libtrudp.so.3
+   /usr/lib/libtrudp.so.3.0.0
    /usr/share/doc/teonet/examples/
    /usr/share/doc/libtrudp/
 "
