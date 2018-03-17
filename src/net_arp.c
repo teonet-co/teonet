@@ -157,7 +157,7 @@ ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
         ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 1);
         #elif TRUDP_VERSION == 2
-        trudp_ChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+        trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
                 arp->port, 0);               
         #endif
         
@@ -191,7 +191,7 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
     #if TRUDP_VERSION == 1
     ksnTRUDPremoveAll(ke->kc->ku);
     #elif TRUDP_VERSION == 2
-    trudp_ChannelDestroyAll(ke->kc->ku);
+    trudpChannelDestroyAll(ke->kc->ku);
     #endif
 }
 
