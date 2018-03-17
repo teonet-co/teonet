@@ -1969,7 +1969,7 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     if(CMD_TRUDP_CHECK(cmd)) {
 
         trudpChannelData *tcd = trudpGetChannelCreate(TD_P(td), addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
-        if(tcd != (void*)-1) trudp_ChannelSendData(tcd, (void *)buf, buf_len);
+        if(tcd != (void*)-1) trudpChannelSendData(tcd, (void *)buf, buf_len);
         buf_len = 0;
     }
 
@@ -2011,7 +2011,7 @@ ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr,
                          socklen_t *addr_len) {
 
-    trudpEventSend((void*)td, PROCESS_RECEIVE, buffer, buffer_len, 0);
+    trudpSendEvent((void*)td, PROCESS_RECEIVE, buffer, buffer_len, 0);
 
     return 0;
 }
@@ -2181,12 +2181,12 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
         size_t data_length;
         trudpChannelData *tcd = trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG) &remaddr, 0);
         if(tcd == (void *)-1 ||
-           trudp_ChannelProcessReceivedPacket(tcd, data, recvlen, &data_length) == (void *)-1) {
+           trudpChannelProcessReceivedPacket(tcd, data, recvlen, &data_length) == (void *)-1) {
 
             if(tcd == (void *)-1)
                 fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");
             else
-                trudpEventSend(tcd, PROCESS_RECEIVE_NO_TRUDP, data, recvlen, NULL);
+                trudpSendEvent(tcd, PROCESS_RECEIVE_NO_TRUDP, data, recvlen, NULL);
         }
     }
 }
@@ -2242,7 +2242,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case CONNECTED: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
                     "connect channel %s\n", key
@@ -2258,7 +2258,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case DISCONNECTED: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             if(data_length == sizeof(uint32_t)) {
 
                 uint32_t last_received = *(uint32_t*)data;
@@ -2277,7 +2277,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
                 
                     // Remove TR-UDP channel
-                    trudp_ChannelDestroy(tcd);
+                    trudpChannelDestroy(tcd);
                 }
             }
             else {
@@ -2299,7 +2299,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_RESET: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got TRU_RESET packet from channel %s\n",
@@ -2315,7 +2315,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case SEND_RESET: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
 
             if(!data)
                 
@@ -2354,7 +2354,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_ACK_RESET: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV, 
                 "got ACK to RESET packet at channel %s\n", key);
@@ -2369,7 +2369,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_ACK_PING: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got ACK to PING packet at channel %s, data: %s, %.3f(%.3f) ms\n",
@@ -2386,7 +2386,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_PING: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got PING packet at channel %s, data: %s\n",
@@ -2403,7 +2403,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_ACK: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
@@ -2432,7 +2432,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             // Process package
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
 
 //            char *data_ptr = memdup(data, data_length), *data_de = data_ptr;
 //            #if KSNET_CRYPT
@@ -2487,7 +2487,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             // Process package
             trudpData *td = TD(tcd);         
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "not TR-UDP %d bytes DATA packet received from channel %s\n",
@@ -2507,7 +2507,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case PROCESS_SEND: {
 
             trudpData *td = TD(tcd);
-            char *key = trudp_ChannelMakeKey(tcd);
+            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "send %d bytes packet ID = %d to channel %s\n",                    
@@ -2521,7 +2521,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             // Start send queue timer
             if(trudpPacketGetType(data) == TRU_DATA)
-                trudp_start_send_queue_cb(td->psq_data, 0);
+                trudpSendQueueCbStart(td->psq_data, 0);
 
         } break;
     }
