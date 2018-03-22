@@ -699,7 +699,7 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
             packet = &tpd->packet;
         }
         else {
-            ksnTCPProxyData _tpd;
+            static ksnTCPProxyData _tpd;
             tpd = &_tpd;
             packet = &tp->packet;
         }
