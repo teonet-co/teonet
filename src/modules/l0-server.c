@@ -179,44 +179,44 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             while(kld->read_buffer_ptr - ptr >= (len = sizeof(teoLNullCPacket) +
                     packet->peer_name_length + packet->data_length)) {
 
-                    // Check checksum
-                    uint8_t header_checksum = get_byte_checksum(packet,
-                            sizeof(teoLNullCPacket) -
-                            sizeof(packet->header_checksum));
-                    uint8_t checksum = get_byte_checksum(packet->peer_name,
-                            packet->peer_name_length + packet->data_length);
-                    if(packet->header_checksum == header_checksum &&
-                       packet->checksum == checksum) {
+                // Check checksum
+                uint8_t header_checksum = get_byte_checksum(packet,
+                        sizeof(teoLNullCPacket) -
+                        sizeof(packet->header_checksum));
+                uint8_t checksum = get_byte_checksum(packet->peer_name,
+                        packet->peer_name_length + packet->data_length);
+                if(packet->header_checksum == header_checksum &&
+                   packet->checksum == checksum) {
 
-                        // Check initialize packet:
-                        // cmd = 0, to_length = 1, data_length = 1 + data_len,
-                        // data = client_name
-                        //
-                        if(packet->cmd == 0 && packet->peer_name_length == 1 &&
-                            !packet->peer_name[0] && packet->data_length) {
+                    // Check initialize packet:
+                    // cmd = 0, to_length = 1, data_length = 1 + data_len,
+                    // data = client_name
+                    //
+                    if(packet->cmd == 0 && packet->peer_name_length == 1 &&
+                        !packet->peer_name[0] && packet->data_length) {
 
-                            // Set temporary name (it will be changed after TEO_AUTH answer)
-                            ksnLNullClientAuthCheck(kl, kld, w->fd, packet);
-                        }
-
-                        // Resend data to teonet
-                        else {
-
-                            ksnLNullSendFromL0(kl, packet, kld->name,
-                                    kld->name_length);
-                        }
+                        // Set temporary name (it will be changed after TEO_AUTH answer)
+                        ksnLNullClientAuthCheck(kl, kld, w->fd, packet);
                     }
 
-                    // Wrong checksum - drop this packet
+                    // Resend data to teonet
                     else {
-                        #ifdef DEBUG_KSNET
-                        ksn_printf(kev, MODULE, DEBUG_VV,
-                            "%s" "wrong packet %d bytes length; dropped ...%s\n",
-                            ANSI_RED, len, ANSI_NONE);
-                        #endif
 
-                        kld->read_buffer_ptr = 0;
+                        ksnLNullSendFromL0(kl, packet, kld->name,
+                                kld->name_length);
                     }
+                }
+
+                // Wrong checksum - drop this packet
+                else {
+                    #ifdef DEBUG_KSNET
+                    ksn_printf(kev, MODULE, DEBUG_VV,
+                        "%s" "wrong packet %d bytes length; dropped ...%s\n",
+                        ANSI_RED, len, ANSI_NONE);
+                    #endif
+
+                    kld->read_buffer_ptr = 0;
+                }
 
                 ptr += len;
                 packet = (void*)packet + len;
