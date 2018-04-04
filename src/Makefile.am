@@ -140,6 +140,7 @@ teonetinclude_HEADERS = \
     ../embedded/libtrudp/src/udp.h \
     ../embedded/libtrudp/src/trudp_channel.h \
     ../embedded/libtrudp/src/trudp_const.h \
+    ../embedded/libtrudp/src/trudp_api.h \
     ../embedded/libtrudp/src/trudp_send_queue.h \
     ../embedded/libtrudp/src/trudp_receive_queue.h
 
