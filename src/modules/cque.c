@@ -108,6 +108,36 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
 }
 
 /**
+ * Remove callback from queue
+ * 
+ * @param kq Pointer to ksnCQueClass
+ * @param id Required ID
+ * 
+ * @return return 0: if callback removed OK; !=0 some error occurred
+ */
+int ksnCQueRemove(ksnCQueClass *kq, uint32_t id) {
+        const int type = 1;
+    int retval = -1;
+    size_t data_len;
+    
+    ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);    
+    if(cq != NULL) {
+        
+        // Stop watcher
+        if(cq->timeout > 0.0)
+            ev_timer_stop(kev->ev_loop, &cq->w);
+        
+        // Remove record from queue
+        if(pblMapRemoveFree(kq->cque_map, &id, sizeof(id), &data_len) != (void*)-1) {
+            
+            retval = 0;
+        }
+    }
+
+    return retval;
+}
+
+/**
  * Set callback queue data, update data set in ksnCQueAdd
  * 
  * @param kq Pointer to ksnCQueClass
