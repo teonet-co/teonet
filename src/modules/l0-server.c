@@ -201,8 +201,8 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
                     // Resend data to teonet
                     else {
-
-                        ksnLNullSendFromL0(kl, packet, kld->name,
+                        if(kld->name)
+                            ksnLNullSendFromL0(kl, packet, kld->name,
                                 kld->name_length);
                     }
                 }
@@ -455,19 +455,29 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 
     kld->name = strdup(packet->peer_name + packet->peer_name_length);
     kld->name_length = strlen(kld->name) + 1;
-    pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
+    if(kld->name_length == packet->data_length) {
+        pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
-    // Send login to authentication application
-    // to check this client
-    ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
-            kld->name, kld->name_length);
+        // Send login to authentication application
+        // to check this client
+        ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
+                kld->name, kld->name_length);
 
-    // Login will continue when answer received
-    #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG,
-        "got login command with name %s\n", kld->name
-    );
-    #endif
+        // Login will continue when answer received
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG,
+            "got login command with name '%s'\n", kld->name
+        );
+        #endif
+    }
+    else { 
+        // Wrong Login name received
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG,
+            "got login command with wrong name '%s'\n", kld->name
+        );
+        #endif
+    }
 }
 
 /**
@@ -588,7 +598,8 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             "L0 client with fd %d disconnected\n", fd);
 
         // Send Disconnect event to all subscribers
-        teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name,
+        if(kld->name != NULL)
+            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name,
                 kld->name_length, 0);
 
         // Free name
@@ -1056,21 +1067,23 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             #endif
 
             // Send Connected event to all subscribers
-            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED,
+            if(kld->name != NULL)  {
+                teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED,
                     kld->name, kld->name_length, 0);
 
-            // Add connection to L0 statistic
-            kl->stat.visits++; // Increment number of visits
+                // Add connection to L0 statistic
+                kl->stat.visits++; // Increment number of visits
 
-            // Send "new visit" event to all subscribers
-            size_t vd_length = sizeof(ksnLNullSVisitsData) +
-                    kld->name_length;
-            ksnLNullSVisitsData *vd = malloc(vd_length);
-            vd->visits = kl->stat.visits;
-            memcpy(vd->client, kld->name, kld->name_length);
-            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_NEW_VISIT,
-                    vd, vd_length, 0);
-            free(vd);
+                // Send "new visit" event to all subscribers
+                size_t vd_length = sizeof(ksnLNullSVisitsData) +
+                        kld->name_length;
+                ksnLNullSVisitsData *vd = malloc(vd_length);
+                vd->visits = kl->stat.visits;
+                memcpy(vd->client, kld->name, kld->name_length);
+                teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_NEW_VISIT,
+                        vd, vd_length, 0);
+                free(vd);
+            }
 
             // Create & Send websocket allow answer message
             size_t snd;
@@ -1085,7 +1098,6 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             size_t packet_length = teoLNullPacketCreate(out_data,
                     out_data_len, CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
             // Send websocket allow message
-            //if((snd = write(fd, out_data, packet_length)) >= 0);
             if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
             free(out_data);
         }
@@ -1108,21 +1120,15 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
     
-    printf("ksnLNullClientsList - 0 \n");
-
     teonet_client_data_ar *data_ar = NULL;
 
-    printf("ksnLNullClientsList - 1 \n");
-    
     if(kl != NULL && kev->ksn_cfg.l0_allow_f && kl->fd) {
 
-        printf("ksnLNullClientsList - 2 \n");
         uint32_t length = pblMapSize(kl->map);
         data_ar = malloc(sizeof(teonet_client_data_ar) +
                 length * sizeof(data_ar->client_data[0]));
         int i = 0;
 
-        printf("ksnLNullClientsList - 3 \n");
         // Create clients list
         PblIterator *it = pblMapIteratorReverseNew(kl->map);
         if(it != NULL) {
@@ -1130,23 +1136,16 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
                 void *entry = pblIteratorPrevious(it);
                 //int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullData *data = pblMapEntryValue(entry);
-                if(data != NULL) {
-                    printf("ksnLNullClientsList - 31 \n");
-                    printf("ksnLNullClientsList - 31: %s \n", data->name);
-                    strncpy(data_ar->client_data[i].name, data->name ? data->name : "" ,
+                if(data != NULL && data->name != NULL) {
+                    strncpy(data_ar->client_data[i].name, data->name,
                             sizeof(data_ar->client_data[i].name));
-                    printf("ksnLNullClientsList - 32 \n");
-                    if(!data->name) printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n");
                     i++;
                 }
             }            
             pblIteratorFree(it);
-            printf("ksnLNullClientsList - 4 \n");
         }
         data_ar->length = i;
     }
-    
-    printf("ksnLNullClientsList - end \n");
 
     return data_ar;
 }
@@ -1221,7 +1220,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                     trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
                     if(tcd) {
                         ksnLNullData* kld = pblMapGet(kl->map, &tcd->fd, sizeof(tcd->fd), &vl);
-                        if(kld != NULL) {
+                        if(kld != NULL && kld->name != NULL) {
                             ksnLNullSendFromL0(kl, cp, kld->name, kld->name_length);
                         }
                         else {
