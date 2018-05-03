@@ -49,18 +49,18 @@ ksnTermClass *ksnTermInit(void *ke) {
 
     // Check configuration, create TCP server and start Terminal telnet CLI server
     //! \todo: Check configuration
-    int fd, port_created, // port = CLI_PORT, 
+    int fd, port_created, // port = CLI_PORT,
         port = kev->ksn_cfg.port;
 
     // Start TCP server
     if((fd = ksnTcpServerCreate(((ksnetEvMgrClass*)ke)->kt, port, ksnet_accept_cb, kter,
         &port_created)) > 0) {
-    
-        ksn_printf(kev, MODULE, MESSAGE, 
+
+        ksn_printf(kev, MODULE, MESSAGE,
                 "started at port %d, socket fd %d\n", port_created, fd);
-        
+
     }
-    
+
     return kter;
 }
 
@@ -202,7 +202,7 @@ int cmd_ksnet_set_peers_f(struct cli_def *cli, const char *command, char *argv[]
                         int argc) {
 
     if (argc < 1 || strcmp(argv[0], "?") == 0) {
-        cli_print(cli, 
+        cli_print(cli,
         "Specify a value: 0 - don't show; 1 - show ones; 2 - continuously");
         return CLI_OK;
     }
@@ -218,7 +218,7 @@ int cmd_ksnet_set_tr_udp_f(struct cli_def *cli, const char *command, char *argv[
                         int argc) {
 
     if (argc < 1 || strcmp(argv[0], "?") == 0) {
-        cli_print(cli, 
+        cli_print(cli,
         "Specify a value: 0 - don't show; 1 - show ones; 2 - continuously");
         return CLI_OK;
     }
@@ -522,7 +522,7 @@ struct cli_def *ksnTermCliInit(ksnTermClass *kter) {
 
     cli = cli_init(kter->ke);
 
-    cli_set_banner(cli, "Teonet terminal server environment, ver. " VERSION 
+    cli_set_banner(cli, "Teonet terminal server environment, ver. " VERSION
                         "\n(press Ctrl+D to quit)");
     cli_set_hostname(cli, kev->ksn_cfg.host_name);
     cli_telnet_protocol(cli, 1);
@@ -572,7 +572,7 @@ struct cli_def *ksnTermCliInit(ksnTermClass *kter) {
 
             cli_register_command(cli, cc, "remove", cmd_ksnet_tunnel_remove, PRIVILEGE_UNPRIVILEGED,
                 MODE_EXEC, "Remove tunnel from list");
-            
+
     if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_TERM_STARTED, NULL, 0, NULL);
 
     /**************************************************************************/
