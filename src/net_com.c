@@ -475,22 +475,14 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 
-    printf("End of CMD_L0_CLIENTS - 00\n");
-    
     // Get l0 clients data
     teonet_client_data_ar *client_data =
         ksnLNullClientsList(((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl);
     
-    printf("End of CMD_L0_CLIENTS - 0\n");
-
     if(client_data != NULL) {
 
-        printf("End of CMD_L0_CLIENTS - 1\n");
-        
         size_t client_data_length = ksnLNullClientsListLength(client_data);
 
-        printf("End of CMD_L0_CLIENTS - 2\n");
-        
         // Send CMD_L0_CLIENTS_ANSWER to L0 user
         if(rd->l0_f)
             ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
@@ -502,13 +494,9 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_L0_CLIENTS_ANSWER,
                     client_data, client_data_length);
         
-        printf("End of CMD_L0_CLIENTS - 3\n");
-
         free(client_data);
     }
     
-    printf("End of CMD_L0_CLIENTS\n");
-
     return 1; // Command processed
 }
 
