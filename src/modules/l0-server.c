@@ -1107,16 +1107,22 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
+    
+    printf("ksnLNullClientsList - 0 \n");
 
     teonet_client_data_ar *data_ar = NULL;
 
+    printf("ksnLNullClientsList - 1 \n");
+    
     if(kl != NULL && kev->ksn_cfg.l0_allow_f && kl->fd) {
 
+        printf("ksnLNullClientsList - 2 \n");
         uint32_t length = pblMapSize(kl->map);
         data_ar = malloc(sizeof(teonet_client_data_ar) +
                 length * sizeof(data_ar->client_data[0]));
         int i = 0;
 
+        printf("ksnLNullClientsList - 3 \n");
         // Create clients list
         PblIterator *it = pblMapIteratorReverseNew(kl->map);
         if(it != NULL) {
@@ -1125,15 +1131,22 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
                 //int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullData *data = pblMapEntryValue(entry);
                 if(data != NULL) {
-                    strncpy(data_ar->client_data[i].name, data->name,
+                    printf("ksnLNullClientsList - 31 \n");
+                    printf("ksnLNullClientsList - 31: %s \n", data->name);
+                    strncpy(data_ar->client_data[i].name, data->name ? data->name : "" ,
                             sizeof(data_ar->client_data[i].name));
+                    printf("ksnLNullClientsList - 32 \n");
+                    if(!data->name) printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX \n");
                     i++;
                 }
-            }
+            }            
             pblIteratorFree(it);
+            printf("ksnLNullClientsList - 4 \n");
         }
         data_ar->length = i;
     }
+    
+    printf("ksnLNullClientsList - end \n");
 
     return data_ar;
 }
