@@ -281,6 +281,16 @@ public:
     }
 
     /**
+     * Get KSNet event manager time
+     *
+     * @param ke Pointer to ksnetEvMgrClass
+     * 
+     * @return
+     */
+    inline double getTime() {
+      return ksnetEvMgrGetTime(ke);
+    }
+    /**
      * Stop Teonet event manager
      *
      */
