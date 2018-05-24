@@ -38,8 +38,10 @@ jobs:
 #      # This is place for run unit tests from docker container
 
 
-  tagged-build:
-    machine: true
+  tagged-build-ubuntu:
+    #machine: true
+    docker: # run the steps with Docker
+      - image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
     steps:
       - checkout
       - run: git submodule update --init --recursive
@@ -61,6 +63,36 @@ jobs:
       # Build DEB package and upload it to repository
       - run: sh/make_package deb
 
+
+  tagged-build-centos:
+    #machine: true
+    docker: # run the steps with Docker
+      - image: gitlab.ksproject.org:5000/ci/centos_teonet
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+
+      # show current variables
+      - run: echo $CIRCLE_PROJECT_REPONAME
+      - run: echo $CIRCLE_BRANCH
+      - run: echo $CIRCLE_TAG
+
+      # Install dependences
+      - run: sh/build-ubuntu.sh
+      # Make
+      - run: ./autogen.sh --prefix=/usr
+      - run: make
+      # Test
+      - run: app/teovpn -?
+      - run: make test
+
+      # Build RPM package and upload it to repository
+      - run: sh/make_package yum
+
+
+  tagged-build-docker:
+    machine: true
+    steps:
       # build the application image
       - run: sudo sysctl -w net.ipv4.ip_forward=1
       - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
@@ -124,9 +156,18 @@ workflows:
             tags:
               only: /^v.*/
 
-      - tagged-build:
+      - tagged-build-ubuntu:
           requires:
             - testing
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - tagged-build-docker:
+          requires:
+            - tagged-build-ubuntu
           filters:
             branches:
               ignore: /.*/
