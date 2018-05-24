@@ -8,7 +8,6 @@ version: 2
 jobs:
 
   un-tagged-build:
-    #machine: true
     docker: # run the steps with Docker
       - image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
     steps:
@@ -39,7 +38,6 @@ jobs:
 
 
   tagged-build-ubuntu:
-    #machine: true
     docker: # run the steps with Docker
       - image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
     steps:
@@ -65,7 +63,6 @@ jobs:
 
 
   tagged-build-centos:
-    #machine: true
     docker: # run the steps with Docker
       - image: gitlab.ksproject.org:5000/ci/centos_teonet
     steps:
@@ -91,7 +88,9 @@ jobs:
 
 
   tagged-build-docker:
-    machine: true
+    #machine: true      
+    machine: #true
+      docker_layer_caching: true    # default - false
     steps:
       - checkout  
       # build the application image
