@@ -63,7 +63,7 @@ jobs:
 
       # build the application image
       - run: sudo sysctl -w net.ipv4.ip_forward=1
-      - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f ci-build-data/Dockerfile .
+      - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
 
       # Check created image
       - run: docker run -it --rm --name $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME -?
