@@ -120,6 +120,10 @@ if [ $RPM_SUBTYPE = 'zyp' ]; then
 else
     SUBFOLDER="rhel"
 fi
+
+mkdir $REPO
+mkdir $REPO/$SUBFOLDER
+
 create_rpm_repo $RPMBUILD $REPO/$SUBFOLDER $ARCH "${INST}"
 
 # Upload repository to remote host and Test Install and run application
