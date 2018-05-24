@@ -1,5 +1,7 @@
 # Build Teonet library from sources
 
+[![CircleCI](https://circleci.com/gh/teonet-co/teonet.svg?style=svg&circle-token=d8827ba514cdb37c75565c8e8d7ebd275a0bc167)](https://circleci.com/gh/teonet-co/teonet)
+
 ## Clone git repository  to get code
 
     git clone git@gitlab.ksproject.org:teonet/teonet.git
