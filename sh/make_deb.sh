@@ -56,6 +56,14 @@ echo ""
 sudo apt-get install -y reprepro
 echo ""
 
+# Download existing repository to local host -----------------------------------
+if [ ! -z "$CI_BUILD_REF" ]; then
+
+    # Download repository from remote host by ftp:
+    ci-build/make_remote_download.sh
+
+fi
+
 # Create DEB repository
 create_deb_repo $REPO ubuntu Teonet teonet sh/gpg_key
 
