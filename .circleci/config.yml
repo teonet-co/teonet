@@ -177,6 +177,7 @@ workflows:
       - tagged-build-docker:
           requires:
             - tagged-build-ubuntu
+            - tagged-build-centos
           filters:
             branches:
               ignore: /.*/
