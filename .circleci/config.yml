@@ -75,7 +75,7 @@ jobs:
       - run: echo $CIRCLE_TAG
 
       # Install dependences
-      - run: sh/build-ubuntu.sh
+      - run: sh/build-centos.sh
       # Make
       - run: ./autogen.sh --prefix=/usr
       - run: make
@@ -157,6 +157,15 @@ workflows:
               only: /^v.*/
 
       - tagged-build-ubuntu:
+          requires:
+            - testing
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - tagged-build-centos:
           requires:
             - testing
           filters:
