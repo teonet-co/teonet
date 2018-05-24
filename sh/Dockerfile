@@ -1,6 +1,6 @@
 # Teonet Dockerfile
 
-FROM       ubuntu
+FROM       ubuntu:16.04
 MAINTAINER Kirill Scherba <kirill@scherba.ru>
 
 # Add teonet repository
