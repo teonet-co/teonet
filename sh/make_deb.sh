@@ -60,7 +60,7 @@ echo ""
 if [ ! -z "$CI_BUILD_REF" ]; then
 
     # Download repository from remote host by ftp:
-    ci-build/make_remote_download.sh
+    sh/make_remote_download.sh
 
 fi
 
