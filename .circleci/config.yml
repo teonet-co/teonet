@@ -26,6 +26,7 @@ jobs:
       - run: ./autogen.sh --prefix=/usr
       - run: make
       # Test
+      - run: app/teovpn -?
       - run: make test
 
 #      # build the application image
@@ -54,24 +55,25 @@ jobs:
       - run: ./autogen.sh --prefix=/usr
       - run: make
       # Test
+      - run: app/teovpn -?
       - run: make test
 
-#      # Build DEB package and upload it to repository
-#      - run: ci-build/make_package deb
-#
-#      # build the application image
-#      - run: sudo sysctl -w net.ipv4.ip_forward=1
-#      - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f ci-build-data/Dockerfile .
-#
-#      # Check created image
-#      - run: docker run -it --rm --name $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME -?
-#
-#      # deploy the image
-#      - run: docker tag $CIRCLE_PROJECT_REPONAME gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-#      - run: docker push gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-#      #
-#      - run: docker tag $CIRCLE_PROJECT_REPONAME gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:latest
-#      - run: docker push gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:latest
+      # Build DEB package and upload it to repository
+      - run: sh/make_package deb
+
+      # build the application image
+      - run: sudo sysctl -w net.ipv4.ip_forward=1
+      - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f ci-build-data/Dockerfile .
+
+      # Check created image
+      - run: docker run -it --rm --name $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME -?
+
+      # deploy the image
+      - run: docker tag $CIRCLE_PROJECT_REPONAME gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
+      - run: docker push gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
+      #
+      - run: docker tag $CIRCLE_PROJECT_REPONAME gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:latest
+      - run: docker push gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:latest
 
 
   testing: # runs not using Workflows must have a `build` job as entry point
