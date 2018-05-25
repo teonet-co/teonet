@@ -87,6 +87,31 @@ jobs:
       - run: sh/make_package yum
 
 
+  tagged-build-opensuse:
+    docker: # run the steps with Docker
+      - image: gitlab.ksproject.org:5000/ci/opensuse_teonet
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+
+      # show current variables
+      - run: echo $CIRCLE_PROJECT_REPONAME
+      - run: echo $CIRCLE_BRANCH
+      - run: echo $CIRCLE_TAG
+
+      # Install dependences
+      - run: sh/build-opensuse.sh
+      # Make
+      - run: ./autogen.sh --prefix=/usr
+      - run: make
+      # Test
+      - run: app/teovpn -?
+      - run: make test
+
+      # Build RPM package and upload it to repository
+      - run: sh/make_package zyp
+
+
   tagged-build-docker:
     #machine: true      
     machine: #true
@@ -166,6 +191,15 @@ workflows:
               only: /^v.*/
 
       - tagged-build-centos:
+          requires:
+            - testing
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - tagged-build-opensuse:
           requires:
             - testing
           filters:
