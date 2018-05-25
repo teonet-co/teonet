@@ -121,8 +121,13 @@ else
     SUBFOLDER="rhel"
 fi
 
-mkdir $REPO
-mkdir $REPO/$SUBFOLDER
+# Download existing repository to local host -----------------------------------
+if [ ! -z "$CI_BUILD_REF" ]; then
+
+    # Download repository from remote host by ftp:
+    sh/make_remote_download.sh
+
+fi
 
 create_rpm_repo $RPMBUILD $REPO/$SUBFOLDER $ARCH "${INST}"
 
