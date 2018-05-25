@@ -212,6 +212,7 @@ workflows:
           requires:
             - tagged-build-ubuntu
             - tagged-build-centos
+            - tagged-build-opensuse
           filters:
             branches:
               ignore: /.*/
