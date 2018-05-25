@@ -40,8 +40,12 @@ else
     fi
 fi
 
-mkdir $REPO
-mkdir $REPO/$SUBFOLDER
+if [ ! -d "$REPO" ]; then
+    mkdir $REPO
+    if [ ! -d "$REPO/$SUBFOLDER" ]; then
+        mkdir $REPO/$SUBFOLDER
+    fi
+fi
 
 # Upload local repository to remote host
 echo $ANSI_BROWN"Download remote host to local repository:"$ANSI_NONE
