@@ -125,6 +125,7 @@
       </df>
       <df name="sh">
         <in>make_package.c</in>
+        <in>rpm_files.txt</in>
       </df>
       <df name="src">
         <df name="config">
@@ -1355,6 +1356,8 @@
         <cTool flags="5">
         </cTool>
       </item>
+      <item path="sh/rpm_files.txt" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
         </cTool>
@@ -2399,6 +2402,8 @@
       <item path="sh/make_package.c" ex="false" tool="0" flavor2="3">
         <cTool flags="6">
         </cTool>
+      </item>
+      <item path="sh/rpm_files.txt" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="3">
         <cTool flags="4">
