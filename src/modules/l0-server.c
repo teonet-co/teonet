@@ -1025,15 +1025,9 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG,
-        "got %d bytes answer from %s authentication application,\n"
-            "accessToken: %s,\n"
-            "userId: %s,\n"
-            "username: %s,\n"
-            "clientId: %s,\n"
-            "networks: %s,\n"
-            "all data: %s\n",
-        rd->data_len, TEO_AUTH, jp.accessToken, jp.userId, jp.username,
-        jp.clientId, jp.networks, rd->data
+        "got %d bytes answer from %s authentication application, "
+            "username: %s\n",
+        rd->data_len, TEO_AUTH, jp.username
     );
     #endif
 
