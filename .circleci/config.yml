@@ -199,20 +199,20 @@ workflows:
             tags:
               only: /^v.*/
 
-      - tagged-build-opensuse:
-          requires:
-            - testing
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+#      - tagged-build-opensuse:
+#          requires:
+#            - testing
+#          filters:
+#            branches:
+#              ignore: /.*/
+#            tags:
+#              only: /^v.*/
 
       - tagged-build-docker:
           requires:
             - tagged-build-ubuntu
             - tagged-build-centos
-            - tagged-build-opensuse
+#            - tagged-build-opensuse
           filters:
             branches:
               ignore: /.*/
