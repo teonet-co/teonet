@@ -263,7 +263,8 @@ int ksnCoreBind(ksnCoreClass *kc) {
         // Set non block mode
         // \todo Test with "Set non block on"
         //       and set the set_nonblock if it work correct
-        set_nonblock(fd);
+        // It was tested and switch back to blocked UDP 2018-05-28
+        //set_nonblock(fd);
     }
 
     return !(fd > 0);
