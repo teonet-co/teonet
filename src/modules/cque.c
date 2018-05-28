@@ -116,7 +116,6 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
  * @return return 0: if callback removed OK; !=0 some error occurred
  */
 int ksnCQueRemove(ksnCQueClass *kq, uint32_t id) {
-        const int type = 1;
     int retval = -1;
     size_t data_len;
     
