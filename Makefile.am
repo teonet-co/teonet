@@ -58,4 +58,7 @@ build-tests:
 	tests/test_teonet
 	
 test:	tests/test_teonet
-	tests/test_teonet
+	embedded/libtrudp/embedded/teoccl/tests/teoccl_cpp_tst
+	embedded/libtrudp/embedded/teoccl/tests/teoccl_tst
+	embedded/libtrudp/tests/trudp_tst
+	tests/test_teonet 
