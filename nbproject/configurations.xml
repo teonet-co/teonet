@@ -211,8 +211,7 @@
                  commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -std=gnu11 -fstack-protector-strong"/>
         <element flagsID="12" commonFlags="-std=c++11"/>
         <element flagsID="13" commonFlags="-std=c++11 -O2 -O2"/>
-        <element flagsID="14" commonFlags="-std=c++17 -O2 -O2"/>
-        <element flagsID="15" commonFlags="-std=gnu11 -fPIC -O2 -g -O2 -fPIC"/>
+        <element flagsID="14" commonFlags="-std=gnu11 -fPIC -O2 -g -O2 -fPIC"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -222,9 +221,63 @@
           <buildCommand>${MAKE} -f Makefile</buildCommand>
           <cleanCommand>${MAKE} -f Makefile clean</cleanCommand>
           <executablePath>app/.libs/teovpn</executablePath>
-          <cTool flags="-fPIC -O2 -g -O2 -fPIC">
+          <cTool flags="6">
+            <incDir>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>embedded/libtrudp/tests</pElem>
+              <pElem>embedded/libtrudp</pElem>
+              <pElem>embedded/libtrudp/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            </incDir>
+            <preprocessorList>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PIC</Elem>
+              <Elem>PIC</Elem>
+              <Elem>PIC</Elem>
+            </preprocessorList>
           </cTool>
-          <ccTool>
+          <ccTool flags="-std=c++17 -O2 -O2">
             <standard>8</standard>
             <incDir>
               <pElem>examples</pElem>
@@ -234,9 +287,23 @@
               <pElem>embedded/libpbl/src</pElem>
               <pElem>embedded/teocli/libteol0</pElem>
               <pElem>embedded/libtrudp/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl</pElem>
+              <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
             </incDir>
             <preprocessorList>
               <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
               <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
             </preprocessorList>
           </ccTool>
@@ -247,7 +314,7 @@
         </preBuild>
       </makefileType>
       <item path="app/embedded/jsmn/jsmn.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="app/embedded/mongoose/mongoose.c" ex="false" tool="0" flavor2="3">
@@ -449,150 +516,6 @@
         <cTool flags="7">
         </cTool>
       </item>
-      <item path="embedded/libtrudp/embedded/teoccl/src/hash.c"
-            ex="false"
-            tool="0"
-            flavor2="10">
-        <cTool flags="9">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/embedded/teoccl/src/map.c"
-            ex="false"
-            tool="0"
-            flavor2="10">
-        <cTool flags="9">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/embedded/teoccl/src/queue.c"
-            ex="false"
-            tool="0"
-            flavor2="10">
-        <cTool flags="9">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-            <Elem>PIC</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/embedded/teoccl/tests/main_cpp_t.cpp"
-            ex="false"
-            tool="1"
-            flavor2="11">
-        <ccTool flags="14">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-          </preprocessorList>
-        </ccTool>
-      </item>
-      <item path="embedded/libtrudp/embedded/teoccl/tests/main_t.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="6">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/embedded/teoccl/tests/map_t.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="6">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
-      <item path="embedded/libtrudp/embedded/teoccl/tests/queue_cpp_t.cpp"
-            ex="false"
-            tool="1"
-            flavor2="11">
-        <ccTool flags="14">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-          </preprocessorList>
-        </ccTool>
-      </item>
-      <item path="embedded/libtrudp/embedded/teoccl/tests/queue_t.c"
-            ex="false"
-            tool="0"
-            flavor2="3">
-        <cTool flags="6">
-          <incDir>
-            <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
       <item path="embedded/libtrudp/examples/snake.c" ex="false" tool="0" flavor2="3">
         <cTool flags="11">
           <incDir>
@@ -696,22 +619,6 @@
         <cTool flags="9">
         </cTool>
       </item>
-      <item path="embedded/libtrudp/tests/main_t.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="6">
-          <incDir>
-            <pElem>embedded/libtrudp/tests</pElem>
-            <pElem>embedded/libtrudp</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-            <Elem>PACKAGE_SRC_DIR="."</Elem>
-          </preprocessorList>
-        </cTool>
-      </item>
       <item path="embedded/libtrudp/tests/packet_queue_t.c"
             ex="false"
             tool="0"
@@ -731,7 +638,7 @@
             ex="false"
             tool="0"
             flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="embedded/teocli/main.c" ex="false" tool="0" flavor2="3">
@@ -1395,103 +1302,103 @@
         </cTool>
       </item>
       <item path="src/config/conf.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/config/opt.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/crypt.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/daemon.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/ev_mgr.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/hotkeys.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/l0-server.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/net_tcp.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/stream.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/teodb_com.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/net_com.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/net_core.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/net_multi.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/net_recon.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/net_split.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/pidfile.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/teonet" ex="false" tool="1" flavor2="8">
@@ -1499,27 +1406,27 @@
         </ccTool>
       </item>
       <item path="src/teonet.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/tr-udp.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/tr-udp_stat.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/utils/base64.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/utils/string_arr.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="src/utils/utils.c" ex="false" tool="0" flavor2="10">
-        <cTool flags="15">
+        <cTool flags="14">
         </cTool>
       </item>
       <item path="tests/teonet_tst.c" ex="false" tool="0" flavor2="3">
