@@ -35,6 +35,7 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/libtrudp/src \
+	 -I../embedded/libtrudp/embedded/teoccl/src \
 	 -I../app/embedded/jsmn \
 	 -I/usr/include/libev \
 	 -DEV_USE_EPOLL=1 \
@@ -59,7 +60,11 @@ AM_CXXFLAGS = \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -lcrypt -ltuntap ../embedded/libpbl/src/libpbl.a ../embedded/libtrudp/src/.libs/libtrudp.a
+LIBS = -lev -lcrypt -ltuntap \
+    ../embedded/libpbl/src/libpbl.a \
+    ../embedded/libtrudp/src/.libs/libtrudp.a \
+    ../embedded/libtrudp/embedded/teoccl/src/.libs/libteoccl.a
+    
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -132,17 +137,17 @@ teonetinclude_HEADERS = \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
     ../app/embedded/jsmn/jsmn.h \
     \
-    ../embedded/libtrudp/src/packet_queue.h \
-    ../embedded/libtrudp/src/queue.h \
-    ../embedded/libtrudp/src/write_queue.h \
-    ../embedded/libtrudp/src/packet.h \
-    ../embedded/libtrudp/src/map.h \
     ../embedded/libtrudp/src/udp.h \
-    ../embedded/libtrudp/src/trudp_channel.h \
-    ../embedded/libtrudp/src/trudp_const.h \
+    ../embedded/libtrudp/src/packet.h \
     ../embedded/libtrudp/src/trudp_api.h \
+    ../embedded/libtrudp/src/trudp_const.h \
+    ../embedded/libtrudp/src/write_queue.h \
+    ../embedded/libtrudp/src/packet_queue.h \
+    ../embedded/libtrudp/src/trudp_channel.h \
     ../embedded/libtrudp/src/trudp_send_queue.h \
-    ../embedded/libtrudp/src/trudp_receive_queue.h
+    ../embedded/libtrudp/src/trudp_receive_queue.h \
+    ../embedded/libtrudp/embedded/teoccl/src/map.h \
+    ../embedded/libtrudp/embedded/teoccl/src/queue.h
 
 libteonet_la_SOURCES = \
     crypt.c \
@@ -178,8 +183,9 @@ libteonet_la_SOURCES = \
     utils/base64.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
     ../app/embedded/jsmn/jsmn.c \
-    ../embedded/libtrudp/src/libtrudp.la
-    
+    ../embedded/libtrudp/src/libtrudp.la \
+    ../embedded/libtrudp/embedded/teoccl/src/libteoccl.la
+
 
 teonetconfdir=$(sysconfdir)/teonet
 teonetconf_DATA = config/teonet.conf.default
