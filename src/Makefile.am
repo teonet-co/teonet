@@ -138,6 +138,7 @@ teonetinclude_HEADERS = \
     ../app/embedded/jsmn/jsmn.h \
     \
     ../embedded/libtrudp/src/udp.h \
+    ../embedded/libtrudp/src/trudp.h \
     ../embedded/libtrudp/src/packet.h \
     ../embedded/libtrudp/src/trudp_api.h \
     ../embedded/libtrudp/src/trudp_const.h \
