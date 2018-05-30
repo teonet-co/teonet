@@ -7,7 +7,7 @@
  * Created on July 14, 2015, 9:52 AM
  */
 
-#include "teonet"
+#include "teonet.hpp"
 
 #define TCPP_VERSION "0.0.1"
 
