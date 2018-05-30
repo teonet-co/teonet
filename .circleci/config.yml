@@ -7,7 +7,7 @@
 version: 2
 jobs:
 
-  un-tagged-build:
+  un-tagged-build-ubuntu:
     docker: # run the steps with Docker
       - image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
     steps:
@@ -35,6 +35,28 @@ jobs:
 #      - run: docker run -it --rm --name $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME node . -?
 #
 #      # This is place for run unit tests from docker container
+
+
+  un-tagged-build-centos:
+    docker: # run the steps with Docker
+      - image: gitlab.ksproject.org:5000/ci/centos_teonet
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+
+      # show current variables
+      - run: echo $CIRCLE_PROJECT_REPONAME
+      - run: echo $CIRCLE_BRANCH
+      - run: echo $CIRCLE_TAG
+
+      # Install dependences
+      - run: sh/build-centos.sh
+      # Make
+      - run: ./autogen.sh --prefix=/usr
+      - run: make
+      # Test
+      - run: app/teovpn -?
+      - run: make test
 
 
   tagged-build-ubuntu:
@@ -165,7 +187,14 @@ workflows:
             tags:
               ignore: /^v.*/
 
-      - un-tagged-build:
+      - un-tagged-build-ubuntu:
+          requires:
+            - testing
+          filters:
+            tags:
+              ignore: /^v.*/
+
+      - un-tagged-build-centos:
           requires:
             - testing
           filters:

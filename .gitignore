@@ -1,3 +1,9 @@
+*.a
+*.o
+*.lo
+*.la
+.deps
+.libs
 /.f1/
 /.teonet_tst/
 /.teovpn/
@@ -14,7 +20,6 @@
 /docs/
 /embedded/Makefile
 /embedded/Makefile.in
-/embedded/libpbl/src/*.o
 /embedded/libpbl/src/pblkftst
 /embedded/libpbl/src/pbliftst
 /embedded/libpbl/src/pblPriorityQueueTest
@@ -31,10 +36,8 @@
 /examples/Makefile
 /examples/teonet_tst
 /examples/teolarge
-/examples/.libs/
 /examples/fossa/Makefile.in
 /examples/fossa/Makefile
-/examples/fossa/.libs/
 /examples/fossa/teofossa
 /examples/teosend
 /examples/teomulti
@@ -42,8 +45,6 @@
 /examples/teotcp
 /examples/teotun
 /examples/teoterm
-/src/.libs/
-/src/.deps/
 /src/Makefile
 /src/Makefile.in
 /src/libteonet.pc
@@ -72,13 +73,10 @@
 /po/Makefile
 /po/stamp-it
 /Makefile
-/app/.libs
 /app/teovpn
 /app/Makefile
 /app/Makefile.in
 /app/embedded/mongoose/.dirstamp
-/app/embedded/mongoose/.deps/.dirstamp
-/tests/.libs/
 /tests/Makefile
 /tests/Makefile.in
 /tests/teonet_tst
@@ -106,7 +104,6 @@
 /examples/teol0cli
 /embedded/libteol0/Makefile.in
 /embedded/libteol0/Makefile
-/embedded/libteol0/.libs/
 /embedded/libteol0/teonet_l0_client_wrap.c
 /embedded/libteol0/teonet_l0_client.py
 /examples/teol0cli_n
@@ -119,13 +116,8 @@
 /app/teoroom
 /src/config/.dirstamp
 /src/utils/.dirstamp
-/src/config/.deps/.dirstamp
 /app/modules/teo_auth/.dirstamp
 /src/modules/.dirstamp
-/app/modules/teo_auth/.deps/.dirstamp
-/app/modules/teo_web/.deps/.dirstamp
-/src/modules/.deps/.dirstamp
-/src/utils/.deps/.dirstamp
 /app/modules/teo_web/.dirstamp
 /configure.scan
 /autoscan.log
