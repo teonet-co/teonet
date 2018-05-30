@@ -111,8 +111,7 @@ nobase_teonetinclude_HEADERS = \
     tr-udp_.h \
     tr-udp_stat.h \
     pidfile.h \
-    teonet.h \
-    teonet \
+    teonet.hpp \
     config/config.h \
     config/conf.h \
     config/opt.h \
@@ -164,7 +163,6 @@ libteonet_la_SOURCES = \
     tr-udp.c \
     tr-udp_stat.c \
     pidfile.c \
-    teonet.c \
     config/conf.c \
     config/opt.c \
     modules/cque.c \

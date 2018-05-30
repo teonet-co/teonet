@@ -15,13 +15,24 @@
  */
 
 /*
- * File:   teonet
+ * File:   teonet.hpp
  * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * Created on October 18, 2017, 11:03 AM
  *
  * Teonet c++ wrapper
  */
+
+/**
+ * \mainpage Teonet library Documentation
+ * 
+ * ### Installation information
+ * See the \ref md_README "README.md" file to get Installation Info
+ * <br>  
+ * ### See the latest news from library ChangeLog: <br>
+ * \include "./ChangeLog"
+ *  
+ */ 
 
 #pragma once
 

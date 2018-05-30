@@ -17,7 +17,7 @@ AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 116, [Teonet dynamic library version])
 AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2018"], [Teonet library copyright])
 
 AC_CONFIG_HEADERS([src/config/config.h])
-AC_CONFIG_SRCDIR([src/teonet.c])
+AC_CONFIG_SRCDIR([src/teonet.hpp])
 
 AM_INIT_AUTOMAKE
 AM_INIT_AUTOMAKE([subdir-objects])

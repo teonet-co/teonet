@@ -16,7 +16,7 @@
 #include <cstring>
 #include <condition_variable>
 
-#include "teonet"
+#include "teonet.hpp"
 
 #define TDB_VERSION "0.0.2"
 #define APPNAME _ANSI_MAGENTA "teodb_ex" _ANSI_NONE
