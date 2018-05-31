@@ -1246,6 +1246,13 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kter = ksnTermInit(ke);
     #endif
 
+    // Logging server module
+    #ifdef M_ENAMBE_LOGGING_SERVER
+    ke->ls = teoLoggingServerInit(ke);
+    #endif
+
+    // \TODO Logging client module
+
     return 1;
 }
 
@@ -1256,6 +1263,10 @@ int modules_init(ksnetEvMgrClass *ke) {
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
 
+    // Logging server module
+    #ifdef M_ENAMBE_LOGGING_SERVER
+    teoLoggingServerDestroy(ke->ls);
+    #endif
     #ifdef M_ENAMBE_TERM
     ksnTermDestroy(ke->kter);
     #endif
