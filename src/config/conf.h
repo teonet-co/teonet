@@ -38,6 +38,7 @@
 #define M_ENAMBE_TCP_P 1
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
+#define M_ENAMBE_LOGGING_SERVER 1
 
 // TRUE & FALSE define
 #define TRUE  1

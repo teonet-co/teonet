@@ -27,6 +27,7 @@
 #include "modules/net_term.h"
 #include "modules/tcp_proxy.h"
 #include "modules/l0-server.h"
+#include "../embedded/teologging/src/modules/logging_server.h"
 
 extern const char *null_str;
 #define NULL_STR (void*) null_str
@@ -244,6 +245,8 @@ typedef struct ksnetEvMgrClass {
 
     ksnet_cfg ksn_cfg; ///< KSNet configuration
 
+    teoLoggingServerClass *ls; ///< Logging server class // \TODO move it up after testing
+    
     int runEventMgr; ///< Run even manages (stop if 0)
     uint32_t timer_val; ///< Event loop timer value
     uint32_t idle_count; ///< Idle callback count
