@@ -78,6 +78,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "vpn_ip",         required_argument, 0, 'i' },
         { "vpn_mtu",        required_argument, 0, 'm' },
         #endif
+        #if M_ENAMBE_LOGGING_SERVER
+        { "logging",        no_argument,       &conf->logging_f, 1 },
+        #endif
 
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
         { "log_priority",   required_argument, (int*)&conf->log_priority, 0 },
@@ -374,6 +377,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --vpn_start          Start VPN\n"
     "       --vpn_ip             VPN IP\n"
     "       --vpn_mtu            VPN MTU\n"
+    #endif
+    #if M_ENAMBE_LOGGING_SERVER
+    "       --logging            Start logging server\n"
     #endif
     "\n"
     "       --sig_segv           Segmentation fault error processing by library\n"
