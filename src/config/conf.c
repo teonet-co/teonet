@@ -93,6 +93,9 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->vpn_connect_f = 0;
     ksn_cfg->vpn_mtu = 0;
     
+    // Logging server
+    ksn_cfg->logging_f = 0;
+    
     // SIGSEGV processing
     ksn_cfg->sig_segv_f = 0;
     
@@ -174,6 +177,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_INT("vpn_mtu", &conf->vpn_mtu),
         CFG_SIMPLE_STR("vpn_dev_name", &vpn_dev_name),
         CFG_SIMPLE_STR("vpn_dev_hwaddr", &vpn_dev_hwaddr),
+        #endif
+
+        #if M_ENAMBE_LOGGING_SERVER
+        CFG_SIMPLE_BOOL("logging_f", &conf->logging_f),
         #endif
 
         CFG_SIMPLE_INT("log_priority", &conf->log_priority),
