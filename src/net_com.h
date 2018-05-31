@@ -61,6 +61,8 @@ enum ksnCMD {
     CMD_TRUDP_INFO_ANSWER,  ///< #95 TR-UDP info answer
     
     CMD_L0_AUTH,            ///< #96 L0 server auth request answer command
+    CMD_AM,                 ///< #97 AM application command 
+    CMD_LOGGING,            ///< #98 LOGGING command
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
