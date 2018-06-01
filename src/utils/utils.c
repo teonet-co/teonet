@@ -154,8 +154,10 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 //            va_list args;
 //            va_start(args, format);
 //            vsyslog(priority, format, args);
-//            va_end(args);            
-            syslog(priority < LOG_DEBUG ? priority : LOG_INFO, "%s", trimlf(removeTEsc(p)));
+//            va_end(args);
+            char *data = trimlf(removeTEsc(p));
+            syslog(priority < LOG_DEBUG ? priority : LOG_INFO, "%s", data);
+            teoLoggingClientSend(ksn_cfg->ke, data, strlen(data)+1);
         }
         free(p);
     }
