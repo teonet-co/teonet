@@ -171,7 +171,7 @@ int ksnTcpServerCreate(
     int *port_created) {
 
     #ifdef DEBUG_KSNET
-    ksn_printf(((ksnetEvMgrClass*)kt->ke), MODULE, DEBUG,
+    ksn_printf(((ksnetEvMgrClass*)kt->ke), MODULE, DEBUG_VV,
             "try create TCP server at port %d ...\n", port);
     #endif
 
@@ -391,7 +391,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 
         // Bind socket to address
         if (bind(sd, (struct sockaddr*) &addr, sizeof(addr)) != 0) {
-            ksn_printf(kev, MODULE, DEBUG,
+            ksn_printf(kev, MODULE, DEBUG_VV,
                     "%s""can't bind on port %d, trying next port number ...%s\n", 
                     ANSI_DARKGREY, *port, ANSI_NONE);
             close(sd);
@@ -411,7 +411,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 
     // Server welcome message
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG,
+    ksn_printf(kev, MODULE, DEBUG_VV,
             "start listen at port %d, socket fd %d\n", *port, sd);
     #endif
 

@@ -298,6 +298,12 @@ typedef struct ksnetEvMgrClass {
 } ksnetEvMgrClass;
 
 /**
+ * Event callback type
+ */
+typedef void (*event_cb_t)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, 
+        void *data, size_t data_len, void *user_data);
+
+/**
  * STDIN idle watcher data
  */
 typedef struct stdin_idle_data {

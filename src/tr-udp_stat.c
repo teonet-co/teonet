@@ -703,7 +703,7 @@ inline int ksnTRUDPqueuesShow(trudpData *td) {
             if(sqs > max_q_size) { max_q_size = sqs; tcd = _tcd; }
             if(rqs > max_q_size) { max_q_size = rqs; tcd = _tcd; }
         }
-        teoMapIteratorDestroy(it);
+        teoMapIteratorFree(it);
     }
     
     if(tcd != (void*)-1) {

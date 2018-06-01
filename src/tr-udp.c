@@ -2214,7 +2214,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             trudpData *td = (trudpData *) tcd;
             trudp_send_queue_init(td);
             #ifdef DEBUG_KSNET
-            ksn_puts(kev, MODULE, DEBUG,
+            ksn_puts(kev, MODULE, DEBUG_VV,
                     "TR-UDP module initialized"
             );
             #endif
@@ -2228,7 +2228,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             trudpData *td = (trudpData *) tcd;
             trudp_send_queue_destroy((trudpData *)tcd);
             #ifdef DEBUG_KSNET
-            ksn_puts(kev, MODULE, DEBUG,
+            ksn_puts(kev, MODULE, DEBUG_VV,
                     "TR-UDP module destroying"
             );
             #endif
