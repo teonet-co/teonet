@@ -280,7 +280,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ke->ev_loop = loop;
     
     // \todo remove this print
-    ksn_printf(ke, MODULE, DEBUG, 
+    ksn_printf(ke, MODULE, DEBUG_VV, 
         _ANSI_BROWN "event loop initialized as %s " _ANSI_NONE ", ke->n_num = %d\n", 
         ke->n_num && ke->km == NULL ? "ev_loop_new (0)" : "EV_DEFAULT",
         (int)ke->n_num
@@ -1246,6 +1246,16 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kter = ksnTermInit(ke);
     #endif
 
+    // Logging server module
+    #ifdef M_ENAMBE_LOGGING_SERVER
+    ke->ls = teoLoggingServerInit(ke);
+    #endif
+
+    // Logging client module
+    #ifdef M_ENAMBE_LOGGING_CLIENT
+    ke->lc = teoLoggingClientInit(ke);
+    #endif
+
     return 1;
 }
 
@@ -1256,6 +1266,12 @@ int modules_init(ksnetEvMgrClass *ke) {
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
 
+    #ifdef M_ENAMBE_LOGGING_CLIENT
+    teoLoggingClientDestroy(ke->lc);
+    #endif
+    #ifdef M_ENAMBE_LOGGING_SERVER
+    teoLoggingServerDestroy(ke->ls);
+    #endif
     #ifdef M_ENAMBE_TERM
     ksnTermDestroy(ke->kter);
     #endif
@@ -1284,6 +1300,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     ksnLNullDestroy(ke->kl);
     #endif
 
+    ke->ksn_cfg.port = ke->kc->port;
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
     

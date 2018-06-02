@@ -126,6 +126,8 @@ nobase_teonetinclude_HEADERS = \
     modules/tcp_proxy.h \
     modules/teodb.h \
     modules/teodb_com.h \
+    ../embedded/teologging/src/modules/logging_server.h \
+    ../embedded/teologging/src/modules/logging_client.h \
     modules/vpn.h \
     utils/string_arr.h \
     utils/utils.h \
@@ -177,6 +179,8 @@ libteonet_la_SOURCES = \
     modules/teodb.c \
     modules/teodb_com.c \
     modules/vpn.c \
+    ../embedded/teologging/src/modules/logging_server.c \
+    ../embedded/teologging/src/modules/logging_client.c \
     utils/string_arr.c \
     utils/utils.c \
     utils/base64.c \

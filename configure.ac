@@ -12,8 +12,8 @@ AC_SUBST([$1], ['$2'])
 # END
 
 AC_PREREQ([2.69])
-AC_INIT([teonet], [0.2.21], [kirill@scherba.ru])
-AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 117, [Teonet dynamic library version])
+AC_INIT([teonet], [0.2.22], [kirill@scherba.ru])
+AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 118, [Teonet dynamic library version])
 AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2018"], [Teonet library copyright])
 
 AC_CONFIG_HEADERS([src/config/config.h])
@@ -277,6 +277,8 @@ AC_CONFIG_FILES([
 ])
 
 # Call libtrudp's ./configure script recursively.
-AC_CONFIG_SUBDIRS([embedded/libtrudp])
-
+AC_CONFIG_SUBDIRS([
+    embedded/libtrudp
+    embedded/teologging
+])
 AC_OUTPUT

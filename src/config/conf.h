@@ -38,6 +38,8 @@
 #define M_ENAMBE_TCP_P 1
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
+#define M_ENAMBE_LOGGING_SERVER 1
+#define M_ENAMBE_LOGGING_CLIENT 1
 
 // TRUE & FALSE define
 #define TRUE  1
@@ -59,7 +61,8 @@ typedef struct ksnet_cfg {
         show_tr_udp_f, ///< Show TR-UDP statistic at start up 
         send_ack_event_f, ///< Send TR-UDP ACK event (EV_K_RECEIVED_ACK) to the teonet event loop
         sig_segv_f, ///< SIGSEGV processing
-        block_cli_input_f; ///< Block teonet CLI input (for using in GUI application)
+        block_cli_input_f, ///< Block teonet CLI input (for using in GUI application)
+        logging_f; ///< Start logging server 
     
     // Daemon mode flags
     int dflag,  ///< Start application in Daemon mode
