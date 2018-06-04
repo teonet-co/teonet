@@ -248,7 +248,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
     ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
+    ksn_printf(kev, MODULE, DEBUG, // \TODO Can't remove this message or switch it to DEBUG_VV
             "create UDP client/server at port %d ...\n", kc->port);
     #endif
 
