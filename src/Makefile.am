@@ -127,6 +127,8 @@ nobase_teonetinclude_HEADERS = \
     modules/teodb.h \
     modules/teodb_com.h \
     modules/vpn.h \
+    modules/logging_server.h \
+    modules/logging_client.h \
     utils/string_arr.h \
     utils/utils.h \
     utils/rlutil.h
@@ -134,8 +136,6 @@ nobase_teonetinclude_HEADERS = \
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
-    ../embedded/teologging/src/modules/logging_server.h \
-    ../embedded/teologging/src/modules/logging_client.h \
     ../app/embedded/jsmn/jsmn.h \
     \
     ../embedded/libtrudp/src/udp.h \
@@ -179,8 +179,8 @@ libteonet_la_SOURCES = \
     modules/teodb.c \
     modules/teodb_com.c \
     modules/vpn.c \
-    ../embedded/teologging/src/modules/logging_server.c \
-    ../embedded/teologging/src/modules/logging_client.c \
+    modules/logging_server.c \
+    modules/logging_client.c \
     utils/string_arr.c \
     utils/utils.c \
     utils/base64.c \

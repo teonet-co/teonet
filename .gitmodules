@@ -10,6 +10,3 @@
 	path = embedded/libtrudp
 	url = https://github.com/teonet-co/trudp.git
 
-[submodule "embedded/teologging"]
-	path = embedded/teologging
-	url = git@github.com:teonet-co/teologging.git

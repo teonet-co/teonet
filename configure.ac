@@ -279,6 +279,5 @@ AC_CONFIG_FILES([
 # Call libtrudp's ./configure script recursively.
 AC_CONFIG_SUBDIRS([
     embedded/libtrudp
-    embedded/teologging
 ])
 AC_OUTPUT

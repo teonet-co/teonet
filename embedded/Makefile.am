@@ -1,3 +1,3 @@
-EXTRA_DIST = libpbl teocli libtrudp teologging
+EXTRA_DIST = libpbl teocli libtrudp
 
 #SUBDIRS = libteol0

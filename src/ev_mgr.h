@@ -27,8 +27,8 @@
 #include "modules/net_term.h"
 #include "modules/tcp_proxy.h"
 #include "modules/l0-server.h"
-#include "../embedded/teologging/src/modules/logging_server.h"
-#include "../embedded/teologging/src/modules/logging_client.h"
+#include "modules/logging_server.h"
+#include "modules/logging_client.h"
 
 extern const char *null_str;
 #define NULL_STR (void*) null_str
