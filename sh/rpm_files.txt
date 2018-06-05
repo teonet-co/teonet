@@ -15,8 +15,8 @@
    /usr/lib/libtrudp.a
    /usr/lib/libtrudp.la
    /usr/lib/libtrudp.so
-   /usr/lib/libtrudp.so.8
-   /usr/lib/libtrudp.so.8.0.0
+   /usr/lib/libtrudp.so.9
+   /usr/lib/libtrudp.so.9.0.0
    /usr/share/doc/teonet/examples/
    /usr/share/doc/libtrudp/
    /usr/doc/libteoccl/AUTHORS
@@ -28,8 +28,8 @@
    /usr/lib/libteoccl.a
    /usr/lib/libteoccl.la
    /usr/lib/libteoccl.so
-   /usr/lib/libteoccl.so.1
-   /usr/lib/libteoccl.so.1.0.0
+   /usr/lib/libteoccl.so.2
+   /usr/lib/libteoccl.so.2.0.0
    /usr/share/doc/libteoccl/tests/main_t.c
    /usr/share/doc/libteoccl/tests/map_t.c
    /usr/share/doc/libteoccl/tests/queue_t.c
