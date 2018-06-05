@@ -1909,19 +1909,83 @@ void ksnTRUDPreceiveHeapDestroyAll(ksnTRUDPClass *tu) {
 
 #include "trudp_ev.h"
 
-///**
-// * Send queue processing data definition
-// */
-//typedef struct process_send_queue_data {
-//
-//    int inited;
-//    trudpData *td;
-//    struct ev_loop *loop;
-//    ev_timer process_send_queue_w;
-//
-//} process_send_queue_data;
-
 #define kev ((ksnetEvMgrClass*)(((trudpData *)td)->user_data))
+
+#ifdef USE_SEND_QUEUE
+
+/**
+ * Send queue processing data definition
+ */
+typedef struct process_send_queue_data {
+
+    int inited;
+    trudpData *td;
+    struct ev_loop *loop;
+    ev_timer process_send_queue_w;
+
+} process_send_queue_data;
+
+/**
+ * Send queue processing timer libev callback
+ *
+ * @param loop
+ * @param w
+ * @param revents
+ */
+static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
+
+    process_send_queue_data *psd = (process_send_queue_data *) w->data;
+    ev_timer_stop(psd->loop, w);
+    
+    // Process send queue
+    uint64_t next_expected_time;
+    trudp_SendQueueProcess(psd->td, &next_expected_time);
+
+    // Start new process_send_queue timer
+    if(next_expected_time)
+        trudp_send_queue_start_cb(psd, next_expected_time);
+}
+
+/**
+ * Start send queue timer
+ *
+ * @param psd Pointer to process_send_queue_data
+ * @param next_expected_time
+ */
+static void trudp_send_queue_start_cb(process_send_queue_data *psd,
+        uint64_t next_expected_time) {
+
+    uint64_t tt, next_et = UINT64_MAX, ts = trudpGetTimestampFull();
+
+    // If next_expected_time selected (non nil)
+    if(next_expected_time) {
+        next_et = next_expected_time > ts ? next_expected_time - ts : 0;
+    }
+
+    // If next_expected_time (net) or GetSendQueueTimeout
+    if((tt = (next_et != UINT64_MAX) ?
+        next_et : trudp_SendQueueGetTimeout(psd->td, ts)) != UINT32_MAX) {
+
+        double tt_d = tt / 1000000.0;
+        if(tt_d == 0.0) tt_d = 0.0001;
+
+        if(!psd->inited) {
+            ev_timer_init(&psd->process_send_queue_w, trudp_send_queue_process_cb, tt_d, 0.0);
+            psd->process_send_queue_w.data = (void*)psd;
+            psd->inited = 1;
+        }
+        else 
+        {
+            if(ev_is_active(&psd->process_send_queue_w))
+            ev_timer_stop(psd->loop, &psd->process_send_queue_w);
+            ev_timer_set(&psd->process_send_queue_w, tt_d, 0.0);
+        }
+
+        ev_timer_start(psd->loop, &psd->process_send_queue_w);
+    }
+}
+
+#endif
 
 /**
  * Allow or disallow send ACK event (EV_K_RECEIVED_ACK) to teonet event loop
@@ -2052,66 +2116,6 @@ static void trudp_send_queue_destroy(trudpData *td) {
     }
 }
 
-///**
-// * Send queue processing timer libev callback
-// *
-// * @param loop
-// * @param w
-// * @param revents
-// */
-//static void trudp_send_queue_process_cb(EV_P_ ev_timer *w, int revents) {
-//
-//    process_send_queue_data *psd = (process_send_queue_data *) w->data;
-//    ev_timer_stop(psd->loop, w);
-//    
-//    // Process send queue
-//    uint64_t next_expected_time;
-//    trudp_SendQueueProcess(psd->td, &next_expected_time);
-//
-//    // Start new process_send_queue timer
-//    if(next_expected_time)
-//        trudp_send_queue_start_cb(psd, next_expected_time);
-//}
-//
-///**
-// * Start send queue timer
-// *
-// * @param psd Pointer to process_send_queue_data
-// * @param next_expected_time
-// */
-//static void trudp_send_queue_start_cb(process_send_queue_data *psd,
-//        uint64_t next_expected_time) {
-//
-//    uint64_t tt, next_et = UINT64_MAX, ts = trudpGetTimestampFull();
-//
-//    // If next_expected_time selected (non nil)
-//    if(next_expected_time) {
-//        next_et = next_expected_time > ts ? next_expected_time - ts : 0;
-//    }
-//
-//    // If next_expected_time (net) or GetSendQueueTimeout
-//    if((tt = (next_et != UINT64_MAX) ?
-//        next_et : trudp_SendQueueGetTimeout(psd->td, ts)) != UINT32_MAX) {
-//
-//        double tt_d = tt / 1000000.0;
-//        if(tt_d == 0.0) tt_d = 0.0001;
-//
-//        if(!psd->inited) {
-//            ev_timer_init(&psd->process_send_queue_w, trudp_send_queue_process_cb, tt_d, 0.0);
-//            psd->process_send_queue_w.data = (void*)psd;
-//            psd->inited = 1;
-//        }
-//        else 
-//        {
-//            if(ev_is_active(&psd->process_send_queue_w))
-//            ev_timer_stop(psd->loop, &psd->process_send_queue_w);
-//            ev_timer_set(&psd->process_send_queue_w, tt_d, 0.0);
-//        }
-//
-//        ev_timer_start(psd->loop, &psd->process_send_queue_w);
-//    }
-//}
-
 /**
  * Send ACK event to teonet event loop
  *
@@ -2212,12 +2216,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param td Pointer to trudpData
         case INITIALIZE: {
 
-            trudpData *td = (trudpData *) tcd;
+            trudpData *td = (trudpData *) tcd_pointer;
             trudp_send_queue_init(td);
             #ifdef DEBUG_KSNET
-            ksn_puts(kev, MODULE, DEBUG_VV,
-                    "TR-UDP module initialized"
-            );
+            ksn_puts(kev, MODULE, DEBUG_VV, "TR-UDP module initialized");
             #endif
 
         } break;
@@ -2226,12 +2228,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param td Pointer to trudpData
         case DESTROY: {
 
-            trudpData *td = (trudpData *) tcd;
-            trudp_send_queue_destroy((trudpData *)tcd);
+            trudpData *td = (trudpData *) tcd_pointer;
+            trudp_send_queue_destroy(td);
             #ifdef DEBUG_KSNET
-            ksn_puts(kev, MODULE, DEBUG_VV,
-                    "TR-UDP module destroying"
-            );
+            ksn_puts(kev, MODULE, DEBUG_VV, "TR-UDP module destroying");
             #endif
 
         } break;
@@ -2242,12 +2242,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case CONNECTED: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
-                    "connect channel %s\n", key
-            );
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
+            ksn_printf(kev, MODULE, DEBUG_VV, "connect channel %s\n", key);
             #endif
 
         } break;
@@ -2258,8 +2256,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case DISCONNECTED: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
             if(data_length == sizeof(uint32_t)) {
 
                 uint32_t last_received = *(uint32_t*)data;
@@ -2274,7 +2272,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 }
                 
                 // Remove peer from ARP table
-                trudpData *td = TD(tcd);
+                const trudpData *td = TD(tcd); // used in kev macro
                 if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
                 
                     // Remove TR-UDP channel
@@ -2299,9 +2297,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_RESET: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got TRU_RESET packet from channel %s\n",
                 key);
@@ -2315,8 +2313,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case SEND_RESET: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
 
             if(!data)
                 
@@ -2354,9 +2352,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_ACK_RESET: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
             ksn_printf(kev, MODULE, DEBUG_VV, 
                 "got ACK to RESET packet at channel %s\n", key);
             #endif
@@ -2369,9 +2367,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_ACK_PING: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got ACK to PING packet at channel %s, data: %s, %.3f(%.3f) ms\n",
                 key, (char*)data,
@@ -2386,9 +2384,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_PING: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
             #ifdef DEBUG_KSNET
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got PING packet at channel %s, data: %s\n",
                 key, (char*)data);
@@ -2403,8 +2401,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_ACK: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
@@ -2432,27 +2430,15 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_DATA: {
 
             // Process package
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = TD(tcd); // used in kev macro
+            const char *key = trudpChannelMakeKey(tcd);
 
-//            char *data_ptr = memdup(data, data_length), *data_de = data_ptr;
-//            #if KSNET_CRYPT
-//            if(kev->ksn_cfg.crypt_f && ksnCheckEncrypted(
-//                    data_ptr, data_length)) {
-//
-//                size_t decrypt_len;
-//                data_de = ksnDecryptPackage(kev->kc->kcr, data_de,
-//                        data_length, &decrypt_len);
-//            }
-//            #endif
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got %d bytes DATA packet from channel %s\n",
-                data_length,
-                key //,(char*)data_de + 1
+                data_length, key 
             );
             #endif
-//            free(data_ptr);
 
             ksnCoreProcessPacket(kev->kc, data, data_length,
                     (__SOCKADDR_ARG) &tcd->remaddr);
@@ -2465,18 +2451,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param data_length Receive buffer length
         // @param user_data NULL
         case PROCESS_RECEIVE: {
-
-            trudpData *td = (trudpData *)tcd;
-//            char *key = trudpMakeKeyChannel(tcd);
-//            #ifdef DEBUG_KSNET
-//            ksn_printf(kev, MODULE, DEBUG_VV,
-//                "%d bytes DATA packet received from channel %s\n",
-//                data_length,
-//                key
-//            );
-//            #endif            
-            trudp_process_receive(td, data, data_length);
-
+            trudp_process_receive((trudpData *) tcd_pointer, data, data_length);
         } break;
 
         // Process received not TR-UDP data
@@ -2487,9 +2462,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case PROCESS_RECEIVE_NO_TRUDP: {
 
             // Process package
-            trudpData *td = TD(tcd);         
-            char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = TD(tcd); // used in kev macro         
             #ifdef DEBUG_KSNET
+            const char *key = trudpChannelMakeKey(tcd);
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "not TR-UDP %d bytes DATA packet received from channel %s\n",
                 data_length,
@@ -2507,9 +2482,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case PROCESS_SEND: {
 
-            trudpData *td = TD(tcd);
-            char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = TD(tcd); // used in kev macro
             #ifdef DEBUG_KSNET
+            const char *key = trudpChannelMakeKey(tcd);
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "send %d bytes packet ID = %d to channel %s\n",                    
                 data_length,

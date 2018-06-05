@@ -1137,6 +1137,7 @@
             <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>/usr/include/CppUTest</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
