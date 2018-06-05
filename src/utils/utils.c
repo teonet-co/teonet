@@ -20,6 +20,7 @@
 #include "rlutil.h"
 
 double ksnetEvMgrGetTime(void *ke);
+void teoLoggingClientSend(void *ke, void *data, size_t data_len);
 
 // Test mode (for tests only)
 static int KSN_TEST_MODE = 0;

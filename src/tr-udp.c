@@ -2030,7 +2030,8 @@ static void trudp_send_queue_init(trudpData *td) {
         p->inited = 0;
         p->started = 0;
         p->loop = kev->ev_loop;
-        p->td = td;
+        p->td = td;     
+        ev_timer_init(&p->process_send_queue_w, NULL, 0, 0.0);
     }
 }
 

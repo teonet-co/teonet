@@ -1094,6 +1094,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>../libtrudp</pElem>
+            <pElem>../libev</pElem>
           </incDir>
         </cTool>
       </folder>
@@ -1160,8 +1162,6 @@
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
           </preprocessorList>
         </cTool>
       </folder>
@@ -1170,6 +1170,14 @@
           <incDir>
             <pElem>embedded/libtrudp/ci-build</pElem>
           </incDir>
+        </cTool>
+      </folder>
+      <folder path="0/embedded/libtrudp/embedded">
+        <cTool>
+          <preprocessorList>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/embedded/libtrudp/embedded/teoccl/src">
