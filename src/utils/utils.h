@@ -60,8 +60,9 @@ typedef enum ksnet_printf_type {
 #ifdef	__cplusplus
 extern "C" {
 #endif
-    
-int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...);
+
+int teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message);        
+int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...);       
 char *ksnet_formatMessage(const char *fmt, ...);
 char *ksnet_sformatMessage(char *str_to_free, const char *fmt, ...);
 char *ksnet_vformatMessage(const char *fmt, va_list ap);

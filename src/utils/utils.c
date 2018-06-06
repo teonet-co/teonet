@@ -167,6 +167,14 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 }
 
 
+int teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message) {
+    return ksnet_printf(ksn_cfg, type,
+        "%s %s: " _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " _ANSI_GREEN "%s" _ANSI_NONE "\n",
+        _ksn_printf_type_(type),
+        module == NULL ? ksn_cfg->app_name : module,
+        "", "", "", message);
+}
+
 /**
  * Remove terminal escape substrings from string
  *
