@@ -124,11 +124,6 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
             if(type != MESSAGE && type != DISPLAY_M && ct != 0.00)
                 printf(_ANSI_DARKGREY"%f: "_ANSI_NONE, ct);
-
-//            va_list args;
-//            va_start(args, format);
-//            ret_val = vprintf(format, args);
-//            va_end(args);
             printf("%s", p);
         }
 
@@ -152,10 +147,6 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
                 log_opened = 1;
             }
 
-//            va_list args;
-//            va_start(args, format);
-//            vsyslog(priority, format, args);
-//            va_end(args);
             char *data = trimlf(removeTEsc(p));
             syslog(priority < LOG_DEBUG ? priority : LOG_INFO, "%s", data);
             teoLoggingClientSend(ksn_cfg->ke, data, strlen(data)+1);
