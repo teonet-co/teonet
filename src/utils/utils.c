@@ -122,7 +122,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         if(show_it) {
 
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
-            if(type != MESSAGE && type != DISPLAY_M && ct != 0.00)
+            if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00)
                 printf(_ANSI_DARKGREY"%f: "_ANSI_NONE, ct);
             printf("%s", p);
         }
@@ -160,10 +160,10 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
 int teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message) {
     return ksnet_printf(ksn_cfg, type,
-        "%s %s: " _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " _ANSI_GREEN "%s" _ANSI_NONE "\n",
+        "%s %s: " /*_ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": "*/ _ANSI_GREEN "%s" _ANSI_NONE "\n",
         _ksn_printf_type_(type),
-        module == NULL ? ksn_cfg->app_name : module,
-        "", "", "", message);
+        module == NULL || module[0] == 0 ? ksn_cfg->app_name : module,
+        /*"", "", "",*/ message);
 }
 
 /**
