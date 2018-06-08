@@ -484,7 +484,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
     #endif
     int client_port = (int) ntohs(addr->sin_port);
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG, "client port is: %d\n", client_port);
+    ksn_printf(ke, MODULE, DEBUG_VV, "client port is: %d\n", client_port);
     #endif
 
     // Sockets Layer Call: inet_ntop()
@@ -496,20 +496,20 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
         memmove(client_ip, client_ip + sizeof(IPV4_PREF) - 1,
                 strlen(client_ip) - (sizeof(IPV4_PREF) - 1) + 1 );
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG, "client IP address is: %s\n", client_ip);
+        ksn_printf(ke, MODULE, DEBUG_VV, "client IP address is: %s\n", client_ip);
         #endif
     } else {
         client_family = AF_INET6;
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG, "client IPv6 address is: %s\n", client_ip);
+        ksn_printf(ke, MODULE, DEBUG_VV, "client IPv6 address is: %s\n", client_ip);
         #endif
     }
     #endif
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG,
-        "successfully connected with client (%d), from IP%s: %s\n",
-        client_sd, client_family == AF_INET6 ? "v6" : "" , client_ip
+    ksn_printf(ke, MODULE, CONNECT,
+        "successfully connected with client (%d), from IP%s: %s:%d\n",
+        client_sd, client_family == AF_INET6 ? "v6" : "" , client_ip, client_port
     );
     #endif
 

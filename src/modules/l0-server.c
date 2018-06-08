@@ -539,7 +539,7 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
     // Set TCP_NODELAY option
     set_tcp_nodelay(fd);
 
-    ksn_printf(kev, MODULE, CONNECT, "L0 client with fd %d connected\n", fd);
+    ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d connected\n", fd);
 
     // Send Connected event to all subscribers
     //teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, "", 1, 0);
@@ -1024,7 +1024,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     json_parse(json_data_unesc, &jp);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG,
+    ksn_printf(ke, MODULE, DEBUG_VV,
         "got %d bytes answer from %s authentication application, "
             "username: %s\n",
         rd->data_len, TEO_AUTH, jp.username
@@ -1056,8 +1056,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG,
-                "connection initialized, client name is: %s ...\n",
-                kld->name);
+                "connection initialized, client name is: %s (username: %s)\n",
+                kld->name, jp.username);
             #endif
 
             // Send Connected event to all subscribers
