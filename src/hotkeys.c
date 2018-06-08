@@ -534,7 +534,8 @@ void _keys_non_blocking_start(ksnetHotkeysClass *kh) {
 ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 
     ksnetHotkeysClass *kh = malloc(sizeof(ksnetHotkeysClass));
-
+    memset(kh, 0, sizeof(ksnetHotkeysClass));
+    
     tcgetattr(0, &kh->initial_settings);
     _keys_non_blocking_start(kh);
     kh->wait_y = Y_NONE;
