@@ -420,6 +420,7 @@ void teoSScrDestroy(teoSScrClass *sscr) {
                 pblListFree(sscr_map_data->list);
             }
         }
+        pblMapFree(sscr->map);
         free(sscr);
     }
 }

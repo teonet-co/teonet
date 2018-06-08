@@ -1322,14 +1322,6 @@
           </incDir>
         </cTool>
       </folder>
-      <folder path="0/src/modules">
-        <cTool>
-          <incDir>
-            <pElem>../libev</pElem>
-            <pElem>../confuse-2.7/src</pElem>
-          </incDir>
-        </cTool>
-      </folder>
       <folder path="0/tests">
         <cTool>
           <incDir>
@@ -1403,58 +1395,114 @@
       </item>
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/l0-server.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/logging_client.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/logging_server.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_tcp.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/stream.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>/usr/include/libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/teodb_com.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
+          <incDir>
+            <pElem>../libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="10">
