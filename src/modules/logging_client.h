@@ -42,20 +42,13 @@ teoLoggingClientClass *teoLoggingClientInit(void *ke);
 void teoLoggingClientDestroy(teoLoggingClientClass *lc);
 
 /**
- * Add logger server peer name to logger servers map
+ * Send log data to logging servers
  * 
- * @param ls Pointer to teoLoggingClientClass
- * @param peer Logger server peer name
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param data Pointer to data
+ * @param data_length Data length
  */
-void teoLoggingClientAddServer(teoLoggingClientClass *lc, const char *peer);
-
-/**
- * Remove logger server peer name from logger servers map
- * 
- * @param ls Pointer to teoLoggingClientClass
- * @param peer Logger server peer name
- */
-void teoLoggingClientRemoveServer(teoLoggingClientClass *lc, const char *peer);
+void teoLoggingClientSend(void *ke, void *data, size_t data_length);
 
 #ifdef __cplusplus
 }
