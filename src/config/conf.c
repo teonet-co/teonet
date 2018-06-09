@@ -96,6 +96,9 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Logging server
     ksn_cfg->logging_f = 0;
     
+    // Disable send logs to logging server
+    ksn_cfg->log_disable_f = 0;
+    
     // SIGSEGV processing
     ksn_cfg->sig_segv_f = 0;
     
@@ -183,6 +186,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("logging_f", &conf->logging_f),
         #endif
 
+        #if M_ENAMBE_LOGGING_CLIENT
+        CFG_SIMPLE_BOOL("log_disable_f", &conf->log_disable_f),
+        #endif        
+        
         CFG_SIMPLE_INT("log_priority", &conf->log_priority),
 
         CFG_END()

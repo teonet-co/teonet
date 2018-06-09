@@ -114,7 +114,12 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
 // Logging client initialize
 teoLoggingClientClass *teoLoggingClientInit(void *ke) {
-    if(!kev->ksn_cfg.logs_disable_f) return NULL;
+    if(kev->ksn_cfg.log_disable_f) {
+        #ifdef DEBUG_KSNET
+        ksn_puts(kev, MODULE, DEBUG, "disable send logs to logging servers");
+        #endif
+        return NULL;
+    }
 
     teoLoggingClientClass *lc = malloc(sizeof(ksnTermClass));
     lc->ke = ke;

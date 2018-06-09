@@ -62,7 +62,8 @@ typedef struct ksnet_cfg {
         send_ack_event_f, ///< Send TR-UDP ACK event (EV_K_RECEIVED_ACK) to the teonet event loop
         sig_segv_f, ///< SIGSEGV processing
         block_cli_input_f, ///< Block teonet CLI input (for using in GUI application)
-        logging_f; ///< Start logging server 
+        logging_f, ///< Start logging server 
+        log_disable_f; ///< Disable send log to logging server 
     
     // Daemon mode flags
     int dflag,  ///< Start application in Daemon mode
