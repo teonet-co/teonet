@@ -288,8 +288,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -304,8 +304,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -320,8 +320,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -336,8 +336,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -352,8 +352,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </item>
@@ -669,10 +669,18 @@
       </item>
       <item path="examples/fossa/fossa.c" ex="false" tool="0" flavor2="3">
         <cTool flags="4">
+          <incDir>
+            <pElem>../libtrudp</pElem>
+            <pElem>../libev</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="examples/fossa/teofossa.c" ex="false" tool="0" flavor2="3">
         <cTool flags="4">
+          <incDir>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
+          </incDir>
         </cTool>
       </item>
       <item path="examples/go/teogo_lib.c" ex="false" tool="0" flavor2="2">
@@ -690,8 +698,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -709,8 +717,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -736,8 +744,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -763,8 +771,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -790,8 +798,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -809,8 +817,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -828,8 +836,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -847,8 +855,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -866,8 +874,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -885,8 +893,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -904,8 +912,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -923,8 +931,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -942,8 +950,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -961,8 +969,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -980,8 +988,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -1048,8 +1056,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
         </cTool>
       </folder>
@@ -1194,8 +1202,8 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libtrudp</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -1213,8 +1221,6 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libtrudp</pElem>
-            <pElem>../libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
@@ -1317,7 +1323,7 @@
       <folder path="0/src/config">
         <cTool>
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1333,7 +1339,7 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
@@ -1364,7 +1370,7 @@
       <item path="src/crypt.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1372,7 +1378,7 @@
       <item path="src/daemon.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1380,7 +1386,7 @@
       <item path="src/ev_mgr.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1388,7 +1394,7 @@
       <item path="src/hotkeys.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1396,7 +1402,7 @@
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1412,7 +1418,7 @@
       <item path="src/modules/logging_client.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1420,7 +1426,7 @@
       <item path="src/modules/logging_server.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1428,7 +1434,7 @@
       <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1444,7 +1450,7 @@
       <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1452,7 +1458,7 @@
       <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1460,7 +1466,7 @@
       <item path="src/modules/stream.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1476,7 +1482,7 @@
       <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1484,7 +1490,7 @@
       <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1500,7 +1506,7 @@
       <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1508,7 +1514,7 @@
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1516,7 +1522,7 @@
       <item path="src/net_com.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1524,7 +1530,7 @@
       <item path="src/net_core.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1532,7 +1538,7 @@
       <item path="src/net_multi.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1540,7 +1546,7 @@
       <item path="src/net_recon.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1548,7 +1554,7 @@
       <item path="src/net_split.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1556,7 +1562,7 @@
       <item path="src/pidfile.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1564,7 +1570,7 @@
       <item path="src/tr-udp.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1572,7 +1578,7 @@
       <item path="src/tr-udp_stat.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>

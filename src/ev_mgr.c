@@ -753,16 +753,15 @@ void open_local_port(ksnetEvMgrClass *ke) {
  */
 static void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
     
-        // Disconnect dead peer from this host
-        ksnCorePacketData rd;
-        rd.from = peer_name;
-        rd.data = NULL;
-        //
-        rd.cmd = 0;
-        rd.addr = "";
-        rd.port = 0;
-        //
-        cmd_disconnected_cb(ke->kc->kco, &rd);
+    // Disconnect dead peer from this host
+    ksnCorePacketData rd;
+    memset(&rd, 0, sizeof(rd));
+
+    rd.from = peer_name;
+    rd.from_len = strlen(peer_name) + 1;
+    rd.addr = "";
+
+    cmd_disconnected_cb(ke->kc->kco, &rd);
 }
 
 /**
