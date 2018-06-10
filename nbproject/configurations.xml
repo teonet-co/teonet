@@ -1380,7 +1380,7 @@
       <item path="src/ev_mgr.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>
@@ -1524,7 +1524,7 @@
       <item path="src/net_core.c" ex="false" tool="0" flavor2="10">
         <cTool flags="14">
           <incDir>
-            <pElem>../libev</pElem>
+            <pElem>/usr/include/libev</pElem>
             <pElem>../confuse-2.7/src</pElem>
           </incDir>
         </cTool>

@@ -268,7 +268,7 @@ static void set_sigaction(ksnetEvMgrClass *ke, int sig,
 int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     #ifdef DEBUG_KSNET
-    ksn_puts(ke, MODULE, MESSAGE, "started ...");
+    ksn_puts(ke, MODULE, MESSAGE, "started");
     #endif
 
     ke->timer_val = 0;
