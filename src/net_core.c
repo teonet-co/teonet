@@ -248,7 +248,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
     ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG, // \TODO Can't remove this message or switch it to DEBUG_VV
+    ksn_printf(kev, MODULE, DEBUG_VV,
             "create UDP client/server at port %d ...\n", kc->port);
     #endif
 
@@ -257,7 +257,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
         kc->fd = fd;
         #ifdef DEBUG_KSNET
         ksn_printf(((ksnetEvMgrClass*)kc->ke), MODULE, MESSAGE,
-                "start listen at port %d, socket fd %d\n", kc->port, kc->fd);
+                "started at UDP port %d, socket fd %d\n", kc->port, kc->fd);
         #endif
 
         // Set non block mode
