@@ -81,6 +81,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         #if M_ENAMBE_LOGGING_SERVER
         { "logging",        no_argument,       &conf->logging_f, 1 },
         #endif
+        #if M_ENAMBE_LOGGING_CLIENT
+        { "log_disable",    no_argument,       &conf->log_disable_f, 1 },
+        #endif
 
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
         { "log_priority",   required_argument, (int*)&conf->log_priority, 0 },
@@ -380,6 +383,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     #if M_ENAMBE_LOGGING_SERVER
     "       --logging            Start logging server\n"
+    #endif
+    #if M_ENAMBE_LOGGING_CLIENT
+    "       --log_disable        Disable send logs to logging servers\n"
     #endif
     "\n"
     "       --sig_segv           Segmentation fault error processing by library\n"

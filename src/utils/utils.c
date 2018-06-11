@@ -16,8 +16,8 @@
 #endif
 
 #include "config/conf.h"
-#include "utils.h"
 #include "rlutil.h"
+#include "utils.h"
 
 double ksnetEvMgrGetTime(void *ke);
 void teoLoggingClientSend(void *ke, void *data, size_t data_len);
