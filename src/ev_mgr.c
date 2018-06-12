@@ -1120,6 +1120,12 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
 
     #define kev ((ksnetEvMgrClass*)(w->data))
 
+    // Send async event to event loop
+    #define SEND_EVENT(data, data_len, user_data) \
+        pthread_mutex_unlock (&kev->async_mutex); \
+        kev->event_cb(kev, EV_K_ASYNC , data, data_len, user_data); \
+        pthread_mutex_lock (&kev->async_mutex)
+
     #ifdef DEBUG_KSNET
     ksn_puts(kev, MODULE, DEBUG_VV, "async event callback");
     #endif
@@ -1132,10 +1138,12 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
         if(data != NULL) {
             void *user_data = *(void**)data; ptr += sizeof(void**);
             uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
-            kev->event_cb(kev, EV_K_ASYNC , data + ptr, data_len, user_data);
+            SEND_EVENT(data + ptr, data_len, user_data);            
             free(data);
         }
-        else  kev->event_cb(kev, EV_K_ASYNC , NULL, 0, NULL);
+        else {
+            SEND_EVENT(NULL, 0, NULL);            
+        }    
     }
     pthread_mutex_unlock (&kev->async_mutex);
     
