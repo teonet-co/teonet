@@ -147,10 +147,16 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
                 log_opened = 1;
             }
 
+            // Log message
             char *data = trimlf(removeTEsc(p));
+            
+            // Save log to syslog
             syslog(priority < LOG_DEBUG ? priority : LOG_INFO, "%s", data);
+            
+            // Send async event to teonet event loop (which processing in 
+            // logging client module) to send log to logging server
             if(!ksn_cfg->log_disable_f)
-                ksnetEvMgrAsync(ksn_cfg->ke, data, strlen(data)+1, NULL); // Send event to teonet
+                ksnetEvMgrAsync(ksn_cfg->ke, data, strlen(data)+1, NULL);
         }
         free(p);
     }
