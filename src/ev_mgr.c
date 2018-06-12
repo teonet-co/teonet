@@ -404,6 +404,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
     if(free_async) {
         
         pblListFree(ke->async_queue);
+        ke->async_queue = NULL;
         pthread_mutex_destroy(&ke->async_mutex);        
     }
     
@@ -591,6 +592,8 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
  */
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data) {
 
+    if(!ke->async_queue) return;
+    
     #ifdef DEBUG_KSNET
     ksn_puts(ke, MODULE, DEBUG_VV, "make Async call to Event manager");
     #endif
@@ -608,7 +611,7 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
     pthread_mutex_lock (&ke->async_mutex);
     pblListAdd(ke->async_queue, element); 
     pthread_mutex_unlock (&ke->async_mutex);
-    
+
     // Send async signal to process queue
     ev_async_send(ke->ev_loop,/*EV_DEFAULT_*/ &ke->sig_async_w); 
 }

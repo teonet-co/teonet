@@ -86,7 +86,7 @@ static void teoLoggingClientRemoveServer(teoLoggingClientClass *lc,
 
 // Event loop to gab teonet events
 static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
-        size_t data_len, void *user_data) {
+        size_t data_length, void *user_data) {
 
     const ksnCorePacketData *rd = (ksnCorePacketData *) data;
     switch(event) {
@@ -102,6 +102,11 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 teoLoggingClientAddServer(ke->lc, rd->from);
             }
             break;
+            
+        // Async event from kns_printf
+        case EV_K_ASYNC:
+            teoLoggingClientSend(ke, data, data_length);
+            break;
 
         default:
             break;
@@ -109,7 +114,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
     // Call parent event loop
     if(ke->lc->event_cb != NULL)
-        ((event_cb_t)ke->lc->event_cb)(ke, event, data, data_len, user_data);
+        ((event_cb_t)ke->lc->event_cb)(ke, event, data, data_length, user_data);
 }
 
 // Logging client initialize
