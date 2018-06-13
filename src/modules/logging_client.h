@@ -45,10 +45,9 @@ void teoLoggingClientDestroy(teoLoggingClientClass *lc);
  * Send log data to logging servers
  * 
  * @param ke Pointer to ksnetEvMgrClass
- * @param data Pointer to data
- * @param data_length Data length
+ * @param message Pointer to cstring message
  */
-void teoLoggingClientSend(void *ke, void *data, size_t data_length);
+void teoLoggingClientSend(void *ke, const char *message);
 
 #ifdef __cplusplus
 }

@@ -14,6 +14,9 @@
 #define kev ((ksnetEvMgrClass*)(ke))
 //#define MAP_SIZE_DEFAULT 10
 
+// Logging Async call label
+static const uint32_t ASYNC_LABEL = 0x55775577; 
+
 /**
  * Logging servers Maps Foreach user data
  */
@@ -24,25 +27,6 @@ typedef struct teoLoggingClientSendData {
     size_t data_length;
 
 } teoLoggingClientSendData;
-
-/**
- * Send log data to one logging server
- * 
- * @param m Pointer to teoMap
- * @param idx Index
- * @param el Pointer to map element data
- * @param user_data Pointer to user data 
- * @return 
- */
-static int teoLoggingClientSendOne(teoMap *m, int idx, teoMapElementData *el, 
-        void* user_data) {
-    const teoLoggingClientSendData *data = user_data;
-    const ksnetEvMgrClass *ke = data->lc->ke;
-    const char* peer = el->data;
-    ksnCoreSendCmdto(ke->kc, (char*)peer, CMD_LOGGING, data->data, 
-            data->data_length);
-    return 0;
-}
 
 /**
  * Add logger server peer name to logger servers map
@@ -84,10 +68,40 @@ static void teoLoggingClientRemoveServer(teoLoggingClientClass *lc,
     }
 }
 
+/**
+ * Send log data to one logging server
+ * 
+ * @param m Pointer to teoMap
+ * @param idx Index
+ * @param el Pointer to map element data
+ * @param user_data Pointer to user data 
+ * @return 
+ */
+static int teoLoggingClientSendOne(teoMap *m, int idx, teoMapElementData *el, 
+        void* user_data) {
+    const teoLoggingClientSendData *data = user_data;
+    const ksnetEvMgrClass *ke = data->lc->ke;
+    const char* peer = el->data;
+    ksnCoreSendCmdto(ke->kc, (char*)peer, CMD_LOGGING, data->data, 
+            data->data_length);
+    return 0;
+}
+
+// Send log data to logging servers
+static void teoLoggingClientSendAll(ksnetEvMgrClass *ke, void *data, 
+        size_t data_length) {
+    const teoLoggingClientClass *lc = ke->lc;
+    if(lc) {
+        teoLoggingClientSendData d = { lc, data, data_length };
+        teoMapForeach(lc->map, teoLoggingClientSendOne, &d);
+    }
+}
+
 // Event loop to gab teonet events
 static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         size_t data_length, void *user_data) {
 
+    int processed = 0;
     const ksnCorePacketData *rd = (ksnCorePacketData *) data;
     switch(event) {
 
@@ -100,12 +114,16 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_RECEIVED:
             if(rd->cmd == CMD_LOGGING && rd->data_len == 0) {
                 teoLoggingClientAddServer(ke->lc, rd->from);
+                processed = 1;
             }
             break;
             
-        // Async event from kns_printf
+        // Async event from teoLoggingClientSend (kns_printf)
         case EV_K_ASYNC:
-            teoLoggingClientSend(ke, data, data_length);
+            if(user_data && *(uint32_t*)user_data == ASYNC_LABEL) {
+                teoLoggingClientSendAll(ke, data, data_length);
+                processed = 1;
+            }
             break;
 
         default:
@@ -113,7 +131,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
     }
 
     // Call parent event loop
-    if(ke->lc->event_cb != NULL)
+    if(ke->lc->event_cb != NULL && !processed)
         ((event_cb_t)ke->lc->event_cb)(ke, event, data, data_length, user_data);
 }
 
@@ -157,10 +175,9 @@ void teoLoggingClientDestroy(teoLoggingClientClass *lc) {
 }
 
 // Send log data to logging servers
-void teoLoggingClientSend(void *ke, void *data, size_t data_length) {
-    const teoLoggingClientClass *lc = kev->lc;
-    if(lc) {
-        teoLoggingClientSendData d = { lc, data, data_length };
-        teoMapForeach(lc->map, teoLoggingClientSendOne, &d);
+void teoLoggingClientSend(void *ke, const char *message) {
+    if(!kev->ksn_cfg.log_disable_f) {
+        ksnetEvMgrAsync(ke, (void*)message, strlen(message)+1, 
+                (void*)&ASYNC_LABEL);
     }
 }
