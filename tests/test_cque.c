@@ -39,7 +39,7 @@ void test_4_1() {
     kc_emul();
 
     // Initialize module
-    ksnCQueClass *kq = ksnCQueInit(ke);
+    ksnCQueClass *kq = ksnCQueInit(ke, 1);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kq);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kq->cque_map);
     
@@ -81,7 +81,7 @@ void test_4_2() {
     kc_emul();
 
     // Initialize module
-    ksnCQueClass *kq = ksnCQueInit(ke);
+    ksnCQueClass *kq = ksnCQueInit(ke, 1);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kq);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kq->cque_map);
     
@@ -113,7 +113,7 @@ void test_4_3() {
     kc_emul();
 
     // Initialize module
-    ksnCQueClass *kq = ksnCQueInit(ke);
+    ksnCQueClass *kq = ksnCQueInit(ke, 1);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kq);
     CU_ASSERT_PTR_NOT_NULL_FATAL(kq->cque_map);
     

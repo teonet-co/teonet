@@ -1213,7 +1213,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     
     // Callback QUEUE
     #if M_ENAMBE_CQUE
-    ke->kq = ksnCQueInit(ke);
+    ke->kq = ksnCQueInit(ke, 0);
     #endif
 
     // Stream module

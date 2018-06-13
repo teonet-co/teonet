@@ -20,6 +20,7 @@ typedef struct ksnCQueClass {
     void *ke; ///< Pointer to ksnEvMgrClass
     uint32_t id; ///< New callback queue ID
     PblMap *cque_map; ///< Pointer to the callback queue pblMap
+    uint8_t event_f; ///< Send cque event if true
     
 } ksnCQueClass;
 
@@ -52,7 +53,7 @@ typedef struct ksnCQueData {
 extern "C" {
 #endif
 
-ksnCQueClass *ksnCQueInit(void *ke);
+ksnCQueClass *ksnCQueInit(void *ke, uint8_t send_event);
 void ksnCQueDestroy(ksnCQueClass *kq);
 
 int ksnCQueExec(ksnCQueClass *kq, uint32_t id);
