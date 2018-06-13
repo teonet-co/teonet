@@ -20,7 +20,7 @@
 #include "utils.h"
 
 double ksnetEvMgrGetTime(void *ke);
-void ksnetEvMgrAsync(void *ke, void *data, size_t data_len, void *user_data);
+void teoLoggingClientSend(void *ke, const char *message);
 
 // Test mode (for tests only)
 static int KSN_TEST_MODE = 0;
@@ -155,8 +155,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             
             // Send async event to teonet event loop (which processing in 
             // logging client module) to send log to logging server
-            if(!ksn_cfg->log_disable_f)
-                ksnetEvMgrAsync(ksn_cfg->ke, data, strlen(data)+1, NULL);
+            teoLoggingClientSend(ksn_cfg->ke, data);
         }
         free(p);
     }

@@ -64,7 +64,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
     }
 
     // Call parent event loop
-    if(!processed && ke->ls->event_cb != NULL)
+    if(ke->ls->event_cb != NULL && !processed)
         ((event_cb_t)ke->ls->event_cb)(ke, event, data, data_len, user_data);
 }
 
