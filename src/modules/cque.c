@@ -36,14 +36,16 @@
  * Initialize ksnCQue module [class](@ref ksnCQueClass)
  * 
  * @param ke Pointer to ksnetEvMgrClass
+ * @param send_event Send cque event if true
  * 
  * @return Pointer to created ksnCQueClass or NULL if error occurred
  */
-ksnCQueClass *ksnCQueInit(void *ke) {
+ksnCQueClass *ksnCQueInit(void *ke, uint8_t send_event) {
     
     ksnCQueClass *kq = malloc(sizeof(ksnCQueClass));
     if(kq != NULL) {
         kq->ke = ke; // Pointer event manager class
+        kq->event_f = send_event ? 1 : 0; // Send cque event if true
         kq->cque_map = pblMapNewHashMap(); // Create a new hash map
         kq->id = 0; // New callback queue id
     }
@@ -93,7 +95,7 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
             cq->cb(id, type, cq->data); // Type 1: successful callback
         
         // Send teonet successful event in addition to callback
-        if(kev->event_cb != NULL) 
+        if(kev->event_cb != NULL && cq->kq->event_f) 
             kev->event_cb(kev, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
                     (void*)&type);
         
@@ -201,7 +203,7 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     
     // Send teonet timeout event in addition to callback
     #define kev2 ((ksnetEvMgrClass*)(cq->kq->ke))
-    if(kev2->event_cb != NULL) 
+    if(kev2->event_cb != NULL && cq->kq->event_f) 
         kev2->event_cb(kev2, EV_K_CQUE_CALLBACK, cq, sizeof(ksnCQueData), 
                 (void*)&type);
     #undef kev2
