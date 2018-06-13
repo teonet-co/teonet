@@ -15,7 +15,7 @@
 //#define MAP_SIZE_DEFAULT 10
 
 // Logging Async call label
-static const uint32_t ASYNC_LABEL = 0x55775577; 
+static const uint32_t ASYNC_LABEL = 0xAA77AA77; 
 
 /**
  * Logging servers Maps Foreach user data
