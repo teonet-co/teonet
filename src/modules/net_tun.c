@@ -250,6 +250,8 @@ void ksnTunMapFree(ksnTunClass * ktun) {
 
             cmd_tun_disconnected_send(ktun, *fd);
         }
+        
+        pblIteratorFree(it);
     }
 
     pblMapFree(ktun->map);

@@ -1165,7 +1165,8 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     teoSScrSend(kev->kc->kco->ksscr, EV_K_DISCONNECTED, rd->from, rd->from_len, 0);
 
     // Remove from ARP Table
-    ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
+    void *v = ksnetArpRemove(((ksnCoreClass*)kco->kc)->ka, peer_name);
+    if(v) free(v);
 
     return 1;
 

@@ -346,6 +346,8 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
             data_ar->arp_data[i].data.connected_time = ksnetEvMgrGetTime(ka->ke) - data_ar->arp_data[i].data.connected_time;
             i++;
         }
+        
+        pblIteratorFree(it);
     }
     
     return data_ar;
