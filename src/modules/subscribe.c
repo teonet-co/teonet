@@ -419,6 +419,8 @@ void teoSScrDestroy(teoSScrClass *sscr) {
 
                 pblListFree(sscr_map_data->list);
             }
+            
+            pblIteratorFree(it);
         }
         pblMapFree(sscr->map);
         free(sscr);

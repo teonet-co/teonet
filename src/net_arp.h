@@ -80,7 +80,7 @@ void ksnetArpAddHost(ksnetArpClass *ka);
 void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port);
 ksnet_arp_data *ksnetArpGet(ksnetArpClass *ka, char *name);
 int ksnetArpSize(ksnetArpClass *ka);
-ksnet_arp_data *ksnetArpRemove(ksnetArpClass *ka, char* name);
+int ksnetArpRemove(ksnetArpClass *ka, char* name);
 void ksnetArpRemoveAll(ksnetArpClass *ka);
 int ksnetArpShow(ksnetArpClass *ka);
 char *ksnetArpShowStr(ksnetArpClass *ka);

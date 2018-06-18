@@ -139,9 +139,9 @@ void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
  *
  * @param ka Pointer to ksnetArpClass
  * @param name Peer name to remove
- * @return Pointer to previously associated value or NULL if not found
+ * @return True if successfully removed
  */
-ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
+int ksnetArpRemove(ksnetArpClass *ka, char* name) {
 
     size_t var_len = 0;
     char* peer_name = strdup(name);
@@ -167,10 +167,12 @@ ksnet_arp_data * ksnetArpRemove(ksnetArpClass *ka, char* name) {
     
     // If not found
     if(arp == (void*)-1) arp = NULL;
-    
+
+    // Free memory
+    if(arp) free(arp);    
     free(peer_name);
     
-    return arp;
+    return arp ? 1 : 0;
 }
 
 /**
@@ -346,6 +348,8 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
             data_ar->arp_data[i].data.connected_time = ksnetEvMgrGetTime(ka->ke) - data_ar->arp_data[i].data.connected_time;
             i++;
         }
+        
+        pblIteratorFree(it);
     }
     
     return data_ar;
