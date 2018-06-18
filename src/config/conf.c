@@ -129,10 +129,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
         strncpy(conf->l0_tcp_ip_remote, l0_tcp_ip_remote, KSN_BUFFER_SM_SIZE/2)
 
     // Load string values
+    char *vpn_ip = strdup(conf->vpn_ip);
     char *net_key = strdup(conf->net_key);
     char *host_name = strdup(conf->host_name);
     char *r_host_addr = strdup(conf->r_host_addr);
-    char *vpn_ip = strdup(conf->vpn_ip);
     char *vpn_dev_name = strdup(conf->vpn_dev_name);
     char *vpn_dev_hwaddr = strdup(conf->vpn_dev_hwaddr);
     char *l0_tcp_ip_remote = strdup(conf->l0_tcp_ip_remote);
@@ -267,6 +267,14 @@ void read_config(ksnet_cfg *conf, int port_param) {
     //printf("username: %s\n", username);
 
     cfg_free(cfg);
+    
+    free(l0_tcp_ip_remote);
+    free(vpn_dev_hwaddr);
+    free(vpn_dev_name);
+    free(r_host_addr);
+    free(host_name);
+    free(net_key);
+    free(vpn_ip);
 
     // Save file parameters for last use
     conf->pp = port_param;
