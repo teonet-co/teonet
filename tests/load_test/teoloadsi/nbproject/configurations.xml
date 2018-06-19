@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="97">
+<configurationDescriptor version="100">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <df root="." name="0">
       <df name="src">
@@ -28,7 +28,8 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <flagsDictionary>
-        <element flagsID="0" commonFlags="-g -std=c11 -O2 -g -O2"/>
+        <element flagsID="0"
+                 commonFlags="-mtune=generic -march=x86-64 -g -g -O2 -O2 -std=c11 -fstack-protector-strong"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -40,18 +41,16 @@
           <executablePath>src/.libs/teoloadsi</executablePath>
           <cTool>
             <incDir>
+              <pElem>../../../src/config</pElem>
+              <pElem>../../../src/utils</pElem>
+              <pElem>../../../embedded/libpbl/src</pElem>
+              <pElem>../../../embedded/teocli/libteol0</pElem>
+              <pElem>../../../src</pElem>
+              <pElem>../../../embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>../../../embedded/libtrudp/src</pElem>
+              <pElem>../../../src/modules</pElem>
               <pElem>src</pElem>
-              <pElem>../teonet/src</pElem>
-              <pElem>../teonet/embedded/libpbl/src</pElem>
-              <pElem>../teonet/embedded/teocli/libteol0</pElem>
-              <pElem>/usr/include/teonet</pElem>
             </incDir>
-            <preprocessorList>
-              <Elem>HAVE_CONFIG_H</Elem>
-              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
-              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
-              <Elem>PACKAGE_SRC_DIR="."</Elem>
-            </preprocessorList>
           </cTool>
         </makeTool>
         <preBuild>
@@ -59,7 +58,7 @@
           <preBuildCommand>./configure </preBuildCommand>
         </preBuild>
       </makefileType>
-      <item path="src/main.c" ex="false" tool="0" flavor2="10">
+      <item path="src/main.c" ex="false" tool="0" flavor2="3">
         <cTool flags="0">
         </cTool>
       </item>

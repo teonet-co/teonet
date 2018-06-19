@@ -1,6 +1,21 @@
 ## Process this file with automake to produce Makefile.in
 #
 
+localteonet   = $(HOME)/Projects/teonet
+
+teonetinclude = -I$(localteonet)/src \
+		-I$(localteonet)/src/config \
+                -I$(localteonet)/embedded/libpbl/src \
+	        -I$(localteonet)/embedded/teocli/libteol0 \
+	        -I$(localteonet)/embedded/libtrudp/src \
+		-I$(localteonet)/embedded/libtrudp/embedded/teoccl/src \
+	        -I$(includedir)/teonet \
+		-I$(includedir)/teonet/config \
+		-I$(includedir)/libccl \
+		-I$(includedir)/libtrudp	
+	
+teonetlib     = -L$(localteonet)/src/
+
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
@@ -10,27 +25,16 @@ AM_CFLAGS = \
 	 -Wall \
 	 -g \
 	 -std=c11 \
-	 -I$(HOME)/Projects/teonet/src/ \
-	 -I$(HOME)/Projects/teonet/embedded/libpbl/src \
-	 -I$(HOME)/Projects/teonet/embedded/teocli/libteol0 \
-	 -I$(HOME)/Projects/teonet/embedded/libtrudp/src \
-	 -I/usr/include/libtrudp \
-	 -I/usr/include/teonet
+	 $(teonetinclude)
 
 AM_LDFLAGS = \
- 	 -L$(HOME)/Projects/teonet/src/
+ 	 $(teonetlib)
 
 AM_CXX = clang++
 AM_CXXFLAGS = \
          -g -Wall \
 	 -std=c++11 \
-	 -I/opt/localionclude \
-	 -I$(HOME)/Projects/teonet/src/ \
-	 -I$(HOME)/Projects/teonet/embedded/libpbl/src \
-	 -I$(HOME)/Projects/teonet/embedded/teocli/libteol0 \
-	 -I$(HOME)/Projects/teonet/embedded/libtrudp/src \
-	 -I/usr/include/libtrudp \
-	 -I/usr/include/teonet
+	 $(teonetinclude)
 
 ## Debug info
 if DEBUG
@@ -41,7 +45,7 @@ else
   AM_CXXFLAGS += -O2
 endif
 
-LIBS =-lteonet -lcrypto
+LIBS = -lteonet
 
 bin_PROGRAMS = teoloadsi
 
