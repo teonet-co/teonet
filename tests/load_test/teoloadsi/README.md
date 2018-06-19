@@ -3,6 +3,19 @@
 ## 1. Description
 
 
+Simple load client server test.
+
+To execute this test Start server first, than start client. It possible to 
+connect several clients.
+
+Start server:
+
+    src/teoloadsi teo-load-si none -p 9900
+
+Start client:
+
+    src/teoloadsi teo-load-si-2 teo-load-si -a localhost -r 9900
+
 
 ## 2. Installation
 
