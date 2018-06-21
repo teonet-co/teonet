@@ -17,7 +17,8 @@ typedef struct teoLoggingServerClass {
 
     void *ke; // Pointer to ksnEvMgrClass
     void *event_cb; // Pointer to event callback
-
+    char *filter;
+    
 } teoLoggingServerClass;
 
 
@@ -33,6 +34,7 @@ extern "C" {
  */
 teoLoggingServerClass *teoLoggingServerInit(void *ke);
 
+void teoLoggingServerSetFilter(void *ke, void *filter);
 /**
  * Logging server destroy and free allocated memory
  *

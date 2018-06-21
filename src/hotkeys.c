@@ -110,6 +110,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
             " "COLOR_DW"Q"COLOR_END" - TR-UDP queues\n"
             " "COLOR_DW"a"COLOR_END" - show application menu\n"
+            " "COLOR_DW"f"COLOR_END" - set filter for log(till)\n"
             " "COLOR_DW"r"COLOR_END" - restart application\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
@@ -452,6 +453,34 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             }
             break;
 
+        // Filter
+        case 'f':
+        {
+            kev->ksn_cfg.filter_f = !kev->ksn_cfg.filter_f;
+                // Got hot key
+            if(khv->non_blocking) {
+                khv->str_number = 0;
+                printf("Enter words filter(example: DEBUG,ps-server): ");
+                fflush(stdout);
+                _keys_non_blocking_stop(khv); // Switch STDIN to string
+            }
+            // Got requested strings
+            else switch(khv->str_number) {
+                
+                // Got 'filter' string
+                case 0:
+                {
+                    trimlf((char*)data);
+                    if(((char*)data)[0]) {
+                        // Send message
+                        printf("FILTER '%s'\n", (char*)data);
+                        teoLoggingServerSetFilter(ke, data);
+                    }
+                    _keys_non_blocking_start(khv); // Switch STDIN to hot key
+                }
+                break;
+            }
+        } break;
         // Quit
         case 'q':
             puts("Press y to quit application");
