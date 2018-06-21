@@ -43,6 +43,7 @@
 #define BUFFER_SIZE 128
 #define NUM_TO_SHOW 10000
 #define SERVER_PEER ke->ksn_cfg.app_argv[1]
+#define EXIT_AFTER 0
 
 /**
  * Simple load test data structure
@@ -55,6 +56,7 @@ typedef struct cmd_data {
 
 // Server flag
 static int server_f = 0; ///! Server flag: 1 - this host is a server, 0 - this host is a client
+static int exit_code = 0;
 
 /**
  * Send command with simple load test data
@@ -160,7 +162,13 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                     // Send answer or new packet
                     if(d->type == 0) sendCmdT(ke, rd->from, d->id, 1);
-                    else if(!server_f) sendCmdT(ke, SERVER_PEER, ++id, 0);
+                    else if(!server_f) {
+                        if(EXIT_AFTER && id >= NUM_TO_SHOW*10) { 
+                            exit_code = errors+10;
+                            ksnetEvMgrStop(ke);
+                        }
+                        else sendCmdT(ke, SERVER_PEER, ++id, 0);
+                    }
 
                 } break;
             }
@@ -212,5 +220,5 @@ int main(int argc, char** argv) {
     // Start teonet
     ksnetEvMgrRun(ke);
 
-    return (EXIT_SUCCESS);
+    return (exit_code);
 }

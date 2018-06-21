@@ -147,3 +147,5 @@ examples/go/teogo/teogo
 /examples/perl/Makefile.old
 /examples/perl/Teonet.pm
 /embedded/libpbl/src/package-lock.json
+/tests/load_test/teoloadsi-js/nbproject/private/
+/tests/load_test/teoloadsi-js/node_modules/
