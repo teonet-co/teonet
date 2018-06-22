@@ -21,6 +21,8 @@
 
 double ksnetEvMgrGetTime(void *ke);
 void teoLoggingClientSend(void *ke, const char *message);
+unsigned char teoFilterFlagCheck(void *ke);
+unsigned char teoLogCheck(void *ke, void *log);
 
 // Test mode (for tests only)
 static int KSN_TEST_MODE = 0;
