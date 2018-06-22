@@ -144,7 +144,7 @@ teoLoggingClientClass *teoLoggingClientInit(void *ke) {
         return NULL;
     }
 
-    teoLoggingClientClass *lc = malloc(sizeof(ksnTermClass));
+    teoLoggingClientClass *lc = malloc(sizeof(teoLoggingClientClass));
     lc->ke = ke;
     lc->map = teoMapNew(MAP_SIZE_DEFAULT, 1);
     lc->event_cb = kev->event_cb;
