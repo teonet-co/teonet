@@ -79,7 +79,7 @@ void teoHotkeySetFilter(void *ke, void *filter) {
 }
 
 signed char teoLogCheck(void *ke, void *log) {
-    if (kev->kh->filter != NULL) 
+    if ((khv != NULL) && (khv->filter != NULL)) 
         return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
     return 1;
 }
@@ -124,7 +124,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
             " "COLOR_DW"Q"COLOR_END" - TR-UDP queues\n"
             " "COLOR_DW"a"COLOR_END" - show application menu\n"
-            " "COLOR_DW"f"COLOR_END" - set filter for log(till)\n"
+            " "COLOR_DW"f"COLOR_END" - set filter\n"
             " "COLOR_DW"r"COLOR_END" - restart application\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
@@ -486,9 +486,11 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 {
                     trimlf((char*)data);
                     if(((char*)data)[0]) {
-                        // Send message
                         printf("FILTER '%s'\n", (char*)data);
                         teoHotkeySetFilter(ke, data);
+                    } else {
+                        printf("FILTER was reset\n");
+                        teoHotkeySetFilter(ke, " ");
                     }
                     _keys_non_blocking_start(khv); // Switch STDIN to hot key
                 }
