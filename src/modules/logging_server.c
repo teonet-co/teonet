@@ -72,7 +72,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
 teoLoggingServerClass *teoLoggingServerInit(void *ke) {
     if(!kev->ksn_cfg.logging_f) return NULL;
 
-    teoLoggingServerClass *ls = malloc(sizeof(ksnTermClass));
+    teoLoggingServerClass *ls = malloc(sizeof(teoLoggingServerClass));
     ls->ke = ke;
     ls->event_cb = kev->event_cb;
     kev->event_cb = event_cb;
