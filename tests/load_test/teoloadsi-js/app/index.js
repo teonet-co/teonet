@@ -112,6 +112,24 @@ function sendCmdT(ke, to, id, type) {
     send_f = 0;
 }
 
+function test_sendCmdAnswerToBinary(ke) {
+    // rd, cmd, data, data_length
+    const rd = { l0_f:0, from:"me\0", from_len: 3, addr:"127.0.0.1\0", port:7755 };
+    const cmd = 129;
+    const data = Buffer.from("hello\0");
+    const data_length = 6;
+    teonet.sendCmdAnswerToBinary(ke, rd, cmd, data, data_length);
+}
+
+function test_subscribe(ke) {
+    // f_type, cmd, peer_length, ev, peer
+    const rd = { l0_f:0, from:"me\0", from_len: 3, addr:"127.0.0.1\0", port:7755 };
+    const cmd = 129;
+    const data = Buffer.from("hello\0");
+    const data_length = 6;
+    teonet.subscribe(ke, "my-peer", 32768);
+}
+
 /**
  * Teonet event callback
  *
@@ -157,6 +175,9 @@ function teoEventCb(ke, ev, data, data_len, user_data) {
                 console.log("Client mode, server name:", SERVER_PEER);
                 id = 0;
                 sendCmdT(ke, SERVER_PEER, ++id, 0);
+                
+                //test_sendCmdAnswerToBinary(ke);
+                //test_subscribe(ke);
 
                 start_f = 0;
             } 
@@ -177,8 +198,9 @@ function teoEventCb(ke, ev, data, data_len, user_data) {
 
                     if(dref.id !== id) errors++;
                     if(!(dref.id%NUM_TO_SHOW))
-                        console.log(" Got an answer", dref.id, dref.type,
-                            "errors:", errors);
+                        console.log(" Got an answer", 
+                            dref.id, `(type: ${dref.type})`,
+                            errors ? `errors: ${errors}` : "");
                     if(!SEND_IN_MAIN) sendCmdT(ke, SERVER_PEER, ++id, 0);
                     else send_f = 1;
 
@@ -245,7 +267,7 @@ function sender() {
         if(_ke !== undefined) {
             if(send_f) {
                 sendCmdT(_ke, SERVER_PEER, ++id, 0);
-                sendRandom(NUM_RUNDOM);
+                sendRandom(NUM_RUNDOM*20);
             }
             //console.log("main, send id:", id);
         }
