@@ -49,7 +49,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
                 
                 // Show log message
                 if (kev->ksn_cfg.filter_f)
-                    if (teoLoggingServerLogCheck(ke, rd->data))
+                    if (teoLogCheck(ke, rd->data))
                         printf("%s: %s\n", rd->from, (char*)rd->data);
                 
                 // Add log to syslog
@@ -78,8 +78,6 @@ teoLoggingServerClass *teoLoggingServerInit(void *ke) {
 
     teoLoggingServerClass *ls = malloc(sizeof(teoLoggingServerClass));
     ls->ke = ke;
-    ls->filter = "";
-    ls->filter = NULL;
     ls->event_cb = kev->event_cb;
     kev->event_cb = event_cb;
 
@@ -91,28 +89,12 @@ teoLoggingServerClass *teoLoggingServerInit(void *ke) {
     return ls;
 }
 
-void teoLoggingServerSetFilter(void *ke, void *filter) {
-    if (kev->ls->filter != NULL) {
-        free(kev->ls->filter);
-        kev->ls->filter = NULL;
-    }
-    kev->ls->filter = malloc(strlen((char *)filter) + 1);
-    strncpy(kev->ls->filter, (char *)filter, strlen((char *)filter) + 1);
-}
-
-signed char teoLoggingServerLogCheck(void *ke, void *log) {
-    if (kev->ls->filter != NULL) 
-        return strstr((char *)log, kev->ls->filter) == NULL ? 0 : 1;
-    return 1;
-}
 
 // Logging server destroy and free allocated memory
 void teoLoggingServerDestroy(teoLoggingServerClass *ls) {
     if(ls) {
         ksnetEvMgrClass *ke = ls->ke;
         ke->event_cb = ls->event_cb;
-        free(ls->filter);
-        ls->filter = NULL;
         free(ls);
         ke->ls = NULL;
 

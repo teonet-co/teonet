@@ -65,15 +65,29 @@ const char
 /* Hot keys functions                                                         */
 /*                                                                            */
 /******************************************************************************/
+#define kev ((ksnetEvMgrClass*)ke) // Event manager
+#define khv  kev->kh   // Hotkeys class
+#define kc  kev->kc   // Net core class
+
+void teoHotkeySetFilter(void *ke, void *filter) {
+    if (khv->filter != NULL) {
+        free(khv->filter);
+        khv->filter = NULL;
+    }
+    khv->filter = malloc(strlen((char *)filter) + 1);
+    strncpy(khv->filter, (char *)filter, strlen((char *)filter) + 1);
+}
+
+signed char teoLogCheck(void *ke, void *log) {
+    if (kev->kh->filter != NULL) 
+        return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
+    return 1;
+}
 
 /**
  * Callback procedure which called by event manager when STDIN FD has any data
  */
 int hotkeys_cb(void *ke, void *data, ev_idle *w) {
-
-    #define kev ((ksnetEvMgrClass*)ke) // Event manager
-    #define khv  kev->kh   // Hotkeys class
-    #define kc  kev->kc   // Net core class
 
     int hotkey;
 
@@ -460,7 +474,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 // Got hot key
             if(khv->non_blocking) {
                 khv->str_number = 0;
-                printf("Enter words filter(example: DEBUG,ps-server): ");
+                printf("Enter word filter: ");
                 fflush(stdout);
                 _keys_non_blocking_stop(khv); // Switch STDIN to string
             }
@@ -474,7 +488,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                     if(((char*)data)[0]) {
                         // Send message
                         printf("FILTER '%s'\n", (char*)data);
-                        teoLoggingServerSetFilter(ke, data);
+                        teoHotkeySetFilter(ke, data);
                     }
                     _keys_non_blocking_start(khv); // Switch STDIN to hot key
                 }
@@ -575,6 +589,8 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->mt = NULL;
     kh->pet = NULL;
     kh->put = NULL;
+    kh->filter = "";
+    kh->filter = NULL;
     kh->ke = ke;
 
     // Initialize and start STDIN keyboard input watcher
@@ -616,7 +632,8 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
         
         ev_io_stop (ke->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
-        
+        free(kh->filter);
+        kh->filter = NULL;
         free(kh);
         ke->kh = NULL;
     }
