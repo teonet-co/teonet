@@ -78,7 +78,14 @@ void teoHotkeySetFilter(void *ke, void *filter) {
     strncpy(khv->filter, (char *)filter, strlen((char *)filter) + 1);
 }
 
-signed char teoLogCheck(void *ke, void *log) {
+unsigned char teoFilterFlagCheck(void *ke) {
+    if (khv != NULL) {
+        if (khv->filter_f) return 1; else return 0;
+    }
+    return 1;
+}
+
+unsigned char teoLogCheck(void *ke, void *log) {
     if ((khv != NULL) && (khv->filter != NULL)) 
         return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
     return 1;
@@ -470,7 +477,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
         // Filter
         case 'f':
         {
-            kev->ksn_cfg.filter_f = !kev->ksn_cfg.filter_f;
+            khv->filter_f = !khv->filter_f;
                 // Got hot key
             if(khv->non_blocking) {
                 khv->str_number = 0;
@@ -593,6 +600,7 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->put = NULL;
     kh->filter = "";
     kh->filter = NULL;
+    kh->filter_f = 1;
     kh->ke = ke;
 
     // Initialize and start STDIN keyboard input watcher

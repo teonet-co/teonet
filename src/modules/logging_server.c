@@ -48,7 +48,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
             if(rd->cmd == CMD_LOGGING && rd->data_len) {
                 
                 // Show log message
-                if (kev->ksn_cfg.filter_f)
+                if (teoFilterFlagCheck(kev))
                     if (teoLogCheck(ke, rd->data))
                         printf("%s: %s\n", rd->from, (char*)rd->data);
                 

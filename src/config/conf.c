@@ -55,7 +55,6 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_debug_vvv_f = 0;
     ksn_cfg->show_peers_f = 0;
     ksn_cfg->show_tr_udp_f = 0;
-    ksn_cfg->filter_f = 1;
     
     // Other flags
     ksn_cfg->send_ack_event_f = 0;

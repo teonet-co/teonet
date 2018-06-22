@@ -65,7 +65,6 @@ typedef struct ksnet_cfg {
         logging_f,         ///< Start logging server
         log_disable_f;     ///< Disable send log to logging server 
     
-    unsigned filter_f : 1;
     // Daemon mode flags
     int dflag,  ///< Start application in Daemon mode
         kflag;  ///< Kill application in Daemon mode

@@ -117,7 +117,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         va_start(args, format);
         char *p = ksnet_vformatMessage(format, args);
         va_end(args);
-        if (ksn_cfg->filter_f)
+        if (teoFilterFlagCheck(ksn_cfg->ke))
             if (teoLogCheck(ksn_cfg->ke, p)) show_it = 1; else show_it = 0;
         else show_it = 0;
         // Show message

@@ -15,7 +15,7 @@
 #include "rlutil.h"
 #include "string_arr.h"
 #include "config/conf.h"
-
+#include "../hotkeys.h"
 /**
  * KSNet printf messages types
  */
