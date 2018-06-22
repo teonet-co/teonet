@@ -55,6 +55,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->show_debug_vvv_f = 0;
     ksn_cfg->show_peers_f = 0;
     ksn_cfg->show_tr_udp_f = 0;
+    ksn_cfg->filter_f = 1;
     
     // Other flags
     ksn_cfg->send_ack_event_f = 0;
@@ -166,6 +167,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("show_debug_f", &conf->show_debug_f),
         CFG_SIMPLE_BOOL("show_debug_vv_f", &conf->show_debug_vv_f),
         CFG_SIMPLE_BOOL("show_debug_vvv_f", &conf->show_debug_vvv_f),
+//        CFG_SIMPLE_BOOL("filter_f", &conf->filter_f),
         CFG_SIMPLE_BOOL("show_peers_f", &conf->show_peers_f),
         CFG_SIMPLE_BOOL("show_tr_udp_f", &conf->show_tr_udp_f),
         CFG_SIMPLE_BOOL("hot_keys_f", &conf->hot_keys_f),

@@ -51,20 +51,21 @@ typedef struct ksnet_cfg {
 
     // Flags
     int show_connect_f,    ///< Show connection message
-        show_debug_f,     ///< Show debug messages
-        show_debug_vv_f, ///< Show debug vv messages
-        show_debug_vvv_f, ///< Show debug vvv messages
-        show_peers_f,   ///< Show peers at start up
-        hot_keys_f,    ///< Show hotkeys when press h
-        crypt_f,      ///< Encrypt/Decrypt packets
-        vpn_connect_f,  ///< Start VPN flag
-        show_tr_udp_f, ///< Show TR-UDP statistic at start up 
-        send_ack_event_f, ///< Send TR-UDP ACK event (EV_K_RECEIVED_ACK) to the teonet event loop
-        sig_segv_f, ///< SIGSEGV processing
+        show_debug_f,      ///< Show debug messages
+        show_debug_vv_f,   ///< Show debug vv messages
+        show_debug_vvv_f,  ///< Show debug vvv messages
+        show_peers_f,      ///< Show peers at start up
+        hot_keys_f,        ///< Show hotkeys when press h
+        crypt_f,           ///< Encrypt/Decrypt packets
+        vpn_connect_f,     ///< Start VPN flag
+        show_tr_udp_f,     ///< Show TR-UDP statistic at start up 
+        send_ack_event_f,  ///< Send TR-UDP ACK event (EV_K_RECEIVED_ACK) to the teonet event loop
+        sig_segv_f,        ///< SIGSEGV processing
         block_cli_input_f, ///< Block teonet CLI input (for using in GUI application)
-        logging_f, ///< Start logging server 
-        log_disable_f; ///< Disable send log to logging server 
+        logging_f,         ///< Start logging server
+        log_disable_f;     ///< Disable send log to logging server 
     
+    unsigned filter_f : 1;
     // Daemon mode flags
     int dflag,  ///< Start application in Daemon mode
         kflag;  ///< Kill application in Daemon mode
