@@ -21,6 +21,8 @@
 
 double ksnetEvMgrGetTime(void *ke);
 void teoLoggingClientSend(void *ke, const char *message);
+unsigned char teoFilterFlagCheck(void *ke);
+unsigned char teoLogCheck(void *ke, void *log);
 
 // Test mode (for tests only)
 static int KSN_TEST_MODE = 0;
@@ -117,7 +119,9 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         va_start(args, format);
         char *p = ksnet_vformatMessage(format, args);
         va_end(args);
-
+        if (teoFilterFlagCheck(ksn_cfg->ke))
+            if (teoLogCheck(ksn_cfg->ke, p)) show_it = 1; else show_it = 0;
+        else show_it = 0;
         // Show message
         if(show_it) {
 
