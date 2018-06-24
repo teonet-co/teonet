@@ -130,7 +130,7 @@ typedef enum ksnetEvMgrEvents {
      * @param data_len Size of ksnCorePacketData
      * @param user_data Pointer to packet ID
      */
-    EV_K_RECEIVED_ACK,  // #7  This host Received ACK to sent data
+    EV_K_RECEIVED_ACK,  ///< #7  This host Received ACK to sent data
     EV_K_IDLE,          ///< #8  Idle check host events (after 11.5 after last host send or receive data)
     EV_K_TIMER,         ///< #9  Timer event
 
@@ -145,7 +145,7 @@ typedef enum ksnetEvMgrEvents {
      * @param data_len Size of integer
      * @param user_data Pointer to raw keyboard input buffer
      */
-    EV_K_HOTKEY,        // #10 Hotkey event
+    EV_K_HOTKEY,        ///< #10 Hotkey event
     EV_K_USER,          ///< #11 User press A hotkey
     EV_K_ASYNC,         ///< #12 Async event
 

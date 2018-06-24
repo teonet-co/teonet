@@ -212,5 +212,5 @@ int main(int argc, char** argv) {
     // Start teonet
     ksnetEvMgrRun(ke);
 
-    return (EXIT_SUCCESS);
+    return (exit_code);
 }
