@@ -17,7 +17,7 @@ typedef struct teoLoggingServerClass {
 
     void *ke; // Pointer to ksnEvMgrClass
     void *event_cb; // Pointer to event callback
-
+    
 } teoLoggingServerClass;
 
 

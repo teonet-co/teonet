@@ -17,6 +17,8 @@
 typedef void (*event_cb_t)(struct ksnetEvMgrClass *ke, ksnetEvMgrEvents event, 
         void *data, size_t data_len, void *user_data);
 
+signed char teoLoggingServerLogCheck(void *ke, void *log);
+
 // Event loop to gab teonet events
 static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
         void *data, size_t data_len, void *user_data) {
@@ -46,7 +48,9 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
             if(rd->cmd == CMD_LOGGING && rd->data_len) {
                 
                 // Show log message
-                printf("%s: %s\n", rd->from, (char*)rd->data);
+                if (teoFilterFlagCheck(kev))
+                    if (teoLogCheck(ke, rd->data))
+                        printf("%s: %s\n", rd->from, (char*)rd->data);
                 
                 // Add log to syslog
                 syslog(LOG_INFO, "TEO_LOGGING: %s: %s", rd->from, (char*)rd->data);
@@ -72,7 +76,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
 teoLoggingServerClass *teoLoggingServerInit(void *ke) {
     if(!kev->ksn_cfg.logging_f) return NULL;
 
-    teoLoggingServerClass *ls = malloc(sizeof(ksnTermClass));
+    teoLoggingServerClass *ls = malloc(sizeof(teoLoggingServerClass));
     ls->ke = ke;
     ls->event_cb = kev->event_cb;
     kev->event_cb = event_cb;
@@ -84,6 +88,7 @@ teoLoggingServerClass *teoLoggingServerInit(void *ke) {
 
     return ls;
 }
+
 
 // Logging server destroy and free allocated memory
 void teoLoggingServerDestroy(teoLoggingServerClass *ls) {

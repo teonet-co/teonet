@@ -65,15 +65,36 @@ const char
 /* Hot keys functions                                                         */
 /*                                                                            */
 /******************************************************************************/
+#define kev ((ksnetEvMgrClass*)ke) // Event manager
+#define khv  kev->kh   // Hotkeys class
+#define kc  kev->kc   // Net core class
+
+void teoHotkeySetFilter(void *ke, void *filter) {
+    if (khv->filter != NULL) {
+        free(khv->filter);
+        khv->filter = NULL;
+    }
+    khv->filter = malloc(strlen((char *)filter) + 1);
+    strncpy(khv->filter, (char *)filter, strlen((char *)filter) + 1);
+}
+
+unsigned char teoFilterFlagCheck(void *ke) {
+    if (khv != NULL) {
+        if (khv->filter_f) return 1; else return 0;
+    }
+    return 1;
+}
+
+unsigned char teoLogCheck(void *ke, void *log) {
+    if ((khv != NULL) && (khv->filter != NULL)) 
+        return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
+    return 1;
+}
 
 /**
  * Callback procedure which called by event manager when STDIN FD has any data
  */
 int hotkeys_cb(void *ke, void *data, ev_idle *w) {
-
-    #define kev ((ksnetEvMgrClass*)ke) // Event manager
-    #define khv  kev->kh   // Hotkeys class
-    #define kc  kev->kc   // Net core class
 
     int hotkey;
 
@@ -110,6 +131,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
             " "COLOR_DW"Q"COLOR_END" - TR-UDP queues\n"
             " "COLOR_DW"a"COLOR_END" - show application menu\n"
+            " "COLOR_DW"f"COLOR_END" - set filter\n"
             " "COLOR_DW"r"COLOR_END" - restart application\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
@@ -452,6 +474,36 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             }
             break;
 
+        // Filter
+        case 'f':
+        {
+            khv->filter_f = !khv->filter_f;
+                // Got hot key
+            if(khv->non_blocking) {
+                khv->str_number = 0;
+                printf("Enter word filter: ");
+                fflush(stdout);
+                _keys_non_blocking_stop(khv); // Switch STDIN to string
+            }
+            // Got requested strings
+            else switch(khv->str_number) {
+                
+                // Got 'filter' string
+                case 0:
+                {
+                    trimlf((char*)data);
+                    if(((char*)data)[0]) {
+                        printf("FILTER '%s'\n", (char*)data);
+                        teoHotkeySetFilter(ke, data);
+                    } else {
+                        printf("FILTER was reset\n");
+                        teoHotkeySetFilter(ke, " ");
+                    }
+                    _keys_non_blocking_start(khv); // Switch STDIN to hot key
+                }
+                break;
+            }
+        } break;
         // Quit
         case 'q':
             puts("Press y to quit application");
@@ -546,6 +598,9 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->mt = NULL;
     kh->pet = NULL;
     kh->put = NULL;
+    kh->filter = "";
+    kh->filter = NULL;
+    kh->filter_f = 1;
     kh->ke = ke;
 
     // Initialize and start STDIN keyboard input watcher
@@ -587,7 +642,8 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
         
         ev_io_stop (ke->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
-        
+        free(kh->filter);
+        kh->filter = NULL;
         free(kh);
         ke->kh = NULL;
     }
