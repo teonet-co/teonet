@@ -1,0 +1,31 @@
+{
+  "name": "teoloadsi-js",
+  "version": "0.0.1",
+  "description": "Teonet simple load JS",
+  "main": "./app/index.js",
+  "scripts": {
+    "test": "test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "No repository yet"
+  },
+  "keywords": [
+    "teonet",
+    "network"
+  ],
+  "files": [
+    "generators"
+  ],
+  "dependencies": {
+    "teonet": "^0.0.74",
+    "ref": "^1.3.5",
+    "ref-array": "^1.2.0",
+    "ref-struct": "^1.1.0"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  },
+  "author": "Kirill Scherba <kirill@scherba.ru>",
+  "license": "MIT"
+}
