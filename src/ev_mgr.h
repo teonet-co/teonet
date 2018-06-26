@@ -263,6 +263,7 @@ typedef struct ksnetEvMgrClass {
     ev_idle idle_activity_w;///< Idle Check activity watcher
     ev_timer timer_w;       ///< Timer watcher
     ev_async sig_async_w;   ///< Async signal watcher
+    ev_idle idle_async_w;   ///< Async signal idle watcher
 
     double custom_timer_interval;   ///< Custom timer interval
     double last_custom_timer;       ///< Last time the custom timer called
