@@ -130,6 +130,16 @@ function test_subscribe(ke) {
     teonet.subscribe(ke, "my-peer", 32768);
 }
 
+function test(_ke) {
+    console.log("\nstatrt\n");
+
+    teonet.sendCmdTo(_ke, "teo-load-si-6", 130, `{"packetId":12,"data":{"userId":"5b30efeed8c69f05913fe0b7","key":"playerDisciples"}}`);
+
+    teonet.subscribe(_ke, "teo-load-si-6", 0x8000);
+
+    teonet.sendToSscr(_ke, 0x8000, "hello", 5, 0);            
+}
+
 /**
  * Teonet event callback
  *
@@ -146,7 +156,7 @@ function teoEventCb(ke, ev, data, data_len, user_data) {
     var rd;
 
     switch (ev) {
-
+        
         // EV_K_STARTED #0 Calls immediately after event manager starts
         case teonet.ev.EV_K_STARTED:
             _ke = ke;
@@ -170,6 +180,9 @@ function teoEventCb(ke, ev, data, data_len, user_data) {
 
         // EV_K_TIMER #9 Timer event, seted by ksnetEvMgrSetCustomTimer
         case teonet.ev.EV_K_TIMER:
+            
+            //test(_ke);
+            
             if(start_f) {
 
                 console.log("Client mode, server name:", SERVER_PEER);
@@ -182,6 +195,7 @@ function teoEventCb(ke, ev, data, data_len, user_data) {
                 start_f = 0;
             } 
             else sendRandom(NUM_RUNDOM);
+            
             break;
 
         // EV_K_RECEIVED #5 This host Received a data
