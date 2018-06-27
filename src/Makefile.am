@@ -129,6 +129,7 @@ nobase_teonetinclude_HEADERS = \
     modules/vpn.h \
     modules/logging_server.h \
     modules/logging_client.h \
+    modules/async_calls.h \
     utils/string_arr.h \
     utils/utils.h \
     utils/rlutil.h
@@ -181,6 +182,7 @@ libteonet_la_SOURCES = \
     modules/vpn.c \
     modules/logging_server.c \
     modules/logging_client.c \
+    modules/async_calls.c \
     utils/string_arr.c \
     utils/utils.c \
     utils/base64.c \
