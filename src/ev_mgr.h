@@ -27,6 +27,7 @@
 #include "modules/net_term.h"
 #include "modules/tcp_proxy.h"
 #include "modules/l0-server.h"
+#include "modules/async_calls.h"
 #include "modules/logging_server.h"
 #include "modules/logging_client.h"
 
@@ -250,6 +251,8 @@ typedef struct ksnetEvMgrClass {
 
     teoLoggingServerClass *ls; ///< Logging server class // \TODO move it up after testing
     teoLoggingClientClass *lc; ///< Logging client class // \TODO move it up after testing
+    
+    teoAsyncClass *ta;  ///< Async calls module
 
     int runEventMgr; ///< Run even manages (stop if 0)
     uint32_t timer_val; ///< Event loop timer value
