@@ -1160,7 +1160,7 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
 
     // Get data from async queue and send user event with it
     pthread_mutex_lock (&kev->async_mutex);
-    int i = 0;
+    //int i = 0;
     while(!pblListIsEmpty(kev->async_queue)) {
         if(!ev_is_active(EV_A_ &kev->idle_async_w)) {
            //printf("pblListSize: %d\n", pblListSize(kev->async_queue));
@@ -1175,7 +1175,7 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
             else {
                 SEND_EVENT(NULL, 0, NULL);
             }
-            if(++i <= 2) continue; // Send 3 records without Idle event
+            //if(++i <= 2) continue; // Send 3 records without Idle event
             ev_idle_start(EV_A_ &kev->idle_async_w); // Send idle event to continue queue processing 
         }        
         break;
