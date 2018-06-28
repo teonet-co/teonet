@@ -50,6 +50,8 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data);
 
+void teoHotkeySetFilter(void *ke, void *filter);
+
 /**
  * Initialize KSNet Event Manager and network
  *
@@ -379,7 +381,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         // Initialize async idle watcher
         ev_idle_init (&ke->idle_async_w, idle_async_cb);
         ke->idle_async_w.data = ke;
-
+        
         // Run event loop
         ke->runEventMgr = 1;
         if(ke->km == NULL) ev_run(loop, 0);
@@ -1244,6 +1246,8 @@ int modules_init(ksnetEvMgrClass *ke) {
     // Hotkeys
     if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
         if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
+        // Set filter from parameters
+        if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke, ke->ksn_cfg.filter);
     }
 
     // Callback QUEUE

@@ -66,6 +66,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "l0_allow",           no_argument,       &conf->l0_allow_f, 1 },
         { "l0_tcp_port",        required_argument, 0, 'l' },
         { "l0_tcp_ip_remote",   required_argument, 0, 'I' },
+        { "filter",         required_argument, 0, 'f' },
         { "hot_keys",       no_argument,       &conf->hot_keys_f, 1 },
         { "show_debug",     no_argument,       &conf->show_debug_f, 1 },
         { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
@@ -233,6 +234,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           strncpy((char*)conf->l0_tcp_ip_remote, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
           
+        case 'f':
+          strncpy((char*)conf->filter, optarg, KSN_BUFFER_SM_SIZE/2);
+          break;
+         
         case 'd':
           // Start this application in Daemon mode
           conf->dflag = 1;
@@ -368,6 +373,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --l0_allow           Allow L0 Server and l0 clients connection\n"
     "  -l,  --l0_tcp_port=value  L0 Server TCP port number (default "KSNET_PORT_DEFAULT")\n"
     "  -I,  --l0_tcp_ip=value    L0 Server remote IP address (send to clients)\n"
+    "  -f,  --filter=value       Set display log filter\n"
     "       --hot_keys           Switch on the hot keys monitor after starts\n"
     #ifdef DEBUG_KSNET
     "       --show_debug         Show debug messages\n"
