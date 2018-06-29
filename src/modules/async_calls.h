@@ -41,15 +41,19 @@ teoAsyncClass *teoAsyncInit(void *ke);
 void teoAsyncDestroy(teoAsyncClass *ta);
 
 
-void sendCmdToBinaryA(void *ke, const char *peer, uint8_t cmd, void *data,
+// # case 1:
+void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
         size_t data_length);
 
-void sendToSscrA(void *ke, uint16_t event, void *data, size_t data_length,
+// # case 2:
+void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
         uint8_t cmd);
 
+// # case 3:
 void sendCmdAnswerToBinaryA(void *ke, void *rd, uint8_t cmd, void *data,
         size_t data_length);
 
+// # case 4:
 /**
  * Send command to subscribe this host to event at remote peer
  *

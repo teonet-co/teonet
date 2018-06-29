@@ -32,7 +32,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     const uint8_t cmd = *(uint8_t*)(data + ptr); ptr++;
                     switch(f_type) {
                         
-                        // sendCmdToBinaryA
+                        // ksnCoreSendCmdtoA (sendCmdToBinaryA)
                         case 1: {
                             // Parse buffer: { f_type, cmd, peer_length, peer, data }
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
@@ -41,13 +41,13 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             const size_t d_length = data_length - ptr;
                             if(kev->ta->test)
                                 ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-                                        "sendCmdToBinaryA Test: %s %d %s %d\n", peer, cmd, d, d_length);
+                                        "teoSScrSendA Test: %s %d %s %d\n", peer, cmd, d, d_length);
                             else ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
                             processed = 1;
                             
                         } break;
                         
-                        // sendToSscrA
+                        // teoSScrSend (sendToSscrA)
                         case 2: {
                             // Parse buffer: { f_type, cmd, event, data }
                             const uint16_t event = *(uint16_t*)(data + ptr); ptr += 2;
@@ -55,7 +55,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             const size_t d_length = data_length - ptr;
                             if(kev->ta->test)
                                 ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-                                        "sendToSscrA Test: %d %s %d %d\n", event, d, d_length, cmd);
+                                        "teoSScrSend Test: %d %s %d %d\n", event, d, d_length, cmd);
                             else teoSScrSend(kev->kc->kco->ksscr, event, d, d_length, cmd);
                             processed = 1;
                         } break;
@@ -81,7 +81,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             processed = 1;
                         } break;
                         
-                        // subscribeA
+                        // teoSScrSubscribeA (subscribeA)
                         case 4: {
                             // Parse buffer: { f_type, cmd, peer_length, ev, peer }
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
@@ -139,12 +139,12 @@ void teoAsyncDestroy(teoAsyncClass *ta) {
     #endif
 }
 
-void sendCmdToBinaryA(void *ke, const char *peer, uint8_t cmd, void *data,
+void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
         size_t data_length) {
     
     if(kev->ta->test)
         ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-            "sendCmdToBinaryA: %s %d %s %d\n", peer, cmd, data, data_length);
+            "ksnCoreSendCmdtoA: %s %d %s %d\n", peer, cmd, data, data_length);
     
     int ptr = 0;
     const uint8_t f_type = 1;
@@ -162,12 +162,12 @@ void sendCmdToBinaryA(void *ke, const char *peer, uint8_t cmd, void *data,
     free(buf);
 }
 
-void sendToSscrA(void *ke, uint16_t event, void *data, size_t data_length,
+void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
         uint8_t cmd) {
 
     if(kev->ta->test)
         ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-            "sendToSscrA: %d %s %d %d\n", event, data, data_length, cmd);
+            "teoSScrSendA: %d %s %d %d\n", event, data, data_length, cmd);
 
     int ptr = 0;
     const uint8_t f_type = 2;
@@ -247,10 +247,10 @@ void teoAsyncTest(void *ke) {
     kev->ta->test = 1;
     
     // 1
-    sendCmdToBinaryA(ke, "teo-test-peer", 129, "Hello", 6);
+    ksnCoreSendCmdtoA(ke, "teo-test-peer", 129, "Hello", 6);
     
     // 2
-    sendToSscrA(ke, 0x8000, "Hello", 6, 129);
+    teoSScrSendA(ke, 0x8000, "Hello", 6, 129);
     
     // 3
     ksnCorePacketData rd;
@@ -263,6 +263,4 @@ void teoAsyncTest(void *ke) {
     
     // 4
     teoSScrSubscribeA(kev->kc->kco->ksscr, "teo-test-peer", 0x8000);
-    
-    //kev->ta->test = 0;
 }
