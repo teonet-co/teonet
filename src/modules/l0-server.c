@@ -1101,6 +1101,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         if(jp.clientId != NULL) free(jp.clientId);
         if(jp.userId != NULL) free(jp.userId);
         if(jp.username != NULL) free(jp.username);
+        if(jp.networks != NULL) free(jp.networks);
     }
 
     return retval;
