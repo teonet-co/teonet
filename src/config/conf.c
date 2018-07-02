@@ -75,6 +75,9 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->l0_allow_f = 0;
     ksn_cfg->l0_tcp_port = ksn_cfg->port;
     ksn_cfg->l0_tcp_ip_remote[0] = '\0';
+    
+    // Display log filter
+    ksn_cfg->filter[0] = '\0';
             
     // Remote host default
     ksn_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
@@ -126,10 +129,12 @@ void read_config(ksnet_cfg *conf, int port_param) {
         strncpy(conf->vpn_ip, vpn_ip, KSN_MAX_HOST_NAME); \
         strncpy(conf->vpn_dev_name, vpn_dev_name, KSN_MAX_HOST_NAME); \
         strncpy(conf->vpn_dev_hwaddr, vpn_dev_hwaddr, KSN_MAX_HOST_NAME); \
-        strncpy(conf->l0_tcp_ip_remote, l0_tcp_ip_remote, KSN_BUFFER_SM_SIZE/2)
+        strncpy(conf->l0_tcp_ip_remote, l0_tcp_ip_remote, KSN_BUFFER_SM_SIZE/2); \
+        strncpy(conf->filter, filter, KSN_BUFFER_SM_SIZE/2)
 
     // Load string values
     char *vpn_ip = strdup(conf->vpn_ip);
+    char *filter = strdup(conf->filter);
     char *net_key = strdup(conf->net_key);
     char *host_name = strdup(conf->host_name);
     char *r_host_addr = strdup(conf->r_host_addr);
@@ -152,6 +157,8 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_INT("l0_tcp_port", &conf->l0_tcp_port),
         CFG_SIMPLE_STR("l0_tcp_ip_remote", &l0_tcp_ip_remote),
 
+        CFG_SIMPLE_STR("filter", &filter),
+        
         CFG_SIMPLE_STR("r_host_addr", &r_host_addr),
         CFG_SIMPLE_INT("r_port", &conf->r_port),
         
@@ -274,6 +281,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     free(r_host_addr);
     free(host_name);
     free(net_key);
+    free(filter);
     free(vpn_ip);
 
     // Save file parameters for last use
