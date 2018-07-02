@@ -28,9 +28,10 @@
    /usr/lib/libteoccl.a
    /usr/lib/libteoccl.la
    /usr/lib/libteoccl.so
-   /usr/lib/libteoccl.so.2
-   /usr/lib/libteoccl.so.2.0.0
+   /usr/lib/libteoccl.so.3
+   /usr/lib/libteoccl.so.3.0.0
    /usr/share/doc/libteoccl/tests/main_t.c
    /usr/share/doc/libteoccl/tests/map_t.c
    /usr/share/doc/libteoccl/tests/queue_t.c
+   /usr/share/doc/libteoccl/tests/list_t.c
 
