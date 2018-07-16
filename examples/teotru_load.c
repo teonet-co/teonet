@@ -26,10 +26,11 @@ int app_mode = 0; // 0 -client mode; 1- server mode
 
 void test_01(ksnetEvMgrClass *ke, char *server_peer) {
     
-    const size_t BUF_LEN = 1024;
-    const size_t NUM_RECORDS = 1024;
+    static int num = 0;
+    const size_t BUF_LEN = 128; //1024;
+    const size_t NUM_RECORDS = 2048; //1024;
 
-    printf("\nTest 01: ");
+    printf("\nTest 01 #%d: ", ++num);
     printf("Send %d records of %d bytes each messages ... ", (int)NUM_RECORDS, (int)BUF_LEN);
     fflush(stdout);
     
@@ -113,6 +114,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Data received event
         case EV_K_RECEIVED:
         {    
+            static int num = 0;
             ksnCorePacketData *rd = (ksnCorePacketData *)data;
             static int num_data_cmds = 0;
             
@@ -122,8 +124,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
                     // Server mode
                     num_data_cmds = 0;
-                    printf("\nTest \"%s\" from %s started ...\n", 
-                            (char*)rd->data, rd->from);
+                    printf("\nTest \"%s\" #%d from %s started ...\n", 
+                            (char*)rd->data, ++num, rd->from);
                     break;
                 
                 case CMD_USER:
@@ -150,8 +152,8 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 case CMD_USER + 2:
                     
                     // Server mode
-                    printf("Got %d commands\nTest \"%s\" from %s stopped ...\n", 
-                            num_data_cmds, (char*)rd->data, rd->from);
+                    printf("Got %d commands\nTest \"%s\" #%d from %s stopped ...\n", 
+                            num_data_cmds, (char*)rd->data, num, rd->from);
                     num_data_cmds = 0;
                     
                     break;
