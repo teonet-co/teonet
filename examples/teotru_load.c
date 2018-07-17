@@ -112,7 +112,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
         // Data received event
         case EV_K_RECEIVED:
-        {
+        {    
             static int num = 0;
             static int num_data_cmds = 0;
             ksnCorePacketData *rd = (ksnCorePacketData *)data;
