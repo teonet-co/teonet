@@ -823,7 +823,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     }
 
     // Disconnect dead peer
-    else if(arp_data->triptime == 0.00 || ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
+    else if(arp_data->last_triptime == 0.00 || ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
         // Disconnect dead peer from this host
 //        ksnCorePacketData rd;
