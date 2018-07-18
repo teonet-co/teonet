@@ -683,7 +683,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         rd->arp = ksnetArpGet(kc->ka, rd->from);
 
         // Send child to new peer and new peer to child
-        ksnetArpGetAll(kc->ka, send_cmd_connected_cb, rd);
+        //ksnetArpGetAll(kc->ka, send_cmd_connected_cb, rd);
 
         // Send event callback
         if(ke->event_cb != NULL)
