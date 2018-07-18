@@ -1009,7 +1009,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #ifdef DEBUG_KSNET
     ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
             MODULE, DEBUG_VV,
-            "process CMD_CONNECT_R (cmd = %u) command, from %s (%s:%d)\n",
+            "process CMD_CONNECT_R (cmd = %u) command, from %s connect address: %s:%d\n",
             rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 
@@ -1033,7 +1033,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             else {
                 lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
             }
-
+            
             // Send local IP address and port to child
             ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb,
                     &lrd);
@@ -1041,7 +1041,6 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Send peer address to child
         ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, rd);
-
     }
 
     // For TCP proxy connection resend this host IPs to child
