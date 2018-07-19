@@ -815,6 +815,9 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
     int retval = 0; // Return value
     double ct = ksnetEvMgrGetTime(kev); //Current time
+    
+//    if(arp_data->last_triptime < 0.0001)
+//        printf("arp_data->last_triptime: %f\n", arp_data->last_triptime);
 
     // Send trip time request
     if(ct - arp_data->last_triptime_send > CHECK_EVENTS_AFTER / 10) {
@@ -823,7 +826,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     }
 
     // Disconnect dead peer
-    else if(arp_data->last_triptime == 0.00 || ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
+    if(/*arp_data->last_triptime < 0.0001 ||*/ ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
         // Disconnect dead peer from this host
 //        ksnCorePacketData rd;
@@ -834,6 +837,8 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL,  arp_data, NULL);
+        
+        printf("arp_data->last_triptime: %f, disconnect\n", arp_data->last_triptime);
 
         retval = 1;
     }
