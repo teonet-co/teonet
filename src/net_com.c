@@ -291,13 +291,14 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
  * Send CONNECTED command to peer by address
  *
  * @param kco Pointer to ksnCommandClass
- * @param to Send command to peer name
+ * @param to_addr Send command to IP address 
+ * @param to_port Send command to Port 
  * @param name Name of peer to connect
  * @param addr IP address of peer to connect
  * @param port Port of peer to connect
  * @return
  */
-int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *p_addr, uint32_t p_port, 
+int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *to_addr, uint32_t to_port, 
         char *name, char *addr, uint32_t port) {
 
     // Create command data
@@ -307,7 +308,7 @@ int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *p_addr, uint32_t p_por
     strncpy(data + ptr, addr, KSN_BUFFER_DB_SIZE - ptr); ptr += strlen(addr) + 1;
     *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
 
-    return ksnCoreSendto(kco->kc, p_addr, p_port, CMD_CONNECT, data, ptr);
+    return ksnCoreSendto(kco->kc, to_addr, to_port, CMD_CONNECT, data, ptr);
 }
 
 /**
@@ -1034,13 +1035,8 @@ static int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
     #define rd ((ksnCorePacketData*)data)
 
     if(strcmp(peer_name, rd->from)) {
-//        ksnCommandSendCmdConnect( ((ksnetEvMgrClass*) ka->ke)->kc->kco,
-//                peer_name, rd->from, rd->addr, rd->port);
-        
         ksnCommandSendCmdConnectA( ((ksnetEvMgrClass*) ka->ke)->kc->kco, 
                 rd->addr, rd->port, peer_name, arp_data->addr, arp_data->port);
-                
-        //ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc, rd->addr, rd->port, CMD_CONNECT)
     }
 
     return 0;
