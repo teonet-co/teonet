@@ -288,6 +288,30 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
 }
 
 /**
+ * Send CONNECTED command to peer by address
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param to_addr Send command to IP address 
+ * @param to_port Send command to Port 
+ * @param name Name of peer to connect
+ * @param addr IP address of peer to connect
+ * @param port Port of peer to connect
+ * @return
+ */
+int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *to_addr, uint32_t to_port, 
+        char *name, char *addr, uint32_t port) {
+
+    // Create command data
+    size_t ptr = 0;
+    char data[KSN_BUFFER_DB_SIZE];
+    strncpy(data, name, KSN_BUFFER_DB_SIZE); ptr = strlen(name) + 1;
+    strncpy(data + ptr, addr, KSN_BUFFER_DB_SIZE - ptr); ptr += strlen(addr) + 1;
+    *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
+
+    return ksnCoreSendto(kco->kc, to_addr, to_port, CMD_CONNECT, data, ptr);
+}
+
+/**
  * Process CMD_RESET command
  *
  * @param kco Pointer to ksnCommandClass
@@ -983,7 +1007,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param arp_data Pointer to ARP data ksnet_arp_data
  * @param data Pointer to ksnCorePacketData
  */
-int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
+static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
                         ksnet_arp_data *arp_data, void *data) {
 
     #define rd ((ksnCorePacketData*)data)
@@ -991,6 +1015,28 @@ int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
     if(strcmp(peer_name, rd->from)) {
         ksnCommandSendCmdConnect( ((ksnetEvMgrClass*) ka->ke)->kc->kco,
                 peer_name, rd->from, rd->addr, rd->port);
+    }
+
+    return 0;
+    #undef rd
+}
+
+/**
+ * Send connect command
+ *
+ * @param ka Pointer to ksnetArpClass
+ * @param peer_name Peer name
+ * @param arp_data Pointer to ARP data ksnet_arp_data
+ * @param data Pointer to ksnCorePacketData
+ */
+static int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
+                        ksnet_arp_data *arp_data, void *data) {
+
+    #define rd ((ksnCorePacketData*)data)
+
+    if(strcmp(peer_name, rd->from)) {
+        ksnCommandSendCmdConnectA( ((ksnetEvMgrClass*) ka->ke)->kc->kco, 
+                rd->addr, rd->port, peer_name, arp_data->addr, arp_data->port);
     }
 
     return 0;
@@ -1018,29 +1064,35 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                   NULL_STR, 1);
 
     // Parse command data
-    size_t i, ptr = 0;
+    size_t i, ptr;
     ksnCorePacketData lrd;
-    uint8_t *num_ip = rd->data; ptr += sizeof(uint8_t); // Number of IPs
+    uint8_t *num_ip = rd->data; // Number of IPs
 
     // For UDP connection resend received IPs to child
     if(*num_ip) {
 
-        lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t)));
-        lrd.from = rd->from;
-        for(i = 0; i <= *num_ip; i++ ) {
+	for(int j=0; j < 1; j++) {
+	    ptr = sizeof(uint8_t);
+    	    lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t)));
+    	    lrd.from = rd->from;
+    	    for(i = 0; i <= *num_ip; i++ ) {
 
-            if(!i) lrd.addr = (char*)localhost;
-            else {
-                lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
-            }
-            
-            // Send local IP address and port to child
-            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb,
+        	if(!i) lrd.addr = (char*)localhost;
+        	else {
+            	    lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
+        	}
+
+        	// Send local IP address and port to child
+        	ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb,
                     &lrd);
-        }
+    	    }
 
-        // Send peer address to child
-        ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, rd);
+    	    // Send peer address to child
+    	    ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb, rd);
+            
+            // Send child address to peer
+            ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb_b, rd);
+        }
     }
 
     // For TCP proxy connection resend this host IPs to child

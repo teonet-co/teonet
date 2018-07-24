@@ -74,7 +74,7 @@ enum ksnCMD {
     CMD_LAST = 255          ///< #255 Last command Reserved for future use
 };
 
-#define CMD_TRUDP_CHECK(CMD) (CMD == CMD_CONNECT || CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED)
+#define CMD_TRUDP_CHECK(CMD) (!CMD || CMD == CMD_CONNECT || CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED)
 
 /**
  * KSNet command class data

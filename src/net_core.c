@@ -780,8 +780,8 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
 
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,
-                "got %d byte data, cmd = %d, from %s\n",
-                rd.data_len, rd.cmd, rd.from);
+                "got %d byte data, cmd = %d, from %s %s:%d\n",
+                rd.data_len, rd.cmd, rd.from, rd.addr, rd.port);
             #endif
 
             // Check new peer connected
