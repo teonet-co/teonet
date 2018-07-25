@@ -172,7 +172,22 @@ public:
 
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
+    
+    /**
+     * Send command by name to peer(async)
+     *
+     * @param kc Pointer to ksnCoreClass
+     * @param to Peer name to send to
+     * @param cmd Command
+     * @param data Commands data
+     * @param data_len Commands data length
+     */
+    inline void sendToA(const char *to, uint8_t cmd, void *data,
+        size_t data_len) {
 
+        ksnCoreSendCmdtoA((void *)ke, to, cmd, data, data_len);
+    }
+    
     inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) {
         sendCmdAnswerTo(getKe(), rd, (char *)name, out_data, out_data_len);
     }
@@ -212,6 +227,29 @@ public:
           cname_length, cmd, data, data_len);
     }
 
+    /**
+     * Send data to L0 client. Usually it is an answer to request from L0 client(async)
+     *
+     * @param addr IP address of remote peer
+     * @param port Port of remote peer
+     * @param cname L0 client name (include trailing zero)
+     * @param cname_length Length of the L0 client name
+     * @param cmd Command
+     * @param data Data
+     * @param data_len Data length
+     *
+     */
+    inline void sendToL0A(const char *addr, int port, const char *cname, 
+        size_t cname_length, uint8_t cmd, void *data, size_t data_len) {
+        ksnCorePacketData rd;
+        rd.from = (char *)cname;
+        rd.from_len = cname_length;
+        rd.addr = (char *)addr;
+        rd.port = port;
+        rd.l0_f = 1;
+        sendCmdAnswerToBinaryA((void *)ke, &rd, cmd, data, data_len);
+    }    
+    
     /**
      * Send data to L0 client with the teoL0Client structure.
      * 
