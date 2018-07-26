@@ -112,7 +112,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
         // Data received event
         case EV_K_RECEIVED:
-        {    
+        {
             static int num = 0;
             static int num_data_cmds = 0;
             ksnCorePacketData *rd = (ksnCorePacketData *)data;
@@ -161,7 +161,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // Client mode
             if(app_mode == 0) start_test_01 = !start_test_01 ? 1:0;
         } break;
-        
+
         default:
             break;
     }

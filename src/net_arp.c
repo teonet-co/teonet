@@ -32,12 +32,12 @@ ksnetArpClass *ksnetArpInit(void *ke) {
     ksnetArpClass *ka = malloc(sizeof(ksnetArpClass));
     ka->map = pblMapNewHashMap();
     ka->ke = ke;
-    
+
     ksnetArpAddHost(ka);
 
     return ka;
-    
-    #undef kev 
+
+    #undef kev
 }
 
 /**
@@ -65,12 +65,12 @@ ksnet_arp_data * ksnetArpGet(ksnetArpClass *ka, char *name) {
 
 /**
  * Returns the number of entries in arp map.
- * 
+ *
  * @param ka Pointer to ksnetArpClass
  * @return The number of entries in arp map.
  */
 int ksnetArpSize(ksnetArpClass *ka) {
-    
+
     return pblMapSize(ka->map);
 }
 
@@ -92,18 +92,18 @@ void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data) {
 
 /**
  * Add (or update) this host to ARP table
- * 
+ *
  * @param ka
  */
-void ksnetArpAddHost(ksnetArpClass *ka) { 
+void ksnetArpAddHost(ksnetArpClass *ka) {
 
     ksnetEvMgrClass *ke = ka->ke;
     ksnet_arp_data arp;
-    
+
     char* name = ke->ksn_cfg.host_name;
     char *addr = (char*)localhost; //"0.0.0.0";
     int port = ke->kc->port;
-    
+
     memset(&arp, 0, sizeof(arp));
     arp.connected_time = ev_now(ke->ev_loop); //ksnetEvMgrGetTime(ke);
     strncpy(arp.addr, addr, sizeof(arp.addr));
@@ -115,22 +115,22 @@ void ksnetArpAddHost(ksnetArpClass *ka) {
 
 /**
  * Change port at existing arp data associated with key (per name)
- * 
+ *
  * @param ka
  * @param name
  * @param port
  * @return Return NULL if name not found in the map
  */
 void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
-    
+
     size_t valueLength;
-    
-    ksnet_arp_data* arp = pblMapGetStr(ka->map, name, &valueLength); 
-    
+
+    ksnet_arp_data* arp = pblMapGetStr(ka->map, name, &valueLength);
+
     if(arp != NULL) {
         arp->port = port;
     }
-    
+
     return arp;
 }
 
@@ -145,50 +145,50 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
 
     size_t var_len = 0;
     char* peer_name = strdup(name);
-    
+
     // Remove from ARP table
     ksnet_arp_data *arp = pblMapRemoveStr(ka->map, name, &var_len);
-    
+
     // If removed successfully
     if(arp != (void*)-1) {
-        
+
         // Remove peer from TR-UDP module
         #if TRUDP_VERSION == 1
-        ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
+        ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
                 arp->port, 1);
         #elif TRUDP_VERSION == 2
-        trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr, 
-                arp->port, 0);               
+        trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
+                arp->port, 0);
         #endif
-        
+
         // Remove from Stream module
         ksnStreamClosePeer(((ksnetEvMgrClass*) ka->ke)->ks, peer_name);
-    }    
-    
+    }
+
     // If not found
     if(arp == (void*)-1) arp = NULL;
 
     // Free memory
-    if(arp) free(arp);    
+    if(arp) free(arp);
     free(peer_name);
-    
+
     return arp ? 1 : 0;
 }
 
 /**
  * Remove all records instead host from ARP table
- * 
+ *
  * Free ARP Hash map, create new and add this host to created ARP Hash map
- * 
+ *
  * @param ka
  */
 void ksnetArpRemoveAll(ksnetArpClass *ka) {
-        
+
     ksnetEvMgrClass *ke = ka->ke;
-    
+
     pblMapFree(ka->map);
     ke->ksn_cfg.r_host_name[0] = '\0';
-    ka->map = pblMapNewHashMap();    
+    ka->map = pblMapNewHashMap();
     ksnetArpAddHost(ka);
     #if TRUDP_VERSION == 1
     ksnTRUDPremoveAll(ke->kc->ku);
@@ -206,8 +206,8 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
  * @param flag Include this host if true
  */
 int ksnetArpGetAll_(ksnetArpClass *ka,
-        int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
-            ksnet_arp_data *arp_data, void *data), 
+        int (*peer_callback)(ksnetArpClass *ka, char *peer_name,
+            ksnet_arp_data *arp_data, void *data),
         void *data, int flag) {
 
     int retval = 0;
@@ -221,7 +221,7 @@ int ksnetArpGetAll_(ksnetArpClass *ka,
             char *name = pblMapEntryKey(entry);
             ksnet_arp_data *arp_data = pblMapEntryValue(entry);
 
-            if(flag || arp_data->mode >= 0) { 
+            if(flag || arp_data->mode >= 0) {
 
                 if(peer_callback(ka, name, arp_data, data)) {
 
@@ -244,10 +244,10 @@ int ksnetArpGetAll_(ksnetArpClass *ka,
  * @param data
  */
 inline int ksnetArpGetAll(ksnetArpClass *ka,
-        int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
-            ksnet_arp_data *arp_data, void *data), 
+        int (*peer_callback)(ksnetArpClass *ka, char *peer_name,
+            ksnet_arp_data *arp_data, void *data),
         void *data) {
-       
+
     return ksnetArpGetAll_(ka, peer_callback, data, 0);
 }
 
@@ -259,81 +259,81 @@ inline int ksnetArpGetAll(ksnetArpClass *ka,
  * @param data
  */
 inline int ksnetArpGetAllH(ksnetArpClass *ka,
-        int (*peer_callback)(ksnetArpClass *ka, char *peer_name, 
-            ksnet_arp_data *arp_data, void *data), 
+        int (*peer_callback)(ksnetArpClass *ka, char *peer_name,
+            ksnet_arp_data *arp_data, void *data),
         void *data) {
-    
+
     return ksnetArpGetAll_(ka, peer_callback, data, 1);
 }
 
 typedef struct find_arp_data {
-    
+
   __CONST_SOCKADDR_ARG addr;
   ksnet_arp_data *arp_data;
   char *peer_name;
-    
+
 } find_arp_data;
 
-int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name, 
+int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
             ksnet_arp_data *arp_data, void *data) {
-    
+
     int retval = 0;
     find_arp_data *fa = data;
-    
+
     if(ntohs(((struct sockaddr_in *) fa->addr)->sin_port) == arp_data->port &&
-       !strcmp(inet_ntoa(((struct sockaddr_in *) fa->addr)->sin_addr), 
+       !strcmp(inet_ntoa(((struct sockaddr_in *) fa->addr)->sin_addr),
             arp_data->addr)) {
-        
+
         fa->arp_data = arp_data;
         fa->peer_name = peer_name;
-        
+
         retval = 1;
     }
-    
+
     return retval;
 }
 
 /**
  * Find ARP data by address
- * 
+ *
  * @param ka Pointer to ksnetArpClass
  * @param addr Address
  * @param peer_name [out] Peer name (may be null)
- * 
+ *
  * @return  Pointer to ARP data or NULL if not found
  */
-ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr, 
+ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr,
         char **peer_name) {
 
     find_arp_data fa;
     fa.addr = addr;
     fa.arp_data = NULL;
     fa.peer_name = NULL;
-    
+
     ksnet_arp_data *retval = NULL;
-    
+
     if(ka != NULL && ksnetArpGetAllH(ka, find_arp_by_addr_cb, (void*) &fa)) {
-        
+
         retval = fa.arp_data;
         if(peer_name) *peer_name = fa.peer_name;
     }
-    
+
     return retval;
 }
 
 /**
  * Return ARP table in digital format
- * 
+ *
  * @param ka Pointer to the ksnetArpClass
- * @return Return pointer to the ksnet_arp_data_ar data with ARP table data. 
+ * @return Return pointer to the ksnet_arp_data_ar data with ARP table data.
  * Should be free after use.
  */
 ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
-    
+
     uint32_t length = pblMapSize(ka->map);
     ksnet_arp_data_ar *data_ar = malloc(sizeof(ksnet_arp_data_ar) + length * sizeof(data_ar->arp_data[0]));
     data_ar->length = length;
-    
+
     PblIterator *it = pblMapIteratorNew(ka->map);
     int i = 0;
     if(it != NULL) {
@@ -348,23 +348,23 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
             data_ar->arp_data[i].data.connected_time = ksnetEvMgrGetTime(ka->ke) - data_ar->arp_data[i].data.connected_time;
             i++;
         }
-        
+
         pblIteratorFree(it);
     }
-    
+
     return data_ar;
 }
 
 /**
  * Convert peers data to JSON
- * 
+ *
  * @param peers_data Pointer to ksnet_arp_data_ar
  * @param peers_data_json_len [out] Result json string length
  * @return String with ARP table in JSON format. Should be free after use
  */
-char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data, 
+char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data,
         size_t *peers_data_json_len) {
-    
+
     ksnet_arp_data_ar *arp_data_ar = (ksnet_arp_data_ar *) peers_data;
     size_t data_str_len = sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length;
     char *data_str = malloc(data_str_len);
@@ -379,8 +379,8 @@ char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data,
                 "\"port\": %d, "
                 "\"triptime\": %.3f,"
                 "\"uptime\": %.3f"
-                " }", 
-                i ? ", " : "", 
+                " }",
+                i ? ", " : "",
                 arp_data_ar->arp_data[i].name,
                 arp_data_ar->arp_data[i].data.mode,
                 arp_data_ar->arp_data[i].data.addr,
@@ -390,20 +390,20 @@ char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data,
         );
     }
     snprintf(data_str + ptr,  data_str_len - ptr, " ] }");
-    
+
     if(peers_data_json_len != NULL) *peers_data_json_len = strlen(data_str) + 1;
-    
+
     return data_str;
 }
 
 /**
  * Return size of ksnet_arp_data_ar data
- * 
+ *
  * @param peers_data
  * @return Size of ksnet_arp_data_ar data
  */
 inline size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data) {
-    
+
     return peers_data != NULL ?
         sizeof(ksnet_arp_data_ar) + peers_data->length * sizeof(peers_data->arp_data[0])
             : 0;
@@ -412,9 +412,9 @@ inline size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data) {
 
 /**
  * Show (return string) with KSNet ARP table header
- * 
+ *
  * @param header_f Header flag. If 1 - return Header, if 0 - return Footer
- * @return 
+ * @return
  */
 char *ksnetArpShowHeader(int header_f) {
 
@@ -426,9 +426,9 @@ char *ksnetArpShowHeader(int header_f) {
 
     // Header part
     if(header_f) {
-        
+
         str = ksnet_sformatMessage(str, "%s"
-            "  # Peer \t Mod | IP \t\t| Port | Trip time\n", 
+            "  # Peer \t Mod | IP \t\t| Port | Trip time\n",
             str);
 
         str = ksnet_sformatMessage(str, "%s%s", str, div);
@@ -439,17 +439,17 @@ char *ksnetArpShowHeader(int header_f) {
 
 /**
  * Show (return string) one record of KSNet ARP table
- * 
+ *
  * @param num Record number
  * @param name Peer name
  * @param data Pointer to ksnet_arp_data structure
  * @return String with formated ARP table line. Should be free after use
  */
 char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data) {
-    
+
     // Format last trip time
     char *last_triptime = ksnet_formatMessage("%7.3f", data->last_triptime);
-    
+
     char *str = ksnet_formatMessage(
         "%3d %s%s%s\t %3d   %-15s  %5d   %7s %s\n",
 
@@ -477,9 +477,9 @@ char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data) {
         // TCP Proxy last trip time type (ms)
         ""
     );
-    
+
     free(last_triptime);
-            
+
     return str;
 }
 
@@ -498,7 +498,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
     str = ksnet_formatMessage(div);
 
     str = ksnet_sformatMessage(str, "%s"
-        "  # Peer          | Mod | IP              | Port |  Trip time | TR-UDP trip time\n", 
+        "  # Peer          | Mod | IP              | Port |  Trip time | TR-UDP trip time\n",
         str);
 
     str = ksnet_sformatMessage(str, "%s%s", str, div);
@@ -512,49 +512,49 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
             void *entry = pblIteratorNext(it);
             char *name = pblMapEntryKey(entry);
             ksnet_arp_data *data = pblMapEntryValue(entry);
-            char *last_triptime = ksnet_formatMessage("%7.3f", 
+            char *last_triptime = ksnet_formatMessage("%7.3f",
                     data->last_triptime);
-            
+
             // Get TR-UDP ip map data by key
             #if TRUDP_VERSION == 1
             size_t val_len;
             size_t key_len = KSN_BUFFER_SM_SIZE;
             char key[key_len];
-            key_len = snprintf(key, key_len, "%s:%d", data->addr, data->port);           
+            key_len = snprintf(key, key_len, "%s:%d", data->addr, data->port);
             ip_map_data *ip_map_d = pblMapGet(
-                    ((ksnetEvMgrClass*)ka->ke)->kc->ku->ip_map, key, key_len, 
+                    ((ksnetEvMgrClass*)ka->ke)->kc->ku->ip_map, key, key_len,
                     &val_len);
-            
+
             // Last trip time
-            char *tcp_last_triptime = ip_map_d != NULL ? 
-                ksnet_formatMessage("%7.3f / ", 
+            char *tcp_last_triptime = ip_map_d != NULL ?
+                ksnet_formatMessage("%7.3f / ",
                     ip_map_d->stat.triptime_last/1000.0) : strdup(null_str);
-            
+
             // Last 10 max trip time
-            char *tcp_triptime_last10_max = ip_map_d != NULL ? 
-                ksnet_formatMessage("%.3f ms", 
+            char *tcp_triptime_last10_max = ip_map_d != NULL ?
+                ksnet_formatMessage("%.3f ms",
                     ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
-            
+
             #elif TRUDP_VERSION == 2
             // Get TR-UDP by address and port
             trudpChannelData *tcd = trudpGetChannelAddr(
-                    ((ksnetEvMgrClass*)ka->ke)->kc->ku, 
+                    ((ksnetEvMgrClass*)ka->ke)->kc->ku,
                     data->addr, data->port, 0
             );
             // Set Last and Middle trip time
-            char *tcp_last_triptime, *tcp_triptime_last10_max; 
+            char *tcp_last_triptime, *tcp_triptime_last10_max;
             if(tcd != (void*)-1) {
-                tcp_last_triptime = ksnet_formatMessage("%7.3f / ", 
+                tcp_last_triptime = ksnet_formatMessage("%7.3f / ",
                     tcd->triptime/1000.0);
-                tcp_triptime_last10_max = ksnet_formatMessage("%.3f ms", 
+                tcp_triptime_last10_max = ksnet_formatMessage("%.3f ms",
                     tcd->triptimeMiddle/1000.0);
             }
-            else {   
+            else {
                 tcp_last_triptime = strdup(null_str);
                 tcp_triptime_last10_max = strdup(null_str);
             }
             #endif
-                        
+
             str = ksnet_sformatMessage(str, "%s"
                 "%3d %s%-15s%s %3d   %-15s  %5d   %7s %s  %s%s%s\n",
                 str,
@@ -584,7 +584,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                 "",
                 tcp_last_triptime,
                 tcp_triptime_last10_max
-                    
+
                 // Rx/Tx
                 //"", //(data->idx >= 0 && data->direct_con ? itoa( (&kn->host->peers[data->idx])->incomingDataTotal) : ""),
                 //"", // (data->idx >= 0 && data->direct_con ? "/" : ""),
