@@ -14,25 +14,42 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         size_t data_length, void *user_data) {
 
     int processed = 0;
-    
+
     switch(event) {
-        
+
         // Start test
         case EV_K_STARTED:
             //teoAsyncTest(ke);
             break;
-        
+
         // Async event from teoLoggingClientSend (kns_printf)
         case EV_K_ASYNC:
             if(user_data && *(uint32_t*)user_data == ASYNC_LABEL) {
-                                
+
                 if(data && data_length > 2) {
                     int ptr = 0;
                     const uint8_t f_type = *(uint8_t*)data; ptr++;
                     const uint8_t cmd = *(uint8_t*)(data + ptr); ptr++;
                     switch(f_type) {
-                        
+
+//                        // type #0
+//                        // Wait for channel sendQueue ready
+//                        //   if call made from different thread, check sendQueue
+//                        //   of destination peer and send wait flag = 1, or ready flag = 2
+//                        //   flag to caller
+//                        case 0: {
+//                            // Parse buffer: { f_type, cmd, peer_length, addr_length, peer, addr, port, flag }
+//                            const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
+//                            const uint8_t addr_length = *(uint8_t*)(data + ptr); ptr++;
+//                            const char *peer = (const char *)(data + ptr); ptr += peer_length;
+//                            const char *addr = (const char *)(data + ptr); ptr += addr_length;
+//                            const uint32_t port = *(uint32_t*)(data + ptr); ptr += 4;
+//                            const int *flag = *(int**)(data + ptr); ptr += sizeof(int*);
+//                        } break;
+
+                        // type #1
                         // ksnCoreSendCmdtoA (sendCmdToBinaryA)
+                        // Send command by name to peer
                         case 1: {
                             // Parse buffer: { f_type, cmd, peer_length, peer, data }
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
@@ -44,10 +61,11 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                         "teoSScrSendA Test: %s %d %s %d\n", peer, cmd, d, d_length);
                             else ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
                             processed = 1;
-                            
                         } break;
-                        
+
+                        // type #2
                         // teoSScrSend (sendToSscrA)
+                        // Send event and it data to all subscribers
                         case 2: {
                             // Parse buffer: { f_type, cmd, event, data }
                             const uint16_t event = *(uint16_t*)(data + ptr); ptr += 2;
@@ -59,10 +77,13 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             else teoSScrSend(kev->kc->kco->ksscr, event, d, d_length, cmd);
                             processed = 1;
                         } break;
-                        
+
+                        // type #3
                         // sendCmdAnswerToBinaryA
+                        // Send data to L0 client. Usually it is an answer to request from L0 client
+                        // or
+                        // Send data to remote peer IP:Port
                         case 3: {
-                            //int retval = 0;
                             // Parse buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
                             const uint8_t l0_f = *(uint8_t*)(data + ptr); ptr++;
                             const uint8_t addr_length = *(uint8_t*)(data + ptr); ptr++;
@@ -75,13 +96,15 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             if(kev->ta->test)
                                 ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
                                         "sendCmdAnswerToBinaryA Test: %d %d %d %d %s %s %d %s %d\n", cmd, l0_f, addr_length, from_length, addr, from, port, d, d_length);
-                            else 
-                            if (l0_f) /*retval =*/ ksnLNullSendToL0(ke, (char*)addr, port, (char*)from, from_length, cmd, d, d_length);
-                            else /*retval =*/ ksnCoreSendto(kev->kc, (char*)addr, port, cmd, d, d_length);
+                            else
+                            if (l0_f) ksnLNullSendToL0(ke, (char*)addr, port, (char*)from, from_length, cmd, d, d_length);
+                            else ksnCoreSendto(kev->kc, (char*)addr, port, cmd, d, d_length);
                             processed = 1;
                         } break;
-                        
+
+                        // type #4
                         // teoSScrSubscribeA (subscribeA)
+                        // Send command to subscribe this host to event at remote peer
                         case 4: {
                             // Parse buffer: { f_type, cmd, peer_length, ev, peer }
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
@@ -93,7 +116,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             else teoSScrSubscribe(kev->kc->kco->ksscr, (char*)peer, ev);
                             processed = 1;
                         } break;
-                        
+
                         default:
                             break;
                     }
@@ -115,6 +138,7 @@ teoAsyncClass *teoAsyncInit(void *ke) {
     teoAsyncClass *ta = malloc(sizeof(teoAsyncClass));
     ta->ke = ke;
     ta->event_cb = kev->event_cb;
+    ta->t_id = pthread_self();
     kev->event_cb = event_cb;
     ta->test = 0;
 
@@ -139,13 +163,54 @@ void teoAsyncDestroy(teoAsyncClass *ta) {
     #endif
 }
 
+// Wait to send queue
+// Return
+//   1 if call was made from thread different to teonet thread
+//   0 if there is the same thread
+//   -1 at timeout of sendQueue free waiting
+//   -2 at wrong request
+//   -3 wrong peer
+//   -4 wrong address
+static inline int _wait_send_queue(void *ke, const char*peer, size_t peer_length,
+        const char*addr, size_t addr_length, uint32_t port) {
+
+    int other_thread = pthread_self() != kev->ta->t_id;
+    if(other_thread) {
+        // check sendQueue
+        // by peer name
+        if(peer && !addr) {
+            ksnet_arp_data *arp = ksnetArpGet(kev->kc->ka, (char*)peer);
+            if(arp) {
+                addr = arp->addr;
+                port = arp->port;
+            }
+            // wrong peer
+            else other_thread = -3;
+        }
+        // check address and port
+        if(addr) {
+            trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, (char*)addr, port, 0);
+            if(tcd != (void*)-1) {
+                // Wait sendQueue ready to get packet
+                while(trudpSendQueueSize(tcd->sendQueue) > 200) usleep(1000); // Sleep 1ms
+            }
+            // wrong address
+            else other_thread = -4;
+        }
+        // wrong request
+        else other_thread = -2;
+    }
+    return other_thread;
+}
+
+// type #1
 void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
         size_t data_length) {
-    
+
     if(kev->ta->test)
         ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
             "ksnCoreSendCmdtoA: %s %d %s %d\n", peer, cmd, data, data_length);
-    
+
     int ptr = 0;
     const uint8_t f_type = 1;
     const uint8_t peer_length = strlen(peer) + 1;
@@ -158,10 +223,15 @@ void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
     *(uint8_t*)(buf + ptr) = peer_length; ptr++;
     memcpy(buf + ptr, peer, peer_length); ptr += peer_length;
     memcpy(buf + ptr, data, data_length);
-    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL); 
+
+    // Wait for sendQueue ready
+    _wait_send_queue(ke, peer, peer_length, NULL, 0, 0);
+
+    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL);
     free(buf);
 }
 
+// type #2
 void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
         uint8_t cmd) {
 
@@ -179,20 +249,27 @@ void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
     *(uint8_t*)(buf + ptr) = cmd; ptr++;
     *(uint16_t*)(buf + ptr) = event; ptr += 2;
     memcpy(buf + ptr, data, data_length);
-    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL); 
+
+    // Wait for sendQueue ready
+    //_wait_send_queue(ke, peer, peer_length, NULL, 0, 0);
+
+    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL);
     free(buf);
 }
 
+// type #3
 void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
         size_t data_length) {
-    
+
     ksnCorePacketData *rd = rdp;
-    
+
     const uint8_t addr_length = strlen(rd->addr) + 1;
-    
+
     if(kev->ta->test)
         ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-            "sendCmdAnswerToBinaryA: %d %d %d %d %s %s %d %s %d\n", cmd, rd->l0_f, addr_length, rd->from_len, rd->addr, rd->from, rd->port, data, data_length);
+            "sendCmdAnswerToBinaryA: %d %d %d %d %s %s %d %s %d\n",
+            cmd, rd->l0_f, addr_length, rd->from_len, rd->addr, rd->from,
+            rd->port, data, data_length);
 
     int ptr = 0;
     const uint8_t f_type = 3;
@@ -209,19 +286,24 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
     memcpy(buf + ptr, rd->from, rd->from_len); ptr += rd->from_len;
     *(uint32_t*)(buf + ptr) = rd->port; ptr += 4;
     memcpy(buf + ptr, data, data_length);
-    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL); 
+
+    // Wait for sendQueue ready
+    _wait_send_queue(ke, NULL, 0, rd->addr, addr_length, rd->port);
+
+    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL);
     free(buf);
 }
 
+// type #4
 void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
-    
+
     const uint8_t peer_length = strlen(peer) + 1;
     const void *ke = sscr->ke;
-    
+
     if(kev->ta->test)
         ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
             "teoSScrSubscribeA: %d %d %d %s\n", 0, peer_length, ev, peer);
-    
+
     int ptr = 0;
     const uint8_t f_type = 4;
 
@@ -233,26 +315,30 @@ void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
     *(uint8_t*)(buf + ptr) = peer_length; ptr++;
     *(uint16_t*)(buf + ptr) = ev; ptr += 2;
     memcpy(buf + ptr, peer, peer_length);
-    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL); 
+
+    // Wait for sendQueue ready
+    _wait_send_queue((void*)ke, (const char*)peer, peer_length, NULL, 0, 0);
+
+    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL);
     free(buf);
 }
 
 void teoAsyncTest(void *ke) {
-    
+
     #ifdef DEBUG_KSNET
     ksn_puts(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
             "start test");
     #endif
-        
+
     kev->ta->test = 1;
-    
-    // 1
+
+    // #1
     ksnCoreSendCmdtoA(ke, "teo-test-peer", 129, "Hello", 6);
-    
-    // 2
+
+    // #2
     teoSScrSendA(ke, 0x8000, "Hello", 6, 129);
-    
-    // 3
+
+    // #3
     ksnCorePacketData rd;
     rd.addr = "127.0.0.1";
     rd.port = 9010;
@@ -260,7 +346,7 @@ void teoAsyncTest(void *ke) {
     rd.from_len = 14;
     rd.l0_f = 0;
     sendCmdAnswerToBinaryA(ke, &rd, 129, "Hello", 6);
-    
-    // 4
+
+    // #4
     teoSScrSubscribeA(kev->kc->kco->ksscr, "teo-test-peer", 0x8000);
 }
