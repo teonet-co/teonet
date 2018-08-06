@@ -188,6 +188,10 @@ public:
         ksnCoreSendCmdtoA((void *)ke, to, cmd, data, data_len);
     }
     
+    inline void sendToA(const char *to, uint8_t cmd, const std::string &msg) {
+        sendToA(to, cmd, (void*)msg.c_str(), msg.size() + 1);
+    }
+    
     inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) {
         sendCmdAnswerTo(getKe(), rd, (char *)name, out_data, out_data_len);
     }
@@ -327,6 +331,15 @@ public:
      */
     static inline const char* getTeonetVersion() {
         return teoGetLibteonetVersion();
+    }
+    
+    /**
+     * Return host name
+     *
+     * @return
+     */
+    inline const char* getHostName() {
+        return ksnetEvMgrGetHostName(ke);
     }
 
     /**
