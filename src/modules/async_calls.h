@@ -19,6 +19,8 @@ typedef struct teoAsyncClass {
     void *event_cb; // Pointer to event callback
     pthread_t t_id; // Self thread id
     uint8_t test;
+    pthread_mutex_t cv_mutex; // Condition variables mutex
+    pthread_cond_t cv_threshold; // Condition variable threshold
 
 } teoAsyncClass;
 

@@ -30,8 +30,7 @@
       </toolsSet>
       <flagsDictionary>
         <element flagsID="0" commonFlags="-g -std=c11 -O2 -g -O2"/>
-        <element flagsID="1"
-                 commonFlags="-mtune=generic -march=x86-64 -O2 -O2 -std=c++1z -fstack-protector-strong"/>
+        <element flagsID="1" commonFlags="-std=c++17 -O2 -O2"/>
       </flagsDictionary>
       <codeAssistance>
       </codeAssistance>
@@ -58,16 +57,24 @@
           </cTool>
           <ccTool>
             <incDir>
+              <pElem>src</pElem>
               <pElem>../../../src</pElem>
-              <pElem>../../../src/utils</pElem>
               <pElem>../../../src/config</pElem>
               <pElem>../../../embedded/libpbl/src</pElem>
               <pElem>../../../embedded/teocli/libteol0</pElem>
-              <pElem>../../../embedded/libtrudp/embedded/teoccl/src</pElem>
               <pElem>../../../embedded/libtrudp/src</pElem>
-              <pElem>../../../src/modules</pElem>
-              <pElem>src</pElem>
+              <pElem>../../../embedded/libtrudp/embedded/teoccl/src</pElem>
+              <pElem>..</pElem>
+              <pElem>../../../config</pElem>
+              <pElem>../../../../libccl</pElem>
+              <pElem>../../../../libtrudp</pElem>
             </incDir>
+            <preprocessorList>
+              <Elem>HAVE_CONFIG_H</Elem>
+              <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+              <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+              <Elem>PACKAGE_SRC_DIR="."</Elem>
+            </preprocessorList>
           </ccTool>
         </makeTool>
         <preBuild>

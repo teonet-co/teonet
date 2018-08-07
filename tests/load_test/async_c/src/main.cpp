@@ -78,13 +78,22 @@ private:
   
   // Process
   void process(int id) {
-    int i = 0;
+    int j, i = 0;
     showMessage("Process started\n");
-    while (running) {
-        showMessage("process " + std::to_string(i++) + "\n");
-        sendToA(getHostName(), 129, "Hello!");
+    while (getKe()->runEventMgr) {
+        double t = getTime();
+        showMessage("process " + std::to_string(i++) + " started\n");
+        for(j=0; j<1000000; j++) {
+            //std::string msg = "Hello " + std::to_string(i) + "!";
+            sendToA("teo-async-s" /*getHostName()*/, 129, "Hello " + std::to_string(i) + "!");
+            //showMessage("send, run: " + std::to_string(getKe()->runEventMgr) + "\n");
+            if(!getKe()->runEventMgr) goto exit;
+        }
+        showMessage("was send " + std::to_string(j) + " records during " + std::to_string(getTime()-t) + " sec\n\n");
         std::this_thread::sleep_for(1s);
     }
+    
+exit:
     showMessage("Process stopped\n");
   }
 
@@ -106,9 +115,9 @@ private:
 // Own class methods and data
 public:
 
-  void showMessage(const std::string msg) {
-    std::cout << msg;
-  }
+//  void showMessage(const std::string msg) {
+//    std::cout << msg;
+//  }
 
   /**
    * Teonet event handler

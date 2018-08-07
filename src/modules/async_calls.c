@@ -9,6 +9,49 @@ void teoAsyncTest(void *ke);
 // Logging Async call label
 static const uint32_t ASYNC_LABEL = 0x77AA77AA;
 
+static const int SEND_IF = 64;
+
+typedef struct async_data {
+    
+    uint32_t label;
+    int sq_length;
+    int rv;
+    
+} async_data;
+
+static inline int _check_send_queue(void *ke, const char*peer, size_t peer_length,
+        const char*addr, size_t addr_length, uint32_t port) {
+    
+    int rv = 0;
+    
+    // check sendQueue
+    // by peer name
+    if(peer && !addr) {
+        ksnet_arp_data *arp = ksnetArpGet(kev->kc->ka, (char*)peer);
+        if(arp) {
+            addr = arp->addr;
+            port = arp->port;
+        }
+        // wrong peer
+        else rv = -3;
+    }
+    // check address and port
+    if(addr) {
+        trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, (char*)addr, port, 0);
+        if(tcd != (void*)-1) {
+            // Wait sendQueue ready to get packet
+            //while(trudpSendQueueSize(tcd->sendQueue) > 200) usleep(1000); // Sleep 1ms
+            rv = trudpSendQueueSize(tcd->sendQueue);
+        }
+        // wrong address
+        else rv = -4;
+    }
+    // wrong request
+    else rv = -2;
+    
+    return rv;
+}
+
 // Event loop to gab teonet events
 static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         size_t data_length, void *user_data) {
@@ -27,6 +70,8 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if(user_data && *(uint32_t*)user_data == ASYNC_LABEL) {
 
                 if(data && data_length > 2) {
+                    pthread_mutex_lock(&kev->ta->cv_mutex);
+
                     int ptr = 0;
                     const uint8_t f_type = *(uint8_t*)data; ptr++;
                     const uint8_t cmd = *(uint8_t*)(data + ptr); ptr++;
@@ -56,10 +101,18 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             const char *peer = (const char *)(data + ptr); ptr += peer_length;
                             void *d = data + ptr;
                             const size_t d_length = data_length - ptr;
-                            if(kev->ta->test)
-                                ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-                                        "teoSScrSendA Test: %s %d %s %d\n", peer, cmd, d, d_length);
-                            else ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
+
+                            async_data *ud = user_data;
+                            ud->rv = _check_send_queue(ke, peer, peer_length, NULL, 0, 0);                            
+                            
+                            if(ud->rv >= 0 && ud->rv < SEND_IF) {
+                                ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
+                            }
+                            
+//                            ksn_printf(kev, MODULE, DEBUG, "sent to peer: %s, id: %u\n", peer, pthread_self());
+
+                            pthread_cond_signal(&kev->ta->cv_threshold);
+
                             processed = 1;
                         } break;
 
@@ -120,6 +173,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         default:
                             break;
                     }
+                    pthread_mutex_unlock(&kev->ta->cv_mutex);
                 }
             }
             break;
@@ -142,6 +196,10 @@ teoAsyncClass *teoAsyncInit(void *ke) {
     kev->event_cb = event_cb;
     ta->test = 0;
 
+    // Initialize conditional variable
+    pthread_cond_init(&ta->cv_threshold, NULL);
+    pthread_mutex_init(&ta->cv_mutex, NULL);
+
     #ifdef DEBUG_KSNET
     ksn_puts(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
             "have been initialized");
@@ -151,6 +209,9 @@ teoAsyncClass *teoAsyncInit(void *ke) {
 }
 
 void teoAsyncDestroy(teoAsyncClass *ta) {
+
+    pthread_cond_destroy(&ta->cv_threshold);
+    pthread_mutex_destroy(&ta->cv_mutex);
 
     ksnetEvMgrClass *ke = ta->ke;
     ke->event_cb = ta->event_cb;
@@ -225,9 +286,34 @@ void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
     memcpy(buf + ptr, data, data_length);
 
     // Wait for sendQueue ready
-    _wait_send_queue(ke, peer, peer_length, NULL, 0, 0);
+    //_wait_send_queue(ke, peer, peer_length, NULL, 0, 0);
 
-    ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL);
+    pthread_mutex_lock(&kev->ta->cv_mutex);
+
+//    ksn_printf(kev, MODULE, DEBUG, "wait start, id: %u\n", pthread_self());
+    async_data *ud = malloc(sizeof(async_data));
+    ud->label = ASYNC_LABEL;
+    ud->rv = 0;
+    
+    for(;;) {
+//        struct timeval now;
+//        struct timespec timeToWait;
+//        gettimeofday(&now,NULL);
+//        timeToWait.tv_sec = now.tv_sec+2;
+//        timeToWait.tv_nsec = now.tv_usec;        
+
+        ksnetEvMgrAsync(kev, buf, buf_length, (void*)ud); //&ASYNC_LABEL);
+//        pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait);
+        pthread_cond_wait(&kev->ta->cv_threshold, &kev->ta->cv_mutex);
+        //ksn_printf(kev, MODULE, DEBUG, "wait done, id: %u, rv: %d, run: %d\n\n", pthread_self(), ud->rv, kev->runEventMgr);
+        if(ud->rv >= SEND_IF && kev->runEventMgr) usleep(10000);
+        else break;
+    }    
+    
+    free(ud);
+    
+    pthread_mutex_unlock(&kev->ta->cv_mutex);
+
     free(buf);
 }
 
@@ -288,7 +374,7 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
     memcpy(buf + ptr, data, data_length);
 
     // Wait for sendQueue ready
-    _wait_send_queue(ke, NULL, 0, rd->addr, addr_length, rd->port);
+    //_wait_send_queue(ke, NULL, 0, rd->addr, addr_length, rd->port);
 
     ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL);
     free(buf);
@@ -317,7 +403,7 @@ void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
     memcpy(buf + ptr, peer, peer_length);
 
     // Wait for sendQueue ready
-    _wait_send_queue((void*)ke, (const char*)peer, peer_length, NULL, 0, 0);
+    //_wait_send_queue((void*)ke, (const char*)peer, peer_length, NULL, 0, 0);
 
     ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_LABEL);
     free(buf);
