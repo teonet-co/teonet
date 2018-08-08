@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>teonet</name>
+            <name>teonet_wait_send</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc,cpp</cpp-extensions>
             <header-extensions>h,hpp</header-extensions>

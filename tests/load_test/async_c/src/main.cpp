@@ -73,43 +73,45 @@ public:
 // Threads methods and data  
 private:
 
-  std::thread first;
-  std::atomic<bool> running = ATOMIC_VAR_INIT(true);
+  static const int NUM_PROCESS = 10;
+  static const int NUM_RECORDS = 10000;
+  std::thread first[NUM_PROCESS];
   
   // Process
   void process(int id) {
     int j, i = 0;
-    showMessage("Process started\n");
+    showMessage("Process " + std::to_string(id) + " started\n");
     while (getKe()->runEventMgr) {
         double t = getTime();
-        showMessage("process " + std::to_string(i++) + " started\n");
-        for(j=0; j<1000000; j++) {
-            //std::string msg = "Hello " + std::to_string(i) + "!";
-            sendToA("teo-async-s" /*getHostName()*/, 129, "Hello " + std::to_string(i) + "!");
-            //showMessage("send, run: " + std::to_string(getKe()->runEventMgr) + "\n");
+        std::string loop = "process " + std::to_string(id) + " loop " + std::to_string(++i);
+        showMessage(loop + " started\n");
+        for(j = 1; j <= NUM_RECORDS; j++) {
+            std::string msg = "Hello " + std::to_string(id) + " " + std::to_string(i) + " " + std::to_string(j) + "!";
+            sendToA("teo-async-s" /*getHostName()*/, 129, msg);
+            showMessage("send: " + msg + "\n");
             if(!getKe()->runEventMgr) goto exit;
         }
-        showMessage("was send " + std::to_string(j) + " records during " + std::to_string(getTime()-t) + " sec\n\n");
-        std::this_thread::sleep_for(1s);
+        showMessage(loop + " send " + std::to_string(j-1) + " records during " + std::to_string(getTime()-t) + " sec\n");
+        std::this_thread::sleep_for(500ms);
     }
     
 exit:
-    showMessage("Process stopped\n");
+
+    showMessage("Process " + std::to_string(id) + " stopped\n");
   }
 
   /**
-   * Start thread
+   * Start threads
    */
   void start_thread(int id = 1) {
-    first = std::thread([this, id] { process(id); });
+    first[id-1] = std::thread([this, id] { process(id); });
   }
 
   /**
    * Stop thread
    */
-  void stop_thread() {
-    running = false;
-    first.join();
+  void stop_thread(int id = 1) {
+    first[id-1].join();
   }  
 
 // Own class methods and data
@@ -136,7 +138,7 @@ public:
       case EV_K_STARTED: {
         showMessage("Event: EV_K_STARTED, Teonet class version: " +
           (std::string)getClassVersion() + "\n");
-        start_thread();
+        for(int id=1; id <= NUM_PROCESS; id++) start_thread(id);
       } break;
 
       // Calls when peer connected to this application
@@ -187,7 +189,7 @@ public:
       
       // Call before event manager stopped
       case EV_K_STOPPED_BEFORE:
-        stop_thread();
+        for(int id=1; id <= NUM_PROCESS; id++) stop_thread(id);
         break;
 
       // Calls after event manager stopped

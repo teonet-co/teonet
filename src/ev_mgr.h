@@ -251,7 +251,7 @@ typedef struct ksnetEvMgrClass {
 
     teoLoggingServerClass *ls; ///< Logging server class // \TODO move it up after testing
     teoLoggingClientClass *lc; ///< Logging client class // \TODO move it up after testing
-    
+
     teoAsyncClass *ta;  ///< Async calls module
 
     int runEventMgr; ///< Run even manages (stop if 0)
@@ -273,6 +273,7 @@ typedef struct ksnetEvMgrClass {
 
     PblList* async_queue;   ///< Async data queue
     pthread_mutex_t async_mutex; ///< Async data queue mutex
+    pthread_mutex_t printf_mutex; ///< Printf data queue mutex
 
     size_t n_num; ///< Network number
     void *n_prev; ///< Previouse network

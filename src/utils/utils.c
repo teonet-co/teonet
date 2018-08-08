@@ -18,8 +18,9 @@
 #include "config/conf.h"
 #include "rlutil.h"
 #include "utils.h"
+#include "ev_mgr.h"
 
-double ksnetEvMgrGetTime(void *ke);
+//double ksnetEvMgrGetTime(void *ke);
 void teoLoggingClientSend(void *ke, const char *message);
 unsigned char teoFilterFlagCheck(void *ke);
 unsigned char teoLogCheck(void *ke, void *log);
@@ -62,6 +63,8 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
     // Skip execution in tests
     if(KSN_GET_TEST_MODE()) return ret_val;
 
+    pthread_mutex_lock(&((ksnetEvMgrClass*)(ksn_cfg->ke))->printf_mutex);
+    
     // Check type
     switch(type) {
 
@@ -119,12 +122,16 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         va_start(args, format);
         char *p = ksnet_vformatMessage(format, args);
         va_end(args);
-        if (teoFilterFlagCheck(ksn_cfg->ke))
-            if (teoLogCheck(ksn_cfg->ke, p)) show_it = 1; else show_it = 0;
-        else show_it = 0;
+        
+        // Filter
+        if(show_it) {
+            if(teoFilterFlagCheck(ksn_cfg->ke))
+                if(teoLogCheck(ksn_cfg->ke, p)) show_it = 1; else show_it = 0;
+            else show_it = 0;
+        }
+        
         // Show message
         if(show_it) {
-
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
             if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00)
                 printf(_ANSI_DARKGREY"%f: "_ANSI_NONE, ct);
@@ -132,7 +139,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         }
 
         // Log message
-        if(show_log ) {
+        if(show_log) {
 
             // Open log at first message
             if(!log_opened) {
@@ -163,6 +170,8 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         }
         free(p);
     }
+    
+    pthread_mutex_unlock(&((ksnetEvMgrClass*)(ksn_cfg->ke))->printf_mutex);
 
     return ret_val;
 }

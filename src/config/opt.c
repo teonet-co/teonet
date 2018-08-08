@@ -87,7 +87,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         #endif
 
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
-        { "log_priority",   required_argument, (int*)&conf->log_priority, 0 },
+        { "log_priority",   required_argument, 0, 'L' }, //(int*)&conf->log_priority, 0 },
         
         { "daemon",         no_argument,       &conf->dflag, 1 },
         { "kill",           no_argument,       &conf->kflag, 1 },
@@ -123,7 +123,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
     // Check online parameters
     for(;;) {
 
-      opt = getopt_long (argc, argv, "?hva:I:dkl:n:o:p:P:r:t:", loptions,
+      opt = getopt_long (argc, argv, "?hva:I:dkl:n:o:p:P:r:t:f:", loptions,
                          &option_index);
       if (opt==-1)
       {
@@ -212,6 +212,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 'm':
           conf->vpn_mtu = atoi(optarg);
+          break;
+          
+        case 'L':
+          conf->log_priority = atoi(optarg);
           break;
 
         case 'n':
