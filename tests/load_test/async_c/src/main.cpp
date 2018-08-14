@@ -24,14 +24,14 @@
  * Author: Kirill Scherba <kirill@scherba.ru>
  *
  * teoasync_c c++ application.
- * 
+ *
  * Application API:
- * 
+ *
  *  \TODO Describe server API here
  *  CMD_USER: ...
  *      @input ...
  *      @output ...
- * 
+ *
  * Created on December 20, 2017, 9:52 AM
  */
 
@@ -69,14 +69,14 @@ public:
   virtual ~MyTeonet() {
     std::cout << "Destructor myTeonet\n";
   }
-  
-// Threads methods and data  
+
+// Threads methods and data
 private:
 
-  static const int NUM_PROCESS = 10;
+  static const int NUM_PROCESS = 20;
   static const int NUM_RECORDS = 10000;
   std::thread first[NUM_PROCESS];
-  
+
   // Process
   void process(int id) {
     int j, i = 0;
@@ -88,13 +88,13 @@ private:
         for(j = 1; j <= NUM_RECORDS; j++) {
             std::string msg = "Hello " + std::to_string(id) + " " + std::to_string(i) + " " + std::to_string(j) + "!";
             sendToA("teo-async-s" /*getHostName()*/, 129, msg);
-            showMessage("send: " + msg + "\n");
+            //showMessage("send: " + msg + "\n");
             if(!getKe()->runEventMgr) goto exit;
         }
         showMessage(loop + " send " + std::to_string(j-1) + " records during " + std::to_string(getTime()-t) + " sec\n");
-        std::this_thread::sleep_for(500ms);
+        //std::this_thread::sleep_for(500ms);
     }
-    
+
 exit:
 
     showMessage("Process " + std::to_string(id) + " stopped\n");
@@ -112,7 +112,7 @@ exit:
    */
   void stop_thread(int id = 1) {
     first[id-1].join();
-  }  
+  }
 
 // Own class methods and data
 public:
@@ -134,7 +134,7 @@ public:
 
     switch (event) {
 
-      // Calls when event started  
+      // Calls when event started
       case EV_K_STARTED: {
         showMessage("Event: EV_K_STARTED, Teonet class version: " +
           (std::string)getClassVersion() + "\n");
@@ -186,7 +186,7 @@ public:
         }
 
       } break;
-      
+
       // Call before event manager stopped
       case EV_K_STOPPED_BEFORE:
         for(int id=1; id <= NUM_PROCESS; id++) stop_thread(id);
@@ -204,7 +204,7 @@ public:
   }
 
 };
- 
+
 /**
  * Main teoasync_c application function
  *

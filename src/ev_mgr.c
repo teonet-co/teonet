@@ -618,7 +618,7 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
     pthread_mutex_lock (&ke->async_mutex);
     pblListAdd(ke->async_queue, element);
     pthread_mutex_unlock (&ke->async_mutex);
-
+    
     // Send async signal to process queue
     ev_async_send(ke->ev_loop,/*EV_DEFAULT_*/ &ke->sig_async_w);
 }
@@ -876,6 +876,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
         // Connect to R-Host
         connect_r_host_cb(kev);
         // Send event to application
+        if(kev->ta) kev->ta->t_id = pthread_self();
         if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
     }
     // Idle count max value
@@ -1173,13 +1174,12 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
         if(isEmpty) break;
 
         if(!ev_is_active(EV_A_ &kev->idle_async_w)) {
-           //printf("pblListSize: %d\n", pblListSize(kev->async_queue));
             size_t ptr = 0;
             pthread_mutex_lock(&kev->async_mutex);
             void *data = pblListPoll(kev->async_queue);
             pthread_mutex_unlock(&kev->async_mutex);
             if(data != NULL) {
-                void *user_data = *(void**)data; ptr += sizeof(void**);
+                void *user_data = *(void**)data; ptr += sizeof(void*);
                 uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
                 SEND_EVENT(data + ptr, data_len, user_data);
                 free(data);

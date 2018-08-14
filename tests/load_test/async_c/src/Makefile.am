@@ -28,7 +28,7 @@ AM_CFLAGS = \
 	 $(teonetinclude)
 
 AM_LDFLAGS = \
- 	 -L$(HOME)/Projects/teonet/src/
+ 	 -L$(localteonet)/src/
 
 AM_CXX = clang++
 AM_CXXFLAGS = \

@@ -25,8 +25,8 @@ typedef struct async_data {
 //   -2 at wrong request
 //   -3 wrong peer
 //   -4 wrong address
-static inline int _check_send_queue(void *ke, const char*peer, size_t peer_length,
-        const char*addr, size_t addr_length, uint32_t port) {
+static inline int _check_send_queue(void *ke, const char*peer, const char*addr, 
+        uint32_t port) {
 
     int rv = 0;
 
@@ -38,22 +38,15 @@ static inline int _check_send_queue(void *ke, const char*peer, size_t peer_lengt
             addr = arp->addr;
             port = arp->port;
         }
-        // wrong peer
-        else rv = -3;
+        else rv = -3; // wrong peer
     }
     // check address and port
     if(addr) {
         trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, (char*)addr, port, 0);
-        if(tcd != (void*)-1) {
-            // Wait sendQueue ready to get packet
-            //while(trudpSendQueueSize(tcd->sendQueue) > 200) usleep(1000); // Sleep 1ms
-            rv = trudpSendQueueSize(tcd->sendQueue);
-        }
-        // wrong address
-        else rv = -4;
+        if(tcd != (void*)-1) rv = trudpSendQueueSize(tcd->sendQueue);
+        else rv = -4; // wrong address
     }
-    // wrong request
-    else rv = -2;
+    else rv = -2; // wrong request
 
     return rv;
 }
@@ -94,7 +87,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             const size_t d_length = data_length - ptr;
 
                             async_data *ud = user_data;
-                            ud->rv = _check_send_queue(ke, peer, peer_length, NULL, 0, 0);
+                            ud->rv = _check_send_queue(ke, peer, NULL, 0);
 
                             if(ud->rv >= 0 && ud->rv < SEND_IF) {
                                 ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
@@ -105,22 +98,22 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         } break;
 
                         // type #2
-                        // teoSScrSend (sendToSscrA)
+                        // teoSScrSend (teoSScrSendA)
                         // Send event and it data to all subscribers
                         case 2: {
                             // Parse buffer: { f_type, cmd, event, data }
                             const uint16_t event = *(uint16_t*)(data + ptr); ptr += 2;
                             void *d = data + ptr;
                             const size_t d_length = data_length - ptr;
-                            
+
                             async_data *ud = user_data;
                             ud->rv = 0;
-                                    
+
                             if(kev->ta->test)
                                 ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
                                         "teoSScrSend Test: %d %s %d %d\n", event, d, d_length, cmd);
                             else teoSScrSend(kev->kc->kco->ksscr, event, d, d_length, cmd);
-                            
+
                             pthread_cond_signal(&kev->ta->cv_threshold);
                             processed = 1;
                         } break;
@@ -142,8 +135,8 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             const size_t d_length = data_length - ptr;
 
                             async_data *ud = user_data;
-                            ud->rv = _check_send_queue(ke, NULL, 0, addr, addr_length, port);
-                            
+                            ud->rv = _check_send_queue(ke, NULL, addr, port);
+
                             if(ud->rv >= 0 && ud->rv < SEND_IF) {
                                 if(kev->ta->test)
                                     ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
@@ -165,17 +158,17 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
                             const uint16_t ev = *(uint32_t*)(data + ptr); ptr += 2;
                             const char *peer = (const char *)(data + ptr); ptr += peer_length;
-                            
+
                             async_data *ud = user_data;
-                            ud->rv = _check_send_queue(ke, peer, peer_length, NULL, 0, 0);
-                            
+                            ud->rv = _check_send_queue(ke, peer, NULL, 0);
+
                             if(ud->rv >= 0 && ud->rv < SEND_IF) {
                                 if(kev->ta->test)
                                     ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
                                             "teoSScrSubscribeA Test: %d %d %d %s\n", cmd, peer_length, ev, peer);
                                 else teoSScrSubscribe(kev->kc->kco->ksscr, (char*)peer, ev);
                             }
-                            
+
                             pthread_cond_signal(&kev->ta->cv_threshold);
                             processed = 1;
                         } break;
@@ -207,6 +200,7 @@ teoAsyncClass *teoAsyncInit(void *ke) {
     ta->test = 0;
 
     // Initialize conditional variable
+    pthread_mutex_init(&ta->async_func_mutex, NULL);
     pthread_cond_init(&ta->cv_threshold, NULL);
     pthread_mutex_init(&ta->cv_mutex, NULL);
 
@@ -220,8 +214,9 @@ teoAsyncClass *teoAsyncInit(void *ke) {
 
 void teoAsyncDestroy(teoAsyncClass *ta) {
 
+    pthread_mutex_destroy(&ta->async_func_mutex);
     pthread_cond_destroy(&ta->cv_threshold);
-    pthread_mutex_destroy(&ta->cv_mutex);
+    pthread_mutex_destroy(&ta->cv_mutex); 
 
     ksnetEvMgrClass *ke = ta->ke;
     ke->event_cb = ta->event_cb;
@@ -245,65 +240,76 @@ void teoAsyncDestroy(teoAsyncClass *ta) {
         timeToWait.tv_sec = now.tv_sec+1; \
         timeToWait.tv_nsec = now.tv_usec; \
         \
-        pthread_mutex_lock(&kev->ta->async_mutex); \
+        pthread_mutex_lock(&kev->ta->async_func_mutex); \
         pthread_mutex_lock(&kev->ta->cv_mutex); \
         ksnetEvMgrAsync(kev, buf, buf_length, (void*)ud); \
         pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait); \
         pthread_mutex_unlock(&kev->ta->cv_mutex); \
-        pthread_mutex_unlock(&kev->ta->async_mutex); \
+        pthread_mutex_unlock(&kev->ta->async_func_mutex); \
         \
-        if(ud->rv >= SEND_IF && kev->runEventMgr) usleep(10000); \
+        if(ud->rv >= SEND_IF && kev->runEventMgr) usleep(5000); \
         else break; \
     } \
-    free(ud)
+    free(ud); \
+    free(buf)
+
+// check thread
+static inline int _check_thread(void *ke) {
+    return pthread_self() != kev->ta->t_id;
+}
 
 // type #1
 void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
         size_t data_length) {
 
-    if(kev->ta->test)
-        ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-            "ksnCoreSendCmdtoA: %s %d %s %d\n", peer, cmd, data, data_length);
+    if(_check_thread(ke)) {
+        if(kev->ta->test)
+            ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+                "ksnCoreSendCmdtoA: %s %d %s %d\n", peer, cmd, data, data_length);
 
-    int ptr = 0;
-    const uint8_t f_type = 1;
-    const uint8_t peer_length = strlen(peer) + 1;
+        int ptr = 0;
+        const uint8_t f_type = 1;
+        const uint8_t peer_length = strlen(peer) + 1;
 
-    // Create buffer: { f_type, cmd, peer_length, peer, data }
-    size_t buf_length = sizeof(uint8_t)*3 + peer_length + data_length;
-    void *buf = malloc(buf_length);
-    *(uint8_t*)(buf + ptr) = f_type; ptr++;
-    *(uint8_t*)(buf + ptr) = cmd; ptr++;
-    *(uint8_t*)(buf + ptr) = peer_length; ptr++;
-    memcpy(buf + ptr, peer, peer_length); ptr += peer_length;
-    memcpy(buf + ptr, data, data_length);
-    SEND_ASYNC(buf, buf_length);
-    
-    free(buf);
+        // Create buffer: { f_type, cmd, peer_length, peer, data }
+        size_t buf_length = sizeof(uint8_t)*3 + peer_length + data_length;
+        void *buf = malloc(buf_length);
+        *(uint8_t*)(buf + ptr) = f_type; ptr++;
+        *(uint8_t*)(buf + ptr) = cmd; ptr++;
+        *(uint8_t*)(buf + ptr) = peer_length; ptr++;
+        memcpy(buf + ptr, peer, peer_length); ptr += peer_length;
+        memcpy(buf + ptr, data, data_length);
+
+        // Send sync and clear buffer
+        SEND_ASYNC(buf, buf_length);
+    }
+    else { ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, data, data_length); }
 }
 
 // type #2
 void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
         uint8_t cmd) {
 
-    if(kev->ta->test)
-        ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-            "teoSScrSendA: %d %s %d %d\n", event, data, data_length, cmd);
+    if(_check_thread(ke)) {
+        if(kev->ta->test)
+            ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+                "teoSScrSendA: %d %s %d %d\n", event, data, data_length, cmd);
 
-    int ptr = 0;
-    const uint8_t f_type = 2;
+        int ptr = 0;
+        const uint8_t f_type = 2;
 
-    // Create buffer: { f_type, cmd, event, data }
-    size_t buf_length = sizeof(uint8_t)*2 + sizeof(uint16_t) + data_length;
-    void *buf = malloc(buf_length);
-    *(uint8_t*)(buf + ptr) = f_type; ptr++;
-    *(uint8_t*)(buf + ptr) = cmd; ptr++;
-    *(uint16_t*)(buf + ptr) = event; ptr += 2;
-    memcpy(buf + ptr, data, data_length);
+        // Create buffer: { f_type, cmd, event, data }
+        size_t buf_length = sizeof(uint8_t)*2 + sizeof(uint16_t) + data_length;
+        void *buf = malloc(buf_length);
+        *(uint8_t*)(buf + ptr) = f_type; ptr++;
+        *(uint8_t*)(buf + ptr) = cmd; ptr++;
+        *(uint16_t*)(buf + ptr) = event; ptr += 2;
+        memcpy(buf + ptr, data, data_length);
 
-    //ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_FUNC_LABEL);
-    SEND_ASYNC(buf, buf_length);
-    free(buf);
+        // Send sync and clear buffer
+        SEND_ASYNC(buf, buf_length);
+    }
+    else teoSScrSend(kev->kc->kco->ksscr, event, data, data_length, cmd);
 }
 
 // type #3
@@ -311,61 +317,68 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
         size_t data_length) {
 
     ksnCorePacketData *rd = rdp;
-
     const uint8_t addr_length = strlen(rd->addr) + 1;
 
-    if(kev->ta->test)
-        ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-            "sendCmdAnswerToBinaryA: %d %d %d %d %s %s %d %s %d\n",
-            cmd, rd->l0_f, addr_length, rd->from_len, rd->addr, rd->from,
-            rd->port, data, data_length);
+    if(_check_thread(ke)) {
+        if(kev->ta->test)
+            ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+                "sendCmdAnswerToBinaryA: %d %d %d %d %s %s %d %s %d\n",
+                cmd, rd->l0_f, addr_length, rd->from_len, rd->addr, rd->from,
+                rd->port, data, data_length);
 
-    int ptr = 0;
-    const uint8_t f_type = 3;
+        int ptr = 0;
+        const uint8_t f_type = 3;
 
-    // Create buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
-    size_t buf_length = sizeof(uint8_t)*5 + addr_length + rd->from_len + sizeof(uint32_t) + data_length;
-    void *buf = malloc(buf_length);
-    *(uint8_t*)(buf + ptr) = f_type; ptr++;
-    *(uint8_t*)(buf + ptr) = cmd; ptr++;
-    *(uint8_t*)(buf + ptr) = rd->l0_f; ptr++;
-    *(uint8_t*)(buf + ptr) = addr_length; ptr++;
-    *(uint8_t*)(buf + ptr) = rd->from_len; ptr++;
-    memcpy(buf + ptr, rd->addr, addr_length); ptr += addr_length;
-    memcpy(buf + ptr, rd->from, rd->from_len); ptr += rd->from_len;
-    *(uint32_t*)(buf + ptr) = rd->port; ptr += 4;
-    memcpy(buf + ptr, data, data_length);
+        // Create buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
+        size_t buf_length = sizeof(uint8_t)*5 + addr_length + rd->from_len + sizeof(uint32_t) + data_length;
+        void *buf = malloc(buf_length);
+        *(uint8_t*)(buf + ptr) = f_type; ptr++;
+        *(uint8_t*)(buf + ptr) = cmd; ptr++;
+        *(uint8_t*)(buf + ptr) = rd->l0_f; ptr++;
+        *(uint8_t*)(buf + ptr) = addr_length; ptr++;
+        *(uint8_t*)(buf + ptr) = rd->from_len; ptr++;
+        memcpy(buf + ptr, rd->addr, addr_length); ptr += addr_length;
+        memcpy(buf + ptr, rd->from, rd->from_len); ptr += rd->from_len;
+        *(uint32_t*)(buf + ptr) = rd->port; ptr += 4;
+        memcpy(buf + ptr, data, data_length);
 
-    //ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_FUNC_LABEL);
-    SEND_ASYNC(buf, buf_length);
-    free(buf);
+        // Send sync and clear buffer
+        SEND_ASYNC(buf, buf_length);
+    }
+    else {
+        if (rd->l0_f) ksnLNullSendToL0(ke, (char*)rd->addr, rd->port, (char*)rd->from, rd->from_len, cmd, data, data_length);
+        else ksnCoreSendto(kev->kc, (char*)rd->addr, rd->port, cmd, data, data_length);
+    }
 }
 
 // type #4
 void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
 
-    const uint8_t peer_length = strlen(peer) + 1;
-    const void *ke = sscr->ke;
+    void *ke = sscr->ke;
 
-    if(kev->ta->test)
-        ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-            "teoSScrSubscribeA: %d %d %d %s\n", 0, peer_length, ev, peer);
+    if(_check_thread(ke)) {
+        const uint8_t peer_length = strlen(peer) + 1;
 
-    int ptr = 0;
-    const uint8_t f_type = 4;
+        if(kev->ta->test)
+            ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+                "teoSScrSubscribeA: %d %d %d %s\n", 0, peer_length, ev, peer);
 
-    // Create buffer: { f_type, cmd, peer_length, ev, peer }
-    size_t buf_length = sizeof(uint8_t)*3 + sizeof(uint16_t) + peer_length;
-    void *buf = malloc(buf_length);
-    *(uint8_t*)(buf + ptr) = f_type; ptr++;
-    *(uint8_t*)(buf + ptr) = 0; ptr++; // cmd
-    *(uint8_t*)(buf + ptr) = peer_length; ptr++;
-    *(uint16_t*)(buf + ptr) = ev; ptr += 2;
-    memcpy(buf + ptr, peer, peer_length);
+        int ptr = 0;
+        const uint8_t f_type = 4;
 
-    //ksnetEvMgrAsync(kev, buf, buf_length, (void*)&ASYNC_FUNC_LABEL);
-    SEND_ASYNC(buf, buf_length);
-    free(buf);
+        // Create buffer: { f_type, cmd, peer_length, ev, peer }
+        size_t buf_length = sizeof(uint8_t)*3 + sizeof(uint16_t) + peer_length;
+        void *buf = malloc(buf_length);
+        *(uint8_t*)(buf + ptr) = f_type; ptr++;
+        *(uint8_t*)(buf + ptr) = 0; ptr++; // cmd
+        *(uint8_t*)(buf + ptr) = peer_length; ptr++;
+        *(uint16_t*)(buf + ptr) = ev; ptr += 2;
+        memcpy(buf + ptr, peer, peer_length);
+
+        // Send sync and clear buffer
+        SEND_ASYNC(buf, buf_length);
+    }
+    else teoSScrSubscribe(kev->kc->kco->ksscr, (char*)peer, ev);
 }
 
 void teoAsyncTest(void *ke) {
