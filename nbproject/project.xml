@@ -3,7 +3,7 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>teonet_wait_send</name>
+            <name>teonet</name>
             <c-extensions>c,i</c-extensions>
             <cpp-extensions>cc,cpp</cpp-extensions>
             <header-extensions>h,hpp</header-extensions>
@@ -80,6 +80,7 @@
             <word>mutex</word>
             <word>name'</word>
             <word>namespace</word>
+            <word>nodejs</word>
             <word>nonblock</word>
             <word>org</word>
             <word>outrunning</word>
@@ -89,6 +90,7 @@
             <word>po</word>
             <word>printf</word>
             <word>recvfrom</word>
+            <word>retval</word>
             <word>rm</word>
             <word>scherba</word>
             <word>segv</word>

@@ -73,7 +73,7 @@ public:
 // Threads methods and data
 private:
 
-  static const int NUM_PROCESS = 20;
+  static const int NUM_PROCESS = 4;
   static const int NUM_RECORDS = 10000;
   std::thread first[NUM_PROCESS];
 

@@ -1181,7 +1181,7 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
             if(data != NULL) {
                 void *user_data = *(void**)data; ptr += sizeof(void*);
                 uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
-                SEND_EVENT(data + ptr, data_len, user_data);
+                SEND_EVENT(data_len ? data + ptr : NULL, data_len, user_data);
                 free(data);
             }
             else {

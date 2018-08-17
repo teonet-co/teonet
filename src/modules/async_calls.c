@@ -3,6 +3,8 @@
 
 #define MODULE "async_module"
 #define kev ((ksnetEvMgrClass*)(ke))
+#define MULTITHREADED() kev->ta->f_multi_thread == MULTITHREAD
+#define NO_MULTITHREADED() kev->ta->f_multi_thread == NO_MULTITHREAD
 
 void teoAsyncTest(void *ke);
 
@@ -10,22 +12,41 @@ void teoAsyncTest(void *ke);
 static const uint32_t ASYNC_FUNC_LABEL = 0x77AA77AA;
 
 static const int SEND_IF = 64;
+static int ud_count = 0, ud_count_total = 0;
 
 typedef struct async_data {
-
     uint32_t label;
     int sq_length;
     int rv;
-
 } async_data;
+
+enum CHECK_SEND_QUEUE {
+    CHSQ_WRONG_REQUEST = -2,   //   -2 at wrong request
+    CHSQ_WRONG_PEER    = -3,   //   -3 wrong peer
+    CHSQ_WRONG_ADDRESS = -4,   //   -4 wrong address
+    CHSQ_TIMEOUT = -5,         //   -5 timeout
+};
+
+enum MULTITHREAD {
+    NOT_DEFINED_MULTITHREAD = 0,
+    MULTITHREAD = 1,
+    NO_MULTITHREAD = 2
+};
+
+enum ASYNC_FUNC {
+    KSN_CORE_SEND_CMD_TO = 1,   // ksnCoreSendCmdto
+    TEO_SSCR_SEND = 2,          // teoSScrSend
+    SEND_CMD_ANSWER_TO = 3,     // sendCmdAnswerTo, ksnLNullSendToL0 & ksnCoreSendto
+    TEO_SSCR_SUBSCRIBE = 4      // teoSScrSubscribe
+};
 
 // Get send queue size
 // Return
 //   >= 0 send queue size
-//   -2 at wrong request
-//   -3 wrong peer
-//   -4 wrong address
-static inline int _check_send_queue(void *ke, const char*peer, const char*addr, 
+//   CHSQ_WRONG_REQUEST (-2)  if wrong request
+//   CHSQ_WRONG_PEER    (-3)  if wrong peer
+//   CHSQ_WRONG_ADDRESS (-4)  wrong address
+static inline int _check_send_queue(void *ke, const char*peer, const char*addr,
         uint32_t port) {
 
     int rv = 0;
@@ -38,15 +59,15 @@ static inline int _check_send_queue(void *ke, const char*peer, const char*addr,
             addr = arp->addr;
             port = arp->port;
         }
-        else rv = -3; // wrong peer
+        else rv = CHSQ_WRONG_PEER; // wrong peer
     }
     // check address and port
     if(addr) {
         trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, (char*)addr, port, 0);
         if(tcd != (void*)-1) rv = trudpSendQueueSize(tcd->sendQueue);
-        else rv = -4; // wrong address
+        else rv = CHSQ_WRONG_ADDRESS; // wrong address
     }
-    else rv = -2; // wrong request
+    else rv = CHSQ_WRONG_REQUEST; // wrong request
 
     return rv;
 }
@@ -64,12 +85,32 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             //teoAsyncTest(ke);
             break;
 
-        // Async event from teoLoggingClientSend (kns_printf)
+        // Async event
         case EV_K_ASYNC:
             if(user_data && *(uint32_t*)user_data == ASYNC_FUNC_LABEL) {
 
-                if(data && data_length > 2) {
-                    pthread_mutex_lock(&kev->ta->cv_mutex);
+                async_data *ud = user_data;
+
+                // Check multi thread request
+                if(!data) {
+                    ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/,
+                        "EV_K_ASYNC check MULTITHREAD rv: %d, f_multi_thread: %d\n", 
+                        ud->rv, kev->ta->f_multi_thread);
+                    if(MULTITHREADED()) {
+                        pthread_mutex_lock(&kev->ta->cv_mutex);
+                        ud->rv = 0;
+                        pthread_cond_signal(&kev->ta->cv_threshold);
+                        pthread_mutex_unlock(&kev->ta->cv_mutex);
+                    }
+                    else { //if((NO_MULTITHREADED() || MULTITHREADED()) && ud->rv == CHSQ_TIMEOUT) {
+                        free(ud); ud_count--;
+                    }
+                    processed = 1;
+                }
+
+                // Process async functions
+                else if(data && data_length > 2) {
+                    if(MULTITHREADED()) pthread_mutex_lock(&kev->ta->cv_mutex);
 
                     int ptr = 0;
                     const uint8_t f_type = *(uint8_t*)data; ptr++;
@@ -79,34 +120,35 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // type #1
                         // ksnCoreSendCmdtoA (sendCmdToBinaryA)
                         // Send command by name to peer
-                        case 1: {
+                        case KSN_CORE_SEND_CMD_TO: {
                             // Parse buffer: { f_type, cmd, peer_length, peer, data }
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
                             const char *peer = (const char *)(data + ptr); ptr += peer_length;
                             void *d = data + ptr;
                             const size_t d_length = data_length - ptr;
 
-                            async_data *ud = user_data;
+                            //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, peer, NULL, 0);
 
                             if(ud->rv >= 0 && ud->rv < SEND_IF) {
                                 ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
                             }
 
-                            pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
 
                         // type #2
                         // teoSScrSend (teoSScrSendA)
                         // Send event and it data to all subscribers
-                        case 2: {
+                        case TEO_SSCR_SEND: {
                             // Parse buffer: { f_type, cmd, event, data }
                             const uint16_t event = *(uint16_t*)(data + ptr); ptr += 2;
                             void *d = data + ptr;
                             const size_t d_length = data_length - ptr;
 
-                            async_data *ud = user_data;
+                            //async_data *ud = user_data;
                             ud->rv = 0;
 
                             if(kev->ta->test)
@@ -114,16 +156,17 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                         "teoSScrSend Test: %d %s %d %d\n", event, d, d_length, cmd);
                             else teoSScrSend(kev->kc->kco->ksscr, event, d, d_length, cmd);
 
-                            pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
 
-                        // type #3
+                        // type #3 SEND_CMD_ANSWER_TO
                         // sendCmdAnswerToBinaryA
                         // Send data to L0 client. Usually it is an answer to request from L0 client
                         // or
                         // Send data to remote peer IP:Port
-                        case 3: {
+                        case SEND_CMD_ANSWER_TO: {
                             // Parse buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
                             const uint8_t l0_f = *(uint8_t*)(data + ptr); ptr++;
                             const uint8_t addr_length = *(uint8_t*)(data + ptr); ptr++;
@@ -134,32 +177,34 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             void *d = data + ptr;
                             const size_t d_length = data_length - ptr;
 
-                            async_data *ud = user_data;
+                            //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, NULL, addr, port);
 
                             if(ud->rv >= 0 && ud->rv < SEND_IF) {
                                 if(kev->ta->test)
                                     ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
-                                            "sendCmdAnswerToBinaryA Test: %d %d %d %d %s %s %d %s %d\n", cmd, l0_f, addr_length, from_length, addr, from, port, d, d_length);
+                                        "sendCmdAnswerToBinaryA Test: %d %d %d %d %s %s %d %s %d\n",
+                                        cmd, l0_f, addr_length, from_length, addr, from, port, d, d_length);
                                 else
                                 if (l0_f) ksnLNullSendToL0(ke, (char*)addr, port, (char*)from, from_length, cmd, d, d_length);
                                 else ksnCoreSendto(kev->kc, (char*)addr, port, cmd, d, d_length);
                             }
 
-                            pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
 
-                        // type #4
+                        // type #4 TEO_SSCR_SUBSCRIBE
                         // teoSScrSubscribeA (subscribeA)
                         // Send command to subscribe this host to event at remote peer
-                        case 4: {
+                        case TEO_SSCR_SUBSCRIBE: {
                             // Parse buffer: { f_type, cmd, peer_length, ev, peer }
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
                             const uint16_t ev = *(uint32_t*)(data + ptr); ptr += 2;
                             const char *peer = (const char *)(data + ptr); ptr += peer_length;
 
-                            async_data *ud = user_data;
+                            //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, peer, NULL, 0);
 
                             if(ud->rv >= 0 && ud->rv < SEND_IF) {
@@ -169,14 +214,16 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 else teoSScrSubscribe(kev->kc->kco->ksscr, (char*)peer, ev);
                             }
 
-                            pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
 
                         default:
+                            printf("send unknown func async to user\n");
                             break;
                     }
-                    pthread_mutex_unlock(&kev->ta->cv_mutex);
+                    if(MULTITHREADED()) pthread_mutex_unlock(&kev->ta->cv_mutex);
                 }
             }
             break;
@@ -186,14 +233,17 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
     }
 
     // Call parent event loop
-    if(ke->ta->event_cb != NULL && !processed)
+    if(ke->ta->event_cb != NULL && !processed) {
+        //printf("send async to user\n");
         ((event_cb_t)ke->ta->event_cb)(ke, event, data, data_length, user_data);
+    }
 }
 
 teoAsyncClass *teoAsyncInit(void *ke) {
 
     teoAsyncClass *ta = malloc(sizeof(teoAsyncClass));
     ta->ke = ke;
+    ta->f_multi_thread = NOT_DEFINED_MULTITHREAD;
     ta->event_cb = kev->event_cb;
     ta->t_id = pthread_self();
     kev->event_cb = event_cb;
@@ -216,7 +266,7 @@ void teoAsyncDestroy(teoAsyncClass *ta) {
 
     pthread_mutex_destroy(&ta->async_func_mutex);
     pthread_cond_destroy(&ta->cv_threshold);
-    pthread_mutex_destroy(&ta->cv_mutex); 
+    pthread_mutex_destroy(&ta->cv_mutex);
 
     ksnetEvMgrClass *ke = ta->ke;
     ke->event_cb = ta->event_cb;
@@ -229,36 +279,83 @@ void teoAsyncDestroy(teoAsyncClass *ta) {
     #endif
 }
 
-#define SEND_ASYNC(buf, buf_length) \
+#define SET_TIMEOUT() \
+        gettimeofday(&now,NULL); \
+        t = now.tv_usec + now.tv_sec * 1000000 + timeout; \
+        now.tv_sec = t / 1000000; \
+        now.tv_usec = t % 1000000; \
+        timeToWait.tv_sec = now.tv_sec; \
+        timeToWait.tv_nsec = now.tv_usec * 1000
+
+static int check_retrives = 0, timeouts = 0;
+#define CHECK_RETRIVES 10
+
+#define LOCK_CV() pthread_mutex_lock(&kev->ta->cv_mutex);
+#define UNLOCK_CV() pthread_mutex_unlock(&kev->ta->cv_mutex);
+
+#define SEND_ASYNC(buf, buf_length) ({ \
+    int retval; \
+    _check_multi_thread(ke); \
     async_data *ud = malloc(sizeof(async_data)); \
+    ud_count++; ud_count_total++; \
+    printf("\033[s\033[%d;%dH\33[2Kud_count: %d, timeouts: %d, ud_count_total: %d\n\033[u", 1, 1, ud_count, timeouts, ud_count_total); \
     ud->label = ASYNC_FUNC_LABEL; \
-    ud->rv = -5; \
+    ud->rv = CHSQ_TIMEOUT; \
     for(;;) { \
+        unsigned long t; \
         struct timeval now; \
         struct timespec timeToWait; \
-        gettimeofday(&now,NULL); \
-        timeToWait.tv_sec = now.tv_sec+1; \
-        timeToWait.tv_nsec = now.tv_usec; \
+        const int timeout =  buf ? 50000 : 1000; /* time out for data | time out for check multi thread */ \
         \
         pthread_mutex_lock(&kev->ta->async_func_mutex); \
-        pthread_mutex_lock(&kev->ta->cv_mutex); \
+        if(MULTITHREADED()) LOCK_CV(); \
         ksnetEvMgrAsync(kev, buf, buf_length, (void*)ud); \
-        pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait); \
-        pthread_mutex_unlock(&kev->ta->cv_mutex); \
+      /*retrive:*/ \
+        SET_TIMEOUT(); \
+        if(MULTITHREADED()) pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait); \
+        if(MULTITHREADED() && ud->rv == CHSQ_TIMEOUT) { \
+            timeouts++; \
+            check_retrives++; \
+            kev->ta->f_multi_thread = check_retrives < CHECK_RETRIVES ? NOT_DEFINED_MULTITHREAD : NO_MULTITHREAD; \
+            ksn_puts(kev, MODULE, ERROR_M, "MULTITHREAD timeout"); \
+            UNLOCK_CV(); \
+        } \
+        if(MULTITHREADED()) UNLOCK_CV(); \
         pthread_mutex_unlock(&kev->ta->async_func_mutex); \
         \
-        if(ud->rv >= SEND_IF && kev->runEventMgr) usleep(5000); \
+        if(MULTITHREADED() && (ud->rv >= SEND_IF || ud->rv == CHSQ_TIMEOUT) && kev->runEventMgr) usleep(5000); \
         else break; \
     } \
-    free(ud); \
-    free(buf)
+    retval = ud->rv; \
+    if(MULTITHREADED()) { free(ud); ud_count--; } \
+    if(buf) free(buf); \
+    retval; \
+    })
 
 // check thread
 static inline int _check_thread(void *ke) {
     return pthread_self() != kev->ta->t_id;
 }
 
-// type #1
+// check multi thread
+// return
+// retval MULTITHREAD (1) - if multi thread run correctly;
+// retval NO_MULTITHREAD (2) - if multi thread run incorrectly (no multi thread, like in nodejs);
+static int _check_multi_thread(void *ke) {
+
+    //if(kev->ta->f_multi_thread == NOT_DEFINED_MULTITHREAD) {
+    if(kev->ta->f_multi_thread != MULTITHREAD && check_retrives < CHECK_RETRIVES) {
+        kev->ta->f_multi_thread = MULTITHREAD;
+        kev->ta->f_multi_thread = SEND_ASYNC(NULL, 0) == 0 ? MULTITHREAD : NO_MULTITHREAD;
+        ksn_printf(kev, MODULE, DEBUG, "Check MULTITHREAD mode: %s\n", 
+            kev->ta->f_multi_thread == MULTITHREAD ? "MULTITHREAD" : "NO MULTITHREAD");
+        if(MULTITHREADED()) check_retrives = 0;
+    }
+
+    return kev->ta->f_multi_thread;
+}
+
+// type #1 KSN_CORE_SEND_CMD_TO
 void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
         size_t data_length) {
 
@@ -268,7 +365,7 @@ void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
                 "ksnCoreSendCmdtoA: %s %d %s %d\n", peer, cmd, data, data_length);
 
         int ptr = 0;
-        const uint8_t f_type = 1;
+        const uint8_t f_type = KSN_CORE_SEND_CMD_TO;
         const uint8_t peer_length = strlen(peer) + 1;
 
         // Create buffer: { f_type, cmd, peer_length, peer, data }
@@ -286,7 +383,7 @@ void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
     else { ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, data, data_length); }
 }
 
-// type #2
+// type #2 TEO_SSCR_SEND
 void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
         uint8_t cmd) {
 
@@ -296,14 +393,14 @@ void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
                 "teoSScrSendA: %d %s %d %d\n", event, data, data_length, cmd);
 
         int ptr = 0;
-        const uint8_t f_type = 2;
+        const uint8_t f_type = TEO_SSCR_SEND;
 
         // Create buffer: { f_type, cmd, event, data }
         size_t buf_length = sizeof(uint8_t)*2 + sizeof(uint16_t) + data_length;
         void *buf = malloc(buf_length);
         *(uint8_t*)(buf + ptr) = f_type; ptr++;
         *(uint8_t*)(buf + ptr) = cmd; ptr++;
-        *(uint16_t*)(buf + ptr) = event; ptr += 2;
+        *(uint16_t*)(buf + ptr) = event; ptr += sizeof(uint16_t);
         memcpy(buf + ptr, data, data_length);
 
         // Send sync and clear buffer
@@ -312,7 +409,7 @@ void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
     else teoSScrSend(kev->kc->kco->ksscr, event, data, data_length, cmd);
 }
 
-// type #3
+// type #3 SEND_CMD_ANSWER_TO
 void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
         size_t data_length) {
 
@@ -327,7 +424,7 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
                 rd->port, data, data_length);
 
         int ptr = 0;
-        const uint8_t f_type = 3;
+        const uint8_t f_type = SEND_CMD_ANSWER_TO;
 
         // Create buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
         size_t buf_length = sizeof(uint8_t)*5 + addr_length + rd->from_len + sizeof(uint32_t) + data_length;
@@ -339,7 +436,7 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
         *(uint8_t*)(buf + ptr) = rd->from_len; ptr++;
         memcpy(buf + ptr, rd->addr, addr_length); ptr += addr_length;
         memcpy(buf + ptr, rd->from, rd->from_len); ptr += rd->from_len;
-        *(uint32_t*)(buf + ptr) = rd->port; ptr += 4;
+        *(uint32_t*)(buf + ptr) = rd->port; ptr += sizeof(uint32_t);
         memcpy(buf + ptr, data, data_length);
 
         // Send sync and clear buffer
@@ -351,7 +448,7 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
     }
 }
 
-// type #4
+// type #4 TEO_SSCR_SUBSCRIBE
 void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
 
     void *ke = sscr->ke;
@@ -364,7 +461,7 @@ void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
                 "teoSScrSubscribeA: %d %d %d %s\n", 0, peer_length, ev, peer);
 
         int ptr = 0;
-        const uint8_t f_type = 4;
+        const uint8_t f_type = TEO_SSCR_SUBSCRIBE;
 
         // Create buffer: { f_type, cmd, peer_length, ev, peer }
         size_t buf_length = sizeof(uint8_t)*3 + sizeof(uint16_t) + peer_length;
@@ -372,7 +469,7 @@ void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
         *(uint8_t*)(buf + ptr) = f_type; ptr++;
         *(uint8_t*)(buf + ptr) = 0; ptr++; // cmd
         *(uint8_t*)(buf + ptr) = peer_length; ptr++;
-        *(uint16_t*)(buf + ptr) = ev; ptr += 2;
+        *(uint16_t*)(buf + ptr) = ev; ptr += sizeof(uint16_t);
         memcpy(buf + ptr, peer, peer_length);
 
         // Send sync and clear buffer

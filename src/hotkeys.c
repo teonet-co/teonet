@@ -481,6 +481,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 // Got hot key
             if(khv->non_blocking) {
                 khv->str_number = 0;
+                if(khv->filter && khv->filter[0]) printf("Current filter: %s\n", khv->filter);
                 printf("Enter word filter: ");
                 fflush(stdout);
                 _keys_non_blocking_stop(khv); // Switch STDIN to string
