@@ -251,8 +251,7 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout,
         // watcher
         cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);
         cq->timeout = timeout;
-        if(cq != NULL && timeout > 0.0) {
-            
+        if(cq != NULL && timeout > 0.0) {            
             // Initialize, set user data and start the timer
             ev_timer_init(&cq->w, cq_timer_cb, timeout, 0.0);
             cq->w.data = cq; // Watcher data link to the ksnCQueData
@@ -261,6 +260,35 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout,
     }
     
     return cq;
+}
+
+/**
+ * Find data in CQue
+ * 
+ * @param kq Pointer to ksnCQueClass
+ * @param find Pointer to data to find
+ * @param compare Callback compare function int compare(void* find, void* data) 
+ *                which return pointer to key if data find or NULL in other way
+ * @param key_length [out] Pointer to key_length variable or NULL if not need it
+ * @return 
+ */
+void *ksnCQueFindData(ksnCQueClass *kq, void* find, ksnCQueCompare compare, size_t *key_length) {
+    
+    void *key = NULL;
+    PblIterator *it = pblMapIteratorNew(kq->cque_map);
+    if(it != NULL) {
+        while(pblIteratorHasNext(it)) {
+            void *entry = pblIteratorNext(it);
+            ksnCQueData *data =  pblMapEntryValue(entry);  
+            if(compare(find, data->data)) {
+                key = pblMapEntryKey(entry);
+                if(key_length) *key_length = pblMapEntryKeyLength(entry);
+                break;
+            }
+        }
+        pblIteratorFree(it);
+    }
+    return key;
 }
 
 /**

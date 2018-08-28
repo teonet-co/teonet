@@ -48,6 +48,11 @@ typedef struct ksnCQueData {
     
 } ksnCQueData;
 
+/**
+ * Find data in CQueue callback function
+ */
+typedef int (*ksnCQueCompare) (void *find, void *data);
+
 
 #ifdef	__cplusplus
 extern "C" {
@@ -62,6 +67,7 @@ int ksnCQueSetData(ksnCQueClass *kq, uint32_t id, void *data);
 ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
         void *data);
 int ksnCQueRemove(ksnCQueClass *kq, uint32_t id);
+void *ksnCQueFindData(ksnCQueClass *kq, void* find, ksnCQueCompare compare, size_t *key_length);
 
 void *pblMapRemoveFree(PblMap * map, void * key, size_t keyLength, 
         size_t * valueLengthPtr );
