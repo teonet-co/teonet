@@ -87,7 +87,7 @@ private:
 
     ksnetEvMgrClass *ke;                //! Pointer to ksnetEvMgrClass
     teoEventsCb event_cb;               //! Pointer to c++ callback function
-    const char *classVersion = "0.0.3"; //! Teonet class version
+    const char *classVersion = "0.0.4"; //! Teonet class version
 
 public:
 
