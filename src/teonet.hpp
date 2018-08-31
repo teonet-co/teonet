@@ -175,7 +175,7 @@ public:
     }
 
     inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, const std::string &data) const {
-        return sendTo((char*)to, cmd, (void*)data.c_str(), sizeof(data) + 1);
+        return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
     }
     /**
      * Send command by name to peer(async)
@@ -197,15 +197,15 @@ public:
     }
 
     inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) const {
-        sendCmdAnswerTo(ke, rd, (char *)name, out_data, out_data_len);
+        sendCmdAnswerTo(ke, rd, (char*)name, out_data, out_data_len);
     }
 
     inline void sendAnswerTo(teo::teoPacket *rd, const char *name, const std::string &out_data) const {
-        sendAnswerTo(rd, (char *)name, (void*)out_data.c_str(), sizeof(out_data) + 1);
+        sendAnswerTo(rd, (char*)name, (void*)out_data.c_str(), out_data.size() + 1);
     }
 
     inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, const std::string &out_data) const {
-        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)out_data.c_str(), sizeof(out_data) + 1);
+        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)out_data.c_str(), out_data.size() + 1);
     }
 
     /**
@@ -331,11 +331,11 @@ public:
     }
 
     inline void sendToSscr(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
-        sendToSscr(ev, (void*)data.c_str(), sizeof(data) + 1, cmd);
+        sendToSscr(ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
     
     inline void sendToSscrA(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
-        teoSScrSendA(ke, ev, (void*)data.c_str(), sizeof(data) + 1, cmd);
+        teoSScrSendA(ke, ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
     
     /**
@@ -467,14 +467,14 @@ public:
      *
      * @param cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event
      *           EV_K_CQUE_CALLBACK should be send at the same time.
-     * @param timeout Callback timeout. If equal to 0 than timeout sets automatically
+     * @param timeout Callback timeout. If equal to 0 than timeout sets automatically to 5 sec
      * @param user_data The user data which should be send to the Callback function
      *
      * @return Pointer to added ksnCQueData or NULL if error occurred
      */
 
-    template<typename Callback>
-    cqueData *add(Callback cb, double timeout = 5.00,
+    template<typename Callback, typename T>
+    cqueData *add(Callback cb, T timeout = 5.00,
         void *user_data = NULL) {
 
         struct userData { void *user_data; Callback cb; };
@@ -485,25 +485,26 @@ public:
             ud->cb(id, type, ud->user_data);
             delete(ud);
 
-        }, timeout, ud);
+        }, (double)timeout, ud);
     }
 
-    inline cqueData * add(cqueCallback cb, double timeout = 5.00,
+    template<typename T>
+    inline cqueData * add(cqueCallback cb, T timeout = 5.00,
         void *user_data = NULL) {
 
-        return ksnCQueAdd(ke->kq, cb, timeout, user_data);
+        return ksnCQueAdd(ke->kq, cb, (double)timeout, user_data);
     }
 
     template<typename Callback>
     inline void *find(void *find, const Callback compare, size_t *key_length = NULL) {
-        //static Callback comp = compare;
-        //comp = compare;        
-        //return ksnCQueFindData(ke->kq, find, [](void *find, void *data) {
-        //    return compare(find, data);
-        
         return ksnCQueFindData(ke->kq, find, compare, key_length);
     }
 
+    template<typename Callback>
+    inline void *find(const std::string& find, const Callback compare, size_t *key_length = NULL) {
+        return ksnCQueFindData(ke->kq, (void*)find.c_str(), compare, key_length);
+    }
+    
     /**
      * Execute callback queue record
      *
