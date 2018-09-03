@@ -60,6 +60,10 @@ typedef struct teoL0Client {            //! Teonet L0 Client address
 
     teoL0Client(const char *name, uint8_t name_len, const char *addr, int port) :
     name(strdup(name)), name_len(name_len), addr(strdup(addr)), port(port) {}
+    
+    teoL0Client(const std::string &name, std::string &addr, int port) :
+      teoL0Client(name.c_str(), name.size() + 1, addr.c_str(), port) {
+    }
 
     virtual ~teoL0Client() {
         free((void*)name);
