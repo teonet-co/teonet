@@ -298,7 +298,7 @@ static int check_retrives = 0, timeouts = 0;
     _check_multi_thread(ke); \
     async_data *ud = malloc(sizeof(async_data)); \
     ud_count++; ud_count_total++; \
-    printf("\033[s\033[%d;%dH\33[2Kud_count: %d, timeouts: %d, ud_count_total: %d\n\033[u", 1, 1, ud_count, timeouts, ud_count_total); \
+    /*printf("\033[s\033[%d;%dH\33[2Kud_count: %d, timeouts: %d, ud_count_total: %d\n\033[u", 1, 1, ud_count, timeouts, ud_count_total);*/ \
     ud->label = ASYNC_FUNC_LABEL; \
     ud->rv = CHSQ_TIMEOUT; \
     for(;;) { \

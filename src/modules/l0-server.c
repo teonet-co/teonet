@@ -399,6 +399,28 @@ int ksnLNullSendEchoToL0(void *ke, char *addr, int port, char *cname,
     return retval;
 }
 
+int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
+        size_t cname_length, void *data, size_t data_len) {
+
+    size_t data_e_length;
+    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, 
+            data_len, &data_e_length);
+            
+    int retval = ksnLNullSendToL0(ke, addr, port, cname, cname_length, CMD_ECHO, 
+            data_e, data_e_length);
+
+    ksnCorePacketData rd;
+    rd.addr = addr;
+    rd.port = port;
+    rd.from = cname;
+    rd.from_len = cname_length;
+    rd.l0_f = 1;
+    sendCmdAnswerToBinaryA(ke, &rd, CMD_ECHO, data_e, data_e_length);
+    
+    free(data_e);
+    return retval;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 

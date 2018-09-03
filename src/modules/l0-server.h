@@ -73,6 +73,8 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
         size_t cname_length, uint8_t cmd, void *data, size_t data_len);
 int ksnLNullSendEchoToL0(void *ke, char *addr, int port, char *cname,
         size_t cname_length, void *data, size_t data_len);
+int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
+        size_t cname_length, void *data, size_t data_len);
 int ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name);
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl);
 size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data);

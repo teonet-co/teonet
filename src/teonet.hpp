@@ -307,6 +307,13 @@ public:
         cname_length, data, data_len);
     }
 
+    inline int sendEchoToL0A(const char *addr, int port, const char *cname,
+        size_t cname_length, void *data, size_t data_len) const {
+
+      return ksnLNullSendEchoToL0A(ke, (char*)addr, port, (char*)cname,
+        cname_length, data, data_len);
+    }
+
     /**
      * Send ECHO command to L0 client with teoL0Client structure
      *
@@ -318,6 +325,11 @@ public:
      */
     inline int sendEchoToL0(teoL0Client* l0cli, void *data, size_t data_len) const {
       return sendEchoToL0(l0cli->addr, l0cli->port, l0cli->name,
+                l0cli->name_len, data, data_len);
+    }
+
+    inline int sendEchoToL0A(teoL0Client* l0cli, void *data, size_t data_len) const {
+      return sendEchoToL0A(l0cli->addr, l0cli->port, l0cli->name,
                 l0cli->name_len, data, data_len);
     }
 
