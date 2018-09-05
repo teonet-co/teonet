@@ -406,9 +406,6 @@ int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
     void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, 
             data_len, &data_e_length);
             
-    int retval = ksnLNullSendToL0(ke, addr, port, cname, cname_length, CMD_ECHO, 
-            data_e, data_e_length);
-
     ksnCorePacketData rd;
     rd.addr = addr;
     rd.port = port;
@@ -418,7 +415,7 @@ int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
     sendCmdAnswerToBinaryA(ke, &rd, CMD_ECHO, data_e, data_e_length);
     
     free(data_e);
-    return retval;
+    return 0;
 }
 
 #pragma GCC diagnostic push
