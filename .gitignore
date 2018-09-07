@@ -150,3 +150,4 @@ examples/go/teogo/teogo
 /tests/load_test/teoloadsi-js/nbproject/private/
 /tests/load_test/teoloadsi-js/node_modules/
 *.in~
+/distr/libtuntap-master/

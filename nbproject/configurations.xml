@@ -3315,19 +3315,31 @@
           </incDir>
         </cTool>
       </item>
-      <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
+      <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="10">
+        <cTool flags="17">
           <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>/usr/lib/gcc/x86_64-linux-gnu/7/include</pElem>
+            <pElem>src</pElem>
             <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
+            <pElem>/opt/local/include</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
             <pElem>embedded/libtrudp/src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>app/embedded/jsmn</pElem>
+            <pElem>/usr/include/libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/net_arp.c" ex="false" tool="0" flavor2="3">
