@@ -470,13 +470,13 @@ typedef std::unique_ptr<CQue> cquePtr;
 private:
 
     Teonet *teo;
-    ksnetEvMgrClass *ke;
+    ksnCQueClass *kq;
 
 public:
 
-    CQue(Teonet *t) : teo(t), ke(teo->getKe()) { /*std::cout << "CQue::CQue\n";*/  }
-    CQue(const CQue &obj) : teo(obj.teo), ke(obj.ke) { /*std::cout << "CQue::CQue copy\n";*/ }
-    virtual ~CQue() { /*std::cout << "~CQue::CQue\n";*/ }
+    CQue(Teonet *t, bool send_event = false) : teo(t), kq(ksnCQueInit(t->getKe(), send_event)) { /*std::cout << "CQue::CQue\n";*/  }
+    CQue(const CQue &obj) : teo(obj.teo), kq(obj.kq) { /*std::cout << "CQue::CQue copy\n";*/ }
+    virtual ~CQue() { ksnCQueDestroy(kq); /*std::cout << "~CQue::CQue\n";*/ }
 
     /**
      * Add callback to queue
@@ -495,7 +495,7 @@ public:
 
         struct userData { void *user_data; Callback cb; };
         userData *ud = new userData { user_data, cb };
-        return ksnCQueAdd(ke->kq, [](uint32_t id, int type, void *data) {
+        return ksnCQueAdd(kq, [](uint32_t id, int type, void *data) {
 
             auto ud = (userData*) data;
             ud->cb(id, type, ud->user_data);
@@ -508,17 +508,17 @@ public:
     inline cqueData * add(cqueCallback cb, T timeout = 5.00,
         void *user_data = NULL) {
 
-        return ksnCQueAdd(ke->kq, cb, (double)timeout, user_data);
+        return ksnCQueAdd(kq, cb, (double)timeout, user_data);
     }
 
     template<typename Callback>
     inline void *find(void *find, const Callback compare, size_t *key_length = NULL) {
-        return ksnCQueFindData(ke->kq, find, compare, key_length);
+        return ksnCQueFindData(kq, find, compare, key_length);
     }
 
     template<typename Callback>
     inline void *find(const std::string& find, const Callback compare, size_t *key_length = NULL) {
-        return ksnCQueFindData(ke->kq, (void*)find.c_str(), compare, key_length);
+        return ksnCQueFindData(kq, (void*)find.c_str(), compare, key_length);
     }
     
     /**
@@ -531,7 +531,7 @@ public:
      * @return return 0: if callback executed OK; !=0 some error occurred
      */
     inline int exec(uint32_t id) {
-        return ksnCQueExec(ke->kq, id);
+        return ksnCQueExec(kq, id);
     }
 
     /**
@@ -575,7 +575,7 @@ public:
     int setUserData(uint32_t id, void *data) {
       int retval = -1;
       struct userData { void *user_data; void *cb; };
-      auto ud = (userData *) ksnCQueGetData(ke->kq, id);
+      auto ud = (userData *) ksnCQueGetData(kq, id);
       if(ud) {
         ud->user_data = data;
         retval = 0;
