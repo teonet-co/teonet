@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996-2017 Kirill Scherba <kirill@scherba.ru>
+ * Copyright (c) 1996-2018 Kirill Scherba <kirill@scherba.ru>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -245,6 +245,12 @@ public:
 
         return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname,
           cname_length, cmd, data, data_len);
+    }
+    
+    inline int sendToL0(const char *addr, int port, const std::string &cname, 
+        uint8_t cmd, void *data, size_t data_len) const {
+        
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, data, data_len);
     }
 
     /**
@@ -511,6 +517,11 @@ public:
         return ksnCQueAdd(kq, cb, (double)timeout, user_data);
     }
 
+    template<typename T>
+    inline cqueData * add(T timeout = 5.00, void *user_data = NULL) {
+        return ksnCQueAdd(kq, NULL, (double)timeout, user_data);
+    }
+    
     template<typename Callback>
     inline void *find(void *find, const Callback compare, size_t *key_length = NULL) {
         return ksnCQueFindData(kq, find, compare, key_length);
@@ -543,6 +554,10 @@ public:
      */
     inline cqueData *getData(void *data) const {
         return (cqueData *)data;
+    }
+    
+    inline void *getCQueData(int id) const {
+        return ksnCQueGetData(kq, id);
     }
 
     /**
