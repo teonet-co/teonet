@@ -95,7 +95,7 @@ private:
 
 public:
 
-    ksnetEvMgrClass* getKe() const {
+    inline ksnetEvMgrClass* getKe() const {
         return ke;
     }
 
@@ -474,7 +474,7 @@ public:
 typedef std::unique_ptr<CQue> cquePtr;
 
 private:
-
+    
     Teonet *teo;
     ksnCQueClass *kq;
 
