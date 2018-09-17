@@ -60,7 +60,7 @@ typedef struct teoL0Client {            //! Teonet L0 Client address
 
     teoL0Client(const char *name, uint8_t name_len, const char *addr, int port) :
     name(strdup(name)), name_len(name_len), addr(strdup(addr)), port(port) {}
-    
+
     teoL0Client(const std::string &name, std::string &addr, int port) :
       teoL0Client(name.c_str(), name.size() + 1, addr.c_str(), port) {
     }
@@ -246,10 +246,10 @@ public:
         return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname,
           cname_length, cmd, data, data_len);
     }
-    
-    inline int sendToL0(const char *addr, int port, const std::string &cname, 
+
+    inline int sendToL0(const char *addr, int port, const std::string &cname,
         uint8_t cmd, void *data, size_t data_len) const {
-        
+
         return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, data, data_len);
     }
 
@@ -275,7 +275,7 @@ public:
         rd.l0_f = 1;
         sendCmdAnswerToBinaryA((void *)ke, &rd, cmd, data, data_len);
     }
-    
+
     /**
      * Send data to L0 client with the teoL0Client structure.
      *
@@ -347,7 +347,7 @@ public:
     inline void subscribeA(const char *peer_name, uint16_t ev) const {
         teoSScrSubscribeA((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
     }
-    
+
     inline void sendToSscr(uint16_t ev, void *data, size_t data_length, uint8_t cmd = 0) const {
         teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data,data_length, cmd);
     }
@@ -355,11 +355,11 @@ public:
     inline void sendToSscr(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
         sendToSscr(ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
-    
+
     inline void sendToSscrA(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
         teoSScrSendA(ke, ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
-    
+
     /**
      * Set custom timer interval
      *
@@ -461,6 +461,15 @@ public:
     #define teo_puts(module, type, format) ;
     #endif
 
+    template<typename... Arguments>
+    inline std::string formatMessage(const char *format, const Arguments&... args) {
+        const char *cstr = ksnet_formatMessage(format, args...);
+        std::string str(cstr);
+        delete cstr;
+        return str;
+    }
+
+
 typedef ksnCQueData cqueData;           //! Teonet CQue data structure
 typedef ksnCQueCallback cqueCallback;   //! Teonet CQue callback function
 
@@ -474,7 +483,7 @@ public:
 typedef std::unique_ptr<CQue> cquePtr;
 
 private:
-    
+
     Teonet *teo;
     ksnCQueClass *kq;
 
@@ -521,7 +530,7 @@ public:
     inline cqueData * add(T timeout = 5.00, void *user_data = NULL) {
         return ksnCQueAdd(kq, NULL, (double)timeout, user_data);
     }
-    
+
     template<typename Callback>
     inline void *find(void *find, const Callback compare, size_t *key_length = NULL) {
         return ksnCQueFindData(kq, find, compare, key_length);
@@ -531,7 +540,7 @@ public:
     inline void *find(const std::string& find, const Callback compare, size_t *key_length = NULL) {
         return ksnCQueFindData(kq, (void*)find.c_str(), compare, key_length);
     }
-    
+
     /**
      * Execute callback queue record
      *
@@ -555,7 +564,7 @@ public:
     inline cqueData *getData(void *data) const {
         return (cqueData *)data;
     }
-    
+
     inline void *getCQueData(int id) const {
         return ksnCQueGetData(kq, id);
     }
