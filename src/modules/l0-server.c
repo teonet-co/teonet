@@ -1075,8 +1075,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG,
-                "connection initialized, client name is: %s (username: %s)\n",
-                kld->name, jp.username);
+                "connection initialized, client name is: %s, ip: %s (username: %s)\n",
+                kld->name, kld->t_addr, jp.username);
             #endif
 
             // Send Connected event to all subscribers
