@@ -475,7 +475,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
 //    total_clients ++;
 
     // Get Client IPv4 & port number
-    int client_family = AF_INET;
+    //int client_family = AF_INET;
     char client_ip[100];
     struct sockaddr_in *addr = (struct sockaddr_in*) &client_addr;
     #ifndef KSNET_IPV6_ENABLE
@@ -499,7 +499,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
         ksn_printf(ke, MODULE, DEBUG_VV, "client IP address is: %s\n", client_ip);
         #endif
     } else {
-        client_family = AF_INET6;
+        //client_family = AF_INET6;
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, "client IPv6 address is: %s\n", client_ip);
         #endif
@@ -508,8 +508,8 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, CONNECT,
-        "successfully connected with client (%d), from IP%s: %s:%d\n",
-        client_sd, client_family == AF_INET6 ? "v6" : "" , client_ip, client_port
+        "### 0001,%d,%s,%d\n",
+        client_sd, /*client_family == AF_INET6 ? "v6" : "" , */client_ip, client_port
     );
     #endif
 
