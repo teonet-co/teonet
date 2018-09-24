@@ -485,7 +485,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         // Login will continue when answer received
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG,
-            "got login command with name '%s'\n", kld->name
+            "### 0001,%s,%s\n", kld->name, kld->t_addr
         );
         #endif
     }
