@@ -485,7 +485,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         // Login will continue when answer received
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG,
-            "### 0001,%s,%s\n", kld->name, kld->t_addr
+            "### 0001,%s,%d\n", kld->name, fd
         );
         #endif
     }
@@ -1075,7 +1075,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG,
-                "connection initialized, client name is: %s, ip: %s (username: %s)\n",
+                "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
                 kld->name, kld->t_addr, jp.username);
             #endif
 
