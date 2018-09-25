@@ -2744,13 +2744,9 @@
             <pElem>embedded/teocli/libteol0</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>/usr/include/libtrudp</pElem>
-            <pElem>/usr/include/libev</pElem>
+            <pElem>../libtrudp</pElem>
+            <pElem>../libev</pElem>
           </incDir>
-          <preprocessorList>
-            <Elem>HAVE_CONFIG_H</Elem>
-            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
-          </preprocessorList>
         </cTool>
       </folder>
       <folder path="0/app/modules/teo_auth">
@@ -2777,10 +2773,6 @@
             <pElem>embedded/libtrudp/embedded/teoccl/tests</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>/usr/include/CppUTest</pElem>
-            <pElem>/usr/include/c++/7/bits</pElem>
-            <pElem>/usr/include/c++/7/ext</pElem>
-            <pElem>/usr/include/c++/7</pElem>
           </incDir>
           <preprocessorList>
             <Elem>HAVE_CONFIG_H</Elem>
@@ -2822,7 +2814,9 @@
       <folder path="0/embedded/libtrudp/embedded">
         <cTool>
           <preprocessorList>
-            <Elem>HAVE_CONFIG_H=1</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
           </preprocessorList>
         </cTool>
       </folder>

@@ -484,9 +484,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 
         // Login will continue when answer received
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG,
-            "### 0002,%s,%d\n", kld->name, fd
-        );
+        ksn_printf(kev, MODULE, DEBUG,"### 0002,%s,%d\n", kld->name, fd);
         #endif
     }
     else { 
@@ -613,8 +611,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         }
 
         // Show disconnect message
-        ksn_printf(kev, MODULE, CONNECT,
-            "L0 client with fd %d disconnected\n", fd);
+        ksn_printf(kev, MODULE, CONNECT, "### 0005,%d\n", fd);
 
         // Send Disconnect event to all subscribers
         if(kld->name != NULL)
