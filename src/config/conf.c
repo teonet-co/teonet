@@ -102,6 +102,9 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Disable send logs to logging server
     ksn_cfg->log_disable_f = 0;
     
+    // Disable color terminal output
+    ksn_cfg->color_output_disable_f = 0;
+    
     // SIGSEGV processing
     ksn_cfg->sig_segv_f = 0;
     
@@ -198,6 +201,8 @@ void read_config(ksnet_cfg *conf, int port_param) {
         #endif        
         
         CFG_SIMPLE_INT("log_priority", &conf->log_priority),
+        
+        CFG_SIMPLE_BOOL("color_output_disable_f", &conf->color_output_disable_f),
 
         CFG_END()
     };

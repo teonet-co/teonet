@@ -133,9 +133,15 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         // Show message
         if(show_it) {
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
-            if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00)
+            if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00) {
                 printf(_ANSI_DARKGREY"%f: "_ANSI_NONE, ct);
-            printf("%s", p);
+                
+                if(ksn_cfg->color_output_disable_f) {
+                    trimlf(removeTEsc(p));
+                    printf("%s\n", p);
+                }
+                else printf("%s", p);
+            }
         }
 
         // Log message

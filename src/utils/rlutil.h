@@ -510,6 +510,8 @@ static RLUTIL_INLINE void showcursor(void) {
 #endif // _WIN32 || USE_ANSI
 }
 
+extern int usleep (__useconds_t __useconds);
+
 /// Function: msleep
 /// Waits given number of milliseconds before continuing.
 static RLUTIL_INLINE void msleep(unsigned int ms) {
