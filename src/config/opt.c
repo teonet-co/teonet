@@ -89,6 +89,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
         { "log_priority",   required_argument, 0, 'L' }, 
         { "color_output_disable", no_argument, &conf->color_output_disable_f, 1 },
+        { "block_cli_input", no_argument,      &conf->block_cli_input_f, 1 },
         
         { "daemon",         no_argument,       &conf->dflag, 1 },
         { "kill",           no_argument,       &conf->kflag, 1 },
@@ -405,7 +406,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "                            NO_LOG: 0\n"
     "\n"
     "       --color_output       Disable color output in stdout terminal logs,\n"
-    "                            full name is: --color_output_disable_f\n"
+    "                            (full flag name is: --color_output_disable)\n"
     "\n"
     "  -d, --daemon              Start this application in daemon mode\n"
     "  -k, --kill                Kill the application running in daemon mode\n"

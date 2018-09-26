@@ -64,7 +64,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
     if(KSN_GET_TEST_MODE()) return ret_val;
 
     pthread_mutex_lock(&((ksnetEvMgrClass*)(ksn_cfg->ke))->printf_mutex);
-    
+
     // Check type
     switch(type) {
 
@@ -122,26 +122,29 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         va_start(args, format);
         char *p = ksnet_vformatMessage(format, args);
         va_end(args);
-        
+
         // Filter
         if(show_it) {
             if(teoFilterFlagCheck(ksn_cfg->ke))
                 if(teoLogCheck(ksn_cfg->ke, p)) show_it = 1; else show_it = 0;
             else show_it = 0;
         }
-        
+
         // Show message
         if(show_it) {
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
-            if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00) {
-                printf(_ANSI_DARKGREY"%f: "_ANSI_NONE, ct);
+            if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00) 
+                printf("%s%f:%s ", 
+                       ksn_cfg->color_output_disable_f ? "" : _ANSI_DARKGREY, 
+                       ct, 
+                       ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE
+                );
                 
-                if(ksn_cfg->color_output_disable_f) {
-                    trimlf(removeTEsc(p));
-                    printf("%s\n", p);
-                }
-                else printf("%s", p);
+            if(ksn_cfg->color_output_disable_f) {
+                trimlf(removeTEsc(p));
+                printf("%s\n", p);
             }
+            else printf("%s", p);
         }
 
         // Log message
@@ -166,17 +169,17 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
             // Log message
             char *data = trimlf(removeTEsc(p));
-            
+
             // Save log to syslog
             syslog(priority < LOG_DEBUG ? priority : LOG_INFO, "%s", data);
-            
-            // Send async event to teonet event loop (which processing in 
+
+            // Send async event to teonet event loop (which processing in
             // logging client module) to send log to logging server
             teoLoggingClientSend(ksn_cfg->ke, data);
         }
         free(p);
     }
-    
+
     pthread_mutex_unlock(&((ksnetEvMgrClass*)(ksn_cfg->ke))->printf_mutex);
 
     return ret_val;
