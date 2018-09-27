@@ -347,7 +347,13 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
         }
 
     }
-    else retval = -1;   // Error: To lage packet
+    else {
+        #ifdef DEBUG_KSNET
+        ksn_printf(((ksnetEvMgrClass*)kc->ke), MODULE, ERROR_M,
+                     "can't send to lage packet %d bytes data, cmd %u to %s:%d\n", data_len, cmd, addr, port);
+        #endif
+        retval = -1;   // Error: To lage packet
+    }
 
     // Set last host event time
     ksnCoreSetEventTime(kc);

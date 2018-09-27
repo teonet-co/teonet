@@ -614,7 +614,11 @@ int ksnetArpShow(ksnetArpClass *ka) {
     int num_line = 0;
     char *str = ksnetArpShowStr(ka);
 
-    ksnet_printf(&((ksnetEvMgrClass*)ka->ke)->ksn_cfg, DISPLAY_M, _ANSI_CLS"\033[0;0H""%s", str);
+    ksnet_cfg *ksn_cfg = &((ksnetEvMgrClass*)ka->ke)->ksn_cfg;
+    ksnet_printf(ksn_cfg, DISPLAY_M, 
+            "%s%s", 
+            ksn_cfg->color_output_disable_f ? "" : _ANSI_CLS"\033[0;0H", str
+    );
     num_line = calculate_lines(str);
 
     free(str);

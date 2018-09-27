@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1996-2017 Kirill Scherba <kirill@scherba.ru>
+ * Copyright (c) 1996-2018 Kirill Scherba <kirill@scherba.ru>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -25,14 +25,14 @@
 
 /**
  * \mainpage Teonet library Documentation
- * 
+ *
  * ### Installation information
  * See the \ref md_README "README.md" file to get Installation Info
- * <br>  
+ * <br>
  * ### See the latest news from library ChangeLog: <br>
  * \include "./ChangeLog"
- *  
- */ 
+ *
+ */
 
 #pragma once
 
@@ -44,6 +44,7 @@
 
 #include "ev_mgr.h"
 #include "modules/teodb_com.h"
+#include "modules/subscribe.h"
 
 namespace teo {
 
@@ -59,6 +60,10 @@ typedef struct teoL0Client {            //! Teonet L0 Client address
 
     teoL0Client(const char *name, uint8_t name_len, const char *addr, int port) :
     name(strdup(name)), name_len(name_len), addr(strdup(addr)), port(port) {}
+
+    teoL0Client(const std::string &name, std::string &addr, int port) :
+      teoL0Client(name.c_str(), name.size() + 1, addr.c_str(), port) {
+    }
 
     virtual ~teoL0Client() {
         free((void*)name);
@@ -86,11 +91,11 @@ private:
 
     ksnetEvMgrClass *ke;                //! Pointer to ksnetEvMgrClass
     teoEventsCb event_cb;               //! Pointer to c++ callback function
-    const char *classVersion = "0.0.3"; //! Teonet class version
+    const char *classVersion = "0.0.4"; //! Teonet class version
 
 public:
 
-    ksnetEvMgrClass* getKe() const {
+    inline ksnetEvMgrClass* getKe() const {
         return ke;
     }
 
@@ -168,11 +173,14 @@ public:
      * @return Pointer to ksnet_arp_data or NULL if to peer is absent
      */
     inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, void *data,
-        size_t data_len) {
+        size_t data_len) const {
 
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
-    
+
+    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, const std::string &data) const {
+        return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
+    }
     /**
      * Send command by name to peer(async)
      *
@@ -183,26 +191,38 @@ public:
      * @param data_len Commands data length
      */
     inline void sendToA(const char *to, uint8_t cmd, void *data,
-        size_t data_len) {
+        size_t data_len) const {
 
         ksnCoreSendCmdtoA((void *)ke, to, cmd, data, data_len);
     }
-    
-    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) {
-        sendCmdAnswerTo(getKe(), rd, (char *)name, out_data, out_data_len);
+
+    inline void sendToA(const char *to, uint8_t cmd, const std::string &msg) const {
+        sendToA(to, cmd, (void*)msg.c_str(), msg.size() + 1);
     }
-    
+
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) const {
+        sendCmdAnswerTo(ke, rd, (char*)name, out_data, out_data_len);
+    }
+
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, const std::string &out_data) const {
+        sendAnswerTo(rd, (char*)name, (void*)out_data.c_str(), out_data.size() + 1);
+    }
+
+    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, const std::string &out_data) const {
+        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)out_data.c_str(), out_data.size() + 1);
+    }
+
     /**
      * Send ECHO command to peer
-     * 
+     *
      * @param to Peer name to send to
      * @param cmd Command
      * @param data Commands data
      * @param data_len Commands data length
      * @return True at success
      */
-    inline int sendEchoTo(const char *to, uint8_t cmd, void *data, 
-      size_t data_len) {
+    inline int sendEchoTo(const char *to, uint8_t cmd, void *data,
+      size_t data_len) const {
 
       return ksnCommandSendCmdEcho(ke->kc->kco, (char*)to, data, data_len);
     }
@@ -220,11 +240,17 @@ public:
      *
      * @return Return 0 if success; -1 if data length is too lage (more than 32319)
      */
-    inline int sendToL0(const char *addr, int port, const char *cname, 
-        size_t cname_length, uint8_t cmd, void *data, size_t data_len) {
+    inline int sendToL0(const char *addr, int port, const char *cname,
+        size_t cname_length, uint8_t cmd, void *data, size_t data_len) const {
 
-        return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname, 
+        return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname,
           cname_length, cmd, data, data_len);
+    }
+
+    inline int sendToL0(const char *addr, int port, const std::string &cname,
+        uint8_t cmd, void *data, size_t data_len) const {
+
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, data, data_len);
     }
 
     /**
@@ -239,8 +265,8 @@ public:
      * @param data_len Data length
      *
      */
-    inline void sendToL0A(const char *addr, int port, const char *cname, 
-        size_t cname_length, uint8_t cmd, void *data, size_t data_len) {
+    inline void sendToL0A(const char *addr, int port, const char *cname,
+        size_t cname_length, uint8_t cmd, void *data, size_t data_len) const {
         ksnCorePacketData rd;
         rd.from = (char *)cname;
         rd.from_len = cname_length;
@@ -248,11 +274,11 @@ public:
         rd.port = port;
         rd.l0_f = 1;
         sendCmdAnswerToBinaryA((void *)ke, &rd, cmd, data, data_len);
-    }    
-    
+    }
+
     /**
      * Send data to L0 client with the teoL0Client structure.
-     * 
+     *
      * @param l0cli Pointer to teoL0Client
      * @param cmd Command
      * @param data Data
@@ -260,16 +286,16 @@ public:
      *
      * @return Return 0 if success; -1 if data length is too lage (more than 32319)
      */
-    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data, 
-        size_t data_len) {
-      
-        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len, 
+    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data,
+        size_t data_len) const {
+
+        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len,
                 cmd, data, data_len);
     }
-    
+
     /**
      * Send ECHO command to L0 client
-     * 
+     *
      * @param addr IP address of remote peer
      * @param port Port of remote peer
      * @param cname L0 client name (include trailing zero)
@@ -280,34 +306,66 @@ public:
      *
      * @return Return 0 if success; -1 if data length is too lage (more than 32319)
      */
-    inline int sendEchoToL0(const char *addr, int port, const char *cname, 
-        size_t cname_length, void *data, size_t data_len) {
+    inline int sendEchoToL0(const char *addr, int port, const char *cname,
+        size_t cname_length, void *data, size_t data_len) const {
 
-      return ksnLNullSendEchoToL0(ke, (char*)addr, port, (char*)cname, 
+      return ksnLNullSendEchoToL0(ke, (char*)addr, port, (char*)cname,
+        cname_length, data, data_len);
+    }
+
+    inline int sendEchoToL0A(const char *addr, int port, const char *cname,
+        size_t cname_length, void *data, size_t data_len) const {
+
+      return ksnLNullSendEchoToL0A(ke, (char*)addr, port, (char*)cname,
         cname_length, data, data_len);
     }
 
     /**
-     * Send ECHO command to L0 client with teoL0Client structure 
-     * 
+     * Send ECHO command to L0 client with teoL0Client structure
+     *
      * @param l0cli Pointer to teoL0Client
      * @param data Data
      * @param data_len Data length
      *
      * @return Return 0 if success; -1 if data length is too lage (more than 32319)
      */
-    inline int sendEchoToL0(teoL0Client* l0cli, void *data, size_t data_len) {
-
-      return sendEchoToL0(l0cli->addr, l0cli->port, l0cli->name, 
+    inline int sendEchoToL0(teoL0Client* l0cli, void *data, size_t data_len) const {
+      return sendEchoToL0(l0cli->addr, l0cli->port, l0cli->name,
                 l0cli->name_len, data, data_len);
     }
-    
+
+    inline int sendEchoToL0A(teoL0Client* l0cli, void *data, size_t data_len) const {
+      return sendEchoToL0A(l0cli->addr, l0cli->port, l0cli->name,
+                l0cli->name_len, data, data_len);
+    }
+
+
+    inline void subscribe(const char *peer_name, uint16_t ev) const {
+        teoSScrSubscribe((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
+    }
+
+    inline void subscribeA(const char *peer_name, uint16_t ev) const {
+        teoSScrSubscribeA((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
+    }
+
+    inline void sendToSscr(uint16_t ev, void *data, size_t data_length, uint8_t cmd = 0) const {
+        teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data,data_length, cmd);
+    }
+
+    inline void sendToSscr(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
+        sendToSscr(ev, (void*)data.c_str(), data.size() + 1, cmd);
+    }
+
+    inline void sendToSscrA(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
+        teoSScrSendA(ke, ev, (void*)data.c_str(), data.size() + 1, cmd);
+    }
+
     /**
      * Set custom timer interval
      *
      * @param time_interval
      */
-    void setCustomTimer(double time_interval = 2.00) {
+    inline void setCustomTimer(double time_interval = 2.00) {
         ksnetEvMgrSetCustomTimer(ke, time_interval);
     }
 
@@ -330,13 +388,22 @@ public:
     }
 
     /**
+     * Return host name
+     *
+     * @return
+     */
+    inline const char* getHostName() const {
+        return ksnetEvMgrGetHostName(ke);
+    }
+
+    /**
      * Get KSNet event manager time
      *
      * @param ke Pointer to ksnetEvMgrClass
-     * 
+     *
      * @return
      */
-    inline double getTime() {
+    inline double getTime() const {
       return ksnetEvMgrGetTime(ke);
     }
     /**
@@ -394,6 +461,15 @@ public:
     #define teo_puts(module, type, format) ;
     #endif
 
+    template<typename... Arguments>
+    inline std::string formatMessage(const char *format, const Arguments&... args) {
+        const char *cstr = ksnet_formatMessage(format, args...);
+        std::string str(cstr);
+        delete cstr;
+        return str;
+    }
+
+
 typedef ksnCQueData cqueData;           //! Teonet CQue data structure
 typedef ksnCQueCallback cqueCallback;   //! Teonet CQue callback function
 
@@ -409,44 +485,60 @@ typedef std::unique_ptr<CQue> cquePtr;
 private:
 
     Teonet *teo;
-    ksnetEvMgrClass *ke;
+    ksnCQueClass *kq;
 
 public:
 
-    CQue(Teonet *t) : teo(t), ke(teo->getKe()) { /*std::cout << "CQue::CQue\n";*/  }
-    CQue(const CQue &obj) : teo(obj.teo), ke(obj.ke) { /*std::cout << "CQue::CQue copy\n";*/ }
-    virtual ~CQue() { /*std::cout << "~CQue::CQue\n";*/ }
+    CQue(Teonet *t, bool send_event = false) : teo(t), kq(ksnCQueInit(t->getKe(), send_event)) { /*std::cout << "CQue::CQue\n";*/  }
+    CQue(const CQue &obj) : teo(obj.teo), kq(obj.kq) { /*std::cout << "CQue::CQue copy\n";*/ }
+    virtual ~CQue() { ksnCQueDestroy(kq); /*std::cout << "~CQue::CQue\n";*/ }
 
     /**
      * Add callback to queue
      *
      * @param cb Callback [function](@ref ksnCQueCallback) or NULL. The teonet event
      *           EV_K_CQUE_CALLBACK should be send at the same time.
-     * @param timeout Callback timeout. If equal to 0 than timeout sets automatically
+     * @param timeout Callback timeout. If equal to 0 than timeout sets automatically to 5 sec
      * @param user_data The user data which should be send to the Callback function
      *
      * @return Pointer to added ksnCQueData or NULL if error occurred
      */
 
-    template<typename Callback>
-    cqueData *add(Callback cb, double timeout = 5.00,
+    template<typename Callback, typename T>
+    cqueData *add(Callback cb, T timeout = 5.00,
         void *user_data = NULL) {
 
         struct userData { void *user_data; Callback cb; };
         userData *ud = new userData { user_data, cb };
-        return ksnCQueAdd(ke->kq, [](uint32_t id, int type, void *data) {
+        return ksnCQueAdd(kq, [](uint32_t id, int type, void *data) {
 
             auto ud = (userData*) data;
             ud->cb(id, type, ud->user_data);
             delete(ud);
 
-        }, timeout, ud);
+        }, (double)timeout, ud);
     }
-    
-    inline cqueData * add(cqueCallback cb, double timeout = 5.00,
+
+    template<typename T>
+    inline cqueData * add(cqueCallback cb, T timeout = 5.00,
         void *user_data = NULL) {
-        
-        return ksnCQueAdd(ke->kq, cb, timeout, user_data);
+
+        return ksnCQueAdd(kq, cb, (double)timeout, user_data);
+    }
+
+    template<typename T>
+    inline cqueData * add(T timeout = 5.00, void *user_data = NULL) {
+        return ksnCQueAdd(kq, NULL, (double)timeout, user_data);
+    }
+
+    template<typename Callback>
+    inline void *find(void *find, const Callback compare, size_t *key_length = NULL) {
+        return ksnCQueFindData(kq, find, compare, key_length);
+    }
+
+    template<typename Callback>
+    inline void *find(const std::string& find, const Callback compare, size_t *key_length = NULL) {
+        return ksnCQueFindData(kq, (void*)find.c_str(), compare, key_length);
     }
 
     /**
@@ -459,7 +551,7 @@ public:
      * @return return 0: if callback executed OK; !=0 some error occurred
      */
     inline int exec(uint32_t id) {
-        return ksnCQueExec(ke->kq, id);
+        return ksnCQueExec(kq, id);
     }
 
     /**
@@ -471,6 +563,10 @@ public:
      */
     inline cqueData *getData(void *data) const {
         return (cqueData *)data;
+    }
+
+    inline void *getCQueData(int id) const {
+        return ksnCQueGetData(kq, id);
     }
 
     /**
@@ -494,20 +590,20 @@ public:
 
     /**
      * Set callback queue data, update data set in ksnCQueAdd
-     * 
+     *
      * @param id Existing callback queue ID
      * @param data Pointer to new user data
-     * 
+     *
      * @return return 0: if data set OK; !=0 some error occurred
      */
     int setUserData(uint32_t id, void *data) {
       int retval = -1;
       struct userData { void *user_data; void *cb; };
-      auto ud = (userData *) ksnCQueGetData(ke->kq, id);
-      if(ud) { 
+      auto ud = (userData *) ksnCQueGetData(kq, id);
+      if(ud) {
         ud->user_data = data;
         retval = 0;
-      }  
+      }
       return retval;
     }
 };
@@ -556,14 +652,14 @@ public:
         void *user_data;
 
         teoDbCQueData(TeoDB *teoDb, teoDbData **tdd, teoL0Client * l0client = NULL,
-            uint8_t cb_type = 0) : teodb(teoDb), tdd(tdd), l0client(l0client), 
+            uint8_t cb_type = 0) : teodb(teoDb), tdd(tdd), l0client(l0client),
             cb_type(cb_type) {}
 
         virtual ~teoDbCQueData() {
             if(l0client) delete(l0client);
         }
 
-        static inline teoL0Client* setl0Cli(const char *name, uint8_t name_len, 
+        static inline teoL0Client* setl0Cli(const char *name, uint8_t name_len,
           const char *addr, int port) {
             return new teoL0Client((char*)name, name_len, (char*)addr, port);
         }
@@ -620,7 +716,7 @@ public:
     inline Teonet* getTeonet() const {
         return teo;
     }
-    
+
     inline ksnetEvMgrClass* getKe() const {
         return getTeonet()->getKe();
     }
@@ -647,10 +743,10 @@ public:
     static inline teoDbData* getData(teo::teoPacket *rd) {
         return (teoDbData*) (rd ? rd->data : NULL);
     }
-    
+
     inline ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
         const void *data = NULL, size_t data_len = 0) {
-        
+
         return sendTDD(cmd, key, key_len, data, data_len);
     }
 
@@ -659,37 +755,37 @@ public:
         Callback cb, double timeout,
         uint8_t cb_type, teo::teoPacket *rd = NULL,
         teoDbData **tdd = NULL, void *user_data = NULL) {
-        
+
         // Create user data if it  is NULL
         if(!user_data) {
             if(!tdd) tdd = this->tdd;
             user_data = new teoDbCQueData(this, tdd, teoDbCQueData::setl0Cli(rd), cb_type);
         }
-        
+
         // Add callback to queue and wait timeout after 5 sec ...
-        struct userData { void *user_data; Callback cb; };            
+        struct userData { void *user_data; Callback cb; };
         auto ud = new userData { user_data, cb };
         auto cq = cque.add([](uint32_t id, int type, void *data) {
             auto ud = (userData *) data;
             ud->cb(id, type, ud->user_data);
             delete((TeoDB::teoDbCQueData*)ud->user_data);
-            delete(ud);                                
-        }, timeout, ud);     
+            delete(ud);
+        }, timeout, ud);
         teo_printf(NULL, DEBUG, "Register callback id %u\n", cq->id);
         return sendTDD(cmd, key, key_len, NULL, 0, cq->id);
     }
-    
+
     ksnet_arp_data *send(uint8_t cmd, const void *key, size_t key_len,
         cqueCallback cb, double timeout,
         uint8_t cb_type, teo::teoPacket *rd = NULL,
         teoDbData **tdd = NULL, void *user_data = NULL) {
-        
+
         // Create user data if it  is NULL
         if(!user_data) {
             if(!tdd) tdd = this->tdd;
             user_data = new teoDbCQueData(this, tdd, teoDbCQueData::setl0Cli(rd), cb_type);
         }
-        
+
         // Add callback to queue and wait timeout after 5 sec ...
         std::cout << "!!! cqueCallback !!!\n";
         auto cq = cque.add(cb, timeout, user_data);
@@ -738,12 +834,12 @@ public:
 
         return processed;
     }
-    
+
 private:
 
     ksnet_arp_data *sendTDD(uint8_t cmd, const void *key, size_t key_len,
         const void *data = NULL, size_t data_len = 0, uint32_t id = 0) {
-        
+
         size_t tdd_len;
         auto tddr = prepareRequest(key, key_len, data, data_len, id, &tdd_len);
         return teo->sendTo(peer.c_str(), cmd, tddr.get(), tdd_len);

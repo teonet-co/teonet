@@ -17,7 +17,12 @@ typedef struct teoAsyncClass {
 
     void *ke; // Pointer to ksnEvMgrClass
     void *event_cb; // Pointer to event callback
+    pthread_t t_id; // Self thread id
+    int f_multi_thread; // Multi thread flag
     uint8_t test;
+    pthread_mutex_t cv_mutex; // Condition variables mutex
+    pthread_cond_t cv_threshold; // Condition variable threshold
+    pthread_mutex_t async_func_mutex; // Async functions mutex
 
 } teoAsyncClass;
 

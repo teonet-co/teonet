@@ -399,6 +399,25 @@ int ksnLNullSendEchoToL0(void *ke, char *addr, int port, char *cname,
     return retval;
 }
 
+int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
+        size_t cname_length, void *data, size_t data_len) {
+
+    size_t data_e_length;
+    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, 
+            data_len, &data_e_length);
+            
+    ksnCorePacketData rd;
+    rd.addr = addr;
+    rd.port = port;
+    rd.from = cname;
+    rd.from_len = cname_length;
+    rd.l0_f = 1;
+    sendCmdAnswerToBinaryA(ke, &rd, CMD_ECHO, data_e, data_e_length);
+    
+    free(data_e);
+    return 0;
+}
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 
@@ -465,9 +484,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 
         // Login will continue when answer received
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG,
-            "got login command with name '%s'\n", kld->name
-        );
+        ksn_printf(kev, MODULE, DEBUG,"### 0002,%s,%d\n", kld->name, fd);
         #endif
     }
     else { 
@@ -594,8 +611,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         }
 
         // Show disconnect message
-        ksn_printf(kev, MODULE, CONNECT,
-            "L0 client with fd %d disconnected\n", fd);
+        ksn_printf(kev, MODULE, CONNECT, "### 0005,%d\n", fd);
 
         // Send Disconnect event to all subscribers
         if(kld->name != NULL)
@@ -1056,8 +1072,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG,
-                "connection initialized, client name is: %s (username: %s)\n",
-                kld->name, jp.username);
+                "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
+                kld->name, kld->t_addr, jp.username);
             #endif
 
             // Send Connected event to all subscribers

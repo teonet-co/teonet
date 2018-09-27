@@ -80,6 +80,7 @@
             <word>mutex</word>
             <word>name'</word>
             <word>namespace</word>
+            <word>nodejs</word>
             <word>nonblock</word>
             <word>org</word>
             <word>outrunning</word>
@@ -89,6 +90,7 @@
             <word>po</word>
             <word>printf</word>
             <word>recvfrom</word>
+            <word>retval</word>
             <word>rm</word>
             <word>scherba</word>
             <word>segv</word>
@@ -97,6 +99,7 @@
             <word>src</word>
             <word>SSL</word>
             <word>std</word>
+            <word>stdout</word>
             <word>str</word>
             <word>strndup</word>
             <word>strtol</word>

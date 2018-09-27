@@ -196,11 +196,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // Connect to Unix socket and send test request
             char *socket_path = "/var/run/docker.sock"; // Docker Unix socket path        
             int fd = usock_connect(us, socket_path);           
-            if(fd > 0)
+            if(fd > 0) {
                 // Test requests
                 usock_send_request_http(us, "GET /info");
                 usock_send_request_http(us, "GET /containers/json");
                 usock_send_request_http(us, "GET /networks");
+            }
             break;
 
         // Before stop

@@ -123,8 +123,9 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     teo_argc = argc;
     teo_argv = argv;
 
-    // Initialize async mutex
+    // Initialize async and printf mutex
     pthread_mutex_init(&ke->async_mutex, NULL);
+    pthread_mutex_init(&ke->printf_mutex, NULL);
 
     // KSNet parameters
     const int app_argc = options&APP_PARAM && user_data != NULL && ((ksnetEvMgrAppParam*)user_data)->app_argc > 1 ? ((ksnetEvMgrAppParam*)user_data)->app_argc : 1; // number of application arguments
@@ -381,7 +382,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         // Initialize async idle watcher
         ev_idle_init (&ke->idle_async_w, idle_async_cb);
         ke->idle_async_w.data = ke;
-        
+
         // Run event loop
         ke->runEventMgr = 1;
         if(ke->km == NULL) ev_run(loop, 0);
@@ -448,6 +449,9 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         if(ke->app_version != NULL) free(ke->app_version);
 
         int km = ke->km != NULL;
+
+        // Destroy printf mutex
+        pthread_mutex_destroy(&ke->printf_mutex);
 
         // Free memory
         free(ke);
@@ -601,10 +605,6 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
 
     if(!ke->async_queue) return;
 
-    #ifdef DEBUG_KSNET
-    ksn_puts(ke, MODULE, DEBUG_VV, "make Async call to Event manager");
-    #endif
-
     // Add something to queue and send async signal to event loop
     void* element = NULL;
     if(data == NULL) data_len = 0;
@@ -618,7 +618,7 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
     pthread_mutex_lock (&ke->async_mutex);
     pblListAdd(ke->async_queue, element);
     pthread_mutex_unlock (&ke->async_mutex);
-
+    
     // Send async signal to process queue
     ev_async_send(ke->ev_loop,/*EV_DEFAULT_*/ &ke->sig_async_w);
 }
@@ -631,8 +631,8 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
  * @return
  */
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
-
-    return ke->runEventMgr ? ev_now(ke->ev_loop) : 0.0;
+    double rv = ke->runEventMgr ? ev_now(ke->ev_loop) : 0.0;
+    return rv;
 }
 
 /**
@@ -815,7 +815,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
     int retval = 0; // Return value
     double ct = ksnetEvMgrGetTime(kev); //Current time
-    
+
     // Send trip time request
     if(ct - arp_data->last_triptime_send > CHECK_EVENTS_AFTER / 10) {
         ksnCommandSendCmdEcho(kev->kc->kco, peer_name, (void*) TRIPTIME,
@@ -834,7 +834,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL,  arp_data, NULL);
-        
+
         retval = 1;
     }
 
@@ -876,6 +876,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
         // Connect to R-Host
         connect_r_host_cb(kev);
         // Send event to application
+        if(kev->ta) kev->ta->t_id = pthread_self();
         if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
     }
     // Idle count max value
@@ -1135,7 +1136,7 @@ void idle_async_cb(EV_P_ ev_idle *w, int revents) {
     // Stop this watcher
     ev_idle_stop(EV_A_ w);
     ev_async_send(kev->ev_loop,/*EV_DEFAULT_*/ &kev->sig_async_w);
-    
+
     #undef kev
 }
 
@@ -1152,37 +1153,46 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
 
     // Send async event to event loop
     #define SEND_EVENT(data, data_len, user_data) \
-        pthread_mutex_unlock (&kev->async_mutex); \
-        kev->event_cb(kev, EV_K_ASYNC , data, data_len, user_data); \
-        pthread_mutex_lock (&kev->async_mutex)
+        kev->event_cb(kev, EV_K_ASYNC , data, data_len, user_data)
+
+//        pthread_mutex_unlock (&kev->async_mutex);
+//        kev->event_cb(kev, EV_K_ASYNC , data, data_len, user_data);
+//        pthread_mutex_lock (&kev->async_mutex)
+
 
     #ifdef DEBUG_KSNET
     ksn_puts(kev, MODULE, DEBUG_VV, "async event callback");
     #endif
 
     // Get data from async queue and send user event with it
-    pthread_mutex_lock (&kev->async_mutex);
+//    pthread_mutex_lock (&kev->async_mutex);
     //int i = 0;
-    while(!pblListIsEmpty(kev->async_queue)) {
+    for(;;) {
+        pthread_mutex_lock(&kev->async_mutex);
+        int isEmpty = pblListIsEmpty(kev->async_queue);
+        pthread_mutex_unlock(&kev->async_mutex);
+        if(isEmpty) break;
+
         if(!ev_is_active(EV_A_ &kev->idle_async_w)) {
-           //printf("pblListSize: %d\n", pblListSize(kev->async_queue));
             size_t ptr = 0;
+            pthread_mutex_lock(&kev->async_mutex);
             void *data = pblListPoll(kev->async_queue);
+            pthread_mutex_unlock(&kev->async_mutex);
             if(data != NULL) {
-                void *user_data = *(void**)data; ptr += sizeof(void**);
+                void *user_data = *(void**)data; ptr += sizeof(void*);
                 uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
-                SEND_EVENT(data + ptr, data_len, user_data);
+                SEND_EVENT(data_len ? data + ptr : NULL, data_len, user_data);
                 free(data);
             }
             else {
                 SEND_EVENT(NULL, 0, NULL);
             }
             //if(++i <= 2) continue; // Send 3 records without Idle event
-            ev_idle_start(EV_A_ &kev->idle_async_w); // Send idle event to continue queue processing 
-        }        
+            ev_idle_start(EV_A_ &kev->idle_async_w); // Send idle event to continue queue processing
+        }
         break;
     }
-    pthread_mutex_unlock (&kev->async_mutex);
+//    pthread_mutex_unlock (&kev->async_mutex);
 
     // Do something ...
 
@@ -1309,7 +1319,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     #ifdef M_ENAMBE_ASYNC
     ke->ta = teoAsyncInit(ke);
     #endif
-    
+
     return 1;
 }
 
