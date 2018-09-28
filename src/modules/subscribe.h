@@ -46,6 +46,7 @@ void teoSScrDestroy(teoSScrClass *sscr);
 void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev, ksnet_arp_data *arp);
 int teoSScrUnSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev);
 int teoSScrUnSubscriptionAll(teoSScrClass *sscr, char *peer_name);
+const char *teoSScrSubscriptionList(teoSScrClass *sscr);
 void teoSScrSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev);
 void teoSScrUnSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev);
 void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data, size_t data_length, uint8_t cmd);

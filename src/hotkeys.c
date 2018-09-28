@@ -130,6 +130,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             "%s"
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
             " "COLOR_DW"Q"COLOR_END" - TR-UDP queues\n"
+            " "COLOR_DW"s"COLOR_END" - show subscribers\n"
             " "COLOR_DW"a"COLOR_END" - show application menu\n"
             " "COLOR_DW"f"COLOR_END" - set filter\n"
             " "COLOR_DW"r"COLOR_END" - restart application\n"
@@ -194,6 +195,11 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                    (khv->tr_udp_queues_m ? STOP : START));
             
         } break;
+        
+        // Show subscribers
+        case 's':
+            teoSScrSubscriptionList(kc->kco->ksscr);
+            break;
             
         // Send User event to Application
         case 'a':
