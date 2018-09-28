@@ -75,7 +75,7 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
             memcpy(sscr_out_data->data, data, data_length);
 
             #ifdef DEBUG_KSNET
-            ksn_printf(((ksnetEvMgrClass*)sscr->ke), MODULE, DEBUG_VV,
+            ksn_printf(((ksnetEvMgrClass*)sscr->ke), MODULE, DEBUG,
                    "send CMD_SUBSCRIBE_ANSWER with event #%d, "
                    "data length %d, number of subscribers to this event: %d\n",
                     ev, data_length, num
