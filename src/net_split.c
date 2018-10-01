@@ -115,8 +115,8 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     // Parse command
     size_t ptr_d = 0;
     uint16_t packet_num = *(uint16_t*)rd->data; ptr_d += sizeof(uint16_t); // Packet number
-    int last_packet = (*(uint16_t*)(rd->data + ptr_d)) & (MAX_PACKET_LEN + 1); // Is this last packet
-    uint16_t subpacket_num = (*(uint16_t*)(rd->data + ptr_d)) & MAX_PACKET_LEN; ptr_d += sizeof(uint16_t); // Subpacket number
+    int last_packet = (*(uint16_t*)(rd->data + ptr_d)) & LAST_PACKET_FLAG; // Is this last packet
+    uint16_t subpacket_num = (*(uint16_t*)(rd->data + ptr_d)) & (LAST_PACKET_FLAG-1); ptr_d += sizeof(uint16_t); // Subpacket number
 
     /* Map key structure:
      *
