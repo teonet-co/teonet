@@ -293,7 +293,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     int retval = 0;
 
-    if(data_len <= MAX_PACKET_LEN - MAX_DATA_LEN) {
+    if(data_len <= (MAX_PACKET_LEN - MAX_DATA_LEN)*10) {
 
         struct sockaddr_in remaddr;         // remote address
         socklen_t addrlen = sizeof(remaddr);// length of addresses
