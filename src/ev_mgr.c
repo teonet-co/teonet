@@ -608,10 +608,10 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
     // Add something to queue and send async signal to event loop
     void* element = NULL;
     if(data == NULL) data_len = 0;
-    element = malloc(data_len + sizeof(uint16_t) + sizeof(void*));
+    element = malloc(data_len + sizeof(uint32_t) + sizeof(void*));
     size_t ptr = 0;
     *(void**)element = user_data; ptr += sizeof(void**);
-    *(uint16_t*)(element + ptr) = (uint16_t)data_len; ptr += sizeof(uint16_t);
+    *(uint32_t*)(element + ptr) = (uint32_t)data_len; ptr += sizeof(uint32_t);
     if(data != NULL) {
         memcpy(element + ptr, data, data_len);
     }
@@ -1180,7 +1180,7 @@ void sig_async_cb (EV_P_ ev_async *w, int revents) {
             pthread_mutex_unlock(&kev->async_mutex);
             if(data != NULL) {
                 void *user_data = *(void**)data; ptr += sizeof(void*);
-                uint16_t data_len = *(uint16_t*)(data + ptr); ptr += sizeof(uint16_t);
+                uint32_t data_len = *(uint32_t*)(data + ptr); ptr += sizeof(uint32_t);
                 SEND_EVENT(data_len ? data + ptr : NULL, data_len, user_data);
                 free(data);
             }

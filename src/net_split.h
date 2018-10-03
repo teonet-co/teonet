@@ -14,7 +14,8 @@
 #include "ev_mgr.h"
 
 #define MAX_DATA_LEN 448
-#define MAX_PACKET_LEN 0x7FFF
+#define MAX_PACKET_LEN 0x7FFFF
+#define LAST_PACKET_FLAG 0x8000
 
 /**
  * KSNet split class data
