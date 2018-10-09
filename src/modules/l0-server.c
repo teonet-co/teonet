@@ -1042,8 +1042,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG,
         "got %d bytes answer from %s authentication application, "
-            "username: %s\n",
-        rd->data_len, TEO_AUTH, jp.username
+            "username: %s\n%s\n",
+        rd->data_len, rd->from, jp.username, rd->data
     );
     #endif
 
@@ -1077,7 +1077,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             #endif
 
             // Send Connected event to all subscribers
-            if(kld->name != NULL)  {
+            if(kld->name != NULL && !strcmp(rd->from,TEO_AUTH)) {
                 teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED,
                     kld->name, kld->name_length, 0);
 
