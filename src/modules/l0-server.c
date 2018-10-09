@@ -1056,7 +1056,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         if(kld != NULL) {
 
             // Rename client
-            if(jp.userId != NULL && jp.clientId != NULL) {
+            if(jp.userId != NULL) { // && jp.clientId != NULL) {
 
                 // Remove existing name
                 if(kld->name != NULL) {
@@ -1065,7 +1065,11 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                     free(kld->name);
                 }
                 // Set new name
-                kld->name = ksnet_formatMessage("%s:%s", jp.userId, jp.clientId);
+                kld->name = ksnet_formatMessage("%s%s%s",
+                    jp.userId, 
+                    jp.clientId ? ":" : "" , 
+                    jp.clientId ? jp.clientId : ""
+                );
                 kld->name_length = strlen(kld->name) + 1;
                 pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
             }
