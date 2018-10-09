@@ -1040,7 +1040,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     json_parse(json_data_unesc, &jp);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV,
+    ksn_printf(ke, MODULE, DEBUG,
         "got %d bytes answer from %s authentication application, "
             "username: %s\n",
         rd->data_len, TEO_AUTH, jp.username
