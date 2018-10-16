@@ -499,7 +499,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 
         // Send login to authentication application
         // to check this client or register 'wg001' clients
-        if(strncmp(WG001, kld->name, sizeof(WG001))) {
+        if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
         }
