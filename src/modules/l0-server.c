@@ -19,6 +19,7 @@
 
 #define MODULE _ANSI_LIGHTCYAN "l0_server" _ANSI_NONE
 #define TEO_AUTH "teo-auth"
+#define WG001 "wg001-"
 
 // Local functions
 static int ksnLNullStart(ksnLNullClass *kl);
@@ -461,6 +462,25 @@ static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData 
     }
 }
 
+void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name, 
+        size_t name_length) {
+        
+    // Send Connected event to all subscribers
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED,
+        (void *)name, name_length, 0);
+
+    // Add connection to L0 statistic
+    ke->kl->stat.visits++; // Increment number of visits
+
+    // Send "new visit" event to all subscribers
+    size_t vd_length = sizeof(ksnLNullSVisitsData) + name_length;
+    ksnLNullSVisitsData *vd = malloc(vd_length);
+    vd->visits = ke->kl->stat.visits;
+    memcpy(vd->client, name, name_length);
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, vd, vd_length, 0);
+    free(vd);    
+}
+
 /**
  * Set client name and check it in auth server
  *
@@ -478,9 +498,12 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
         // Send login to authentication application
-        // to check this client
-        ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
-                kld->name, kld->name_length);
+        // to check this client or register 'wg001' clients
+        if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
+            ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
+                    kld->name, kld->name_length);
+        }
+        else _send_subscribe_events(kev, kld->name, kld->name_length);        
 
         // Login will continue when answer received
         #ifdef DEBUG_KSNET
@@ -1081,22 +1104,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             #endif
 
             // Send Connected event to all subscribers
-            if(kld->name != NULL && !strcmp(rd->from,TEO_AUTH)) {
-                teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED,
-                    kld->name, kld->name_length, 0);
-
-                // Add connection to L0 statistic
-                kl->stat.visits++; // Increment number of visits
-
-                // Send "new visit" event to all subscribers
-                size_t vd_length = sizeof(ksnLNullSVisitsData) +
-                        kld->name_length;
-                ksnLNullSVisitsData *vd = malloc(vd_length);
-                vd->visits = kl->stat.visits;
-                memcpy(vd->client, kld->name, kld->name_length);
-                teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_NEW_VISIT,
-                        vd, vd_length, 0);
-                free(vd);
+            if(kld->name != NULL && !strcmp(rd->from, TEO_AUTH)) {
+                _send_subscribe_events(kev, kld->name, kld->name_length);
             }
 
             // Create & Send websocket allow answer message
