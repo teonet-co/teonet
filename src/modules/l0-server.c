@@ -150,6 +150,9 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         ksnLNullData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), &vl);
         if(kld != NULL) {
 
+            // Set last time received
+            kld->last_time = ksnetEvMgrGetTime(kl->ke);
+
             // Add received data to the read buffer
             if(received > kld->read_buffer_size - kld->read_buffer_ptr) {
 
@@ -375,7 +378,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 }
 
 /**
- * Send echo to L0 client. 
+ * Send echo to L0 client.
  *
  * @param ke Pointer to ksnetEvMgrClass
  * @param addr IP address of remote peer
@@ -389,12 +392,12 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
  */
 int ksnLNullSendEchoToL0(void *ke, char *addr, int port, char *cname,
         size_t cname_length, void *data, size_t data_len) {
-    
+
     size_t data_e_length;
-    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, 
+    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data,
             data_len, &data_e_length);
-            
-    int retval = ksnLNullSendToL0(ke, addr, port, cname, cname_length, CMD_ECHO, 
+
+    int retval = ksnLNullSendToL0(ke, addr, port, cname, cname_length, CMD_ECHO,
             data_e, data_e_length);
     free(data_e);
     return retval;
@@ -404,9 +407,9 @@ int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
         size_t cname_length, void *data, size_t data_len) {
 
     size_t data_e_length;
-    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, 
+    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data,
             data_len, &data_e_length);
-            
+
     ksnCorePacketData rd;
     rd.addr = addr;
     rd.port = port;
@@ -414,7 +417,7 @@ int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
     rd.from_len = cname_length;
     rd.l0_f = 1;
     sendCmdAnswerToBinaryA(ke, &rd, CMD_ECHO, data_e, data_e_length);
-    
+
     free(data_e);
     return 0;
 }
@@ -451,6 +454,7 @@ static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData 
        data.t_port = 0;
        data.t_channel = 0;
     }
+    data.last_time = ksnetEvMgrGetTime(kl->ke);
     pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));
 
     if(packet) {
@@ -462,9 +466,9 @@ static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData 
     }
 }
 
-void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name, 
+void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
         size_t name_length) {
-        
+
     // Send Connected event to all subscribers
     teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED,
         (void *)name, name_length, 0);
@@ -478,7 +482,7 @@ void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
     vd->visits = ke->kl->stat.visits;
     memcpy(vd->client, name, name_length);
     teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, vd, vd_length, 0);
-    free(vd);    
+    free(vd);
 }
 
 /**
@@ -503,14 +507,14 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
         }
-        else _send_subscribe_events(kev, kld->name, kld->name_length);        
+        else _send_subscribe_events(kev, kld->name, kld->name_length);
 
         // Login will continue when answer received
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG,"### 0002,%s,%d\n", kld->name, fd);
         #endif
     }
-    else { 
+    else {
         // Wrong Login name received
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG,
@@ -690,6 +694,29 @@ static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
     ksnLNullClientConnect(w->data, fd);
 }
 
+#define CHECK_TIMEOUT 2.00
+
+void _check_connected(uint32_t id, int type, void *data) {
+
+    ksnLNullClass *kl = data;
+
+    // Disconnect all clients which don't send nothing during timeout
+    PblIterator *it = pblMapIteratorReverseNew(kl->map);
+    if(it != NULL) {
+        while(pblIteratorHasPrevious(it) > 0) {
+            void *entry = pblIteratorPrevious(it);
+            ksnLNullData *data = pblMapEntryValue(entry);
+            if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
+                int *fd = (int *) pblMapEntryKey(entry);
+                ksnLNullClientDisconnect(kl, *fd, 0);
+            }
+        }
+        pblIteratorFree(it);
+    }
+
+    ksnCQueAdd(kl->cque, _check_connected, CHECK_TIMEOUT, kl);
+}
+
 /**
  * Start l0 Server
  *
@@ -720,6 +747,10 @@ static int ksnLNullStart(ksnLNullClass *kl) {
 
             kev->ksn_cfg.l0_tcp_port = port_created;
             kl->fd = fd;
+
+            // Init check clients cque
+            kl->cque = ksnCQueInit(kl->ke, 0);
+            ksnCQueAdd(kl->cque, _check_connected, CHECK_TIMEOUT, kl);
         }
     }
 
@@ -754,6 +785,8 @@ static void ksnLNullStop(ksnLNullClass *kl) {
         pblMapClear(kl->map_n);
         pblMapClear(kl->map);
 
+        ksnCQueDestroy(kl->cque); // Init check clients cque
+
         // Stop the server
         ksnTcpServerStop(kev->kt, kl->fd);
     }
@@ -772,12 +805,12 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksnLNullSPacket *data = rd->data;
 
     // Process command
-    if(data->cmd == CMD_ECHO || data->cmd == CMD_ECHO_ANSWER || 
-       data->cmd == CMD_PEERS || data->cmd == CMD_L0_CLIENTS || 
+    if(data->cmd == CMD_ECHO || data->cmd == CMD_ECHO_ANSWER ||
+       data->cmd == CMD_PEERS || data->cmd == CMD_L0_CLIENTS ||
        data->cmd == CMD_RESET || data->cmd == CMD_SUBSCRIBE || CMD_UNSUBSCRIBE ||
-       data->cmd == CMD_L0_CLIENTS_N || data->cmd == CMD_L0_STAT || 
-       data->cmd == CMD_HOST_INFO || data->cmd == CMD_GET_NUM_PEERS || 
-       data->cmd == CMD_TRUDP_INFO || 
+       data->cmd == CMD_L0_CLIENTS_N || data->cmd == CMD_L0_STAT ||
+       data->cmd == CMD_HOST_INFO || data->cmd == CMD_GET_NUM_PEERS ||
+       data->cmd == CMD_TRUDP_INFO ||
        (data->cmd >= CMD_USER && data->cmd < CMD_192_RESERVED) ||
        (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {
 
@@ -1089,8 +1122,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 }
                 // Set new name
                 kld->name = ksnet_formatMessage("%s%s%s",
-                    jp.userId, 
-                    jp.clientId ? ":" : "" , 
+                    jp.userId,
+                    jp.clientId ? ":" : "" ,
                     jp.clientId ? jp.clientId : ""
                 );
                 kld->name_length = strlen(kld->name) + 1;
@@ -1144,7 +1177,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
-    
+
     teonet_client_data_ar *data_ar = NULL;
 
     if(kl != NULL && kev->ksn_cfg.l0_allow_f && kl->fd) {
@@ -1166,7 +1199,7 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
                             sizeof(data_ar->client_data[i].name));
                     i++;
                 }
-            }            
+            }
             pblIteratorFree(it);
         }
         data_ar->length = i;

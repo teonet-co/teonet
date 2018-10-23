@@ -28,6 +28,7 @@ typedef struct ksnLNullData {
     char *t_addr;             ///< TR-UDP IP address
     int t_port;               ///< TR-UDP port
     int t_channel;            ///< TR-UDP channel
+    double last_time;
 
 } ksnLNullData;  
                    
@@ -42,6 +43,7 @@ typedef struct  ksnLNullClass {
     int fd;             ///< L0 TCP Server FD
     ksnLNullSStat stat; ///< L0 server statistic
     int fd_trudp;       ///< Last free TR-UDP L0 FD
+    ksnCQueClass *cque; ///< CQUe to check dead clients
     
 } ksnLNullClass;
 
