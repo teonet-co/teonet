@@ -711,15 +711,15 @@ void _check_connected(uint32_t id, int type, void *data) {
                 int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
-            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
-                printf("Send ping to %s:%d %s\n", data->t_addr, data->t_port, data->name);
-                ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "ping", 5);
-            }
+//            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
+//                printf("Send ping to %s:%d %s\n", data->t_addr, data->t_port, data->name);
+//                ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "ping", 5);
+//            }
         }
         pblIteratorFree(it);
     }
 
-    ksnCQueAdd(kl->cque, _check_connected, CHECK_TIMEOUT, kl);
+    ksnCQueAdd(kl->cque, _check_connected, SEND_TIMEOUT, kl);
 }
 
 /**
