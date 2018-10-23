@@ -694,7 +694,7 @@ static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
     ksnLNullClientConnect(w->data, fd);
 }
 
-#define CHECK_TIMEOUT 2.00
+#define CHECK_TIMEOUT 60.00
 
 void _check_connected(uint32_t id, int type, void *data) {
 
