@@ -708,7 +708,7 @@ void _check_connected(uint32_t id, int type, void *data) {
             ksnLNullData *data = pblMapEntryValue(entry);
             if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
                 int *fd = (int *) pblMapEntryKey(entry);
-                ksnLNullClientDisconnect(kl, *fd, 0);
+                ksnLNullClientDisconnect(kl, *fd, 1);
             }
         }
         pblIteratorFree(it);
