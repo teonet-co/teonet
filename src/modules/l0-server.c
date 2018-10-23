@@ -694,7 +694,8 @@ static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
     ksnLNullClientConnect(w->data, fd);
 }
 
-#define CHECK_TIMEOUT 60.00
+#define CHECK_TIMEOUT 45.00
+#define SEND_TIMEOUT 60.00
 
 void _check_connected(uint32_t id, int type, void *data) {
 
@@ -706,9 +707,12 @@ void _check_connected(uint32_t id, int type, void *data) {
         while(pblIteratorHasPrevious(it) > 0) {
             void *entry = pblIteratorPrevious(it);
             ksnLNullData *data = pblMapEntryValue(entry);
-            if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
+            if(ksnetEvMgrGetTime(kl->ke) - data->last_time > SEND_TIMEOUT) {
                 int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullClientDisconnect(kl, *fd, 1);
+            }
+            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
+                ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "", 1);
             }
         }
         pblIteratorFree(it);
