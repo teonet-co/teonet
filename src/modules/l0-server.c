@@ -712,7 +712,7 @@ void _check_connected(uint32_t id, int type, void *data) {
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
             else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
-                ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "", 1);
+                ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "ping", 5);
             }
         }
         pblIteratorFree(it);
