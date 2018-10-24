@@ -707,16 +707,20 @@ void _check_connected(uint32_t id, int type, void *data) {
         while(pblIteratorHasPrevious(it) > 0) {
             void *entry = pblIteratorPrevious(it);
             ksnLNullData *data = pblMapEntryValue(entry);
+            int *fd = (int *) pblMapEntryKey(entry);
+            // Disconnect client
             if(ksnetEvMgrGetTime(kl->ke) - data->last_time > SEND_TIMEOUT) {
-                int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
+            // Send echo to client
             else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
                 printf("Send ping to %s:%d %s\n", data->t_addr, data->t_port, data->name);
-                
+
+                // From this host(peer)
                 const char *from = ksnetEvMgrGetHostName(kl->ke);
                 size_t data_e_length, from_len = strlen(from) + 1;
-                int *fd = (int *) pblMapEntryKey(entry);
+
+                // Create echo buffer
                 void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass *)(kl->ke))->kc->kco, "ping", 5, &data_e_length);
                 
                 // Create L0 packet
@@ -728,9 +732,9 @@ void _check_connected(uint32_t id, int type, void *data) {
                 
                 
                 ksnLNullPacketSend(kl, *fd, out_data, packet_length);
-                //ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "ping", 5);
                 
                 free(data_e);
+                free(out_data);
             }
         }
         pblIteratorFree(it);
