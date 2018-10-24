@@ -710,6 +710,7 @@ void _check_connected(uint32_t id, int type, void *data) {
             int *fd = (int *) pblMapEntryKey(entry);
             // Disconnect client
             if(ksnetEvMgrGetTime(kl->ke) - data->last_time > SEND_TIMEOUT) {
+                printf("Disconnect: %s\n", data->name);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
             // Send echo to client
