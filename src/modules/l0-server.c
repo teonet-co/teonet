@@ -710,12 +710,12 @@ void _check_connected(uint32_t id, int type, void *data) {
             int *fd = (int *) pblMapEntryKey(entry);
             // Disconnect client
             if(ksnetEvMgrGetTime(kl->ke) - data->last_time > SEND_TIMEOUT) {
-                printf("Disconnect: %s\n", data->name);
+                ksn_printf(kev, MODULE, DEBUG, "Disconnect client by timeout, fd: %d, name: %s\n", *fd, data->name);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
             // Send echo to client
             else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
-                printf("Send ping to %s:%d %s\n", data->t_addr, data->t_port, data->name);
+                ksn_printf(kev, MODULE, DEBUG, "Send ping to client by timeout, fd: %d, name: %s\n", *fd, data->name);
 
                 // From this host(peer)
                 const char *from = ksnetEvMgrGetHostName(kl->ke);
