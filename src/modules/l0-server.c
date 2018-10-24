@@ -694,7 +694,7 @@ static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
     ksnLNullClientConnect(w->data, fd);
 }
 
-#define CHECK_TIMEOUT 45.00
+#define CHECK_TIMEOUT 30.00
 #define SEND_TIMEOUT 60.00
 
 void _check_connected(uint32_t id, int type, void *data) {
@@ -711,15 +711,32 @@ void _check_connected(uint32_t id, int type, void *data) {
                 int *fd = (int *) pblMapEntryKey(entry);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
-//            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
-//                printf("Send ping to %s:%d %s\n", data->t_addr, data->t_port, data->name);
-//                ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "ping", 5);
-//            }
+            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
+                printf("Send ping to %s:%d %s\n", data->t_addr, data->t_port, data->name);
+                
+                const char *from = ksnetEvMgrGetHostName(kl->ke);
+                size_t data_e_length, from_len = strlen(from) + 1;
+                int *fd = (int *) pblMapEntryKey(entry);
+                void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass *)(kl->ke))->kc->kco, "ping", 5, &data_e_length);
+                
+                // Create L0 packet
+                size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_e_length;
+                char *out_data = malloc(out_data_len);
+                memset(out_data, 0, out_data_len);
+                size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+                        CMD_ECHO, from, data_e, data_e_length);
+                
+                
+                ksnLNullPacketSend(kl, *fd, out_data, packet_length);
+                //ksnLNullSendEchoToL0(kl->ke, data->t_addr, data->t_port, data->name, data->name_length, "ping", 5);
+                
+                free(data_e);
+            }
         }
         pblIteratorFree(it);
     }
 
-    ksnCQueAdd(kl->cque, _check_connected, SEND_TIMEOUT, kl);
+    ksnCQueAdd(kl->cque, _check_connected, CHECK_TIMEOUT, kl);
 }
 
 /**
