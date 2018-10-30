@@ -1913,11 +1913,7 @@
         </cTool>
       </item>
       <item path="app/modules/teo_web/teo_web_conf.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="8">
-          <incDir>
-            <pElem>app/modules/teo_web</pElem>
-            <pElem>src/utils</pElem>
-          </incDir>
+        <cTool flags="3">
         </cTool>
       </item>
       <item path="app/modules/teo_web/teo_ws.c" ex="false" tool="0" flavor2="3">

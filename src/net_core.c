@@ -382,6 +382,8 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
+    
+    // Send by type in this network
 
     // Send to peer at other network
     else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL &&
