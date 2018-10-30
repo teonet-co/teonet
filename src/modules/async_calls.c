@@ -93,7 +93,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                 // Check multi thread request
                 if(!data) {
-                    ksn_printf(kev, MODULE, DEBUG_VV,
+                    ksn_printf(kev, MODULE, DEBUG,
                         "EV_K_ASYNC check MULTITHREAD rv: %d, f_multi_thread: %d\n", 
                         ud->rv, kev->ta->f_multi_thread);
                     if(MULTITHREADED()) {
@@ -317,7 +317,7 @@ static int check_retrives = 0, timeouts = 0;
             timeouts++; \
             check_retrives++; \
             kev->ta->f_multi_thread = check_retrives < CHECK_RETRIVES ? NOT_DEFINED_MULTITHREAD : NO_MULTITHREAD; \
-            ksn_puts(kev, MODULE, DEBUG_VV, "MULTITHREAD timeout"); \
+            ksn_puts(kev, MODULE, DEBUG, "MULTITHREAD timeout"); \
             UNLOCK_CV(); \
         } \
         if(MULTITHREADED()) UNLOCK_CV(); \
@@ -343,11 +343,10 @@ static inline int _check_thread(void *ke) {
 // retval NO_MULTITHREAD (2) - if multi thread run incorrectly (no multi thread, like in nodejs);
 static int _check_multi_thread(void *ke) {
 
-    //if(kev->ta->f_multi_thread == NOT_DEFINED_MULTITHREAD) {
-    if(kev->ta->f_multi_thread != MULTITHREAD && check_retrives < CHECK_RETRIVES) {
+    if(!kev->ksn_cfg.no_multi_thread_f && kev->ta->f_multi_thread != MULTITHREAD && check_retrives < CHECK_RETRIVES) {
         kev->ta->f_multi_thread = MULTITHREAD;
         kev->ta->f_multi_thread = SEND_ASYNC(NULL, 0) == 0 ? MULTITHREAD : NO_MULTITHREAD;
-        ksn_printf(kev, MODULE, DEBUG_VV, "Check MULTITHREAD mode: %s\n", 
+        ksn_printf(kev, MODULE, DEBUG, "Check MULTITHREAD mode: %s\n", 
             kev->ta->f_multi_thread == MULTITHREAD ? "MULTITHREAD" : "NO MULTITHREAD");
         if(MULTITHREADED()) check_retrives = 0;
     }
