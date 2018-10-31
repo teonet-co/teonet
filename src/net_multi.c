@@ -199,7 +199,7 @@ ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd,
         
         // Get network and check its arp
         ksnetEvMgrClass *ke = pblListGet(km->list, i);
-        arp = ksnetArpGet(ke->kc->ka, to);
+        arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, to);
         
         // Send to peer at network
         if(arp != NULL) {

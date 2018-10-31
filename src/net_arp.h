@@ -75,18 +75,18 @@ extern "C" {
 // Peers ARP table functions
 ksnetArpClass *ksnetArpInit(void *ke);
 void ksnetArpDestroy(ksnetArpClass *ka);
-void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data);
+void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data_ext *data);
 void ksnetArpAddHost(ksnetArpClass *ka); 
 void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port);
-ksnet_arp_data *ksnetArpGet(ksnetArpClass *ka, char *name);
+ksnet_arp_data_ext *ksnetArpGet(ksnetArpClass *ka, char *name);
 int ksnetArpSize(ksnetArpClass *ka);
 int ksnetArpRemove(ksnetArpClass *ka, char* name);
 void ksnetArpRemoveAll(ksnetArpClass *ka);
 int ksnetArpShow(ksnetArpClass *ka);
 char *ksnetArpShowStr(ksnetArpClass *ka);
-int ksnetArpGetAll_(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data, int flag);
-int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data);
-int ksnetArpGetAllH(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data), void *data);
+int ksnetArpGetAll_(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data, int flag);
+int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data);
+int ksnetArpGetAllH(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data);
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr, char **peer_name);
 ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka);
 size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);

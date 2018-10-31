@@ -56,10 +56,10 @@ void ksnetArpDestroy(ksnetArpClass *ka) {
  * @param name Peer name
  * @return Pointer to ARP data or NULL if not found
  */
-ksnet_arp_data * ksnetArpGet(ksnetArpClass *ka, char *name) {
+ksnet_arp_data_ext *ksnetArpGet(ksnetArpClass *ka, char *name) {
 
     size_t val_len;
-    return (ksnet_arp_data *) pblMapGetStr(ka->map, name, &val_len);
+    return (ksnet_arp_data_ext *) pblMapGetStr(ka->map, name, &val_len);
 }
 
 
@@ -81,7 +81,7 @@ int ksnetArpSize(ksnetArpClass *ka) {
  * @param name
  * @param data
  */
-void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data) {
+void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data_ext *data) {
 
     pblMapAdd(
         ka->map,
@@ -98,17 +98,17 @@ void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data *data) {
 void ksnetArpAddHost(ksnetArpClass *ka) {
 
     ksnetEvMgrClass *ke = ka->ke;
-    ksnet_arp_data arp;
+    ksnet_arp_data_ext arp;
 
     char* name = ke->ksn_cfg.host_name;
     char *addr = (char*)localhost; //"0.0.0.0";
     int port = ke->kc->port;
 
     memset(&arp, 0, sizeof(arp));
-    arp.connected_time = ev_now(ke->ev_loop); //ksnetEvMgrGetTime(ke);
-    strncpy(arp.addr, addr, sizeof(arp.addr));
-    arp.port = port;
-    arp.mode = -1;
+    arp.data.connected_time = ev_now(ke->ev_loop); //ksnetEvMgrGetTime(ke);
+    strncpy(arp.data.addr, addr, sizeof(arp.data.addr));
+    arp.data.port = port;
+    arp.data.mode = -1;
 
     ksnetArpAdd(ka, name, &arp);
 }
@@ -147,7 +147,7 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
     char* peer_name = strdup(name);
 
     // Remove from ARP table
-    ksnet_arp_data *arp = pblMapRemoveStr(ka->map, name, &var_len);
+    ksnet_arp_data_ext *arp = pblMapRemoveStr(ka->map, name, &var_len);
 
     // If removed successfully
     if(arp != (void*)-1) {
@@ -157,8 +157,8 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
         ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
                 arp->port, 1);
         #elif TRUDP_VERSION == 2
-        trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
-                arp->port, 0);
+        trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->data.addr,
+                arp->data.port, 0);
         #endif
 
         // Remove from Stream module
@@ -169,7 +169,10 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
     if(arp == (void*)-1) arp = NULL;
 
     // Free memory
-    if(arp) free(arp);
+    if(arp) {
+        if(arp->type) free(arp->type);
+        free(arp);
+    }
     free(peer_name);
 
     return arp ? 1 : 0;
@@ -207,7 +210,7 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
  */
 int ksnetArpGetAll_(ksnetArpClass *ka,
         int (*peer_callback)(ksnetArpClass *ka, char *peer_name,
-            ksnet_arp_data *arp_data, void *data),
+            ksnet_arp_data_ext *arp_data, void *data),
         void *data, int flag) {
 
     int retval = 0;
@@ -219,11 +222,11 @@ int ksnetArpGetAll_(ksnetArpClass *ka,
 
             void *entry = pblIteratorNext(it);
             char *name = pblMapEntryKey(entry);
-            ksnet_arp_data *arp_data = pblMapEntryValue(entry);
+            ksnet_arp_data_ext *arp = pblMapEntryValue(entry);
 
-            if(flag || arp_data->mode >= 0) {
+            if(flag || arp->data.mode >= 0) {
 
-                if(peer_callback(ka, name, arp_data, data)) {
+                if(peer_callback(ka, name, arp, data)) {
 
                     retval = 1;
                     break;
@@ -245,14 +248,14 @@ int ksnetArpGetAll_(ksnetArpClass *ka,
  */
 inline int ksnetArpGetAll(ksnetArpClass *ka,
         int (*peer_callback)(ksnetArpClass *ka, char *peer_name,
-            ksnet_arp_data *arp_data, void *data),
+            ksnet_arp_data_ext *arp, void *data),
         void *data) {
 
     return ksnetArpGetAll_(ka, peer_callback, data, 0);
 }
 
 /**
- * Get all known peer without current host. Send it too fnd_peer_cb callback
+ * Get all known peer with current host. Send it too fnd_peer_cb callback
  *
  * @param ka
  * @param peer_callback int peer_callback(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp_data, void *data)
@@ -260,7 +263,7 @@ inline int ksnetArpGetAll(ksnetArpClass *ka,
  */
 inline int ksnetArpGetAllH(ksnetArpClass *ka,
         int (*peer_callback)(ksnetArpClass *ka, char *peer_name,
-            ksnet_arp_data *arp_data, void *data),
+            ksnet_arp_data_ext *arp, void *data),
         void *data) {
 
     return ksnetArpGetAll_(ka, peer_callback, data, 1);
@@ -275,16 +278,16 @@ typedef struct find_arp_data {
 } find_arp_data;
 
 int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
-            ksnet_arp_data *arp_data, void *data) {
+            ksnet_arp_data_ext *arp, void *data) {
 
     int retval = 0;
     find_arp_data *fa = data;
 
-    if(ntohs(((struct sockaddr_in *) fa->addr)->sin_port) == arp_data->port &&
+    if(ntohs(((struct sockaddr_in *) fa->addr)->sin_port) == arp->data.port &&
        !strcmp(inet_ntoa(((struct sockaddr_in *) fa->addr)->sin_addr),
-            arp_data->addr)) {
+            arp->data.addr)) {
 
-        fa->arp_data = arp_data;
+        fa->arp_data = (ksnet_arp_data *)arp;
         fa->peer_name = peer_name;
 
         retval = 1;

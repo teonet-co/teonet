@@ -291,7 +291,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         packet->peer_name + packet->peer_name_length, spacket->data_length);
 
     // Send teonet L0 packet
-    ksnet_arp_data *arp = NULL;
+    ksnet_arp_data *arp_data = NULL;
     // Send to peer
     if(strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
 
@@ -301,7 +301,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
             spacket->from, packet->peer_name);
         #endif
 
-        arp = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0,
+        arp_data = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0,
                 spacket, out_data_len);
     }
     // Send to this host
@@ -322,14 +322,14 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
                 &addrlen)) {
 
             ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
-            arp = ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
+            arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
         }
         free(pkg);
     }
 
     free(out_data);
 
-    return arp;
+    return arp_data;
 }
 
 /**

@@ -41,9 +41,9 @@ int ksnCoreBind(ksnCoreClass *kc);
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, size_t *packet_len);
 void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd, char *from, size_t from_len, const void *data,
         size_t data_len, size_t *packet_len);
-int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
+int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data_ext *arp_data, void *data);
+int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data_ext *arp_data, void *data);
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
-int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
 
 // UDP / UDT functions
 #define ksn_socket(domain, type, protocol) \
@@ -361,6 +361,28 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
     return retval;
 }
 
+typedef struct send_by_type_check_t {
+    char *name;
+    int num;
+    ksnet_arp_data_ext **arp; 
+} send_by_type_check_t;
+
+int send_by_type_check_cb(ksnetArpClass *ka, char *peer_name, 
+        ksnet_arp_data_ext *arp,void *pd) {
+    
+    send_by_type_check_t *sd = pd;
+    if(arp->type && strstr(arp->type, sd->name)) {
+        if(!sd->num) sd->arp = malloc(sizeof(ksnet_arp_data *));
+        else sd->arp = realloc(sd->arp, sizeof(ksnet_arp_data *) * (sd->num + 1));
+        
+        //*(sd->arp + sd->num) = arp;
+        sd->arp[sd->num] = arp;
+        
+        sd->num++;
+    }
+    return 0;
+}
+
 /**
  * Send command by name to peer
  *
@@ -376,14 +398,31 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
     int fd;
     ksnet_arp_data *arp;
+    send_by_type_check_t sd = { .name = to, .num = 0 };
 
     // Send to peer in this network
-    if((arp = ksnetArpGet(kc->ka, to)) != NULL/* && arp->mode != -1*/) {
-
+    if((arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, to)) != NULL/* && arp->mode != -1*/) {
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
     
     // Send by type in this network
+    else if(!ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd) && sd.num) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
+                "send to peer by type \"%s\" \n", to);
+        #endif  
+        int i = 0;
+        for(i=0; i < sd.num; i++) {
+            printf("%s\n", sd.arp[i]->data.addr);
+        }
+        
+        int r = rand() % sd.num;
+        printf("=> %s\n", sd.arp[r]->data.addr);
+        
+        ksnCoreSendto(kc, sd.arp[r]->data.addr, sd.arp[r]->data.port, cmd, data, data_len);
+        
+        free(sd.arp);
+    }
 
     // Send to peer at other network
     else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL &&
@@ -430,7 +469,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
         // If connected to r-host
         char *r_host = ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.r_host_name;
-        if(r_host[0] && (arp = ksnetArpGet(kc->ka, r_host)) != NULL) {
+        if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) { 
 
             #ifdef DEBUG_KSNET
             ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV,
@@ -592,11 +631,11 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *child_peer,
  * @param data
  */
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
-                            ksnet_arp_data *arp_data, void *data) {
+                            ksnet_arp_data_ext *arp_data, void *data) {
 
     ksnCoreSendto(((ksnetEvMgrClass*) ka->ke)->kc,
-            arp_data->addr,
-            arp_data->port,
+            arp_data->data.addr,
+            arp_data->data.port,
             CMD_DISCONNECTED,
             data, data != NULL ? strlen(data)+1 : 0
     );
@@ -613,9 +652,9 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
  * @param data
  */
 int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name,
-                            ksnet_arp_data *arp_data, void *data) {
+                            ksnet_arp_data_ext *arp_data, void *data) {
 
-    if(arp_data->mode == 2) {
+    if(arp_data->data.mode == 2) {
         ksnetArpGetAll(ka, send_cmd_disconnect_cb, name);
     }
 
@@ -665,7 +704,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
     // Check new peer connected
     if((rd->arp = ksnetArpGet(kc->ka, rd->from)) == NULL) {
 
-        ksnet_arp_data arp;
+        ksnet_arp_data_ext arp;
 
         rd->arp = &arp;
         int mode = 0;
@@ -683,10 +722,10 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         // Add peer to ARP Table
         memset(rd->arp, 0, sizeof(*rd->arp));
-        strncpy(rd->arp->addr, rd->addr, sizeof(rd->arp->addr));
-        rd->arp->connected_time = ksnetEvMgrGetTime(ke);
-        rd->arp->port = rd->port;
-        rd->arp->mode = mode;
+        strncpy(rd->arp->data.addr, rd->addr, sizeof(rd->arp->data.addr));
+        rd->arp->data.connected_time = ksnetEvMgrGetTime(ke);
+        rd->arp->data.port = rd->port;
+        rd->arp->data.mode = mode;
         ksnetArpAdd(kc->ka, rd->from, rd->arp);
         rd->arp = ksnetArpGet(kc->ka, rd->from);
 
@@ -699,6 +738,9 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         // Send event to subscribers
         teoSScrSend(ke->kc->kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
+        
+        // Request host info
+        ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, NULL, 0);
     }
 }
 
@@ -796,7 +838,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
             ksnCoreCheckNewPeer(kc, &rd);
 
             // Set last activity time
-            rd.arp->last_activity = ksnetEvMgrGetTime(ke);
+            rd.arp->data.last_activity = ksnetEvMgrGetTime(ke);
 
             // Check & process command
             command_processed = ksnCommandCheck(kc->kco, &rd);
