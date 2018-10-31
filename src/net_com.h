@@ -63,6 +63,7 @@ enum ksnCMD {
     CMD_L0_AUTH,            ///< #96 L0 server auth request answer command
     CMD_AM,                 ///< #97 AM application command 
     CMD_LOGGING,            ///< #98 LOGGING command
+    CMD_L0_CLIENT_RESET,    ///< #99 L0 client reset command
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
@@ -107,7 +108,7 @@ typedef struct ksnCorePacketData {
     void *raw_data;         ///< Received packet data
     size_t raw_data_len;    ///< Received packet length
 
-    ksnet_arp_data *arp;    ///< Pointer to ARP Table data
+    ksnet_arp_data_ext *arp;///< Pointer to extended ARP Table data
 
     int l0_f;               ///< L0 command flag (from set to l0 client name)
 

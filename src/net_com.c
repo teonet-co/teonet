@@ -38,6 +38,7 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -192,6 +193,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_host_info_cb(kco, rd);
             break;
 
+        case CMD_HOST_INFO_ANSWER:
+            processed = cmd_host_info_answer_cb(kco, rd);
+            break;
+            
         case CMD_TRUDP_INFO:
             processed = cmd_trudp_info_cb(kco, rd);
             break;
@@ -692,6 +697,49 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     return 1; // Command processed
 }
 
+
+/**
+ * Process CMD_HOST_INFO_ANSWER
+ *
+ * @param kco
+ * @param rd
+ * @return
+ */
+static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    int retval = 0;
+    
+    if(!rd->arp->type) {
+        
+        host_info_data *hid = (host_info_data *)rd->data;
+        int i;
+        size_t ptr     = strlen(hid->string_ar) + 1;
+        char *type_str = strdup(null_str);
+        for (i = 1; i < hid->string_ar_num; i++) {
+            type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"",
+                type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
+
+            ptr += strlen(hid->string_ar + ptr) + 1;
+        }
+
+        // Add type to arp-table
+        rd->arp->type = strdup(type_str);
+
+        free(type_str);
+        
+        retval = 1;
+
+        #ifdef DEBUG_KSNET
+        ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
+            MODULE, DEBUG,
+            "process CMD_HOST_INFO_ANSWER (cmd = %u) command, from %s (%s:%d), arp-addr %s:%d, type: %s\n",
+            rd->cmd, rd->from, rd->addr, rd->port, rd->arp->data.addr, rd->arp->data.port, rd->arp->type);
+        #endif
+    }
+    
+    return retval; // Command send to user level
+}
+
 /**
  * Process CMD_HOST_INFO
  *
@@ -862,7 +910,7 @@ static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // If we resend command from sender, than sender don't know about the peer,
     // try send connect command to peer to direct connect sender with peer
     ksnet_arp_data *arp;
-    if((arp = ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, to)) != NULL) {
+    if((arp = (ksnet_arp_data *)ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, to)) != NULL) {
 
         // Send connect command request to peer
         ksnCommandSendCmdConnect(kco, to, rd->from, rd->addr, rd->port);
@@ -937,9 +985,9 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         triptime = (time_got - time_send) * 1000.0;
 
     // Set trip time and last tip time got
-    rd->arp->last_triptime_got = time_got;
-    rd->arp->last_triptime = triptime;
-    rd->arp->triptime = (rd->arp->triptime + triptime) / 2.0;
+    rd->arp->data.last_triptime_got = time_got;
+    rd->arp->data.last_triptime = triptime;
+    rd->arp->data.triptime = (rd->arp->data.triptime + triptime) / 2.0;
 
     // Ping answer
     if(!strcmp(rd->data, PING)) {
@@ -974,9 +1022,9 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         //#endif
 
         // Set monitor time
-        ksnet_arp_data *arp_data = ksnetArpGet(ke->kc->ka, rd->from);
-        arp_data->monitor_time = time_got - time_send;
-        ksnetArpAdd(ke->kc->ka, rd->from, arp_data);
+        ksnet_arp_data_ext *arp = ksnetArpGet(ke->kc->ka, rd->from);
+        arp->data.monitor_time = time_got - time_send;
+        ksnetArpAdd(ke->kc->ka, rd->from, arp);
     }
 
     else {
@@ -1008,7 +1056,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param data Pointer to ksnCorePacketData
  */
 static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
-                        ksnet_arp_data *arp_data, void *data) {
+                        ksnet_arp_data_ext *arp, void *data) {
 
     #define rd ((ksnCorePacketData*)data)
 
@@ -1030,13 +1078,13 @@ static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
  * @param data Pointer to ksnCorePacketData
  */
 static int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
-                        ksnet_arp_data *arp_data, void *data) {
+                        ksnet_arp_data_ext *arp, void *data) {
 
     #define rd ((ksnCorePacketData*)data)
 
     if(strcmp(peer_name, rd->from)) {
         ksnCommandSendCmdConnectA( ((ksnetEvMgrClass*) ka->ke)->kc->kco, 
-                rd->addr, rd->port, peer_name, arp_data->addr, arp_data->port);
+            rd->addr, rd->port, peer_name, arp->data.addr, arp->data.port);
     }
 
     return 0;
@@ -1098,8 +1146,8 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // For TCP proxy connection resend this host IPs to child
     else {
 
-        rd->arp->mode = 2;
-        lrd.port = rd->arp->port;
+        rd->arp->data.mode = 2;
+        lrd.port = rd->arp->data.port;
         lrd.from = rd->from;
 
         // Get this server IPs array
@@ -1120,7 +1168,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         ksnet_stringArrFree(&ips);
 
         // Send main peer address to child
-        lrd.addr = rd->arp->addr;
+        lrd.addr = rd->arp->data.addr;
         ksnetArpGetAll( ((ksnCoreClass*)kco->kc)->ka, send_cmd_connect_cb,
                 &lrd);
     }

@@ -298,7 +298,7 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
  *
  * @return Always return 0
  */
-int send_to_one_cb(ksnetArpClass *ka, char *peer_name, ksnet_arp_data *arp,
+int send_to_one_cb(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp,
                    void *pd) {
 
     send_to_peer(((ksnetEvMgrClass*)(ka->ke))->kvpn,

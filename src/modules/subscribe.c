@@ -221,10 +221,10 @@ static void teoSScrFree(teoSScrListData *element) {
  * @param sscr Pointer to teoSScrClass
  * @param peer_name Remote peer name
  * @param ev Event
- * @param arp Pointer to arp data if peer_name is L0 client, or NULL if it's a peer
+ * @param arp_data Pointer to arp data if peer_name is L0 client, or NULL if it's a peer
  */
 void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev,
-        ksnet_arp_data *arp) {
+        ksnet_arp_data *arp_data) {
 
     // \todo In the add_data_to_list() Subscribe to L0 disconnect and remove
     // disconnected clients
@@ -237,15 +237,15 @@ void teoSScrSubscription(teoSScrClass *sscr, char *peer_name, uint16_t ev,
         strcpy(sscr_list_data->data, peer_name); \
         sscr_list_data->cmd = c; \
         sscr_list_data->ev = e; \
-        if(arp == NULL) { \
+        if(arp_data == NULL) { \
             sscr_list_data->l0_f = 0; \
             sscr_list_data->addr[0] = 0; \
             sscr_list_data->port = 0; \
         } \
         else { \
             sscr_list_data->l0_f = 1; \
-            strncpy(sscr_list_data->addr, arp->addr, sizeof(sscr_list_data->addr)); \
-            sscr_list_data->port = arp->port; \
+            strncpy(sscr_list_data->addr, arp_data->addr, sizeof(sscr_list_data->addr)); \
+            sscr_list_data->port = arp_data->port; \
         } \
         pblListAdd(sscr_list, (void*)sscr_list_data)
 
@@ -500,7 +500,7 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             ev = atoi((char*)rd->data + 5);
 //            printf("!!! %s\n", rd->data);
         }
-        teoSScrSubscription(kco->ksscr, rd->from, ev, rd->l0_f ? rd->arp:NULL);
+        teoSScrSubscription(kco->ksscr, rd->from, ev, rd->l0_f ? (ksnet_arp_data*)rd->arp:NULL);
 
         // Send event callback
         if(kev->event_cb != NULL)

@@ -140,7 +140,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Send reset
                     case '4':
                     {
-                        ksnet_arp_data *arp = ksnetArpGet(ke->kc->ka, peer_to);
+                        ksnet_arp_data *arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, peer_to);
                         if(arp != NULL) {
                             
                             // Make address from string
@@ -183,12 +183,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     case '5':
                     {
                         show_data_or_statistic_at_server = !show_data_or_statistic_at_server;
-                        ksnet_arp_data *arp = ksnetArpGet(ke->kc->ka, peer_to);
-                        if(arp != NULL) {
+                        ksnet_arp_data *arp_data = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, peer_to);
+                        if(arp_data != NULL) {
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
                             socklen_t addrlen = sizeof(remaddr); // length of addresses
-                            if(!make_addr(arp->addr, arp->port, 
+                            if(!make_addr(arp_data->addr, arp_data->port, 
                                     (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
                                 //Make command string

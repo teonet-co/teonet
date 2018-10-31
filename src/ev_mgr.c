@@ -642,7 +642,7 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
  */
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
 
-    ksnet_arp_data *r_host_arp = ksnetArpGet(ke->kc->ka, ke->ksn_cfg.r_host_name);
+    ksnet_arp_data *r_host_arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, ke->ksn_cfg.r_host_name);
     static int check_connection_f = 0; // Check r-host connection flag
 
     // Reset r-host if connection is down
@@ -809,7 +809,7 @@ int remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr) {
  * @param data
  */
 int check_connected_cb(ksnetArpClass *ka, char *peer_name,
-                        ksnet_arp_data *arp_data, void *data) {
+                        ksnet_arp_data_ext *arp, void *data) {
 
     #define kev ((ksnetEvMgrClass*)(ka->ke))
 
@@ -817,13 +817,13 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     double ct = ksnetEvMgrGetTime(kev); //Current time
 
     // Send trip time request
-    if(ct - arp_data->last_triptime_send > CHECK_EVENTS_AFTER / 10) {
+    if(ct - arp->data.last_triptime_send > CHECK_EVENTS_AFTER / 10) {
         ksnCommandSendCmdEcho(kev->kc->kco, peer_name, (void*) TRIPTIME,
                               TRIPTIME_LEN);
     }
 
     // Disconnect dead peer
-    if(/*arp_data->last_triptime < 0.0001 ||*/ ct - arp_data->last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
+    if(/*arp_data->last_triptime < 0.0001 ||*/ ct - arp->data.last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
         // Disconnect dead peer from this host
 //        ksnCorePacketData rd;
@@ -833,7 +833,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
         remove_peer(kev, peer_name);
 
         // Send this host disconnect command to dead peer
-        send_cmd_disconnect_cb(kev->kc->ka, NULL,  arp_data, NULL);
+        send_cmd_disconnect_cb(kev->kc->ka, NULL, (ksnet_arp_data *)arp, NULL);
 
         retval = 1;
     }

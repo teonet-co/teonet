@@ -819,20 +819,19 @@ void ping_timer_stop(ping_timer_data **pt) {
  * @param data
  */
 int monitor_timer_one_cb(ksnetArpClass *ka, char *peer_name, 
-        ksnet_arp_data *arp_data, void *data) {
+        ksnet_arp_data_ext *arp, void *data) {
 
 
     // Reset monitor time
     //ksnet_arp_data *arp_data = ksnetArpGet(ka, peer_name);
     printf("%s%s: %.3f ms %s \n",
-            arp_data->monitor_time == 0.0 ? 
+            arp->data.monitor_time == 0.0 ? 
                 getANSIColor(LIGHTRED) : getANSIColor(LIGHTGREEN),
-            peer_name, arp_data->monitor_time * 1000.0,
+            peer_name, arp->data.monitor_time * 1000.0,
             getANSIColor(NONE));
-    arp_data->monitor_time = 0;
-    ksnetArpAdd(ka, peer_name, arp_data);
+    arp->data.monitor_time = 0;
+    ksnetArpAdd(ka, peer_name, arp);
 
-    //peer_send_cmd_echo(kn, peer_name, (void*)MONITOR, MONITOR_LEN, 1);
     ksnCommandSendCmdEcho(((ksnetEvMgrClass*)(ka->ke))->kc->kco, peer_name,
                           (void*)MONITOR, MONITOR_LEN);
 

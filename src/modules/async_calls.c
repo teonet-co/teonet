@@ -54,7 +54,7 @@ static inline int _check_send_queue(void *ke, const char*peer, const char*addr,
     // check sendQueue
     // by peer name
     if(peer && !addr) {
-        ksnet_arp_data *arp = ksnetArpGet(kev->kc->ka, (char*)peer);
+        ksnet_arp_data *arp = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)peer);
         if(arp) {
             addr = arp->addr;
             port = arp->port;
