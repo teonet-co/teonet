@@ -502,7 +502,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     if(kld->name_length == packet->data_length) {
         
         if(!strcmp(WG001_NEW, kld->name)) {
-            kld->name = ksnet_sformatMessage(kld->name, "%s123", kld->name);
+            kld->name = ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke),fd);
             kld->name_length = strlen(kld->name) + 1;
         }        
         pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
