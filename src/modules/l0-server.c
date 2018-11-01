@@ -20,6 +20,7 @@
 #define MODULE _ANSI_LIGHTCYAN "l0_server" _ANSI_NONE
 #define TEO_AUTH "teo-auth"
 #define WG001 "wg001-"
+#define WG001_NEW "wg001-new-"
 
 // Local functions
 static int ksnLNullStart(ksnLNullClass *kl);
@@ -499,6 +500,11 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     kld->name = strdup(packet->peer_name + packet->peer_name_length);
     kld->name_length = strlen(kld->name) + 1;
     if(kld->name_length == packet->data_length) {
+        
+        if(!strcmp(WG001_NEW, kld->name)) {
+            kld->name = ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke),fd);
+            kld->name_length = strlen(kld->name) + 1;
+        }        
         pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
         // Send login to authentication application
