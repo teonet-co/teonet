@@ -1156,6 +1156,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
             #endif
+
+            ksnLNullClientDisconnect(kl, fd_old, 1);
         }
 
         size_t vl;
