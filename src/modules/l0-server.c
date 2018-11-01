@@ -501,10 +501,21 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     kld->name_length = strlen(kld->name) + 1;
     if(kld->name_length == packet->data_length) {
         
+        // Create unique name for WG new user
         if(!strcmp(WG001_NEW, kld->name)) {
             kld->name = ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke),fd);
             kld->name_length = strlen(kld->name) + 1;
         }        
+        
+        // Remove client with the same name
+        int fd_ex;
+        if((fd_ex = ksnLNullClientIsConnected(kl, kld->name))) {
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", kld->name, fd_ex);
+            #endif
+        }
+        
+        // Add client to name map
         pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
         // Send login to authentication application
