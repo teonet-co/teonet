@@ -658,7 +658,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         ksn_printf(kev, MODULE, CONNECT, "### 0005,%d\n", fd);
 
         // Send Disconnect event to all subscribers
-        if(kld->name != NULL)
+        if(kld->name != NULL  && remove_f != 2)
             teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name,
                 kld->name_length, 0);
 
