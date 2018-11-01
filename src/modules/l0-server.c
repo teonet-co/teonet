@@ -1165,7 +1165,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 if(fd_old < MAX_FD_NUMBER) {
                     ev_io_stop(kev->ev_loop, &kld->w);
                     //close(fd);
-                    //pblMapRemoveFree(kl->map, &fd_old, sizeof(fd_old), &valueLength);
+                    pblMapRemoveFree(kl->map, &fd_old, sizeof(fd_old), &valueLength);
                 }
             }
         }
