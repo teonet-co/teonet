@@ -651,7 +651,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         // Stop L0 client watcher
         if(fd < MAX_FD_NUMBER) {
             ev_io_stop(kev->ev_loop, &kld->w);
-            close(fd);
+            if(remove_f != 2) close(fd);
         }
 
         // Show disconnect message
@@ -1161,12 +1161,13 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             size_t valueLength;
             ksnLNullData* kld = pblMapGet(kl->map, &fd_old, sizeof(fd_old), &valueLength);
             if(kld != NULL) {
-                // Stop L0 client watcher
-                if(fd_old < MAX_FD_NUMBER) {
-                    ev_io_stop(kev->ev_loop, &kld->w);
-                    //close(fd);
-                    pblMapRemoveFree(kl->map, &fd_old, sizeof(fd_old), &valueLength);
-                }
+//                // Stop L0 client watcher
+//                if(fd_old < MAX_FD_NUMBER) {
+//                    ev_io_stop(kev->ev_loop, &kld->w);
+//                    //close(fd);
+//                    pblMapRemoveFree(kl->map, &fd_old, sizeof(fd_old), &valueLength);
+//                }
+                ksnLNullClientDisconnect(kl, fd_old, 2);
             }
         }
 
