@@ -1157,7 +1157,17 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
             #endif
 
-            ksnLNullClientDisconnect(kl, fd_old, 1);
+            //ksnLNullClientDisconnect(kl, fd_old, 1);
+            size_t valueLength;
+            ksnLNullData* kld = pblMapGet(kl->map, &fd_old, sizeof(fd_old), &valueLength);
+            if(kld != NULL) {
+
+                // Stop L0 client watcher
+                if(fd < MAX_FD_NUMBER) {
+                    ev_io_stop(kev->ev_loop, &kld->w);
+                    //close(fd);
+                }
+            }
         }
 
         size_t vl;
