@@ -1150,6 +1150,13 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
     int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
     if(fd) {
+        
+        int fd_old = ksnLNullClientIsConnected(kl, jp.userId);
+        if(fd_old) {
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
+            #endif
+        }
 
         size_t vl;
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
