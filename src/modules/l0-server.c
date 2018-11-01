@@ -1148,29 +1148,25 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
-    int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
-    if(fd) {
-        
-        int fd_old;
-        if(jp.userId && (fd_old = ksnLNullClientIsConnected(kl, jp.userId))) {
-            #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
-            #endif
+    
+    // Remove old user
+    int fd_old;
+    if(jp.userId && (fd_old = ksnLNullClientIsConnected(kl, jp.userId))) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
+        #endif
 
-            // Check user already connected
-            size_t valueLength;
-            ksnLNullData* kld = pblMapGet(kl->map, &fd_old, sizeof(fd_old), &valueLength);
-            if(kld != NULL) {
-//                // Stop L0 client watcher
-//                if(fd_old < MAX_FD_NUMBER) {
-//                    ev_io_stop(kev->ev_loop, &kld->w);
-//                    //close(fd);
-//                    pblMapRemoveFree(kl->map, &fd_old, sizeof(fd_old), &valueLength);
-//                }
-                ksnLNullClientDisconnect(kl, fd_old, 2);
-            }
+        // Check user already connected
+        size_t valueLength;
+        ksnLNullData* kld = pblMapGet(kl->map, &fd_old, sizeof(fd_old), &valueLength);
+        if(kld != NULL) {
+            ksnLNullClientDisconnect(kl, fd_old, 2);
         }
+    }
 
+    // Authorize new user
+    int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
+    if(fd) {        
         size_t vl;
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
         if(kld != NULL) {
@@ -1222,14 +1218,14 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             free(out_data);
             free(ALLOW);
         }
-
-        // Free tags
-        if(jp.accessToken != NULL) free(jp.accessToken);
-        if(jp.clientId != NULL) free(jp.clientId);
-        if(jp.userId != NULL) free(jp.userId);
-        if(jp.username != NULL) free(jp.username);
-        if(jp.networks != NULL) free(jp.networks);
     }
+    
+    // Free json tags
+    if(jp.accessToken != NULL) free(jp.accessToken);
+    if(jp.clientId != NULL) free(jp.clientId);
+    if(jp.userId != NULL) free(jp.userId);
+    if(jp.username != NULL) free(jp.username);
+    if(jp.networks != NULL) free(jp.networks);
 
     return retval;
 }
