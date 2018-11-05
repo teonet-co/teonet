@@ -501,10 +501,21 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     kld->name_length = strlen(kld->name) + 1;
     if(kld->name_length == packet->data_length) {
         
+        // Create unique name for WG new user
         if(!strcmp(WG001_NEW, kld->name)) {
             kld->name = ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke),fd);
             kld->name_length = strlen(kld->name) + 1;
         }        
+        
+        // Remove client with the same name
+        int fd_ex;
+        if((fd_ex = ksnLNullClientIsConnected(kl, kld->name))) {
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", kld->name, fd_ex);
+            #endif
+        }
+        
+        // Add client to name map
         pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
         // Send login to authentication application
@@ -640,14 +651,14 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         // Stop L0 client watcher
         if(fd < MAX_FD_NUMBER) {
             ev_io_stop(kev->ev_loop, &kld->w);
-            close(fd);
+            if(remove_f != 2) close(fd);
         }
 
         // Show disconnect message
         ksn_printf(kev, MODULE, CONNECT, "### 0005,%d\n", fd);
 
         // Send Disconnect event to all subscribers
-        if(kld->name != NULL)
+        if(kld->name != NULL  && remove_f != 2)
             teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name,
                 kld->name_length, 0);
 
@@ -1137,9 +1148,25 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
-    int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
-    if(fd) {
+    
+    // Remove old user
+    int fd_old;
+    if(jp.userId && (fd_old = ksnLNullClientIsConnected(kl, jp.userId))) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
+        #endif
 
+        // Check user already connected
+        size_t valueLength;
+        ksnLNullData* kld = pblMapGet(kl->map, &fd_old, sizeof(fd_old), &valueLength);
+        if(kld != NULL) {
+            ksnLNullClientDisconnect(kl, fd_old, 2);
+        }
+    }
+
+    // Authorize new user
+    int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
+    if(fd) {        
         size_t vl;
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
         if(kld != NULL) {
@@ -1191,14 +1218,14 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             free(out_data);
             free(ALLOW);
         }
-
-        // Free tags
-        if(jp.accessToken != NULL) free(jp.accessToken);
-        if(jp.clientId != NULL) free(jp.clientId);
-        if(jp.userId != NULL) free(jp.userId);
-        if(jp.username != NULL) free(jp.username);
-        if(jp.networks != NULL) free(jp.networks);
     }
+    
+    // Free json tags
+    if(jp.accessToken != NULL) free(jp.accessToken);
+    if(jp.clientId != NULL) free(jp.clientId);
+    if(jp.userId != NULL) free(jp.userId);
+    if(jp.username != NULL) free(jp.username);
+    if(jp.networks != NULL) free(jp.networks);
 
     return retval;
 }
