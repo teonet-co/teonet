@@ -2876,6 +2876,13 @@
           </incDir>
         </cTool>
       </folder>
+      <folder path="0/src/modules">
+        <cTool>
+          <incDir>
+            <pElem>src/modules</pElem>
+          </incDir>
+        </cTool>
+      </folder>
       <folder path="0/src/utils">
         <cTool>
           <incDir>
@@ -3001,7 +3008,6 @@
       <item path="src/modules/async_calls.c" ex="false" tool="0" flavor2="3">
         <cTool flags="5">
           <incDir>
-            <pElem>src/modules</pElem>
             <pElem>embedded/libtrudp/src</pElem>
             <pElem>src/config</pElem>
             <pElem>src/utils</pElem>
@@ -3015,7 +3021,6 @@
       <item path="src/modules/cque.c" ex="false" tool="0" flavor2="3">
         <cTool flags="5">
           <incDir>
-            <pElem>src/modules</pElem>
             <pElem>src/config</pElem>
             <pElem>src/utils</pElem>
             <pElem>embedded/libpbl/src</pElem>
@@ -3026,7 +3031,181 @@
           </incDir>
         </cTool>
       </item>
-      <item path="src/modules/l0-server.c" ex="false" tool="0" flavor2="10">
+      <item path="src/modules/l0-server.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>app/embedded/jsmn</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/logging_client.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/logging_server.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/net_tcp.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/stream.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/teodb_com.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>src</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/net_arp.c" ex="false" tool="0" flavor2="3">
+        <cTool flags="5">
+          <incDir>
+            <pElem>src/config</pElem>
+            <pElem>src/utils</pElem>
+            <pElem>embedded/libpbl/src</pElem>
+            <pElem>embedded/teocli/libteol0</pElem>
+            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
+            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
+          </incDir>
+        </cTool>
+      </item>
+      <item path="src/net_com.c" ex="false" tool="0" flavor2="10">
         <cTool flags="16">
           <incDir>
             <pElem>src</pElem>
@@ -3053,204 +3232,31 @@
           </preprocessorList>
         </cTool>
       </item>
-      <item path="src/modules/logging_client.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
+      <item path="src/net_core.c" ex="false" tool="0" flavor2="10">
+        <cTool flags="16">
           <incDir>
-            <pElem>src/modules</pElem>
+            <pElem>src</pElem>
             <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
+            <pElem>/opt/local/include</pElem>
             <pElem>embedded/libpbl/src</pElem>
             <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
             <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/logging_server.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
             <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
+            <pElem>app/embedded/jsmn</pElem>
+            <pElem>/usr/include/libev</pElem>
+            <pElem>../confuse-2.7/src</pElem>
           </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/net_cli.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/net_tcp.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/net_term.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/net_tun.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/stream.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/subscribe.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/tcp_proxy.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/teodb.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/teodb_com.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/modules/vpn.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/modules</pElem>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>src</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/net_arp.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>src/modules</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/net_com.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>src/modules</pElem>
-            <pElem>src</pElem>
-          </incDir>
-        </cTool>
-      </item>
-      <item path="src/net_core.c" ex="false" tool="0" flavor2="3">
-        <cTool flags="5">
-          <incDir>
-            <pElem>src/config</pElem>
-            <pElem>src/utils</pElem>
-            <pElem>embedded/libpbl/src</pElem>
-            <pElem>embedded/teocli/libteol0</pElem>
-            <pElem>embedded/libtrudp/embedded/teoccl/src</pElem>
-            <pElem>embedded/libtrudp/src</pElem>
-            <pElem>src/modules</pElem>
-            <pElem>src</pElem>
-          </incDir>
+          <preprocessorList>
+            <Elem>EV_USE_EPOLL=1</Elem>
+            <Elem>HAVE_CONFIG_H</Elem>
+            <Elem>LOCALEDIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_DATA_DIR="/usr/local/share/teonet"</Elem>
+            <Elem>PACKAGE_LOCALE_DIR="/usr/local/share/locale"</Elem>
+            <Elem>PACKAGE_SRC_DIR="."</Elem>
+            <Elem>PIC</Elem>
+            <Elem>TEONET_SYS_CONFIG_DIR="/usr/local/etc/teonet"</Elem>
+            <Elem>USE_LIBEV</Elem>
+          </preprocessorList>
         </cTool>
       </item>
       <item path="src/net_multi.c" ex="false" tool="0" flavor2="3">

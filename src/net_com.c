@@ -709,7 +709,10 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
     
     int retval = 0;
     
-    if(!rd->arp->type) {
+    if(!rd->arp->type 
+        && rd->data_len 
+        && ((char*)rd->data)[0] != '{'
+        && ((char*)rd->data)[rd->data_len-1] != '}') {
         
         host_info_data *hid = (host_info_data *)rd->data;
         int i;
@@ -731,7 +734,7 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
 
         #ifdef DEBUG_KSNET
         ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
-            MODULE, DEBUG,
+            MODULE, DEBUG_VV,
             "process CMD_HOST_INFO_ANSWER (cmd = %u) command, from %s (%s:%d), arp-addr %s:%d, type: %s\n",
             rd->cmd, rd->from, rd->addr, rd->port, rd->arp->data.addr, rd->arp->data.port, rd->arp->type);
         #endif
