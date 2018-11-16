@@ -35,6 +35,10 @@ extern char** teo_argv;
 // Global library constants
 const char *null_str = "";
 
+// Run file name and buffer
+#define RUN_NAME "/teonet.run"
+char run_file[KSN_BUFFER_SIZE];
+
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback
 void idle_activity_cb(EV_P_ ev_idle *w, int revents); // Idle activity callback
@@ -274,7 +278,31 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     #ifdef DEBUG_KSNET
     ksn_puts(ke, MODULE, MESSAGE, "started");
     #endif
+    
+    // Create run file name
+    const char *network = ke->ksn_cfg.network;
+    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE);
+    if(network != NULL && network[0]) {
+        strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
+        strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);
+    }
+    strncat(run_file, RUN_NAME, KSN_BUFFER_SIZE - strlen(run_file) - 1);
+    
+    FILE *fp;
 
+    // Wait other teonet application to get disconnect signal
+    // if this application crash or deployed    
+    if ((fp = fopen(run_file, "r"))){
+        usleep(2500000);
+        fclose(fp);
+    }
+    // Create run file
+    else {
+        fp = fopen(run_file, "w");
+        fprintf(fp,"run\n");
+        fclose(fp);    
+    }
+    
     ke->timer_val = 0;
     ke->idle_count = 0;
     ke->idle_activity_count = 0;
@@ -455,6 +483,9 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
 
         // Free memory
         free(ke);
+        
+        // Remove run_file
+        remove(run_file);
 
         // Restart application if need it
         if(!km) ksnetEvMgrRestart(argc, argv);
@@ -618,7 +649,7 @@ void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *use
     pthread_mutex_lock (&ke->async_mutex);
     pblListAdd(ke->async_queue, element);
     pthread_mutex_unlock (&ke->async_mutex);
-    
+
     // Send async signal to process queue
     ev_async_send(ke->ev_loop,/*EV_DEFAULT_*/ &ke->sig_async_w);
 }
@@ -761,7 +792,7 @@ void open_local_port(ksnetEvMgrClass *ke) {
  * @param ke Pointer to ksnetEvMgrClass
  * @param peer_name
  */
-static void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
+static void remove_peer(ksnetEvMgrClass *ke, char *peer_name, ksnet_arp_data_ext *arp) {
 
     // Disconnect dead peer from this host
     ksnCorePacketData rd;
@@ -769,7 +800,9 @@ static void remove_peer(ksnetEvMgrClass *ke, char *peer_name) {
 
     rd.from = peer_name;
     rd.from_len = strlen(peer_name) + 1;
-    rd.addr = "";
+    rd.addr = arp->data.addr;
+    rd.port = arp->data.port;
+    rd.arp = arp;
 
     cmd_disconnected_cb(ke->kc->kco, &rd);
 }
@@ -788,13 +821,13 @@ int remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr) {
 
     int rv = 0;
     char *peer_name;
-    ksnet_arp_data *arp;
-    if((arp = ksnetArpFindByAddr(ke->kc->ka, (__CONST_SOCKADDR_ARG) addr, &peer_name))) {
-        if(arp->mode >= 0) {
-            remove_peer(ke, peer_name);
+    ksnet_arp_data_ext *arp;
+    if((arp = (ksnet_arp_data_ext *)ksnetArpFindByAddr(ke->kc->ka, (__CONST_SOCKADDR_ARG) addr, &peer_name))) {
+        if(arp->data.mode >= 0) {
+            remove_peer(ke, peer_name, arp);
             rv = 1;
         }
-        else rv = arp->mode;
+        else rv = arp->data.mode;
     }
 
     return rv;
@@ -830,7 +863,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 //        rd.from = peer_name;
 //        rd.data = NULL;
 //        cmd_disconnected_cb(kev->kc->kco, &rd);
-        remove_peer(kev, peer_name);
+        remove_peer(kev, peer_name, arp);
 
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL, (ksnet_arp_data *)arp, NULL);
