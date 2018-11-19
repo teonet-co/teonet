@@ -200,6 +200,8 @@ void read_config(ksnet_cfg *conf, int port_param) {
 
         #if M_ENAMBE_LOGGING_CLIENT
         CFG_SIMPLE_BOOL("log_disable_f", &conf->log_disable_f),
+        CFG_SIMPLE_BOOL("send_all_logs_f", &conf->send_all_logs_f),
+        
         #endif        
         
         CFG_SIMPLE_INT("log_priority", &conf->log_priority),

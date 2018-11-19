@@ -65,6 +65,7 @@ typedef struct ksnet_cfg {
         block_cli_input_f,      ///< Block teonet CLI input (for using in GUI application)
         logging_f,              ///< Start logging server
         log_disable_f,          ///< Disable send log to logging server 
+        send_all_logs_f,        ///< Send all logs to logging server (by default only ###)
         color_output_disable_f, ///< Disable color output flag
         no_multi_thread_f;      ///< Don't try multi thread mode in async calls 
     

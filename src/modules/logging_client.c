@@ -177,7 +177,8 @@ void teoLoggingClientDestroy(teoLoggingClientClass *lc) {
 // Send log data to logging servers
 void teoLoggingClientSend(void *ke, const char *message) {
     if(!kev->ksn_cfg.log_disable_f) {
-        ksnetEvMgrAsync(ke, (void*)message, strlen(message)+1, 
-                (void*)&ASYNC_LABEL);
+        if(kev->ksn_cfg.send_all_logs_f || message[0] == '#' || strstr(message,": ### "))
+            ksnetEvMgrAsync(ke, (void*)message, strlen(message)+1, 
+                    (void*)&ASYNC_LABEL);
     }
 }

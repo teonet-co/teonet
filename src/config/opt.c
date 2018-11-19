@@ -84,6 +84,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         #endif
         #if M_ENAMBE_LOGGING_CLIENT
         { "log_disable",    no_argument,       &conf->log_disable_f, 1 },
+        { "send_all_logs",  no_argument,       &conf->send_all_logs_f, 1 },
         #endif
 
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
@@ -399,6 +400,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     #endif
     #if M_ENAMBE_LOGGING_CLIENT
     "       --log_disable        Disable send logs to logging servers\n"
+    "       --send_all_logs      Send all logs (by default send only metrics)\n"
     #endif
     "\n"
     "       --sig_segv           Segmentation fault error processing by library\n"
