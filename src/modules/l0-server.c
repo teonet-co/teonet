@@ -28,6 +28,7 @@ static void ksnLNullStop(ksnLNullClass *kl);
 static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
         char *cname, size_t cname_length);
 static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData *rd);
+static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data, size_t data_length);
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, int fd, teoLNullCPacket *packet);
 
 
@@ -500,13 +501,13 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     kld->name = strdup(packet->peer_name + packet->peer_name_length);
     kld->name_length = strlen(kld->name) + 1;
     if(kld->name_length == packet->data_length) {
-        
+
         // Create unique name for WG new user
         if(!strcmp(WG001_NEW, kld->name)) {
             kld->name = ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke),fd);
             kld->name_length = strlen(kld->name) + 1;
-        }        
-        
+        }
+
         // Remove client with the same name
         int fd_ex;
         if((fd_ex = ksnLNullClientIsConnected(kl, kld->name))) {
@@ -514,7 +515,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", kld->name, fd_ex);
             #endif
         }
-        
+
         // Add client to name map
         pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
@@ -542,6 +543,35 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 }
 
 /**
+ * Send command from this L0 server to L0 client
+ *
+ * @param kl Pointer to ksnLNullClass
+ * @param fd L0 client socket
+ * @param cmd Command
+ * @param data_e Pointer to data
+ * @param data_e_length Data length
+ * @return
+ */
+static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
+        size_t data_length) {
+
+    ssize_t snd = -1;
+
+    const char *from = ksnetEvMgrGetHostName(kl->ke);
+    size_t from_len = strlen(from) + 1;
+    // Create L0 packet
+    size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_length;
+    char *out_data = malloc(out_data_len);
+    memset(out_data, 0, out_data_len);
+    size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+            cmd, from, data, data_length);
+    // Send packet
+    snd = ksnLNullPacketSend(kl, fd, out_data, packet_length);
+    free(out_data);
+    return snd;
+}
+
+/**
  * Send packet to L0 client
  *
  * @param fd L0 client socket
@@ -550,7 +580,8 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
  *
  * @return Length of send data or -1 at error
  */
-ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg, size_t pkg_length) {
+ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
+        size_t pkg_length) {
 
     ssize_t snd = -1;
 
@@ -740,17 +771,17 @@ void _check_connected(uint32_t id, int type, void *data) {
 
                 // Create echo buffer
                 void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass *)(kl->ke))->kc->kco, "ping", 5, &data_e_length);
-                
+
                 // Create L0 packet
                 size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_e_length;
                 char *out_data = malloc(out_data_len);
                 memset(out_data, 0, out_data_len);
                 size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
                         CMD_ECHO, from, data_e, data_e_length);
-                
-                
+
+
                 ksnLNullPacketSend(kl, *fd, out_data, packet_length);
-                
+
                 free(data_e);
                 free(out_data);
             }
@@ -1148,13 +1179,16 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
-    
+
     // Remove old user
     int fd_old;
     if(jp.userId && (fd_old = ksnLNullClientIsConnected(kl, jp.userId))) {
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
         #endif
+
+        // Send 99 command to user
+        ksnLNullSend(kl, fd_old, CMD_L0_CLIENT_RESET, "2", 2);
 
         // Check user already connected
         size_t valueLength;
@@ -1166,7 +1200,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Authorize new user
     int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
-    if(fd) {        
+    if(fd) {
         size_t vl;
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
         if(kld != NULL) {
@@ -1219,7 +1253,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             free(ALLOW);
         }
     }
-    
+
     // Free json tags
     if(jp.accessToken != NULL) free(jp.accessToken);
     if(jp.clientId != NULL) free(jp.clientId);
