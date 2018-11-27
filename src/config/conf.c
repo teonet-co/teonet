@@ -184,6 +184,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("sig_segv_f", &conf->sig_segv_f),
         CFG_SIMPLE_BOOL("block_cli_input_f", &conf->block_cli_input_f),
         CFG_SIMPLE_BOOL("no_multi_thread_f", &conf->no_multi_thread_f),
+        CFG_SIMPLE_BOOL("send_ack_event_f", &conf->send_ack_event_f),
 
         #if M_ENAMBE_VPN
         CFG_SIMPLE_BOOL("vpn_connect_f", &conf->vpn_connect_f),

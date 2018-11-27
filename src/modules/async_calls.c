@@ -67,7 +67,7 @@ static inline int _check_send_queue(void *ke, const char*peer, const char*addr,
         if(tcd != (void*)-1) rv = trudpSendQueueSize(tcd->sendQueue);
         else rv = CHSQ_WRONG_ADDRESS; // wrong address
     }
-    else rv = CHSQ_WRONG_REQUEST; // wrong request
+    else if(!rv) rv = CHSQ_WRONG_REQUEST; // wrong request
 
     return rv;
 }
@@ -121,6 +121,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // ksnCoreSendCmdtoA (sendCmdToBinaryA)
                         // Send command by name to peer
                         case KSN_CORE_SEND_CMD_TO: {
+                            //printf("KSN_CORE_SEND_CMD_TO 1\n");
                             // Parse buffer: { f_type, cmd, peer_length, peer, data }
                             const uint8_t peer_length = *(uint8_t*)(data + ptr); ptr++;
                             const char *peer = (const char *)(data + ptr); ptr += peer_length;
@@ -129,8 +130,9 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, peer, NULL, 0);
-
-                            if(ud->rv >= 0 && ud->rv < SEND_IF) {
+                            //printf("KSN_CORE_SEND_CMD_TO rv: %d\n", ud->rv);
+                            if((ud->rv >= 0 || ud->rv == CHSQ_WRONG_PEER) && ud->rv < SEND_IF) {
+                                printf("KSN_CORE_SEND_CMD_TO 2\n");
                                 ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
                             }
 

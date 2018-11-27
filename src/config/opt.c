@@ -92,6 +92,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "color_output_disable", no_argument, &conf->color_output_disable_f, 1 },
         { "block_cli_input", no_argument,      &conf->block_cli_input_f, 1 },        
         { "no_multi_thread", no_argument,      &conf->no_multi_thread_f, 1 },
+        { "send_ack_event", no_argument,       &conf->send_ack_event_f, 1 },
         
         { "daemon",         no_argument,       &conf->dflag, 1 },
         { "kill",           no_argument,       &conf->kflag, 1 },
@@ -411,7 +412,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --color_output       Disable color output in stdout terminal logs,\n"
     "                            (full flag name is: --color_output_disable)\n"
     "\n"
-    "       --no_multi_thread    Don't check multi thread mode in async calls\n"        
+    "       --no_multi_thread    Don't check multi thread mode in async calls\n"   
+    "       --send_ack_event     Send ACK event when cmd delivered\n"
     "\n"
     "  -d, --daemon              Start this application in daemon mode\n"
     "  -k, --kill                Kill the application running in daemon mode\n"

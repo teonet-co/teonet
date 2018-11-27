@@ -413,11 +413,11 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         #endif  
         int i = 0;
         for(i=0; i < sd.num; i++) {
-            printf("%s\n", sd.arp[i]->data.addr);
+            printf("%s:%d\n", sd.arp[i]->data.addr, sd.arp[i]->data.port);
         }
         
         int r = rand() % sd.num;
-        printf("=> %s\n", sd.arp[r]->data.addr);
+        printf("=> %s:%d\n", sd.arp[r]->data.addr, sd.arp[r]->data.port);
         
         ksnCoreSendto(kc, sd.arp[r]->data.addr, sd.arp[r]->data.port, cmd, data, data_len);
         
