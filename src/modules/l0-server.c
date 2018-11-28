@@ -185,14 +185,11 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             while(kld->read_buffer_ptr - ptr >= (len = sizeof(teoLNullCPacket) +
                     packet->peer_name_length + packet->data_length)) {
 
-                // Check checksum
-                uint8_t header_checksum = get_byte_checksum(packet,
-                        sizeof(teoLNullCPacket) -
-                        sizeof(packet->header_checksum));
-                uint8_t checksum = get_byte_checksum(packet->peer_name,
-                        packet->peer_name_length + packet->data_length);
-                if(packet->header_checksum == header_checksum &&
-                   packet->checksum == checksum) {
+                // Check checksum                
+                if(packet->header_checksum == get_byte_checksum(packet,
+                    sizeof(teoLNullCPacket) - sizeof(packet->header_checksum)) &&
+                   packet->checksum == get_byte_checksum(packet->peer_name,
+                        packet->peer_name_length + packet->data_length)) {
 
                     // Check initialize packet:
                     // cmd = 0, to_length = 1, data_length = 1 + data_len,
@@ -205,23 +202,30 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         ksnLNullClientAuthCheck(kl, kld, w->fd, packet);
                     }
 
-                    // Resend data to teonet
+                    // Resend data to teonet or drop wrong packet
                     else {
+                        // Resend data to teonet
                         if(kld->name)
                             ksnLNullSendFromL0(kl, packet, kld->name,
                                 kld->name_length);
+                        // Drop wrong packet
+                        else {
+                            #ifdef DEBUG_KSNET
+                            ksn_printf(kev, MODULE, DEBUG,
+                                "%s" "got valid packet from fd: %d before login command; packet ignored ...%s\n",
+                                ANSI_RED, w->fd, ANSI_NONE);
+                            #endif
+                        }
                     }
                 }
 
                 // Wrong checksum - drop this packet
                 else {
                     #ifdef DEBUG_KSNET
-                    ksn_printf(kev, MODULE, DEBUG_VV,
-                        "%s" "wrong packet %d bytes length; dropped ...%s\n",
-                        ANSI_RED, len, ANSI_NONE);
+                    ksn_printf(kev, MODULE, DEBUG,
+                        "%s" "got wrong packet %d bytes length, from fd: %d; packet dropped ...%s\n",
+                        ANSI_RED, len, w->fd, ANSI_NONE);
                     #endif
-
-                    kld->read_buffer_ptr = 0;
                 }
 
                 ptr += len;

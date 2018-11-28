@@ -293,7 +293,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     // Wait other teonet application to get disconnect signal
     // if this application crash or deployed    
     if ((fp = fopen(run_file, "r"))){
-        usleep(2500000);
+        usleep(3500000);
         fclose(fp);
     }
     // Create run file
