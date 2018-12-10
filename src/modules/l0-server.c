@@ -206,8 +206,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     else {
                         // Resend data to teonet
                         if(kld->name)
-                            ksnLNullSendFromL0(kl, packet, kld->name,
-                                kld->name_length);
+                            ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
                         // Drop wrong packet
                         else {
                             #ifdef DEBUG_KSNET
@@ -746,8 +745,9 @@ static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
     ksnLNullClientConnect(w->data, fd);
 }
 
-#define CHECK_TIMEOUT 30.00
-#define SEND_TIMEOUT 60.00
+#define CHECK_TIMEOUT 10.00
+#define SEND_PING_TIMEOUT 30.00
+#define DISCONNECT_TIMEOUT 60.00
 
 void _check_connected(uint32_t id, int type, void *data) {
 
@@ -761,12 +761,12 @@ void _check_connected(uint32_t id, int type, void *data) {
             ksnLNullData *data = pblMapEntryValue(entry);
             int *fd = (int *) pblMapEntryKey(entry);
             // Disconnect client
-            if(ksnetEvMgrGetTime(kl->ke) - data->last_time > SEND_TIMEOUT) {
+            if(ksnetEvMgrGetTime(kl->ke) - data->last_time >= DISCONNECT_TIMEOUT) {
                 ksn_printf(kev, MODULE, DEBUG, "Disconnect client by timeout, fd: %d, name: %s\n", *fd, data->name);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
             // Send echo to client
-            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time > CHECK_TIMEOUT) {
+            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time >= SEND_PING_TIMEOUT) {
                 ksn_printf(kev, MODULE, DEBUG, "Send ping to client by timeout, fd: %d, name: %s\n", *fd, data->name);
 
                 // From this host(peer)
@@ -1377,6 +1377,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                     if(tcd) {
                         ksnLNullData* kld = pblMapGet(kl->map, &tcd->fd, sizeof(tcd->fd), &vl);
                         if(kld != NULL && kld->name != NULL) {
+                            kld->last_time = ksnetEvMgrGetTime(kl->ke);
                             ksnLNullSendFromL0(kl, cp, kld->name, kld->name_length);
                         }
                         else {
