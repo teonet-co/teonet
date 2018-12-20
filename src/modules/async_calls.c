@@ -3,8 +3,17 @@
 
 #define MODULE "async_module"
 #define kev ((ksnetEvMgrClass*)(ke))
-#define MULTITHREADED() kev->ta->f_multi_thread == MULTITHREAD
-#define NO_MULTITHREADED() kev->ta->f_multi_thread == NO_MULTITHREAD
+#define MULTITHREADED() (kev->ta->f_multi_thread == MULTITHREAD)
+#define NO_MULTITHREADED() (kev->ta->f_multi_thread == NO_MULTITHREAD)
+// \TODO Think about CHSQ_WRONG_PEER - it used if we send to peer by it type, 
+// but in this contend the _check_send_queue function does not check real send 
+// queue channel
+//
+// \TODO we use the !MULTITHREADED() condition with this condition in one if
+// and the !MULTITHREADED() mode application do not consider real send queue 
+// channel size returned by _check_send_queue function, so we can to overload 
+// send queue and break peers connection
+#define SEND_CONDITION() ((ud->rv >= 0 || ud->rv == CHSQ_WRONG_PEER) && ud->rv < SEND_IF)
 
 void teoAsyncTest(void *ke);
 
@@ -94,7 +103,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 // Check multi thread request
                 if(!data) {
                     ksn_printf(kev, MODULE, DEBUG,
-                        "EV_K_ASYNC check MULTITHREAD rv: %d, f_multi_thread: %d\n", 
+                        "EV_K_ASYNC check MULTITHREAD rv: %d, f_multi_thread: %d\n",
                         ud->rv, kev->ta->f_multi_thread);
                     if(MULTITHREADED()) {
                         pthread_mutex_lock(&kev->ta->cv_mutex);
@@ -127,9 +136,11 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             void *d = data + ptr;
                             const size_t d_length = data_length - ptr;
 
+                            ksn_printf(kev, MODULE, DEBUG_VV, "KSN_CORE_SEND_CMD_TO, data_length: %d\n", d_length);
+
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, peer, NULL, 0);
-                            if((ud->rv >= 0 || ud->rv == CHSQ_WRONG_PEER) && ud->rv < SEND_IF) {
+                            if(!MULTITHREADED() || SEND_CONDITION()) {
                                 ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
                             }
 
@@ -179,7 +190,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, NULL, addr, port);
 
-                            if(ud->rv >= 0 && ud->rv < SEND_IF) {
+                            if(!MULTITHREADED() || SEND_CONDITION()) {
                                 if(kev->ta->test)
                                     ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
                                         "sendCmdAnswerToBinaryA Test: %d %d %d %d %s %s %d %s %d\n",
@@ -206,7 +217,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, peer, NULL, 0);
 
-                            if(ud->rv >= 0 && ud->rv < SEND_IF) {
+                            if(!MULTITHREADED() || SEND_CONDITION()) {
                                 if(kev->ta->test)
                                     ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
                                             "teoSScrSubscribeA Test: %d %d %d %s\n", cmd, peer_length, ev, peer);
@@ -345,7 +356,7 @@ static int _check_multi_thread(void *ke) {
     if(!kev->ksn_cfg.no_multi_thread_f && kev->ta->f_multi_thread != MULTITHREAD && check_retrives < CHECK_RETRIVES) {
         kev->ta->f_multi_thread = MULTITHREAD;
         kev->ta->f_multi_thread = SEND_ASYNC(NULL, 0) == 0 ? MULTITHREAD : NO_MULTITHREAD;
-        ksn_printf(kev, MODULE, DEBUG, "Check MULTITHREAD mode: %s\n", 
+        ksn_printf(kev, MODULE, DEBUG, "Check MULTITHREAD mode: %s\n",
             kev->ta->f_multi_thread == MULTITHREAD ? "MULTITHREAD" : "NO MULTITHREAD");
         if(MULTITHREADED()) check_retrives = 0;
     }
