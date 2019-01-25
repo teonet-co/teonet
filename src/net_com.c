@@ -1292,11 +1292,10 @@ static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #define kev ((ksnetEvMgrClass*) ((ksnCoreClass *) kco->kc)->ke)
 
-    int processed;
+    int processed = 0;
 
     ksnCorePacketData *rds = ksnSplitCombine(kco->ks, rd);
     if(rds != NULL) {
-
         processed = ksnCommandCheck(kco, rds);
         if(!processed) {
 
@@ -1304,7 +1303,7 @@ static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             if(kev->event_cb != NULL)
                kev->event_cb(kev, EV_K_RECEIVED, (void*)rds, sizeof(rds), NULL);
 
-            processed = 1;
+            processed = 2;
         }
         ksnSplitFreeRds(kco->ks, rds);
     }

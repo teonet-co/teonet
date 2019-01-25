@@ -858,15 +858,11 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
     // Disconnect dead peer
     if(/*arp_data->last_triptime < 0.0001 ||*/ ct - arp->data.last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
 
-        // Disconnect dead peer from this host
-//        ksnCorePacketData rd;
-//        rd.from = peer_name;
-//        rd.data = NULL;
-//        cmd_disconnected_cb(kev->kc->kco, &rd);
-        remove_peer(kev, peer_name, arp);
-
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL, (ksnet_arp_data *)arp, NULL);
+
+        // Disconnect dead peer from this host
+        remove_peer(kev, peer_name, arp);
 
         retval = 1;
     }

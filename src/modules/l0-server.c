@@ -905,13 +905,12 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         rds->cmd = data->cmd;
         rds->from = data->from;
         rds->from_len = data->from_length;
-        rds->data = memdup(data->from + data->from_length, data->data_length);
+        rds->data = data->from + data->from_length;
         rds->data_len = data->data_length;
         rds->l0_f = 1;
 
         // Execute L0 client command
         retval = ksnCommandCheck(ke->kc->kco, rds);
-        if(retval) free(rds->data);  // \todo How to free the rds->data if not processed
     }
     // Wrong command
     else {
@@ -1389,6 +1388,15 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
             }
         }
     }
+// \TODO shell it message added    ?
+//    else {
+//        #ifdef DEBUG_KSNET
+//        ksn_puts(kev, MODULE, DEBUG_VV,
+//            "got undefined TR-UDP packet"                
+//        );
+//        #endif        
+//    }
+    
     return retval;
 }
 

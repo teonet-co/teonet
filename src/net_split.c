@@ -103,8 +103,8 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
  *
  * @param ks Pointer to ksnSplitClass
  * @param rd Pointer to ksnCorePacketData
- * 
- * @return Pointer to combined packet ksnCorePacketData or NULL if not combined 
+ *
+ * @return Pointer to combined packet ksnCorePacketData or NULL if not combined
  *         or error
  */
 ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
@@ -145,7 +145,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     create_key(subpacket_num);
     pblMapAdd(ks->map, key, key_len, rd->data + ptr_d, rd->data_len - ptr_d);
     free(key);
-    
+
     // Save current time when record was added to map
     ks->last_added = current_time;
 
@@ -170,9 +170,13 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             void *data_s = pblMapGet(ks->map, key, key_len, &data_s_len);
 
             // Check error (the subpacket has not received or added to the map)
-            if(data_s == NULL) {                 
-                free(key); 
-                return NULL; 
+            if(data_s == NULL) {
+                #ifdef DEBUG_KSNET
+                ksn_puts(kev, MODULE, ERROR_M,
+                    "the subpacket has not received or added to the map\n");
+                free(key);
+                #endif
+                return NULL;
             }
 
             // Get command from first subpacket
@@ -206,6 +210,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
         rds->addr = rd->addr;
         rds->arp = rd->arp;
         rds->data = data;
+        ks->data_save = data;
         rds->data_len = data_len;
         rds->from = rd->from;
         rds->from_len = rd->from_len;
@@ -227,8 +232,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
 void ksnSplitFreeRds(ksnSplitClass *ks, ksnCorePacketData *rd) {
 
     if(rd != NULL) {
-
-        free(rd->data);
+        free(ks->data_save);
         free(rd);
     }
 }
