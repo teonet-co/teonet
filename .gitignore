@@ -149,5 +149,6 @@ examples/go/teogo/teogo
 /embedded/libpbl/src/package-lock.json
 /tests/load_test/teoloadsi-js/nbproject/private/
 /tests/load_test/teoloadsi-js/node_modules/
+/tests/pipe_ping
 *.in~
 /distr/libtuntap-master/

@@ -106,8 +106,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if((rc = read(sd.fd_in, read_buf, KSN_BUFFER_SM_SIZE)) >= 0) {
                 
                 printf("Read %d bytes from stream name \"%s\" of peer \"%s\": "
-                       "\"%s\"\n", 
-                       (int) rc, sd.stream_name, sd.peer_name, read_buf);
+                        "\"%s\"\n", 
+                        (int) rc, sd.stream_name, sd.peer_name, read_buf);
+
+                //if(write(sd.fd_out, read_buf, rc) >= 0);
             }
 
         } break;
