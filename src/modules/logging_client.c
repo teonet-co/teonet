@@ -151,7 +151,7 @@ teoLoggingClientClass *teoLoggingClientInit(void *ke) {
     kev->event_cb = event_cb;
 
     #ifdef DEBUG_KSNET
-    ksn_puts(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+    ksn_puts(kev, MODULE, DEBUG_VV,
             "have been initialized");
     #endif
 
@@ -168,7 +168,7 @@ void teoLoggingClientDestroy(teoLoggingClientClass *lc) {
         ke->lc = NULL;
 
         #ifdef DEBUG_KSNET
-        ksn_puts(ke, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+        ksn_puts(ke, MODULE, DEBUG_VV,
                 "have been de-initialized");
         #endif
     }

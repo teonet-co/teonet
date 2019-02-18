@@ -45,6 +45,7 @@
 #include "ev_mgr.h"
 #include "modules/teodb_com.h"
 #include "modules/subscribe.h"
+#include "modules/log_reader.h"
 
 namespace teo {
 
@@ -850,6 +851,40 @@ private:
     }
 };
 
+class LogReader {
+
+public:
+
+  using Watcher = teoLogReaderWatcher;
+  using Flags =  teoLogReaderFlag;
+  
+private:
+
+    using Callback = teoLogReaderCallback;
+
+    Teonet &teo;
+
+public:
+
+  LogReader(Teonet &teo) : teo(teo) {}
+  LogReader(Teonet *teo) : teo(*teo) {}
+
+  template<typename AnyCallback>
+  Watcher* open(const char *name, const char *file_name, Flags f, AnyCallback cb = NULL) {
+    struct UserData { AnyCallback cb; };
+    UserData* ud = new UserData{cb};
+    auto wd = teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, f,
+      [](void* data, size_t data_length, Watcher *wd) {
+        ((UserData*)wd->user_data)->cb(data, data_length, wd);
+      }, (void*)ud);
+    return wd;
+  }
+
+  inline int close(Watcher *wd) {
+    return teoLogReaderClose(wd);
+  }
+};
+
 };
 
 /**
@@ -892,5 +927,6 @@ struct HostInfo {
         }
     }
 };
+
 
 }

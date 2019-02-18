@@ -27,6 +27,7 @@
 #include "modules/net_term.h"
 #include "modules/tcp_proxy.h"
 #include "modules/l0-server.h"
+#include "modules/log_reader.h"
 #include "modules/async_calls.h"
 #include "modules/logging_server.h"
 #include "modules/logging_client.h"
@@ -212,6 +213,8 @@ typedef enum ksnetEvMgrEvents {
     EV_A_INTERVAL,                  // #27 Angular interval event happened
 
     EV_K_LOGGING,                   ///< #28 Logging server event, like EV_K_RECEIVED: data Pointer to ksnCorePacketData, data_len Size of ksnCorePacketData, , user_data NULL
+ 
+    EV_K_LOG_READER,                ///< #29 LogReader read data.  
 
     EV_K_APP_USER = 0x8000          ///< #0x8000 Teonet based Applications events
 
@@ -251,6 +254,8 @@ typedef struct ksnetEvMgrClass {
 
     teoLoggingServerClass *ls; ///< Logging server class // \TODO move it up after testing
     teoLoggingClientClass *lc; ///< Logging client class // \TODO move it up after testing
+    
+    teoLogReaderClass *lr; ///< Log reader class
 
     teoAsyncClass *ta;  ///< Async calls module
 

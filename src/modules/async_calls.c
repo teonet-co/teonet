@@ -265,7 +265,7 @@ teoAsyncClass *teoAsyncInit(void *ke) {
     pthread_mutex_init(&ta->cv_mutex, NULL);
 
     #ifdef DEBUG_KSNET
-    ksn_puts(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+    ksn_puts(kev, MODULE, DEBUG_VV,
             "have been initialized");
     #endif
 
@@ -284,7 +284,7 @@ void teoAsyncDestroy(teoAsyncClass *ta) {
     ke->ta = NULL;
 
     #ifdef DEBUG_KSNET
-    ksn_puts(ke, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
+    ksn_puts(ke, MODULE, DEBUG_VV,
             "have been de-initialized");
     #endif
 }

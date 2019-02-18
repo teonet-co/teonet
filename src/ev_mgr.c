@@ -1344,6 +1344,11 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->lc = teoLoggingClientInit(ke);
     #endif
 
+    // Log reader module
+    #ifdef M_ENAMBE_LOG_READER
+    ke->lr = teoLogReaderInit(ke);
+    #endif
+
     // Async module
     #ifdef M_ENAMBE_ASYNC
     ke->ta = teoAsyncInit(ke);
@@ -1361,6 +1366,9 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 
     #ifdef M_ENAMBE_ASYNC
     teoAsyncDestroy(ke->ta);
+    #endif
+    #ifdef M_ENAMBE_LOG_READER
+    teoLogReaderDestroy(ke->lr);
     #endif
     #ifdef M_ENAMBE_LOGGING_CLIENT
     teoLoggingClientDestroy(ke->lc);
