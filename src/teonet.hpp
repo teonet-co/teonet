@@ -398,6 +398,38 @@ public:
     }
 
     /**
+     * Create Application parameters
+     *
+     * @param params
+     * @param params_description
+     * @return
+     */
+    static teo::teoAppParam *appParam(
+        std::vector<const char*> params,
+        std::vector<const char*> params_description) {
+
+      params.insert(params.begin(), "");
+      params_description.insert(params_description.begin(), "");
+
+      static teo::teoAppParam app_param;
+      app_param.app_argc = params.size();
+      app_param.app_argv = reinterpret_cast<const char**>(params.data());
+      app_param.app_descr = reinterpret_cast<const char**>(params_description.data());
+      return &app_param;
+    };
+
+
+    /**
+     * Get additional application command line parameter defined in teoAppParam
+     *
+     * @param parm_number Number of application parameter (started from 1)
+     * @return
+     */
+    inline const char* getParam(int parm_number) const {
+        return getKe()->ksn_cfg.app_argv[parm_number];
+    }
+
+    /**
      * Get KSNet event manager time
      *
      * @param ke Pointer to ksnetEvMgrClass
@@ -857,7 +889,7 @@ public:
 
   using Watcher = teoLogReaderWatcher;
   using Flags =  teoLogReaderFlag;
-  
+
 private:
 
     using Callback = teoLogReaderCallback;
@@ -880,9 +912,7 @@ public:
     return wd;
   }
 
-  inline int close(Watcher *wd) {
-    return teoLogReaderClose(wd);
-  }
+  inline int close(Watcher *wd) { return teoLogReaderClose(wd); }
 };
 
 };
@@ -891,7 +921,6 @@ public:
  * Teonet host info processing class
  */
 struct HostInfo {
-
 
     std::string name;
     struct {
@@ -928,5 +957,51 @@ struct HostInfo {
     }
 };
 
+/**
+ * Teonet string array class
+ */
+class StringArray {
+    
+private:
+
+    ksnet_stringArr sa;
+
+    inline ksnet_stringArr create() { return ksnet_stringArrCreate(); }
+    inline ksnet_stringArr split(const char* str, const char* separators, int with_empty, int max_parts) {
+        return ksnet_stringArrSplit(str, separators, with_empty, max_parts);
+    }
+    inline ksnet_stringArr free(ksnet_stringArr *arr) { return ksnet_stringArrFree(arr); }
+    inline char *_to_string(const char* separator) { return ksnet_stringArrCombine(sa, separator); }
+
+public:
+
+    StringArray() { sa = create(); }
+    StringArray(const char* str, const char* separators, 
+      bool with_empty = false, int max_parts = 0) {
+        sa = split(str, separators, with_empty, max_parts); }
+    StringArray(std::string &str, std::string &separators, 
+      bool with_empty = false, int max_parts = 0) {
+        StringArray(str.c_str(), separators.c_str(), with_empty, max_parts);
+    }
+    virtual ~StringArray() { free(&sa); }
+
+public:
+
+    inline const char* operator [] (int i) { return sa[i]; }
+
+    inline int size() { return ksnet_stringArrLength(sa); }
+    inline void add(const char* str) { ksnet_stringArrAdd(&sa, str); };
+    inline void add(std::string &str) { add(str.c_str()); };
+    inline std::string to_string(const char* separator) {
+        char *str = _to_string(separator);
+        std::string retstr = str;
+        delete str;
+        return retstr;
+    }
+    inline std::string to_string(std::string &separator) { return to_string(separator.c_str()); }
+    inline bool move(unsigned int fromIdx, unsigned int toIdx) { 
+        return !!ksnet_stringArrMoveTo(sa, fromIdx, toIdx); 
+    }
+};
 
 }

@@ -84,7 +84,7 @@ teoLogReaderWatcher *teoLogReaderOpenCbPP(teoLogReaderClass *lr,
     teoLogReaderWatcher *wd = NULL;
     int fd = open(file_name, O_RDONLY);
     if (fd == -1) ksn_printf(kev, MODULE, ERROR_M,
-            "Data file %s not present", file_name);
+            "Data file %s not present\n", file_name);
     else {
         wd = malloc(sizeof(teoLogReaderWatcher));
         ev_stat *w = malloc(sizeof(ev_stat));
