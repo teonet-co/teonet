@@ -157,7 +157,7 @@ public:
     /**
      * Start Teonet Event Manager and network communication
      *
-     * @return Alway 0
+     * @return Always 0
      */
     inline int run() {
         return ksnetEvMgrRun(ke);
@@ -175,15 +175,16 @@ public:
      */
     inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, void *data,
         size_t data_len) const {
-
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
-
-    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, const std::string &data) const {
-        return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
+    template<typename T>
+    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, T&& data) const {
+        //std::cout<<"L-value: "<< std::is_lvalue_reference<T>{} <<std::endl;
+        return sendTo((char*)to, cmd, (void*)std::forward<T>(data).c_str(),
+                std::forward<T>(data).size() + 1);
     }
     /**
-     * Send command by name to peer(async)
+     * Send command by name to peer(asynchronously)
      *
      * @param kc Pointer to ksnCoreClass
      * @param to Peer name to send to
@@ -193,24 +194,51 @@ public:
      */
     inline void sendToA(const char *to, uint8_t cmd, void *data,
         size_t data_len) const {
-
         ksnCoreSendCmdtoA((void *)ke, to, cmd, data, data_len);
     }
-
-    inline void sendToA(const char *to, uint8_t cmd, const std::string &msg) const {
-        sendToA(to, cmd, (void*)msg.c_str(), msg.size() + 1);
+    template<typename T>
+    inline void sendToA(const char *to, uint8_t cmd, T&& data) const {
+        sendToA(to, cmd, (void*)std::forward<T>(data).c_str(),
+                std::forward<T>(data).size() + 1);
     }
 
-    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) const {
-        sendCmdAnswerTo(ke, rd, (char*)name, out_data, out_data_len);
+    /**
+     * Sent teonet command to peer or l0 client depend of input rd
+     *
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param rd Pointer to rd
+     * @param name Name to send to
+     * @param data
+     * @param data_len
+     *
+     * @return
+     */
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *data, size_t data_len) const {
+        sendCmdAnswerTo(ke, rd, (char*)name, data, data_len);
     }
-
-    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, const std::string &out_data) const {
-        sendAnswerTo(rd, (char*)name, (void*)out_data.c_str(), out_data.size() + 1);
+    template<typename T>
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, T&& data) const {
+        sendAnswerTo(rd, (char*)name, (void*)std::forward<T>(data).c_str(),
+                std::forward<T>(data).size() + 1);
     }
-
-    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, const std::string &out_data) const {
-        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)out_data.c_str(), out_data.size() + 1);
+   /**
+     * Sent teonet command to peer or l0 client depend of input rd (asynchronously)
+     *
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param rd Pointer to rd
+     * @param name Name to send to
+     * @param data
+     * @param data_len
+     *
+     * @return
+     */
+    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, void *data, size_t data_len) const {
+        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)data, data_len);
+    }
+    template<typename T>
+    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, T&& data) const {
+        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)std::forward<T>(data).c_str(),
+                std::forward<T>(data).size() + 1);
     }
 
     /**
@@ -224,7 +252,6 @@ public:
      */
     inline int sendEchoTo(const char *to, uint8_t cmd, void *data,
       size_t data_len) const {
-
       return ksnCommandSendCmdEcho(ke->kc->kco, (char*)to, data, data_len);
     }
 
@@ -247,11 +274,12 @@ public:
         return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname,
           cname_length, cmd, data, data_len);
     }
-
-    inline int sendToL0(const char *addr, int port, const std::string &cname,
+    template<typename T>
+    inline int sendToL0(const char *addr, int port, T&& cname,
         uint8_t cmd, void *data, size_t data_len) const {
 
-        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, data, data_len);
+        return sendToL0(addr, port, std::forward<T>(cname).c_str(),
+                std::forward<T>(cname).size() + 1, cmd, data, data_len);
     }
 
     /**
@@ -334,7 +362,6 @@ public:
       return sendEchoToL0(l0cli->addr, l0cli->port, l0cli->name,
                 l0cli->name_len, data, data_len);
     }
-
     inline int sendEchoToL0A(teoL0Client* l0cli, void *data, size_t data_len) const {
       return sendEchoToL0A(l0cli->addr, l0cli->port, l0cli->name,
                 l0cli->name_len, data, data_len);
@@ -344,21 +371,22 @@ public:
     inline void subscribe(const char *peer_name, uint16_t ev) const {
         teoSScrSubscribe((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
     }
-
     inline void subscribeA(const char *peer_name, uint16_t ev) const {
         teoSScrSubscribeA((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
     }
 
     inline void sendToSscr(uint16_t ev, void *data, size_t data_length, uint8_t cmd = 0) const {
-        teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data,data_length, cmd);
+        teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data, data_length, cmd);
     }
-
-    inline void sendToSscr(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
-        sendToSscr(ev, (void*)data.c_str(), data.size() + 1, cmd);
+    template<typename T>
+    inline void sendToSscr(uint16_t ev, T&& data, uint8_t cmd = 0) const {
+        sendToSscr(ev, (void*)std::forward<T>(data).c_str(),
+                std::forward<T>(data).size() + 1, cmd);
     }
-
-    inline void sendToSscrA(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
-        teoSScrSendA(ke, ev, (void*)data.c_str(), data.size() + 1, cmd);
+    template<typename T>
+    inline void sendToSscrA(uint16_t ev, T&& data, uint8_t cmd = 0) const {
+        teoSScrSendA(ke, ev, (void*)std::forward<T>(data).c_str(),
+                std::forward<T>(data).size() + 1, cmd);
     }
 
     /**
@@ -903,6 +931,7 @@ public:
 
   template<typename AnyCallback>
   Watcher* open(const char *name, const char *file_name, Flags f, AnyCallback cb = NULL) {
+    std::cout << "name: "  << name << ", fname: " << file_name << std::endl;
     struct UserData { AnyCallback cb; };
     UserData* ud = new UserData{cb};
     auto wd = teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, f,
@@ -961,28 +990,54 @@ struct HostInfo {
  * Teonet string array class
  */
 class StringArray {
-    
+
 private:
 
     ksnet_stringArr sa;
+    std::string sep = ",";
 
     inline ksnet_stringArr create() { return ksnet_stringArrCreate(); }
     inline ksnet_stringArr split(const char* str, const char* separators, int with_empty, int max_parts) {
+        sep = separators;
         return ksnet_stringArrSplit(str, separators, with_empty, max_parts);
     }
     inline ksnet_stringArr free(ksnet_stringArr *arr) { return ksnet_stringArrFree(arr); }
-    inline char *_to_string(const char* separator) { return ksnet_stringArrCombine(sa, separator); }
+    inline char *_to_string(const char* separator) {
+        return ksnet_stringArrCombine(sa, separator ? separator : sep.c_str());
+    }
 
 public:
 
-    StringArray() { sa = create(); }
-    StringArray(const char* str, const char* separators, 
-      bool with_empty = false, int max_parts = 0) {
-        sa = split(str, separators, with_empty, max_parts); }
-    StringArray(std::string &str, std::string &separators, 
-      bool with_empty = false, int max_parts = 0) {
-        StringArray(str.c_str(), separators.c_str(), with_empty, max_parts);
+    // Default constructor
+    StringArray() {
+        std::cout << "Default constructor" << std::endl;
+        sa = create();
     }
+
+    // Split from const char* constructor
+    StringArray(const char* str, const char* separators,
+      bool with_empty, int max_parts) {
+        std::cout << "Split from const char* constructor" << std::endl;
+        sa = split(str, separators, with_empty, max_parts);
+
+    }
+    
+    // Split from std::string constructor
+    //template<typename T>
+    StringArray(std::string&& str, std::string&& separators, bool with_empty = false, int max_parts = 0) :
+      StringArray(std::move(str).c_str(), std::move(separators).c_str(),
+        with_empty, max_parts) {
+        std::cout << "Split from std::string constructor" << std::endl;
+    }
+
+    // Combine from std::vector constructor
+    StringArray(std::vector<const char*>&& vstr, const char* separators = ",") {
+        std::cout << "Combine from std::vector constructor" << std::endl;
+        sa = create();
+        sep = separators;
+        for(auto &st : vstr) add(st);
+    }
+
     virtual ~StringArray() { free(&sa); }
 
 public:
@@ -990,18 +1045,43 @@ public:
     inline const char* operator [] (int i) { return sa[i]; }
 
     inline int size() { return ksnet_stringArrLength(sa); }
-    inline void add(const char* str) { ksnet_stringArrAdd(&sa, str); };
-    inline void add(std::string &str) { add(str.c_str()); };
-    inline std::string to_string(const char* separator) {
+    inline StringArray& add(const char* str) { ksnet_stringArrAdd(&sa, str); return *this; };
+    inline StringArray& add(std::string &str) { add(str.c_str()); return *this; };
+    inline std::string to_string(const char* separator = NULL) {
         char *str = _to_string(separator);
         std::string retstr = str;
         delete str;
         return retstr;
     }
     inline std::string to_string(std::string &separator) { return to_string(separator.c_str()); }
-    inline bool move(unsigned int fromIdx, unsigned int toIdx) { 
-        return !!ksnet_stringArrMoveTo(sa, fromIdx, toIdx); 
+    inline bool move(unsigned int fromIdx, unsigned int toIdx) {
+        return !!ksnet_stringArrMoveTo(sa, fromIdx, toIdx);
     }
+
+    class iterator {
+
+    private:
+
+        using pointer = ksnet_stringArr;
+        using reference = char* & ;
+
+        pointer ptr_;
+        int idx_ = 0;
+
+    public:
+
+        iterator(pointer ptr, int idx) : ptr_(ptr), idx_(idx) { }
+        const pointer operator->() { return ptr_; }
+        iterator operator++() { idx_++; return *this; }
+        iterator operator++(int junk) { auto rv = *this; idx_++; return rv; }
+        bool operator==(const iterator& rhs) { return idx_ == rhs.idx_; }
+        bool operator!=(const iterator& rhs) { return idx_ != rhs.idx_; }
+        reference operator*() { return (ptr_)[idx_]; }
+    };
+
+    inline iterator begin() { return iterator(sa, 0); }
+    inline iterator end() { return iterator(sa, size()); }
+
 };
 
 }
