@@ -177,11 +177,11 @@ public:
         size_t data_len) const {
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
-    template<typename T>
-    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, T&& data) const {
+    //template<typename T>
+    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, 
+        std::string&& data) const {
         //std::cout<<"L-value: "<< std::is_lvalue_reference<T>{} <<std::endl;
-        return sendTo((char*)to, cmd, (void*)std::forward<T>(data).c_str(),
-                std::forward<T>(data).size() + 1);
+        return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
     }
     /**
      * Send command by name to peer(asynchronously)
@@ -1024,8 +1024,9 @@ public:
     
     // Split from std::string constructor
     //template<typename T>
-    StringArray(std::string&& str, std::string&& separators, bool with_empty = false, int max_parts = 0) :
-      StringArray(std::move(str).c_str(), std::move(separators).c_str(),
+    using T = std::string;
+    StringArray(T&& str, T&& separators, bool with_empty = false, int max_parts = 0) :
+      StringArray(std::forward<T>(str).c_str(), std::forward<T>(separators).c_str(),
         with_empty, max_parts) {
         std::cout << "Split from std::string constructor" << std::endl;
     }
