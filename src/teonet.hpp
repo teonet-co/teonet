@@ -178,7 +178,7 @@ public:
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
     //template<typename T>
-    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, 
+    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd,
         std::string&& data) const {
         //std::cout<<"L-value: "<< std::is_lvalue_reference<T>{} <<std::endl;
         return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
@@ -995,7 +995,7 @@ private:
     std::string sep = ",";
 
     inline ksnet_stringArr create() const { return ksnet_stringArrCreate(); }
-    inline ksnet_stringArr split(const char* str, const char* separators, 
+    inline ksnet_stringArr split(const char* str, const char* separators,
       int with_empty, int max_parts) {
       sep = separators;
       return ksnet_stringArrSplit(str, separators, with_empty, max_parts);
@@ -1014,14 +1014,14 @@ public:
     }
 
     // Split from const char* constructor
-    StringArray(const char* str, const char* separators, bool with_empty, 
-      int max_parts) {
+    StringArray(const char* str, const char* separators = ",", bool with_empty = 0,
+      int max_parts = 0) {
       std::cout << "Split from const char* constructor" << std::endl;
       sa = split(str, separators, with_empty, max_parts);
     }
-    
+
     // Split from std::string constructor
-    StringArray(std::string&& str, std::string&& separators, 
+    StringArray(std::string&& str, std::string&& separators = ",",
       bool with_empty = false, int max_parts = 0) :
       StringArray(str.c_str(), separators.c_str(), with_empty, max_parts) {
       std::cout << "Split from std::string constructor" << std::endl;
@@ -1044,11 +1044,12 @@ public:
     inline int size() const { return ksnet_stringArrLength(sa); }
     inline StringArray& add(const char* str) { ksnet_stringArrAdd(&sa, str); return *this; };
     inline StringArray& add(std::string &&str) { add(str.c_str()); return *this; };
-    inline std::string to_string(const char* separator = NULL) const { 
+    inline std::string to_string(const char* separator = NULL) const {
+//      // It does not work... remove it from other places of this file      
 //      std::unique_ptr<const char[]> str_ptr(_to_string(separator));
 //      return str_ptr.get();
       auto rawstr = _to_string(separator);
-      auto retstr = std::string(rawstr); 
+      auto retstr = std::string(rawstr);
       free((void*)rawstr);
       return retstr;
     }
