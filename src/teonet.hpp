@@ -920,8 +920,6 @@ public:
 
 private:
 
-    using Callback = teoLogReaderCallback;
-
     Teonet &teo;
 
 public:
@@ -930,10 +928,10 @@ public:
   LogReader(Teonet *teo) : teo(*teo) {}
 
   template<typename AnyCallback>
-  Watcher* open(const char *name, const char *file_name, Flags f, AnyCallback cb = NULL) {
+  Watcher* open(const char *name, const char *file_name, Flags f, AnyCallback cb = NULL) const {
     std::cout << "name: "  << name << ", fname: " << file_name << std::endl;
     struct UserData { AnyCallback cb; };
-    UserData* ud = new UserData{cb};
+    auto ud = new UserData {cb};
     auto wd = teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, f,
       [](void* data, size_t data_length, Watcher *wd) {
         ((UserData*)wd->user_data)->cb(data, data_length, wd);
@@ -941,7 +939,7 @@ public:
     return wd;
   }
 
-  inline int close(Watcher *wd) { return teoLogReaderClose(wd); }
+  inline int close(Watcher *wd) const { return teoLogReaderClose(wd); }
 };
 
 };
@@ -996,68 +994,66 @@ private:
     ksnet_stringArr sa;
     std::string sep = ",";
 
-    inline ksnet_stringArr create() { return ksnet_stringArrCreate(); }
-    inline ksnet_stringArr split(const char* str, const char* separators, int with_empty, int max_parts) {
-        sep = separators;
-        return ksnet_stringArrSplit(str, separators, with_empty, max_parts);
+    inline ksnet_stringArr create() const { return ksnet_stringArrCreate(); }
+    inline ksnet_stringArr split(const char* str, const char* separators, 
+      int with_empty, int max_parts) {
+      sep = separators;
+      return ksnet_stringArrSplit(str, separators, with_empty, max_parts);
     }
-    inline ksnet_stringArr free(ksnet_stringArr *arr) { return ksnet_stringArrFree(arr); }
-    inline char *_to_string(const char* separator) {
-        return ksnet_stringArrCombine(sa, separator ? separator : sep.c_str());
+    inline ksnet_stringArr destroy(ksnet_stringArr *arr) const { return ksnet_stringArrFree(arr); }
+    inline const char* _to_string(const char* separator) const {
+      return ksnet_stringArrCombine(sa, separator ? separator : sep.c_str());
     }
 
 public:
 
     // Default constructor
     StringArray() {
-        std::cout << "Default constructor" << std::endl;
-        sa = create();
+      std::cout << "Default constructor" << std::endl;
+      sa = create();
     }
 
     // Split from const char* constructor
-    StringArray(const char* str, const char* separators,
-      bool with_empty, int max_parts) {
-        std::cout << "Split from const char* constructor" << std::endl;
-        sa = split(str, separators, with_empty, max_parts);
-
+    StringArray(const char* str, const char* separators, bool with_empty, 
+      int max_parts) {
+      std::cout << "Split from const char* constructor" << std::endl;
+      sa = split(str, separators, with_empty, max_parts);
     }
     
     // Split from std::string constructor
-    //template<typename T>
-    using T = std::string;
-    StringArray(T&& str, T&& separators, bool with_empty = false, int max_parts = 0) :
-      StringArray(std::forward<T>(str).c_str(), std::forward<T>(separators).c_str(),
-        with_empty, max_parts) {
-        std::cout << "Split from std::string constructor" << std::endl;
+    StringArray(std::string&& str, std::string&& separators, 
+      bool with_empty = false, int max_parts = 0) :
+      StringArray(str.c_str(), separators.c_str(), with_empty, max_parts) {
+      std::cout << "Split from std::string constructor" << std::endl;
     }
 
     // Combine from std::vector constructor
     StringArray(std::vector<const char*>&& vstr, const char* separators = ",") {
-        std::cout << "Combine from std::vector constructor" << std::endl;
-        sa = create();
-        sep = separators;
-        for(auto &st : vstr) add(st);
+      std::cout << "Combine from std::vector constructor" << std::endl;
+      sa = create();
+      sep = separators;
+      for(auto &st : vstr) add(st);
     }
 
-    virtual ~StringArray() { free(&sa); }
+    virtual ~StringArray() { destroy(&sa); }
 
 public:
 
-    inline const char* operator [] (int i) { return sa[i]; }
+    inline const char* operator [] (int i) const { return sa[i]; }
 
-    inline int size() { return ksnet_stringArrLength(sa); }
+    inline int size() const { return ksnet_stringArrLength(sa); }
     inline StringArray& add(const char* str) { ksnet_stringArrAdd(&sa, str); return *this; };
-    inline StringArray& add(std::string &str) { add(str.c_str()); return *this; };
-    inline std::string to_string(const char* separator = NULL) {
-        char *str = _to_string(separator);
-        std::string retstr = str;
-        delete str;
-        return retstr;
+    inline StringArray& add(std::string &&str) { add(str.c_str()); return *this; };
+    inline std::string to_string(const char* separator = NULL) const { 
+//      std::unique_ptr<const char[]> str_ptr(_to_string(separator));
+//      return str_ptr.get();
+      auto rawstr = _to_string(separator);
+      auto retstr = std::string(rawstr); 
+      free((void*)rawstr);
+      return retstr;
     }
-    inline std::string to_string(std::string &separator) { return to_string(separator.c_str()); }
-    inline bool move(unsigned int fromIdx, unsigned int toIdx) {
-        return !!ksnet_stringArrMoveTo(sa, fromIdx, toIdx);
-    }
+    inline std::string to_string(std::string &&separator) const { return to_string(separator.c_str()); }
+    inline bool move(unsigned int fromIdx, unsigned int toIdx) { return !!ksnet_stringArrMoveTo(sa, fromIdx, toIdx); }
 
     class iterator {
 

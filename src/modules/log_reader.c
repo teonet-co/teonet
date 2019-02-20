@@ -65,16 +65,17 @@ static char *readLine(teoLogReaderClass *lr, int fd) {
 static void receive_cb(EV_P_ ev_stat *w, int revents) {
     teoLogReaderWatcher *wd = w->data;
     teoLogReaderClass *lr = wd->lr;
-    for(;;) {
+    int empty;
+    do {
         const char *line = readLine(lr, wd->fd);
-        if(line[0]) {
+        empty = !line[0];
+        if(!empty) {
             size_t data_len = strlen(line) + 1;
             kev->event_cb(kev, EV_K_LOG_READER, (void*)line, data_len, wd);
-            if(wd->cb) wd->cb((void*)line, data_len, wd);
-            free((void*)line);
+            if(wd->cb) wd->cb((void*)line, data_len, wd);            
         }
-        else break;
-    }
+        free((void*)line);
+    } while(!empty);
 }
 
 teoLogReaderWatcher *teoLogReaderOpenCbPP(teoLogReaderClass *lr, 
