@@ -177,10 +177,8 @@ public:
         size_t data_len) const {
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
-    //template<typename T>
     inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd,
         std::string&& data) const {
-        //std::cout<<"L-value: "<< std::is_lvalue_reference<T>{} <<std::endl;
         return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
     }
     /**
@@ -192,14 +190,11 @@ public:
      * @param data Commands data
      * @param data_len Commands data length
      */
-    inline void sendToA(const char *to, uint8_t cmd, void *data,
-        size_t data_len) const {
+    inline void sendToA(const char *to, uint8_t cmd, void *data, size_t data_len) const {
         ksnCoreSendCmdtoA((void *)ke, to, cmd, data, data_len);
     }
-    template<typename T>
-    inline void sendToA(const char *to, uint8_t cmd, T&& data) const {
-        sendToA(to, cmd, (void*)std::forward<T>(data).c_str(),
-                std::forward<T>(data).size() + 1);
+    inline void sendToA(const char *to, uint8_t cmd, std::string&& data) const {
+        sendToA(to, cmd, (void*)data.c_str(), data.size() + 1);
     }
 
     /**
@@ -216,10 +211,8 @@ public:
     inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *data, size_t data_len) const {
         sendCmdAnswerTo(ke, rd, (char*)name, data, data_len);
     }
-    template<typename T>
-    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, T&& data) const {
-        sendAnswerTo(rd, (char*)name, (void*)std::forward<T>(data).c_str(),
-                std::forward<T>(data).size() + 1);
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, std::string&& data) const {
+        sendAnswerTo(rd, (char*)name, (void*)data.c_str(), data.size() + 1);
     }
    /**
      * Sent teonet command to peer or l0 client depend of input rd (asynchronously)
@@ -235,10 +228,8 @@ public:
     inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, void *data, size_t data_len) const {
         sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)data, data_len);
     }
-    template<typename T>
-    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, T&& data) const {
-        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)std::forward<T>(data).c_str(),
-                std::forward<T>(data).size() + 1);
+    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, std::string&& data) const {
+        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)data.c_str(), data.size() + 1);
     }
 
     /**
@@ -270,20 +261,39 @@ public:
      */
     inline int sendToL0(const char *addr, int port, const char *cname,
         size_t cname_length, uint8_t cmd, void *data, size_t data_len) const {
-
         return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname,
           cname_length, cmd, data, data_len);
     }
-    template<typename T>
-    inline int sendToL0(const char *addr, int port, T&& cname,
+    inline int sendToL0(const char *addr, int port, std::string&& cname,
         uint8_t cmd, void *data, size_t data_len) const {
-
-        return sendToL0(addr, port, std::forward<T>(cname).c_str(),
-                std::forward<T>(cname).size() + 1, cmd, data, data_len);
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, 
+                data, data_len);
+    }
+    inline int sendToL0(const char *addr, int port, std::string&& cname,
+        uint8_t cmd, std::string&& data) const {
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, 
+                (void*)data.c_str(), data.size() + 1);
     }
 
     /**
-     * Send data to L0 client. Usually it is an answer to request from L0 client(async)
+     * Send data to L0 client with the teoL0Client structure.
+     *
+     * @param l0cli Pointer to teoL0Client
+     * @param cmd Command
+     * @param data Data
+     * @param data_len Data length
+     *
+     * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+     */
+    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data,
+        size_t data_len) const {
+
+        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len,
+                cmd, data, data_len);
+    }
+
+    /**
+     * Send data to L0 client. Usually it is an answer to request from L0 client(asynchronously)
      *
      * @param addr IP address of remote peer
      * @param port Port of remote peer
@@ -303,23 +313,6 @@ public:
         rd.port = port;
         rd.l0_f = 1;
         sendCmdAnswerToBinaryA((void *)ke, &rd, cmd, data, data_len);
-    }
-
-    /**
-     * Send data to L0 client with the teoL0Client structure.
-     *
-     * @param l0cli Pointer to teoL0Client
-     * @param cmd Command
-     * @param data Data
-     * @param data_len Data length
-     *
-     * @return Return 0 if success; -1 if data length is too lage (more than 32319)
-     */
-    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data,
-        size_t data_len) const {
-
-        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len,
-                cmd, data, data_len);
     }
 
     /**
@@ -378,15 +371,11 @@ public:
     inline void sendToSscr(uint16_t ev, void *data, size_t data_length, uint8_t cmd = 0) const {
         teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data, data_length, cmd);
     }
-    template<typename T>
-    inline void sendToSscr(uint16_t ev, T&& data, uint8_t cmd = 0) const {
-        sendToSscr(ev, (void*)std::forward<T>(data).c_str(),
-                std::forward<T>(data).size() + 1, cmd);
+    inline void sendToSscr(uint16_t ev, std::string&& data, uint8_t cmd = 0) const {
+        sendToSscr(ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
-    template<typename T>
-    inline void sendToSscrA(uint16_t ev, T&& data, uint8_t cmd = 0) const {
-        teoSScrSendA(ke, ev, (void*)std::forward<T>(data).c_str(),
-                std::forward<T>(data).size() + 1, cmd);
+    inline void sendToSscrA(uint16_t ev, std::string&& data, uint8_t cmd = 0) const {
+        teoSScrSendA(ke, ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
 
     /**
@@ -572,11 +561,9 @@ public:
         struct userData { void *user_data; Callback cb; };
         userData *ud = new userData { user_data, cb };
         return ksnCQueAdd(kq, [](uint32_t id, int type, void *data) {
-
-            auto ud = (userData*) data;
+            userData* ud = (userData*) data;
             ud->cb(id, type, ud->user_data);
             delete(ud);
-
         }, (double)timeout, ud);
     }
 
@@ -827,7 +814,7 @@ public:
         struct userData { void *user_data; Callback cb; };
         auto ud = new userData { user_data, cb };
         auto cq = cque.add([](uint32_t id, int type, void *data) {
-            auto ud = (userData *) data;
+            userData* ud = (userData *) data;
             ud->cb(id, type, ud->user_data);
             delete((TeoDB::teoDbCQueData*)ud->user_data);
             delete(ud);
