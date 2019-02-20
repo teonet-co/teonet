@@ -22,9 +22,9 @@ public:
 // Own class methods and data
 public:
 
-    void showMessage(const std::string msg) {
-        std::cout << msg;
-    }
+//    void showMessage(const std::string msg) {
+//        std::cout << msg;
+//    }
     
     /**
      * Teonet event handler
@@ -41,7 +41,7 @@ public:
 
             case EV_K_STARTED: {
 
-                showMessage("Event: EV_K_STARTED, Teonet class version: " +
+                showMessage(DEBUG, "Event: EV_K_STARTED, Teonet class version: " +
                     (std::string)getClassVersion() + "\n");
 
             } break;
@@ -50,7 +50,7 @@ public:
 
                 // Teonet packet
                 auto rd = getPacket(data);
-                showMessage("Event: EV_K_CONNECTED, "
+                showMessage(DEBUG, "Event: EV_K_CONNECTED, "
                             "from: " + (const std::string)rd->from + ",\t"
                             "data: " + (const char*)rd->data + "\n");
 
@@ -72,7 +72,7 @@ public:
                     case CMD_HOST_INFO_ANSWER: {
 
                         auto host_info = teo::HostInfo(rd->data);
-                        showMessage("Event: EV_K_RECEIVED, "
+                        showMessage(DEBUG, "Event: EV_K_RECEIVED, "
                             "Cmd: CMD_HOST_INFO_ANSWER, from: " + (std::string)rd->from + ", "
                                 "name: " + host_info.name + ", " +
                                 "version: " + host_info.version + ", " +
@@ -83,7 +83,7 @@ public:
                     } break;
 
                     default: {
-                        showMessage("Event: EV_K_RECEIVED, "
+                        showMessage(DEBUG, "Event: EV_K_RECEIVED, "
                                 "cmd: " + std::to_string(rd->cmd) + ", "
                                 "from: " + (const char*)rd->from + ",\t"
                                 "data: " + (const char*)rd->data + "\n");
@@ -94,7 +94,7 @@ public:
 
             // Calls after event manager stopped
             case EV_K_STOPPED:
-                showMessage("Event: EV_K_STOPPED\n");
+                showMessage(DEBUG, "Event: EV_K_STOPPED\n");
                 break;
 
             default:

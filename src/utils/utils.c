@@ -145,6 +145,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
                 printf("%s\n", p);
             }
             else printf("%s", p);
+            fflush(stdout);
         }
 
         // Log message

@@ -74,6 +74,22 @@ typedef struct teoL0Client {            //! Teonet L0 Client address
 } teoL0Client;
 
 /**
+ * The unique_raw_ptr::make make unique_ptr from allocated raw pointer,
+ * and free this pointer pointer when the unique_ptr does not used more.
+ */
+namespace unique_raw_ptr {
+
+    template<typename T>
+    struct destroy { void operator()(T x) { free((void*)x); } };
+
+    template<typename T>
+    std::unique_ptr<T[],destroy<T*>> make(T* raw_data) {
+        std::unique_ptr<T[],destroy<T*>> str_ptr(raw_data);
+        return std::move(str_ptr);
+    }
+}
+
+/**
  * Teonet class.
  *
  * This is Teonet L0 client C++ wrapper
@@ -266,12 +282,12 @@ public:
     }
     inline int sendToL0(const char *addr, int port, std::string&& cname,
         uint8_t cmd, void *data, size_t data_len) const {
-        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, 
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd,
                 data, data_len);
     }
     inline int sendToL0(const char *addr, int port, std::string&& cname,
         uint8_t cmd, std::string&& data) const {
-        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, 
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd,
                 (void*)data.c_str(), data.size() + 1);
     }
 
@@ -495,17 +511,23 @@ public:
     #ifdef DEBUG_KSNET
     #define teo_printf(module, type, format, ...) \
         ksnet_printf(&((getKe())->ksn_cfg), type, \
-            _ksn_printf_format_(format), \
-            _ksn_printf_type_(type), \
-            module == NULL ? (getKe())->ksn_cfg.app_name : module, \
-            __func__, __FILE__, __LINE__, __VA_ARGS__)
+            type != DISPLAY_M ? _ksn_printf_format_(format) : _ksn_printf_format_display_m(format), \
+            type != DISPLAY_M ? _ksn_printf_type_(type) : "", \
+            type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "", \
+            type != DISPLAY_M ? __func__ : "", \
+            type != DISPLAY_M ? __FILE__ : "", \
+            type != DISPLAY_M ? __LINE__ : 0, \
+            __VA_ARGS__)
 
     #define teo_puts(module, type, format) \
         ksnet_printf(&((getKe())->ksn_cfg), type, \
-            _ksn_printf_format_(format) "\n", \
-            _ksn_printf_type_(type), \
-            module == NULL ? (getKe())->ksn_cfg.app_name : module, \
-            __func__, __FILE__, __LINE__)
+            type != DISPLAY_M ? _ksn_printf_format_(format) "\n" : _ksn_printf_format_display_m(format) "\n", \
+            type != DISPLAY_M ? _ksn_printf_type_(type) : "", \
+            type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "", \
+            type != DISPLAY_M ? __func__ : "", \
+            type != DISPLAY_M ? __FILE__ : "", \
+            type != DISPLAY_M ? __LINE__ : 0)
+    
     #else
     #define teo_printf(module, type, format, ...) ;
     #define teo_puts(module, type, format) ;
@@ -515,7 +537,7 @@ public:
     inline std::string formatMessage(const char *format, const Arguments&... args) {
         const char *cstr = ksnet_formatMessage(format, args...);
         std::string str(cstr);
-        delete cstr;
+        free((void*)cstr);
         return str;
     }
 
@@ -916,7 +938,7 @@ public:
 
   template<typename AnyCallback>
   Watcher* open(const char *name, const char *file_name, Flags f, AnyCallback cb = NULL) const {
-    std::cout << "name: "  << name << ", fname: " << file_name << std::endl;
+    //std::cout << "name: "  << name << ", fname: " << file_name << std::endl;
     struct UserData { AnyCallback cb; };
     auto ud = new UserData {cb};
     auto wd = teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, f,
@@ -996,14 +1018,14 @@ public:
 
     // Default constructor
     StringArray() {
-      std::cout << "Default constructor" << std::endl;
+      //std::cout << "Default constructor" << std::endl;
       sa = create();
     }
 
     // Split from const char* constructor
     StringArray(const char* str, const char* separators = ",", bool with_empty = 0,
       int max_parts = 0) {
-      std::cout << "Split from const char* constructor" << std::endl;
+      //std::cout << "Split from const char* constructor" << std::endl;
       sa = split(str, separators, with_empty, max_parts);
     }
 
@@ -1011,12 +1033,12 @@ public:
     StringArray(std::string&& str, std::string&& separators = ",",
       bool with_empty = false, int max_parts = 0) :
       StringArray(str.c_str(), separators.c_str(), with_empty, max_parts) {
-      std::cout << "Split from std::string constructor" << std::endl;
+      //std::cout << "Split from std::string constructor" << std::endl;
     }
 
     // Combine from std::vector constructor
     StringArray(std::vector<const char*>&& vstr, const char* separators = ",") {
-      std::cout << "Combine from std::vector constructor" << std::endl;
+      //std::cout << "Combine from std::vector constructor" << std::endl;
       sa = create();
       sep = separators;
       for(auto &st : vstr) add(st);
@@ -1032,13 +1054,7 @@ public:
     inline StringArray& add(const char* str) { ksnet_stringArrAdd(&sa, str); return *this; };
     inline StringArray& add(std::string &&str) { add(str.c_str()); return *this; };
     inline std::string to_string(const char* separator = NULL) const {
-//      // It does not work... remove it from other places of this file      
-//      std::unique_ptr<const char[]> str_ptr(_to_string(separator));
-//      return str_ptr.get();
-      auto rawstr = _to_string(separator);
-      auto retstr = std::string(rawstr);
-      free((void*)rawstr);
-      return retstr;
+      return std::string(unique_raw_ptr::make<const char>(_to_string(separator)).get());
     }
     inline std::string to_string(std::string &&separator) const { return to_string(separator.c_str()); }
     inline bool move(unsigned int fromIdx, unsigned int toIdx) { return !!ksnet_stringArrMoveTo(sa, fromIdx, toIdx); }
@@ -1070,3 +1086,39 @@ public:
 };
 
 }
+
+/*
+ * This an Utils submodule.
+ *
+ * - The showMessage used to show teonet messages:
+ *    showMessage(DEBUG, "Some debuf message\n");
+ *
+ * - The watch(x) is very useful debugging define to print variable name and it
+ * value in next format:
+ *    variable = value
+ *
+ */
+#ifndef THIS_UTILS_H
+#define THIS_UTILS_H
+
+#define msg_to_string(msg) ({ \
+    std::ostringstream foo; \
+    foo << msg; \
+    foo.str(); \
+})
+
+#define showMessage(mtype,msg) teo_printf(NULL, mtype, "%s", msg_to_string(msg).c_str())
+#define showMessageLn(mtype,msg) teo_printf(NULL, mtype, "%s\n", msg_to_string(msg).c_str())
+
+#define watch(x) std::cout << (#x) << " = " << (x) << std::endl
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* THIS_UTILS_H */
