@@ -14,15 +14,20 @@
 #ifndef LOG_READER_H
 #define LOG_READER_H
 
-typedef enum teoLogReaderFlag {
-  READ_FROM_BEGIN,  // Read log file from the beginning
-  READ_FROM_END     // Read new strings only (after current end)
-} teoLogReaderFlag;
+typedef uint32_t teoLogReaderFlag;
+typedef enum _teoLogReaderFlag {
+  READ_FROM_BEGIN,        // 000 Read log file from the beginning
+  READ_FROM_END = 0b001,  // 001 Read new strings only (after current end)
+  SKIP_EMPTY    = 0b010   // 010 Skip empty strings
+} _teoLogReaderFlag;
 
 typedef struct teoLogReaderClass {
 
     void *ke; // Pointer to ksnEvMgrClass
-    //teoMap *map; // Log reader files map
+    void *buffer; // Pointer to read buffer
+    size_t buf_size; // Size of current allocated read buffer size
+    void *line_buffer; // Pointer to read line buffer
+    size_t line_buf_size; // Size of current allocated read line buffer size
 
 } teoLogReaderClass;
 
@@ -32,6 +37,7 @@ typedef void (*teoLogReaderCallback) (void* data, size_t data_length, teoLogRead
 
 typedef struct teoLogReaderWatcher {
     teoLogReaderCallback cb;
+    teoLogReaderFlag flags;
     teoLogReaderClass *lr;
     const char *file_name;
     const char *name; 

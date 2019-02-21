@@ -53,7 +53,7 @@ endif
 
 AM_CXX = clang++
 AM_CXXFLAGS = \
-	-std=gnu++14 \
+	-std=c++17 \
 	-fPIC \
 	-Wall \
 	-I/opt/local/include

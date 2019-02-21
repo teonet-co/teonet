@@ -20,8 +20,14 @@
 #define MODULE "log_reader"
 #define kev ((ksnetEvMgrClass*)(lr->ke))
 
+#define BUFINC 256
+
 teoLogReaderClass *teoLogReaderInit(void *ke) {
     teoLogReaderClass *lr = malloc(sizeof(teoLogReaderClass));
+    lr->buf_size = 0;
+    lr->buffer = NULL;
+    lr->line_buf_size = 0;
+    lr->line_buffer = NULL;
     lr->ke = ke;
     #ifdef DEBUG_KSNET
     ksn_puts(kev, MODULE, DEBUG_VV, "have been initialized");
@@ -32,6 +38,8 @@ teoLogReaderClass *teoLogReaderInit(void *ke) {
 void teoLogReaderDestroy(teoLogReaderClass *lr) {
     if(lr) {
         ksnetEvMgrClass *ke = lr->ke;
+        if(lr->line_buffer) free(lr->line_buffer);
+        if(lr->buffer) free(lr->buffer);
         free(lr);
 
         #ifdef DEBUG_KSNET
@@ -40,21 +48,47 @@ void teoLogReaderDestroy(teoLogReaderClass *lr) {
     }
 }
 
-static char *readLine(teoLogReaderClass *lr, int fd) {
-    const size_t BUFINC  = 256; 
-    size_t bufsize = BUFINC;
-    char *retstr = malloc(bufsize);
+static void *readBuffer(teoLogReaderClass *lr, int fd, size_t *data_length) {
+
+    size_t ptr = 0, rd;
+    for(;;) {
+        // Allocate and reallocate buffer
+        if(!lr->buf_size) {
+            lr->buf_size = BUFINC * 2;
+            lr->buffer = malloc(lr->buf_size);
+        }
+        else if(lr->buf_size - ptr < BUFINC) {
+            lr->buf_size += BUFINC * 2;
+            lr->buffer = realloc(lr->buffer, lr->buf_size);
+        }
+        // Read from file
+        rd = read(fd, lr->buffer + ptr, lr->buf_size - ptr);
+        if(rd > 0) ptr += rd;
+        else break;
+    }
+    if(data_length) *data_length = ptr;
+    return lr->buffer;
+}
+
+static char *readLineBuffer(teoLogReaderClass *lr, size_t *ptr, size_t data_length) {
+    // Allocate line buffer
+    if(!lr->line_buffer) {
+        lr->line_buf_size = BUFINC;
+        lr->line_buffer = malloc(lr->line_buf_size);
+    }
+    // Split input buffer by end of line  
+    #define retstr ((char*)lr->line_buffer)
     retstr[0] = 0;
-    char ch;
-    int i = 0;
-    while(read(fd, &ch, 1) == 1) {
+    for(int i = 0; *ptr < data_length; ) {
+        char ch = ((char*)lr->buffer)[(*ptr)++];
         if(ch == '\r') continue;
         if(ch != '\n') {
             retstr[i++] = ch;
             retstr[i] = 0;
-            if(i >= bufsize-1) {
-                bufsize += BUFINC;
-                retstr = realloc(retstr, bufsize);
+            // Reallocate line buffer
+            if(i >= lr->line_buf_size-1) {
+                lr->line_buf_size += BUFINC;
+                lr->line_buffer = realloc(lr->line_buffer, lr->line_buf_size);
             }
         }
         else break;
@@ -66,20 +100,21 @@ static void receive_cb(EV_P_ ev_stat *w, int revents) {
     teoLogReaderWatcher *wd = w->data;
     teoLogReaderClass *lr = wd->lr;
     int empty;
+    size_t data_length, ptr = 0;
+    readBuffer(lr, wd->fd, &data_length);
     do {
-        const char *line = readLine(lr, wd->fd);
+        const char *line = readLineBuffer(lr, &ptr, data_length);
         empty = !line[0];
-        if(!empty) {
+        if(!((wd->flags & SKIP_EMPTY) && empty)) {
             size_t data_len = strlen(line) + 1;
             kev->event_cb(kev, EV_K_LOG_READER, (void*)line, data_len, wd);
-            if(wd->cb) wd->cb((void*)line, data_len, wd);            
+            if(wd->cb) wd->cb((void*)line, data_len, wd);
         }
-        free((void*)line);
-    } while(!empty);
+    } while(ptr < data_length);
 }
 
-teoLogReaderWatcher *teoLogReaderOpenCbPP(teoLogReaderClass *lr, 
-        const char *name, const char *file_name, teoLogReaderFlag flags, 
+teoLogReaderWatcher *teoLogReaderOpenCbPP(teoLogReaderClass *lr,
+        const char *name, const char *file_name, teoLogReaderFlag flags,
         teoLogReaderCallback cb, void *user_data) {
 
     teoLogReaderWatcher *wd = NULL;
@@ -92,6 +127,7 @@ teoLogReaderWatcher *teoLogReaderOpenCbPP(teoLogReaderClass *lr,
         wd->file_name = strdup(file_name);
         wd->user_data = user_data;
         wd->name = strdup(name);
+        wd->flags = flags;
         wd->lr = lr;
         wd->fd = fd;
         wd->cb = cb;
@@ -99,19 +135,19 @@ teoLogReaderWatcher *teoLogReaderOpenCbPP(teoLogReaderClass *lr,
         ev_stat_init (w, receive_cb, file_name, 0.01);
         w->data = wd;
         ev_stat_start (kev->ev_loop, w);
-        if(flags == READ_FROM_BEGIN) receive_cb(kev->ev_loop, w, 0);
-        else if(flags == READ_FROM_END) lseek(fd, 0, SEEK_END);
+        if(flags & READ_FROM_END) lseek(fd, 0, SEEK_END);
+        else receive_cb(kev->ev_loop, w, 0);
     }
     return wd;
 }
 
-inline teoLogReaderWatcher *teoLogReaderOpenCb(teoLogReaderClass *lr, 
-        const char *name, const char *file_name, teoLogReaderFlag flags, 
+inline teoLogReaderWatcher *teoLogReaderOpenCb(teoLogReaderClass *lr,
+        const char *name, const char *file_name, teoLogReaderFlag flags,
         teoLogReaderCallback cb) {
     return teoLogReaderOpenCbPP(lr, name, file_name, flags, cb, NULL);
 }
 
-inline teoLogReaderWatcher *teoLogReaderOpen(teoLogReaderClass *lr, 
+inline teoLogReaderWatcher *teoLogReaderOpen(teoLogReaderClass *lr,
         const char *name, const char *file_name, teoLogReaderFlag flags) {
     return teoLogReaderOpenCbPP(lr, name, file_name, flags, NULL, NULL);
 }
@@ -120,13 +156,12 @@ int teoLogReaderClose(teoLogReaderWatcher *wd) {
     int retval = -1;
     if(wd) {
         // Stop this watcher and free memory
-        ev_stat_stop(((ksnetEvMgrClass*)wd->lr->ke)->ev_loop, wd->w);        
+        ev_stat_stop(((ksnetEvMgrClass*)wd->lr->ke)->ev_loop, wd->w);
         retval = close(wd->fd);
-        if(wd->user_data) free(wd->user_data);
         free((void*)wd->file_name);
         free((void*)wd->name);
         free(wd->w);
         free(wd);
     }
-    return retval; 
+    return retval;
 }

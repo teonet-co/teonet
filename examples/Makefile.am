@@ -14,7 +14,7 @@ AM_CFLAGS = \
 
 AM_CXXFLAGS = \
 	 -g -Wall \
-	 -std=c++11 \
+	 -std=c++14 \
 	 -I/opt/local/include \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONE) \

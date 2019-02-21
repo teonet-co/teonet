@@ -527,7 +527,7 @@ public:
             type != DISPLAY_M ? __func__ : "", \
             type != DISPLAY_M ? __FILE__ : "", \
             type != DISPLAY_M ? __LINE__ : 0)
-    
+
     #else
     #define teo_printf(module, type, format, ...) ;
     #define teo_puts(module, type, format) ;
@@ -937,15 +937,18 @@ public:
   LogReader(Teonet *teo) : teo(*teo) {}
 
   template<typename AnyCallback>
-  Watcher* open(const char *name, const char *file_name, Flags f, AnyCallback cb = NULL) const {
-    //std::cout << "name: "  << name << ", fname: " << file_name << std::endl;
-    struct UserData { AnyCallback cb; };
-    auto ud = new UserData {cb};
-    auto wd = teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, f,
+  Watcher* open(const char *name, const char *file_name, 
+    Flags flags = READ_FROM_BEGIN, AnyCallback cb = NULL) const {
+    
+    struct UserData {
+      UserData(const AnyCallback& cb) : cb(cb) { }
+      AnyCallback cb;
+    };
+    
+    return teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, flags,
       [](void* data, size_t data_length, Watcher *wd) {
         ((UserData*)wd->user_data)->cb(data, data_length, wd);
-      }, (void*)ud);
-    return wd;
+      }, (std::make_unique<UserData>(cb)).get());
   }
 
   inline int close(Watcher *wd) const { return teoLogReaderClose(wd); }
