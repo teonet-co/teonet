@@ -400,7 +400,7 @@ char *getRandomHostName(void) {
 }
 
 /**
- * Get path to ksnet data folder
+ * Get path to teonet data folder
  *
  * @return NULL terminated static string
  */

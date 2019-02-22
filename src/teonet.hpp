@@ -472,6 +472,16 @@ public:
     inline double getTime() const {
       return ksnetEvMgrGetTime(ke);
     }
+    
+    /**
+     * Get path to teonet data folder
+     *
+     * @return Null terminated static string
+     */
+    inline const std::string getPath() {
+      return getDataPath();
+    }
+    
     /**
      * Stop Teonet event manager
      *
