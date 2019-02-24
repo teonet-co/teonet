@@ -34,7 +34,9 @@
  *
  */
 
-#pragma once
+//#pragma once
+#ifndef THIS_TEONET_H
+#define THIS_TEONET_H
 
 #include <iostream>
 #include <cstring>
@@ -947,21 +949,25 @@ public:
   LogReader(Teonet *teo) : teo(*teo) {}
 
   template<typename AnyCallback>
-  Watcher* open(const char *name, const char *file_name, 
-    Flags flags = READ_FROM_BEGIN, AnyCallback cb = NULL) const {
-    
+  inline Watcher* open(const char *name, const char *file_name, 
+    Flags flags = READ_FROM_BEGIN, AnyCallback &&cb = NULL) const {
     struct UserData {
-      UserData(const AnyCallback& cb) : cb(cb) { }
+      UserData(AnyCallback &&cb) : cb(cb) { }
       AnyCallback cb;
     };
-    
+    auto ud = new UserData(std::forward<AnyCallback>(cb));
+    //auto ud = std::make_unique<UserData>(cb);
     return teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, flags,
       [](void* data, size_t data_length, Watcher *wd) {
-        ((UserData*)wd->user_data)->cb(data, data_length, wd);
-      }, (std::make_unique<UserData>(cb)).get());
+        //(*static_cast<AnyCallback*>(wd->user_data)) (data, data_length, wd);
+        (*(AnyCallback*)wd->user_data) (data, data_length, wd);
+    }, ud);
   }
 
-  inline int close(Watcher *wd) const { return teoLogReaderClose(wd); }
+  inline int close(Watcher *wd) const {
+    //delete wd->user_data;
+    return teoLogReaderClose(wd); 
+  }
 };
 
 };
@@ -1036,15 +1042,16 @@ public:
     }
 
     // Split from const char* constructor
-    StringArray(const char* str, const char* separators = ",", bool with_empty = 0,
-      int max_parts = 0) {
+    StringArray(const char* str, const char* separators = ",", 
+      bool with_empty = true, int max_parts = 0) {
       //std::cout << "Split from const char* constructor" << std::endl;
       sa = split(str, separators, with_empty, max_parts);
     }
 
     // Split from std::string constructor
-    StringArray(std::string&& str, std::string&& separators = ",",
-      bool with_empty = false, int max_parts = 0) :
+    template<typename T1, typename T2>
+    StringArray(T1&& str, T2&& separators = ",",
+      bool with_empty = true, int max_parts = 0) :
       StringArray(str.c_str(), separators.c_str(), with_empty, max_parts) {
       //std::cout << "Split from std::string constructor" << std::endl;
     }
@@ -1135,3 +1142,5 @@ extern "C" {
 #endif
 
 #endif /* THIS_UTILS_H */
+
+#endif /*THIS_TEONET_H */
