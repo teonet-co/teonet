@@ -474,7 +474,7 @@ public:
     inline double getTime() const {
       return ksnetEvMgrGetTime(ke);
     }
-    
+
     /**
      * Get path to teonet data folder
      *
@@ -483,7 +483,7 @@ public:
     inline const std::string getPath() {
       return getDataPath();
     }
-    
+
     /**
      * Stop Teonet event manager
      *
@@ -948,25 +948,28 @@ public:
   LogReader(Teonet &teo) : teo(teo) {}
   LogReader(Teonet *teo) : teo(*teo) {}
 
+  struct PUserData {
+    virtual ~PUserData() { std::cout << "~PUserData" << std::endl; }
+  };
+
   template<typename AnyCallback>
-  inline Watcher* open(const char *name, const char *file_name, 
-    Flags flags = READ_FROM_BEGIN, AnyCallback &&cb = NULL) const {
-    struct UserData {
-      UserData(AnyCallback &&cb) : cb(cb) { }
+  inline Watcher* open(const char *name, const char *file_name,
+    Flags flags = READ_FROM_BEGIN, AnyCallback &&cb = nullptr) const {
+    struct UserData : PUserData {
       AnyCallback cb;
+      UserData(AnyCallback &&cb) : cb(cb) { }
+      virtual ~UserData() { std::cout << "~UserData" << std::endl; }
     };
     auto ud = new UserData(std::forward<AnyCallback>(cb));
-    //auto ud = std::make_unique<UserData>(cb);
     return teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, flags,
       [](void* data, size_t data_length, Watcher *wd) {
-        //(*static_cast<AnyCallback*>(wd->user_data)) (data, data_length, wd);
-        (*(AnyCallback*)wd->user_data) (data, data_length, wd);
-    }, ud);
+        ((UserData*)wd->user_data)->cb (data, data_length, wd);
+    },ud);
   }
 
   inline int close(Watcher *wd) const {
-    //delete wd->user_data;
-    return teoLogReaderClose(wd); 
+    if(wd->user_data) delete (PUserData*) wd->user_data;
+    return teoLogReaderClose(wd);
   }
 };
 
@@ -1042,7 +1045,7 @@ public:
     }
 
     // Split from const char* constructor
-    StringArray(const char* str, const char* separators = ",", 
+    StringArray(const char* str, const char* separators = ",",
       bool with_empty = true, int max_parts = 0) {
       //std::cout << "Split from const char* constructor" << std::endl;
       sa = split(str, separators, with_empty, max_parts);

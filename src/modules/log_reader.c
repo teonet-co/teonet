@@ -102,7 +102,7 @@ static void receive_cb(EV_P_ ev_stat *w, int revents) {
     int empty;
     size_t data_length, ptr = 0;
     readBuffer(lr, wd->fd, &data_length);
-    do {
+    if(data_length) do {
         const char *line = readLineBuffer(lr, &ptr, data_length);
         empty = !line[0];
         if(!((wd->flags & SKIP_EMPTY) && empty)) {
