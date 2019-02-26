@@ -1067,6 +1067,16 @@ public:
       for(auto &st : vstr) add(st);
     }
 
+    // Assignment operator
+    StringArray& operator= (const StringArray &ar) {
+      sa = create();
+      sep = ar.sep;
+      for(int i = 0; i < ar.size(); i++) {
+        add(ar[i]);
+      }
+      return *this;
+    }
+
     virtual ~StringArray() { destroy(&sa); }
 
 public:
