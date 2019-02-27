@@ -145,6 +145,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
                 printf("%s\n", p);
             }
             else printf("%s", p);
+            fflush(stdout);
         }
 
         // Log message
@@ -399,7 +400,7 @@ char *getRandomHostName(void) {
 }
 
 /**
- * Get path to ksnet data folder
+ * Get path to teonet data folder
  *
  * @return NULL terminated static string
  */

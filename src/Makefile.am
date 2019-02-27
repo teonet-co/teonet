@@ -53,7 +53,7 @@ endif
 
 AM_CXX = clang++
 AM_CXXFLAGS = \
-	-std=gnu++14 \
+	-std=c++17 \
 	-fPIC \
 	-Wall \
 	-I/opt/local/include
@@ -130,6 +130,7 @@ nobase_teonetinclude_HEADERS = \
     modules/logging_server.h \
     modules/logging_client.h \
     modules/async_calls.h \
+    modules/log_reader.h \
     utils/string_arr.h \
     utils/utils.h \
     utils/rlutil.h
@@ -183,6 +184,7 @@ libteonet_la_SOURCES = \
     modules/logging_server.c \
     modules/logging_client.c \
     modules/async_calls.c \
+    modules/log_reader.c \
     utils/string_arr.c \
     utils/utils.c \
     utils/base64.c \

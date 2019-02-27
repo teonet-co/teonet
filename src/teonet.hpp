@@ -34,7 +34,9 @@
  *
  */
 
-#pragma once
+//#pragma once
+#ifndef THIS_TEONET_H
+#define THIS_TEONET_H
 
 #include <iostream>
 #include <cstring>
@@ -45,6 +47,7 @@
 #include "ev_mgr.h"
 #include "modules/teodb_com.h"
 #include "modules/subscribe.h"
+#include "modules/log_reader.h"
 
 namespace teo {
 
@@ -71,6 +74,22 @@ typedef struct teoL0Client {            //! Teonet L0 Client address
     }
 
 } teoL0Client;
+
+/**
+ * The unique_raw_ptr::make make unique_ptr from allocated raw pointer,
+ * and free this pointer pointer when the unique_ptr does not used more.
+ */
+namespace unique_raw_ptr {
+
+    template<typename T>
+    struct destroy { void operator()(T x) { free((void*)x); } };
+
+    template<typename T>
+    std::unique_ptr<T[],destroy<T*>> make(T* raw_data) {
+        std::unique_ptr<T[],destroy<T*>> str_ptr(raw_data);
+        return std::move(str_ptr);
+    }
+}
 
 /**
  * Teonet class.
@@ -156,7 +175,7 @@ public:
     /**
      * Start Teonet Event Manager and network communication
      *
-     * @return Alway 0
+     * @return Always 0
      */
     inline int run() {
         return ksnetEvMgrRun(ke);
@@ -174,15 +193,14 @@ public:
      */
     inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, void *data,
         size_t data_len) const {
-
         return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
     }
-
-    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd, const std::string &data) const {
+    inline ksnet_arp_data *sendTo(const char *to, uint8_t cmd,
+        std::string&& data) const {
         return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
     }
     /**
-     * Send command by name to peer(async)
+     * Send command by name to peer(asynchronously)
      *
      * @param kc Pointer to ksnCoreClass
      * @param to Peer name to send to
@@ -190,26 +208,46 @@ public:
      * @param data Commands data
      * @param data_len Commands data length
      */
-    inline void sendToA(const char *to, uint8_t cmd, void *data,
-        size_t data_len) const {
-
+    inline void sendToA(const char *to, uint8_t cmd, void *data, size_t data_len) const {
         ksnCoreSendCmdtoA((void *)ke, to, cmd, data, data_len);
     }
-
-    inline void sendToA(const char *to, uint8_t cmd, const std::string &msg) const {
-        sendToA(to, cmd, (void*)msg.c_str(), msg.size() + 1);
+    inline void sendToA(const char *to, uint8_t cmd, std::string&& data) const {
+        sendToA(to, cmd, (void*)data.c_str(), data.size() + 1);
     }
 
-    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *out_data, size_t out_data_len) const {
-        sendCmdAnswerTo(ke, rd, (char*)name, out_data, out_data_len);
+    /**
+     * Sent teonet command to peer or l0 client depend of input rd
+     *
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param rd Pointer to rd
+     * @param name Name to send to
+     * @param data
+     * @param data_len
+     *
+     * @return
+     */
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, void *data, size_t data_len) const {
+        sendCmdAnswerTo(ke, rd, (char*)name, data, data_len);
     }
-
-    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, const std::string &out_data) const {
-        sendAnswerTo(rd, (char*)name, (void*)out_data.c_str(), out_data.size() + 1);
+    inline void sendAnswerTo(teo::teoPacket *rd, const char *name, std::string&& data) const {
+        sendAnswerTo(rd, (char*)name, (void*)data.c_str(), data.size() + 1);
     }
-
-    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, const std::string &out_data) const {
-        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)out_data.c_str(), out_data.size() + 1);
+   /**
+     * Sent teonet command to peer or l0 client depend of input rd (asynchronously)
+     *
+     * @param ke Pointer to ksnetEvMgrClass
+     * @param rd Pointer to rd
+     * @param name Name to send to
+     * @param data
+     * @param data_len
+     *
+     * @return
+     */
+    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, void *data, size_t data_len) const {
+        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)data, data_len);
+    }
+    inline void sendAnswerToA(teo::teoPacket *rd, uint8_t cmd, std::string&& data) const {
+        sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)data.c_str(), data.size() + 1);
     }
 
     /**
@@ -223,7 +261,6 @@ public:
      */
     inline int sendEchoTo(const char *to, uint8_t cmd, void *data,
       size_t data_len) const {
-
       return ksnCommandSendCmdEcho(ke->kc->kco, (char*)to, data, data_len);
     }
 
@@ -242,19 +279,39 @@ public:
      */
     inline int sendToL0(const char *addr, int port, const char *cname,
         size_t cname_length, uint8_t cmd, void *data, size_t data_len) const {
-
         return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname,
           cname_length, cmd, data, data_len);
     }
-
-    inline int sendToL0(const char *addr, int port, const std::string &cname,
+    inline int sendToL0(const char *addr, int port, std::string&& cname,
         uint8_t cmd, void *data, size_t data_len) const {
-
-        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd, data, data_len);
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd,
+                data, data_len);
+    }
+    inline int sendToL0(const char *addr, int port, std::string&& cname,
+        uint8_t cmd, std::string&& data) const {
+        return sendToL0(addr, port, cname.c_str(), cname.size() + 1, cmd,
+                (void*)data.c_str(), data.size() + 1);
     }
 
     /**
-     * Send data to L0 client. Usually it is an answer to request from L0 client(async)
+     * Send data to L0 client with the teoL0Client structure.
+     *
+     * @param l0cli Pointer to teoL0Client
+     * @param cmd Command
+     * @param data Data
+     * @param data_len Data length
+     *
+     * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+     */
+    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data,
+        size_t data_len) const {
+
+        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len,
+                cmd, data, data_len);
+    }
+
+    /**
+     * Send data to L0 client. Usually it is an answer to request from L0 client(asynchronously)
      *
      * @param addr IP address of remote peer
      * @param port Port of remote peer
@@ -274,23 +331,6 @@ public:
         rd.port = port;
         rd.l0_f = 1;
         sendCmdAnswerToBinaryA((void *)ke, &rd, cmd, data, data_len);
-    }
-
-    /**
-     * Send data to L0 client with the teoL0Client structure.
-     *
-     * @param l0cli Pointer to teoL0Client
-     * @param cmd Command
-     * @param data Data
-     * @param data_len Data length
-     *
-     * @return Return 0 if success; -1 if data length is too lage (more than 32319)
-     */
-    inline int sendToL0(teoL0Client* l0cli, uint8_t cmd, void *data,
-        size_t data_len) const {
-
-        return sendToL0(l0cli->addr,l0cli->port, l0cli->name, l0cli->name_len,
-                cmd, data, data_len);
     }
 
     /**
@@ -333,7 +373,6 @@ public:
       return sendEchoToL0(l0cli->addr, l0cli->port, l0cli->name,
                 l0cli->name_len, data, data_len);
     }
-
     inline int sendEchoToL0A(teoL0Client* l0cli, void *data, size_t data_len) const {
       return sendEchoToL0A(l0cli->addr, l0cli->port, l0cli->name,
                 l0cli->name_len, data, data_len);
@@ -343,20 +382,17 @@ public:
     inline void subscribe(const char *peer_name, uint16_t ev) const {
         teoSScrSubscribe((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
     }
-
     inline void subscribeA(const char *peer_name, uint16_t ev) const {
         teoSScrSubscribeA((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
     }
 
     inline void sendToSscr(uint16_t ev, void *data, size_t data_length, uint8_t cmd = 0) const {
-        teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data,data_length, cmd);
+        teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data, data_length, cmd);
     }
-
-    inline void sendToSscr(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
+    inline void sendToSscr(uint16_t ev, std::string&& data, uint8_t cmd = 0) const {
         sendToSscr(ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
-
-    inline void sendToSscrA(uint16_t ev, const std::string &data, uint8_t cmd = 0) const {
+    inline void sendToSscrA(uint16_t ev, std::string&& data, uint8_t cmd = 0) const {
         teoSScrSendA(ke, ev, (void*)data.c_str(), data.size() + 1, cmd);
     }
 
@@ -397,6 +433,38 @@ public:
     }
 
     /**
+     * Create Application parameters
+     *
+     * @param params
+     * @param params_description
+     * @return
+     */
+    static teo::teoAppParam *appParam(
+        std::vector<const char*> params,
+        std::vector<const char*> params_description) {
+
+      params.insert(params.begin(), "");
+      params_description.insert(params_description.begin(), "");
+
+      static teo::teoAppParam app_param;
+      app_param.app_argc = params.size();
+      app_param.app_argv = reinterpret_cast<const char**>(params.data());
+      app_param.app_descr = reinterpret_cast<const char**>(params_description.data());
+      return &app_param;
+    };
+
+
+    /**
+     * Get additional application command line parameter defined in teoAppParam
+     *
+     * @param parm_number Number of application parameter (started from 1)
+     * @return
+     */
+    inline const char* getParam(int parm_number) const {
+        return getKe()->ksn_cfg.app_argv[parm_number];
+    }
+
+    /**
      * Get KSNet event manager time
      *
      * @param ke Pointer to ksnetEvMgrClass
@@ -406,6 +474,16 @@ public:
     inline double getTime() const {
       return ksnetEvMgrGetTime(ke);
     }
+
+    /**
+     * Get path to teonet data folder
+     *
+     * @return Null terminated static string
+     */
+    inline const std::string getPath() {
+      return getDataPath();
+    }
+
     /**
      * Stop Teonet event manager
      *
@@ -445,17 +523,23 @@ public:
     #ifdef DEBUG_KSNET
     #define teo_printf(module, type, format, ...) \
         ksnet_printf(&((getKe())->ksn_cfg), type, \
-            _ksn_printf_format_(format), \
-            _ksn_printf_type_(type), \
-            module == NULL ? (getKe())->ksn_cfg.app_name : module, \
-            __func__, __FILE__, __LINE__, __VA_ARGS__)
+            type != DISPLAY_M ? _ksn_printf_format_(format) : _ksn_printf_format_display_m(format), \
+            type != DISPLAY_M ? _ksn_printf_type_(type) : "", \
+            type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "", \
+            type != DISPLAY_M ? __func__ : "", \
+            type != DISPLAY_M ? __FILE__ : "", \
+            type != DISPLAY_M ? __LINE__ : 0, \
+            __VA_ARGS__)
 
     #define teo_puts(module, type, format) \
         ksnet_printf(&((getKe())->ksn_cfg), type, \
-            _ksn_printf_format_(format) "\n", \
-            _ksn_printf_type_(type), \
-            module == NULL ? (getKe())->ksn_cfg.app_name : module, \
-            __func__, __FILE__, __LINE__)
+            type != DISPLAY_M ? _ksn_printf_format_(format) "\n" : _ksn_printf_format_display_m(format) "\n", \
+            type != DISPLAY_M ? _ksn_printf_type_(type) : "", \
+            type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "", \
+            type != DISPLAY_M ? __func__ : "", \
+            type != DISPLAY_M ? __FILE__ : "", \
+            type != DISPLAY_M ? __LINE__ : 0)
+
     #else
     #define teo_printf(module, type, format, ...) ;
     #define teo_puts(module, type, format) ;
@@ -465,7 +549,7 @@ public:
     inline std::string formatMessage(const char *format, const Arguments&... args) {
         const char *cstr = ksnet_formatMessage(format, args...);
         std::string str(cstr);
-        delete cstr;
+        free((void*)cstr);
         return str;
     }
 
@@ -511,11 +595,9 @@ public:
         struct userData { void *user_data; Callback cb; };
         userData *ud = new userData { user_data, cb };
         return ksnCQueAdd(kq, [](uint32_t id, int type, void *data) {
-
-            auto ud = (userData*) data;
+            userData* ud = (userData*) data;
             ud->cb(id, type, ud->user_data);
             delete(ud);
-
         }, (double)timeout, ud);
     }
 
@@ -766,7 +848,7 @@ public:
         struct userData { void *user_data; Callback cb; };
         auto ud = new userData { user_data, cb };
         auto cq = cque.add([](uint32_t id, int type, void *data) {
-            auto ud = (userData *) data;
+            userData* ud = (userData *) data;
             ud->cb(id, type, ud->user_data);
             delete((TeoDB::teoDbCQueData*)ud->user_data);
             delete(ud);
@@ -850,13 +932,53 @@ private:
     }
 };
 
+class LogReader {
+
+public:
+
+  using Watcher = teoLogReaderWatcher;
+  using Flags =  teoLogReaderFlag;
+
+private:
+
+    Teonet &teo;
+
+public:
+
+  LogReader(Teonet &teo) : teo(teo) {}
+  LogReader(Teonet *teo) : teo(*teo) {}
+
+  struct PUserData {
+    virtual ~PUserData() { std::cout << "~PUserData" << std::endl; }
+  };
+
+  template<typename AnyCallback>
+  inline Watcher* open(const char *name, const char *file_name,
+    Flags flags = READ_FROM_BEGIN, AnyCallback &&cb = nullptr) const {
+    struct UserData : PUserData {
+      AnyCallback cb;
+      UserData(AnyCallback &&cb) : cb(cb) { }
+      virtual ~UserData() { std::cout << "~UserData" << std::endl; }
+    };
+    auto ud = new UserData(std::forward<AnyCallback>(cb));
+    return teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, flags,
+      [](void* data, size_t data_length, Watcher *wd) {
+        ((UserData*)wd->user_data)->cb (data, data_length, wd);
+    },ud);
+  }
+
+  inline int close(Watcher *wd) const {
+    if(wd->user_data) delete (PUserData*) wd->user_data;
+    return teoLogReaderClose(wd);
+  }
+};
+
 };
 
 /**
  * Teonet host info processing class
  */
 struct HostInfo {
-
 
     std::string name;
     struct {
@@ -893,4 +1015,145 @@ struct HostInfo {
     }
 };
 
+/**
+ * Teonet string array class
+ */
+class StringArray {
+
+private:
+
+    ksnet_stringArr sa;
+    std::string sep = ",";
+
+    inline ksnet_stringArr create() const { return ksnet_stringArrCreate(); }
+    inline ksnet_stringArr split(const char* str, const char* separators,
+      int with_empty, int max_parts) {
+      sep = separators;
+      return ksnet_stringArrSplit(str, separators, with_empty, max_parts);
+    }
+    inline ksnet_stringArr destroy(ksnet_stringArr *arr) const { return ksnet_stringArrFree(arr); }
+    inline const char* _to_string(const char* separator) const {
+      return ksnet_stringArrCombine(sa, separator ? separator : sep.c_str());
+    }
+
+public:
+
+    // Default constructor
+    StringArray() {
+      //std::cout << "Default constructor" << std::endl;
+      sa = create();
+    }
+
+    // Split from const char* constructor
+    StringArray(const char* str, const char* separators = ",",
+      bool with_empty = true, int max_parts = 0) {
+      //std::cout << "Split from const char* constructor" << std::endl;
+      sa = split(str, separators, with_empty, max_parts);
+    }
+
+    // Split from std::string constructor
+    template<typename T1, typename T2>
+    StringArray(T1&& str, T2&& separators = ",",
+      bool with_empty = true, int max_parts = 0) :
+      StringArray(str.c_str(), separators.c_str(), with_empty, max_parts) {
+      //std::cout << "Split from std::string constructor" << std::endl;
+    }
+
+    // Combine from std::vector constructor
+    StringArray(std::vector<const char*>&& vstr, const char* separators = ",") {
+      //std::cout << "Combine from std::vector constructor" << std::endl;
+      sa = create();
+      sep = separators;
+      for(auto &st : vstr) add(st);
+    }
+
+    // Assignment operator
+    StringArray& operator= (const StringArray &ar) {
+      sa = create();
+      sep = ar.sep;
+      for(int i = 0; i < ar.size(); i++) {
+        add(ar[i]);
+      }
+      return *this;
+    }
+
+    virtual ~StringArray() { destroy(&sa); }
+
+public:
+
+    inline const char* operator [] (int i) const { return sa[i]; }
+
+    inline int size() const { return ksnet_stringArrLength(sa); }
+    inline StringArray& add(const char* str) { ksnet_stringArrAdd(&sa, str); return *this; };
+    inline StringArray& add(std::string &&str) { add(str.c_str()); return *this; };
+    inline std::string to_string(const char* separator = NULL) const {
+      return std::string(unique_raw_ptr::make<const char>(_to_string(separator)).get());
+    }
+    inline std::string to_string(std::string &&separator) const { return to_string(separator.c_str()); }
+    inline bool move(unsigned int fromIdx, unsigned int toIdx) { return !!ksnet_stringArrMoveTo(sa, fromIdx, toIdx); }
+
+    class iterator {
+
+    private:
+
+        using pointer = ksnet_stringArr;
+        using reference = char* & ;
+
+        pointer ptr_;
+        int idx_ = 0;
+
+    public:
+
+        iterator(pointer ptr, int idx) : ptr_(ptr), idx_(idx) { }
+        const pointer operator->() { return ptr_; }
+        iterator operator++() { idx_++; return *this; }
+        iterator operator++(int junk) { auto rv = *this; idx_++; return rv; }
+        bool operator==(const iterator& rhs) { return idx_ == rhs.idx_; }
+        bool operator!=(const iterator& rhs) { return idx_ != rhs.idx_; }
+        reference operator*() { return (ptr_)[idx_]; }
+    };
+
+    inline iterator begin() { return iterator(sa, 0); }
+    inline iterator end() { return iterator(sa, size()); }
+
+};
+
 }
+
+/*
+ * This an Utils submodule.
+ *
+ * - The showMessage used to show teonet messages:
+ *    showMessage(DEBUG, "Some debuf message\n");
+ *
+ * - The watch(x) is very useful debugging define to print variable name and it
+ * value in next format:
+ *    variable = value
+ *
+ */
+#ifndef THIS_UTILS_H
+#define THIS_UTILS_H
+
+#define msg_to_string(msg) ({ \
+    std::ostringstream foo; \
+    foo << msg; \
+    foo.str(); \
+})
+
+#define showMessage(mtype,msg) teo_printf(NULL, mtype, "%s", msg_to_string(msg).c_str())
+#define showMessageLn(mtype,msg) teo_printf(NULL, mtype, "%s\n", msg_to_string(msg).c_str())
+
+#define watch(x) std::cout << (#x) << " = " << (x) << std::endl
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* THIS_UTILS_H */
+
+#endif /*THIS_TEONET_H */

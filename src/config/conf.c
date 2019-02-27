@@ -150,14 +150,14 @@ void read_config(ksnet_cfg *conf, int port_param) {
 
         CFG_SIMPLE_STR("host_name", &host_name),
         CFG_SIMPLE_INT("port", &conf->port),
-        CFG_SIMPLE_BOOL("port_inc_f", &conf->port_inc_f),
+        CFG_SIMPLE_BOOL("port_inc_f", (cfg_bool_t*)&conf->port_inc_f),
         
         CFG_SIMPLE_STR("key", &net_key),
         
         CFG_SIMPLE_INT("tcp_port", &conf->tcp_port),
-        CFG_SIMPLE_BOOL("tcp_allow_f", &conf->tcp_allow_f),
+        CFG_SIMPLE_BOOL("tcp_allow_f", (cfg_bool_t*)&conf->tcp_allow_f),
 
-        CFG_SIMPLE_BOOL("l0_allow_f", &conf->l0_allow_f),
+        CFG_SIMPLE_BOOL("l0_allow_f", (cfg_bool_t*)&conf->l0_allow_f),
         CFG_SIMPLE_INT("l0_tcp_port", &conf->l0_tcp_port),
         CFG_SIMPLE_STR("l0_tcp_ip_remote", &l0_tcp_ip_remote),
 
@@ -166,28 +166,28 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_STR("r_host_addr", &r_host_addr),
         CFG_SIMPLE_INT("r_port", &conf->r_port),
         
-        CFG_SIMPLE_BOOL("r_tcp_f", &conf->r_tcp_f),
+        CFG_SIMPLE_BOOL("r_tcp_f", (cfg_bool_t*)&conf->r_tcp_f),
         CFG_SIMPLE_INT("r_tcp_port", &conf->r_tcp_port),        
 
         #if KSNET_CRYPT
-        CFG_SIMPLE_BOOL("crypt_f", &conf->crypt_f),
+        CFG_SIMPLE_BOOL("crypt_f", (cfg_bool_t*)&conf->crypt_f),
         #endif
 
-        CFG_SIMPLE_BOOL("show_connect_f", &conf->show_connect_f),
-        CFG_SIMPLE_BOOL("show_debug_f", &conf->show_debug_f),
-        CFG_SIMPLE_BOOL("show_debug_vv_f", &conf->show_debug_vv_f),
-        CFG_SIMPLE_BOOL("show_debug_vvv_f", &conf->show_debug_vvv_f),
-        CFG_SIMPLE_BOOL("show_peers_f", &conf->show_peers_f),
-        CFG_SIMPLE_BOOL("show_tr_udp_f", &conf->show_tr_udp_f),
-        CFG_SIMPLE_BOOL("hot_keys_f", &conf->hot_keys_f),
-        CFG_SIMPLE_BOOL("daemon_mode_f", &conf->dflag),
-        CFG_SIMPLE_BOOL("sig_segv_f", &conf->sig_segv_f),
-        CFG_SIMPLE_BOOL("block_cli_input_f", &conf->block_cli_input_f),
-        CFG_SIMPLE_BOOL("no_multi_thread_f", &conf->no_multi_thread_f),
-        CFG_SIMPLE_BOOL("send_ack_event_f", &conf->send_ack_event_f),
+        CFG_SIMPLE_BOOL("show_connect_f", (cfg_bool_t*)&conf->show_connect_f),
+        CFG_SIMPLE_BOOL("show_debug_f", (cfg_bool_t*)&conf->show_debug_f),
+        CFG_SIMPLE_BOOL("show_debug_vv_f", (cfg_bool_t*)&conf->show_debug_vv_f),
+        CFG_SIMPLE_BOOL("show_debug_vvv_f", (cfg_bool_t*)&conf->show_debug_vvv_f),
+        CFG_SIMPLE_BOOL("show_peers_f", (cfg_bool_t*)&conf->show_peers_f),
+        CFG_SIMPLE_BOOL("show_tr_udp_f", (cfg_bool_t*)&conf->show_tr_udp_f),
+        CFG_SIMPLE_BOOL("hot_keys_f", (cfg_bool_t*)&conf->hot_keys_f),
+        CFG_SIMPLE_BOOL("daemon_mode_f", (cfg_bool_t*)&conf->dflag),
+        CFG_SIMPLE_BOOL("sig_segv_f", (cfg_bool_t*)&conf->sig_segv_f),
+        CFG_SIMPLE_BOOL("block_cli_input_f", (cfg_bool_t*)&conf->block_cli_input_f),
+        CFG_SIMPLE_BOOL("no_multi_thread_f", (cfg_bool_t*)&conf->no_multi_thread_f),
+        CFG_SIMPLE_BOOL("send_ack_event_f", (cfg_bool_t*)&conf->send_ack_event_f),
 
         #if M_ENAMBE_VPN
-        CFG_SIMPLE_BOOL("vpn_connect_f", &conf->vpn_connect_f),
+        CFG_SIMPLE_BOOL("vpn_connect_f", (cfg_bool_t*)&conf->vpn_connect_f),
         CFG_SIMPLE_STR("vpn_ip", &vpn_ip),
         CFG_SIMPLE_INT("vpn_ip_net", &conf->vpn_ip_net),
         CFG_SIMPLE_INT("vpn_mtu", &conf->vpn_mtu),
@@ -196,18 +196,18 @@ void read_config(ksnet_cfg *conf, int port_param) {
         #endif
 
         #if M_ENAMBE_LOGGING_SERVER
-        CFG_SIMPLE_BOOL("logging_f", &conf->logging_f),
+        CFG_SIMPLE_BOOL("logging_f", (cfg_bool_t*)&conf->logging_f),
         #endif
 
         #if M_ENAMBE_LOGGING_CLIENT
-        CFG_SIMPLE_BOOL("log_disable_f", &conf->log_disable_f),
-        CFG_SIMPLE_BOOL("send_all_logs_f", &conf->send_all_logs_f),
+        CFG_SIMPLE_BOOL("log_disable_f", (cfg_bool_t*)&conf->log_disable_f),
+        CFG_SIMPLE_BOOL("send_all_logs_f", (cfg_bool_t*)&conf->send_all_logs_f),
         
         #endif        
         
         CFG_SIMPLE_INT("log_priority", &conf->log_priority),
         
-        CFG_SIMPLE_BOOL("color_output_disable_f", &conf->color_output_disable_f),
+        CFG_SIMPLE_BOOL("color_output_disable_f", (cfg_bool_t*)&conf->color_output_disable_f),
 
         CFG_END()
     };
