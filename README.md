@@ -45,7 +45,15 @@ PBL - The Program Base Library
 MYSQL - MariaDB or MySQL connector (used in teoweb application)
 
     sudo apt-get install libmysqlclient-dev
+    
+CUnit - A Unit Testing Framework for C
 
+    sudo apt-get install libcunit1-dev
+    
+Cpputest - CppUTest unit testing and mocking framework for C/C++
+
+    sudo apt-get install cpputest
+  
 
 ## Install from repositories notes:
 
