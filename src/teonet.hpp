@@ -64,7 +64,7 @@ typedef struct teoL0Client {            //! Teonet L0 Client address
   teoL0Client(const char* name, uint8_t name_len, const char* addr, int port)
       : name(strdup(name)), name_len(name_len), addr(strdup(addr)), port(port) {}
 
-  teoL0Client(const std::string& name, std::string& addr, int port)
+  teoL0Client(const std::string& name, const std::string& addr, int port)
       : teoL0Client(name.c_str(), name.size() + 1, addr.c_str(), port) {}
 
   virtual ~teoL0Client() {
@@ -717,7 +717,7 @@ public:
     CQue cque = CQue(teo);
 
   public:
-    TeoDB(Teonet* t, const std::string peer, teoDbData** tdd)
+    TeoDB(Teonet* t, const std::string& peer, teoDbData** tdd)
         : teo(t), tdd(tdd), peer(peer) { /*std::cout << "TeoDB::TeoDB\n";*/
     }
     TeoDB(const TeoDB& obj)
@@ -877,13 +877,13 @@ public:
 
     template <typename AnyCallback>
     inline Watcher* open(const char* name, const char* file_name, Flags flags = READ_FROM_BEGIN,
-                         AnyCallback&& cb = nullptr) const {
+                         const AnyCallback& cb = nullptr) const {
       struct UserData : PUserData {
         AnyCallback cb;
-        UserData(AnyCallback&& cb) : cb(cb) {}
+        UserData(const AnyCallback& cb) : cb(cb) {}
         virtual ~UserData() { std::cout << "~UserData" << std::endl; }
       };
-      auto ud = new UserData(std::forward<AnyCallback>(cb));
+      auto ud = new UserData(cb);
       return teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, flags,
                                   [](void* data, size_t data_length, Watcher* wd) {
                                     ((UserData*)wd->user_data)->cb(data, data_length, wd);
@@ -973,14 +973,14 @@ public:
   }
 
   // Split from std::string constructor
-  template <typename T1, typename T2>
-  StringArray(T1&& str, T2&& separators = ",", bool with_empty = true, int max_parts = 0)
+  StringArray(const std::string& str, const std::string& separators = ",", bool with_empty = true,
+              int max_parts = 0)
       : StringArray(str.c_str(), separators.c_str(), with_empty, max_parts) {
     // std::cout << "Split from std::string constructor" << std::endl;
   }
 
   // Combine from std::vector constructor
-  StringArray(std::vector<const char*>&& vstr, const char* separators = ",") {
+  StringArray(const std::vector<const char*>& vstr, const char* separators = ",") {
     // std::cout << "Combine from std::vector constructor" << std::endl;
     sa = create();
     sep = separators;
