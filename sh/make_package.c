@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
             b_type > DEB ? argv[1] : "deb" // $6 RPM subtype
             //"", // $7 Package name (default: libteonet)
             //""  // $8 Package description (default: ...)
-    );
+    ) < 0 ? abort() : (void)0;
 
     rv = system(cmd);
 
