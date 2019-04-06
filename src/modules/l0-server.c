@@ -610,9 +610,19 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
                     (char*)(packet->peer_name + packet->peer_name_length));
             #endif
 
-            ksnTRUDPsendto(((ksnetEvMgrClass*)(kl->ke))->kc->ku , 0, 0, 0,
-                    packet->cmd, fd, pkg, pkg_length, 0,
+            
+            // \TODO Split big packages to smaller
+            if(pkg_length > 512);
+            
+            for(;;) {
+                size_t len = pkg_length > 512 ? 512 : pkg_length;                                                 
+                ksnTRUDPsendto(((ksnetEvMgrClass*)(kl->ke))->kc->ku , 0, 0, 0,
+                    packet->cmd, fd, pkg, len, 0,
                     (__CONST_SOCKADDR_ARG) &remaddr, addrlen);
+                pkg_length -= len;
+                if(!pkg_length) break;
+                pkg += len;
+            }
         }
     }
 
