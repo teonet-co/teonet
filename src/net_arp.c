@@ -152,14 +152,17 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
     // If removed successfully
     if(arp != (void*)-1) {
 
-        // Remove peer from TR-UDP module
-        #if TRUDP_VERSION == 1
-        ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
-                arp->port, 1);
-        #elif TRUDP_VERSION == 2
-        trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->data.addr,
-                arp->data.port, 0);
-        #endif
+        // Remove peer from TR-UDP module 
+        // \TODO The 'if(arp)' was added because we drop here. Check why arp may be NULL.
+        if(arp) {
+            #if TRUDP_VERSION == 1
+            ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
+                    arp->port, 1);
+            #elif TRUDP_VERSION == 2
+            trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->data.addr,
+                    arp->data.port, 0);
+            #endif
+        }
 
         // Remove from Stream module
         ksnStreamClosePeer(((ksnetEvMgrClass*) ka->ke)->ks, peer_name);
