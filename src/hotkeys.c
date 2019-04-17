@@ -97,7 +97,6 @@ unsigned char teoLogCheck(void *ke, void *log) {
             }
         }
     } else return 1;
-
     return 0;
 }
 
