@@ -74,6 +74,9 @@ void teoHotkeySetFilter(void *ke, void *filter) {
         ksnet_stringArrFree(&khv->filter_arr);
     }
     khv->filter_arr = ksnet_stringArrSplit((char *)filter, "|", 0, 0);
+    unsigned i = 0;
+    for (i = 0; khv->filter_arr[i] != NULL; ++i)
+        printf("%s\n",  khv->filter_arr[i]);
 //    khv->filter = malloc(strlen((char *)filter) + 1);
 //    strncpy(khv->filter, (char *)filter, strlen((char *)filter) + 1);
 }
@@ -89,13 +92,14 @@ unsigned char teoLogCheck(void *ke, void *log) {
     if ((khv != NULL) && (khv->filter_arr != NULL)) {
         unsigned i = 0;
         for (i = 0; khv->filter_arr[i] != NULL; ++i) {
-            if (!strstr((char *)log, khv->filter_arr[i])) {
-                return 0;
+//            printf("%s %s\n",  khv->filter_arr[i], (char *)log);
+            if (strstr((char *)log, khv->filter_arr[i]) != NULL) {
+                return 1;
             }
         }
-    }
+    } else return 1;
 //        return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
-    return 1;
+    return 0;
 }
 
 /**
@@ -494,7 +498,10 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 // Got hot key
             if(khv->non_blocking) {
                 khv->str_number = 0;
-                if(khv->filter && khv->filter[0]) printf("Current filter: %s\n", khv->filter);
+                if(khv->filter_arr) {
+                    printf("Current filter: \n");
+                    // \TODO:
+                }
                 printf("Enter word filter: ");
                 fflush(stdout);
                 _keys_non_blocking_stop(khv); // Switch STDIN to string
@@ -612,8 +619,7 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->mt = NULL;
     kh->pet = NULL;
     kh->put = NULL;
-    kh->filter = "";
-    kh->filter = NULL;
+    kh->filter_arr = NULL;
     kh->filter_f = 1;
     kh->ke = ke;
 
@@ -656,8 +662,7 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
         
         ev_io_stop (ke->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
-        free(kh->filter);
-        kh->filter = NULL;
+        ksnet_stringArrFree(&kh->filter_arr);
         free(kh);
         ke->kh = NULL;
     }
