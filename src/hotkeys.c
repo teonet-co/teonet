@@ -499,8 +499,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             if(khv->non_blocking) {
                 khv->str_number = 0;
                 if(khv->filter_arr) {
-                    printf("Current filter: \n");
-                    // \TODO:
+                    printf("Current filter: %s\n",ksnet_stringArrCombine(khv->filter_arr, "|"));
                 }
                 printf("Enter word filter: ");
                 fflush(stdout);
