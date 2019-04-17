@@ -112,7 +112,7 @@ ksnet_stringArr ksnet_stringArrFree(ksnet_stringArr *arr) {
 
         int i;
 
-        for(i = 0; (*arr)[i] != NULL; i++) free((*arr)[i]);
+        for(i = 0; (*arr)[i] != NULL; ++i) free((*arr)[i]);
         free(*arr);
 
         *arr = NULL;

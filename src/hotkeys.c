@@ -70,12 +70,12 @@ const char
 #define kc  kev->kc   // Net core class
 
 void teoHotkeySetFilter(void *ke, void *filter) {
-    if (khv->filter != NULL) {
-        free(khv->filter);
-        khv->filter = NULL;
+    if (khv->filter_arr != NULL) {
+        ksnet_stringArrFree(&khv->filter_arr);
     }
-    khv->filter = malloc(strlen((char *)filter) + 1);
-    strncpy(khv->filter, (char *)filter, strlen((char *)filter) + 1);
+    khv->filter_arr = ksnet_stringArrSplit((char *)filter, "|", 0, 0);
+//    khv->filter = malloc(strlen((char *)filter) + 1);
+//    strncpy(khv->filter, (char *)filter, strlen((char *)filter) + 1);
 }
 
 unsigned char teoFilterFlagCheck(void *ke) {
@@ -86,8 +86,15 @@ unsigned char teoFilterFlagCheck(void *ke) {
 }
 
 unsigned char teoLogCheck(void *ke, void *log) {
-    if ((khv != NULL) && (khv->filter != NULL)) 
-        return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
+    if ((khv != NULL) && (khv->filter_arr != NULL)) {
+        unsigned i = 0;
+        for (i = 0; khv->filter_arr[i] != NULL; ++i) {
+            if (!strstr((char *)log, khv->filter_arr[i])) {
+                return 0;
+            }
+        }
+    }
+//        return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
     return 1;
 }
 
