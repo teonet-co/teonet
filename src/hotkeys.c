@@ -74,11 +74,6 @@ void teoHotkeySetFilter(void *ke, void *filter) {
         ksnet_stringArrFree(&khv->filter_arr);
     }
     khv->filter_arr = ksnet_stringArrSplit((char *)filter, "|", 0, 0);
-    unsigned i = 0;
-    for (i = 0; khv->filter_arr[i] != NULL; ++i)
-        printf("%s\n",  khv->filter_arr[i]);
-//    khv->filter = malloc(strlen((char *)filter) + 1);
-//    strncpy(khv->filter, (char *)filter, strlen((char *)filter) + 1);
 }
 
 unsigned char teoFilterFlagCheck(void *ke) {
