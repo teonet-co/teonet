@@ -84,7 +84,7 @@ unsigned char teoFilterFlagCheck(void *ke) {
 }
 
 unsigned char teoLogCheck(void *ke, void *log) {
-    if ((khv != NULL) && (khv->filter_arr != NULL)) {
+    if ((log != NULL) && (khv != NULL) && (khv->filter_arr != NULL)) {
         unsigned i = 0;
         for (i = 0; khv->filter_arr[i] != NULL; ++i) {
 //            printf("%s %s\n",  khv->filter_arr[i], (char *)log);
