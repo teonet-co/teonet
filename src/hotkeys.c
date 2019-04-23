@@ -78,7 +78,11 @@ void teoHotkeySetFilter(void *ke, void *filter) {
 
 unsigned char teoFilterFlagCheck(void *ke) {
     if (khv != NULL) {
-        if (khv->filter_f) return 1; else return 0;
+        if (khv->filter_f) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
     return 1;
 }
