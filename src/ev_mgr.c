@@ -857,7 +857,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
     // Disconnect dead peer
     if(/*arp_data->last_triptime < 0.0001 ||*/ ct - arp->data.last_activity > (CHECK_EVENTS_AFTER / 10) * 1.5) {
-
+        
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL, (ksnet_arp_data *)arp, NULL);
 
@@ -940,7 +940,7 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
     #ifdef DEBUG_KSNET
     const int show_interval = 5 / KSNET_EVENT_MGR_TIMER /* 10 */;
     #endif
-    const int activity_interval = (CHECK_EVENTS_AFTER / 8) / KSNET_EVENT_MGR_TIMER /* 23 */;
+    const int activity_interval = (CHECK_EVENTS_AFTER / 5 / 8) / KSNET_EVENT_MGR_TIMER /* 23 */;
     ksnetEvMgrClass *ke = w->data;
     double t = ksnetEvMgrGetTime(ke);
     if(ke->last_custom_timer == 0.0) ke->last_custom_timer = t;
@@ -1261,7 +1261,7 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
     }
 
     // Check TR-UDP activity
-    trudpProcessKeepConnection(kev->kc->ku);
+    //trudpProcessKeepConnection(kev->kc->ku);
 
     #undef kev
 }
