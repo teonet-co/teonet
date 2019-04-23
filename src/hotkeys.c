@@ -20,6 +20,7 @@
 #include "utils/rlutil.h"
 #include "utils/utils.h"
 #include "tr-udp_stat.h"
+#include "utils/teo_memory.h"
 
 #undef MODULE
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
@@ -696,12 +697,12 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
         int ch = getchar();
         putchar(ch);
         putchar('\n');
-        data = malloc(sizeof(int));
+        data = teo_malloc(sizeof(int));
         *(int*)data = ch;
     }
 
     // Create STDIN idle watcher data
-    stdin_idle_data *id = malloc(sizeof(stdin_idle_data));
+    stdin_idle_data *id = teo_malloc(sizeof(stdin_idle_data));
     id->ke = ((ksnetEvMgrClass *)w->data);
     id->data = data;
     id->stdin_w = w;
@@ -783,7 +784,7 @@ void ping_timer_cb(EV_P_ ev_timer *w, int revents) {
  */
 ping_timer_data *ping_timer_init(ksnCoreClass *kn, char *peer) {
 
-    ping_timer_data *pt = malloc(sizeof(ping_timer_data));
+    ping_timer_data *pt = teo_malloc(sizeof(ping_timer_data));
     pt->peer_name_len = strlen(peer) + 1;
     pt->peer_name = malloc(pt->peer_name_len);
     strcpy(pt->peer_name, peer);
