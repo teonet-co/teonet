@@ -598,7 +598,13 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             const char *l0 = "teo-l0";
             size_t l0_len = strlen(l0) + 1;
             *hd_len += l0_len;
-            hd = realloc(hd, *hd_len);
+            host_info_data *tmp_hd = realloc(hd, *hd_len);
+            if(tmp_hd) {
+                hd = tmp_hd;
+            } else {
+                fprintf(stderr,"Insufficient memory");
+                exit(EXIT_FAILURE);
+            }
             memcpy(hd->string_ar + ptr, l0, l0_len); ptr += l0_len;
             hd->string_ar_num++;
         }
@@ -1286,6 +1292,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     // Hotkeys
     if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
         if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
+        printf("POINTER!!! : %p \n", ke->kh);
         // Set filter from parameters
         if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke, ke->ksn_cfg.filter);
     }
