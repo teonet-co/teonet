@@ -22,6 +22,7 @@
 #include "net_multi.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
 
@@ -598,13 +599,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             const char *l0 = "teo-l0";
             size_t l0_len = strlen(l0) + 1;
             *hd_len += l0_len;
-            host_info_data *tmp_hd = realloc(hd, *hd_len);
-            if(tmp_hd) {
-                hd = tmp_hd;
-            } else {
-                fprintf(stderr,"Insufficient memory");
-                exit(EXIT_FAILURE);
-            }
+            hd = teo_realloc(hd, *hd_len);
             memcpy(hd->string_ar + ptr, l0, l0_len); ptr += l0_len;
             hd->string_ar_num++;
         }
@@ -613,7 +608,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             const char *vpn = "teo-vpn";
             size_t vpn_len = strlen(vpn) + 1;
             *hd_len += vpn_len;
-            hd = realloc(hd, *hd_len);
+            hd = teo_realloc(hd, *hd_len);
             memcpy(hd->string_ar + ptr, vpn, vpn_len);  ptr += vpn_len;
             hd->string_ar_num++;
         }
@@ -621,7 +616,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
         if(app_version != NULL) {
             size_t app_version_len = strlen(app_version) + 1;
             *hd_len += app_version_len;
-            hd = realloc(hd, *hd_len);
+            hd = teo_realloc(hd, *hd_len);
             memcpy(hd->string_ar + ptr, app_version, app_version_len); ptr += app_version_len;
             //hd->string_ar_num++;
         }
