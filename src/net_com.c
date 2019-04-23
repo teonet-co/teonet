@@ -1111,8 +1111,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     // Replay to address we got from peer
-    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE,
-                  NULL_STR, 1);
+    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, NULL_STR, 1);
 
     // Parse command data
     size_t i, ptr;
