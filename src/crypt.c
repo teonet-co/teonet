@@ -32,6 +32,10 @@ ksnCryptClass *ksnCryptInit(void *ke) {
     #define kev ((ksnetEvMgrClass*)ke)
     
     ksnCryptClass *kcr = malloc(sizeof(ksnCryptClass));
+    if (kcr == NULL) {
+        fprintf(stderr, "Insufficient memory");
+        exit(EXIT_FAILURE);
+    }
     kcr->ke = ke;
 
     // A 128 bit IV
@@ -231,8 +235,8 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     size_t ptr = 0;
 
     // Calculate encrypted length
-    *encrypt_len = ( ((package_len + 1) / kcr->blocksize) +
-                     ((package_len + 1) % kcr->blocksize ? 1 : 0) ) * kcr->blocksize;
+    *encrypt_len = (((package_len + 1) / kcr->blocksize) +
+                   (((package_len + 1) % kcr->blocksize) ? 1 : 0) ) * kcr->blocksize;
 
     // Create buffer if it NULL
     if(buffer == NULL) {
