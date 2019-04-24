@@ -25,6 +25,7 @@
 #include "ev_mgr.h"
 #include "net_recon.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 
 #define MODULE _ANSI_GREEN "net_reconnect" _ANSI_NONE
 
@@ -357,7 +358,7 @@ ksnReconnectClass *ksnReconnectInit(void *kco) {
 
     #undef kev_
     
-    ksnReconnectClass *this = malloc(sizeof(ksnReconnectClass));
+    ksnReconnectClass *this = teo_malloc(sizeof(ksnReconnectClass));
     
     this->map = pblMapNewHashMap();
     this->this = this;

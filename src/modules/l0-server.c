@@ -558,8 +558,6 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
         size_t data_length) {
 
-    ssize_t snd = -1;
-
     const char *from = ksnetEvMgrGetHostName(kl->ke);
     size_t from_len = strlen(from) + 1;
     // Create L0 packet
@@ -569,7 +567,7 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
     size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
             cmd, from, data, data_length);
     // Send packet
-    snd = ksnLNullPacketSend(kl, fd, out_data, packet_length);
+    ssize_t snd = ksnLNullPacketSend(kl, fd, out_data, packet_length);
     free(out_data);
     return snd;
 }
