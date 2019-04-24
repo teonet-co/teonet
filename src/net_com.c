@@ -14,6 +14,7 @@
 #include "net_split.h"
 #include "net_recon.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 #include "modules/subscribe.h"
 #if TRUDP_VERSION == 2
 #include "trudp_stat.h"
@@ -57,7 +58,7 @@ const char *BINARY = "BINARY";
  */
 ksnCommandClass *ksnCommandInit(void *kc) {
 
-    ksnCommandClass *kco = malloc(sizeof(ksnCommandClass));
+    ksnCommandClass *kco = teo_malloc(sizeof(ksnCommandClass));
     kco->kc = kc;
     kco->ks = ksnSplitInit(kco);
     kco->kr = ksnReconnectInit(kco);
