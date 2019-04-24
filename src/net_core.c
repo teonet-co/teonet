@@ -25,6 +25,7 @@ typedef int socklen_t;
 #include "net_multi.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 #include "tr-udp.h"
 #include "tr-udp_.h"
 
@@ -104,13 +105,13 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_dat
  */
 ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
 
-    ksnCoreClass *kc = malloc(sizeof(ksnCoreClass));
+    ksnCoreClass *kc = teo_malloc(sizeof(ksnCoreClass));
 
     kc->ke = ke;
-    kc->name = strdup(name);
+    kc->name = teo_strdup(name);
     kc->name_len = strlen(name) + 1;
     kc->port = port;
-    if(addr != NULL) kc->addr = strdup(addr);
+    if(addr != NULL) kc->addr = teo_strdup(addr);
     else kc->addr = addr;
     kc->last_check_event = 0;
 

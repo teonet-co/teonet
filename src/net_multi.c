@@ -12,6 +12,7 @@
 
 #include "net_multi.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 
 /**
  * Initialize ksnMultiClass object
@@ -21,7 +22,7 @@
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     
     int i;
-    ksnMultiClass *km = malloc(sizeof(ksnMultiClass));
+    ksnMultiClass *km = teo_malloc(sizeof(ksnMultiClass));
     
     // Create network list
     km->list = pblListNewArrayList();

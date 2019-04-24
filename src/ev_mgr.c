@@ -1286,7 +1286,6 @@ int modules_init(ksnetEvMgrClass *ke) {
     // Hotkeys
     if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
         if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
-        printf("POINTER!!! : %p \n", ke->kh);
         // Set filter from parameters
         if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke, ke->ksn_cfg.filter);
     }

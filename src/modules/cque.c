@@ -310,6 +310,7 @@ void *pblMapRemoveFree(PblMap * map, void * key, size_t keyLength,
     void *rv = pblMapRemove(map, key, keyLength, valueLengthPtr);
     if(rv != NULL && rv != (void*)-1) {
         free(rv);
+        // Maybe add this line: return (void *) 1;
     }
 
     return rv;
