@@ -289,6 +289,13 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
     strncpy(data + ptr, addr, KSN_BUFFER_DB_SIZE - ptr); ptr += strlen(addr) + 1;
     *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
 
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
+            MODULE, DEBUG_VV,
+            "send CMD_CONNECT (cmd = 5) command to peer %s\n",
+            to);
+    #endif
+
     return ksnCoreSendCmdto(kco->kc, to, CMD_CONNECT, data, ptr) != NULL;
 }
 
@@ -312,6 +319,13 @@ int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *to_addr, uint32_t to_p
     strncpy(data, name, KSN_BUFFER_DB_SIZE); ptr = strlen(name) + 1;
     strncpy(data + ptr, addr, KSN_BUFFER_DB_SIZE - ptr); ptr += strlen(addr) + 1;
     *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
+    
+    #ifdef DEBUG_KSNET
+    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
+            MODULE, DEBUG_VV,
+            "send CMD_CONNECT (cmd = 5) command to peer by address %s:%d\n",
+            to_addr, to_port);
+    #endif
 
     return ksnCoreSendto(kco->kc, to_addr, to_port, CMD_CONNECT, data, ptr);
 }
@@ -1178,6 +1192,32 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     return 1;
 }
 
+typedef struct cmd_connect_cque_cb_data {
+    ksnetEvMgrClass* ke;
+    char * addr;
+    int port;
+} cmd_connect_cque_cb_data;
+
+static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
+    if(data) {
+        cmd_connect_cque_cb_data *cqd = data;
+        
+        char *peer_name;
+        socklen_t addr_length;
+        struct sockaddr_in remaddr;
+        trudpUdpMakeAddr(cqd->addr, cqd->port, (__SOCKADDR_ARG) &remaddr, &addr_length);
+        ksnet_arp_data *arp = ksnetArpFindByAddr(cqd->ke->kc->ka, (__CONST_SOCKADDR_ARG) &remaddr, &peer_name);
+        #ifdef DEBUG_KSNET
+        ksn_printf(cqd->ke, MODULE, DEBUG_VV, 
+                "processing CMD_CONNECT cmd_connect_cque_cb, %s:%d %s\n", 
+                cqd->addr, cqd->port, arp ? " - connected" : " - remove trudp channel");
+        #endif
+        if(!arp) trudpChannelDestroyAddr(cqd->ke->kc->ku, cqd->addr, cqd->port, 0);
+        free(cqd->addr);
+        free(data);
+    }
+}
+
 /**
  * Process CMD_CONNECT command. A peer send his child to us
  *
@@ -1186,13 +1226,14 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return True if command is processed
  */
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    
+    #define kev ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
-            MODULE, DEBUG_VV,
-            "process CMD_CONNECT (cmd = %u) command, from %s (%s:%d)\n",
-            rd->cmd, rd->from, rd->addr, rd->port);
-    #endif
+//    #ifdef DEBUG_KSNET
+//    ksn_printf(kev, MODULE, DEBUG_VV,
+//            "process CMD_CONNECT (cmd = %u) command, from %s (%s:%d)\n",
+//            rd->cmd, rd->from, rd->addr, rd->port);
+//    #endif
 
     /**
      * KSNet CMD_PEER command data
@@ -1214,16 +1255,35 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     pd.port = *((uint32_t *)(rd->data + ptr));
 
     #ifdef DEBUG_KSNET
-    ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke), MODULE, DEBUG_VV,
-            "got CMD_CONNECT from: \"%s\" %s:%d\n", pd.name, pd.addr, pd.port);
+    ksn_printf(kev, MODULE, DEBUG_VV,
+            "process CMD_CONNECT (cmd = %u) to %s (%s:%d), got from %s (%s:%d)\n", 
+            rd->cmd, pd.name, pd.addr, pd.port, rd->from, rd->addr, rd->port);
     #endif
 
     // Check ARP
     if(ksnetArpGet(((ksnCoreClass*)kco->kc)->ka, pd.name) == NULL) {
+        
+        // Send CMD_NONE to remote peer to connect to it
         ksnCoreSendto(kco->kc, pd.addr, pd.port, CMD_NONE, NULL_STR, 1);
+        
+        // Wait connection 2 sec and remove TRUDP channel in callback if not connected
+        cmd_connect_cque_cb_data *cqd = malloc(sizeof(cmd_connect_cque_cb_data));
+        cqd->ke = kev;
+        cqd->addr = strdup(pd.addr);
+        cqd->port = pd.port;
+        ksnCQueAdd(kev->kq, cmd_connect_cque_cb, 2.000, cqd);
+    }
+    else {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG_VV,
+                "processing CMD_CONNECT from already existing peer %s (%s:%d) - ignore it\n",
+                pd.name, pd.addr, pd.port);
+        #endif
     }
 
     return 1;
+    
+    #undef kev
 }
 
 /**
