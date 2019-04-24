@@ -785,7 +785,7 @@ ping_timer_data *ping_timer_init(ksnCoreClass *kn, char *peer) {
 
     ping_timer_data *pt = teo_malloc(sizeof(ping_timer_data));
     pt->peer_name_len = strlen(peer) + 1;
-    pt->peer_name = malloc(pt->peer_name_len);
+    pt->peer_name = teo_malloc(pt->peer_name_len);
     strcpy(pt->peer_name, peer);
     pt->kn = kn;
 
@@ -876,7 +876,7 @@ void monitor_timer_cb(EV_P_ ev_timer *w, int revents) {
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 monitor_timer_data *monitor_timer_init(ksnCoreClass *kn) {
 
-    monitor_timer_data *mt = malloc(sizeof(monitor_timer_data));
+    monitor_timer_data *mt = teo_malloc(sizeof(monitor_timer_data));
     mt->kn = kn;
 
     // Initialize and start main timer watcher, it is a repeated timer
@@ -966,7 +966,7 @@ void peer_timer_cb(EV_P_ ev_timer *tw, int revents) {
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 peer_timer_data *peer_timer_init(ksnCoreClass *kn) {
 
-    peer_timer_data *pet = malloc(sizeof(peer_timer_data));
+    peer_timer_data *pet = teo_malloc(sizeof(peer_timer_data));
     pet->kn = kn;
 
     // Initialize and start main timer watcher, it is a repeated timer
@@ -1066,7 +1066,7 @@ void tr_udp_timer_cb(EV_P_ ev_timer *tw, int revents) {
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 tr_udp_timer_data *tr_udp_timer_init(ksnCoreClass *kn) {
 
-    tr_udp_timer_data *pet = malloc(sizeof(tr_udp_timer_data));
+    tr_udp_timer_data *pet = teo_malloc(sizeof(tr_udp_timer_data));
     pet->kc = kn;
     pet->num = 0;
 
