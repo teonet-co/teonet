@@ -514,13 +514,18 @@ struct cli_command *cli_register_command(
     c->system = 0;
     c->callback = callback;
     c->next = NULL;
-    if (!(c->command = strdup(command)))
+    if (!(c->command = strdup(command))) {
+        free(c);
         return NULL;
+    }
     c->parent = parent;
     c->privilege = privilege;
     c->mode = mode;
-    if (help && !(c->help = strdup(help)))
+    if (help && !(c->help = strdup(help))) {
+        free(c->command);
+        free(c);
         return NULL;
+    }
 
     if (parent)
     {
@@ -1244,7 +1249,7 @@ int cli_run_command(struct cli_def *cli, const char *command)
     for (i = f = 0; i < num_words && f < CLI_MAX_LINE_WORDS - 1; i++)
     {
         if (words[i][0] == '|')
-        filters[f++] = i;
+            filters[f++] = i;
     }
 
     filters[f] = 0;
@@ -2382,19 +2387,27 @@ int cli_loop(struct cli_def *cli, int sockfd)
         __write(sockfd, negotiate, strlen(negotiate));
     }
 
-    if ((cd->cmd = malloc(CLI_MAX_LINE_LENGTH)) == NULL)
+    if ((cd->cmd = malloc(CLI_MAX_LINE_LENGTH)) == NULL) {
+        free(cd);
         return CLI_ERROR;
+    }
 
     #ifdef WIN32
     /*
      * OMG, HACK
      */
-    if (!(cli->client = fdopen(_open_osfhandle(sockfd, 0), "w+")))
+    if (!(cli->client = fdopen(_open_osfhandle(sockfd, 0), "w+"))) {
+        free(cd->cmd);
+        free(cd);
         return CLI_ERROR;
+    }
     cli->client->_file = sockfd;
     #else
-    if (!(cli->client = fdopen(sockfd, "w+")))
+    if (!(cli->client = fdopen(sockfd, "w+"))) {
+        free(cd->cmd);
+        free(cd);
         return CLI_ERROR;
+    }
     #endif
 
     setbuf(cli->client, NULL);

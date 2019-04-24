@@ -12,6 +12,7 @@
 
 #include "net_split.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 
 #define MODULE _ANSI_BLUE "net_split" _ANSI_NONE
 
@@ -25,7 +26,7 @@
  */
 ksnSplitClass *ksnSplitInit(ksnCommandClass *kco) {
 
-    ksnSplitClass *ks = malloc(sizeof(ksnSplitClass));
+    ksnSplitClass *ks = teo_malloc(sizeof(ksnSplitClass));
     ks->kco = kco;
     ks->map = pblMapNewHashMap();
     ks->packet_number = 0;
@@ -129,7 +130,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     // Create maps key macros
     #define create_key(subpacket_num) \
     size_t key_len = sizeof(uint8_t) + rd->from_len + sizeof(uint16_t)*2; \
-    void *key = malloc(key_len); \
+    void *key = teo_malloc(key_len); \
     size_t ptr = 0; \
     *(uint8_t*)key = rd->from_len; ptr += sizeof(uint8_t); \
     memcpy(key + ptr, rd->from, rd->from_len); ptr += rd->from_len; \
@@ -157,8 +158,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
         void *data = malloc(data_len_alloc);
 
         // Create new rds
-        rds = malloc(sizeof(ksnCorePacketData));
-        memset(rds, 0, sizeof(ksnCorePacketData));
+        rds = teo_calloc(sizeof(ksnCorePacketData));
 
         // Get subpackets from map and add it to combined block
         int i;
@@ -188,7 +188,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             // Reallocate memory
             if(data_len_alloc < data_len + data_s_len) {
                 data_len_alloc = data_len + data_s_len;
-                data = realloc(data, data_len_alloc);
+                data = teo_realloc(data, data_len_alloc);
             }
 
             // Combine data

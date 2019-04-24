@@ -15,7 +15,7 @@
 #include "tr-udp_.h"
 #include "utils/rlutil.h"
 #include "utils/utils.h"
-
+#include "utils/teo_memory.h"
 
 /******************************************************************************/
 /* KSNet ARP functions                                                        */
@@ -29,7 +29,7 @@ ksnetArpClass *ksnetArpInit(void *ke) {
 
     #define kev ((ksnetEvMgrClass*)(ke))
 
-    ksnetArpClass *ka = malloc(sizeof(ksnetArpClass));
+    ksnetArpClass *ka = teo_malloc(sizeof(ksnetArpClass));
     ka->map = pblMapNewHashMap();
     ka->ke = ke;
 
@@ -311,11 +311,7 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr,
         char **peer_name) {
 
-    find_arp_data fa;
-    fa.addr = addr;
-    fa.arp_data = NULL;
-    fa.peer_name = NULL;
-
+    find_arp_data fa = { .addr = addr, .arp_data = NULL, .peer_name = NULL };
     ksnet_arp_data *retval = NULL;
 
     if(ka != NULL && ksnetArpGetAllH(ka, find_arp_by_addr_cb, (void*) &fa)) {
@@ -337,7 +333,7 @@ ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr,
 ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
 
     uint32_t length = pblMapSize(ka->map);
-    ksnet_arp_data_ar *data_ar = malloc(sizeof(ksnet_arp_data_ar) + length * sizeof(data_ar->arp_data[0]));
+    ksnet_arp_data_ar *data_ar = teo_malloc(sizeof(ksnet_arp_data_ar) + length * sizeof(data_ar->arp_data[0]));
     data_ar->length = length;
 
     PblIterator *it = pblMapIteratorNew(ka->map);
