@@ -245,7 +245,11 @@ public:
    * @param data_len Commands data length
    * @return True at success
    */
-  inline int sendEchoTo(const char* to, uint8_t cmd, void* data, size_t data_len) const {
+  int sendEchoTo(const char* to, void* data = NULL, size_t data_len = 0) const {
+    if(!data || !data_len) {
+      data = (void*)"Hello Teonet!";
+      data_len = std::strlen((char*)data) + 1;
+    }
     return ksnCommandSendCmdEcho(ke->kc->kco, (char*)to, data, data_len);
   }
 
