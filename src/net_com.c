@@ -1202,15 +1202,15 @@ static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
     if(data) {
         cmd_connect_cque_cb_data *cqd = data;
         
-        char *peer_name;
-        socklen_t addr_length;
-        struct sockaddr_in remaddr;
-        trudpUdpMakeAddr(cqd->addr, cqd->port, (__SOCKADDR_ARG) &remaddr, &addr_length);
+        char *peer_name = "";        
+        struct sockaddr_in remaddr;         // remote address
+        socklen_t addr_len = sizeof(remaddr);// length of addresses
+        make_addr(cqd->addr, cqd->port, (__SOCKADDR_ARG) &remaddr, &addr_len);        
         ksnet_arp_data *arp = ksnetArpFindByAddr(cqd->ke->kc->ka, (__CONST_SOCKADDR_ARG) &remaddr, &peer_name);
         #ifdef DEBUG_KSNET
         ksn_printf(cqd->ke, MODULE, DEBUG_VV, 
-                "processing CMD_CONNECT cmd_connect_cque_cb, %s:%d %s\n", 
-                cqd->addr, cqd->port, arp ? " - connected" : " - remove trudp channel");
+                "processing CMD_CONNECT cmd_connect_cque_cb, %s, %s:%d %s\n", 
+                peer_name, cqd->addr, cqd->port, arp ? " - connected" : " - remove trudp channel");
         #endif
         if(!arp) trudpChannelDestroyAddr(cqd->ke->kc->ku, cqd->addr, cqd->port, 0);
         free(cqd->addr);
@@ -1228,12 +1228,6 @@ static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     #define kev ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke)
-
-//    #ifdef DEBUG_KSNET
-//    ksn_printf(kev, MODULE, DEBUG_VV,
-//            "process CMD_CONNECT (cmd = %u) command, from %s (%s:%d)\n",
-//            rd->cmd, rd->from, rd->addr, rd->port);
-//    #endif
 
     /**
      * KSNet CMD_PEER command data
@@ -1266,12 +1260,6 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         // Send CMD_NONE to remote peer to connect to it
         ksnCoreSendto(kco->kc, pd.addr, pd.port, CMD_NONE, NULL_STR, 1);
         
-        // Wait connection 2 sec and remove TRUDP channel in callback if not connected
-        cmd_connect_cque_cb_data *cqd = malloc(sizeof(cmd_connect_cque_cb_data));
-        cqd->ke = kev;
-        cqd->addr = strdup(pd.addr);
-        cqd->port = pd.port;
-        ksnCQueAdd(kev->kq, cmd_connect_cque_cb, 2.000, cqd);
     }
     else {
         #ifdef DEBUG_KSNET
@@ -1280,6 +1268,13 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 pd.name, pd.addr, pd.port);
         #endif
     }
+    
+    // Wait connection 2 sec and remove TRUDP channel in callback if not connected
+    cmd_connect_cque_cb_data *cqd = malloc(sizeof(cmd_connect_cque_cb_data));
+    cqd->ke = kev;
+    cqd->addr = strdup(pd.addr);
+    cqd->port = pd.port;
+    ksnCQueAdd(kev->kq, cmd_connect_cque_cb, 2.000, cqd);
 
     return 1;
     
