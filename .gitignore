@@ -153,3 +153,5 @@ examples/go/teogo/teogo
 *.in~
 /distr/libtuntap-master/
 nbproject/
+/embedded/cpputest-3.8/
+/embedded/cpputest-3.8.tar.gz*
