@@ -115,9 +115,6 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Terminal
 //    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
 //    strncpy(ksn_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
-
-    // Load-balance default policy
-    ksn_cfg->lb_policy = TEO_LB_POLICY_ROUND_ROBIN;
 }
 
 /**
