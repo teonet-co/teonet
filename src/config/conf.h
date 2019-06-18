@@ -47,12 +47,6 @@
 #define TRUE  1
 #define FALSE 0
 
-typedef enum teo_lb_policy
-{
-    TEO_LB_POLICY_RANDOM      = 0,  ///< Random Load-balance
-    TEO_LB_POLICY_ROUND_ROBIN = 1   ///< Round-robin
-} teo_lb_policy_t;
-
 typedef struct ksnet_cfg {
 
     void *ke; ///< Poiner to ksnetEventManager
@@ -135,8 +129,6 @@ typedef struct ksnet_cfg {
     char pn[KSN_BUFFER_SM_SIZE];
     char r_host_name[KSN_MAX_HOST_NAME];    ///< Remote host name (if connected)
 
-    // Load-balance policy  
-    teo_lb_policy_t lb_policy; 
 } ksnet_cfg;
 
 #ifdef	__cplusplus
