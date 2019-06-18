@@ -96,7 +96,6 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         
         { "daemon",         no_argument,       &conf->dflag, 1 },
         { "kill",           no_argument,       &conf->kflag, 1 },
-        { "lb_policy",      required_argument, 0, 'b' },
         { 0, 0, 0, 0 }
     };
     static const char *data_path = NULL;
@@ -256,12 +255,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           // Kill application started in Daemon mode
           conf->kflag = 1;
           break;
-        case 'b':
-          conf->lb_policy = atoi(optarg);
-          break;
       }
     }
-          printf("POLICY %d\n", conf->lb_policy);
 
     // Check for arguments
     if((argc - optind) < app_argc) {
@@ -421,7 +416,6 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "\n"
     "  -d, --daemon              Start this application in daemon mode\n"
     "  -k, --kill                Kill the application running in daemon mode\n"
-    "  --lb_policy=value         0 - Random Load balance, 1 - Round-Robin algo. (1 - default)\n"
     "\n",
     basename(app_name_cpy), app_argv_str);
 
