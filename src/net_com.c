@@ -386,7 +386,6 @@ static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_ECHO_ANSWER,
                 rd->data, rd->data_len);
 
-
     return 1; // Command processed
 }
 
@@ -1329,7 +1328,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 }
 
 /**
- * Process CMD_SPLEET command. A peer send disconnect command
+ * Process CMD_SPLIT command. A peer send disconnect command
  *
  * @param kco Pointer to ksnCommandClass
  * @param rd Pointer to ksnCorePacketData
@@ -1340,7 +1339,7 @@ static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #ifdef DEBUG_KSNET
     ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
             MODULE, DEBUG_VV,
-            "process CMD_SPLEET (cmd = %u) command, from %s (%s:%d)\n",
+            "process CMD_SPLIT (cmd = %u) command, from %s (%s:%d)\n",
             rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 

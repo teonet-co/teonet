@@ -758,8 +758,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
  * @param recvlen Packet length
  * @param remaddr Address
  */
-void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
-        __SOCKADDR_ARG remaddr) {
+void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG remaddr) {
 
     ksnCoreClass *kc = vkc; // ksnCoreClass Class object
     ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
@@ -782,10 +781,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         #if KSNET_CRYPT
         if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
             data = ksnDecryptPackage(kc->kcr, buf, recvlen, &data_len);
-        }
-
-        // Use packet without decryption
-        else {
+        } else { // Use packet without decryption
         #endif
             data = buf;
             data_len = recvlen;
@@ -808,10 +804,10 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         //
 
         // Parse ksnet packet and Fill ksnet receive data structure
-//        ksnet_arp_data arp;
         ksnCorePacketData rd;
         memset(&rd, 0, sizeof(rd));
-        int event = EV_K_RECEIVED, command_processed = 0;
+        int event = EV_K_RECEIVED;
+        int command_processed = 0;
 
         // Remote peer address and peer
         rd.addr = addr; // IP to string
@@ -829,11 +825,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
             } else {
                 command_processed = 1;
             }
-        }
-
-        // Check ARP Table and add peer if not present
-        else {
-
+        } else { // Check ARP Table and add peer if not present
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,
                 "got %d byte data, cmd = %d, from %s %s:%d\n",
@@ -851,25 +843,10 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen,
         }
 
         // Send event to User level
-        if(!command_processed) {
-
-            // Send event callback
-            if(ke->event_cb != NULL)
-                ke->event_cb(ke, event, (void*)&rd, sizeof(rd), NULL);
-
+        if(!command_processed && ke->event_cb) {
+            ke->event_cb(ke, event, (void*)&rd, sizeof(rd), NULL);
         }
 
-        // Free address buffer
         free(addr);
     }
-
-//    // Socket disconnected
-//    else {
-//        #ifdef DEBUG_KSNET
-//        ksnet_printf(&ke->ksn_cfg, DEBUG_VV,
-//                "TR-UDP protocol data, dropped or disconnected ...\n");
-//        #endif
-//    }
 }
-
-
