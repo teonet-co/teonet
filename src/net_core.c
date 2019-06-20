@@ -280,7 +280,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
  * @param data Pointer to data
  * @param data_len Data size
  *
- * @return Return 0 if success; -1 if data length is too lage (more than 32319)
+ * @return Return 0 if success; -1 if data length is too lage (more than MAX_PACKET_LEN)
  */
 int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
                   void *data, size_t data_len) {
