@@ -1328,6 +1328,103 @@ inline size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data) {
             clients_data->length * sizeof(clients_data->client_data[0]) : 0;
 }
 
+#define BUFFER_SIZE_CLIENT 4096
+
+static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t data_len, ssize_t recieved)
+{
+    ssize_t retval = -1;
+
+    if (tcd->last_packet_ptr > 0) {
+        tcd->read_buffer_ptr -= tcd->last_packet_ptr;
+        if (tcd->read_buffer_ptr > 0) {
+            memmove(tcd->read_buffer, (char *)tcd->read_buffer + tcd->last_packet_ptr, (int)tcd->read_buffer_ptr);
+        }
+
+        tcd->last_packet_ptr = 0;
+    }
+
+    if ((size_t) recieved > tcd->read_buffer_size - tcd->read_buffer_ptr) {
+        tcd->read_buffer_size += data_len;
+        if (tcd->read_buffer) {
+            tcd->read_buffer = realloc(tcd->read_buffer, tcd->read_buffer_size);
+        } else {
+            tcd->read_buffer = malloc(tcd->read_buffer_size);
+        }
+    }
+
+    if (recieved > 0) {
+        memmove((char*)tcd->read_buffer + tcd->read_buffer_ptr, data, recieved);
+        tcd->read_buffer_ptr += recieved;
+    }
+
+    teoLNullCPacket *packet = (teoLNullCPacket *)tcd->read_buffer;
+    ssize_t len;
+
+    // Process read buffer
+    if(tcd->read_buffer_ptr - tcd->last_packet_ptr > sizeof(teoLNullCPacket) &&
+       tcd->read_buffer_ptr - tcd->last_packet_ptr >= (size_t)(len = sizeof(teoLNullCPacket) + packet->peer_name_length + packet->data_length)) {
+
+        // Check checksum
+        uint8_t header_checksum = get_byte_checksum(packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
+        uint8_t checksum = get_byte_checksum(packet->peer_name, packet->peer_name_length + packet->data_length);
+
+        if(packet->header_checksum == header_checksum && packet->checksum == checksum) {
+            // Packet has received - return packet size
+            retval = len;
+            tcd->last_packet_ptr += len;
+        } else { // Wrong checksum, wrong packet - drop this packet and return -2
+            tcd->read_buffer_ptr = 0;
+            tcd->last_packet_ptr = 0;
+            retval = -2;
+        }
+    }
+
+    return retval;
+}
+
+ssize_t recvCheck(trudpChannelData *tcd, char *data, ssize_t data_length)
+{
+    return packetCombineClient(tcd, data, BUFFER_SIZE_CLIENT, data_length != -1 ? data_length : 0);
+}
+
+int processCmd(ksnLNullClass *kl, ksnCorePacketData *rd, teoLNullCPacket *cp)
+{
+    int retval = 0;
+    switch(cp->cmd) {
+
+        // Login packet
+        case 0: {
+            if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
+                int fd = kl->fd_trudp++;
+                ksnLNullClientRegister(kl, fd, rd);
+                // Add fd to tr-udp channel data
+                trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+                if(tcd) tcd->fd = fd;
+                retval = 1;
+            }
+        } break;
+
+            // Process other L0 packets
+        default: {
+            // Process other L0 TR-UDP packets
+            // Send packet to peer
+            size_t vl;
+            trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+            if(tcd) {
+                ksnLNullData* kld = pblMapGet(kl->map, &tcd->fd, sizeof(tcd->fd), &vl);
+                if(kld != NULL && kld->name != NULL) {
+                    kld->last_time = ksnetEvMgrGetTime(kl->ke);
+                    ksnLNullSendFromL0(kl, cp, kld->name, kld->name_length);
+                } else {
+                    trudp_ChannelSendReset(tcd);
+                }
+            }
+            retval = 1;
+        } break;
+    }
+
+    return retval;
+}
 /**
  * Check and process L0 packet received through TR-UDP
  *
@@ -1345,14 +1442,10 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
     if(rd->data_len == cp->data_length + cp->peer_name_length + sizeof(teoLNullCPacket))
     {
         // Check packet checksum
-        uint8_t header_checksum = get_byte_checksum(cp,
-                sizeof(teoLNullCPacket) -
-                sizeof(cp->header_checksum));
-        uint8_t checksum = get_byte_checksum(cp->peer_name,
-                cp->peer_name_length + cp->data_length);
+        uint8_t header_checksum = get_byte_checksum(cp, sizeof(teoLNullCPacket) - sizeof(cp->header_checksum));
+        uint8_t checksum = get_byte_checksum(cp->peer_name, cp->peer_name_length + cp->data_length);
 
-        if(cp->header_checksum == header_checksum &&
-           cp->checksum == checksum) {
+        if(cp->header_checksum == header_checksum && cp->checksum == checksum) {
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
@@ -1363,50 +1456,36 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                 (char*)(cp->peer_name + cp->peer_name_length));
             #endif
 
-            switch(cp->cmd) {
+            retval = processCmd(kl, rd, cp);
 
-                // Login packet
-                case 0: {
-                    if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
-                        int fd = kl->fd_trudp++;
-                        ksnLNullClientRegister(kl, fd, rd);
-                        // Add fd to tr-udp channel data
-                        trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
-                        if(tcd) tcd->fd = fd;
-                        retval = 1;
-                    }
-                } break;
-
-                // Process other L0 packets
-                default: {
-                    // Process other L0 TR-UDP packets
-                    // Send packet to peer
-                    size_t vl;
-                    trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
-                    if(tcd) {
-                        ksnLNullData* kld = pblMapGet(kl->map, &tcd->fd, sizeof(tcd->fd), &vl);
-                        if(kld != NULL && kld->name != NULL) {
-                            kld->last_time = ksnetEvMgrGetTime(kl->ke);
-                            ksnLNullSendFromL0(kl, cp, kld->name, kld->name_length);
-                        }
-                        else {
-                            trudp_ChannelSendReset(tcd);
-                        }
-                    }
-                    retval = 1;
-                } break;
-            }
         }
+    } else {
+        trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+        ssize_t rc = recvCheck(tcd, rd->data, rd->data_len);
+        if (!(rc > 0)) {
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV,
+                       "Wait next part of large packet %d\n",
+                       rd->data_len
+            );
+            #endif
+            return 1;
+        }
+
+        void *l_data = tcd->read_buffer;
+        teoLNullCPacket *cp = trudpPacketGetData(trudpPacketGetPacket(l_data));
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG_VV,
+                "got Large TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
+                rd->addr, rd->port,
+                (unsigned)cp->cmd,
+                (char*) cp->peer_name,
+                (char*)(cp->peer_name + cp->peer_name_length));
+        #endif
+
+        retval = processCmd(kl, rd, cp);
     }
-// \TODO shell it message added    ?
-//    else {
-//        #ifdef DEBUG_KSNET
-//        ksn_puts(kev, MODULE, DEBUG_VV,
-//            "got undefined TR-UDP packet"                
-//        );
-//        #endif        
-//    }
-    
+
     return retval;
 }
 
