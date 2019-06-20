@@ -2196,81 +2196,6 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
     }
 }
 
-#define BUFFER_SIZE_CLIENT 4096
-
-static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t data_len,
-        ssize_t recieved)
-{
-    ssize_t retval = -1;
-
-    if (tcd->last_packet_ptr > 0) {
-        tcd->read_buffer_ptr -= tcd->last_packet_ptr;
-        if (tcd->read_buffer_ptr > 0) {
-            memmove(tcd->read_buffer, (char *)tcd->read_buffer + tcd->last_packet_ptr, (int)tcd->read_buffer_ptr);
-        }
-
-        tcd->last_packet_ptr = 0;
-    }
-
-    if ((size_t) recieved > tcd->read_buffer_size - tcd->read_buffer_ptr) {
-        tcd->read_buffer_size += data_len;
-        if (tcd->read_buffer) {
-            tcd->read_buffer = realloc(tcd->read_buffer, tcd->read_buffer_size);
-        } else {
-            tcd->read_buffer = malloc(tcd->read_buffer_size);
-        }
-    }
-
-    if (recieved > 0) {
-        memmove((char*)tcd->read_buffer + tcd->read_buffer_ptr, data, recieved);
-        tcd->read_buffer_ptr += recieved;
-    }
-
-    teoLNullCPacket *packet = (teoLNullCPacket *)tcd->read_buffer;
-    ssize_t len;
-
-    // Process read buffer
-    if(tcd->read_buffer_ptr - tcd->last_packet_ptr > sizeof(teoLNullCPacket) &&
-        tcd->read_buffer_ptr - tcd->last_packet_ptr >= (size_t)(len = sizeof(teoLNullCPacket) + packet->peer_name_length + packet->data_length)) {
-
-        // Check checksum
-        uint8_t header_checksum = get_byte_checksum(packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
-        uint8_t checksum = get_byte_checksum(packet->peer_name, packet->peer_name_length + packet->data_length);
-
-        if(packet->header_checksum == header_checksum && packet->checksum == checksum) {
-
-            // Packet has received - return packet size
-            retval = len;
-            tcd->last_packet_ptr += len;
-
-//#ifdef DEBUG_MSG
-//            printf("L0 Server: Identify packet %" PRId32 " bytes length ...\n",
-//                (int)retval);
-//#endif
-        } else { // Wrong checksum, wrong packet - drop this packet and return -2
-            tcd->read_buffer_ptr = 0;
-            tcd->last_packet_ptr = 0;
-            retval = -2;
-
-//#ifdef DEBUG_MSG
-//            printf("L0 Client: Wrong packet %" PRId32 " bytes length; dropped ...\n",
-//                (int)len);
-//#endif
-        }
-    } else {
-//#ifdef DEBUG_MSG
-//        printf("L0 Client: Wait next part of packet, now it has %" PRId32 " bytes ...\n",
-//               (int)kld->read_buffer_ptr);
-//#endif
-    }
-
-    return retval;
-}
-
-ssize_t recvCheck(trudpChannelData *tcd, char *data, ssize_t data_length)
-{
-    return packetCombineClient(tcd, data, BUFFER_SIZE_CLIENT, data_length != -1 ? data_length : 0);
-}
 
 /**
  * TR-UDP event callback
@@ -2505,26 +2430,26 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_DATA: {
 
-            uint32_t id = trudpPacketGetId(trudpPacketGetPacket(data));
-            size_t length = trudpPacketGetPacketLength(trudpPacketGetPacket(data));
+//            uint32_t id = trudpPacketGetId(trudpPacketGetPacket(data));
+//            size_t length = trudpPacketGetPacketLength(trudpPacketGetPacket(data));
             // Process package
             const trudpData *td = TD(tcd); // used in kev macro
             const char *key = trudpChannelMakeKey(tcd);
 
-            ssize_t rc = recvCheck(tcd, data, data_length);
-            if (!(rc > 0)) {
-                #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, DEBUG_VV,
-                           "%d !!!!!!!!!!!!!!!!!!!\n",
-                           data_length
-                );
-                #endif
-                break;
-            }
-            data_length = rc;
-            data = tcd->read_buffer;
-            //teoLNullCPacket *cp = trudpPacketGetData(trudpPacketGetPacket(data));
-            //printf("!!!!!!!!!!!!!!!!!!!!!!!!!!got %d byte data at channel %s [%.3f(%.3f) ms], id=%u, peer: %s, cmd: %d, data length: %d,data: %s\n", length, key, (double)tcd->triptime / 1000.0, (double)tcd->triptimeMiddle / 1000.0, id, cp->peer_name, cp->cmd, cp->data_length, cp->peer_name + cp->peer_name_length);
+//            ssize_t rc = recvCheck(tcd, data, data_length);
+//            if (!(rc > 0)) {
+//                #ifdef DEBUG_KSNET
+//                ksn_printf(kev, MODULE, DEBUG_VV,
+//                           "%d !!!!!!!!!!!!!!!!!!!\n",
+//                           data_length
+//                );
+//                #endif
+//                break;
+//            }
+//            data_length = rc;
+//            data = tcd->read_buffer;
+//            //teoLNullCPacket *cp = trudpPacketGetData(trudpPacketGetPacket(data));
+//            //printf("!!!!!!!!!!!!!!!!!!!!!!!!!!got %d byte data at channel %s [%.3f(%.3f) ms], id=%u, peer: %s, cmd: %d, data length: %d,data: %s\n", length, key, (double)tcd->triptime / 1000.0, (double)tcd->triptimeMiddle / 1000.0, id, cp->peer_name, cp->cmd, cp->data_length, cp->peer_name + cp->peer_name_length);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got %d bytes DATA packet from channel %s\n",
