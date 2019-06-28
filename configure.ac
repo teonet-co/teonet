@@ -279,5 +279,6 @@ AC_CONFIG_FILES([
 # Call libtrudp's ./configure script recursively.
 AC_CONFIG_SUBDIRS([
     embedded/libtrudp
+    embedded/teocli/linux
 ])
 AC_OUTPUT

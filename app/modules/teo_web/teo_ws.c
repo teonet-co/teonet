@@ -325,7 +325,7 @@ static teoLNullConnectData *teoWSadd(teoWSClass *kws, void *nc_p,
     int rv = -1;
     
     // Connect to L0 server
-    teoLNullConnectData *con = teoLNullConnect(server, port);
+    teoLNullConnectData *con = teoLNullConnect(server, port, TCP);
     con->user_data = malloc(sizeof(teoLNullConnectUserData));
     ((teoLNullConnectUserData*)con->user_data)->kws = kws;
             
