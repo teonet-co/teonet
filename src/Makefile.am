@@ -139,6 +139,9 @@ nobase_teonetinclude_HEADERS = \
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
+    ../embedded/teocli/libteol0/teonet_socket.h \
+    ../embedded/teocli/libteol0/teonet_time.h \
+    ../embedded/teocli/libteol0/teonet_platform.h\
     ../app/embedded/jsmn/jsmn.h \
     \
     ../embedded/libtrudp/src/udp.h \
@@ -191,6 +194,8 @@ libteonet_la_SOURCES = \
     utils/utils.c \
     utils/base64.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
+    ../embedded/teocli/libteol0/teonet_socket.c \
+    ../embedded/teocli/libteol0/teonet_time.c \
     ../app/embedded/jsmn/jsmn.c \
     ../embedded/libtrudp/src/libtrudp.la \
     ../embedded/libtrudp/embedded/teoccl/src/libteoccl.la
