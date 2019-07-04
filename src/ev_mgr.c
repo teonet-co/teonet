@@ -22,7 +22,7 @@
 #include "net_multi.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
-#include "utils/teo_memory.h"
+#include "stdbool.h"
 
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
 
@@ -123,6 +123,7 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->teo_class = NULL;
     ke->argc = argc;
     ke->argv = argv;
+    ke->ev_loop = NULL;
 
     // Set Global Variables used by SIGSEGV signal handler
     teo_argc = argc;
@@ -309,8 +310,11 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     ke->idle_activity_count = 0;
 
     // Event loop
-    struct ev_loop *loop = ke->n_num && ke->km == NULL ? ev_loop_new (0) : EV_DEFAULT;
-    ke->ev_loop = loop;
+    bool loop_already_initialised = ke->ev_loop != NULL;
+    if(ke->ev_loop == NULL){
+        struct ev_loop *loop = ke->n_num && ke->km == NULL ? ev_loop_new (0) : EV_DEFAULT;
+        ke->ev_loop = loop;
+    }
 
     // \todo remove this print
     ksn_printf(ke, MODULE, DEBUG_VV,
@@ -334,7 +338,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         // Initialize and start main timer watcher, it is a repeated timer
         ev_timer_init (&ke->timer_w, timer_cb, 0.0, KSNET_EVENT_MGR_TIMER);
         ke->timer_w.data = ke;
-        ev_timer_start (loop, &ke->timer_w);
+        ev_timer_start (ke->ev_loop, &ke->timer_w);
 
         // Initialize signals and keyboard watcher for first net (default loop)
         if(!ke->n_num) {
@@ -343,41 +347,41 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             // SIGINT
             ev_signal_init (&ke->sigint_w, sigint_cb, SIGINT);
             ke->sigint_w.data = ke;
-            ev_signal_start (loop, &ke->sigint_w);
+            ev_signal_start (ke->ev_loop, &ke->sigint_w);
 
             // SIGQUIT
             #ifdef SIGQUIT
             ev_signal_init (&ke->sigquit_w, sigint_cb, SIGQUIT);
             ke->sigquit_w.data = ke;
-            ev_signal_start (loop, &ke->sigquit_w);
+            ev_signal_start (ke->ev_loop, &ke->sigquit_w);
             #endif
 
             // SIGTERM
             #ifdef SIGTERM
             ev_signal_init (&ke->sigterm_w, sigint_cb, SIGTERM);
             ke->sigterm_w.data = ke;
-            ev_signal_start (loop, &ke->sigterm_w);
+            ev_signal_start (ke->ev_loop, &ke->sigterm_w);
             #endif
 
             // SIGKILL
             #ifdef SIGKILL
             ev_signal_init (&ke->sigkill_w, sigint_cb, SIGKILL);
             ke->sigkill_w.data = ke;
-            ev_signal_start (loop, &ke->sigkill_w);
+            ev_signal_start (ke->ev_loop, &ke->sigkill_w);
             #endif
 
             // SIGSTOP
             #ifdef SIGSTOP
             ev_signal_init (&ke->sigstop_w, sigint_cb, SIGSTOP);
             ke->sigstop_w.data = ke;
-            ev_signal_start (loop, &ke->sigstop_w);
+            ev_signal_start (ke->ev_loop, &ke->sigstop_w);
             #endif
 
             // SIGABRT used to restart this application
             #ifdef SIGUSR2
             ev_signal_init (&ke->sigabrt_w, sigusr2_cb, SIGUSR2);
             ke->sigabrt_w.data = ke;
-            ev_signal_start (loop, &ke->sigabrt_w);
+            ev_signal_start (ke->ev_loop, &ke->sigabrt_w);
             #endif
 
             // SIGSEGV
@@ -406,7 +410,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         ke->async_queue = pblListNewArrayList();
         ev_async_init (&ke->sig_async_w, sig_async_cb);
         ke->sig_async_w.data = ke;
-        ev_async_start (loop, &ke->sig_async_w);
+        ev_async_start (ke->ev_loop, &ke->sig_async_w);
 
         // Initialize async idle watcher
         ev_idle_init (&ke->idle_async_w, idle_async_cb);
@@ -414,7 +418,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
         // Run event loop
         ke->runEventMgr = 1;
-        if(ke->km == NULL) ev_run(loop, 0);
+        if(ke->km == NULL && loop_already_initialised == false) ev_run(ke->ev_loop, 0);
         else return 0;
 
         ksnetEvMgrFree(ke, 1); // Free class variables and watchers after run
@@ -484,7 +488,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
 
         // Free memory
         free(ke);
-        
+
         // Remove run_file
         remove(run_file);
 
@@ -599,7 +603,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             const char *l0 = "teo-l0";
             size_t l0_len = strlen(l0) + 1;
             *hd_len += l0_len;
-            hd = teo_realloc(hd, *hd_len);
+            hd = realloc(hd, *hd_len);
             memcpy(hd->string_ar + ptr, l0, l0_len); ptr += l0_len;
             hd->string_ar_num++;
         }
@@ -608,7 +612,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             const char *vpn = "teo-vpn";
             size_t vpn_len = strlen(vpn) + 1;
             *hd_len += vpn_len;
-            hd = teo_realloc(hd, *hd_len);
+            hd = realloc(hd, *hd_len);
             memcpy(hd->string_ar + ptr, vpn, vpn_len);  ptr += vpn_len;
             hd->string_ar_num++;
         }
@@ -616,7 +620,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
         if(app_version != NULL) {
             size_t app_version_len = strlen(app_version) + 1;
             *hd_len += app_version_len;
-            hd = teo_realloc(hd, *hd_len);
+            hd = realloc(hd, *hd_len);
             memcpy(hd->string_ar + ptr, app_version, app_version_len); ptr += app_version_len;
             //hd->string_ar_num++;
         }
