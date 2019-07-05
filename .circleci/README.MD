@@ -6,7 +6,8 @@ Docker image which is used to assemble is taken in cr.yandex/crp8ph86e05bgnsgjbb
  
 Assembled docker container pushing to: cr.yandex/crp8ph86e05bgnsgjbb8/test/teonet (the path will be changed later). In https://circleci.com/ build starts by TAG. For this, you need to create a release with any tag. Build start by commit and untagget build not used.
 
-Get images from yandex container regisrty (YCR) like this:
+**Get images from yandex container regisrty (YCR) like this:**
+
 docker login \
 --username oauth \
 --password $YC_AUTH \ #TOKEN ID you can ask from me
