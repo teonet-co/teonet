@@ -47,7 +47,7 @@ lftp -c "
 set ftp:list-options -a;
 open ftp://repo:$CI_TEONET_REPO_FTP_PWD@repo.ksproject.org; 
 lcd $REPO/$SUBFOLDER;
-cd /$SUBFOLDER;
+cd repo/$SUBFOLDER;
 mirror --reverse --delete --use-cache --verbose --allow-chown
 "
 echo ""
