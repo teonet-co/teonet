@@ -12,5 +12,5 @@ Assembled docker container pushing to: cr.yandex/crp8ph86e05bgnsgjbb8/test/teone
  
 >docker pull cr.yandex/crp8ph86e05bgnsgjbb8/path/to/image
 
-**in our case:**
+**In our case:**
 >docker pull  cr.yandex/crp8ph86e05bgnsgjbb8/test/teonet
