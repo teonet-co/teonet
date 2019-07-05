@@ -10,6 +10,7 @@ Assembled docker container pushing to: cr.yandex/crp8ph86e05bgnsgjbb8/test/teone
 
 >docker login \
 >--username oauth \ # Username == oauth type, in our case - oauth
+
 >--password $YC_AUTH \ #TOKEN ID you can ask from me
 >cr.yandex
 
