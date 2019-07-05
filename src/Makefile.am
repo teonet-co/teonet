@@ -154,6 +154,7 @@ teonetinclude_HEADERS = \
     ../embedded/teocli/libtrudp/src/packet_queue.h \
     ../embedded/teocli/libtrudp/src/trudp_channel.h \
     ../embedded/teocli/libtrudp/src/trudp_send_queue.h \
+    ../embedded/teocli/libtrudp/src/trudp_utils.h \
     ../embedded/teocli/libtrudp/src/trudp_receive_queue.h \
     ../embedded/teocli/libtrudp/embedded/teoccl/src/map.h \
     ../embedded/teocli/libtrudp/embedded/teoccl/src/queue.h
