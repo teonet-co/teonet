@@ -7,6 +7,9 @@ jobs:
     docker:
       #- image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
       - image: cr.yandex/crp8ph86e05bgnsgjbb8/ci_ubuntu_build_docker
+        auth:
+          username: $YC_AUTH
+          password: $YC_TOKEN
     steps:
       - checkout
       - run: git submodule update --init --recursive
