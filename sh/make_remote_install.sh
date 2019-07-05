@@ -58,7 +58,8 @@ if [ "$RPM_SUBTYPE" = "deb" ]; then
     echo $ANSI_BROWN"Add repository:"$ANSI_NONE
     echo ""
     sudo apt-get install -y software-properties-common
-    sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
+    #sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
+    sudo add-apt-repository "ftp://$REPO_USER:$REPO_PASSWORD@repo2.ksproject.org/repo/ubuntu teonet main"
     sudo apt-get update
     echo ""
 
