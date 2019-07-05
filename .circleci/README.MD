@@ -14,3 +14,7 @@ Assembled docker container pushing to: cr.yandex/crp8ph86e05bgnsgjbb8/test/teone
 
 **In our case:**
 >docker pull  cr.yandex/crp8ph86e05bgnsgjbb8/test/teonet
+
+New ftp server: ftp://repo2.ksproject.org/ authentication type "digest". Username and password set in circle-ci environment variables: $REPO_USER $REPO_PASSWORD
+
+New doc: http://repo2.ksproject.org/ authentication type "digest". Credentinals, you can ask from me cr.yandex (auth dissable during circle job)
