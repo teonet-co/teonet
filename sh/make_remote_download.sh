@@ -54,7 +54,7 @@ lftp -c "
 set ftp:list-options -a;
 open ftp://$REPO_USER:$REPO_PASSWORD@repo2.ksproject.org;
 lcd $REPO/$SUBFOLDER;
-cd /$SUBFOLDER;
+cd repo/$SUBFOLDER;
 mirror --delete --use-cache --verbose --allow-chown
 "
 echo ""
