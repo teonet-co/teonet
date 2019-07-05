@@ -14,41 +14,41 @@
 # sh/make_remote_doc_upload teonet
 
 # Check parameters
-if [ -z "$1" ];  then
-    PROJECT_NAME="teonet";
-else
-    PROJECT_NAME=$1
-fi
+##if [ -z "$1" ];  then
+##    PROJECT_NAME="teonet";
+##else
+##    PROJECT_NAME=$1
+##fi
 
 # Exit with error if GitLab CI variable is not set
-if [ -z $CI_TEONET_REPO_FTP_PWD ]; then
-    echo "Can't upload documentation from local host"
-    exit 1
+##if [ -z $CI_TEONET_REPO_FTP_PWD ]; then
+##    echo "Can't upload documentation from local host"
+##    exit 1
     #CI_TEONET_REPO_FTP_PWD="VV9x5ClC"
-fi
+##fi
 
-ANSI_BROWN="\033[22;33m"
-ANSI_NONE="\033[0m"
+##ANSI_BROWN="\033[22;33m"
+##ANSI_NONE="\033[0m"
 
-DOC_MAKE="make doxygen-doc"
-DOC_FOLDER=docs/html
+##DOC_MAKE="make doxygen-doc"
+##DOC_FOLDER=docs/html
 
-REPO_DOC_FOLDER=/docs/$PROJECT_NAME
+##REPO_DOC_FOLDER=/docs/$PROJECT_NAME
 
 # Make documentation
-echo $ANSI_BROWN"Make documentation:"$ANSI_NONE
-echo ""
-$DOC_MAKE
-echo ""
+##echo $ANSI_BROWN"Make documentation:"$ANSI_NONE
+##echo ""
+##$DOC_MAKE
+##echo ""
 
 # Upload project documentation to remote host
-echo $ANSI_BROWN"Upload project documentation to remote host:"$ANSI_NONE
-echo ""
-lftp -c "
-set ftp:list-options -a;
-open ftp://repo:$CI_TEONET_REPO_FTP_PWD@repo.ksproject.org; 
-lcd $DOC_FOLDER;
-cd $REPO_DOC_FOLDER;
-mirror --reverse --delete --use-cache --verbose --allow-chown --only-newer --ignore-time
-"
-echo ""
+##echo $ANSI_BROWN"Upload project documentation to remote host:"$ANSI_NONE
+##echo ""
+##lftp -c "
+##set ftp:list-options -a;
+##open ftp://$REPO_USER:$REPO_PASSWORD@repo2.ksproject.org; 
+##lcd $DOC_FOLDER;
+##cd $REPO_DOC_FOLDER;
+##mirror --reverse --delete --use-cache --verbose --allow-chown --only-newer --ignore-time
+##"
+##echo ""

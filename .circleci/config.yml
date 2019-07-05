@@ -3,10 +3,10 @@
 version: 2
 jobs:
 
-  tagged-build-ubuntu:
+  tagged-build-ubuntu-1804:
     docker:
       #- image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
-      - image: cr.yandex/crp8ph86e05bgnsgjbb8/ci_ubuntu_build_docker
+      - image: cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ci/ubuntu-1804
         auth:
           username: $YC_AUTH
           password: $YC_TOKEN
@@ -28,9 +28,9 @@ jobs:
       
       # Test
       - run: app/teovpn -?
-      #- run: make test
+      - run: make test
 
-      # Build .deb package and upload it to repository
+      # Build .deb package and upload it to repositorry
       - run: sh/make_package deb
 
   tagged-build-docker:      
@@ -45,10 +45,10 @@ jobs:
       - run: docker login --username $YC_AUTH --password $YC_TOKEN cr.yandex
       
       # Push image to YCR
-      - run: docker tag $CIRCLE_PROJECT_REPONAME cr.yandex/crp8ph86e05bgnsgjbb8/test/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-      - run: docker push cr.yandex/crp8ph86e05bgnsgjbb8/test/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-      - run: docker tag $CIRCLE_PROJECT_REPONAME cr.yandex/crp8ph86e05bgnsgjbb8/test/$CIRCLE_PROJECT_REPONAME:latest
-      - run: docker push cr.yandex/crp8ph86e05bgnsgjbb8/test/$CIRCLE_PROJECT_REPONAME:latest
+      - run: docker tag $CIRCLE_PROJECT_REPONAME cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
+      - run: docker push cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
+      - run: docker tag $CIRCLE_PROJECT_REPONAME cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:latest
+      - run: docker push cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:latest
 
 workflows:
   version: 2
@@ -56,7 +56,7 @@ workflows:
   tagged:
     jobs:
 
-      - tagged-build-ubuntu:
+      - tagged-build-ubuntu-1804:
           filters:
             branches:
               ignore: /.*/
