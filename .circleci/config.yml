@@ -28,7 +28,7 @@ jobs:
       
       # Test
       - run: app/teovpn -?
-      #- run: make test
+      - run: make test
 
       # Build .deb package and upload it to repository
       - run: sh/make_package deb
