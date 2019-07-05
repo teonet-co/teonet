@@ -9,7 +9,9 @@ Assembled docker container pushing to: cr.yandex/crp8ph86e05bgnsgjbb8/test/teone
 **Get images from yandex container regisrty (YCR) like this:**
 
 docker login \
+
 --username oauth \
+
 --password $YC_AUTH \ #TOKEN ID you can ask from me
 
 cr.yandex
