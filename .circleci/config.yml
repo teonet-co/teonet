@@ -54,8 +54,6 @@ workflows:
     jobs:
 
       - tagged-build-ubuntu:
-          requires:
-            - testing
           filters:
             branches:
               ignore: /.*/
@@ -63,8 +61,6 @@ workflows:
               only: /^v.*/
 
       - tagged-build-docker:
-          requires:
-            - tagged-build-ubuntu
           filters:
             branches:
               ignore: /.*/
