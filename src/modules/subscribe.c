@@ -493,36 +493,53 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     int processed = 0;
 
-    if(rd->cmd == CMD_SUBSCRIBE) {
+    switch(rd->cmd) {
+        case CMD_SUBSCRIBE: {
+            uint16_t ev = *((uint16_t *)rd->data);
+            if(rd->data_len >= 6 && !strncmp(rd->data, "TEXT:", 5)) {
+                ev = atoi((char*)rd->data + 5);
+            }
+            teoSScrSubscription(kco->ksscr, rd->from, ev, rd->l0_f ? (ksnet_arp_data*)rd->arp:NULL);
 
-        uint16_t ev = *((uint16_t *)rd->data);
-        if(rd->data_len >= 6 && !strncmp(rd->data, "TEXT:", 5)) {
-            ev = atoi((char*)rd->data + 5);
-//            printf("!!! %s\n", rd->data);
-        }
-        teoSScrSubscription(kco->ksscr, rd->from, ev, rd->l0_f ? (ksnet_arp_data*)rd->arp:NULL);
+            if(kev->event_cb != NULL) {
+                kev->event_cb(kev, EV_K_SUBSCRIBED, (void*)rd, sizeof(*rd), NULL);
+            }
 
-        // Send event callback
-        if(kev->event_cb != NULL)
-            kev->event_cb(kev, EV_K_SUBSCRIBED, (void*)rd, sizeof(*rd), NULL);
+            processed = 1;
+        } break;
 
-        processed = 1;
+        case CMD_UNSUBSCRIBE: {
+            teoSScrUnSubscription(kco->ksscr, rd->from, *((uint16_t *)rd->data));
+            processed = 1;
+        } break;
+
+        case CMD_SUBSCRIBE_ANSWER: {
+            if(kev->event_cb != NULL) {
+                kev->event_cb(kev, EV_K_SUBSCRIBE, (void*)rd, sizeof(*rd), NULL);
+            }
+
+            processed = 1;
+        } break;
+
+        case CMD_SUBSCRIBE_RND: {
+            ksnet_arp_data_ext *arp_ext_data = ksnetArpGet(kev->kc->ka, rd->from);
+            uint16_t ev = *((uint16_t *)rd->data);
+            if(rd->data_len >= 6 && !strncmp(rd->data, "TEXT:", 5)) {
+                ev = atoi((char*)rd->data + 5);
+            }
+            teoSScrSubscription(kco->ksscr, arp_ext_data->type, ev, rd->l0_f ? (ksnet_arp_data*)rd->arp:NULL);
+
+            if(kev->event_cb != NULL) {
+                kev->event_cb(kev, EV_K_SUBSCRIBED, (void*)rd, sizeof(*rd), NULL);
+            }
+            processed = 1;
+        } break;
+
+        default: {
+            processed = 0;
+        } break;
     }
 
-    else if(rd->cmd == CMD_UNSUBSCRIBE) {
-
-        teoSScrUnSubscription(kco->ksscr, rd->from, *((uint16_t *)rd->data));
-        processed = 1;
-    }
-
-    else if(rd->cmd == CMD_SUBSCRIBE_ANSWER) {
-
-        // Send event callback
-        if(kev->event_cb != NULL)
-            kev->event_cb(kev, EV_K_SUBSCRIBE, (void*)rd, sizeof(*rd), NULL);
-
-        processed = 1;
-    }
 
     return processed;
 

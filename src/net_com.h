@@ -64,6 +64,7 @@ enum ksnCMD {
     CMD_AM,                 ///< #97 AM application command 
     CMD_LOGGING,            ///< #98 LOGGING command
     CMD_L0_CLIENT_RESET,    ///< #99 L0 client reset command
+    CMD_SUBSCRIBE_RND,      ///< #100 Subscribe command extension. (Send answer for one random peer by type)
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
