@@ -46,9 +46,11 @@ jobs:
 
 workflows:
   version: 2
+  untagged:
+    jobs: 
+     - testing
   tagged:
     jobs:
-      - testing:
       - tagged-build:
           filters:
             branches:
