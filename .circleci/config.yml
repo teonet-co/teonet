@@ -1,71 +1,58 @@
-# Yandex cloud configuration for circle.ci
-# The configuration is a test. Only ubuntu-build. 
 version: 2
 jobs:
-
-  tagged-build-ubuntu-1804:
-    docker:
-      #- image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
-      - image: cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ci/ubuntu-1804
-        auth:
-          username: $YC_AUTH
-          password: $YC_TOKEN
+  testing:
+    machine:
+      docker_layer_caching: true
+    environment:
+      AWS_REGION: eu-west-1
+      AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
+      YC_YCR_REPONAME: cr.yandex/crp8ph86e05bgnsgjbb8/teonet
     steps:
       - checkout
       - run: git submodule update --init --recursive
+      - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
+      - run: docker run $CIRCLE_PROJECT_REPONAME make test
 
-      # Show variables
-      - run: echo $CIRCLE_PROJECT_REPONAME
-      - run: echo $CIRCLE_BRANCH
-      - run: echo $CIRCLE_TAG
-
-      # Install dependences
-      - run: sh/build-ubuntu.sh
-      
-      # Make
-      - run: ./autogen.sh --prefix=/usr
-      - run: make
-      
-      # Test
-      - run: app/teovpn -?
-      - run: make test
-
-      # Build .deb package and upload it to repositorry
-      - run: sh/make_package deb
-
-  tagged-build-docker:      
+  tagged-build:
     machine:
-      docker_layer_caching: true    # default - false
+      docker_layer_caching: true
+    environment:
+      AWS_REGION: eu-west-1
+      AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
+      YC_YCR_REPONAME: cr.yandex/crp8ph86e05bgnsgjbb8/teonet
     steps:
-      - checkout  
-      - run: sudo sysctl -w net.ipv4.ip_forward=1
-      - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
+      - run: docker run $CIRCLE_PROJECT_REPONAME make test
+
+      # login to ECR
+      - run: $(aws --region $AWS_REGION ecr get-login --no-include-email)
+
+      # push image to ECR
+      - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:$CIRCLE_TAG
+      - run: docker push ${AWS_ECR_REPONAME}:$CIRCLE_TAG
+      - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:latest
+      - run: docker push ${AWS_ECR_REPONAME}:latest
       
-      # Login to Yandex container Registry (YCR)
-      - run: docker login --username $YC_AUTH --password $YC_TOKEN cr.yandex
+      # Login to Yandex Container Registry (YCR)
+      - run: docker login --username $YAC_AUTH --password $YAC_TOKEN cr.yandex
       
-      # Push image to YCR
-      - run: docker tag $CIRCLE_PROJECT_REPONAME cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-      - run: docker push cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-      - run: docker tag $CIRCLE_PROJECT_REPONAME cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:latest
-      - run: docker push cr.yandex/crp8ph86e05bgnsgjbb8/teonet-co/ubuntu1804-$CIRCLE_PROJECT_REPONAME:latest
+      # Push to Yandex Container Registry (YCR)
+      - run: docker tag $CIRCLE_PROJECT_REPONAME ${YC_YCR_REPONAME}:$CIRCLE_TAG
+      - run: docker push ${YC_YCR_REPONAME}:$CIRCLE_TAG
+      - run: docker tag ${CIRCLE_PROJECT_REPONAME} ${YC_YCR_REPONAME}:latest
+      - run: docker push ${YC_YCR_REPONAME}:latest
 
 workflows:
   version: 2
-  
   tagged:
     jobs:
-
-      - tagged-build-ubuntu-1804:
+      - testing:
+      - tagged-build:
           filters:
             branches:
               ignore: /.*/
             tags:
               only: /^v.*/
-
-      - tagged-build-docker:
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /^v.*/
+          
