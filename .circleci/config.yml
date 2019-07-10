@@ -36,7 +36,7 @@ jobs:
       - run: docker push ${AWS_ECR_REPONAME}:latest
       
       # Login to Yandex Container Registry (YCR)
-      - run: docker login --username $YAC_AUTH --password $YAC_TOKEN cr.yandex
+      - run: docker login --username $YC_AUTH --password $YC_TOKEN cr.yandex
       
       # Push to Yandex Container Registry (YCR)
       - run: docker tag $CIRCLE_PROJECT_REPONAME ${YC_YCR_REPONAME}:$CIRCLE_TAG
