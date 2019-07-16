@@ -815,8 +815,13 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
             rd.data = data;
             rd.data_len = data_len;
             // Check TR-UDP L0 packet and process it if valid
-            if(!ksnLNulltrudpCheckPaket(ke->kl, &rd)) {
+            if(!ke->kl || !ksnLNulltrudpCheckPaket(ke->kl, &rd)) {
                 event = EV_K_RECEIVED_WRONG;
+                #ifdef DEBUG_KSNET
+                ksn_printf(ke, MODULE, DEBUG,
+                    "WRONG RECEIVED! cmd = %d, from: %s %s:%d\n", rd.cmd, rd.from, rd.addr, rd.port);
+                #endif
+               
             } else {
                 command_processed = 1;
             }
