@@ -205,6 +205,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         case CMD_SUBSCRIBE:
         case CMD_UNSUBSCRIBE:
         case CMD_SUBSCRIBE_ANSWER:
+        case CMD_SUBSCRIBE_RND:
             processed = cmd_subscribe_cb(kco, rd);
             break;
 
