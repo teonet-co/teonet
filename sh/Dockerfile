@@ -30,4 +30,4 @@ RUN ldconfig
 RUN cd /teonet && ./autogen.sh --prefix=/usr/local
 RUN make
 RUN make install
-RUN sh/libteonet_copy.sh
+RUN /teonet/sh/libteonet_copy.sh
