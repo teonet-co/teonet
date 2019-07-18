@@ -368,7 +368,7 @@ const char *teoGetAppVersion(ksnetEvMgrClass *ke);
 
 int remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr);
 int ksnetAllowAckEvent(ksnetEvMgrClass* ke, int allow);
-
+void ksnetEvMgrInitialize(ksnetEvMgrClass *ke);
 
 #ifdef	__cplusplus
 }
