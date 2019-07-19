@@ -176,3 +176,9 @@ Update repositories database:
     make clean && make
     src/teodb teo-db -a 127.0.0.1 -P 9009
 
+
+# Sume LXC notes
+
+When you run teonet in LXC container you posible need to open(forward) UDP port (8000 in exampe below) in LXC host:
+
+    iptables -t nat -A PREROUTING -i eth0 -p udp --dport 8000 -j DNAT --to 10.29.213.63:8000

@@ -196,7 +196,7 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
                     
                     // Add callback to queue and wait timeout after ~5 sec ...
                     map_data->cq = ksnCQueAdd(((ksnetEvMgrClass*)kcor->ke)->kq, 
-                            this->callback, CHECK_EVENTS_AFTER / 2.0, map_data);
+                        this->callback, 5.0/*CHECK_EVENTS_AFTER / 2.0*/, map_data);
                 }
                 
                 // PBL error

@@ -732,6 +732,12 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         // Send child to new peer and new peer to child
         //ksnetArpGetAll(kc->ka, send_cmd_connected_cb, rd);
+        
+        #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG_VV, 
+                    "new peer %s (%s:%d) connected\n", 
+                    rd->from, rd->addr, rd->port);
+        #endif
 
         // Send event callback
         if(ke->event_cb != NULL)

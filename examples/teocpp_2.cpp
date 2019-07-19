@@ -41,8 +41,8 @@ public:
 
             case EV_K_STARTED: {
 
-                showMessage(DEBUG, "Event: EV_K_STARTED, Teonet class version: " +
-                    (std::string)getClassVersion() + "\n");
+                showMessage(DEBUG, "Event: EV_K_STARTED, Teonet class version: " 
+                        << (std::string)getClassVersion() + "\n");
 
             } break;
             
@@ -50,9 +50,8 @@ public:
 
                 // Teonet packet
                 auto rd = getPacket(data);
-                showMessage(DEBUG, "Event: EV_K_CONNECTED, "
-                            "from: " + (const std::string)rd->from + ",\t"
-                            "data: " + (const char*)rd->data + "\n");
+                showMessage(DEBUG, "Event: EV_K_CONNECTED, from: " 
+                        << (const std::string)rd->from << "\n");
 
                 // Request host info
                 sendTo(rd->from, CMD_HOST_INFO, NULL, 0); //(void*)"JSON", 5);
@@ -91,6 +90,24 @@ public:
                 }
 
             } break;
+            
+          case EV_K_TIMER: {
+            
+            showMessage(DEBUG, "Event: EV_K_TIMER\n");
+            
+//            char *arp_txt = ksnetArpShowStr(getKe()->kc->ka);
+//            std::cout << "Peers:\n" << arp_txt << "\n";
+//            free(arp_txt);
+            
+            // Get peers data
+            ksnet_arp_data_ar *peers_data = ksnetArpShowData(getKe()->kc->ka);
+            //size_t peers_data_length = ksnetArpShowDataLength(peers_data);
+            for(int i=0; i < (int)peers_data->length; i++) {
+              std::cout << peers_data->arp_data[i].name << "\n";
+              sendEchoTo(peers_data->arp_data[i].name);
+            }
+            
+          } break;
 
             // Calls after event manager stopped
             case EV_K_STOPPED:
@@ -125,6 +142,7 @@ int main(int argc, char** argv) {
     // Set application type
     teo->setAppType("teo-cpp");
     teo->setAppVersion(TCPP_VERSION);
+    teo->setCustomTimer(1.00);
 
     // Start teonet
     teo->run();
