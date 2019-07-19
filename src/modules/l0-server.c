@@ -586,11 +586,11 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
 
     ssize_t snd = -1;
 
-    // Send by TCP
-    if(fd < MAX_FD_NUMBER) snd = teoLNullPacketSend(fd, pkg, pkg_length);
-
-    // Send by TR-UDP
-    else {
+    // Send by TCP TODO:!!!!!!
+    if(fd < MAX_FD_NUMBER) {
+        teosockSend(fd, pkg, pkg_length);
+        // snd = teoLNullPacketSend(fd, pkg, pkg_length);
+    } else {    // Send by TR-UDP
         size_t vl;
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
         if(kld != NULL) {
