@@ -1351,6 +1351,10 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
     }
 
     if (recieved > 0) {
+        if (tcd->read_buffer_ptr == 0 && ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum(data, sizeof(teoLNullCPacket) - sizeof(((teoLNullCPacket *)data)->header_checksum))) {
+            retval = -3;
+            return retval;
+        }
         memmove((char*)tcd->read_buffer + tcd->read_buffer_ptr, data, recieved);
         tcd->read_buffer_ptr += recieved;
     }
@@ -1460,11 +1464,18 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
     } else {
         trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
         ssize_t rc = recvCheck(tcd, rd->data, rd->data_len);
-        if (!(rc > 0)) {
+        if (rc == -3) {
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
-                       "Wait next part of large packet %d\n",
-                       rd->data_len
+                       "WRONG UDP PACKET %d\n", rc
+            );
+            #endif
+            return 1;
+        } else if ((rc != -3) && (rc <= 0)) {
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV,
+                       "Wait next part of large packet %d status = %d\n",
+                       rd->data_len, rc
             );
             #endif
             return 1;
