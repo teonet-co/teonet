@@ -517,6 +517,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", kld->name, fd_ex);
             #endif
+            ksnLNullClientDisconnect(kl, fd_ex, 1);
         }
 
         // Add client to name map
@@ -1353,7 +1354,6 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
     if (recieved > 0) {
         if (tcd->read_buffer_ptr == 0 && ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum(data, sizeof(teoLNullCPacket) - sizeof(((teoLNullCPacket *)data)->header_checksum))) {
             retval = -3;
-            return retval;
         }
         memmove((char*)tcd->read_buffer + tcd->read_buffer_ptr, data, recieved);
         tcd->read_buffer_ptr += recieved;
