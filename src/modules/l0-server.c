@@ -1470,7 +1470,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                        "WRONG UDP PACKET %d\n", rc
             );
             #endif
-            return 1;
+            return 0;
         } else if ((rc != -3) && (rc <= 0)) {
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
