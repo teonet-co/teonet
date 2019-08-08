@@ -2031,7 +2031,6 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
 
     // TR-UDP: Check commands array
     if(CMD_TRUDP_CHECK(cmd)) {
-
         trudpChannelData *tcd = trudpGetChannelCreate(TD_P(td), addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
         if(tcd != (void*)-1) trudpChannelSendData(tcd, (void *)buf, buf_len);
         buf_len = 0;
@@ -2039,7 +2038,6 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
 
     // Not TR-UDP
     else {
-
         // Show debug messages
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
@@ -2507,13 +2505,14 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 trudpPacketGetId(data),
                 key
             );
-            #endif 
+            #endif
             teo_sendto(kev, td->fd, data, data_length, 0,
                     (__CONST_SOCKADDR_ARG) &tcd->remaddr, tcd->addrlen);
 
             // Start send queue timer
-            if(trudpPacketGetType(data) == TRU_DATA)
+            if(trudpPacketGetType(data) == TRU_DATA) {
                 trudpSendQueueCbStart(td->psq_data, 0);
+            }
 
         } break;
     }
