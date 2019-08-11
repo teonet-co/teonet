@@ -280,7 +280,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     #ifdef DEBUG_KSNET
     ksn_puts(ke, MODULE, MESSAGE, "started");
     #endif
-    
+
     // Create run file name
     const char *network = ke->ksn_cfg.network;
     strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE);
@@ -289,11 +289,11 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);
     }
     strncat(run_file, RUN_NAME, KSN_BUFFER_SIZE - strlen(run_file) - 1);
-    
+
     FILE *fp;
 
     // Wait other teonet application to get disconnect signal
-    // if this application crash or deployed    
+    // if this application crash or deployed
     if ((fp = fopen(run_file, "r"))){
         usleep(3500000);
         fclose(fp);
@@ -302,9 +302,9 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     else {
         fp = fopen(run_file, "w");
         fprintf(fp,"run\n");
-        fclose(fp);    
+        fclose(fp);
     }
-    
+
     ke->timer_val = 0;
     ke->idle_count = 0;
     ke->idle_activity_count = 0;
@@ -891,7 +891,7 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 
     // Disconnect dead peer
     if(ct - arp->data.last_activity > CHECK_EVENTS_AFTER + 2.5) { // 14 sec
-        
+
         // Send this host disconnect command to dead peer
         send_cmd_disconnect_cb(kev->kc->ka, NULL, (ksnet_arp_data *)arp, NULL);
 
@@ -1295,7 +1295,7 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
     }
 
     // Check TR-UDP activity
-    //trudpProcessKeepConnection(kev->kc->ku);
+    trudpProcessKeepConnection(kev->kc->ku);
 
     #undef kev
 }
