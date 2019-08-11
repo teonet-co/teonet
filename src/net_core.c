@@ -365,20 +365,20 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 typedef struct send_by_type_check_t {
     char *name;
     int num;
-    ksnet_arp_data_ext **arp; 
+    ksnet_arp_data_ext **arp;
 } send_by_type_check_t;
 
-int send_by_type_check_cb(ksnetArpClass *ka, char *peer_name, 
+int send_by_type_check_cb(ksnetArpClass *ka, char *peer_name,
         ksnet_arp_data_ext *arp,void *pd) {
-    
+
     send_by_type_check_t *sd = pd;
     if(arp->type && strstr(arp->type, sd->name)) {
         if(!sd->num) sd->arp = malloc(sizeof(ksnet_arp_data *));
         else sd->arp = realloc(sd->arp, sizeof(ksnet_arp_data *) * (sd->num + 1));
-        
+
         //*(sd->arp + sd->num) = arp;
         sd->arp[sd->num] = arp;
-        
+
         sd->num++;
     }
     return 0;
@@ -405,23 +405,23 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     if((arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, to)) != NULL/* && arp->mode != -1*/) {
         ksnCoreSendto(kc, arp->addr, arp->port, cmd, data, data_len);
     }
-    
+
     // Send by type in this network
     else if(!ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd) && sd.num) {
         #ifdef DEBUG_KSNET
         ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
                 "send to peer by type \"%s\" \n", to);
-        #endif  
+        #endif
         int i = 0;
         for(i=0; i < sd.num; i++) {
             printf("%s:%d\n", sd.arp[i]->data.addr, sd.arp[i]->data.port);
         }
-        
+
         int r = rand() % sd.num;
         printf("=> %s:%d\n", sd.arp[r]->data.addr, sd.arp[r]->data.port);
-        
+
         ksnCoreSendto(kc, sd.arp[r]->data.addr, sd.arp[r]->data.port, cmd, data, data_len);
-        
+
         free(sd.arp);
     }
 
@@ -470,7 +470,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
         // If connected to r-host
         char *r_host = ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.r_host_name;
-        if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) { 
+        if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) {
 
             #ifdef DEBUG_KSNET
             ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV,
@@ -732,10 +732,10 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         // Send child to new peer and new peer to child
         //ksnetArpGetAll(kc->ka, send_cmd_connected_cb, rd);
-        
+
         #ifdef DEBUG_KSNET
-            ksn_printf(ke, MODULE, DEBUG_VV, 
-                    "new peer %s (%s:%d) connected\n", 
+            ksn_printf(ke, MODULE, DEBUG_VV,
+                    "new peer %s (%s:%d) connected\n",
                     rd->from, rd->addr, rd->port);
         #endif
 
@@ -745,7 +745,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         // Send event to subscribers
         teoSScrSend(ke->kc->kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
-        
+
         // Request host info
         ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, NULL, 0);
     }
@@ -824,10 +824,11 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
             if(!ke->kl || !ksnLNulltrudpCheckPaket(ke->kl, &rd)) {
                 event = EV_K_RECEIVED_WRONG;
                 #ifdef DEBUG_KSNET
-                ksn_printf(ke, MODULE, DEBUG,
+                ksn_printf(ke, MODULE, DEBUG_VV,
                     "WRONG RECEIVED! cmd = %d, from: %s %s:%d\n", rd.cmd, rd.from, rd.addr, rd.port);
                 #endif
-               
+                command_processed = 1;
+
             } else {
                 command_processed = 1;
             }
