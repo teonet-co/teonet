@@ -36,7 +36,8 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/teocli/libtrudp/src \
-	 -I../embedded/teocli/libtrudp/embedded/teoccl/src \
+	 -I../embedded/teocli/libtrudp/libs/teobase/include \
+	 -I../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
 	 -I../app/embedded/jsmn \
 	 -I/usr/include/libev \
 	 -DEV_USE_EPOLL=1 \
@@ -64,7 +65,8 @@ AM_LDFLAGS = -L/opt/local/lib
 LIBS = -lev -lcrypt -ltuntap \
     ../embedded/libpbl/src/libpbl.a \
     ../embedded/teocli/libtrudp/src/.libs/libtrudp.a \
-    ../embedded/teocli/libtrudp/embedded/teoccl/src/.libs/libteoccl.a
+    ../embedded/teocli/libtrudp/libs/teobase/src/.libs/libteobase.a \
+    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/src/.libs/libteoccl.a
     
 
 # Not embed confuse flag
@@ -140,9 +142,7 @@ nobase_teonetinclude_HEADERS = \
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
-    ../embedded/teocli/libteol0/teonet_socket.h \
-    ../embedded/teocli/libteol0/teonet_time.h \
-    ../embedded/teocli/libteol0/teonet_platform.h\
+    ../embedded/teocli/libtrudp/libs/teobase/include \
     ../app/embedded/jsmn/jsmn.h \
     \
     ../embedded/teocli/libtrudp/src/udp.h \
@@ -156,8 +156,8 @@ teonetinclude_HEADERS = \
     ../embedded/teocli/libtrudp/src/trudp_send_queue.h \
     ../embedded/teocli/libtrudp/src/trudp_utils.h \
     ../embedded/teocli/libtrudp/src/trudp_receive_queue.h \
-    ../embedded/teocli/libtrudp/embedded/teoccl/src/map.h \
-    ../embedded/teocli/libtrudp/embedded/teoccl/src/queue.h
+    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include
+
 
 libteonet_la_SOURCES = \
     crypt.c \
@@ -196,8 +196,8 @@ libteonet_la_SOURCES = \
     utils/utils.c \
     utils/base64.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
-    ../embedded/teocli/libteol0/teonet_socket.c \
-    ../embedded/teocli/libteol0/teonet_time.c \
+    ../embedded/teocli/libtrudp/libs/teobase/src/teobase/socket.c \
+    ../embedded/teocli/libtrudp/libs/teobase/src/teobase/time.c \
     ../app/embedded/jsmn/jsmn.c \
     ../embedded/teocli/libtrudp/src/libtrudp.la \
     ../embedded/teocli/libtrudp/embedded/teoccl/src/libteoccl.la
