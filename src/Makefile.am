@@ -142,7 +142,8 @@ nobase_teonetinclude_HEADERS = \
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
-    ../embedded/teocli/libtrudp/libs/teobase/include \
+    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include/teoccl/map.h \
+    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include/teoccl/hash.h \
     ../app/embedded/jsmn/jsmn.h \
     \
     ../embedded/teocli/libtrudp/src/udp.h \
@@ -155,8 +156,9 @@ teonetinclude_HEADERS = \
     ../embedded/teocli/libtrudp/src/trudp_channel.h \
     ../embedded/teocli/libtrudp/src/trudp_send_queue.h \
     ../embedded/teocli/libtrudp/src/trudp_utils.h \
-    ../embedded/teocli/libtrudp/src/trudp_receive_queue.h \
-    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include
+    ../embedded/teocli/libtrudp/src/trudp_receive_queue.h
+#    ../embedded/teocli/libtrudp/libs/teobase/include/teobase/
+
 
 
 libteonet_la_SOURCES = \
