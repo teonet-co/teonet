@@ -142,8 +142,6 @@ nobase_teonetinclude_HEADERS = \
 teonetinclude_HEADERS = \
     ../embedded/libpbl/src/pbl.h \
     ../embedded/teocli/libteol0/teonet_l0_client.h \
-    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include/teoccl/map.h \
-    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include/teoccl/hash.h \
     ../app/embedded/jsmn/jsmn.h \
     \
     ../embedded/teocli/libtrudp/src/udp.h \
