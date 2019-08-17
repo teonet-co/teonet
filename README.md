@@ -19,7 +19,12 @@ certificate while accessing https ..." execute git command:
 
 ## First time, after got sources from subversion repository
 
+### Ubuntu
     sh/build-ubuntu.sh
+    ./autogen.sh
+    make
+### Manjaro
+    autoreconf --force --install
     ./autogen.sh
     make
  
