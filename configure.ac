@@ -18,12 +18,13 @@ AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2019"], [Teonet library copyright]
 
 AC_CONFIG_HEADERS([src/config/config.h])
 AC_CONFIG_SRCDIR([src/teonet.hpp])
+AC_CONFIG_MACRO_DIR([m4])
+
+AC_USE_SYSTEM_EXTENSIONS
 
 AM_INIT_AUTOMAKE
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_SILENT_RULES([yes])
-
-AC_USE_SYSTEM_EXTENSIONS
 
 m4_include([libev.m4])
 
@@ -278,7 +279,10 @@ AC_CONFIG_FILES([
 
 # Call libtrudp's ./configure script recursively.
 AC_CONFIG_SUBDIRS([
-#    embedded/libtrudp
-    embedded/teocli/linux
+        embedded/teocli/linux
 ])
+#    embedded/teocli/libtrudp/libs/teobase/libs/teoccl
+#    embedded/teocli/libtrudp/libs/teobase
+#    embedded/teocli/libtrudp
+#    embedded/teocli/linux
 AC_OUTPUT
