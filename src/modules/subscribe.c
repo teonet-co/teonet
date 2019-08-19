@@ -522,12 +522,13 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         } break;
 
         case CMD_SUBSCRIBE_RND: {
-            ksnet_arp_data_ext *arp_ext_data = ksnetArpGet(kev->kc->ka, rd->from);
             uint16_t ev = *((uint16_t *)rd->data);
+            char *peer_type = ((char *)rd->data + sizeof(uint16_t));
+
             if(rd->data_len >= 6 && !strncmp(rd->data, "TEXT:", 5)) {
                 ev = atoi((char*)rd->data + 5);
             }
-            teoSScrSubscription(kco->ksscr, arp_ext_data->type, ev, rd->l0_f ? (ksnet_arp_data*)rd->arp:NULL);
+            teoSScrSubscription(kco->ksscr, peer_type, ev, rd->l0_f ? (ksnet_arp_data*)rd->arp:NULL);
 
             if(kev->event_cb != NULL) {
                 kev->event_cb(kev, EV_K_SUBSCRIBED, (void*)rd, sizeof(*rd), NULL);
