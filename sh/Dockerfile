@@ -27,7 +27,8 @@ RUN cd /teonet/distr && \
 RUN ldconfig
 
 # build teonet
-RUN cd /teonet && ./autogen.sh --prefix=/usr/local
+RUN cd /teonet && autoreconf --force --install
+RUN ./autogen.sh --prefix=/usr/local
 RUN make
 RUN make install
 RUN cp /teonet/src/.libs/libteonet* /usr/lib/
