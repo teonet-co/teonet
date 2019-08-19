@@ -89,16 +89,15 @@ unsigned char teoFilterFlagCheck(void *ke) {
 }
 
 unsigned char teoLogCheck(void *ke, void *log) {
+
     if ((log != NULL) && (khv != NULL) && (khv->filter_arr != NULL)) {
         unsigned i = 0;
         for (i = 0; khv->filter_arr[i] != NULL; ++i) {
-//            printf("%s %s\n",  khv->filter_arr[i], (char *)log);
             if (strstr((char *)log, khv->filter_arr[i]) != NULL) {
                 return 1;
             }
         }
     } else return 1;
-//        return strstr((char *)log, kev->kh->filter) == NULL ? 0 : 1;
     return 0;
 }
 

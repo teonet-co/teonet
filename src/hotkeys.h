@@ -96,6 +96,7 @@ typedef struct ksnetHotkeysClass  {
     char str[4][KSN_BUFFER_SM_SIZE]; ///< Strings
 
     unsigned filter_f;
+
     ksnet_stringArr filter_arr; ///< filter for logs
         
     ping_timer_data *pt; ///< Hotkey Pinger timer data
