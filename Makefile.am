@@ -13,7 +13,7 @@ DX_CLEANFILES = -rf @DX_DOCDIR@/*
 
 endif
 
-SUBDIRS = embedded/libpbl/src embedded/teocli/libtrudp embedded src po tests examples app sh
+SUBDIRS = embedded/libpbl/src embedded/teocli/libtrudp/libs/teobase embedded/teocli/libtrudp embedded src po tests examples app sh
 #embedded/libtrudp
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
@@ -58,7 +58,7 @@ build-tests:
 	tests/test_teonet
 	
 test:	tests/test_teonet
-	embedded/teocli/libtrudp/embedded/teoccl/tests/teoccl_cpp_tst
-	embedded/teocli/libtrudp/embedded/teoccl/tests/teoccl_tst
+	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_cpp_tst
+	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_tst
 	embedded/teocli/libtrudp/tests/trudp_tst
 	tests/test_teonet 
