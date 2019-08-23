@@ -1295,7 +1295,7 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
     }
 
     // Check TR-UDP activity
-    trudpProcessKeepConnection(kev->kc->ku);
+    //trudpProcessKeepConnection(kev->kc->ku);
 
     #undef kev
 }

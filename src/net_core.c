@@ -579,14 +579,17 @@ int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *rd) {
     rd->from_len = *((uint8_t*)packet); ptr += sizeof(rd->from_len); // From length
     if(rd->from_len &&
        rd->from_len + PACKET_HEADER_ADD_SIZE <= packet_len &&
-       *((char*)(packet + ptr + rd->from_len - 1)) == '\0') {
-
+       *((char*)(packet + ptr + rd->from_len - 1)) == '\0'
+     ) {
         rd->from = (char*)(packet + ptr); ptr += rd->from_len; // From pointer
-        rd->cmd = *((uint8_t*)(packet + ptr)); ptr += sizeof(rd->cmd); // Command ID
-        rd->data = packet + ptr; // Data pointer
-        rd->data_len = packet_len - ptr; // Data length
+        if(strlen(rd->from) + 1 == rd->from_len) {
 
-        packed_valid = 1;
+          rd->cmd = *((uint8_t*)(packet + ptr)); ptr += sizeof(rd->cmd); // Command ID
+          rd->data = packet + ptr; // Data pointer
+          rd->data_len = packet_len - ptr; // Data length
+
+          packed_valid = 1;
+        }
     }
 
     return packed_valid;
