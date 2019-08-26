@@ -206,9 +206,15 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           conf->r_tcp_port = atoi(optarg);
           break;
 
-        case 'a':
-          strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
-          break;
+        case 'a': {
+          const char *localhost_str = "localhost";
+          const char *localhost_num = "127.0.0.1";
+          if (!strncmp(localhost_str, optarg, strlen(localhost_str))) {
+              strncpy((char*)conf->r_host_addr, localhost_num, strlen(localhost_num));
+          } else {
+              strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
+          }
+        } break;
 
         case 'i':
           strncpy((char*)conf->vpn_ip, optarg, KSN_BUFFER_SM_SIZE/2);
