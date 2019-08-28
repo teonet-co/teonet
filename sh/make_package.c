@@ -107,8 +107,8 @@ int main(int argc, char** argv) {
             b_type == DEB ? argv[1] : "rpm",  // 0
             // Script parameters
             version,                // $1 Version
-            LIBRARY_MAJOR_VERSION,  // $2 Library major version
-            LIBRARY_MAJOR_VERSION,  // $3 Library version
+            PACKAGE_VERSION,  // $2 Library major version
+            PACKAGE_VERSION,  // $3 Library version
             CI_BUILD_ID != NULL ? CI_BUILD_ID : (CIRCLE_BUILD_NUM != NULL ? CIRCLE_BUILD_NUM : "1"), // $4 Build
             argc >= 3 ? argv[2] : b_type == DEB ? "amd64" : "x86_64", // $5 Architecture
             b_type > DEB ? argv[1] : "deb" // $6 RPM subtype
