@@ -13,10 +13,13 @@ AC_SUBST([$1], ['$2'])
 
 AC_PREREQ([2.69])
 
-AC_INIT([teonet], [0.3.3], [kirill@scherba.ru])
-AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 158, [Teonet dynamic library version])
+AC_INIT([teonet], [0.3.4], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
 
-AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2019"], [Teonet library copyright])
+AC_DEFINE_SUBST(LIBRARY_CURRENT,  2, [teocli dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_REVISION, 3, [teocli dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_AGE,      2, [teocli dynamic library version])
+
+AC_DEFINE(COPYRIGHT, ["(c) Teonet co., 1996-2019"], [Teonet library copyright])
 
 AC_CONFIG_HEADERS([src/config/config.h])
 AC_CONFIG_SRCDIR([src/teonet.hpp])

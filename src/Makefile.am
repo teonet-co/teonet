@@ -219,7 +219,7 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info $(LIBRARY_MAJOR_VERSION):0:0
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info  $(LIBRARY_CURRENT):$(LIBRARY_REVISION):$(LIBRARY_AGE)
 #49:0:0
 
 uninstall-local:
