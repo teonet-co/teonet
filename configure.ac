@@ -13,11 +13,11 @@ AC_SUBST([$1], ['$2'])
 
 AC_PREREQ([2.69])
 
-AC_INIT([teonet], [0.3.4], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
+AC_INIT([teonet], [0.3.5], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
 
 AC_DEFINE_SUBST(LIBRARY_CURRENT,  2, [teocli dynamic library version])
-AC_DEFINE_SUBST(LIBRARY_REVISION, 3, [teocli dynamic library version])
-AC_DEFINE_SUBST(LIBRARY_AGE,      2, [teocli dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_REVISION, 4, [teocli dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_AGE,      0, [teocli dynamic library version])
 
 AC_DEFINE(COPYRIGHT, ["(c) Teonet co., 1996-2019"], [Teonet library copyright])
 

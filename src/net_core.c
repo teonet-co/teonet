@@ -473,7 +473,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) {
 
             #ifdef DEBUG_KSNET
-            ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV,
+            ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
                     "resend command to peer \"%s\" to r-host\n", to);
             #endif
 
@@ -694,6 +694,32 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     ksnCoreSetEventTime(kc);
 }
 
+struct peer_type_req {
+    ksnCoreClass *kc;
+    char *addr;
+    char *from;
+    int port;
+};
+
+typedef struct peer_type_req peer_type_req_t;
+
+void peer_type_cb(uint32_t id, int type, void *data) {
+    peer_type_req_t *type_req = data;
+    if (!type) {//timeout // TODO: rename type
+        ksnCoreSendto(type_req->kc, type_req->addr, type_req->port, CMD_HOST_INFO, NULL, 0);
+        ksnetEvMgrClass *ke = type_req->kc->ke;
+
+        ksnCQueData *cq = ksnCQueAdd(ke->kq, peer_type_cb, 1, type_req);
+        ksnet_arp_data_ext *arp_cque =  ksnetArpGet(type_req->kc->ka, type_req->from);
+        arp_cque->cque_id_peer_type = cq->id;
+        ksnetArpAdd(type_req->kc->ka, type_req->from, arp_cque);
+    } else {//exec
+        free(type_req->addr);
+        free(type_req->from);
+        free(type_req);
+    }
+}
+
 /**
  * Check new peer
  *
@@ -730,11 +756,6 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         rd->arp->data.connected_time = ksnetEvMgrGetTime(ke);
         rd->arp->data.port = rd->port;
         rd->arp->data.mode = mode;
-        ksnetArpAdd(kc->ka, rd->from, rd->arp);
-        rd->arp = ksnetArpGet(kc->ka, rd->from);
-
-        // Send child to new peer and new peer to child
-        //ksnetArpGetAll(kc->ka, send_cmd_connected_cb, rd);
 
         #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,
@@ -742,15 +763,20 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
                     rd->from, rd->addr, rd->port);
         #endif
 
-        // Send event callback
-        if(ke->event_cb != NULL)
-            ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
-
         // Send event to subscribers
         teoSScrSend(ke->kc->kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
 
         // Request host info
         ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, NULL, 0);
+        peer_type_req_t *type_request = malloc(sizeof(peer_type_req_t));
+        type_request->kc = ke->kc;
+        type_request->addr = strdup(rd->addr);
+        type_request->from = strdup(rd->from);
+        type_request->port = rd->port;
+        ksnCQueData *cq = ksnCQueAdd(ke->kq, peer_type_cb, 1, type_request);
+        rd->arp->cque_id_peer_type = cq->id;
+        ksnetArpAdd(kc->ka, rd->from, rd->arp);
+        rd->arp = ksnetArpGet(kc->ka, rd->from);
     }
 }
 
