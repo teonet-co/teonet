@@ -39,6 +39,7 @@ const char *null_str = "";
 // Run file name and buffer
 #define RUN_NAME "/teonet.run"
 char run_file[KSN_BUFFER_SIZE];
+ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X){return ((ksnetEvMgrClass*)((ksnCoreClass*)X->kc)->ke); }
 
 // Local functions
 void idle_cb (EV_P_ ev_idle *w, int revents); // Timer idle callback

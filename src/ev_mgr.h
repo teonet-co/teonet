@@ -231,6 +231,8 @@ typedef struct ksnetEvMgrAppParam {
 
 } ksnetEvMgrAppParam;
 
+
+
 /**
  * KSNet event manager functions data
  */
@@ -308,6 +310,11 @@ typedef struct ksnetEvMgrClass {
     char *app_version;  ///< Application version
 
 } ksnetEvMgrClass;
+
+ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X);
+#define EVENT_MANAGER_CLASS(X) _Generic((X), \
+      ksnCommandClass* : __ke_from_command_class) (X)
+
 
 /**
  * Event callback type

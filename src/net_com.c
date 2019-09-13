@@ -722,7 +722,7 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
-    ksnetEvMgrClass *ke = ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
     ksnetArpClass *arp_class = ((ksnetArpClass*)((ksnCoreClass*)kco->kc)->ka);
 
     const int not_json = rd->data_len && ((char*)rd->data)[0] != '{' && ((char*)rd->data)[rd->data_len-1] != '}';
