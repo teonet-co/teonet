@@ -269,6 +269,11 @@ int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, size_t dat
     return arp != NULL;
 }
 
+void fillConnectData(char *data, size_t *ptr, char *name, char *addr, uint32_t port) {
+    strncpy(data, name, KSN_BUFFER_DB_SIZE); *ptr = strlen(name) + 1;
+    strncpy(data + *ptr, addr, KSN_BUFFER_DB_SIZE - *ptr); *ptr += strlen(addr) + 1;
+    *((uint32_t *)(data + *ptr)) = port; *ptr += sizeof(uint32_t);
+}
 /**
  * Send CONNECTED command to peer
  *
@@ -285,9 +290,7 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
     // Create command data
     size_t ptr = 0;
     char data[KSN_BUFFER_DB_SIZE];
-    strncpy(data, name, KSN_BUFFER_DB_SIZE); ptr = strlen(name) + 1;
-    strncpy(data + ptr, addr, KSN_BUFFER_DB_SIZE - ptr); ptr += strlen(addr) + 1;
-    *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
+    fillConnectData(data, &ptr, name, addr, port);
     // TODO: duplicate code
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
@@ -315,9 +318,7 @@ int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *to_addr, uint32_t to_p
     // Create command data
     size_t ptr = 0;
     char data[KSN_BUFFER_DB_SIZE];
-    strncpy(data, name, KSN_BUFFER_DB_SIZE); ptr = strlen(name) + 1;
-    strncpy(data + ptr, addr, KSN_BUFFER_DB_SIZE - ptr); ptr += strlen(addr) + 1;
-    *((uint32_t *)(data + ptr)) = port; ptr += sizeof(uint32_t);
+    fillConnectData(data, &ptr, name, addr, port);
     // TODO: duplicate code
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
