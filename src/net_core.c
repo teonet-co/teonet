@@ -711,7 +711,7 @@ void peer_type_cb(uint32_t id, int type, void *data) {
             ksnCoreSendto(type_req->kc, type_req->addr, type_req->port, CMD_HOST_INFO, NULL, 0);
             ksnetEvMgrClass *ke = type_req->kc->ke;
 
-            ksnCQueData *cq = ksnCQueAdd(ke->kq, peer_type_cb, 5, type_req);
+            ksnCQueData *cq = ksnCQueAdd(ke->kq, peer_type_cb, 1, type_req);
             arp_cque->cque_id_peer_type = cq->id;
             ksnetArpAdd(type_req->kc->ka, type_req->from, arp_cque);
         }
@@ -773,7 +773,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         type_request->addr = strdup(rd->addr);
         type_request->from = strdup(rd->from);
         type_request->port = rd->port;
-        ksnCQueData *cq = ksnCQueAdd(ke->kq, peer_type_cb, 5, type_request);
+        ksnCQueData *cq = ksnCQueAdd(ke->kq, peer_type_cb, 1, type_request);
         rd->arp->cque_id_peer_type = cq->id;
         ksnetArpAdd(kc->ka, rd->from, rd->arp);
         rd->arp = ksnetArpGet(kc->ka, rd->from);
