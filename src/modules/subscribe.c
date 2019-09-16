@@ -88,14 +88,11 @@ void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data,
                 teoSScrListData *sscr_list_data = pblListGet(sscr_map_data->list, i);
 
                 if(!sscr_list_data->l0_f) {
-
                     // Send subscribe command to remote peer
                     ksnCoreSendCmdto(((ksnetEvMgrClass*)sscr->ke)->kc,
                         sscr_list_data->data, CMD_SUBSCRIBE_ANSWER,
                         sscr_out_data, sscr_data_length);
-                }
-                else {
-
+                }                else {
                     // Send subscribe command to L0 client
                     ksnLNullSendToL0(sscr->ke,
                         sscr_list_data->addr, sscr_list_data->port,

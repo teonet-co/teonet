@@ -722,39 +722,50 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
+    ksnetEvMgrClass *ke = ((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke);
+    ksnetArpClass *arp_class = ((ksnetArpClass*)((ksnCoreClass*)kco->kc)->ka);
+
+    const int not_json = rd->data_len && ((char*)rd->data)[0] != '{' && ((char*)rd->data)[rd->data_len-1] != '}';
+    
     int retval = 0;
+    if (not_json) {
+        ksnet_arp_data_ext *arp_cque =  ksnetArpGet(arp_class, rd->from);
+        ksnCQueExec(ke->kq, arp_cque->cque_id_peer_type);
     
-    if(!rd->arp->type 
-        && rd->data_len 
-        && ((char*)rd->data)[0] != '{'
-        && ((char*)rd->data)[rd->data_len-1] != '}') {
-        
-        host_info_data *hid = (host_info_data *)rd->data;
-        int i;
-        size_t ptr     = strlen(hid->string_ar) + 1;
-        char *type_str = strdup(null_str);
-        for (i = 1; i < hid->string_ar_num; i++) {
-            type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"",
-                type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
+        if(!rd->arp->type) {
+            
+            host_info_data *hid = (host_info_data *)rd->data;
+            int i;
+            size_t ptr     = strlen(hid->string_ar) + 1;
+            char *type_str = strdup(null_str);
+            for (i = 1; i < hid->string_ar_num; i++) {
+                type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"",
+                    type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
 
-            ptr += strlen(hid->string_ar + ptr) + 1;
+                ptr += strlen(hid->string_ar + ptr) + 1;
+            }
+
+            // Add type to arp-table
+            rd->arp->type = strdup(type_str);
+            free(type_str);
+
+            // Send event callback
+            if(ke->event_cb != NULL)
+                ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
+
+            // Send event to subscribers
+            teoSScrSend(kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
+
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke,
+                MODULE, DEBUG_VV,
+                "process CMD_HOST_INFO_ANSWER (cmd = %u) command, from %s (%s:%d), arp-addr %s:%d, type: %s\n",
+                rd->cmd, rd->from, rd->addr, rd->port, rd->arp->data.addr, rd->arp->data.port, rd->arp->type);
+            #endif
+            retval = 1;
         }
-
-        // Add type to arp-table
-        rd->arp->type = strdup(type_str);
-
-        free(type_str);
-        
-        retval = 1;
-
-        #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
-            MODULE, DEBUG_VV,
-            "process CMD_HOST_INFO_ANSWER (cmd = %u) command, from %s (%s:%d), arp-addr %s:%d, type: %s\n",
-            rd->cmd, rd->from, rd->addr, rd->port, rd->arp->data.addr, rd->arp->data.port, rd->arp->type);
-        #endif
     }
-    
+
     return retval; // Command send to user level
 }
 
@@ -780,7 +791,6 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     host_info_data *hid = teoGetHostInfo(ke, &hid_len);
 
     if(hid != NULL) {
-
         // Get type of request: 0 - binary; 1 - JSON
         const int data_type = rd->data_len &&
                               !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
@@ -827,18 +837,18 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         }
 
         // Send PEERS_ANSWER to L0 user
-        if(rd->l0_f)
+        if(rd->l0_f) {
             ksnLNullSendToL0(((ksnetEvMgrClass*)((ksnCoreClass*)kco->kc)->ke),
                     rd->addr, rd->port, rd->from, rd->from_len,
                     CMD_HOST_INFO_ANSWER,
                     data_out, data_out_len);
 
         // Send HOST_INFO_ANSWER to peer
-        else
+        } else {
             ksnCoreSendto(kco->kc, rd->addr, rd->port,
                     CMD_HOST_INFO_ANSWER,
                     data_out, data_out_len);
-
+	}
         // Free json string data
         if(json_str != NULL) free(json_str);
         free(hid);
