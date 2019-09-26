@@ -30,6 +30,8 @@ typedef struct ksnLNullData {
     int t_channel;            ///< TR-UDP channel
     double last_time;
 
+    // \TODO: Save server crypto key here
+
 } ksnLNullData;  
                    
 /**
