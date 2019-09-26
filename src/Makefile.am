@@ -197,6 +197,9 @@ libteonet_la_SOURCES = \
     utils/utils.c \
     utils/base64.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
+    ../embedded/teocli/libtinycrypt/encryption.c \
+    ../embedded/teocli/libtinycrypt/tiny-AES-c/aes.c \
+    ../embedded/teocli/libtinycrypt/tiny-ECDH-c/ecdh.c \
     ../embedded/teocli/libtrudp/libs/teobase/src/teobase/socket.c \
     ../embedded/teocli/libtrudp/libs/teobase/src/teobase/time.c \
     ../app/embedded/jsmn/jsmn.c \
