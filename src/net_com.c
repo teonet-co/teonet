@@ -1212,7 +1212,7 @@ typedef struct cmd_connect_cque_cb_data {
 static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
     if(data) {
         cmd_connect_cque_cb_data *cqd = data;
-        
+
         char *peer_name = "";        
         struct sockaddr_in remaddr;         // remote address
         socklen_t addr_len = sizeof(remaddr);// length of addresses
@@ -1286,6 +1286,7 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     cqd->addr = strdup(pd.addr);
     cqd->port = pd.port;
     ksnCQueAdd(kev->kq, cmd_connect_cque_cb, 2.000, cqd);
+
 
     return 1;
     

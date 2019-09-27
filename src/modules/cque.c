@@ -53,15 +53,38 @@ ksnCQueClass *ksnCQueInit(void *ke, uint8_t send_event) {
     return kq;
 }
 
+static int teoCqueStopAll(ksnCQueClass *kq) {
+
+    int retval = -1;
+    PblIterator *it =  pblMapIteratorNew(kq->cque_map);
+
+
+    if(it != NULL) {
+        while(pblIteratorHasNext(it)) {
+            void *entry = pblIteratorNext(it);
+            ksnCQueData *cq = pblMapEntryValue(entry);
+            if(cq != NULL) {
+                if (cq->timeout > 0.0) {
+                    ev_timer_stop(kev->ev_loop, &cq->w);
+                }
+            }
+
+        }
+        pblIteratorFree(it);
+        pblMapClear(kq->cque_map);
+    }
+
+    return retval;
+}
+
 /**
  * Destroy ksnCQue module [class](@ref ksnCQueClass)
  *
  * @param kq Pointer to ksnCQueClass
  */
 void ksnCQueDestroy(ksnCQueClass *kq) {
-
     if(kq != NULL) {
-
+        teoCqueStopAll(kq);
         pblMapFree(kq->cque_map);
         free(kq);
     }
@@ -84,6 +107,7 @@ int ksnCQueExec(ksnCQueClass *kq, uint32_t id) {
     size_t data_len;
 
     ksnCQueData *cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);
+
     if(cq != NULL) {
 
         // Stop watcher
@@ -137,6 +161,7 @@ int ksnCQueRemove(ksnCQueClass *kq, uint32_t id) {
 
     return retval;
 }
+
 
 /**
  * Set callback queue data, update data set in ksnCQueAdd
@@ -212,7 +237,6 @@ void cq_timer_cb(EV_P_ ev_timer *w, int revents) {
     size_t data_len;
     if(pblMapRemoveFree(cq->kq->cque_map, &cq->id, sizeof(cq->id),
             &data_len) != (void*)-1) {
-
         // Do something in success
     }
 
@@ -246,7 +270,6 @@ ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout,
 
     // Add data to the Callback Queue
     if(pblMapAdd(kq->cque_map, &id, sizeof(id), &data_new, sizeof(data_new)) >= 0) {
-
         // If successfully added get real ksnCQueData pointer and start timeout
         // watcher
         cq = pblMapGet(kq->cque_map, &id, sizeof(id), &data_len);
