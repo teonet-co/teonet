@@ -30,8 +30,7 @@ typedef struct ksnLNullData {
     int t_channel;            ///< TR-UDP channel
     double last_time;
 
-    // \TODO: Save server crypto key here
-
+    ENCRYPTION_CONTEXT *server_crypt;
 } ksnLNullData;  
                    
 /**
@@ -80,6 +79,7 @@ int ksnLNullSendEchoToL0(void *ke, char *addr, int port, char *cname,
 int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
         size_t cname_length, void *data, size_t data_len);
 int ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name);
+ENCRYPTION_CONTEXT *ksnLNullClientGetCrypto(ksnLNullClass *kl, int fd);
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl);
 size_t ksnLNullClientsListLength(teonet_client_data_ar *clients_data);
 ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl);

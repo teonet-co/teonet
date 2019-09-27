@@ -10,6 +10,7 @@ AM_CFLAGS = \
 	 -I../embedded/teocli/libtrudp/src \
          -I../embedded/teocli/libtrudp/libs/teobase/include \
 	 -I../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
+	 -I../embedded/teocli \
 	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev
 
@@ -25,6 +26,7 @@ AM_CXXFLAGS = \
 	 -I../embedded/teocli/libtrudp/src \
 	 -I../embedded/teocli/libtrudp/libs/teobase/include \
          -I../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
+	 -I../embedded/teocli \
 	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev
 

@@ -31,6 +31,7 @@ static void ksnLNullClientRegister(ksnLNullClass* kl, int fd, ksnCorePacketData*
 static ssize_t ksnLNullSend(ksnLNullClass* kl, int fd, uint8_t cmd, void* data, size_t data_length);
 static void ksnLNullClientAuthCheck(ksnLNullClass* kl, ksnLNullData* kld, int fd,
                                     teoLNullCPacket* packet);
+static const char *ksnLNullClientCryptoKey(ksnLNullClass* kl, ksnLNullData* kld, int fd, teoLNullCPacket* packet);
 
 // Other modules not declared functions
 void* ksnCoreCreatePacket(ksnCoreClass* kc, uint8_t cmd, const void* data, size_t data_len,
@@ -108,24 +109,23 @@ static void cmd_l0_read_cb(struct ev_loop* loop, struct ev_io* w, int revents) {
 
   // Read TCP data
   ssize_t received = read(w->fd, data, data_len);
-#ifdef DEBUG_KSNET
+  #ifdef DEBUG_KSNET
   ksn_printf(kev, MODULE, DEBUG_VV, "Got something from fd %d w->events = %d, received = %d ...\n",
              w->fd, w->events, (int)received);
-#endif
+  #endif
 
   // Disconnect client:
   // Close TCP connections and remove data from l0 clients map
   if(!received) {
 
-#ifdef DEBUG_KSNET
+    #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV, "Connection closed. Stop listening fd %d ...\n", w->fd);
-#endif
+    #endif
 
     ksnLNullClientDisconnect(kl, w->fd, 1);
-  }
 
+  } else if(received < 0) {
   // \todo Process reading error
-  else if(received < 0) {
 
     //        if( errno == EINTR ) {
     //            // OK, just skip it
@@ -139,10 +139,9 @@ static void cmd_l0_read_cb(struct ev_loop* loop, struct ev_io* w, int revents) {
     //            ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE
     //        );
     //        #endif
-  }
 
-  // Success read. Process package and resend it to teonet
-  else {
+  } else {
+    // Success read. Process package and resend it to teonet
 
     size_t vl;
     ksnLNullData* kld = pblMapGet(kl->map, &w->fd, sizeof(w->fd), &vl);
@@ -161,12 +160,12 @@ static void cmd_l0_read_cb(struct ev_loop* loop, struct ev_io* w, int revents) {
         else
           kld->read_buffer = malloc(kld->read_buffer_size);
 
-#ifdef DEBUG_KSNET
+        #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
                    "%s"
                    "increase read buffer to new size: %d bytes ...%s\n",
                    ANSI_DARKGREY, kld->read_buffer_size, ANSI_NONE);
-#endif
+        #endif
       }
       memmove(kld->read_buffer + kld->read_buffer_ptr, data, received);
       kld->read_buffer_ptr += received;
@@ -187,6 +186,8 @@ static void cmd_l0_read_cb(struct ev_loop* loop, struct ev_io* w, int revents) {
            packet->checksum == get_byte_checksum(packet->peer_name,
                                                  packet->peer_name_length + packet->data_length)) {
 
+          teoLNullPacketDecrypt(kld->server_crypt, packet);
+
           // Check initialize packet:
           // cmd = 0, to_length = 1, data_length = 1 + data_len,
           // data = client_name
@@ -196,33 +197,37 @@ static void cmd_l0_read_cb(struct ev_loop* loop, struct ev_io* w, int revents) {
 
             // Set temporary name (it will be changed after TEO_AUTH answer)
             ksnLNullClientAuthCheck(kl, kld, w->fd, packet);
-          }
+            const char *err = ksnLNullClientCryptoKey(kl, kld, w->fd, packet);
+            if ( err ) {
+              ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d: KEX_PACKET_%s\n", w->fd, err);
+            }
 
+          } else {
           // Resend data to teonet or drop wrong packet
-          else {
             // Resend data to teonet
-            if(kld->name) ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
-            // Drop wrong packet
-            else {
-#ifdef DEBUG_KSNET
+            if(kld->name) {
+              ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+
+            } else {
+              // Drop wrong packet
+              #ifdef DEBUG_KSNET
               ksn_printf(
                   kev, MODULE, DEBUG,
                   "%s"
                   "got valid packet from fd: %d before login command; packet ignored ...%s\n",
                   ANSI_RED, w->fd, ANSI_NONE);
-#endif
+              #endif
             }
           }
-        }
 
-        // Wrong checksum - drop this packet
-        else {
-#ifdef DEBUG_KSNET
+        } else {
+          // Wrong checksum - drop this packet
+          #ifdef DEBUG_KSNET
           ksn_printf(kev, MODULE, DEBUG,
                      "%s"
                      "got wrong packet %d bytes length, from fd: %d; packet dropped ...%s\n",
                      ANSI_RED, len, w->fd, ANSI_NONE);
-#endif
+          #endif
         }
 
         ptr += len;
@@ -232,17 +237,19 @@ static void cmd_l0_read_cb(struct ev_loop* loop, struct ev_io* w, int revents) {
       // Check end of buffer
       if(kld->read_buffer_ptr - ptr > 0) {
 
-#ifdef DEBUG_KSNET
+        #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
                    "%s"
                    "wait next part of packet, now it has %d bytes ...%s\n",
                    ANSI_DARKGREY, kld->read_buffer_ptr - ptr, ANSI_NONE);
-#endif
+        #endif
 
         kld->read_buffer_ptr = kld->read_buffer_ptr - ptr;
         memmove(kld->read_buffer, kld->read_buffer + ptr, kld->read_buffer_ptr);
-      } else
+
+      } else {
         kld->read_buffer_ptr = 0;
+      }
     }
   }
 }
@@ -276,9 +283,8 @@ static ksnet_arp_data* ksnLNullSendFromL0(ksnLNullClass* kl, teoLNullCPacket* pa
                                           size_t cname_length) {
 
   size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + packet->data_length;
-  char* out_data = malloc(out_data_len);
-  memset(out_data, 0, out_data_len);
-  ksnLNullSPacket* spacket = (ksnLNullSPacket*)out_data;
+  ksnLNullSPacket* spacket = (ksnLNullSPacket*)malloc(out_data_len);
+  memset(spacket, 0, out_data_len);
 
   // Create teonet L0 packet
   spacket->cmd = packet->cmd;
@@ -321,7 +327,7 @@ static ksnet_arp_data* ksnLNullSendFromL0(ksnLNullClass* kl, teoLNullCPacket* pa
     free(pkg);
   }
 
-  free(out_data);
+  free(spacket);
 
   return arp_data;
 }
@@ -432,6 +438,7 @@ static void ksnLNullClientRegister(ksnLNullClass* kl, int fd, ksnCorePacketData*
   data.name = NULL;
   data.name_length = 0;
   data.read_buffer = NULL;
+  data.server_crypt = NULL;
   data.read_buffer_ptr = 0;
   data.read_buffer_size = 0;
   if(rd && fd >= MAX_FD_NUMBER) {
@@ -450,12 +457,63 @@ static void ksnLNullClientRegister(ksnLNullClass* kl, int fd, ksnCorePacketData*
     size_t vl;
     ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
     if(kld != NULL) { 
-        ksnLNullClientAuthCheck(kl, kld, fd, packet); 
-
-        // \TODO: create function ksnLNullClientCryptoKey(kld) to create keys
+      ksnLNullClientAuthCheck(kl, kld, fd, packet); 
+      const char *err = ksnLNullClientCryptoKey(kl, kld, fd, packet);
+      if ( err ) {
+        ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d: KEX_PACKET_%s\n", fd, err);
+      }
     }
   }
+}
 
+const char *ksnLNullClientCryptoKey(ksnLNullClass* kl, ksnLNullData* kld, int fd, teoLNullCPacket* packet) {
+  if (packet->data_length < 1) {
+    return "DATA_TOO_SHORT";
+  }
+  const char *login_name = packet->peer_name + packet->peer_name_length;
+  size_t login_name_len = strnlen(login_name, packet->data_length) + 1;
+  if (login_name_len >= packet->data_length) {
+    return "NO_KEYS_AFTER_NAME";
+  }
+
+  KEYEXCHANGEPAYLOAD *kex = (KEYEXCHANGEPAYLOAD *)(login_name + login_name_len);
+  if (kex->protocolId == ENC_PROTO_ECDH_AES_128_V1) {
+    if (login_name_len + sizeof(KEYEXCHANGEPAYLOAD) != packet->data_length) {
+      return "ECDH_AES_128_V1_INVALID_SIZE";
+    }
+    kld->server_crypt = (ENCRYPTION_CONTEXT *)malloc(sizeof(ENCRYPTION_CONTEXT));
+    kld->server_crypt->enc_proto = ENC_PROTO_ECDH_AES_128_V1;
+    kld->server_crypt->state = SESCRYPT_NEWBORN;
+    kld->server_crypt->receiveNonce = 1;
+    kld->server_crypt->sendNonce = 1;
+
+    ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d: Got LOGIN with crypto key\n", fd);
+    initPeerKeys(&kld->server_crypt->keys);
+    kld->server_crypt->state = SESCRYPT_PENDING;
+
+    // TODO: compare salt enropy and choose best one of local and remote
+
+    const char* err = initApplyRemoteKey(&kld->server_crypt->keys, &kex->pubkey, &kex->salt);
+    if (err) {
+      free(kld->server_crypt);
+      kld->server_crypt = NULL;
+      return err;
+    }
+
+    ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d: Sending our crypto key in response\n", fd);
+    KEYEXCHANGEPAYLOAD answerPayload={  ENC_PROTO_ECDH_AES_128_V1,
+                                        kld->server_crypt->keys.pubkeylocal,
+                                        kld->server_crypt->keys.sessionsalt     };
+
+    ksnLNullSend(kl, fd, CMD_L_L0_CRYPTO_KEY, (void*)&answerPayload, sizeof(answerPayload));
+
+    // HINT: Must set SESCRYPT_ESTABLISHED only AFTER sending CMD_L_L0_CRYPTO_KEY
+    //       because client won't be able to decrypt message before received our public key
+    kld->server_crypt->state = SESCRYPT_ESTABLISHED;
+
+    return NULL;
+  }
+  return "UNKNOWN_PROTOCOL";
 }
 
 void _send_subscribe_events(ksnetEvMgrClass* ke, const char* name, size_t name_length) {
@@ -488,45 +546,37 @@ static void ksnLNullClientAuthCheck(ksnLNullClass* kl, ksnLNullData* kld, int fd
 
   kld->name = strdup(packet->peer_name + packet->peer_name_length);
   kld->name_length = strlen(kld->name) + 1;
-  if(kld->name_length == packet->data_length) {
+  // Create unique name for WG new user
+  if(!strcmp(WG001_NEW, kld->name)) {
+    kld->name =
+        ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke), fd);
+    kld->name_length = strlen(kld->name) + 1;
+  }
 
-    // Create unique name for WG new user
-    if(!strcmp(WG001_NEW, kld->name)) {
-      kld->name =
-          ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke), fd);
-      kld->name_length = strlen(kld->name) + 1;
-    }
-
-    // Remove client with the same name
-    int fd_ex;
-    if((fd_ex = ksnLNullClientIsConnected(kl, kld->name))) {
+  // Remove client with the same name
+  int fd_ex;
+  if((fd_ex = ksnLNullClientIsConnected(kl, kld->name))) {
 #ifdef DEBUG_KSNET
-      ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n",
-                 kld->name, fd_ex);
+    ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n",
+                kld->name, fd_ex);
 #endif
-      ksnLNullClientDisconnect(kl, fd_ex, 1);
-    }
+    ksnLNullClientDisconnect(kl, fd_ex, 1);
+  }
 
-    // Add client to name map
-    pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
+  // Add client to name map
+  pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
-    // Send login to authentication application
-    // to check this client or register 'wg001' clients
-    if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
-      ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER, kld->name, kld->name_length);
-    } else
-      _send_subscribe_events(kev, kld->name, kld->name_length);
+  // Send login to authentication application
+  // to check this client or register 'wg001' clients
+  if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
+    ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER, kld->name, kld->name_length);
+  } else
+    _send_subscribe_events(kev, kld->name, kld->name_length);
 
 // Login will continue when answer received
 #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG, "### 0002,%s,%d\n", kld->name, fd);
+  ksn_printf(kev, MODULE, DEBUG, "### 0002,%s,%d\n", kld->name, fd);
 #endif
-  } else {
-// Wrong Login name received
-#ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG, "got login command with wrong name '%s'\n", kld->name);
-#endif
-  }
 }
 
 /**
@@ -545,10 +595,10 @@ static ssize_t ksnLNullSend(ksnLNullClass* kl, int fd, uint8_t cmd, void* data,
   const char* from = ksnetEvMgrGetHostName(kl->ke);
   size_t from_len = strlen(from) + 1;
   // Create L0 packet
-  size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_length;
+  size_t out_data_len = teoLNullBufferSize(from_len, data_length);
   char* out_data = malloc(out_data_len);
-  memset(out_data, 0, out_data_len);
-  size_t packet_length = teoLNullPacketCreate(out_data, out_data_len, cmd, from, data, data_length);
+  size_t packet_length = teoLNullPacketCreate(ksnLNullClientGetCrypto(kl, fd), out_data,
+                                              out_data_len, cmd, from, data, data_length);
   // Send packet
   ssize_t snd = ksnLNullPacketSend(kl, fd, out_data, packet_length);
   free(out_data);
@@ -588,10 +638,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass* kl, int fd, void* pkg, size_t pkg_leng
                  (char*)(packet->peer_name + packet->peer_name_length));
 #endif
 
-      // \TODO Split big packages to smaller
-      if(pkg_length > 512)
-        ;
-
+      //  Split big packages to smaller
       for(;;) {
         size_t len = pkg_length > 512 ? 512 : pkg_length;
         ksnTRUDPsendto(((ksnetEvMgrClass*)(kl->ke))->kc->ku, 0, 0, 0, packet->cmd,
@@ -707,6 +754,11 @@ void ksnLNullClientDisconnect(ksnLNullClass* kl, int fd, int remove_f) {
       kld->read_buffer_size = 0;
     }
 
+    if(kld->server_crypt != NULL) {
+      free(kld->server_crypt);
+      kld->server_crypt = NULL;
+    }
+
     // Remove data from map
     if(remove_f) pblMapRemoveFree(kl->map, &fd, sizeof(fd), &valueLength);
   }
@@ -763,11 +815,10 @@ void _check_connected(uint32_t id, int type, void* data) {
             ksnCommandEchoBuffer(((ksnetEvMgrClass*)(kl->ke))->kc->kco, "ping", 5, &data_e_length);
 
         // Create L0 packet
-        size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_e_length;
+        size_t out_data_len = teoLNullBufferSize(from_len, data_e_length);
         char* out_data = malloc(out_data_len);
-        memset(out_data, 0, out_data_len);
         size_t packet_length =
-            teoLNullPacketCreate(out_data, out_data_len, CMD_ECHO, from, data_e, data_e_length);
+            teoLNullPacketCreate(data->server_crypt, out_data, out_data_len, CMD_ECHO, from, data_e, data_e_length);
 
         ksnLNullPacketSend(kl, *fd, out_data, packet_length);
 
@@ -921,6 +972,23 @@ int ksnLNullClientIsConnected(ksnLNullClass* kl, char* client_name) {
 }
 
 /**
+ * Returns L0 client encryption context and return it if available
+ *
+ * @param kl Pointer to ksnLNullClass
+ * @param fd Client name connection fd
+ *
+ * @return ENCRYPTION_CONTEXT pointer or null if not available
+ */
+ENCRYPTION_CONTEXT *ksnLNullClientGetCrypto(ksnLNullClass *kl, int fd) {
+  if (fd) {
+    size_t valueLength;
+    ksnLNullData *kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength);
+    if (kld) { return kld->server_crypt; }
+  }
+  return NULL;
+}
+
+/**
  * Process CMD_L0_TO teonet command
  *
  * @param ke Pointer to ksnetEvMgrClass
@@ -941,23 +1009,19 @@ int cmd_l0_to_cb(ksnetEvMgrClass* ke, ksnCorePacketData* rd) {
 
   // If l0 module is initialized
   if(ke->kl) {
+    int fd = ksnLNullClientIsConnected(ke->kl, data->from);
+    if (fd) {
+      // Create L0 packet
+      size_t out_data_len = teoLNullBufferSize(rd->from_len, data->data_length);
+      char *out_data = malloc(out_data_len);
+      size_t packet_length = teoLNullPacketCreate( ksnLNullClientGetCrypto(ke->kl, fd), 
+          out_data, out_data_len, data->cmd, rd->from,
+          data->from + data->from_length, data->data_length);
 
-    // Create L0 packet
-    size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + data->data_length;
-    char* out_data = malloc(out_data_len);
-    memset(out_data, 0, out_data_len);
-    size_t packet_length = teoLNullPacketCreate(out_data, out_data_len, data->cmd, rd->from,
-                                                data->from + data->from_length, data->data_length);
-
-    // Send command to L0 client
-    int* fd;
-    size_t snd;
-    size_t valueLength;
-    fd = pblMapGet(ke->kl->map_n, data->from, data->from_length, &valueLength);
-    if(fd != NULL) {
-
+      size_t snd;
+      // Send command to L0 client
       // if((snd = write(*fd, out_data, packet_length)) >= 0);
-      if((snd = ksnLNullPacketSend(ke->kl, *fd, out_data, packet_length)) >= 0)
+      if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0)
         ;
 
 #ifdef DEBUG_KSNET
@@ -966,13 +1030,12 @@ int cmd_l0_to_cb(ksnetEvMgrClass* ke, ksnCorePacketData* rd) {
       ksn_printf(ke, MODULE, DEBUG_VV,
                  "send %d bytes to \"%s\" L0 client: %d bytes data, "
                  "from peer \"%s\"\n",
-                 (int)snd, data->from, packet->data_length, packet->peer_name);
+                 (int)snd, data->from, packet->data_length, rd->from);
 #endif
-    }
+      free(out_data);
 
+    } else {
     // The L0 client was disconnected
-    else {
-
 #ifdef DEBUG_KSNET
       ksn_printf(ke, MODULE, DEBUG_VV,
                  "%s"
@@ -980,8 +1043,6 @@ int cmd_l0_to_cb(ksnetEvMgrClass* ke, ksnCorePacketData* rd) {
                  ANSI_RED, data->from, ANSI_NONE);
 #endif
     }
-
-    free(out_data);
   }
 
   // If l0 server is no initialized
@@ -1214,11 +1275,10 @@ int cmd_l0_check_cb(ksnCommandClass* kco, ksnCorePacketData* rd) {
                                         jp.networks ? jp.networks : "null");
       size_t ALLOW_len = strlen(ALLOW) + 1;
       // Create L0 packet
-      size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len + ALLOW_len;
+      size_t out_data_len = teoLNullBufferSize(rd->from_len, ALLOW_len);
       char* out_data = malloc(out_data_len);
-      memset(out_data, 0, out_data_len);
-      size_t packet_length =
-          teoLNullPacketCreate(out_data, out_data_len, CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
+      size_t packet_length = teoLNullPacketCreate(kld->server_crypt, out_data, out_data_len,
+                                                  CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
       // Send websocket allow message
       if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0)
         ;
@@ -1354,21 +1414,28 @@ ssize_t recvCheck(trudpChannelData* tcd, char* data, ssize_t data_length) {
   return packetCombineClient(tcd, data, BUFFER_SIZE_CLIENT, data_length != -1 ? data_length : 0);
 }
 
-int processCmd(ksnLNullClass* kl, ksnCorePacketData* rd, teoLNullCPacket* cp) {
-  int retval = 0;
+int processCmd(ksnLNullClass* kl, ksnCorePacketData* rd, teoLNullCPacket* cp, const char *packet_kind) {
+#ifdef DEBUG_KSNET
+  ksn_printf(kev, MODULE, DEBUG_VV,
+              "got %s TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
+              packet_kind, rd->addr, rd->port, (unsigned)cp->cmd,
+              (char*)cp->peer_name, (char*)(cp->peer_name + cp->peer_name_length));
+#endif
+
   switch(cp->cmd) {
 
   // Login packet
   case 0: {
 
     if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
+      // registration packet can't be encrypted itself
       int fd = kl->fd_trudp++;
       ksnLNullClientRegister(kl, fd, rd);
       // Add fd to tr-udp channel data
       trudpChannelData* tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
 
       if(tcd) tcd->fd = fd;
-      retval = 1;
+      return 1;
     }
   } break;
 
@@ -1379,6 +1446,10 @@ int processCmd(ksnLNullClass* kl, ksnCorePacketData* rd, teoLNullCPacket* cp) {
     size_t vl;
     trudpChannelData* tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
     if(tcd) {
+      ENCRYPTION_CONTEXT *ctx = ksnLNullClientGetCrypto(kl,tcd->fd);
+      ksn_printf(kev, MODULE, DEBUG_VV, "teoLNullPacketDecrypt fd %d/ ctx %p \n", tcd->fd, ctx);
+      teoLNullPacketDecrypt(ctx, cp);
+
       ksnLNullData* kld = pblMapGet(kl->map, &tcd->fd, sizeof(tcd->fd), &vl);
       if(kld != NULL && kld->name != NULL) {
         kld->last_time = ksnetEvMgrGetTime(kl->ke);
@@ -1387,11 +1458,11 @@ int processCmd(ksnLNullClass* kl, ksnCorePacketData* rd, teoLNullCPacket* cp) {
         trudp_ChannelSendReset(tcd);
       }
     }
-    retval = 1;
+    return 1;
   } break;
   }
 
-  return retval;
+  return 0;
 }
 /**
  * Check and process L0 packet received through TR-UDP
@@ -1401,9 +1472,6 @@ int processCmd(ksnLNullClass* kl, ksnCorePacketData* rd, teoLNullCPacket* cp) {
  * @return
  */
 int ksnLNulltrudpCheckPaket(ksnLNullClass* kl, ksnCorePacketData* rd) {
-
-  int retval = 0;
-
   teoLNullCPacket* cp = (teoLNullCPacket*)rd->data;
 
   // Check packet length
@@ -1414,15 +1482,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass* kl, ksnCorePacketData* rd) {
     uint8_t checksum = get_byte_checksum(cp->peer_name, cp->peer_name_length + cp->data_length);
 
     if(cp->header_checksum == header_checksum && cp->checksum == checksum) {
-
-#ifdef DEBUG_KSNET
-      ksn_printf(kev, MODULE, DEBUG_VV,
-                 "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n", rd->addr,
-                 rd->port, (unsigned)cp->cmd, (char*)cp->peer_name,
-                 (char*)(cp->peer_name + cp->peer_name_length));
-#endif
-
-      retval = processCmd(kl, rd, cp);
+      return processCmd(kl, rd, cp, "small");
     }
   } else {
     trudpChannelData* tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
@@ -1440,19 +1500,12 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass* kl, ksnCorePacketData* rd) {
       return 1;
     }
 
-    void* l_data = tcd->read_buffer;
-    teoLNullCPacket* cp = trudpPacketGetData(trudpPacketGetPacket(l_data));
-#ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
-               "got Large TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n", rd->addr,
-               rd->port, (unsigned)cp->cmd, (char*)cp->peer_name,
-               (char*)(cp->peer_name + cp->peer_name_length));
-#endif
+    teoLNullCPacket* large_cp = tcd->read_buffer; // FIXME trudpPacketGetData(trudpPacketGetPacket(l_data));
 
-    retval = processCmd(kl, rd, cp);
+    return processCmd(kl, rd, large_cp, "LARGE");
   }
 
-  return retval;
+  return 0;
 }
 
 #undef kev

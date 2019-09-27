@@ -400,6 +400,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     int fd;
     ksnet_arp_data *arp;
     send_by_type_check_t sd = { .name = to, .num = 0 };
+    ksnetEvMgrClass *ke = kc->ke;
 
     // Send to peer in this network
     if((arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, to)) != NULL/* && arp->mode != -1*/) {
@@ -409,8 +410,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     // Send by type in this network
     else if(!ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd) && sd.num) {
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
-                "send to peer by type \"%s\" \n", to);
+        ksn_printf(ke, MODULE, DEBUG, "send to peer by type \"%s\" \n", to);
         #endif
         int i = 0;
         for(i=0; i < sd.num; i++) {
@@ -426,24 +426,18 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     }
 
     // Send to peer at other network
-    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL &&
-        (arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data,
-                data_len))) {
+    else if(ke->km != NULL && (arp = ksnMultiSendCmdTo(ke->km, to, cmd, data, data_len))) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
-                "send to peer \"%s\" at other network\n", to);
+        ksn_printf(ke, MODULE, DEBUG, "send to peer \"%s\" at other network\n", to);
         #endif
     }
 
     // Send this message to L0 client
-    else if(cmd == CMD_L0 &&
-            ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&
-            (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, to))) {
+    else if(cmd == CMD_L0 && ke->ksn_cfg.l0_allow_f && (fd = ksnLNullClientIsConnected(ke->kl, to))) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV,
-                "send command to L0 client \"%s\" to r-host\n", to);
+        ksn_printf(ke, MODULE, DEBUG_VV, "send command to L0 client \"%s\" to r-host\n", to);
         #endif
 
         ssize_t snd;
@@ -455,13 +449,13 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         );
 
         char *buf = malloc(buf_length);
-        teoLNullPacketCreate(buf, buf_length,
+        teoLNullPacketCreate(ksnLNullClientGetCrypto(ke->kl, fd), buf, buf_length,
                 cmd_l0_data->cmd,
                 cmd_l0_data->from,
                 cmd_l0_data->from + cmd_l0_data->from_length,
                 cmd_l0_data->data_length);
         //if((snd = write(fd, buf, buf_length)) >= 0);
-        if((snd = ksnLNullPacketSend(((ksnetEvMgrClass*)(kc->ke))->kl, fd, buf, buf_length)) >= 0);
+        if((snd = ksnLNullPacketSend(ke->kl, fd, buf, buf_length)) >= 0);
         free(buf);
     }
 
@@ -469,12 +463,11 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     else {
 
         // If connected to r-host
-        char *r_host = ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.r_host_name;
+        char *r_host = ke->ksn_cfg.r_host_name;
         if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) {
 
             #ifdef DEBUG_KSNET
-            ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
-                    "resend command to peer \"%s\" to r-host\n", to);
+            ksn_printf(ke, MODULE, DEBUG, "resend command to peer \"%s\" to r-host\n", to);
             #endif
 
             // Create resend command buffer and Send command to r-host
