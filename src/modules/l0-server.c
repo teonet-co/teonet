@@ -1399,6 +1399,9 @@ int processCmd(ksnLNullClass *kl, ksnCorePacketData *rd, teoLNullCPacket *cp)
         case 0: {
             if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
                 int fd = kl->fd_trudp++;
+                if (fd <= MAX_FD_NUMBER) {
+                  fd = kl->fd_trudp = MAX_FD_NUMBER + 1;
+                }
                 ksnLNullClientRegister(kl, fd, rd);
                 // Add fd to tr-udp channel data
                 trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
