@@ -895,7 +895,7 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     // Process command
     if(data->cmd == CMD_ECHO || data->cmd == CMD_ECHO_ANSWER ||
        data->cmd == CMD_PEERS || data->cmd == CMD_L0_CLIENTS ||
-       data->cmd == CMD_RESET || data->cmd == CMD_SUBSCRIBE || data->cmd == CMD_SUBSCRIBE_RND || CMD_UNSUBSCRIBE ||
+       data->cmd == CMD_RESET || data->cmd == CMD_SUBSCRIBE || data->cmd == CMD_SUBSCRIBE_RND || data->cmd == CMD_UNSUBSCRIBE ||
        data->cmd == CMD_L0_CLIENTS_N || data->cmd == CMD_L0_STAT ||
        data->cmd == CMD_HOST_INFO || data->cmd == CMD_GET_NUM_PEERS ||
        data->cmd == CMD_TRUDP_INFO ||
