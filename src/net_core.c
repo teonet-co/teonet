@@ -793,6 +793,11 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
     ksnCoreClass *kc = vkc; // ksnCoreClass Class object
     ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
 
+    if (ksnetEvMgrStatus(ke) == kEventMgrStopped) {
+        printf("Event manager already stopped\n");
+        return;
+    }
+
     // Data received
     if(recvlen > 0) {
 
@@ -845,6 +850,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
 
         // Parse packet and check if it valid
         if(!ksnCoreParsePacket(data, data_len, &rd)) {
+            printf("Event Mgr status = %d\n", ksnetEvMgrStatus(ke));
             rd.from = "";
             rd.from_len = 1;
             rd.data = data;

@@ -155,6 +155,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #endif
 
         case CMD_PEERS:
+	    printf("CMD_PEERS recieved\n");
             processed = cmd_peers_cb(kco, rd);
             break;
 

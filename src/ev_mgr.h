@@ -37,6 +37,11 @@ extern const char *null_str;
 
 #define CHECK_EVENTS_AFTER 11.5
 
+enum EventManagerStatus {
+  kEventMgrStopped = 0,
+  kEventMgrRunning = 1
+};
+
 /**
  * KSNet event manager events
  */
@@ -364,6 +369,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async);
 int ksnetEvMgrRunThread(ksnetEvMgrClass *ke);
 #endif
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
+int ksnetEvMgrStatus(ksnetEvMgrClass *ke);
 int ksnetEvMgrRestart(int argc, char **argv);
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);

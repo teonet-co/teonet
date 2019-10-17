@@ -243,6 +243,9 @@ inline void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
     ke->runEventMgr = 0;
 }
 
+int ksnetEvMgrStatus(ksnetEvMgrClass *ke) {
+    return ke->runEventMgr;
+}
 /**
  * Set sigaction function typedef
  */
@@ -1028,12 +1031,14 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
  * @param revents
  */
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
-
+    printf("sigint_cb\n");
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     #ifdef DEBUG_KSNET
-    ksn_puts(((ksnetEvMgrClass *)w->data), MODULE, DEBUG,
+    ksn_puts(ke, MODULE, DEBUG,
             "got a signal to stop event manager ...");
     #endif
 
+    trudpSendResetAll(ke->kc->ku);
     ((ksnetEvMgrClass *)w->data)->runEventMgr = 0;
 }
 
@@ -1048,6 +1053,7 @@ void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     static int attempt = 0;
+    trudpSendResetAll(ke->kc->ku);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, MESSAGE,
