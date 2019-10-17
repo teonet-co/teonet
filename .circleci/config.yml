@@ -2,7 +2,7 @@ version: 2
 jobs:
   testing:
     machine:
-      docker_layer_caching: true
+      docker_layer_caching: false
     environment:
       AWS_REGION: eu-west-1
       AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
@@ -15,7 +15,7 @@ jobs:
 
   tagged-build:
     machine:
-      docker_layer_caching: true
+      docker_layer_caching: false
     environment:
       AWS_REGION: eu-west-1
       AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
