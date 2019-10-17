@@ -1448,7 +1448,6 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         uint8_t checksum = get_byte_checksum(cp->peer_name, cp->peer_name_length + cp->data_length);
 
         if(cp->header_checksum == header_checksum && cp->checksum == checksum) {
-
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
