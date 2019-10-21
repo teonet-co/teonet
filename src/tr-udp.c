@@ -2180,6 +2180,8 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
             (__SOCKADDR_ARG)&remaddr, &addr_len);
 
     if (trudpIsPacketPing(data, recvlen) && trudpGetChannel(td, (__CONST_SOCKADDR_ARG) &remaddr, 0) == (void *)-1) {
+        trudpChannelData *tcd = trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG) &remaddr, 0);
+        trudpChannelSendRESET(tcd, NULL, 0);
         printf("FIRST PACKET PING\n");
         return;
     }
