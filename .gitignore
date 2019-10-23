@@ -155,3 +155,4 @@ examples/go/teogo/teogo
 nbproject/
 /embedded/cpputest-3.8/
 /embedded/cpputest-3.8.tar.gz*
+/m4/
