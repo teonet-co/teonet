@@ -13,7 +13,7 @@ AC_SUBST([$1], ['$2'])
 
 AC_PREREQ([2.69])
 
-AC_INIT([teonet], [0.3.6], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
+AC_INIT([teonet], [0.3.7-dev], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
 
 AC_DEFINE_SUBST(LIBRARY_CURRENT,  2, [teocli dynamic library version])
 AC_DEFINE_SUBST(LIBRARY_REVISION, 5, [teocli dynamic library version])
