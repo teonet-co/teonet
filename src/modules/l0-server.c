@@ -467,6 +467,7 @@ static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData 
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
         if(kld != NULL) {
             ksnLNullClientAuthCheck(kl, kld, fd, packet);
+
         }
     }
 }
@@ -530,11 +531,6 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
                     kld->name, kld->name_length);
         }
         else _send_subscribe_events(kev, kld->name, kld->name_length);
-
-        // Login will continue when answer received
-        #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG,"### 0002,%s,%d\n", kld->name, fd);
-        #endif
     }
     else {
         // Wrong Login name received
@@ -696,9 +692,10 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             ev_io_stop(kev->ev_loop, &kld->w);
             if(remove_f != 2) close(fd);
         }
-
-        // Show disconnect message
-        ksn_printf(kev, MODULE, CONNECT, "### 0005,%d\n", fd);
+        if (!strstr(kld->name, "-new-")) {
+            // Show disconnect message
+            ksn_printf(kev, MODULE, CONNECT, "### 0005,%s\n", kld->name);
+        }
 
         // Send Disconnect event to all subscribers
         if(kld->name != NULL  && remove_f != 2)
@@ -1241,6 +1238,10 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
                 kld->name, kld->t_addr, jp.username);
             #endif
+            ksnetEvMgrClass *ke = (ksnetEvMgrClass*)kl->ke;
+//            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, CONNECT, "### 0001,%s\n", kld->name);
+//            #endif
 
             // Send Connected event to all subscribers
             if(kld->name != NULL && !strcmp(rd->from, TEO_AUTH)) {
@@ -1449,12 +1450,13 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
         if(cp->header_checksum == header_checksum && cp->checksum == checksum) {
             #ifdef DEBUG_KSNET
+            char *data = (char*)(cp->peer_name + cp->peer_name_length);
             ksn_printf(kev, MODULE, DEBUG_VV,
-                "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
+                "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: 0x%x\n",
                 rd->addr, rd->port,
                 (unsigned)cp->cmd,
-                (char*) cp->peer_name,
-                (char*)(cp->peer_name + cp->peer_name_length));
+                (char*)cp->peer_name,
+                *data);
             #endif
 
             retval = processCmd(kl, rd, cp);

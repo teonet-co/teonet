@@ -11,13 +11,22 @@ AC_SUBST([$1], ['$2'])
 ])
 # END
 
+m4_define([package_major], [0]) dnl
+m4_define([package_minor], [3]) dnl
+m4_define([package_patch], [7-dev]) dnl
+m4_define([package_version], [package_major[.]package_minor[.]package_patch]) dnl
+
 AC_PREREQ([2.69])
 
-AC_INIT([teonet], [0.3.7-dev], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
+AC_INIT([teonet], [package_version], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
 
 AC_DEFINE_SUBST(LIBRARY_CURRENT,  2, [teocli dynamic library version])
 AC_DEFINE_SUBST(LIBRARY_REVISION, 5, [teocli dynamic library version])
 AC_DEFINE_SUBST(LIBRARY_AGE,      0, [teocli dynamic library version])
+
+AC_DEFINE_SUBST(PACKAGE_MAJOR_VERSION, [package_major], [pack ver])
+AC_DEFINE_SUBST(PACKAGE_MINOR_VERSION, [package_minor], [pack ver])
+AC_DEFINE_SUBST(PACKAGE_PATCH_VERSION, [package_patch], [pack ver])
 
 AC_DEFINE(COPYRIGHT, ["(c) Teonet co., 1996-2019"], [Teonet library copyright])
 

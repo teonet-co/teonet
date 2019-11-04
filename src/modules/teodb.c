@@ -179,15 +179,16 @@ void *ksnTDBget(ksnTDBClass *kf, const void *key, size_t key_len,
         long rc = pblKfFind(kf->k, PBLLA, (void*) key, key_len,
                 (void*) okey, &okey_len);
 
-        if(rc >= 0) {
+	if (rc == 0) {
+	    data = strdup(""); // Return empty string if data length equal to 0
+	    return data;
+	}
 
-            *data_len = rc;
-            if(rc > 0) {
-                data = malloc(rc);
-                pblKfRead(kf->k, data, rc);
-            }
-            else data = strdup(""); // Return empty string if data length equal to 0
-        }
+	if (rc > 0) {
+	    *data_len = rc;
+            data = malloc(rc);
+            pblKfRead(kf->k, data, rc);
+	}
     }
 
     return data;
@@ -412,20 +413,20 @@ int ksnTDBdeleteNs(ksnTDBClass *kf, const char *namespace, const void *key,
  * @return Number of 
  */
 int ksnTDBkeyList(ksnTDBClass *kf, const char *key, ksnet_stringArr *argv) {
-    
+
     int num_of_key = 0;
     *argv = NULL;
-    
+
     if(kf->k != NULL) {
-        
+
         char okey[KSN_BUFFER_SM_SIZE];
-        size_t okey_len = KSN_BUFFER_SM_SIZE;        
-                
-        long data_len; 
-        
+        size_t okey_len = KSN_BUFFER_SM_SIZE;
+
+        long data_len;
+
         // No key present
         if(key == NULL || key[0] == 0) {
-            
+
             // Get first key
             if((data_len = pblKfGetAbs(kf->k, 0, (void*) okey, &okey_len)) >= 0) {
 
@@ -441,17 +442,17 @@ int ksnTDBkeyList(ksnTDBClass *kf, const char *key, ksnet_stringArr *argv) {
                 }
             }
         }
-        
+
         //Key is present
         else {
-            
+
             // Get first key
             size_t key_len = strlen(key) + 1;
             if((data_len = pblKfFind (kf->k, PBLGE, (void *)key, key_len, (void *)okey, 
                     &okey_len )) >= 0) {
-                
+
                 if(!strncmp(key, okey, key_len - 1)) {
-                    
+
                     // Add first key to string array
                     ksnet_stringArrAdd(argv, okey);
                     num_of_key++;
@@ -466,7 +467,7 @@ int ksnTDBkeyList(ksnTDBClass *kf, const char *key, ksnet_stringArr *argv) {
                     }
                 }
             }
-        }                
+        }
     }
     
     return num_of_key;
