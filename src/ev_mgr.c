@@ -1406,7 +1406,6 @@ int modules_init(ksnetEvMgrClass *ke) {
  * @param ke
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
-
     #ifdef M_ENAMBE_ASYNC
     teoAsyncDestroy(ke->ta);
     #endif
