@@ -793,6 +793,10 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
     ksnCoreClass *kc = vkc; // ksnCoreClass Class object
     ksnetEvMgrClass *ke = kc->ke; // ksnetEvMgr Class object
 
+    if (ksnetEvMgrStatus(ke) == kEventMgrStopped) {
+        return;
+    }
+
     // Data received
     if(recvlen > 0) {
 
@@ -856,11 +860,9 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
                 ksn_printf(ke, MODULE, DEBUG_VV,
                     "WRONG RECEIVED! cmd = %d, from: %s %s:%d\n", rd.cmd, rd.from, rd.addr, rd.port);
                 #endif
-                command_processed = 1;
-
-            } else {
-                command_processed = 1;
             }
+
+            command_processed = 1;
         } else { // Check ARP Table and add peer if not present
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,

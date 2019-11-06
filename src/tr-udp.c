@@ -2170,14 +2170,21 @@ void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id,
  * @param data_length
  */
 void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
-
     struct sockaddr_in remaddr; // remote address
+
     socklen_t addr_len = sizeof(remaddr);
 
     // Read data using teonet
     ssize_t recvlen = teo_recvfrom(kev,
             td->fd, data, data_length, 0 /* int flags*/,
             (__SOCKADDR_ARG)&remaddr, &addr_len);
+
+    if (trudpIsPacketPing(data, recvlen) && trudpGetChannel(td, (__CONST_SOCKADDR_ARG) &remaddr, 0) == (void *)-1) {
+        trudpChannelData *tcd = trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG) &remaddr, 0);
+        trudpChannelSendRESET(tcd, NULL, 0);
+        printf("FIRST PACKET PING\n");
+        return;
+    }
 
     // Process received packet
     if(recvlen > 0) {
@@ -2382,7 +2389,6 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param data Pointer to ping data (usually it is a string)
         // @param user_data NULL
         case GOT_PING: {
-
             #ifdef DEBUG_KSNET
             const trudpData *td = TD(tcd); // used in kev macro
             const char *key = trudpChannelMakeKey(tcd);
@@ -2404,10 +2410,12 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             const char *key = trudpChannelMakeKey(tcd);
 
             #ifdef DEBUG_KSNET
+            int net_lag = trudpGetTimestamp() - trudpPacketGetTimestamp(data);
             ksn_printf(kev, MODULE, DEBUG_VV,
-                "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms\n",
+                "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms, network lag %d ms%s`",
                 trudpPacketGetId(data/*trudpPacketGetPacket(data)*/),
-                key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
+                key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0,
+                (int)net_lag, (net_lag > 50000) ? _ANSI_RED "  Big Lag!" _ANSI_NONE "\n" : "\n" );
             #endif
 
             // Send event ACK to teonet event loop

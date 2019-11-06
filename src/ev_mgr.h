@@ -37,6 +37,11 @@ extern const char *null_str;
 
 #define CHECK_EVENTS_AFTER 11.5
 
+enum EventManagerStatus {
+  kEventMgrStopped = 0,
+  kEventMgrRunning = 1
+};
+
 /**
  * KSNet event manager events
  */
@@ -231,6 +236,8 @@ typedef struct ksnetEvMgrAppParam {
 
 } ksnetEvMgrAppParam;
 
+
+
 /**
  * KSNet event manager functions data
  */
@@ -309,6 +316,15 @@ typedef struct ksnetEvMgrClass {
 
 } ksnetEvMgrClass;
 
+ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X);
+ksnetArpClass* __arp_from_command_class(ksnCommandClass *X);
+
+#define EVENT_MANAGER_CLASS(X) _Generic((X), \
+      ksnCommandClass* : __ke_from_command_class) (X)
+
+#define ARP_TABLE_CLASS(X) _Generic((X), \
+      ksnCommandClass* : __arp_from_command_class) (X)
+
 /**
  * Event callback type
  */
@@ -353,6 +369,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async);
 int ksnetEvMgrRunThread(ksnetEvMgrClass *ke);
 #endif
 void ksnetEvMgrStop(ksnetEvMgrClass *ke);
+int ksnetEvMgrStatus(ksnetEvMgrClass *ke);
 int ksnetEvMgrRestart(int argc, char **argv);
 void ksnetEvMgrAsync(ksnetEvMgrClass *ke, void *data, size_t data_len, void *user_data);
 double ksnetEvMgrGetTime(ksnetEvMgrClass *ke);

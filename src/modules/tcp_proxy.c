@@ -129,6 +129,10 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
             int fd, void *buffer, size_t buffer_len, int flags,
             __SOCKADDR_ARG addr, socklen_t *__restrict addr_len) {
     
+    if (ksnetEvMgrStatus(ke) == kEventMgrStopped) {
+        return 0;
+    }
+
     ssize_t recvlen = 0; 
     
     // Get data from TCP Proxy buffer 

@@ -53,8 +53,12 @@ ksnCQueClass *ksnCQueInit(void *ke, uint8_t send_event) {
     return kq;
 }
 
+/* Checking the working cycle is necessary if user-level
+ * applications have created their own instance of cque.
+ * Application will crash when sending a signal SIGINT(by pressing ctrl-c),
+ * because the ev_loop will already be destroyed.
+ */
 static int teoCqueStopAll(ksnCQueClass *kq) {
-
     int retval = -1;
     PblIterator *it =  pblMapIteratorNew(kq->cque_map);
 
@@ -63,10 +67,9 @@ static int teoCqueStopAll(ksnCQueClass *kq) {
         while(pblIteratorHasNext(it)) {
             void *entry = pblIteratorNext(it);
             ksnCQueData *cq = pblMapEntryValue(entry);
-            if(cq != NULL) {
-                if (cq->timeout > 0.0) {
-                    ev_timer_stop(kev->ev_loop, &cq->w);
-                }
+
+            if(cq != NULL && cq->timeout > 0.0 && ksnetEvMgrStatus(kev) == kEventMgrRunning) {
+                ev_timer_stop(kev->ev_loop, &cq->w);
             }
 
         }

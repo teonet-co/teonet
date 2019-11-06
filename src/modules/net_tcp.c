@@ -506,13 +506,6 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
     }
     #endif
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, CONNECT,
-        "### 0001,%d,%s,%d\n",
-        client_sd, /*client_family == AF_INET6 ? "v6" : "" , */client_ip, client_port
-    );
-    #endif
-
     // Execute ksnet callback (to Initialize and start watcher to read Servers client requests)
     if(watcher->ksnet_cb != NULL)
         watcher->ksnet_cb(loop, watcher, revents, client_sd);
