@@ -298,7 +298,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     // Send teonet L0 packet
     ksnet_arp_data *arp_data = NULL;
     // Send to peer
-    if(strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
+    if(strlen((char*)packet->peer_name) && strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
 
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
