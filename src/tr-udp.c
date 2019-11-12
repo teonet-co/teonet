@@ -2466,7 +2466,14 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
 
         } break;
+	case GOT_DATA_NO_TRUDP: {
+            const trudpData *td = TD(tcd); // used in kev macro
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, DEBUG_VV, "got %d bytes DATA packet from no trudp \n", data_length);
+            #endif
 
+            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
+	} break;
         // Process received data
         // @param tcd Pointer to trudpData
         // @param data Pointer to receive buffer
