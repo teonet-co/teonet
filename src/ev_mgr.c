@@ -37,7 +37,7 @@ extern char** teo_argv;
 const char *null_str = "";
 
 // Run file name and buffer
-#define RUN_NAME "/teonet.run"
+#define RUN_NAME "-teonet.run"
 char run_file[KSN_BUFFER_SIZE];
 
 ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X){return ((ksnetEvMgrClass*)((ksnCoreClass*)X->kc)->ke); }
@@ -290,12 +290,14 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     // Create run file name
     const char *network = ke->ksn_cfg.network;
     strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE);
-    if(network != NULL && network[0]) {
+    if (network != NULL && network[0]) {
         strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
         strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);
     }
+    strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
+    strncat(run_file, ksnetEvMgrGetHostName(ke),
+                KSN_BUFFER_SIZE - strlen(run_file) - 1);
     strncat(run_file, RUN_NAME, KSN_BUFFER_SIZE - strlen(run_file) - 1);
-
     FILE *fp;
 
     // Wait other teonet application to get disconnect signal
