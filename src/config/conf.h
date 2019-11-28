@@ -39,6 +39,7 @@
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
 #define M_ENAMBE_ASYNC 1
+#define M_ENAMBE_METRIC 1
 #define M_ENAMBE_LOGGING_SERVER 1
 #define M_ENAMBE_LOGGING_CLIENT 1
 #define M_ENAMBE_LOG_READER 1
@@ -123,6 +124,10 @@ typedef struct ksnet_cfg {
     
     // Syslog options
     long log_priority;                       ///< Syslog priority 
+
+    // StatsD address
+    char statsd_ip[KSN_BUFFER_SM_SIZE/2];
+    long statsd_port;
     
     // Helpers
     int pp;

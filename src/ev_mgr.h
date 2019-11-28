@@ -22,6 +22,7 @@
 #include "modules/cque.h"
 #include "modules/teodb.h"
 #include "modules/stream.h"
+#include "modules/metric.h"
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
 #include "modules/net_term.h"
@@ -265,6 +266,8 @@ typedef struct ksnetEvMgrClass {
     teoLogReaderClass *lr; ///< Log reader class
 
     teoAsyncClass *ta;  ///< Async calls module
+
+    teoMetricClass *tm; ///< Metric send module
 
     int runEventMgr; ///< Run even manages (stop if 0)
     uint32_t timer_val; ///< Event loop timer value

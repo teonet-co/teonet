@@ -135,6 +135,7 @@ nobase_teonetinclude_HEADERS = \
     modules/logging_client.h \
     modules/async_calls.h \
     modules/log_reader.h \
+    modules/metric.h \
     utils/teo_memory.h \
     utils/string_arr.h \
     utils/utils.h \
@@ -192,6 +193,7 @@ libteonet_la_SOURCES = \
     modules/logging_client.c \
     modules/async_calls.c \
     modules/log_reader.c \
+    modules/metric.c \
     utils/teo_memory.c \
     utils/string_arr.c \
     utils/utils.c \

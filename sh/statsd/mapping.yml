@@ -1,0 +1,9 @@
+mappings:
+    # usage: test_api_call.product-api.timer./v1/product
+    # 
+  - match: "*.teonet.*.*.*"
+    name: "${1}_teonet_${4}"
+    labels:
+        network: "$2"
+        peer: "$3"
+        type: "$1"
