@@ -87,6 +87,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "send_all_logs",  no_argument,       &conf->send_all_logs_f, 1 },
         #endif
 
+        { "statsd_ip",      required_argument, 0, 's' },
+        { "statsd_port",    required_argument, 0, 'S' },
+
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
         { "log_priority",   required_argument, 0, 'L' }, 
         { "color_output_disable", no_argument, &conf->color_output_disable_f, 1 },
@@ -222,6 +225,14 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 'm':
           conf->vpn_mtu = atoi(optarg);
+          break;
+
+        case 's':
+          strncpy((char*)conf->statsd_ip, optarg, KSN_BUFFER_SM_SIZE/2);
+          break;
+
+        case 'S':
+          conf->statsd_port = atoi(optarg);
           break;
           
         case 'L':
@@ -408,6 +419,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --log_disable        Disable send logs to logging servers\n"
     "       --send_all_logs      Send all logs (by default send only metrics)\n"
     #endif
+    "\n"
+    "       --statsd_ip          Metric exporter IP address\n"
+    "       --statsd_port        Metric exporter Port number\n"
     "\n"
     "       --sig_segv           Segmentation fault error processing by library\n"
     "       --log_priority       Syslog priority (Default: 4):\n"

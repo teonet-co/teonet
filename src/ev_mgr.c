@@ -16,13 +16,13 @@
 #include <libgen.h>
 #include <signal.h>
 #include <pthread.h>    // For mutex and TEO_TREAD
-
+#include <stdbool.h>
 
 #include "ev_mgr.h"
 #include "net_multi.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
-#include "stdbool.h"
+#include "modules/metric.h"
 
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
 
@@ -999,6 +999,22 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
             ksn_printf(((ksnetEvMgrClass *)w->data), MODULE, DEBUG_VV,
                     "timer (%.1f sec of %f)\n",
                     show_interval * KSNET_EVENT_MGR_TIMER, t);
+
+            // Send metric
+            // // Send by udp
+            // // int addrlen;
+            // struct sockaddr_in to;
+            // memset(&to, 0, sizeof(to));
+            // to.sin_family = AF_INET;
+            // to.sin_addr.s_addr = inet_addr("127.0.0.1");
+            // to.sin_port   = htons(8125);
+
+            // // static char * base 
+            // const char *buffer = "teonet.teonet.teo-vpn.count:1|c";
+            // sendto(ke->kc->fd, buffer, strlen(buffer), 0, (struct sockaddr*)&to, sizeof(to));
+
+            metric_teonet_count(ke->tm);
+
         }
         #endif
 
@@ -1399,6 +1415,11 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->ta = teoAsyncInit(ke);
     #endif
 
+    // Metric module
+    #ifdef M_ENAMBE_METRIC
+    ke->tm = teoMetricInit(ke);
+    #endif
+
     return 1;
 }
 
@@ -1408,6 +1429,9 @@ int modules_init(ksnetEvMgrClass *ke) {
  * @param ke
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
+    #ifdef M_ENAMBE_METRIC
+    teoMetricKill(ke->tm);
+    #endif
     #ifdef M_ENAMBE_ASYNC
     teoAsyncDestroy(ke->ta);
     #endif
