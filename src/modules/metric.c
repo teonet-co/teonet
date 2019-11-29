@@ -15,8 +15,8 @@ teoMetricClass *teoMetricInit(void *kep) {
 
     memset(&tm->to, 0, sizeof(tm->to));
     tm->to.sin_family = AF_INET;
-    tm->to.sin_addr.s_addr = inet_addr("127.0.0.1");
-    tm->to.sin_port = htons(8125);
+    tm->to.sin_addr.s_addr = inet_addr(ke->ksn_cfg.statsd_ip);
+    tm->to.sin_port = htons(ke->ksn_cfg.statsd_port);
 
     return tm;
 }
@@ -25,12 +25,13 @@ void teoMetricKill(teoMetricClass *tm) {
     if (tm) free(tm);
 }
 
-void teoMetric(teoMetricClass *tm, char *name, char *type, int value) {
+static void teoMetric(teoMetricClass *tm, const char *name, const char *type,
+                      int value) {
     if (!tm) return;
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)tm->ke;
 
     char buffer[256];
-    const char *fmt = "%s.teonet.%s.%s.%s:%d|%s";
+    const char *fmt = "teonet.%s.%s.%s.%s:%d|%s";
     int len = snprintf(buffer, 255, fmt, type, ke->ksn_cfg.network,
                        ke->kc->name, name, value, type);
 
@@ -38,22 +39,25 @@ void teoMetric(teoMetricClass *tm, char *name, char *type, int value) {
            sizeof(tm->to));
 }
 
-void teoMetricCounter(teoMetricClass *tm, char *name, int value) {
+// Send counter metric
+void teoMetricCounter(teoMetricClass *tm, const char *name, int value) {
     teoMetric(tm, name, "c", value);
 }
 
-void teoMetricMs(teoMetricClass *tm, char *name, int value) {
+// Send time(ms) metric
+void teoMetricMs(teoMetricClass *tm, const char *name, int value) {
     teoMetric(tm, name, "ms", value);
 }
 
-void teoMetricGauge(teoMetricClass *tm, char *name, int value) {
+// Send gauge metric
+void teoMetricGauge(teoMetricClass *tm, const char *name, int value) {
     teoMetric(tm, name, "g", value);
 }
 
+// Send default teonet metrics
 void metric_teonet_count(teoMetricClass *tm) {
     if (!tm) return;
     static uint64_t gauge = 0;
     teoMetricCounter(tm, "total", 1);
-    // teoMetricGauge(tm, "count", gauge++);
-    // teoMetricGauge(tm, "count2", gauge++);
+    teoMetricGauge(tm, "tick", gauge++);
 }

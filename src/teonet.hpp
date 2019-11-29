@@ -467,6 +467,36 @@ public:
   inline teo::teoPacket* getPacket(void* data) const { return (teo::teoPacket*)data; }
 
   /**
+   * Send counter metric
+   * 
+   * @param name Metric name
+   * @param value Metric value 
+   */
+  inline void metricCounter(std::string name, int value) {
+    teoMetricCounter(ke->tm, name.c_str(), value);
+  }
+
+  /**
+   * Send time(ms) metric
+   * 
+   * @param name Metric name
+   * @param value Metric value 
+   */
+  inline void metricMs(std::string name, int value) {
+    teoMetricMs(ke->tm, name.c_str(), value);
+  }
+
+  /**
+   * Send gauge metric
+   * 
+   * @param name Metric name
+   * @param value Metric value 
+   */
+  inline void metricGauge(std::string name, int value) {
+    teoMetricGauge(ke->tm, name.c_str(), value);
+  }
+
+  /**
    * Virtual Teonet event callback
    *
    * @param event
