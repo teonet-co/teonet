@@ -534,17 +534,6 @@ char *getExecPath (char *path, size_t dest_len, char *argv0) {
 #endif
 
 #ifndef HAVE_MINGW
-// Moved to teonet_lo_client.c
-///**
-// * Set socket or FD to non blocking mode
-// */
-//void set_nonblock(int fd) {
-//
-//    int flags;
-//
-//    flags = fcntl(fd, F_GETFL, 0);
-//    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-//}
 
 /**
  * Make socket reusable

@@ -116,13 +116,11 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
     // Disconnect client:
     // Close TCP connections and remove data from l0 clients map
-    if(!received) {
+    if(received == 0) {
 
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
-            "Connection closed. Stop listening fd %d ...\n",
-            w->fd
-        );
+                   "Connection closed. Stop listening fd %d ...\n", w->fd);
         #endif
 
         ksnLNullClientDisconnect(kl, w->fd, 1);
@@ -637,7 +635,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
 static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
 
     // Set TCP_NODELAY option
-    set_tcp_nodelay(fd);
+    teosockSetTcpNodelay(fd);
 
     ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d connected\n", fd);
 
@@ -1483,7 +1481,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         }
 
         void *l_data = tcd->read_buffer;
-        teoLNullCPacket *cp = trudpPacketGetData(trudpPacketGetPacket(l_data));
+        teoLNullCPacket *cp = (teoLNullCPacket *)l_data;
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
                 "got Large TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",

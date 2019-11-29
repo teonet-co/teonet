@@ -55,7 +55,6 @@ void ksnTcpServerStopAllClients(ksnTcpClass *kt, int sd);
 int ksnTcpGetServer(ksnTcpClass *kt, int sd);
 
 int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server);
-int set_tcp_nodelay(int fd);
 
 #ifdef	__cplusplus
 }

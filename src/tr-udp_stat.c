@@ -691,19 +691,16 @@ inline int ksnTRUDPqueuesShow(trudpData *td) {
     
     // Loop all channel maps
     teoMapElementData *el;
-    teoMapIterator *it;
-    if((it = teoMapIteratorNew(td->map))) {
-        while((el = teoMapIteratorNext(it))) {
-            
-            trudpChannelData *_tcd = (trudpChannelData *)
-                    teoMapIteratorElementData(el, NULL);
-            
-            // Get element with max queue size
-            int sqs = trudpSendQueueSize(_tcd->sendQueue), rqs = trudpReceiveQueueSize(_tcd->receiveQueue);
-            if(sqs > max_q_size) { max_q_size = sqs; tcd = _tcd; }
-            if(rqs > max_q_size) { max_q_size = rqs; tcd = _tcd; }
-        }
-        teoMapIteratorFree(it);
+    teoMapIterator it;
+    teoMapIteratorReset(&it, td->map);
+    while((el = teoMapIteratorNext(&it))) {
+        trudpChannelData *_tcd =
+            (trudpChannelData *)teoMapIteratorElementData(el, NULL);
+
+        // Get element with max queue size
+        int sqs = trudpSendQueueSize(_tcd->sendQueue), rqs = trudpReceiveQueueSize(_tcd->receiveQueue);
+        if(sqs > max_q_size) { max_q_size = sqs; tcd = _tcd; }
+        if(rqs > max_q_size) { max_q_size = rqs; tcd = _tcd; }
     }
     
     if(tcd != (void*)-1) {

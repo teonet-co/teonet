@@ -37,7 +37,7 @@ AM_CFLAGS = \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/teocli/libtrudp/src \
 	 -I../embedded/teocli/libtrudp/libs/teobase/include \
-	 -I../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
+	 -I../embedded/teocli/libtrudp/libs/teoccl/include \
 	 -I../app/embedded/jsmn \
 	 -I/usr/include/libev \
 	 -DEV_USE_EPOLL=1 \
@@ -64,9 +64,9 @@ AM_LDFLAGS = -L/opt/local/lib
 
 LIBS = -lev -lcrypt -ltuntap \
     ../embedded/libpbl/src/libpbl.a \
-    ../embedded/teocli/libtrudp/src/.libs/libtrudp.a \
-    ../embedded/teocli/libtrudp/libs/teobase/src/.libs/libteobase.a \
-    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/src/.libs/libteoccl.a
+    ../embedded/teocli/libtrudp/src/.libs/libtrudp.a
+#    ../embedded/teocli/libtrudp/libs/teobase/src/.libs/libteobase.a \
+#    ../embedded/teocli/libtrudp/libs/teoccl/src/.libs/libteoccl.a
     
 
 # Not embed confuse flag
@@ -202,8 +202,8 @@ libteonet_la_SOURCES = \
     ../embedded/teocli/libtrudp/libs/teobase/src/teobase/socket.c \
     ../embedded/teocli/libtrudp/libs/teobase/src/teobase/time.c \
     ../app/embedded/jsmn/jsmn.c \
-    ../embedded/teocli/libtrudp/src/libtrudp.la \
-    ../embedded/teocli/libtrudp/embedded/teoccl/src/libteoccl.la
+    ../embedded/teocli/libtrudp/src/libtrudp.la
+#    ../embedded/teocli/libtrudp/embedded/teoccl/src/libteoccl.la
 
 
 teonetconfdir=$(sysconfdir)/teonet
