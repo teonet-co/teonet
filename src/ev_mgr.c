@@ -1420,7 +1420,7 @@ int modules_init(ksnetEvMgrClass *ke) {
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
     #ifdef M_ENAMBE_METRIC
-    teoMetricKill(ke->tm);
+    teoMetricDestroy(ke->tm);
     #endif
     #ifdef M_ENAMBE_ASYNC
     teoAsyncDestroy(ke->ta);

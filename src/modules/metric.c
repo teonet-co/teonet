@@ -21,7 +21,7 @@ teoMetricClass *teoMetricInit(void *kep) {
     return tm;
 }
 
-void teoMetricKill(teoMetricClass *tm) {
+void teoMetricDestroy(teoMetricClass *tm) {
     if (tm) free(tm);
 }
 

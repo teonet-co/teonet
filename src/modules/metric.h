@@ -9,7 +9,7 @@ typedef struct teoMetricClass {
 } teoMetricClass;
 
 teoMetricClass *teoMetricInit(void *ke);
-void teoMetricKill(teoMetricClass *tm);
+void teoMetricDestroy(teoMetricClass *tm);
 
 // Send counter metric
 void teoMetricCounter(teoMetricClass *tm, const char *name, int value);
