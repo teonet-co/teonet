@@ -1,8 +1,10 @@
 mappings:
     # usage: test_api_call.product-api.timer./v1/product
     # 
-  - match: "*.teonet.*.*.*"
-    name: "${1}_teonet_${4}"
+    # - match: "teonet.*.*.*.*"
+  - match: "teonet\\.([a-zA-Z0-9-]+)\\.([a-zA-Z0-9-]+)\\.([a-zA-Z0-9-]+)\\.([a-zA-Z0-9-]+)"
+    match_type: regex
+    name: "teonet_${1}_${4}"
     labels:
         network: "$2"
         peer: "$3"

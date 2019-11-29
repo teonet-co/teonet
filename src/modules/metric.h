@@ -11,6 +11,13 @@ typedef struct teoMetricClass {
 teoMetricClass *teoMetricInit(void *ke);
 void teoMetricKill(teoMetricClass *tm);
 
-void metric_teonet_count(teoMetricClass *tm);
+// Send counter metric
+void teoMetricCounter(teoMetricClass *tm, const char *name, int value);
+
+// Send time(ms) metric
+void teoMetricMs(teoMetricClass *tm, const char *name, int value);
+
+// Send gauge metric
+void teoMetricGauge(teoMetricClass *tm, const char *name, int value);
 
 #endif /* METRIC_H */

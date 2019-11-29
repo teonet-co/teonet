@@ -59,6 +59,7 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data);
 
 void teoHotkeySetFilter(void *ke, void *filter);
+void metric_teonet_count(teoMetricClass *tm);
 
 /**
  * Initialize KSNet Event Manager and network
@@ -993,30 +994,19 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
         // Increment timer value
         ke->timer_val++;
 
-        // Show timer info
-        #ifdef DEBUG_KSNET
+        // Show timer info and send teonet metrics
         if( !(ke->timer_val % show_interval) ) {
+
+            // Show timer info
+            #ifdef DEBUG_KSNET
             ksn_printf(((ksnetEvMgrClass *)w->data), MODULE, DEBUG_VV,
                     "timer (%.1f sec of %f)\n",
                     show_interval * KSNET_EVENT_MGR_TIMER, t);
+            #endif
 
-            // Send metric
-            // // Send by udp
-            // // int addrlen;
-            // struct sockaddr_in to;
-            // memset(&to, 0, sizeof(to));
-            // to.sin_family = AF_INET;
-            // to.sin_addr.s_addr = inet_addr("127.0.0.1");
-            // to.sin_port   = htons(8125);
-
-            // // static char * base 
-            // const char *buffer = "teonet.teonet.teo-vpn.count:1|c";
-            // sendto(ke->kc->fd, buffer, strlen(buffer), 0, (struct sockaddr*)&to, sizeof(to));
-
+            // Send teonet metrics
             metric_teonet_count(ke->tm);
-
         }
-        #endif
 
         // Send custom timer Event
         if(ke->event_cb != NULL &&
