@@ -472,7 +472,7 @@ public:
    * @param name Metric name
    * @param value Metric value 
    */
-  inline void metricCounter(std::string name, int value) {
+  inline void metricCounter(const std::string &name, int value) {
     teoMetricCounter(ke->tm, name.c_str(), value);
   }
 
@@ -482,7 +482,7 @@ public:
    * @param name Metric name
    * @param value Metric value 
    */
-  inline void metricMs(std::string name, int value) {
+  inline void metricMs(const std::string &name, int value) {
     teoMetricMs(ke->tm, name.c_str(), value);
   }
 
@@ -492,7 +492,7 @@ public:
    * @param name Metric name
    * @param value Metric value 
    */
-  inline void metricGauge(std::string name, int value) {
+  inline void metricGauge(const std::string &name, int value) {
     teoMetricGauge(ke->tm, name.c_str(), value);
   }
 
