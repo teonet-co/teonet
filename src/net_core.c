@@ -263,9 +263,9 @@ int ksnCoreBind(ksnCoreClass *kc) {
 
         // Set non block mode
         // \todo Test with "Set non block on"
-        //       and set the set_nonblock if it work correct
+        //       and set the TEOSOCK_NON_BLOCKING_MODE if it work correct
         // It was tested and switch back to blocked UDP 2018-05-28
-        //set_nonblock(fd);
+        //teosockSetBlockingMode(fd, TEOSOCK_NON_BLOCKING_MODE);
     }
 
     return !(fd > 0);
