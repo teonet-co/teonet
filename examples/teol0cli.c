@@ -118,7 +118,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 printf("Start teonet L0 Client example\n");
                 
                 // Set TCP_NODELAY option
-                set_tcp_nodelay(fd);
+                teosockSetTcpNodelay(fd);
                 
                 // Create and start TCP watcher (start TCP client processing)
                 ev_init (&w, tcp_read_cb);
