@@ -637,7 +637,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
 static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
 
     // Set TCP_NODELAY option
-    set_tcp_nodelay(fd);
+    teosockSetTcpNodelay(fd);
 
     ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d connected\n", fd);
 
