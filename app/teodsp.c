@@ -109,7 +109,7 @@ static int usock_connect(usock_class *us, char *socket_path) {
     }
     
     // Set non block mode
-    set_nonblock(fd);
+    teosockSetBlockingMode(fd, TEOSOCK_NON_BLOCKING_MODE);
     
     // Add UNIX socket watcher to the event manager
     if(us->w != NULL) usock_disconnect(us);
