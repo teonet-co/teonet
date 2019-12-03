@@ -561,7 +561,7 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
     size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_length;
     char *out_data = malloc(out_data_len);
     memset(out_data, 0, out_data_len);
-    size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+    size_t packet_length = teoLNullPacketCreate(NULL, out_data, out_data_len,
             cmd, from, data, data_length);
     // Send packet
     ssize_t snd = ksnLNullPacketSend(kl, fd, out_data, packet_length);
@@ -786,7 +786,7 @@ void _check_connected(uint32_t id, int type, void *data) {
                 size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_e_length;
                 char *out_data = malloc(out_data_len);
                 memset(out_data, 0, out_data_len);
-                size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+                size_t packet_length = teoLNullPacketCreate(NULL, out_data, out_data_len,
                         CMD_ECHO, from, data_e, data_e_length);
 
 
@@ -978,7 +978,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
                 data->data_length;
         char *out_data = malloc(out_data_len);
         memset(out_data, 0, out_data_len);
-        size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+        size_t packet_length = teoLNullPacketCreate(NULL, out_data, out_data_len,
                 data->cmd, rd->from, data->from + data->from_length,
                 data->data_length);
 
@@ -1258,7 +1258,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                     ALLOW_len;
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
-            size_t packet_length = teoLNullPacketCreate(out_data,
+            size_t packet_length = teoLNullPacketCreate(NULL, out_data,
                     out_data_len, CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
             // Send websocket allow message
             if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
