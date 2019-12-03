@@ -455,7 +455,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         );
 
         char *buf = malloc(buf_length);
-        teoLNullPacketCreate(buf, buf_length,
+        teoLNullPacketCreate(NULL, buf, buf_length,
                 cmd_l0_data->cmd,
                 cmd_l0_data->from,
                 cmd_l0_data->from + cmd_l0_data->from_length,
