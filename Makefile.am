@@ -2,6 +2,8 @@
 
 include aminclude.am
 
+ACLOCAL_AMFLAGS = -I m4
+
 if DX_COND_man
 
 # You'd probably want to post-process man pages and installed the patched
@@ -31,6 +33,7 @@ teonetdoc_DATA = \
 	# end of teonetdoc_DATA
 
 teonetsysconfdir = ${sysconfdir}/teonet
+
 #teonetsysconf_DATA = conf/teonet.conf \
 #		conf/teonet-8005.conf
 
@@ -63,11 +66,11 @@ uninstall-local:
 run:	app/teovpn
 	app/teovpn just-make --port=9057
 
-build-tests: 
+build-tests:
 	tests/test_teonet
 
 test:	tests/test_teonet
 	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_cpp_tst
 	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_tst
 	embedded/teocli/libtrudp/tests/trudp_tst
-	tests/test_teonet 
+	tests/test_teonet

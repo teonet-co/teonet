@@ -285,8 +285,9 @@ AC_CONFIG_FILES([
     Makefile
     src/libteonet.pc
     src/Makefile
-    embedded/teocli/linux/Makefile
 ])
+
+#    embedded/teocli/linux/Makefile
 #    embedded/Makefile
 #    po/Makefile.in
 #    examples/Makefile
