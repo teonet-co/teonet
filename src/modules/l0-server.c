@@ -1437,66 +1437,55 @@ int processCmd(ksnLNullClass *kl, ksnCorePacketData *rd, teoLNullCPacket *cp)
  */
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
-    int retval = 0;
-
-    teoLNullCPacket *cp = (teoLNullCPacket*) rd->data;
-
-    // Check packet length
-    if(rd->data_len == cp->data_length + cp->peer_name_length + sizeof(teoLNullCPacket))
-    {
-        // Check packet checksum
-        uint8_t header_checksum = get_byte_checksum(cp, sizeof(teoLNullCPacket) - sizeof(cp->header_checksum));
-        uint8_t checksum = get_byte_checksum(cp->peer_name, cp->peer_name_length + cp->data_length);
-
-        if(cp->header_checksum == header_checksum && cp->checksum == checksum) {
-            #ifdef DEBUG_KSNET
-            char *data = (char*)(cp->peer_name + cp->peer_name_length);
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: 0x%x\n",
-                rd->addr, rd->port,
-                (unsigned)cp->cmd,
-                (char*)cp->peer_name,
-                *data);
-            #endif
-
-            retval = processCmd(kl, rd, cp);
-
-        }
-    } else {
-        trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
-        ssize_t rc = recvCheck(tcd, rd->data, rd->data_len);
-        if (rc == -3) {
-            #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                       "WRONG UDP PACKET %d\n", rc
-            );
-            #endif
-            return 1;
-        } else if ((rc != -3) && (rc <= 0)) {
-            #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                       "Wait next part of large packet %d status = %d\n",
-                       rd->data_len, rc
-            );
-            #endif
-            return 1;
-        }
-
-        void *l_data = tcd->read_buffer;
-        teoLNullCPacket *cp = trudpPacketGetData(trudpPacketGetPacket(l_data));
+    teoLNullCPacket *cp = teoLNullPacketGetFromBuffer(rd->data, rd->data_len);
+    if(cp != NULL) {
         #ifdef DEBUG_KSNET
+        uint8_t *data =  teoLNullPacketGetPayload(cp);
         ksn_printf(kev, MODULE, DEBUG_VV,
-                "got Large TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
-                rd->addr, rd->port,
-                (unsigned)cp->cmd,
-                (char*) cp->peer_name,
-                (char*)(cp->peer_name + cp->peer_name_length));
+            "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: 0x%x\n",
+            rd->addr, rd->port,
+            (unsigned)cp->cmd,
+            (char*)cp->peer_name,
+            *data);
         #endif
 
-        retval = processCmd(kl, rd, cp);
+        return processCmd(kl, rd, cp);
     }
 
-    return retval;
+    trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    // FIXME FIXME FIXME in recvCheck ---> packetCombineClient we could use teoLNullPacketGetFromBuffer
+    ssize_t rc = recvCheck(tcd, rd->data, rd->data_len);
+    if (rc == -3) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG_VV,
+                    "WRONG UDP PACKET %d\n", rc
+        );
+        #endif
+        return 1;
+    } else if (rc <= 0) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG_VV,
+                    "Wait next part of large packet %d status = %d\n",
+                    rd->data_len, rc
+        );
+        #endif
+        return 1;
+    }
+
+    // FIXME FIXME FIXME FIXME FIXME FIXME
+    // trudpPacket * packet = (trudpPacket *)tcd->read_buffer;
+    // cp = trudpPacketGetData(packet);
+    cp = (teoLNullCPacket *)tcd->read_buffer;
+    #ifdef DEBUG_KSNET
+    ksn_printf(kev, MODULE, DEBUG_VV,
+            "got Large TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
+            rd->addr, rd->port,
+            (unsigned)cp->cmd,
+            (char*) cp->peer_name,
+            (char*)(cp->peer_name + cp->peer_name_length));
+    #endif
+
+    return processCmd(kl, rd, cp);
 }
 
 #undef kev
