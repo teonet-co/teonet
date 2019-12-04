@@ -287,7 +287,6 @@ AC_CONFIG_FILES([
     src/Makefile
 ])
 
-#    embedded/teocli/linux/Makefile
 #    embedded/Makefile
 #    po/Makefile.in
 #    examples/Makefile
