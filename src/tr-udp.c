@@ -2439,7 +2439,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             );
             #endif
 
-            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
+            trudpPacket * packet = (trudpPacket *)data;
+            size_t block_len = trudpPacketGetDataLength(packet);
+            void* block = trudpPacketGetData(packet);
+            ksnCoreProcessPacket(kev->kc, block, block_len, (__SOCKADDR_ARG) &tcd->remaddr);
 
         } break;
 
