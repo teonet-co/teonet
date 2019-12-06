@@ -850,7 +850,9 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         rd.port = port; // Port to integer
 
         // Parse packet and check if it valid
-        if(!encrypted || !ksnCoreParsePacket(data, data_len, &rd)) {
+        //if(!ksnCoreParsePacket(data, data_len, &rd)) {
+        if(! ( ksnCoreParsePacket(data, data_len, &rd) && (encrypted || (!encrypted && rd.cmd == 72)) )  ) {
+ 
             rd.from = "";
             rd.from_len = 1;
             rd.data = data;
