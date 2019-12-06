@@ -90,6 +90,8 @@ DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 
 #nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
+teobasedir = $(pkgincludedir)/teobase
+teoccldir = $(pkgincludedir)/teoccl
 #teobaseincludedir=$(includedir)/teobase
 #teocclincludedir=$(includedir)/teoccl
 #teonetinclude_HEADERS =
@@ -153,6 +155,24 @@ teonetinclude_HEADERS = \
 	../embedded/teocli/libtrudp/src/trudp_receive_queue.h \
 	# end of teonetinclude_HEADERS
 
+teobase_HEADERS = \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/logging.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/socket.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/time.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/platform.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/array_list.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/hash.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/map.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/memory.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/queue.h \
+	#end of teobase_HEADERS
+teoccl_HEADERS = \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/array_list.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/hash.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/map.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/memory.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/queue.h \
+	#end of teoccl_HEADERS
 
 libteonet_la_SOURCES = \
     crypt.c \
