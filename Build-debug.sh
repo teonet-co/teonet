@@ -37,6 +37,6 @@ iprint "\n\t`fBROWN`Creating build scripts`aRST`\n"
 ./autogen.sh || die "Can't create 'configure' script"
 
 iprint "\n\t`fBROWN`Configuring `fGREEN`DEBUG`fBROWN` build`aRST`\n"
-./configure --prefix=/dbg CPPFLAGS=-DDEBUG CXXFLAGS="-g -O0" CFLAGS="-g -O0" || die
+./configure --prefix=/dbg CXXFLAGS="-g -O0" CFLAGS="-g -O0" || die
 
 iprint "\n\t`fBROWN`Now you can run `fGREEN`'make'`fBROWN` to compile `fGREEN`DEBUG`fBROWN` teonet`aRST`\n"

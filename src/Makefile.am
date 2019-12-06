@@ -31,7 +31,7 @@ AM_CFLAGS = \
 	 -Wall \
 	 -Wno-unused-function \
 	 -I/opt/local/include \
-	 -DUSE_LIBEV \
+	 -DUSE_LIBEV=1 \
 	 -DTEONET_SYS_CONFIG_DIR=\""${sysconfdir}/teonet"\" \
 	 $(DRELEASE_TEONET) \
 	 -I../embedded/libpbl/src \
@@ -60,6 +60,7 @@ AM_CXXFLAGS = \
 	-std=c++17 \
 	-fPIC \
 	-Wall \
+	-DUSE_LIBEV=1 \
 	-I/opt/local/include \
 	# end of AM_CXXFLAGS
 

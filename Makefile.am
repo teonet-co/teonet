@@ -19,7 +19,11 @@ SUBDIRS = \
 	embedded/libpbl/src \
 	embedded/teocli/linux \
 	src \
-	# po tests examples app sh \
+	app \
+	# po \
+	# tests \
+	# examples \
+	# sh \
 	# end of SUBDIRS
 
 teonetdocdir = ${prefix}/doc/teonet

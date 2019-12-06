@@ -285,6 +285,7 @@ AC_CONFIG_FILES([
     Makefile
     src/libteonet.pc
     src/Makefile
+    app/Makefile
 ])
 
 #    embedded/Makefile
@@ -292,7 +293,6 @@ AC_CONFIG_FILES([
 #    examples/Makefile
 #    examples/fossa/Makefile
 #    tests/Makefile
-#    app/Makefile
 #    sh/Makefile
 
 
@@ -303,5 +303,5 @@ AC_CONFIG_SUBDIRS([
 #    embedded/teocli/libtrudp/libs/teobase/libs/teoccl
 #    embedded/teocli/libtrudp/libs/teobase
 #    embedded/teocli/libtrudp
-#    embedded/teocli/linux
+
 AC_OUTPUT
