@@ -9,8 +9,8 @@ AM_CFLAGS = \
 	 -I../../embedded/libpbl/src \
 	 -I../../embedded/teocli/libteol0 \
 	 -I../../embedded/teocli/libtrudp/src \
-         -I../../embedded/teocli/libtrudp/libs/teobase/include \
-	 -I../../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
+	 -I../../embedded/teocli/libtrudp/libs/teobase/include \
+	 -I../../embedded/teocli/libtrudp/libs/teoccl/include \
 	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev \
 	 -pthread
@@ -27,7 +27,10 @@ if MINGW
 AM_LDFLAGS += -L../../../libev-4.19 -L../../../confuse-2.7/src -L../../../libtuntap-master
 endif
 
-LIBS = -lteonet -lcrypto 
+LIBS = \
+	../../src/libteonet.la \
+	../../embedded/teocli/linux/libteocli.la \
+	-lcrypto -lev
 
 #bin_PROGRAMS = teofossa
 noinst_PROGRAMS = teofossa

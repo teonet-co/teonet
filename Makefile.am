@@ -21,7 +21,7 @@ SUBDIRS = \
 	src \
 	app \
 	tests \
-	# examples \
+	examples \
 	# sh \
 	# po \
 	# end of SUBDIRS
