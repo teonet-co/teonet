@@ -278,6 +278,11 @@ AM_CONDITIONAL(RELEASE_TEONET, test "$release_teonet" = true)
 
 AC_CACHE_SAVE
 
+dnl ***************************************************************************
+dnl Internationalization
+dnl ***************************************************************************
+IT_PROG_INTLTOOL([0.35.0])
+
 LT_PREREQ([2.4])
 LT_INIT
 
@@ -289,11 +294,10 @@ AC_CONFIG_FILES([
     tests/Makefile
     examples/fossa/Makefile
     examples/Makefile
+    po/Makefile.in
     sh/Makefile
 ])
-
 #    embedded/Makefile
-#    po/Makefile.in
 
 
 # Call libtrudp's ./configure script recursively.
