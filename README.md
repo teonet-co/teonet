@@ -22,26 +22,26 @@ certificate while accessing https ..." execute git command:
 ### Ubuntu
     sh/build-ubuntu.sh
     ./autogen.sh
+    ./configure
     make
+
 ### Manjaro
     autoreconf --force --install
     ./autogen.sh
+    ./configure
     make
- 
 
-## At errors try running:
+## At errors try running
 
     autoreconf --force --install
     ./configure
     make
 
-
-## Third party notes:
+## Third party notes
 
 libev - A full-featured and high-performance event loop
 
     URL: http://libev.schmorp.de/
-
 
 PBL - The Program Base Library
 
@@ -50,17 +50,16 @@ PBL - The Program Base Library
 MYSQL - MariaDB or MySQL connector (used in teoweb application)
 
     sudo apt-get install libmysqlclient-dev
-    
+
 CUnit - A Unit Testing Framework for C
 
     sudo apt-get install libcunit1-dev
-    
+
 Cpputest - CppUTest unit testing and mocking framework for C/C++
 
     sudo apt-get install cpputest
-  
 
-## Install from repositories notes:
+## Install from repositories notes
 
     DEB / RPM repository: http://repo.ksproject.org
 
@@ -73,18 +72,18 @@ Cpputest - CppUTest unit testing and mocking framework for C/C++
 Add repository key:  
 
     sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 8CC88F3BE7D6113C
-    
-Add repository:    
+
+Add repository:
 
     sudo apt-get install -y software-properties-common
     sudo add-apt-repository "deb http://repo.ksproject.org/ubuntu/ teonet main"
-    
+
 or add the following line to your /etc/apt/sources.list:  
 
     deb http://repo.ksproject.org/ubuntu/ teonet main
-    
-Update repositories database:    
-    
+
+Update repositories database:
+
     sudo apt-get update
 
 #### Install
@@ -94,7 +93,6 @@ Update repositories database:
 #### Run
 
     teovpn -?
-
 
 ### CENTOS / RHEL / FEDORA
 
@@ -123,7 +121,6 @@ Update repositories database:
 
     teovpn -?
 
-
 ### SUSE
 
 #### Add repository
@@ -131,14 +128,13 @@ Update repositories database:
     zypper ar -f http://repo.ksproject.org/opensuse/x86_64/ teonet
 
 #### Install
-    
+
     zypper in -y libteonet
     ldconfig
 
 #### Run
 
     teovpn -?
-    
 
 # Teonet local net configuration (run from sources folder)
 
@@ -180,7 +176,6 @@ Update repositories database:
     cd /$HOME/Projects/teodb
     make clean && make
     src/teodb teo-db -a 127.0.0.1 -P 9009
-
 
 # Sume LXC notes
 
