@@ -781,7 +781,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 }
 
 /**
- * Process ksnet packet
+ * Process teonet packet
  *
  * @param vkc Pointer to ksnCoreClass
  * @param buf Buffer with packet
@@ -850,10 +850,37 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         rd.port = port; // Port to integer
 
         // Parse packet and check if it valid
-        //if(!ksnCoreParsePacket(data, data_len, &rd)) {
-        if( !( ksnCoreParsePacket(data, data_len, &rd) && ( encrypted || (!encrypted && rd.cmd == 70) ) )  ) {
+        //    
+        // In this place we check two type of packets one from teonet another 
+        // from teonet client.
+        // 
+        // Teonet packets are encrypte (but only one packet with cmd == CMD_L0 
+        // may be not encrypted) & ksnCoreParsePacket return true.
+        //
+        // Teocli packet is not encrypted and ksnCoreParsePacket return false.
+        // ksnCoreParsePacket sometimes may return false positive. So we use 
+        // additional precautions in this if.
+        //
+        // CMD_L0 => #70 Command from L0 Client    
+        if( ksnCoreParsePacket(data, data_len, &rd) && ( encrypted || rd.cmd == CMD_L0 ) ) {
  
-            printf("rd.cmd %d\n", rd.cmd);
+            // Check ARP Table and add peer if not present            
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG_VV,
+                "got %d byte data, cmd = %d, from %s %s:%d\n",
+                rd.data_len, rd.cmd, rd.from, rd.addr, rd.port);
+            #endif
+
+            // Check new peer connected
+            ksnCoreCheckNewPeer(kc, &rd);
+
+            // Set last activity time
+            rd.arp->data.last_activity = ksnetEvMgrGetTime(ke);
+
+            // Check & process command
+            command_processed = ksnCommandCheck(kc->kco, &rd);
+
+        } else { 
             
             rd.from = "";
             rd.from_len = 1;
@@ -869,21 +896,6 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
             }
 
             command_processed = 1;
-        } else { // Check ARP Table and add peer if not present
-            #ifdef DEBUG_KSNET
-            ksn_printf(ke, MODULE, DEBUG_VV,
-                "got %d byte data, cmd = %d, from %s %s:%d\n",
-                rd.data_len, rd.cmd, rd.from, rd.addr, rd.port);
-            #endif
-
-            // Check new peer connected
-            ksnCoreCheckNewPeer(kc, &rd);
-
-            // Set last activity time
-            rd.arp->data.last_activity = ksnetEvMgrGetTime(ke);
-
-            // Check & process command
-            command_processed = ksnCommandCheck(kc->kco, &rd);
         }
 
         // Send event to User level
