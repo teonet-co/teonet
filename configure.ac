@@ -286,13 +286,13 @@ AC_CONFIG_FILES([
     src/libteonet.pc
     src/Makefile
     app/Makefile
+    tests/Makefile
 ])
 
 #    embedded/Makefile
 #    po/Makefile.in
 #    examples/Makefile
 #    examples/fossa/Makefile
-#    tests/Makefile
 #    sh/Makefile
 
 

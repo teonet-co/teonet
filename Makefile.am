@@ -20,10 +20,10 @@ SUBDIRS = \
 	embedded/teocli/linux \
 	src \
 	app \
-	# po \
-	# tests \
+	tests \
 	# examples \
 	# sh \
+	# po \
 	# end of SUBDIRS
 
 teonetdocdir = ${prefix}/doc/teonet
