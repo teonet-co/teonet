@@ -13,36 +13,45 @@ DX_CLEANFILES = -rf @DX_DOCDIR@/*
 
 endif
 
-SUBDIRS = embedded/libpbl/src embedded/teocli/libtrudp/libs/teobase embedded/teocli/libtrudp embedded src po tests examples app sh
-#embedded/libtrudp
+SUBDIRS = \
+	embedded/libpbl/src \
+	embedded/teocli/linux \
+	src \
+	# po tests examples app sh \
+	# end of SUBDIRS
+
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
-	README\
-	COPYING\
-	AUTHORS\
-	ChangeLog\
-	INSTALL\
-	NEWS
+	README \
+	COPYING \
+	AUTHORS \
+	ChangeLog \
+	INSTALL \
+	NEWS \
+	# end of teonetdoc_DATA
 
 teonetsysconfdir = ${sysconfdir}/teonet
 #teonetsysconf_DATA = conf/teonet.conf \
-#		     conf/teonet-8005.conf
+#		conf/teonet-8005.conf
 
 INTLTOOL_FILES = intltool-extract.in \
 	intltool-merge.in \
-	intltool-update.in
+	intltool-update.in \
+	# end of INTLTOOL_FILES
 
 EXTRA_DIST = \
 	$(teonetdoc_DATA) \
 	$(INTLTOOL_FILES) \
-	$(DX_CONFIG)
-#	tests/test-suite.sh
+	$(DX_CONFIG) \
+	# tests/test-suite.sh \
+	# end of EXTRA_DIST
 
 DISTCLEANFILES = intltool-extract \
 	intltool-merge \
 	intltool-update \
 	po/.intltool-merge-cache \
-	@DX_DOCDIR@
+	@DX_DOCDIR@ \
+	# end of DISTCLEANFILES
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
@@ -56,7 +65,7 @@ run:	app/teovpn
 
 build-tests: 
 	tests/test_teonet
-	
+
 test:	tests/test_teonet
 	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_cpp_tst
 	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_tst

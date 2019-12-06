@@ -23,7 +23,8 @@ endif
 AM_CPPFLAGS = \
 	-DPACKAGE_LOCALE_DIR=\""$(localedir)"\" \
 	-DPACKAGE_SRC_DIR=\""$(srcdir)"\" \
-	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\"
+	-DPACKAGE_DATA_DIR=\""$(pkgdatadir)"\" \
+	# end of AM_CPPFLAGS
 
 AM_CFLAGS = \
 	 -std=gnu11 \
@@ -37,11 +38,12 @@ AM_CFLAGS = \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/teocli/libtrudp/src \
 	 -I../embedded/teocli/libtrudp/libs/teobase/include \
-	 -I../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
+	 -I../embedded/teocli/libtrudp/libs/teoccl/include \
 	 -I../app/embedded/jsmn \
 	 -I/usr/include/libev \
 	 -DEV_USE_EPOLL=1 \
-	 -fno-strict-aliasing
+	 -fno-strict-aliasing \
+	 # end of AM_CFLAGS
 
 if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD
@@ -58,16 +60,15 @@ AM_CXXFLAGS = \
 	-std=c++17 \
 	-fPIC \
 	-Wall \
-	-I/opt/local/include
+	-I/opt/local/include \
+	# end of AM_CXXFLAGS
 
 AM_LDFLAGS = -L/opt/local/lib
 
 LIBS = -lev -lcrypt -ltuntap \
-    ../embedded/libpbl/src/libpbl.a \
-    ../embedded/teocli/libtrudp/src/.libs/libtrudp.a \
-    ../embedded/teocli/libtrudp/libs/teobase/src/.libs/libteobase.a \
-    ../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/src/.libs/libteoccl.a
-    
+	../embedded/libpbl/src/libpbl.a \
+	../embedded/teocli/linux/.libs/libteocli.la \
+	# end of LIBS
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -83,22 +84,13 @@ endif
 
 lib_LTLIBRARIES = libteonet.la
 
-## Debug info
-if DEBUG
-  AM_CFLAGS += -g3 -O0
-  AM_CXXFLAGS += -g3 -O0
-else
-  AM_CFLAGS += -O2
-  AM_CXXFLAGS += -O2
-endif
-
 localedir = $(datadir)/locale
 DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 
 #nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
-teobaseincludedir=$(includedir)/teobase
-teocclincludedir=$(includedir)/teoccl
+#teobaseincludedir=$(includedir)/teobase
+#teocclincludedir=$(includedir)/teoccl
 #teonetinclude_HEADERS =
 nobase_teonetinclude_HEADERS = \
     crypt.h \
@@ -139,26 +131,26 @@ nobase_teonetinclude_HEADERS = \
     utils/teo_memory.h \
     utils/string_arr.h \
     utils/utils.h \
-    utils/rlutil.h
+    utils/rlutil.h \
+		# end of nobase_teonetinclude_HEADERS
 
 teonetinclude_HEADERS = \
-    ../embedded/libpbl/src/pbl.h \
-    ../embedded/teocli/libteol0/teonet_l0_client.h \
-    ../app/embedded/jsmn/jsmn.h \
-    \
-    ../embedded/teocli/libtrudp/src/udp.h \
-    ../embedded/teocli/libtrudp/src/trudp.h \
-    ../embedded/teocli/libtrudp/src/packet.h \
-    ../embedded/teocli/libtrudp/src/trudp_api.h \
-    ../embedded/teocli/libtrudp/src/trudp_const.h \
-    ../embedded/teocli/libtrudp/src/write_queue.h \
-    ../embedded/teocli/libtrudp/src/packet_queue.h \
-    ../embedded/teocli/libtrudp/src/trudp_channel.h \
-    ../embedded/teocli/libtrudp/src/trudp_send_queue.h \
-    ../embedded/teocli/libtrudp/src/trudp_utils.h \
-    ../embedded/teocli/libtrudp/src/trudp_receive_queue.h
-#    ../embedded/teocli/libtrudp/libs/teobase/include/teobase/
-
+	../embedded/libpbl/src/pbl.h \
+	../embedded/teocli/libteol0/teonet_l0_client.h \
+	../app/embedded/jsmn/jsmn.h \
+	\
+	../embedded/teocli/libtrudp/src/udp.h \
+	../embedded/teocli/libtrudp/src/trudp.h \
+	../embedded/teocli/libtrudp/src/packet.h \
+	../embedded/teocli/libtrudp/src/trudp_api.h \
+	../embedded/teocli/libtrudp/src/trudp_const.h \
+	../embedded/teocli/libtrudp/src/write_queue.h \
+	../embedded/teocli/libtrudp/src/packet_queue.h \
+	../embedded/teocli/libtrudp/src/trudp_channel.h \
+	../embedded/teocli/libtrudp/src/trudp_send_queue.h \
+	../embedded/teocli/libtrudp/src/trudp_utils.h \
+	../embedded/teocli/libtrudp/src/trudp_receive_queue.h \
+	# end of teonetinclude_HEADERS
 
 
 libteonet_la_SOURCES = \
@@ -198,12 +190,8 @@ libteonet_la_SOURCES = \
     utils/string_arr.c \
     utils/utils.c \
     utils/base64.c \
-    ../embedded/teocli/libteol0/teonet_l0_client.c \
-    ../embedded/teocli/libtrudp/libs/teobase/src/teobase/socket.c \
-    ../embedded/teocli/libtrudp/libs/teobase/src/teobase/time.c \
     ../app/embedded/jsmn/jsmn.c \
-    ../embedded/teocli/libtrudp/src/libtrudp.la \
-    ../embedded/teocli/libtrudp/embedded/teoccl/src/libteoccl.la
+		# end of libteonet_la_SOURCES
 
 
 teonetconfdir=$(sysconfdir)/teonet
@@ -221,8 +209,10 @@ endif
 # AM_LFLAGS=-Pcfg_yy -olex.yy.c
 #lexer.c: lexer.l
 
-libteonet_la_LDFLAGS = $(AM_LDFLAGS) -version-info  $(LIBRARY_CURRENT):$(LIBRARY_REVISION):$(LIBRARY_AGE)
-#49:0:0
+libteonet_la_LDFLAGS = $(AM_LDFLAGS) \
+	-version-info  $(LIBRARY_CURRENT):$(LIBRARY_REVISION):$(LIBRARY_AGE) \
+	# 49:0:0 \
+	# end of libteonet_la_LDFLAGS
 
 uninstall-local:
 	-rm -r $(teonetincludedir)
