@@ -22,7 +22,7 @@ SUBDIRS = \
 	app \
 	tests \
 	examples \
-	# sh \
+	sh \
 	# po \
 	# end of SUBDIRS
 
