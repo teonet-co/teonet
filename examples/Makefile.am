@@ -8,8 +8,8 @@ AM_CFLAGS = \
 	 -I../embedded/libpbl/src \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/teocli/libtrudp/src \
-         -I../embedded/teocli/libtrudp/libs/teobase/include \
-	 -I../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
+	 -I../embedded/teocli/libtrudp/libs/teobase/include \
+	 -I../embedded/teocli/libtrudp/libs/teoccl/include \
 	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev
 
@@ -24,18 +24,9 @@ AM_CXXFLAGS = \
 	 -I../embedded/teocli/libteol0 \
 	 -I../embedded/teocli/libtrudp/src \
 	 -I../embedded/teocli/libtrudp/libs/teobase/include \
-         -I../embedded/teocli/libtrudp/libs/teobase/libs/teoccl/include \
+	 -I../embedded/teocli/libtrudp/libs/teoccl/include \
 	 -I/usr/include/libtrudp \
 	 -I/usr/include/libev
-
-## Debug info
-if DEBUG
-  AM_CFLAGS += -g3 -O0
- AM_CXXFLAGS += -g3 -O0
-else
-  AM_CFLAGS += -O2
-  AM_CXXFLAGS += -O2
-endif
 
 if TEO_THREAD
 AM_CFLAGS += -DTEO_THREAD
@@ -53,15 +44,25 @@ if MINGW
 AM_LDFLAGS += -L../../../libev-4.19 -L../../../confuse-2.7/src -L../../../libtuntap-master
 endif
 
-LIBS = -lteonet -lcrypto
+LIBS = \
+	../src/libteonet.la \
+	../embedded/teocli/linux/libteocli.la \
+	-lcrypto
+
 if TEO_THREAD
 LIBS += -pthread
 endif
 
 noinst_PROGRAMS = teolarge teosend teomulti teomulti_t teotcp teotun teoterm \
-	  teoack teoackm teocque teodb_ex teostream teol0cli teol0cli_n teol0cli_n \
-	  teol0cli_ns teosscr teotru_load teocpp teocpp_2 teocquecpp teocquecpp_2 \
+	  teoack teoackm teocque teodb_ex teostream teol0cli \
+	  teosscr teotru_load teocpp teocpp_2 teocquecpp teocquecpp_2 \
 	  teodb_ex_cpp teodb_ex_cpp_2
+
+# noinst_PROGRAMS += teol0cli_n teol0cli_ns
+# teol0cli_n_SOURCES = ../embedded/teocli/main.c
+# teol0cli_ns_SOURCES = ../embedded/teocli/main_select.c
+# teol0cli_n_LDFLAGS = $(AM_LDFLAGS) -lev
+# teol0cli_ns_LDFLAGS = $(AM_LDFLAGS) -lev
 
 teoack_SOURCES = teoack.c
 teoackm_SOURCES = teoackm.c
@@ -80,8 +81,6 @@ teoterm_SOURCES = teoterm.c
 teotun_SOURCES = teotun.c
 teostream_SOURCES = teostream.c
 teol0cli_SOURCES = teol0cli.c
-teol0cli_n_SOURCES = ../embedded/teocli/main.c
-teol0cli_ns_SOURCES = ../embedded/teocli/main_select.c
 teosscr_SOURCES = teosscr.c
 teotru_load_SOURCES = teotru_load.c
 teocpp_SOURCES = teocpp.cpp

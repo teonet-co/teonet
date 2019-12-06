@@ -287,12 +287,12 @@ AC_CONFIG_FILES([
     src/Makefile
     app/Makefile
     tests/Makefile
+    examples/fossa/Makefile
+    examples/Makefile
 ])
 
 #    embedded/Makefile
 #    po/Makefile.in
-#    examples/Makefile
-#    examples/fossa/Makefile
 #    sh/Makefile
 
 
