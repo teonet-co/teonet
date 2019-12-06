@@ -851,7 +851,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
 
         // Parse packet and check if it valid
         //if(!ksnCoreParsePacket(data, data_len, &rd)) {
-        if( !( ksnCoreParsePacket(data, data_len, &rd) && ( encrypted || (!encrypted && rd.cmd == 72) ) )  ) {
+        if( !( ksnCoreParsePacket(data, data_len, &rd) && ( encrypted || (!encrypted && rd.cmd == 70) ) )  ) {
  
             printf("rd.cmd %d\n", rd.cmd);
             
