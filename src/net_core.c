@@ -812,8 +812,10 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         size_t data_len; // Decrypted packet data length
 
         // Decrypt package
-        #if KSNET_CRYPT
+        int encrypted = 0;
+        #if KSNET_CRYPT        
         if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
+            encrypted = 1;
             data = ksnDecryptPackage(kc->kcr, buf, recvlen, &data_len);
         } else { // Use packet without decryption
         #endif
@@ -848,7 +850,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         rd.port = port; // Port to integer
 
         // Parse packet and check if it valid
-        if(!ksnCoreParsePacket(data, data_len, &rd)) {
+        if(!encrypted || !ksnCoreParsePacket(data, data_len, &rd)) {
             rd.from = "";
             rd.from_len = 1;
             rd.data = data;
