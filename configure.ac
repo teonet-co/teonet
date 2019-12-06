@@ -289,19 +289,16 @@ AC_CONFIG_FILES([
     tests/Makefile
     examples/fossa/Makefile
     examples/Makefile
+    sh/Makefile
 ])
 
 #    embedded/Makefile
 #    po/Makefile.in
-#    sh/Makefile
 
 
 # Call libtrudp's ./configure script recursively.
 AC_CONFIG_SUBDIRS([
         embedded/teocli/linux
 ])
-#    embedded/teocli/libtrudp/libs/teobase/libs/teoccl
-#    embedded/teocli/libtrudp/libs/teobase
-#    embedded/teocli/libtrudp
 
 AC_OUTPUT
