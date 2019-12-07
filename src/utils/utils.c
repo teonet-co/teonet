@@ -734,3 +734,24 @@ size_t get_num_of_tags(char *data, size_t data_length) {
 
     return num_of_tags * 4;
 }
+
+/**
+ * Prints given @a data to @a buffer in form "XX XX XX XX "
+ * 
+ * prints byte-by-byte, and fills @a buffer via 3 characters at a time
+ * until buffer space is sufficent, up to data_len
+ * always appends terminating NUL character
+ * 
+ * @param buffer Destination buffer, non-null pointer to memory region of @a buffer_len bytes
+ * @param buffer_len destination buffer length, must be atleast 1 byte (for NUL character)
+ * @param data source bytes to be dumped, non-null pointer of @a data_len bytes
+ * @param data_len amount of bytes to be dumped, can be zero
+*/
+void dump_bytes(char *buffer, int buffer_len, uint8_t* data, int data_len) {
+    buffer[0] = 0; // for case of early exit
+    while(data_len > 0 && buffer_len > 4) {
+        sprintf(buffer, "%02X ", data[0]);
+        ++data; --data_len;
+        buffer += 3; buffer_len -= 3;
+    }
+}
