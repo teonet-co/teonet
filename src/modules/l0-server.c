@@ -27,7 +27,7 @@ static int ksnLNullStart(ksnLNullClass *kl);
 static void ksnLNullStop(ksnLNullClass *kl);
 static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
         char *cname, size_t cname_length);
-static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData *rd);
+static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port);
 static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data, size_t data_length);
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, int fd, teoLNullCPacket *packet);
 
@@ -72,6 +72,34 @@ ksnLNullClass *ksnLNullInit(void *ke) {
     }
 
     return kl;
+}
+
+/**
+ * Generate next fake fd number for trudp client connection [class](@ref ksnLNullClass)
+ *
+ * @param kl Pointer to ksnLNullClass
+ * 
+ * @return sequentially ingremented integer out of range of what real fs's can be
+ */
+static int ksnLNullGetNextFakeFd(ksnLNullClass *kl) {
+    // Fixup if had overflow earlier
+    if (kl->fd_trudp < MAX_FD_NUMBER) {
+        kl->fd_trudp = MAX_FD_NUMBER;
+    }
+    return kl->fd_trudp++;
+}
+
+/**
+ * Get client connection
+ *
+ * @param kl Pointer to ksnLNullClass
+ * @param fd connection fd
+ *
+ * @return Client or NULL if not connected
+ */
+static ksnLNullData* ksnLNullGetClientConnection(ksnLNullClass *kl, int fd) {
+    size_t valueLength;
+    return pblMapGet(kl->map, &fd, sizeof(fd), &valueLength);
 }
 
 /**
@@ -436,12 +464,12 @@ int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
  *
  * @param kl Pointer to ksnLNullClass
  * @param fd TCP client connection file descriptor
- * @param rd pointer to ksnCorePacketData
+ * @param remote_addr remote address string
+ * @param remote_port remote port
+ * 
+ * @return client, pointer to ksnLNullData
  */
-static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData *rd) {
-
-
-    teoLNullCPacket *packet = rd ? (teoLNullCPacket*) rd->data:NULL;
+static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port) {
 
     ksnLNullData data;
     data.name = NULL;
@@ -449,27 +477,21 @@ static void ksnLNullClientRegister(ksnLNullClass *kl, int fd, ksnCorePacketData 
     data.read_buffer = NULL;
     data.read_buffer_ptr = 0;
     data.read_buffer_size = 0;
-    if (rd && fd >= MAX_FD_NUMBER ) {
-        data.t_addr = strdup(rd->addr);
-        data.t_port = rd->port;
-        data.t_channel = 0;
-    }
-    else {
-       data.t_addr = NULL;
-       data.t_port = 0;
-       data.t_channel = 0;
-    }
+    data.t_addr = remote_addr ? strdup(remote_addr) : NULL;
+    data.t_port = remote_port;
+    data.t_channel = 0;
     data.last_time = ksnetEvMgrGetTime(kl->ke);
     pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));
 
-    if(packet) {
-        size_t vl;
-        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
-        if(kld != NULL) {
-            ksnLNullClientAuthCheck(kl, kld, fd, packet);
-
-        }
+    ksnLNullData* kld = ksnLNullGetClientConnection(kl, fd);
+    #ifdef DEBUG_KSNET
+    if (kld == NULL) {
+        ksn_printf(kev, MODULE, ERROR_M,
+                   "Failed L0 client registration with fd %d from %s:%d\n",
+                   fd, remote_addr, remote_port);
     }
+    #endif
+    return kld;
 }
 
 void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
@@ -605,12 +627,9 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
                     (char*)(packet->peer_name + packet->peer_name_length));
             #endif
 
-            
-            // \TODO Split big packages to smaller
-            if(pkg_length > 512);
-            
+            // Split big packets to smaller
             for(;;) {
-                size_t len = pkg_length > 512 ? 512 : pkg_length;                                                 
+                size_t len = pkg_length > 512 ? 512 : pkg_length;
                 ksnTRUDPsendto(((ksnetEvMgrClass*)(kl->ke))->kc->ku , 0, 0, 0,
                     packet->cmd, ((ksnetEvMgrClass*)(kl->ke))->kc->ku->fd, pkg, len, 0,
                     (__CONST_SOCKADDR_ARG) &remaddr, addrlen);
@@ -632,36 +651,34 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
  *
  * @param kl Pointer to ksnLNullClass
  * @param fd TCP client connection file descriptor
- *
+ * @param remote_addr remote address string
+ * @param remote_port remote port
  */
-static void ksnLNullClientConnect(ksnLNullClass *kl, int fd) {
+static void ksnLNullClientConnect(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port) {
 
     // Set TCP_NODELAY option
     teosockSetTcpNodelay(fd);
 
-    ksn_printf(kev, MODULE, DEBUG_VV, "L0 client with fd %d connected\n", fd);
+    ksn_printf(kev, MODULE, DEBUG_VV,
+               "L0 client with fd %d connected from %s:%d\n",
+               fd, remote_addr, remote_port);
 
     // Send Connected event to all subscribers
     //teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, "", 1, 0);
 
     // Register client in clients map
-    ksnLNullClientRegister(kl, fd, NULL);
-
-    // Create and start TCP watcher (start client processing)
-    size_t valueLength;
-    ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength);
+    ksnLNullData* kld = ksnLNullClientRegister(kl, fd, remote_addr, remote_port);
     if(kld != NULL) {
-
         // Create and start TCP watcher (start TCP client processing)
         ev_init (&kld->w, cmd_l0_read_cb);
         ev_io_set (&kld->w, fd, EV_READ);
         kld->w.data = kl;
         ev_io_start (kev->ev_loop, &kld->w);
-    }
 
-    // Error: can't register TCP fd in tcp proxy map
-    else {
+    } else {
+        // Error: can't register TCP fd in tcp proxy map
         // \todo process error: can't register TCP fd in tcp proxy map
+        // close(fd);
     }
 }
 
@@ -748,7 +765,18 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
 static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
                        int revents, int fd) {
 
-    ksnLNullClientConnect(w->data, fd);
+    int remote_port = 0;
+    const char *remote_addr = NULL;
+
+    struct sockaddr_in adr_inet;
+    socklen_t len_inet = sizeof adr_inet;
+    bool fail = getpeername(fd, (struct sockaddr *)&adr_inet, &len_inet);
+    if (!fail && (len_inet == sizeof adr_inet)) {
+        remote_port = (int) ntohs(adr_inet.sin_port);;
+        remote_addr = strdup(inet_ntoa(adr_inet.sin_addr));
+    }
+
+    ksnLNullClientConnect(w->data, fd, remote_addr, remote_port);
 }
 
 #define CHECK_TIMEOUT 10.00
@@ -1390,19 +1418,32 @@ ssize_t recvCheck(trudpChannelData *tcd, char *data, ssize_t data_length)
     return packetCombineClient(tcd, data, BUFFER_SIZE_CLIENT, data_length != -1 ? data_length : 0);
 }
 
-int processCmd(ksnLNullClass *kl, ksnCorePacketData *rd, teoLNullCPacket *cp)
-{
+static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
+                      ksnCorePacketData *rd, trudpChannelData *tcd,
+                      teoLNullCPacket *packet, const char *packet_kind) {
+    #ifdef DEBUG_KSNET
+    uint8_t *data = teoLNullPacketGetPayload(packet);
+    char hexdump[64];
+    if (packet->data_length) {
+        dump_bytes(hexdump, sizeof(hexdump), data, packet->data_length);
+    } else {
+        strcpy(hexdump, "(null)");
+    }
+    ksn_printf(
+        kev, MODULE, DEBUG_VV,
+        "got %s TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
+        packet_kind, rd->addr, rd->port, (unsigned)packet->cmd,
+        (char *)packet->peer_name, hexdump);
+    #endif
+
     int retval = 0;
-    switch(cp->cmd) {
+    switch(packet->cmd) {
 
         // Login packet
         case 0: {
-            if(cp->peer_name_length == 1 && !cp->peer_name[0] && cp->data_length) {
-                int fd = kl->fd_trudp++;
-                ksnLNullClientRegister(kl, fd, rd);
-                // Add fd to tr-udp channel data
-                trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
-                if(tcd) tcd->fd = fd;
+            if (packet->peer_name_length == 1 && !packet->peer_name[0] &&
+                packet->data_length) {
+                ksnLNullClientAuthCheck(kl, kld, tcd->fd, packet);
                 retval = 1;
             }
         } break;
@@ -1411,16 +1452,11 @@ int processCmd(ksnLNullClass *kl, ksnCorePacketData *rd, teoLNullCPacket *cp)
         default: {
             // Process other L0 TR-UDP packets
             // Send packet to peer
-            size_t vl;
-            trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
-            if(tcd) {
-                ksnLNullData* kld = pblMapGet(kl->map, &tcd->fd, sizeof(tcd->fd), &vl);
-                if(kld != NULL && kld->name != NULL) {
-                    kld->last_time = ksnetEvMgrGetTime(kl->ke);
-                    ksnLNullSendFromL0(kl, cp, kld->name, kld->name_length);
-                } else {
-                    trudp_ChannelSendReset(tcd);
-                }
+            if (kld->name != NULL) {
+                kld->last_time = ksnetEvMgrGetTime(kl->ke);
+                ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+            } else {
+                trudp_ChannelSendReset(tcd);
             }
             retval = 1;
         } break;
@@ -1428,6 +1464,7 @@ int processCmd(ksnLNullClass *kl, ksnCorePacketData *rd, teoLNullCPacket *cp)
 
     return retval;
 }
+
 /**
  * Check and process L0 packet received through TR-UDP
  *
@@ -1437,22 +1474,23 @@ int processCmd(ksnLNullClass *kl, ksnCorePacketData *rd, teoLNullCPacket *cp)
  */
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
-    teoLNullCPacket *cp = teoLNullPacketGetFromBuffer(rd->data, rd->data_len);
-    if(cp != NULL) {
-        #ifdef DEBUG_KSNET
-        uint8_t *data =  teoLNullPacketGetPayload(cp);
-        ksn_printf(kev, MODULE, DEBUG_VV,
-            "got TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: 0x%x\n",
-            rd->addr, rd->port,
-            (unsigned)cp->cmd,
-            (char*)cp->peer_name,
-            *data);
-        #endif
-
-        return processCmd(kl, rd, cp);
+    trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    if(tcd->fd == 0) {
+        // Add fd to tr-udp channel data
+        tcd->fd = ksnLNullGetNextFakeFd(kl);
     }
 
-    trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    teoLNullCPacket *packet_sm = teoLNullPacketGetFromBuffer(rd->data, rd->data_len);
+    if (packet_sm != NULL) {
+        ksnLNullData *kld = ksnLNullGetClientConnection(kl, tcd->fd);
+        if (kld == NULL) {
+            kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
+        }
+        return (kld == NULL) ? 0
+                             : processCmd(kl, kld, rd, tcd, packet_sm,
+                                          "small"); // SMALL PACKET
+    }
+
     // FIXME FIXME FIXME in recvCheck ---> packetCombineClient we could use teoLNullPacketGetFromBuffer
     ssize_t rc = recvCheck(tcd, rd->data, rd->data_len);
     if (rc == -3) {
@@ -1472,20 +1510,15 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         return 1;
     }
 
-    // FIXME FIXME FIXME FIXME FIXME FIXME
-    // trudpPacket * packet = (trudpPacket *)tcd->read_buffer;
-    // cp = trudpPacketGetData(packet);
-    cp = (teoLNullCPacket *)tcd->read_buffer;
-    #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
-            "got Large TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
-            rd->addr, rd->port,
-            (unsigned)cp->cmd,
-            (char*) cp->peer_name,
-            (char*)(cp->peer_name + cp->peer_name_length));
-    #endif
-
-    return processCmd(kl, rd, cp);
+    // rc > 0 ensures it's correct teoLNullCPacket
+    teoLNullCPacket *packet_large = (teoLNullCPacket *)tcd->read_buffer;
+    ksnLNullData *kld = ksnLNullGetClientConnection(kl, tcd->fd);
+    if (kld == NULL) {
+        kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
+    }
+    return (kld == NULL)
+               ? 0
+               : processCmd(kl, kld, rd, tcd, packet_large, "LARGE"); // LARGE PACKET
 }
 
 #undef kev

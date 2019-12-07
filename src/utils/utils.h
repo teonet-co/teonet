@@ -101,6 +101,8 @@ unsigned char *ksn_base64_decode(const char *data,
                              size_t input_length,
                              size_t *output_length);
 
+void dump_bytes(char *buffer, int buffer_len, uint8_t* data, int data_len);
+
 #ifdef	__cplusplus
 }
 #endif
