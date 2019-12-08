@@ -39,6 +39,7 @@ AM_CFLAGS = \
 	 -I../embedded/teocli/libtrudp/src \
 	 -I../embedded/teocli/libtrudp/libs/teobase/include \
 	 -I../embedded/teocli/libtrudp/libs/teoccl/include \
+	 -I../embedded/teocli \
 	 -I../app/embedded/jsmn \
 	 -I/usr/include/libev \
 	 -DEV_USE_EPOLL=1 \
