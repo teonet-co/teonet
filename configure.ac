@@ -294,9 +294,9 @@ AC_CONFIG_FILES([
     tests/Makefile
     examples/fossa/Makefile
     examples/Makefile
-    po/Makefile.in
     sh/Makefile
 ])
+    # po/Makefile.in
 #    embedded/Makefile
 
 
