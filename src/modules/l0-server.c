@@ -32,6 +32,9 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
 static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port);
 static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data, size_t data_length);
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, int fd, teoLNullCPacket *packet);
+static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd);
+static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
+        KeyExchangePayload_Common *kex, size_t kex_length);
 
 
 // Other modules not declared functions
@@ -178,7 +181,6 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     // Success read. Process package and resend it to teonet
     else {
 
-        size_t vl;
         ksnLNullData* kld = ksnLNullGetClientConnection(kl, w->fd);
         if(kld != NULL) {
 
@@ -229,8 +231,44 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         if(packet->cmd == 0 && packet->peer_name_length == 1 &&
                             !packet->peer_name[0] && packet->data_length) {
 
-                            // Set temporary name (it will be changed after TEO_AUTH answer)
-                            ksnLNullClientAuthCheck(kl, kld, w->fd, packet);
+                            uint8_t *data = teoLNullPacketGetPayload(packet);
+                            KeyExchangePayload_Common *kex =
+                                teoLNullKEXGetFromPayload(data,
+                                                          packet->data_length);
+                            if (kex) {
+                                // received client keys
+                                // must be first time or exactly the same as previous
+                                if (processKeyExchange(kl, kld, w->fd, kex,
+                                                       packet->data_length)) {
+                                    #ifdef DEBUG_KSNET
+                                    ksn_printf(kev, MODULE, DEBUG_VV,
+                                               "Encription established for fd %d ...\n",
+                                               w->fd);
+                                    #endif
+                                } else {
+                                    #ifdef DEBUG_KSNET
+                                    ksn_printf(kev, MODULE, DEBUG_VV,
+                                               "Key exchange failed. Stop listening fd %d ...\n",
+                                               w->fd);
+                                    #endif
+
+                                    ksnLNullClientDisconnect(kl, w->fd, 1);
+                                    return;
+                                }
+                            } else {
+                                // process login here
+                                size_t expected_len = packet->data_length - 1;
+                                if (expected_len > 0 &&
+                                    data[expected_len] == 0 &&
+                                    strlen((const char *)data) == expected_len) {
+                                    // Set temporary name (it will be changed after TEO_AUTH answer)
+                                    ksnLNullClientAuthCheck(kl, kld, w->fd, packet);
+                                } else {
+                                    ksn_printf(kev, MODULE, ERROR_M,
+                                        "Invalid login packet from %s:%d\n",
+                                        kld->t_addr, kld->t_port);
+                                }
+                            }
                         }
 
                         // Resend data to teonet or drop wrong packet
@@ -1439,51 +1477,180 @@ ssize_t recvCheck(trudpChannelData *tcd, char *data, ssize_t data_length)
     return packetCombineClient(tcd, data, BUFFER_SIZE_CLIENT, data_length != -1 ? data_length : 0);
 }
 
+/**
+ * Create and send key exchange packet to client
+ * in @a kld must be initialized and valid encription context
+ * 
+ * @param kl L0 module
+ * @param kld client connection
+ * @param fd connection id
+ * 
+ * @return true if succeed
+*/
+static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
+    size_t resp_len = teoLNullKEXBufferSize(kld->server_crypt->enc_proto);
+    uint8_t *resp_buf = (uint8_t *)malloc(resp_len);
+
+    bool ok = teoLNullKEXCreate(kld->server_crypt, resp_buf, resp_len) != 0;
+    if (ok) {
+        const int CMD_L0_KEX_ANSWER = 0;
+        ok = ksnLNullSend(kl, fd, CMD_L0_KEX_ANSWER, resp_buf, resp_len) > 0;
+    }
+    free(resp_buf);
+    return ok;
+}
+
+/**
+ * Handle receives key exchange packet
+ * Creates encryption context if not created before
+ * Checks if encryption context is compatible with received packet
+ * Applies client keys and ensures encrypted session established
+ *
+ * @param kl L0 module
+ * @param kld client connection
+ * @param fd connection id
+ * @param kex key exchange payload
+ * @param kex_length payload length
+ *
+ * @return true if succeed, in case of failure calling code supposed to
+ * disconnect user
+ */
+static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
+                               KeyExchangePayload_Common *kex,
+                               size_t kex_length) {
+
+    if (kld->server_crypt == NULL) {
+        // Create compatible encryption context
+        size_t crypt_size = teoLNullEncryptionContextSize(kex->protocolId);
+        if (crypt_size == 0) {
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, ERROR_M,
+                       "Invalid KEX from %s:%d - can't create ctx(%d); disconnecting\n",
+                       kld->t_addr, kld->t_port, (int)kex->protocolId);
+            #endif
+            return false;
+        }
+        kld->server_crypt = (teoLNullEncryptionContext *)malloc(crypt_size);
+        teoLNullEncryptionContextCreate(kex->protocolId,
+                                        (uint8_t *)kld->server_crypt,
+                                        crypt_size);
+    }
+
+    // check if can be applied
+    if (!teoLNullKEXValidate(kld->server_crypt, kex, kex_length)) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(
+            kev, MODULE, ERROR_M,
+            "Invalid KEX from %s:%d - failed validation; disconnecting\n",
+            kld->t_addr, kld->t_port);
+        #endif
+        return false;
+    }
+
+    // check if applied successfully
+    if (!teoLNullEncryptionContextApplyKEX(kld->server_crypt, kex,
+                                           kex_length)) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, ERROR_M,
+                   "Invalid KEX from %s:%d - can't apply; disconnecting\n",
+                   kld->t_addr, kld->t_port);
+        #endif
+        return false;
+    }
+
+    // Key exchange payload should be sent unencrypted
+    kld->server_crypt->state = SESCRYPT_PENDING;
+    if (!sendKEXResponse(kl, kld, fd)) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, ERROR_M,
+                   "Failed to send KEX response to %s:%d; disconnecting\n",
+                   kld->t_addr, kld->t_port);
+        #endif
+        return false;
+    }
+
+    // Success !!!
+    kld->server_crypt->state = SESCRYPT_ESTABLISHED;
+    return true;
+}
+
 static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                       ksnCorePacketData *rd, trudpChannelData *tcd,
                       teoLNullCPacket *packet, const char *packet_kind) {
+    const bool was_encrypted = teoLNullPacketIsEncrypted(packet);
+    if (!teoLNullPacketDecrypt(kld->server_crypt, packet)) {
+        ksn_printf(kev, MODULE, ERROR_M,
+                   "teoLNullPacketDecrypt failed fd %d/ ctx %p\n", tcd->fd,
+                   kld->server_crypt);
+        return 0;
+    }
+
     #ifdef DEBUG_KSNET
     uint8_t *data = teoLNullPacketGetPayload(packet);
-    char hexdump[64];
+    char hexdump[32];
     if (packet->data_length) {
         dump_bytes(hexdump, sizeof(hexdump), data, packet->data_length);
     } else {
         strcpy(hexdump, "(null)");
     }
-    ksn_printf(
-        kev, MODULE, DEBUG_VV,
-        "got %s TR-UDP packet, from: %s:%d, cmd: %u, to peer: %s, data: %s\n",
-        packet_kind, rd->addr, rd->port, (unsigned)packet->cmd,
-        (char *)packet->peer_name, hexdump);
+    const char *str_enc = was_encrypted ? " encrypted" : "";
+    ksn_printf(kev, MODULE, DEBUG_VV,
+               "got %s%s TR-UDP packet, from: %s:%d, fd: %d, "
+               "cmd: %u, to peer: %s, data: %s\n",
+               packet_kind, str_enc, rd->addr, rd->port, tcd->fd,
+               (unsigned)packet->cmd, packet->peer_name, hexdump);
     #endif
 
-    int retval = 0;
-    switch(packet->cmd) {
+    switch (packet->cmd) {
 
         // Login packet
-        case 0: {
-            if (packet->peer_name_length == 1 && !packet->peer_name[0] &&
-                packet->data_length) {
-                ksnLNullClientAuthCheck(kl, kld, tcd->fd, packet);
-                retval = 1;
-            }
-        } break;
-
-            // Process other L0 packets
-        default: {
-            // Process other L0 TR-UDP packets
-            // Send packet to peer
-            if (kld->name != NULL) {
-                kld->last_time = ksnetEvMgrGetTime(kl->ke);
-                ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+    case 0: {
+        if (packet->peer_name_length == 1 && !packet->peer_name[0] &&
+            packet->data_length) {
+            uint8_t *data = teoLNullPacketGetPayload(packet);
+            KeyExchangePayload_Common *kex =
+                teoLNullKEXGetFromPayload(data, packet->data_length);
+            if (kex) {
+                // received client keys
+                // must be first time or exactly the same as previous
+                if (!processKeyExchange(kl, kld, tcd->fd, kex,
+                                        packet->data_length)) {
+                    // Failed. disconnect user
+                    trudp_ChannelSendReset(tcd);
+                    ksnLNullClientDisconnect(kl, tcd->fd, 1);
+                }
             } else {
-                trudp_ChannelSendReset(tcd);
+                // process login here
+                size_t expected_len = packet->data_length - 1;
+                if (expected_len > 0 && data[expected_len] == 0 &&
+                    strlen((const char *)data) == expected_len) {
+                    ksnLNullClientAuthCheck(kl, kld, tcd->fd, packet);
+                } else {
+                    ksn_printf(kev, MODULE, ERROR_M,
+                               "Invalid login packet from %s:%d\n", kld->t_addr,
+                               kld->t_port);
+                }
             }
-            retval = 1;
-        } break;
+            return 1;
+        }
+        return 0;
+    } break;
+
+        // Process other L0 packets
+    default: {
+        // Process other L0 TR-UDP packets
+        // Send packet to peer
+        if (kld->name != NULL) {
+            kld->last_time = ksnetEvMgrGetTime(kl->ke);
+            ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+        } else {
+            trudp_ChannelSendReset(tcd);
+        }
+        return 1;
+    }
     }
 
-    return retval;
+    return 0;
 }
 
 /**
