@@ -23,7 +23,7 @@ SUBDIRS = \
 	tests \
 	examples \
 	sh \
-	po \
+	# po \
 	# end of SUBDIRS
 
 teonetdocdir = ${prefix}/doc/teonet
