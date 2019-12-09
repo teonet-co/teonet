@@ -74,7 +74,4 @@ build-tests:
 	tests/test_teonet
 
 test:	tests/test_teonet
-	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_cpp_tst
-	embedded/teocli/libtrudp/libs/teobase/libs/teoccl/tests/teoccl_tst
-	embedded/teocli/libtrudp/tests/trudp_tst
-	tests/test_teonet
+
