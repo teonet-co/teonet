@@ -763,7 +763,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             ev_io_stop(kev->ev_loop, &kld->w);
             if(remove_f != 2) close(fd);
         }
-        if (!strstr(kld->name, "-new-")) {
+        if (kld->name != NULL  && !strstr(kld->name, "-new-")) {
             // Show disconnect message
             ksn_printf(kev, MODULE, CONNECT, "### 0005,%s\n", kld->name);
         }
@@ -1319,15 +1319,17 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
             }
 
-            #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG,
-                "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
-                kld->name, kld->t_addr, jp.username);
-            #endif
-            ksnetEvMgrClass *ke = (ksnetEvMgrClass*)kl->ke;
-//            #ifdef DEBUG_KSNET
-            ksn_printf(ke, MODULE, CONNECT, "### 0001,%s\n", kld->name);
-//            #endif
+            if (kld->name != NULL) {
+                #ifdef DEBUG_KSNET
+                ksn_printf(kev, MODULE, DEBUG,
+                    "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
+                    kld->name, kld->t_addr, jp.username);
+                #endif
+                ksnetEvMgrClass *ke = (ksnetEvMgrClass*)kl->ke;
+    //            #ifdef DEBUG_KSNET
+                ksn_printf(ke, MODULE, CONNECT, "### 0001,%s\n", kld->name);
+    //            #endif
+            }
 
             // Send Connected event to all subscribers
             if(kld->name != NULL && !strcmp(rd->from, TEO_AUTH)) {
@@ -1337,7 +1339,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             // Create & Send websocket allow answer message
             size_t snd;
             char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\", \"networks\": %s }",
-                    kld->name, jp.networks ? jp.networks : "null");
+                    kld->name ? kld->name : "", jp.networks ? jp.networks : "null");
             size_t ALLOW_len = strlen(ALLOW) + 1;
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
