@@ -231,11 +231,6 @@ AM_CONDITIONAL(TEO_THREAD, false)
 
 AC_CACHE_SAVE
 
-# dnl ***************************************************************************
-# dnl Internationalization
-# dnl ***************************************************************************
-# IT_PROG_INTLTOOL([0.35.0])
-
 GETTEXT_PACKAGE=teonet
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
