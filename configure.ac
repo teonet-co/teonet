@@ -288,6 +288,7 @@ LT_INIT
 
 AC_CONFIG_FILES([
     Makefile
+    po/Makefile.in
     src/libteonet.pc
     src/Makefile
     app/Makefile
