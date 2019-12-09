@@ -1496,7 +1496,7 @@ static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
     bool ok = teoLNullKEXCreate(kld->server_crypt, resp_buf, resp_len) != 0;
     if (ok) {
         const int CMD_L0_KEX_ANSWER = 0;
-        ok = ksnLNullSend(kl, fd, CMD_L0_KEX_ANSWER, resp_buf, resp_len) > 0;
+        ksnLNullSend(kl, fd, CMD_L0_KEX_ANSWER, resp_buf, resp_len);
     }
     free(resp_buf);
     return ok;
@@ -1620,6 +1620,15 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                     // Failed. disconnect user
                     trudp_ChannelSendReset(tcd);
                     ksnLNullClientDisconnect(kl, tcd->fd, 1);
+
+                } else {
+                    char saltdump[62];
+                    uint8_t *salt = kld->server_crypt->keys.sessionsalt.data;
+                    dump_bytes(saltdump, sizeof(saltdump), salt, sizeof(salt));
+                    ksn_printf(kev, MODULE, DEBUG_VV,
+                               "VALID KEX from %s:%d salt %s state %d\n",
+                               kld->t_addr, kld->t_port, saltdump,
+                               kld->server_crypt->state);
                 }
             } else {
                 // process login here
@@ -1676,9 +1685,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         if (kld == NULL) {
             kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
         }
-        return (kld == NULL) ? 0
-                             : processCmd(kl, kld, rd, tcd, packet_sm,
-                                          "small"); // SMALL PACKET
+        return processCmd(kl, kld, rd, tcd, packet_sm, "small"); // SMALL PACKET
     }
 
     // FIXME FIXME FIXME in recvCheck ---> packetCombineClient we could use teoLNullPacketGetFromBuffer
@@ -1706,9 +1713,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
     if (kld == NULL) {
         kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
     }
-    return (kld == NULL)
-               ? 0
-               : processCmd(kl, kld, rd, tcd, packet_large, "LARGE"); // LARGE PACKET
+    return processCmd(kl, kld, rd, tcd, packet_large, "LARGE"); // LARGE PACKET
 }
 
 /**
