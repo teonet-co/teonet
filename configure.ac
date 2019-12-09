@@ -239,6 +239,15 @@ AM_GLIB_GNU_GETTEXT
 
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
+# ***************************************************************************
+# Internatinalization
+# ***************************************************************************
+GETTEXT_PACKAGE=teousr
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
+AM_GLIB_GNU_GETTEXT
+IT_PROG_INTLTOOL([0.35.0])
+
 dnl ***************************************************************************
 dnl Documentation
 dnl ***************************************************************************
@@ -273,11 +282,6 @@ AM_CONDITIONAL(RELEASE_TEONET, test "$release_teonet" = true)
 
 AC_CACHE_SAVE
 
-dnl ***************************************************************************
-dnl Internationalization
-dnl ***************************************************************************
-IT_PROG_INTLTOOL([0.35.0])
-
 LT_PREREQ([2.4])
 LT_INIT
 
@@ -292,9 +296,6 @@ AC_CONFIG_FILES([
     examples/Makefile
     sh/Makefile
 ])
-    # po/Makefile.in
-#    embedded/Makefile
-
 
 # Call libtrudp's ./configure script recursively.
 AC_CONFIG_SUBDIRS([
