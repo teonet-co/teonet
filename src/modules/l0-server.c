@@ -53,6 +53,35 @@ extern const char *localhost;
 #define kev ((ksnetEvMgrClass*)kl->ke)
 #define L0_VERSION 0 ///< L0 Server version
 
+void teoLNullPacketCheckMiscrypted(ksnLNullClass *kl, ksnLNullData *kld,
+                                   teoLNullCPacket *packet) {
+    if (packet->reserved_2 == 0 || packet->data_length == 0) {
+        return;
+    }
+
+    uint8_t *p_data = teoLNullPacketGetPayload(packet);
+    uint8_t data_check = get_byte_checksum(p_data, packet->data_length);
+    if (data_check == 0) { data_check++; }
+    if (data_check == packet->reserved_2) {
+        return;
+    }
+
+    char hexdump[92];
+    dump_bytes(hexdump, sizeof(hexdump), p_data, packet->data_length);
+
+    ksn_printf(kev, MODULE, DEBUG,
+               "FAILED " _ANSI_RED "POST DECRYPTION " _ANSI_YELLOW
+               "CHECK from %s:%d" _ANSI_LIGHTCYAN
+               " cmd %u, peer '%s', data_length %d, checksum %d, "
+               "header_checksum %d, data checksum in packet " _ANSI_RED
+               "%d != %d" _ANSI_LIGHTCYAN " as calculated, data: " _ANSI_NONE
+               " %s\n",
+               kld->t_addr, kld->t_port, (uint32_t)packet->cmd,
+               packet->peer_name, (uint32_t)packet->data_length,
+               (uint32_t)packet->checksum, (uint32_t)packet->header_checksum,
+               (uint32_t)packet->reserved_2, data_check, hexdump);
+}
+
 /**
  * Initialize ksnLNull module [class](@ref ksnLNullClass)
  *
@@ -227,6 +256,8 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         packet->peer_name_length + packet->data_length)) {
 
                     if (teoLNullPacketDecrypt(kld->server_crypt, packet)) {
+                        teoLNullPacketCheckMiscrypted(kl, kld, packet);
+
                         // Check initialize packet:
                         // cmd = 0, to_length = 1, data_length = 1 + data_len,
                         // data = client_name
@@ -1602,6 +1633,8 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                    kld->server_crypt);
         return 0;
     }
+
+    teoLNullPacketCheckMiscrypted(kl, kld, packet);
 
     #ifdef DEBUG_KSNET
     uint8_t *data = teoLNullPacketGetPayload(packet);
