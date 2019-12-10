@@ -635,7 +635,10 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
     char *packet = malloc(packet_len);
     memset(packet, 0, packet_len);
 
-    teoLNullEncryptionContext *ctx = ksnLNullClientGetCrypto(kl, fd);
+    teoLNullEncryptionContext *ctx = NULL;
+    if (CMD_TRUDP_CHECK(cmd)) {
+        ctx = ksnLNullClientGetCrypto(kl, fd);
+    }
     size_t packet_length = teoLNullPacketCreate(ctx, packet, packet_len, cmd,
                                                 from, data, data_length);
 
@@ -873,8 +876,13 @@ void _check_connected(uint32_t id, int type, void *data) {
                 size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_e_length;
                 char *out_data = malloc(out_data_len);
                 memset(out_data, 0, out_data_len);
+
+                teoLNullEncryptionContext *ctx = NULL;
+                if (CMD_TRUDP_CHECK(CMD_ECHO)) {
+                    ctx = data->server_crypt;
+                }
                 size_t packet_length = teoLNullPacketCreate(
-                    data->server_crypt, out_data, out_data_len, CMD_ECHO, from,
+                    ctx, out_data, out_data_len, CMD_ECHO, from,
                     data_e, data_e_length);
 
                 ksnLNullPacketSend(kl, *fd, out_data, packet_length);
@@ -1062,7 +1070,10 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
         int fd = ksnLNullClientIsConnected(ke->kl, data->from);
         if (fd) {
-            teoLNullEncryptionContext *ctx = ksnLNullClientGetCrypto(ke->kl, fd);
+            teoLNullEncryptionContext *ctx = NULL;
+            if (CMD_TRUDP_CHECK(data->cmd)) {
+                ctx = ksnLNullClientGetCrypto(ke->kl, fd);
+            }
 
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
@@ -1346,8 +1357,13 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                     ALLOW_len;
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
+
+            teoLNullEncryptionContext *ctx = NULL;
+            if (CMD_TRUDP_CHECK(CMD_L0_AUTH)) {
+                ctx = kld->server_crypt;
+            }
             size_t packet_length =
-                teoLNullPacketCreate(kld->server_crypt, out_data, out_data_len,
+                teoLNullPacketCreate(ctx, out_data, out_data_len,
                                      CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
             // Send websocket allow message
             if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
