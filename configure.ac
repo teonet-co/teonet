@@ -11,10 +11,10 @@ AC_SUBST([$1], ['$2'])
 ])
 # END
 
-m4_define([package_major], [0]) dnl
-m4_define([package_minor], [3]) dnl
-m4_define([package_patch], [12-dev]) dnl
-m4_define([package_version], [package_major[.]package_minor[.]package_patch]) dnl
+m4_define([package_major], [0])
+m4_define([package_minor], [3])
+m4_define([package_patch], [12-dev.r2])
+m4_define([package_version], [package_major[.]package_minor[.]package_patch])
 
 AC_PREREQ([2.69])
 
