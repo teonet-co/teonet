@@ -463,8 +463,8 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         teoLNullPacketCreate(ctx, buf, buf_length,
                 cmd_l0_data->cmd,
                 cmd_l0_data->from,
-                cmd_l0_data->from + cmd_l0_data->from_length,
-                cmd_l0_data->data_length);
+                (uint8_t *)cmd_l0_data->from + cmd_l0_data->from_length,
+                (size_t)cmd_l0_data->data_length);
         //if((snd = write(fd, buf, buf_length)) >= 0);
         if((snd = ksnLNullPacketSend(ke->kl, fd, buf, buf_length)) >= 0);
         free(buf);
