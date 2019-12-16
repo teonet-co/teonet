@@ -217,10 +217,12 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             while(kld->read_buffer_ptr - ptr >= (len = sizeof(teoLNullCPacket) +
                     packet->peer_name_length + packet->data_length)) {
 
-                // Check checksum                
-                if(packet->header_checksum == get_byte_checksum(packet,
+                // Check checksum
+                uint8_t *packet_header = (uint8_t *)packet;
+                uint8_t *packet_body = (uint8_t *)packet->peer_name;
+                if(packet->header_checksum == get_byte_checksum(packet_header,
                     sizeof(teoLNullCPacket) - sizeof(packet->header_checksum)) &&
-                   packet->checksum == get_byte_checksum(packet->peer_name,
+                   packet->checksum == get_byte_checksum(packet_body,
                         packet->peer_name_length + packet->data_length)) {
 
                     if (teoLNullPacketDecrypt(kld->server_crypt, packet)) {
@@ -1081,7 +1083,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
             size_t packet_length = teoLNullPacketCreate(ctx, out_data, out_data_len,
-                    data->cmd, rd->from, data->from + data->from_length,
+                    data->cmd, rd->from, (const uint8_t*)data->from + data->from_length,
                     data->data_length);
 
             // Send command to L0 client
@@ -1364,7 +1366,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             }
             size_t packet_length =
                 teoLNullPacketCreate(ctx, out_data, out_data_len,
-                                     CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
+                                     CMD_L0_AUTH, rd->from, (uint8_t *)ALLOW, ALLOW_len);
             // Send websocket allow message
             if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
             free(out_data);
@@ -1458,7 +1460,7 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
     }
 
     if (recieved > 0) {
-        if (tcd->read_buffer_ptr == 0 && ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum(data, sizeof(teoLNullCPacket) - sizeof(((teoLNullCPacket *)data)->header_checksum))) {
+        if (tcd->read_buffer_ptr == 0 && ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum((uint8_t *)data, sizeof(teoLNullCPacket) - sizeof(((teoLNullCPacket *)data)->header_checksum))) {
             retval = -3;
         }
         memmove((char*)tcd->read_buffer + tcd->read_buffer_ptr, data, recieved);
@@ -1473,8 +1475,8 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
        tcd->read_buffer_ptr - tcd->last_packet_ptr >= (size_t)(len = sizeof(teoLNullCPacket) + packet->peer_name_length + packet->data_length)) {
 
         // Check checksum
-        uint8_t header_checksum = get_byte_checksum(packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
-        uint8_t checksum = get_byte_checksum(packet->peer_name, packet->peer_name_length + packet->data_length);
+        uint8_t header_checksum = get_byte_checksum((const uint8_t*)packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
+        uint8_t checksum = get_byte_checksum((const uint8_t*)packet->peer_name, packet->peer_name_length + packet->data_length);
 
         if(packet->header_checksum == header_checksum && packet->checksum == checksum) {
             // Packet has received - return packet size
