@@ -455,17 +455,13 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                 cmd_l0_data->data_length
         );
 
-        teoLNullEncryptionContext *ctx = NULL;
-        if (CMD_TRUDP_CHECK(cmd_l0_data->cmd)) {
-            ctx = ksnLNullClientGetCrypto(ke->kl, fd);
-        }
         char *buf = malloc(buf_length);
-        teoLNullPacketCreate(ctx, buf, buf_length,
+        teoLNullPacketCreate(buf, buf_length,
                 cmd_l0_data->cmd,
                 cmd_l0_data->from,
                 (uint8_t *)cmd_l0_data->from + cmd_l0_data->from_length,
                 (size_t)cmd_l0_data->data_length);
-        //if((snd = write(fd, buf, buf_length)) >= 0);
+
         if((snd = ksnLNullPacketSend(ke->kl, fd, buf, buf_length)) >= 0);
         free(buf);
     }

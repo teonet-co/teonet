@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "jsmn.h"
@@ -637,12 +638,8 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
     char *packet = malloc(packet_len);
     memset(packet, 0, packet_len);
 
-    teoLNullEncryptionContext *ctx = NULL;
-    if (CMD_TRUDP_CHECK(cmd)) {
-        ctx = ksnLNullClientGetCrypto(kl, fd);
-    }
-    size_t packet_length = teoLNullPacketCreate(ctx, packet, packet_len, cmd,
-                                                from, data, data_length);
+    size_t packet_length =
+        teoLNullPacketCreate(packet, packet_len, cmd, from, data, data_length);
 
     // Send packet
     ssize_t snd = ksnLNullPacketSend(kl, fd, packet, packet_length);
@@ -659,31 +656,44 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
  *
  * @return Length of send data or -1 at error
  */
-ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
-        size_t pkg_length) {
+ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
+                           size_t pkg_length) {
+    teoLNullCPacket *packet = (teoLNullCPacket *)pkg;
+    bool with_encryption = CMD_TRUDP_CHECK(packet->cmd);
+
+    ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
+    teoLNullEncryptionContext *ctx =
+        (with_encryption && (kld != NULL)) ? kld->server_crypt : NULL;
+
+    teoLNullPacketSeal(ctx, with_encryption, packet);
 
     ssize_t snd = -1;
 
     // Send by TCP TODO:!!!!!!
     if(fd < MAX_FD_NUMBER) {
         teosockSend(fd, pkg, pkg_length);
-        // snd = teoLNullPacketSend(fd, pkg, pkg_length);
+
     } else {    // Send by TR-UDP
-        size_t vl;
-        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
         if(kld != NULL) {
-            teoLNullCPacket* packet = (teoLNullCPacket*) pkg;
-            struct sockaddr_in remaddr; ///< Remote address
+            struct sockaddr_in remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
             trudpUdpMakeAddr(kld->t_addr, kld->t_port,
                 (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
+            char hexdump[32];
+            if (packet->data_length) {
+                dump_bytes(hexdump, sizeof(hexdump),
+                           teoLNullPacketGetPayload(packet),
+                           packet->data_length);
+            } else {
+                strcpy(hexdump, "(null)");
+            }
             ksn_printf(kev, MODULE, DEBUG_VV,
-                    "send packet to TR-UDP addr: %s:%d, cmd = %u, from peer: %s, data: %s \n",
-                    kld->t_addr, kld->t_port, (unsigned)packet->cmd,
-                    packet->peer_name,
-                    (char*)(packet->peer_name + packet->peer_name_length));
+                       "send packet to TR-UDP addr: %s:%d, cmd = %u, from "
+                       "peer: %s, data: %s \n",
+                       kld->t_addr, kld->t_port, (unsigned)packet->cmd,
+                       packet->peer_name, hexdump);
             #endif
 
             // Split big packets to smaller
@@ -879,12 +889,8 @@ void _check_connected(uint32_t id, int type, void *data) {
                 char *out_data = malloc(out_data_len);
                 memset(out_data, 0, out_data_len);
 
-                teoLNullEncryptionContext *ctx = NULL;
-                if (CMD_TRUDP_CHECK(CMD_ECHO)) {
-                    ctx = data->server_crypt;
-                }
                 size_t packet_length = teoLNullPacketCreate(
-                    ctx, out_data, out_data_len, CMD_ECHO, from,
+                    out_data, out_data_len, CMD_ECHO, from,
                     data_e, data_e_length);
 
                 ksnLNullPacketSend(kl, *fd, out_data, packet_length);
@@ -1072,17 +1078,13 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
         int fd = ksnLNullClientIsConnected(ke->kl, data->from);
         if (fd) {
-            teoLNullEncryptionContext *ctx = NULL;
-            if (CMD_TRUDP_CHECK(data->cmd)) {
-                ctx = ksnLNullClientGetCrypto(ke->kl, fd);
-            }
 
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
                     data->data_length;
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
-            size_t packet_length = teoLNullPacketCreate(ctx, out_data, out_data_len,
+            size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
                     data->cmd, rd->from, (const uint8_t*)data->from + data->from_length,
                     data->data_length);
 
@@ -1360,12 +1362,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
 
-            teoLNullEncryptionContext *ctx = NULL;
-            if (CMD_TRUDP_CHECK(CMD_L0_AUTH)) {
-                ctx = kld->server_crypt;
-            }
             size_t packet_length =
-                teoLNullPacketCreate(ctx, out_data, out_data_len,
+                teoLNullPacketCreate(out_data, out_data_len,
                                      CMD_L0_AUTH, rd->from, (uint8_t *)ALLOW, ALLOW_len);
             // Send websocket allow message
             if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
