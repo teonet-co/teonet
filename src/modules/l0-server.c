@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "jsmn.h"
@@ -51,6 +52,35 @@ extern const char *localhost;
  */
 #define kev ((ksnetEvMgrClass*)kl->ke)
 #define L0_VERSION 0 ///< L0 Server version
+
+void teoLNullPacketCheckMiscrypted(ksnLNullClass *kl, ksnLNullData *kld,
+                                   teoLNullCPacket *packet) {
+    if (packet->reserved_2 == 0 || packet->data_length == 0) {
+        return;
+    }
+
+    uint8_t *p_data = teoLNullPacketGetPayload(packet);
+    uint8_t data_check = get_byte_checksum(p_data, packet->data_length);
+    if (data_check == 0) { data_check++; }
+    if (data_check == packet->reserved_2) {
+        return;
+    }
+
+    char hexdump[92];
+    dump_bytes(hexdump, sizeof(hexdump), p_data, packet->data_length);
+
+    ksn_printf(kev, MODULE, DEBUG,
+               "FAILED " _ANSI_RED "POST DECRYPTION " _ANSI_YELLOW
+               "CHECK from %s:%d" _ANSI_LIGHTCYAN
+               " cmd %u, peer '%s', data_length %d, checksum %d, "
+               "header_checksum %d, data checksum in packet " _ANSI_RED
+               "%d != %d" _ANSI_LIGHTCYAN " as calculated, data: " _ANSI_NONE
+               " %s\n",
+               kld->t_addr, kld->t_port, (uint32_t)packet->cmd,
+               packet->peer_name, (uint32_t)packet->data_length,
+               (uint32_t)packet->checksum, (uint32_t)packet->header_checksum,
+               (uint32_t)packet->reserved_2, data_check, hexdump);
+}
 
 /**
  * Initialize ksnLNull module [class](@ref ksnLNullClass)
@@ -217,13 +247,17 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             while(kld->read_buffer_ptr - ptr >= (len = sizeof(teoLNullCPacket) +
                     packet->peer_name_length + packet->data_length)) {
 
-                // Check checksum                
-                if(packet->header_checksum == get_byte_checksum(packet,
+                // Check checksum
+                uint8_t *packet_header = (uint8_t *)packet;
+                uint8_t *packet_body = (uint8_t *)packet->peer_name;
+                if(packet->header_checksum == get_byte_checksum(packet_header,
                     sizeof(teoLNullCPacket) - sizeof(packet->header_checksum)) &&
-                   packet->checksum == get_byte_checksum(packet->peer_name,
+                   packet->checksum == get_byte_checksum(packet_body,
                         packet->peer_name_length + packet->data_length)) {
 
                     if (teoLNullPacketDecrypt(kld->server_crypt, packet)) {
+                        teoLNullPacketCheckMiscrypted(kl, kld, packet);
+
                         // Check initialize packet:
                         // cmd = 0, to_length = 1, data_length = 1 + data_len,
                         // data = client_name
@@ -635,12 +669,8 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
     char *packet = malloc(packet_len);
     memset(packet, 0, packet_len);
 
-    teoLNullEncryptionContext *ctx = NULL;
-    if (CMD_TRUDP_CHECK(cmd)) {
-        ctx = ksnLNullClientGetCrypto(kl, fd);
-    }
-    size_t packet_length = teoLNullPacketCreate(ctx, packet, packet_len, cmd,
-                                                from, data, data_length);
+    size_t packet_length =
+        teoLNullPacketCreate(packet, packet_len, cmd, from, data, data_length);
 
     // Send packet
     ssize_t snd = ksnLNullPacketSend(kl, fd, packet, packet_length);
@@ -657,31 +687,44 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
  *
  * @return Length of send data or -1 at error
  */
-ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void* pkg,
-        size_t pkg_length) {
+ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
+                           size_t pkg_length) {
+    teoLNullCPacket *packet = (teoLNullCPacket *)pkg;
+    bool with_encryption = CMD_TRUDP_CHECK(packet->cmd);
+
+    ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
+    teoLNullEncryptionContext *ctx =
+        (with_encryption && (kld != NULL)) ? kld->server_crypt : NULL;
+
+    teoLNullPacketSeal(ctx, with_encryption, packet);
 
     ssize_t snd = -1;
 
     // Send by TCP TODO:!!!!!!
     if(fd < MAX_FD_NUMBER) {
         teosockSend(fd, pkg, pkg_length);
-        // snd = teoLNullPacketSend(fd, pkg, pkg_length);
+
     } else {    // Send by TR-UDP
-        size_t vl;
-        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
         if(kld != NULL) {
-            teoLNullCPacket* packet = (teoLNullCPacket*) pkg;
-            struct sockaddr_in remaddr; ///< Remote address
+            struct sockaddr_in remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
             trudpUdpMakeAddr(kld->t_addr, kld->t_port,
                 (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
+            char hexdump[32];
+            if (packet->data_length) {
+                dump_bytes(hexdump, sizeof(hexdump),
+                           teoLNullPacketGetPayload(packet),
+                           packet->data_length);
+            } else {
+                strcpy(hexdump, "(null)");
+            }
             ksn_printf(kev, MODULE, DEBUG_VV,
-                    "send packet to TR-UDP addr: %s:%d, cmd = %u, from peer: %s, data: %s \n",
-                    kld->t_addr, kld->t_port, (unsigned)packet->cmd,
-                    packet->peer_name,
-                    (char*)(packet->peer_name + packet->peer_name_length));
+                       "send packet to TR-UDP addr: %s:%d, cmd = %u, from "
+                       "peer: %s, data: %s \n",
+                       kld->t_addr, kld->t_port, (unsigned)packet->cmd,
+                       packet->peer_name, hexdump);
             #endif
 
             // Split big packets to smaller
@@ -877,12 +920,8 @@ void _check_connected(uint32_t id, int type, void *data) {
                 char *out_data = malloc(out_data_len);
                 memset(out_data, 0, out_data_len);
 
-                teoLNullEncryptionContext *ctx = NULL;
-                if (CMD_TRUDP_CHECK(CMD_ECHO)) {
-                    ctx = data->server_crypt;
-                }
                 size_t packet_length = teoLNullPacketCreate(
-                    ctx, out_data, out_data_len, CMD_ECHO, from,
+                    out_data, out_data_len, CMD_ECHO, from,
                     data_e, data_e_length);
 
                 ksnLNullPacketSend(kl, *fd, out_data, packet_length);
@@ -1070,18 +1109,14 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
         int fd = ksnLNullClientIsConnected(ke->kl, data->from);
         if (fd) {
-            teoLNullEncryptionContext *ctx = NULL;
-            if (CMD_TRUDP_CHECK(data->cmd)) {
-                ctx = ksnLNullClientGetCrypto(ke->kl, fd);
-            }
 
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
                     data->data_length;
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
-            size_t packet_length = teoLNullPacketCreate(ctx, out_data, out_data_len,
-                    data->cmd, rd->from, data->from + data->from_length,
+            size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+                    data->cmd, rd->from, (const uint8_t*)data->from + data->from_length,
                     data->data_length);
 
             // Send command to L0 client
@@ -1358,13 +1393,9 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
 
-            teoLNullEncryptionContext *ctx = NULL;
-            if (CMD_TRUDP_CHECK(CMD_L0_AUTH)) {
-                ctx = kld->server_crypt;
-            }
             size_t packet_length =
-                teoLNullPacketCreate(ctx, out_data, out_data_len,
-                                     CMD_L0_AUTH, rd->from, ALLOW, ALLOW_len);
+                teoLNullPacketCreate(out_data, out_data_len,
+                                     CMD_L0_AUTH, rd->from, (uint8_t *)ALLOW, ALLOW_len);
             // Send websocket allow message
             if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
             free(out_data);
@@ -1480,8 +1511,8 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
        tcd->read_buffer_ptr - tcd->last_packet_ptr >= (size_t)(len = sizeof(teoLNullCPacket) + packet->peer_name_length + packet->data_length)) {
 
         // Check checksum
-        uint8_t header_checksum = get_byte_checksum(packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
-        uint8_t checksum = get_byte_checksum(packet->peer_name, packet->peer_name_length + packet->data_length);
+        uint8_t header_checksum = get_byte_checksum((const uint8_t*)packet, sizeof(teoLNullCPacket) - sizeof(packet->header_checksum));
+        uint8_t checksum = get_byte_checksum((const uint8_t*)packet->peer_name, packet->peer_name_length + packet->data_length);
 
         if(packet->header_checksum == header_checksum && packet->checksum == checksum) {
             // Packet has received - return packet size
@@ -1609,6 +1640,8 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                    kld->server_crypt);
         return 0;
     }
+
+    teoLNullPacketCheckMiscrypted(kl, kld, packet);
 
     #ifdef DEBUG_KSNET
     uint8_t *data = teoLNullPacketGetPayload(packet);
