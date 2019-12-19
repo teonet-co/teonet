@@ -1489,8 +1489,15 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
     }
 
     if (recieved > 0) {
-        if (tcd->read_buffer_ptr == 0 && ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum((uint8_t *)data, sizeof(teoLNullCPacket) - sizeof(((teoLNullCPacket *)data)->header_checksum))) {
-            retval = -3;
+        static const size_t headerSize = sizeof(teoLNullCPacket) - 
+            sizeof(((teoLNullCPacket *)data)->header_checksum);
+
+        if (tcd->read_buffer_ptr == 0 &&
+            ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum(data, headerSize)) {
+            if (!tcd->stat.packets_send && !tcd->stat.packets_receive) {
+                trudpChannelDestroy(tcd);
+            }
+            return -3;
         }
         memmove((char*)tcd->read_buffer + tcd->read_buffer_ptr, data, recieved);
         tcd->read_buffer_ptr += recieved;
