@@ -33,7 +33,8 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
 static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port);
 static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data, size_t data_length);
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, int fd, teoLNullCPacket *packet);
-static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd);
+static bool sendKEXResponse(ksnLNullClass *kl,
+                            teoLNullEncryptionContext *locked_crypt, int fd);
 static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
         KeyExchangePayload_Common *kex, size_t kex_length);
 
@@ -53,8 +54,8 @@ extern const char *localhost;
 #define kev ((ksnetEvMgrClass*)kl->ke)
 #define L0_VERSION 0 ///< L0 Server version
 
-void teoLNullPacketCheckMiscrypted(ksnLNullClass *kl, ksnLNullData *kld,
-                                   teoLNullCPacket *packet) {
+static void teoLNullPacketCheckMiscrypted(ksnLNullClass *kl, ksnLNullData *kld,
+                                          teoLNullCPacket *packet) {
     if (packet->reserved_2 == 0 || packet->data_length == 0) {
         return;
     }
@@ -255,7 +256,13 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                    packet->checksum == get_byte_checksum(packet_body,
                         packet->peer_name_length + packet->data_length)) {
 
-                    if (teoLNullPacketDecrypt(kld->server_crypt, packet)) {
+                    teoLNullEncryptionContext *locked_crypt =
+                        ksnLNullClientAcquireCrypto(kld);
+                    bool decrypt_ok =
+                        teoLNullPacketDecrypt(locked_crypt, packet);
+                    ksnLNullClientUnlockCrypto(locked_crypt);
+
+                    if (decrypt_ok) {
                         teoLNullPacketCheckMiscrypted(kl, kld, packet);
 
                         // Check initialize packet:
@@ -693,18 +700,21 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
     bool with_encryption = CMD_TRUDP_CHECK(packet->cmd);
 
     ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
-    teoLNullEncryptionContext *ctx =
-        (with_encryption && (kld != NULL)) ? kld->server_crypt : NULL;
-
-    teoLNullPacketSeal(ctx, with_encryption, packet);
 
     ssize_t snd = -1;
 
     // Send by TCP TODO:!!!!!!
-    if(fd < MAX_FD_NUMBER) {
+    if (fd < MAX_FD_NUMBER) {
+        teoLNullEncryptionContext *locked_crypt =
+            with_encryption ? ksnLNullClientAcquireCrypto(kld) : NULL;
+
+        // encrypt and send under lock, so it become atomic pair
+        teoLNullPacketSeal(locked_crypt, with_encryption, packet);
         teosockSend(fd, pkg, pkg_length);
 
-    } else {    // Send by TR-UDP
+        ksnLNullClientUnlockCrypto(locked_crypt);
+
+    } else { // Send by TR-UDP
         if(kld != NULL) {
             struct sockaddr_in remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
@@ -727,6 +737,12 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                        packet->peer_name, hexdump);
             #endif
 
+            teoLNullEncryptionContext *locked_crypt =
+                with_encryption ? ksnLNullClientAcquireCrypto(kld) : NULL;
+
+            // encrypt and send under lock, so it become atomic pair
+            teoLNullPacketSeal(locked_crypt, with_encryption, packet);
+
             // Split big packets to smaller
             for(;;) {
                 size_t len = pkg_length > 512 ? 512 : pkg_length;
@@ -737,6 +753,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                 if(!pkg_length) break;
                 pkg += len;
             }
+            ksnLNullClientUnlockCrypto(locked_crypt);
         }
     }
 
@@ -846,6 +863,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         }
 
         if(kld->server_crypt != NULL) {
+            teoLNullEncryptionContextDestroy(kld->server_crypt);
             free(kld->server_crypt);
             kld->server_crypt = NULL;
         }
@@ -1493,7 +1511,7 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
             sizeof(((teoLNullCPacket *)data)->header_checksum);
 
         if (tcd->read_buffer_ptr == 0 &&
-            ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum(data, headerSize)) {
+            ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum((const uint8_t*)data, headerSize)) {
             if (!tcd->stat.packets_send && !tcd->stat.packets_receive) {
                 trudpChannelDestroy(tcd);
             }
@@ -1535,19 +1553,19 @@ ssize_t recvCheck(trudpChannelData *tcd, char *data, ssize_t data_length)
 
 /**
  * Create and send key exchange packet to client
- * in @a kld must be initialized and valid encription context
  * 
  * @param kl L0 module
- * @param kld client connection
+ * @param locked_crypt already encrypted encryption context
  * @param fd connection id
  * 
  * @return true if succeed
 */
-static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
-    size_t resp_len = teoLNullKEXBufferSize(kld->server_crypt->enc_proto);
+static bool sendKEXResponse(ksnLNullClass *kl,
+                            teoLNullEncryptionContext *locked_crypt, int fd) {
+    size_t resp_len = teoLNullKEXBufferSize(locked_crypt->enc_proto);
     uint8_t *resp_buf = (uint8_t *)malloc(resp_len);
 
-    bool ok = teoLNullKEXCreate(kld->server_crypt, resp_buf, resp_len) != 0;
+    bool ok = teoLNullKEXCreate(locked_crypt, resp_buf, resp_len) != 0;
     if (ok) {
         const int CMD_L0_KEX_ANSWER = 0;
         ksnLNullSend(kl, fd, CMD_L0_KEX_ANSWER, resp_buf, resp_len);
@@ -1592,8 +1610,10 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
                                         crypt_size);
     }
 
+    teoLNullEncryptionContext *locked_crypt = ksnLNullClientAcquireCrypto(kld);
     // check if can be applied
-    if (!teoLNullKEXValidate(kld->server_crypt, kex, kex_length)) {
+    if (!teoLNullKEXValidate(locked_crypt, kex, kex_length)) {
+        ksnLNullClientUnlockCrypto(locked_crypt);
         #ifdef DEBUG_KSNET
         ksn_printf(
             kev, MODULE, ERROR_M,
@@ -1604,8 +1624,8 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     }
 
     // check if applied successfully
-    if (!teoLNullEncryptionContextApplyKEX(kld->server_crypt, kex,
-                                           kex_length)) {
+    if (!teoLNullEncryptionContextApplyKEX(locked_crypt, kex, kex_length)) {
+        ksnLNullClientUnlockCrypto(locked_crypt);
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, ERROR_M,
                    "Invalid KEX from %s:%d - can't apply; disconnecting\n",
@@ -1615,8 +1635,9 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     }
 
     // Key exchange payload should be sent unencrypted
-    kld->server_crypt->state = SESCRYPT_PENDING;
-    if (!sendKEXResponse(kl, kld, fd)) {
+    locked_crypt->state = SESCRYPT_PENDING;
+    if (!sendKEXResponse(kl, locked_crypt, fd)) {
+        ksnLNullClientUnlockCrypto(locked_crypt);
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, ERROR_M,
                    "Failed to send KEX response to %s:%d; disconnecting\n",
@@ -1626,7 +1647,8 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     }
 
     // Success !!!
-    kld->server_crypt->state = SESCRYPT_ESTABLISHED;
+    locked_crypt->state = SESCRYPT_ESTABLISHED;
+    ksnLNullClientUnlockCrypto(locked_crypt);
     return true;
 }
 
@@ -1634,10 +1656,14 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                       ksnCorePacketData *rd, trudpChannelData *tcd,
                       teoLNullCPacket *packet, const char *packet_kind) {
     const bool was_encrypted = teoLNullPacketIsEncrypted(packet);
-    if (!teoLNullPacketDecrypt(kld->server_crypt, packet)) {
+    teoLNullEncryptionContext *locked_crypt = ksnLNullClientAcquireCrypto(kld);
+    bool decrypt_ok = teoLNullPacketDecrypt(locked_crypt, packet);
+    ksnLNullClientUnlockCrypto(locked_crypt);
+
+    if (!decrypt_ok) {
         ksn_printf(kev, MODULE, ERROR_M,
-                   "teoLNullPacketDecrypt failed fd %d/ ctx %p\n", tcd->fd,
-                   kld->server_crypt);
+                   "teoLNullPacketDecrypt failed from: %s:%d\n", kld->t_addr,
+                   kld->t_port);
         return 0;
     }
 
@@ -1679,12 +1705,14 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
 
                 } else {
                     char saltdump[62];
-                    uint8_t *salt = kld->server_crypt->keys.sessionsalt.data;
+                    teoLNullEncryptionContext *locked_crypt = ksnLNullClientAcquireCrypto(kld);
+                    uint8_t *salt = locked_crypt->keys.sessionsalt.data;
                     dump_bytes(saltdump, sizeof(saltdump), salt, sizeof(salt));
+                    teoLNullEncryptedSessionState enc_state = locked_crypt->state;
+                    ksnLNullClientUnlockCrypto(locked_crypt);
                     ksn_printf(kev, MODULE, DEBUG_VV,
                                "VALID KEX from %s:%d salt %s state %d\n",
-                               kld->t_addr, kld->t_port, saltdump,
-                               kld->server_crypt->state);
+                               kld->t_addr, kld->t_port, saltdump, enc_state);
                 }
             } else {
                 // process login here
@@ -1773,16 +1801,46 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 }
 
 /**
- * Returns L0 client encryption context and return it if available
+ * Locks and returns L0 client encryption context and return it if available
+ *
+ * @param kld Pointer to ksnLNullData
+ *
+ * @return teoLNullEncryptionContext pointer or null if not available
+ */
+teoLNullEncryptionContext *ksnLNullClientAcquireCrypto(ksnLNullData *kld) {
+    if (kld == NULL || kld->server_crypt == NULL) { return NULL; }
+
+    teomutexLock(&kld->server_crypt->encryptionGuard);
+    if (kld->server_crypt->enc_proto == ENC_PROTO_DISABLED) {
+        teomutexUnlock(&kld->server_crypt->encryptionGuard);
+        return NULL;
+    }
+
+    return kld->server_crypt;
+}
+
+/**
+ * Locks and returns L0 client encryption context and return it if available
  *
  * @param kl Pointer to ksnLNullClass
  * @param fd Client name connection fd
  *
  * @return teoLNullEncryptionContext pointer or null if not available
  */
-teoLNullEncryptionContext *ksnLNullClientGetCrypto(ksnLNullClass *kl, int fd) {
-    ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
-    return (kld == NULL) ? NULL : kld->server_crypt;
+teoLNullEncryptionContext *ksnLNullClientAcquireChannelCrypto(ksnLNullClass *kl,
+                                                              int fd) {
+    return ksnLNullClientAcquireCrypto(ksnLNullGetClientConnection(kl, fd));
+}
+
+/**
+ * Unlock encryption context obtained by teoLNullAcquireCrypto
+ *
+ * @param locked_crypt teoLNullEncryptionContext pointer
+ */
+void ksnLNullClientUnlockCrypto(teoLNullEncryptionContext *locked_crypt) {
+    if (locked_crypt != NULL) {
+        teomutexUnlock(&locked_crypt->encryptionGuard);
+    }
 }
 
 #undef kev

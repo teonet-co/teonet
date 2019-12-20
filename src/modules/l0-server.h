@@ -30,6 +30,9 @@ typedef struct ksnLNullData {
     int t_channel;            ///< TR-UDP channel
     double last_time;
 
+    //! encryption context, in multithreaded environment must be used in between
+    //! pair of calls
+    //! ksnLNullClientAcquire[Channel]Crypto / ksnLNullClientUnlockCrypto
     teoLNullEncryptionContext *server_crypt;
 } ksnLNullData;  
                    
@@ -86,7 +89,9 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd);
 ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg, size_t pkg_length);
 void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f);
 
-teoLNullEncryptionContext *ksnLNullClientGetCrypto(ksnLNullClass *kl, int fd);
+teoLNullEncryptionContext *ksnLNullClientAcquireChannelCrypto(ksnLNullClass *kl, int fd);
+teoLNullEncryptionContext *ksnLNullClientAcquireCrypto(ksnLNullData *kld);
+void ksnLNullClientUnlockCrypto(teoLNullEncryptionContext *locked_crypt);
 
 #ifdef	__cplusplus
 }
