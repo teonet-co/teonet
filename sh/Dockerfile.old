@@ -1,4 +1,4 @@
-FROM  ubuntu:18.04 as builder
+FROM  ubuntu:18.04
 
 WORKDIR /teonet
 
@@ -15,7 +15,7 @@ RUN apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-de
 COPY . /teonet
 
 # Libtuntap
-RUN apt-get install -y cmake g++ unzip sudo
+RUN apt-get install -y cmake g++ unzip
 RUN cd /teonet/distr && \
     unzip libtuntap.zip && \
     cd libtuntap-master && \
@@ -31,18 +31,5 @@ RUN cd /teonet && autoreconf --force --install
 RUN ./autogen.sh --prefix=/usr/local
 RUN ./configure --prefix=/usr/local
 RUN make
-#RUN make install
-#RUN cp /teonet/src/.libs/libteonet* /usr/lib/
-
-RUN sh/make_libtuntap.sh
-RUN sh/make_package deb
-
-
-FROM  ubuntu:18.04
-
-RUN apt-get update && apt-get -y upgrade
-
-WORKDIR /teonet
-COPY --from=builder /teonet/*.deb /teonet/
-RUN apt-get install -y libssl-dev libev-dev libconfuse-dev uuid-dev
-RUN apt-get install -y /teonet/*.deb
+RUN make install
+RUN cp /teonet/src/.libs/libteonet* /usr/lib/
