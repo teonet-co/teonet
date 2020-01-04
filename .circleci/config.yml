@@ -11,7 +11,7 @@ jobs:
       - checkout
       - run: git submodule update --init --recursive
       - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
-      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn
+      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
 
   tagged-build:
     machine:
@@ -24,7 +24,7 @@ jobs:
       - checkout
       - run: git submodule update --init --recursive
       - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
-      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn
+      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
 
       # login to ECR
       - run: $(aws --region $AWS_REGION ecr get-login --no-include-email)
