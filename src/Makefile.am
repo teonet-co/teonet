@@ -140,6 +140,7 @@ nobase_teonetinclude_HEADERS = \
 
 teonetinclude_HEADERS = \
 	../embedded/libpbl/src/pbl.h \
+	../embedded/teocli/libteol0/teocli_api.h \
 	../embedded/teocli/libteol0/teonet_l0_client.h \
 	../app/embedded/jsmn/jsmn.h \
 	\
