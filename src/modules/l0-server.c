@@ -1373,7 +1373,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 #endif
                 ksnetEvMgrClass *ke = (ksnetEvMgrClass*)kl->ke;
     //            #ifdef DEBUG_KSNET
-                ksn_printf(ke, MODULE, CONNECT, "### 0001,%s\n", kld->name);
+                ksn_printf(ke, MODULE, CONNECT, "### 0001,%s,%s\n", kld->name, kld->t_addr);
     //            #endif
             }
 
