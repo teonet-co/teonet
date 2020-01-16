@@ -604,6 +604,10 @@ public:
       return ksnCQueAdd(kq, NULL, (double)timeout, user_data);
     }
 
+    inline int remove(uint32_t id) {
+      return ksnCQueRemove(kq, id);
+    }
+
     template <typename Callback>
     inline void* find(void* find, const Callback compare, size_t* key_length = NULL) {
       return ksnCQueFindData(kq, find, compare, key_length);
