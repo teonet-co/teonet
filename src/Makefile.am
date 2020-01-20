@@ -69,8 +69,9 @@ AM_LDFLAGS = -L/opt/local/lib
 
 LIBS = -lev -lcrypt -ltuntap \
 	../embedded/libpbl/src/libpbl.a \
-	../embedded/teocli/linux/.libs/libteocli.la \
 	# end of LIBS
+
+#	../embedded/teocli/linux/.libs/libteocli.la 
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -91,11 +92,10 @@ DEFS = @DEFS@ -DLOCALEDIR=\"${localedir}\"
 
 #nodist_include_HEADERS = config/config.h.in
 teonetincludedir=$(includedir)/teonet
-teobasedir = $(pkgincludedir)/teobase
-teoccldir = $(pkgincludedir)/teoccl
-#teobaseincludedir=$(includedir)/teobase
-#teocclincludedir=$(includedir)/teoccl
-#teonetinclude_HEADERS =
+#teobasedir = $(pkgincludedir)/teobase
+#teoccldir = $(pkgincludedir)/teoccl
+teoclidir = $(pkgincludedir)/teocli
+
 nobase_teonetinclude_HEADERS = \
     crypt.h \
     daemon.h \
@@ -140,8 +140,6 @@ nobase_teonetinclude_HEADERS = \
 
 teonetinclude_HEADERS = \
 	../embedded/libpbl/src/pbl.h \
-	../embedded/teocli/libteol0/teocli_api.h \
-	../embedded/teocli/libteol0/teonet_l0_client.h \
 	../app/embedded/jsmn/jsmn.h \
 	\
 	../embedded/teocli/libtrudp/src/udp.h \
@@ -157,24 +155,54 @@ teonetinclude_HEADERS = \
 	../embedded/teocli/libtrudp/src/trudp_receive_queue.h \
 	# end of teonetinclude_HEADERS
 
+#	../embedded/teocli/libteol0/teocli_api.h 
+#	../embedded/teocli/libteol0/teonet_l0_client.h 
+
+####################
+teobasedir = $(pkgincludedir)/teocli/teobase
 teobase_HEADERS = \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/api.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/logging.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/mutex.h \
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/platform.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/socket.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/time.h \
-	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/platform.h \
-	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/array_list.h \
-	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/hash.h \
-	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/map.h \
-	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/memory.h \
-	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/queue.h \
-	#end of teobase_HEADERS
+	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/windows.h \
+	# end of teobase_HEADERS
+
+teoccldir = $(pkgincludedir)/teocli/teoccl
 teoccl_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/array_list.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/hash.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/map.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/memory.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/queue.h \
-	#end of teoccl_HEADERS
+	# end of teoccl_HEADERS
+
+tinyaesdir = $(pkgincludedir)/teocli/libtinycrypt/tiny-AES-c/
+tinyaes_HEADERS = \
+	$(top_srcdir)/embedded/teocli/libtinycrypt/tiny-AES-c/aes.h \
+	# end of tinyaes_HEADERS
+
+tinyecdhdir = $(pkgincludedir)/teocli/libtinycrypt/tiny-ECDH-c/
+tinyecdh_HEADERS = \
+	$(top_srcdir)/embedded/teocli/libtinycrypt/tiny-ECDH-c/ecdh.h \
+	# end of tinyecdh_HEADERS
+
+tinycryptdir = $(pkgincludedir)/teocli/libtinycrypt
+tinycrypt_HEADERS = \
+	$(top_srcdir)/embedded/teocli/libtinycrypt/tinycrypt.h \
+	# end of tinycrypt_HEADERS
+
+teocli_HEADERS = \
+	$(top_srcdir)/embedded/teocli/libteol0/teocli_api.h \
+	$(top_srcdir)/embedded/teocli/libteol0/teocli.hpp \
+	$(top_srcdir)/embedded/teocli/libteol0/teonet_l0_client_crypt.h \
+	$(top_srcdir)/embedded/teocli/libteol0/teonet_l0_client_options.h \
+	$(top_srcdir)/embedded/teocli/libteol0/teonet_l0_client.h \
+	# end of libteol0_HEADERS
+####################
+
 
 libteonet_la_SOURCES = \
     crypt.c \
@@ -214,7 +242,11 @@ libteonet_la_SOURCES = \
     utils/utils.c \
     utils/base64.c \
     ../app/embedded/jsmn/jsmn.c \
-		# end of libteonet_la_SOURCES
+    ../embedded/teocli/libtrudp/libs/teoccl/src/teoccl/map.c \
+    ../embedded/teocli/libtrudp/libs/teoccl/src/teoccl/hash.c \
+    ../embedded/teocli/libtrudp/libs/teoccl/src/teoccl/queue.c \
+    ../embedded/teocli/libtrudp/libs/teoccl/src/teoccl/memory.c \
+    # end of libteonet_la_SOURCES
 
 
 teonetconfdir=$(sysconfdir)/teonet
