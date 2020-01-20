@@ -297,9 +297,4 @@ AC_CONFIG_FILES([
     sh/Makefile
 ])
 
-# Call libtrudp's ./configure script recursively.
-#AC_CONFIG_SUBDIRS([
-#        embedded/teocli/linux
-#])
-
 AC_OUTPUT

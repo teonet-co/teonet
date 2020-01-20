@@ -18,14 +18,12 @@ endif
 SUBDIRS = \
 	embedded/libpbl/src \
 	src \
+	app \
+	tests \
+	examples \
 	sh \
 	po \
 	# end of SUBDIRS
-
-#	embedded/teocli/linux 
-#	app 
-#	tests 
-#	examples 
 
 
 teonetdocdir = ${prefix}/doc/teonet

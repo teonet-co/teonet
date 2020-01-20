@@ -277,18 +277,8 @@ teonetconf_DATA = config/teonet.conf.default
 # Extra distributive
 EXTRA_DIST = config/teonet.conf.default ../docs/man/man3
 
-# Not embed confuse flag
-if NOT_E_CONFUSE
-else
-#libteonet_la_SOURCES += ../lib/confuse/confuse.c lexer.l
-endif
-
-# AM_LFLAGS=-Pcfg_yy -olex.yy.c
-#lexer.c: lexer.l
-
 libteonet_la_LDFLAGS = $(AM_LDFLAGS) \
 	-version-info  $(LIBRARY_CURRENT):$(LIBRARY_REVISION):$(LIBRARY_AGE) \
-	# 49:0:0 \
 	# end of libteonet_la_LDFLAGS
 
 uninstall-local:
