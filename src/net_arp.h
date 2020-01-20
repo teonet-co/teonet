@@ -17,7 +17,7 @@
 #include <pbl.h>
 
 #include "net_core.h"
-#include "teocli/teonet_l0_client.h"
+#include "teonet_l0_client.h"
 
 ///**
 // * KSNet ARP table data structure
