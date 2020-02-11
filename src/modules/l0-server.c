@@ -690,6 +690,17 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
 ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                            size_t pkg_length) {
     teoLNullCPacket *packet = (teoLNullCPacket *)pkg;
+    #ifdef DEBUG_KSNET
+    char hexdump[32];
+    if (packet->data_length) {
+        dump_bytes(hexdump, sizeof(hexdump),
+                    teoLNullPacketGetPayload(packet),
+                    packet->data_length);
+    } else {
+        strcpy(hexdump, "(null)");
+    }
+    #endif
+
     bool with_encryption = CMD_TRUDP_CHECK(packet->cmd);
 
     ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
@@ -712,14 +723,6 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                 (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
-            char hexdump[32];
-            if (packet->data_length) {
-                dump_bytes(hexdump, sizeof(hexdump),
-                           teoLNullPacketGetPayload(packet),
-                           packet->data_length);
-            } else {
-                strcpy(hexdump, "(null)");
-            }
             ksn_printf(kev, MODULE, DEBUG_VV,
                        "send packet to TR-UDP addr: %s:%d, cmd = %u, from "
                        "peer: %s, data: %s \n",
