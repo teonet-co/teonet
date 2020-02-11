@@ -22,6 +22,7 @@
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -107,6 +108,14 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         case CMD_ECHO_ANSWER:
             processed = cmd_echo_answer_cb(kco, rd);
             break;
+
+        case CMD_ECHO_UNR:
+            processed = cmd_echo_unr_cb(kco, rd);
+            break;
+
+//        case CMD_ECHO_UNR_ANSWER:
+//            processed = cmd_echo_unr_answer_cb(kco, rd);
+//            break;
 
         case CMD_CONNECT_R:
             processed = cmd_connect_r_cb(kco, rd);
@@ -383,6 +392,21 @@ static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     return 1; // Command processed
 }
 
+static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+
+    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_ECHO_UNR (cmd = %u) command, from %s (%s:%d)\n",
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
+    // Send ECHO to L0 user
+    ksnLNullSendToL0(ke, rd->addr, rd->port, rd->from, rd->from_len, CMD_ECHO_UNR_ANSWER,
+                rd->data, rd->data_len);
+
+    return 1; // Command processed
+}
 /**
  * Process CMD_PEERS command
  *

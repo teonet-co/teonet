@@ -2029,15 +2029,20 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     );
     #endif
 
+    trudpChannelData *tcd = trudpGetChannelCreate(TD_P(td), addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
+    if(tcd == (void*)-1) {
+        return -1; // what to return in this case?
+    }
+
     // TR-UDP: Check commands array
     if(CMD_TRUDP_CHECK(cmd)) {
-        trudpChannelData *tcd = trudpGetChannelCreate(TD_P(td), addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
-        if(tcd != (void*)-1) trudpChannelSendData(tcd, (void *)buf, buf_len);
+        trudpChannelSendData(tcd, (void *)buf, buf_len);
         buf_len = 0;
     }
 
     // Not TR-UDP
     else {
+        trudpUdpSendto(td->fd, (void *)buf, buf_len, (__CONST_SOCKADDR_ARG)&tcd->remaddr, sizeof(tcd->remaddr));
         // Show debug messages
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
@@ -2448,6 +2453,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
         case GOT_DATA_NO_TRUDP: {
             const trudpData *td = TD(tcd); // used in kev macro
+
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                        "got %d bytes DATA packet from no trudp chan %s \n",
