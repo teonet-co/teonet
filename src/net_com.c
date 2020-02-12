@@ -109,7 +109,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_echo_answer_cb(kco, rd);
             break;
 
-        case CMD_ECHO_UNR:
+        case CMD_ECHO_UNRELIABLE:
             processed = cmd_echo_unr_cb(kco, rd);
             break;
 
@@ -402,7 +402,7 @@ static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     // Send ECHO to L0 user
-    ksnLNullSendToL0(ke, rd->addr, rd->port, rd->from, rd->from_len, CMD_ECHO_UNR_ANSWER,
+    ksnLNullSendToL0(ke, rd->addr, rd->port, rd->from, rd->from_len, CMD_ECHO_UNRELIABLE_ANSWER,
                 rd->data, rd->data_len);
 
     return 1; // Command processed
