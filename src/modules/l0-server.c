@@ -385,11 +385,11 @@ ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl) {
  * Extend L0 log
  */ 
 static int extendedLog() {
-    int log_leval = DEBUG_VV;
+    int log_level = DEBUG_VV;
     if (1 /*show_ext_log*/ ) {
-        log_leval = DEBUG;
+        log_level = DEBUG;
     }
-    return log_leval;
+    return log_level;
 }
 
 /**
