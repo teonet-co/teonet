@@ -93,6 +93,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
         { "log_priority",   required_argument, 0, 'L' }, 
         { "color_output_disable", no_argument, &conf->color_output_disable_f, 1 },
+        { "extended_l0_log", no_argument,      &conf->extended_l0_log_f, 1 },
         { "block_cli_input", no_argument,      &conf->block_cli_input_f, 1 },        
         { "no_multi_thread", no_argument,      &conf->no_multi_thread_f, 1 },
         { "send_ack_event", no_argument,       &conf->send_ack_event_f, 1 },
@@ -430,6 +431,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "\n"
     "       --color_output       Disable color output in stdout terminal logs,\n"
     "                            (full flag name is: --color_output_disable)\n"
+    "\n"
+    "       --extended_l0_log    Extends L0 server DEBUG log\n"
     "\n"
     "       --no_multi_thread    Don't check multi thread mode in async calls\n"   
     "       --send_ack_event     Send ACK event when cmd delivered\n"
