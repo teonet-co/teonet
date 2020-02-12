@@ -382,6 +382,17 @@ ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl) {
 }
 
 /**
+ * Extend L0 log
+ */ 
+static int extendedLog() {
+    int log_leval = DEBUG_VV;
+    if (1 /*show_ext_log*/ ) {
+        log_leval = DEBUG;
+    }
+    return log_leval;
+}
+
+/**
  * Send data received from L0 client to teonet peer
  *
  * @param kl Pointer to ksnLNullClass
@@ -424,8 +435,8 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     // Send to this host
     else {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
-            "send command to L0 server peer \"%s\" from L0 client \"%s\" ...\n",
+        ksn_printf(kev, MODULE, extendedLog(),
+            "send packet to peer \"%s\" from L0 client \"%s\" ...\n",
             packet->peer_name, spacket->from);
         #endif
 
@@ -723,8 +734,8 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                 (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                       "send packet to TR-UDP addr: %s:%d, cmd = %u, from "
+            ksn_printf(kev, MODULE, extendedLog(),
+                       "send packet to trudp addr: %s:%d, cmd = %u, from "
                        "peer: %s, data: %s \n",
                        kld->t_addr, kld->t_port, (unsigned)packet->cmd,
                        packet->peer_name, hexdump);
@@ -1102,8 +1113,8 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksnLNullSPacket *data = rd->data;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV,
-        "got command No %d to \"%s\" L0 client from peer \"%s\" "
+    ksn_printf(ke, MODULE, extendedLog(),
+        "got command No %d for \"%s\" L0 client from peer \"%s\" "
         "with %d bytes data\n",
         data->cmd, data->from, rd->from, data->data_length);
     #endif
@@ -1656,8 +1667,8 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
         strcpy(hexdump, "(null)");
     }
     const char *str_enc = was_encrypted ? " encrypted" : "";
-    ksn_printf(kev, MODULE, DEBUG_VV,
-               "got %s%s TR-UDP packet, from: %s:%d, fd: %d, "
+    ksn_printf(kev, MODULE, extendedLog(),
+               "got %s%s trudp packet, from: %s:%d, fd: %d, "
                "cmd: %u, to peer: %s, data: %s\n",
                packet_kind, str_enc, rd->addr, rd->port, tcd->fd,
                (unsigned)packet->cmd, packet->peer_name, hexdump);
@@ -1665,7 +1676,7 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
 
     switch (packet->cmd) {
 
-        // Login packet
+    // Login packet
     case 0: {
         if (packet->peer_name_length == 1 && !packet->peer_name[0] &&
             packet->data_length) {
