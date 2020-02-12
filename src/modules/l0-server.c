@@ -384,9 +384,9 @@ ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl) {
 /**
  * Extend L0 log
  */ 
-static int extendedLog() {
+static int extendedLog(ksnLNullClass *kl) {
     int log_level = DEBUG_VV;
-    if (1 /*show_ext_log*/ ) {
+    if(kev->ksn_cfg.l0_allow_f && kev->ksn_cfg.extended_l0_log_f) {
         log_level = DEBUG;
     }
     return log_level;
@@ -421,7 +421,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     // Send teonet L0 packet
     ksnet_arp_data *arp_data = NULL;
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, extendedLog(),
+    ksn_printf(kev, MODULE, extendedLog(kl),
         "send packet to peer \"%s\" from L0 client \"%s\" ...\n",
         packet->peer_name, spacket->from);
     #endif
@@ -726,7 +726,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                 (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, extendedLog(),
+            ksn_printf(kev, MODULE, extendedLog(kl),
                        "send packet to trudp addr: %s:%d, cmd = %u, from "
                        "peer: %s, data: %s \n",
                        kld->t_addr, kld->t_port, (unsigned)packet->cmd,
@@ -1105,7 +1105,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksnLNullSPacket *data = rd->data;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, extendedLog(),
+    ksn_printf(ke, MODULE, extendedLog(ke->kl),
         "got command No %d for \"%s\" L0 client from peer \"%s\" "
         "with %d bytes data\n",
         data->cmd, data->from, rd->from, data->data_length);
@@ -1659,7 +1659,7 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
         strcpy(hexdump, "(null)");
     }
     const char *str_enc = was_encrypted ? " encrypted" : "";
-    ksn_printf(kev, MODULE, extendedLog(),
+    ksn_printf(kev, MODULE, extendedLog(kl),
                "got %s%s trudp packet, from: %s:%d, fd: %d, "
                "cmd: %u, to peer: %s, data: %s\n",
                packet_kind, str_enc, rd->addr, rd->port, tcd->fd,
