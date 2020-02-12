@@ -420,26 +420,18 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
 
     // Send teonet L0 packet
     ksnet_arp_data *arp_data = NULL;
+    #ifdef DEBUG_KSNET
+    ksn_printf(kev, MODULE, extendedLog(),
+        "send packet to peer \"%s\" from L0 client \"%s\" ...\n",
+        packet->peer_name, spacket->from);
+    #endif
     // Send to peer
-    if(strlen((char*)packet->peer_name) && strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {
-
-        #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
-            "send command from L0 \"%s\" client to \"%s\" peer ...\n",
-            spacket->from, packet->peer_name);
-        #endif
-
+    if(strlen((char*)packet->peer_name) && strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {        
         arp_data = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0,
                 spacket, out_data_len);
     }
     // Send to this host
     else {
-        #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, extendedLog(),
-            "send packet to peer \"%s\" from L0 client \"%s\" ...\n",
-            packet->peer_name, spacket->from);
-        #endif
-
         // Create packet
         size_t pkg_len;
         void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len,

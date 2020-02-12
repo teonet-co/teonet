@@ -13,7 +13,7 @@ AC_SUBST([$1], ['$2'])
 
 m4_define([package_major], [0])
 m4_define([package_minor], [3])
-m4_define([package_patch], [14-dev])
+m4_define([package_patch], [14-dev-2])
 m4_define([package_version], [package_major[.]package_minor[.]package_patch])
 
 AC_PREREQ([2.69])
