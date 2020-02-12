@@ -2037,26 +2037,20 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     // TR-UDP: Check commands array
     if(CMD_TRUDP_CHECK(cmd)) {
         trudpChannelSendData(tcd, (void *)buf, buf_len);
-        buf_len = 0;
+        return buf_len;
     }
 
-    // Not TR-UDP
-    else {
-        trudpUdpSendto(td->fd, (void *)buf, buf_len, (__CONST_SOCKADDR_ARG)&tcd->remaddr, sizeof(tcd->remaddr));
-        // Show debug messages
-        #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
-                ">> skip this packet, "
-                "send %d bytes direct by UDP to: %s:%d\n",
-                buf_len,
-                inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-                ntohs(((struct sockaddr_in *) addr)->sin_port)
-        );
-        #endif
-    }
+    // UDP
+    ssize_t sent = trudpUdpSendto(td->fd, (void *)buf, buf_len, (__CONST_SOCKADDR_ARG)&tcd->remaddr, sizeof(tcd->remaddr));
 
-    return buf_len > 0 ?
-        teo_sendto(kev, fd, buf, buf_len, flags, addr, addr_len) : buf_len;
+    #ifdef DEBUG_KSNET
+    ksn_printf(kev, MODULE, DEBUG_VV, ">> skip this packet, send %d bytes direct by UDP to: %s:%d\n",
+            sent, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+            ntohs(((struct sockaddr_in *) addr)->sin_port)
+    );
+    #endif
+
+    return sent;
 }
 
 /**
