@@ -27,6 +27,7 @@ typedef struct async_data {
     uint32_t label;
     int sq_length;
     int rv;
+    int multithread;
 } async_data;
 
 enum CHECK_SEND_QUEUE {
@@ -99,19 +100,20 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if(user_data && *(uint32_t*)user_data == ASYNC_FUNC_LABEL) {
 
                 async_data *ud = user_data;
+                int multithread = ud->multithread;
 
                 // Check multi thread request
                 if(!data) {
                     ksn_printf(kev, MODULE, DEBUG,
                         "Check MULTITHREAD mode rv: %d, f_multi_thread: %d\n",
                         ud->rv, kev->ta->f_multi_thread);
-                    if(MULTITHREADED()) {
+                    if(multithread) {
                         pthread_mutex_lock(&kev->ta->cv_mutex);
                         ud->rv = 0;
                         pthread_cond_signal(&kev->ta->cv_threshold);
                         pthread_mutex_unlock(&kev->ta->cv_mutex);
                     }
-                    else { //if((NO_MULTITHREADED() || MULTITHREADED()) && ud->rv == CHSQ_TIMEOUT) {
+                    else { //if((NO_multithread || multithread) && ud->rv == CHSQ_TIMEOUT) {
                         free(ud); ud_count--;
                     }
                     processed = 1;
@@ -119,7 +121,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                 // Process async functions
                 else if(data && data_length > 2) {
-                    if(MULTITHREADED()) pthread_mutex_lock(&kev->ta->cv_mutex);
+                    if(multithread) pthread_mutex_lock(&kev->ta->cv_mutex);
 
                     int ptr = 0;
                     const uint8_t f_type = *(uint8_t*)data; ptr++;
@@ -140,11 +142,11 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, peer, NULL, 0);
-                            if(!MULTITHREADED() || SEND_CONDITION()) {
+                            if(!multithread || SEND_CONDITION()) {
                                 ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, d, d_length);
                             }
 
-                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(multithread) pthread_cond_signal(&kev->ta->cv_threshold);
                             else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
@@ -166,7 +168,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                         "teoSScrSend Test: %d %s %d %d\n", event, d, d_length, cmd);
                             else teoSScrSend(kev->kc->kco->ksscr, event, d, d_length, cmd);
 
-                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(multithread) pthread_cond_signal(&kev->ta->cv_threshold);
                             else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
@@ -190,7 +192,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, NULL, addr, port);
 
-                            if(!MULTITHREADED() || SEND_CONDITION()) {
+                            if(!multithread || SEND_CONDITION()) {
                                 if(kev->ta->test)
                                     ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
                                         "sendCmdAnswerToBinaryA Test: %d %d %d %d %s %s %d %s %d\n",
@@ -200,7 +202,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                                 else ksnCoreSendto(kev->kc, (char*)addr, port, cmd, d, d_length);
                             }
 
-                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(multithread) pthread_cond_signal(&kev->ta->cv_threshold);
                             else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
@@ -217,14 +219,14 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, peer, NULL, 0);
 
-                            if(!MULTITHREADED() || SEND_CONDITION()) {
+                            if(!multithread || SEND_CONDITION()) {
                                 if(kev->ta->test)
                                     ksn_printf(kev, MODULE, DEBUG /*DEBUG_VV*/, // \TODO set DEBUG_VV
                                             "teoSScrSubscribeA Test: %d %d %d %s\n", cmd, peer_length, ev, peer);
                                 else teoSScrSubscribe(kev->kc->kco->ksscr, (char*)peer, ev);
                             }
 
-                            if(MULTITHREADED()) pthread_cond_signal(&kev->ta->cv_threshold);
+                            if(multithread) pthread_cond_signal(&kev->ta->cv_threshold);
                             else { free(ud); ud_count--; }
                             processed = 1;
                         } break;
@@ -233,7 +235,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             printf("send unknown func async to user\n");
                             break;
                     }
-                    if(MULTITHREADED()) pthread_mutex_unlock(&kev->ta->cv_mutex);
+                    if(multithread) pthread_mutex_unlock(&kev->ta->cv_mutex);
                 }
             }
             break;
@@ -305,9 +307,9 @@ static int check_retrives = 0, timeouts = 0;
 
 #define SEND_ASYNC(buf, buf_length) ({ \
     int retval; \
-    _check_multi_thread(ke); \
+    int multithread = _check_multi_thread(ke); \
     async_data *ud = malloc(sizeof(async_data)); \
-    ud_count++; ud_count_total++; \
+    ud->multithread = multithread; ud_count++; ud_count_total++; \
     /*printf("\033[s\033[%d;%dH\33[2Kud_count: %d, timeouts: %d, ud_count_total: %d\n\033[u", 1, 1, ud_count, timeouts, ud_count_total);*/ \
     ud->label = ASYNC_FUNC_LABEL; \
     ud->rv = CHSQ_TIMEOUT; \
@@ -318,26 +320,26 @@ static int check_retrives = 0, timeouts = 0;
         const int timeout =  buf ? 150000 : 150000; /* 50000 : 1000 time out for data | time out for check multi thread */ \
         \
         pthread_mutex_lock(&kev->ta->async_func_mutex); \
-        if(MULTITHREADED()) LOCK_CV(); \
+        if(multithread) LOCK_CV(); \
         ksnetEvMgrAsync(kev, buf, buf_length, (void*)ud); \
       /*retrive:*/ \
         SET_TIMEOUT(); \
-        if(MULTITHREADED()) pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait); \
-        if(MULTITHREADED() && ud->rv == CHSQ_TIMEOUT) { \
+        if(multithread) pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait); \
+        if(multithread && ud->rv == CHSQ_TIMEOUT) { \
             timeouts++; \
             check_retrives++; \
             kev->ta->f_multi_thread = check_retrives < CHECK_RETRIVES ? NOT_DEFINED_MULTITHREAD : NO_MULTITHREAD; \
             ksn_puts(kev, MODULE, DEBUG, "MULTITHREAD timeout"); \
             UNLOCK_CV(); \
         } \
-        if(MULTITHREADED()) UNLOCK_CV(); \
+        if(multithread) UNLOCK_CV(); \
         pthread_mutex_unlock(&kev->ta->async_func_mutex); \
         \
-        if(MULTITHREADED() && (ud->rv >= SEND_IF || ud->rv == CHSQ_TIMEOUT) && kev->runEventMgr) usleep(5000); \
+        if(multithread && (ud->rv >= SEND_IF || ud->rv == CHSQ_TIMEOUT) && kev->runEventMgr) usleep(5000); \
         else break; \
     } \
     retval = ud->rv; \
-    if(MULTITHREADED()) { free(ud); ud_count--; } \
+    if(multithread) { free(ud); ud_count--; } \
     if(buf) free(buf); \
     retval; \
     })
