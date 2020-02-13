@@ -331,9 +331,7 @@ int SEND_ASYNC(void *ke, void *buf, int buf_length) {
         if(MULTITHREADED() && ud->rv == CHSQ_TIMEOUT) {
             timeouts++;
             check_retrives++;
-            kev->ta->f_multi_thread = check_retrives < CHECK_RETRIVES ? NOT_DEFINED_MULTITHREAD : NO_MULTITHREAD;
             ksn_puts(kev, MODULE, DEBUG, "MULTITHREAD timeout");
-            UNLOCK_CV();
         }
         if(MULTITHREADED()) UNLOCK_CV();
         pthread_mutex_unlock(&kev->ta->async_func_mutex);
