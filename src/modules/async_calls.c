@@ -305,44 +305,47 @@ static int check_retrives = 0, timeouts = 0;
 #define LOCK_CV() pthread_mutex_lock(&kev->ta->cv_mutex);
 #define UNLOCK_CV() pthread_mutex_unlock(&kev->ta->cv_mutex);
 
-#define SEND_ASYNC(buf, buf_length) ({ \
-    int retval; \
-    int multithread = _check_multi_thread(ke); \
-    async_data *ud = malloc(sizeof(async_data)); \
-    ud->multithread = multithread; ud_count++; ud_count_total++; \
-    /*printf("\033[s\033[%d;%dH\33[2Kud_count: %d, timeouts: %d, ud_count_total: %d\n\033[u", 1, 1, ud_count, timeouts, ud_count_total);*/ \
-    ud->label = ASYNC_FUNC_LABEL; \
-    ud->rv = CHSQ_TIMEOUT; \
-    for(;;) { \
-        unsigned long t; \
-        struct timeval now; \
-        struct timespec timeToWait; \
-        const int timeout =  buf ? 150000 : 150000; /* 50000 : 1000 time out for data | time out for check multi thread */ \
-        \
-        pthread_mutex_lock(&kev->ta->async_func_mutex); \
-        if(multithread) LOCK_CV(); \
-        ksnetEvMgrAsync(kev, buf, buf_length, (void*)ud); \
-      /*retrive:*/ \
-        SET_TIMEOUT(); \
-        if(multithread) pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait); \
-        if(multithread && ud->rv == CHSQ_TIMEOUT) { \
-            timeouts++; \
-            check_retrives++; \
-            kev->ta->f_multi_thread = check_retrives < CHECK_RETRIVES ? NOT_DEFINED_MULTITHREAD : NO_MULTITHREAD; \
-            ksn_puts(kev, MODULE, DEBUG, "MULTITHREAD timeout"); \
-            UNLOCK_CV(); \
-        } \
-        if(multithread) UNLOCK_CV(); \
-        pthread_mutex_unlock(&kev->ta->async_func_mutex); \
-        \
-        if(multithread && (ud->rv >= SEND_IF || ud->rv == CHSQ_TIMEOUT) && kev->runEventMgr) usleep(5000); \
-        else break; \
-    } \
-    retval = ud->rv; \
-    if(multithread) { free(ud); ud_count--; } \
-    if(buf) free(buf); \
-    retval; \
-    })
+static int _check_multi_thread(void *ke);
+
+int SEND_ASYNC(void *ke, void *buf, int buf_length) {
+    int retval;
+    int multithread = _check_multi_thread(ke);
+    async_data *ud = malloc(sizeof(async_data));
+    ud->multithread = multithread; ud_count++; ud_count_total++;
+    /*printf("\033[s\033[%d;%dH\33[2Kud_count: %d, timeouts: %d, ud_count_total: %d\n\033[u", 1, 1, ud_count, timeouts, ud_count_total);*/
+    ud->label = ASYNC_FUNC_LABEL;
+    ud->rv = CHSQ_TIMEOUT;
+    for(;;) {
+        unsigned long t;
+        struct timeval now;
+        struct timespec timeToWait;
+        const int timeout =  buf ? 150000 : 150000; /* 50000 : 1000 time out for data | time out for check multi thread */
+
+        pthread_mutex_lock(&kev->ta->async_func_mutex);
+        if(multithread) LOCK_CV();
+        ksnetEvMgrAsync(kev, buf, buf_length, (void*)ud);
+      /*retrive:*/
+        SET_TIMEOUT();
+        if(multithread) pthread_cond_timedwait(&kev->ta->cv_threshold, &kev->ta->cv_mutex, &timeToWait);
+        if(multithread && ud->rv == CHSQ_TIMEOUT) {
+            timeouts++;
+            check_retrives++;
+            kev->ta->f_multi_thread = check_retrives < CHECK_RETRIVES ? NOT_DEFINED_MULTITHREAD : NO_MULTITHREAD;
+            ksn_puts(kev, MODULE, DEBUG, "MULTITHREAD timeout");
+            UNLOCK_CV();
+        }
+        if(multithread) UNLOCK_CV();
+        pthread_mutex_unlock(&kev->ta->async_func_mutex);
+
+        if(multithread && (ud->rv >= SEND_IF || ud->rv == CHSQ_TIMEOUT) && kev->runEventMgr) usleep(5000);
+        else break;
+    }
+    retval = ud->rv;
+    if(multithread) { free(ud); ud_count--; }
+    if(buf) free(buf);
+    
+    return retval;
+}
 
 // check thread
 static inline int _check_thread(void *ke) {
@@ -357,7 +360,7 @@ static int _check_multi_thread(void *ke) {
 
     if(!kev->ksn_cfg.no_multi_thread_f && kev->ta->f_multi_thread != MULTITHREAD && check_retrives < CHECK_RETRIVES) {
         kev->ta->f_multi_thread = MULTITHREAD;
-        kev->ta->f_multi_thread = SEND_ASYNC(NULL, 0) == 0 ? MULTITHREAD : NO_MULTITHREAD;
+        kev->ta->f_multi_thread = SEND_ASYNC(ke, NULL, 0) == 0 ? MULTITHREAD : NO_MULTITHREAD;
         ksn_printf(kev, MODULE, DEBUG, "Set MULTITHREAD mode: %s\n",
             kev->ta->f_multi_thread == MULTITHREAD ? "MULTITHREAD" : "NO MULTITHREAD");
         if(MULTITHREADED()) check_retrives = 0;
@@ -389,7 +392,7 @@ void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
         memcpy(buf + ptr, data, data_length);
 
         // Send sync and clear buffer
-        SEND_ASYNC(buf, buf_length);
+        SEND_ASYNC(ke, buf, buf_length);
     }
     else { ksnCoreSendCmdto(kev->kc, (char*)peer, cmd, data, data_length); }
 }
@@ -415,7 +418,7 @@ void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
         memcpy(buf + ptr, data, data_length);
 
         // Send sync and clear buffer
-        SEND_ASYNC(buf, buf_length);
+        SEND_ASYNC(ke, buf, buf_length);
     }
     else teoSScrSend(kev->kc->kco->ksscr, event, data, data_length, cmd);
 }
@@ -451,7 +454,7 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
         memcpy(buf + ptr, data, data_length);
 
         // Send sync and clear buffer
-        SEND_ASYNC(buf, buf_length);
+        SEND_ASYNC(ke, buf, buf_length);
     }
     else {
         if (rd->l0_f) ksnLNullSendToL0(ke, (char*)rd->addr, rd->port, (char*)rd->from, rd->from_len, cmd, data, data_length);
@@ -484,7 +487,7 @@ void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
         memcpy(buf + ptr, peer, peer_length);
 
         // Send sync and clear buffer
-        SEND_ASYNC(buf, buf_length);
+        SEND_ASYNC(ke, buf, buf_length);
     }
     else teoSScrSubscribe(kev->kc->kco->ksscr, (char*)peer, ev);
 }
