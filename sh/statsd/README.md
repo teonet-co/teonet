@@ -6,7 +6,7 @@ script.
 ## Description
 
 Teonet send metrics to the Statsd service. Statsd resend this messages to
-prometheus. Statsd should has mapping (form mapping.yml file) in config.
+prometheus. And statsd should be configured appropriately.
 
 ### Teonet application send two default metrics
 
