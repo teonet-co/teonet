@@ -67,8 +67,6 @@ static void teoMetric(teoMetricClass *tm, const char *name, const char *type,
     int len = snprintf(buffer, 255, fmt, type, ke->ksn_cfg.network,
                        ke->kc->name, name, value, type);
 
-    printf("%s\n", buffer);
-
     sendto(ke->kc->fd, buffer, len, 0, (struct sockaddr *)&tm->to,
            sizeof(tm->to));
 }
