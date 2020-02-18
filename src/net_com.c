@@ -721,6 +721,11 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
             rd->arp->type = strdup(type_str);
             free(type_str);
 
+            // Metrics
+            char *met = ksnet_formatMessage("CON.%s", rd->from);
+            teoMetricGauge(ke->tm, met, 1);
+            free(met);
+
             // Send event callback
             if(ke->event_cb != NULL)
                 ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
@@ -1240,6 +1245,11 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(rd->data != NULL && ((char*)rd->data)[0]) {
         peer_name = rd->data;
     }
+
+    // Metrics
+    char *met = ksnet_formatMessage("CON.%s", peer_name);
+    teoMetricGauge(ke->tm, met, 0);
+    free(met);
 
     // Check r-host disconnected
     int is_rhost = ke->ksn_cfg.r_host_name[0] && !strcmp(ke->ksn_cfg.r_host_name,rd->from);
