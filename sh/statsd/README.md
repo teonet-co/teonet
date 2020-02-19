@@ -8,11 +8,30 @@ script.
 Teonet send metrics to the Statsd service. Statsd resend this messages to
 prometheus. And statsd should be configured appropriately.
 
-### Teonet application send two default metrics
+### Teonet application send next default metrics
 
-    teonet_g_tick{instance="xx.xx.xx.xx:xxxx",job="teonet_application",network="local",peer="teo-vpn-01",type="g"}
+Common metrics parameters:
 
-    teonet_c_total{instance="xx.xx.xx.xx:xxxx",job="teonet_application",network="local",peer="teo-vpn-01",type="c"}
+    network -- tonet network name
+    peer -- senders peer name
+    remote -- remote peer name
+    type -- g (gauge) or c (counter)
+
+Gauge "tick" with value contained counter incremented every 5 sec:
+
+    teonet_g_tick{network="local",peer="teo-vpn-01",type="g"} 9
+
+Counter "total" with value 1 increment total coutner every 5 sec:
+
+    teonet_c_total{network="local",peer="teo-vpn-01",type="c"} 20
+
+Gauge "connected" with value 1 if remote peer connected or 0 if remote peer disconnected:
+
+    teonet_g_connected{network="local",peer="teo-vpn-01",remote="teo-vpn-02",type="g"} 0
+
+Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
+
+    teonet_g_peer_relay_time{network="local",peer="teo-vpn-01",remote="teo-vpn-02",type="g"} 465
 
 ### Teonet application paramenters to send metrics
 
