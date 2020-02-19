@@ -29,7 +29,6 @@ endif
 
 LIBS = \
 	../../src/libteonet.la \
-	../../embedded/teocli/linux/libteocli.la \
 	-lcrypto -lev
 
 #bin_PROGRAMS = teofossa

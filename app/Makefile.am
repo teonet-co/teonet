@@ -36,7 +36,6 @@ teodb_SOURCES = teodb.c ../src/modules/teodb_com.c
 bin_PROGRAMS += teoweb
 teoweb_LDFLAGS = $(AM_LDFLAGS) \
 	-pthread -lev -lconfuse -lcurl \
-	../embedded/teocli/linux/libteocli.la \
 	#end of teoweb_LDFLAGS
 
 teoweb_SOURCES = teoweb.c \
@@ -49,7 +48,7 @@ teoweb_SOURCES = teoweb.c \
 
 
 bin_PROGRAMS += teodsp
-teodsp_LDFLAGS = $(AM_LDFLAGS) -lev ../embedded/teocli/linux/libteocli.la
+teodsp_LDFLAGS = $(AM_LDFLAGS) -lev
 teodsp_SOURCES = teodsp.c
 
 bin_PROGRAMS += teogw

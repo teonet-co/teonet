@@ -30,7 +30,6 @@ endif
 
 LIBS = \
 	../src/libteonet.la \
-	../embedded/teocli/linux/libteocli.la \
 	-lcrypto -lcunit -lev
 
 if TEO_THREAD	

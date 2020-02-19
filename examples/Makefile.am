@@ -46,7 +46,6 @@ endif
 
 LIBS = \
 	../src/libteonet.la \
-	../embedded/teocli/linux/libteocli.la \
 	-lcrypto
 
 if TEO_THREAD
