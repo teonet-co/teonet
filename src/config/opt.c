@@ -89,6 +89,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         { "statsd_ip",      required_argument, 0, 's' },
         { "statsd_port",    required_argument, 0, 'S' },
+        { "statsd_peers",   no_argument,       &conf->statsd_peers_f, 1 },
 
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
         { "log_priority",   required_argument, 0, 'L' }, 
@@ -423,6 +424,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "\n"
     "       --statsd_ip          Metric exporter IP address\n"
     "       --statsd_port        Metric exporter Port number\n"
+    "       --statsd_peers       Send preers metrics\n"
     "\n"
     "       --sig_segv           Segmentation fault error processing by library\n"
     "       --log_priority       Syslog priority (Default: 4):\n"

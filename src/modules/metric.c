@@ -13,6 +13,8 @@
 #include "metric.h"
 #include "ev_mgr.h"
 
+#define MODULE "metrics"
+
 /**
  * Initialize Metrics module
  * 
@@ -24,8 +26,9 @@ teoMetricClass *teoMetricInit(void *kep) {
     if (ke->ksn_cfg.statsd_ip[0] == 0 || ke->ksn_cfg.statsd_port == 0)
         return NULL;
 
-    printf("Send metrics to statsd exporter at address: %s:%ld\n",
-           ke->ksn_cfg.statsd_ip, ke->ksn_cfg.statsd_port);
+    ksn_printf(ke, MODULE, MESSAGE, 
+        "started, and ready to send metrics to statsd exporter at address: %s:%ld\n",
+        ke->ksn_cfg.statsd_ip, ke->ksn_cfg.statsd_port);
 
     teoMetricClass *tm = malloc(sizeof(teoMetricClass));
     tm->ke = ke;
@@ -118,4 +121,7 @@ void metric_teonet_count(teoMetricClass *tm) {
     static uint64_t gauge = 0;
     teoMetricCounter(tm, "total", 1);
     teoMetricGauge(tm, "tick", gauge++);
+
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass *)tm->ke;    
+    if(ke->ksn_cfg.statsd_peers_f) ksnetArpMetrics(ke->kc->ka); // Arp metrics
 }
