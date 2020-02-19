@@ -75,6 +75,29 @@ static void teoMetric(teoMetricClass *tm, const char *name, const char *type,
 }
 
 /**
+ * Send teonet metrics (modules local function)
+ * 
+ * @param tm Pointer to teoMetricClass
+ * @param name Metrics name
+ * @param name Metrics type
+ * @param value Metrics value
+ * 
+ */
+static void teoMetricf(teoMetricClass *tm, const char *name, const char *type,
+                      double value) {
+    if (!tm) return;
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass *)tm->ke;
+
+    char buffer[256];
+    const char *fmt = "teonet.%s.%s.%s.%s:%f|%s";
+    int len = snprintf(buffer, 255, fmt, type, ke->ksn_cfg.network,
+                       ke->kc->name, name, value, type);
+
+    sendto(ke->kc->fd, buffer, len, 0, (struct sockaddr *)&tm->to,
+           sizeof(tm->to));
+}
+
+/**
  * Send counter teonet metric
  * 
  * @param tm Pointer to teoMetricClass
@@ -87,6 +110,18 @@ void teoMetricCounter(teoMetricClass *tm, const char *name, int value) {
 }
 
 /**
+ * Send counter teonet metric
+ * 
+ * @param tm Pointer to teoMetricClass
+ * @param name Metrics name
+ * @param value Metrics counter value
+ * 
+ */
+void teoMetricCounterf(teoMetricClass *tm, const char *name, double value) {
+    teoMetricf(tm, name, "c", value);
+}
+
+/**
  * Send time(ms) teonet metric
  * 
  * @param tm Pointer to teoMetricClass
@@ -94,8 +129,8 @@ void teoMetricCounter(teoMetricClass *tm, const char *name, int value) {
  * @param value Metrics ms value
  * 
  */
-void teoMetricMs(teoMetricClass *tm, const char *name, int value) {
-    teoMetric(tm, name, "ms", value);
+void teoMetricMs(teoMetricClass *tm, const char *name, double value) {
+    teoMetricf(tm, name, "ms", value);
 }
 
 /**
@@ -108,6 +143,18 @@ void teoMetricMs(teoMetricClass *tm, const char *name, int value) {
  */
 void teoMetricGauge(teoMetricClass *tm, const char *name, int value) {
     teoMetric(tm, name, "g", value);
+}
+
+/**
+ * Send gauge teonet metrics
+ * 
+ * @param tm Pointer to teoMetricClass
+ * @param name Metrics name
+ * @param value Metrics gauge value
+ * 
+ */
+void teoMetricGaugef(teoMetricClass *tm, const char *name, double value) {
+    teoMetricf(tm, name, "g", value);
 }
 
 /**

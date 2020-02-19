@@ -49,6 +49,7 @@ Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
      * 
      */
     void teoMetricCounter(teoMetricClass *tm, char *name, int value);
+    void teoMetricCounterf(teoMetricClass *tm, char *name, double value);
 
     /**
      * Send time(ms) teonet metric
@@ -58,7 +59,7 @@ Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
      * @param value Metrics ms value
      * 
      */
-    void teoMetricMs(teoMetricClass *tm, char *name, int value);
+    void teoMetricMs(teoMetricClass *tm, char *name, double value);
 
     /**
      * Send gauge teonet metrics
@@ -69,6 +70,7 @@ Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
      * 
      */
     void teoMetricGauge(teoMetricClass *tm, char *name, int value);
+    void teoMetricGaugef(teoMetricClass *tm, char *name, double value);
 
 ### Teonet C++ functions to send metrics
 
@@ -79,6 +81,7 @@ Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
      * @param value Metric counter value 
      */
     inline void metricCounter(const std::string &name, int value);
+    inline void metricCounter(const std::string &name, double value);
 
     /**
      * Send time(ms) metric
@@ -95,6 +98,7 @@ Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
      * @param value Metric gauge value
      */
     inline void metricGauge(const std::string &name, int value);
+    inline void metricGauge(const std::string &name, double value);
 
 ### Examples
 
@@ -112,4 +116,4 @@ Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
 
 #### Send conter metric (C++ language)
 
-    metricGauge("tick", 25);
+    metricGauge("tick", 25.73);
