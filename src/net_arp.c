@@ -367,9 +367,9 @@ void ksnetArpMetrics(ksnetArpClass *ka) {
     char met[256];
     for(int i = 0; i < arp_data_ar->length; i++) {
         if(arp_data_ar->arp_data[i].data.mode == -1) continue;
-        int val = 1000*arp_data_ar->arp_data[i].data.last_triptime;
+        double val = arp_data_ar->arp_data[i].data.last_triptime;
         snprintf(met, 255, "PT.%s", arp_data_ar->arp_data[i].name);
-        teoMetricGauge(kev->tm, met, val);
+        teoMetricGaugef(kev->tm, met, val);
     }
     #undef kev
 }

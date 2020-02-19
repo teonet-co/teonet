@@ -477,12 +477,22 @@ public:
   }
 
   /**
+   * Send counter metric
+   * 
+   * @param name Metric name
+   * @param value Metric counter value 
+   */
+  inline void metricCounter(const std::string &name, double value) {
+    teoMetricCounterf(ke->tm, name.c_str(), value);
+  }
+
+  /**
    * Send time(ms) metric
    * 
    * @param name Metric name
    * @param value Metric ms value 
    */
-  inline void metricMs(const std::string &name, int value) {
+  inline void metricMs(const std::string &name, double value) {
     teoMetricMs(ke->tm, name.c_str(), value);
   }
 
@@ -494,6 +504,16 @@ public:
    */
   inline void metricGauge(const std::string &name, int value) {
     teoMetricGauge(ke->tm, name.c_str(), value);
+  }
+
+  /**
+   * Send gauge metric
+   * 
+   * @param name Metric name
+   * @param value Metric gauge value 
+   */
+  inline void metricGauge(const std::string &name, double value) {
+    teoMetricGaugef(ke->tm, name.c_str(), value);
   }
 
   /**
