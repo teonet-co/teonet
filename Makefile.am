@@ -17,7 +17,6 @@ endif
 
 SUBDIRS = \
 	embedded/libpbl/src \
-	embedded/teocli/linux \
 	src \
 	app \
 	tests \
@@ -25,6 +24,7 @@ SUBDIRS = \
 	sh \
 	po \
 	# end of SUBDIRS
+
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
