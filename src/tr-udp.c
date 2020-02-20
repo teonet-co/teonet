@@ -2404,10 +2404,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             #ifdef DEBUG_KSNET
             int net_lag = trudpGetTimestamp() - trudpPacketGetTimestamp(packet);
             ksn_printf(kev, MODULE, DEBUG_VV,
-                "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms, network lag %d ms%s`",
+                "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms, network lag %d ms%s\n",
                 trudpPacketGetId(packet),
                 tcd->channel_key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0,
-                (int)net_lag, (net_lag > 50000) ? _ANSI_RED "  Big Lag!" _ANSI_NONE "\n" : "\n" );
+                (int)net_lag, (net_lag > 50000) ? _ANSI_RED "  Big Lag!" _ANSI_NONE : "" );
             #endif
 
             // Send event ACK to teonet event loop

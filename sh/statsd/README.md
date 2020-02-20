@@ -117,3 +117,23 @@ Gauge "peer_relay_time" with value of triptime to remote peer in ms * 1000:
 #### Send conter metric (C++ language)
 
     metricGauge("tick", 25.73);
+
+### Run local teonet network example
+
+    app/teovpn teo-vpn-1 -p 9000 --statsd_ip 10.135.129.36 --statsd_port 8125 --statsd_peers
+    app/teovpn teo-vpn-2 -a 127.0.0.1 -r 9000 --statsd_ip 10.135.129.36 --statsd_port 8125 --statsd_peers
+    app/teovpn teo-vpn-3 -a 127.0.0.1 -r 9000 --statsd_ip 10.135.129.36 --statsd_port 8125 --statsd_peers
+
+### Where too find your metrics in local network
+
+Statsd:
+
+    http://localhost:9102/metrics
+
+Prometheus:
+
+    http://10.135.129.36:9090/
+
+Grafana:
+
+    http://10.135.129.36:3000/

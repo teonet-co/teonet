@@ -362,7 +362,6 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     }
 }
 
-// Get L0 server statistic
 /**
  * Get L0 server statistic
  *
@@ -572,13 +571,18 @@ static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const cha
     pblMapAdd(kl->map, &fd, sizeof(fd), &data, sizeof(ksnLNullData));
 
     ksnLNullData* kld = ksnLNullGetClientConnection(kl, fd);
-    #ifdef DEBUG_KSNET
+    // #ifdef DEBUG_KSNET
     if (kld == NULL) {
         ksn_printf(kev, MODULE, ERROR_M,
                    "Failed L0 client registration with fd %d from %s:%d\n",
                    fd, remote_addr, remote_port);
+        return NULL;
     }
-    #endif
+    // #endif
+
+    // L0 statistic - client connected
+    kl->stat.clients++;
+
     return kld;
 }
 
@@ -819,6 +823,9 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             // Show disconnect message
             ksn_printf(kev, MODULE, CONNECT, "### 0005,%s\n", kld->name);
         }
+
+        // L0 statistic - client disconnect
+        kl->stat.clients--;
 
         // Send Disconnect event to all subscribers
         if(kld->name != NULL  && remove_f != 2)
@@ -1379,9 +1386,10 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                     kld->name, kld->t_addr, jp.username);
                 #endif
                 ksnetEvMgrClass *ke = (ksnetEvMgrClass*)kl->ke;
-    //            #ifdef DEBUG_KSNET
+                // Show connected message
+                // #ifdef DEBUG_KSNET
                 ksn_printf(ke, MODULE, CONNECT, "### 0001,%s,%s\n", kld->name, kld->t_addr);
-    //            #endif
+                // #endif
             }
 
             // Send Connected event to all subscribers
@@ -1689,7 +1697,7 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                     uint8_t *salt = kld->server_crypt->keys.sessionsalt.data;
                     dump_bytes(saltdump, sizeof(saltdump), salt, sizeof(salt));
                     ksn_printf(kev, MODULE, DEBUG_VV,
-                               "VALID KEX from %s:%d salt %s state %d\n",
+                               "got valid kex from %s:%d salt %s state %d\n",
                                kld->t_addr, kld->t_port, saltdump,
                                kld->server_crypt->state);
                 }
@@ -1701,8 +1709,8 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                     ksnLNullClientAuthCheck(kl, kld, tcd->fd, packet);
                 } else {
                     ksn_printf(kev, MODULE, ERROR_M,
-                               "Invalid login packet from %s:%d\n", kld->t_addr,
-                               kld->t_port);
+                               "got invalid login packet from %s:%d\n", 
+                               kld->t_addr, kld->t_port);
                 }
             }
             return 1;
@@ -1748,7 +1756,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         if (kld == NULL) {
             kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
         }
-        return processCmd(kl, kld, rd, tcd, packet_sm, "small"); // SMALL PACKET
+        return processCmd(kl, kld, rd, tcd, packet_sm, "small"); // Small packet
     }
 
     // FIXME FIXME FIXME in recvCheck ---> packetCombineClient we could use teoLNullPacketGetFromBuffer
@@ -1776,7 +1784,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
     if (kld == NULL) {
         kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
     }
-    return processCmd(kl, kld, rd, tcd, packet_large, "LARGE"); // LARGE PACKET
+    return processCmd(kl, kld, rd, tcd, packet_large, "large"); // Large packet
 }
 
 /**

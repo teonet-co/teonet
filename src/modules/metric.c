@@ -165,10 +165,22 @@ void teoMetricGaugef(teoMetricClass *tm, const char *name, double value) {
  */
 void metric_teonet_count(teoMetricClass *tm) {
     if (!tm) return;
+
+    // Standart metrics
     static uint64_t gauge = 0;
     teoMetricCounter(tm, "total", 1);
     teoMetricGauge(tm, "tick", gauge++);
 
-    ksnetEvMgrClass *ke = (ksnetEvMgrClass *)tm->ke;    
-    if(ke->ksn_cfg.statsd_peers_f) ksnetArpMetrics(ke->kc->ka); // Arp metrics
+    // ARP table metrics
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass *)tm->ke;
+    if(ke->ksn_cfg.statsd_peers_f) {
+        ksnetArpMetrics(ke->kc->ka);
+    }
+
+    // L0 server metrics
+    ksnLNullClass *kl = ((ksnetEvMgrClass *)tm->ke)->kl;
+    ksnLNullSStat *kls = ksnLNullStat(kl);
+    if(kls) {        
+        teoMetricGauge(tm, "l0_clients", kls->clients);
+    }
 }
