@@ -1039,7 +1039,7 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
  * @param revents
  */
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
-    printf("sigint_cb\n");
+
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     #ifdef DEBUG_KSNET
     ksn_puts(ke, MODULE, DEBUG,

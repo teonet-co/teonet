@@ -31,8 +31,8 @@ typedef struct ksnLNullData {
     double last_time;
 
     teoLNullEncryptionContext *server_crypt;
-} ksnLNullData;  
-                   
+} ksnLNullData;
+
 /**
  * ksnLNull Class structure definition
  */
