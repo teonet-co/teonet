@@ -8,6 +8,10 @@ typedef struct teoMetricClass {
     struct sockaddr_in to;
 } teoMetricClass;
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 teoMetricClass *teoMetricInit(void *ke);
 void teoMetricDestroy(teoMetricClass *tm);
 
@@ -21,5 +25,9 @@ void teoMetricMs(teoMetricClass *tm, const char *name, double value);
 // Send gauge metric
 void teoMetricGauge(teoMetricClass *tm, const char *name, int value);
 void teoMetricGaugef(teoMetricClass *tm, const char *name, double value);
+
+#ifdef	__cplusplus
+}
+#endif
 
 #endif /* METRIC_H */
