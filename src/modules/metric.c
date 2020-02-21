@@ -178,9 +178,14 @@ void metric_teonet_count(teoMetricClass *tm) {
     }
 
     // L0 server metrics
-    ksnLNullClass *kl = ((ksnetEvMgrClass *)tm->ke)->kl;
-    ksnLNullSStat *kls = ksnLNullStat(kl);
+    ksnLNullSStat *kls = ksnLNullStat(ke->kl);
     if(kls) {        
+        // Clients counter
         teoMetricGauge(tm, "l0_clients", kls->clients);
+        // Packets counters
+        teoMetricGauge(tm, "l0_packets_from_client", kls->packets_from_client);
+        teoMetricGauge(tm, "l0_packets_to_client", kls->packets_to_client);
+        teoMetricGauge(tm, "l0_packets_to_peer", kls->packets_to_peer);
+        teoMetricGauge(tm, "l0_packets_from_peer", kls->packets_from_peer);
     }
 }
