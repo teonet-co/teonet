@@ -424,6 +424,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         "send packet to peer \"%s\" from L0 client \"%s\" ...\n",
         packet->peer_name, spacket->from);
     #endif
+
     // Send to peer
     if(strlen((char*)packet->peer_name) && strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {        
         arp_data = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0,
@@ -445,6 +446,9 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         }
         free(pkg);
     }
+
+    // Send packet to peer statistic
+    kl->stat.packets_to_peer++;
 
     free(out_data);
 
@@ -718,7 +722,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
 
     ssize_t snd = -1;
 
-    // Send by TCP TODO:!!!!!!
+    // Send by TCP
     if(fd < MAX_FD_NUMBER) {
         teosockSend(fd, pkg, pkg_length);
 
@@ -748,6 +752,11 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                 pkg += len;
             }
         }
+    }
+
+    // Send packet to client statistic (skip cmd = 0)
+    if(packet->cmd) {
+        kl->stat.packets_to_client++;
     }
 
     return snd;
@@ -1049,7 +1058,7 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV,
-            "Got valid command No %d from %s client with %d bytes data ...\n",
+            "got valid command No %d from %s client with %d bytes data ...\n",
             data->cmd, data->from, data->data_length);
         #endif
 
@@ -1117,6 +1126,9 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         "with %d bytes data\n",
         data->cmd, data->from, rd->from, data->data_length);
     #endif
+
+    // Got packet from peer statistic
+    ke->kl->stat.packets_from_peer++;
 
     // If l0 module is initialized
     if(ke->kl) {
@@ -1673,6 +1685,11 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
                packet_kind, str_enc, rd->addr, rd->port, tcd->fd,
                (unsigned)packet->cmd, packet->peer_name, hexdump);
     #endif
+
+    // Got packet from client statistic (skip cmd = 0)
+    if(packet->cmd) {
+        kl->stat.packets_from_client++;
+    }
 
     switch (packet->cmd) {
 
