@@ -384,8 +384,16 @@ int send_by_type_check_cb(ksnetArpClass *ka, char *peer_name,
     return 0;
 }
 
-
-
+/**
+ * Send brodcast command to peers by type
+ *
+ * @param kc Pointer to ksnCoreClass
+ * @param to Peer name to send to
+ * @param cmd Command
+ * @param data Commands data
+ * @param data_len Commands data length
+ * @return Pointer to ksnet_arp_data or NULL if to peer is absent
+ */
 void teoBroadcastSend(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len) {
     send_by_type_check_t sd = { .name = to, .num = 0 };
     ksnetEvMgrClass* ke = (ksnetEvMgrClass*)(kc->ke);
@@ -403,8 +411,8 @@ void teoBroadcastSend(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_
     }
 
     free(sd.arp);
-
 }
+
 /**
  * Send command by name to peer
  *

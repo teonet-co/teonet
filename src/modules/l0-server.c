@@ -32,6 +32,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         char *cname, size_t cname_length);
 static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port);
 static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data, size_t data_length);
+static int ksnLNullSendBroadcast(ksnLNullClass *kl, uint8_t cmd, void* data, size_t data_length);
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, int fd, teoLNullCPacket *packet);
 static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd);
 static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
@@ -661,6 +662,38 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 }
 
 /**
+ * Send command from this L0 server to all L0 clients
+ *
+ * @param kl Pointer to ksnLNullClass
+ * @param cmd Command
+ * @param data_e Pointer to data
+ * @param data_e_length Data length
+ * @return Number of cliens
+ */
+static int ksnLNullSendBroadcast(ksnLNullClass *kl, uint8_t cmd, void* data,
+        size_t data_length) {
+
+    int num_clients = 0;
+
+    // Send to all clients
+    PblIterator *it = pblMapIteratorReverseNew(kl->map);
+    if(it != NULL) {
+        while(pblIteratorHasPrevious(it) > 0) {
+            void *entry = pblIteratorPrevious(it);
+            ksnLNullData *client = pblMapEntryValue(entry);
+            if(client != NULL && client->name != NULL) {
+                int fd = ksnLNullClientIsConnected(kl, client->name);
+                if(!fd) continue;
+                ksnLNullSend(kl, fd, cmd, data, data_length);
+                num_clients++;
+            }
+        }
+        pblIteratorFree(it);
+    }
+    return num_clients; 
+}
+
+/**
  * Send command from this L0 server to L0 client
  *
  * @param kl Pointer to ksnLNullClass
@@ -1031,6 +1064,22 @@ static void ksnLNullStop(ksnLNullClass *kl) {
         // Stop the server
         ksnTcpServerStop(kev->kt, kl->fd);
     }
+}
+
+/**
+ * Process CMD_L0_CLIENT_BROADCAST teonet command (from peer to l0)
+ *
+ * @param ke Pointer to ksnetEvMgrClass
+ * @param rd Pointer to ksnCorePacketData data
+ * @return If true - than command was processed by this function
+ */
+int cmd_l0_broadcast_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
+    int retval = 0;
+    if(ke->ksn_cfg.l0_allow_f) {
+        ksnLNullSendBroadcast(ke->kl, rd->cmd, rd->data, rd->data_len);
+        retval = 1;
+    }
+    return retval;
 }
 
 /**
@@ -1520,7 +1569,7 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
             sizeof(((teoLNullCPacket *)data)->header_checksum);
 
         if (tcd->read_buffer_ptr == 0 &&
-            ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum(data, headerSize)) {
+            ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum( (uint8_t*) data, headerSize)) {
             if (!tcd->stat.packets_send && !tcd->stat.packets_receive) {
                 trudpChannelDestroy(tcd);
             }
