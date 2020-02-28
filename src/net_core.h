@@ -99,6 +99,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr);
 void ksnCoreDestroy(ksnCoreClass *kc);
 
 int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd, void *data, size_t data_len);
+void teoBroadcastSend(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len);
 ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len);
 void ksnCoreProcessPacket (void *kc, void *buf, size_t recvlen,
         __SOCKADDR_ARG remaddr);
