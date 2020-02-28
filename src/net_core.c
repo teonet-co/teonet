@@ -384,6 +384,27 @@ int send_by_type_check_cb(ksnetArpClass *ka, char *peer_name,
     return 0;
 }
 
+
+
+void teoBroadcastSend(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len) {
+    send_by_type_check_t sd = { .name = to, .num = 0 };
+    ksnetEvMgrClass* ke = (ksnetEvMgrClass*)(kc->ke);
+
+    ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd);
+
+    if (!sd.num) {
+        printf("There are no peers with this type!\n");
+        return;
+    }
+
+    for(int i=0; i < sd.num; ++i) {
+        printf("SEND TO %s:%d\n", sd.arp[i]->data.addr, sd.arp[i]->data.port);
+        ksnCoreSendto(kc, sd.arp[i]->data.addr, sd.arp[i]->data.port, cmd, data, data_len);
+    }
+
+    free(sd.arp);
+
+}
 /**
  * Send command by name to peer
  *
@@ -413,8 +434,8 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         ksn_printf(ke, MODULE, DEBUG,
                 "send to peer by type \"%s\" \n", to);
         #endif
-        int i = 0;
-        for(i=0; i < sd.num; i++) {
+
+        for(int i=0; i < sd.num; i++) {
             printf("%s:%d\n", sd.arp[i]->data.addr, sd.arp[i]->data.port);
         }
 

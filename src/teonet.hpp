@@ -178,6 +178,9 @@ public:
    * @param data_len Commands data length
    * @return Pointer to ksnet_arp_data or NULL if to peer is absent
    */
+  void BroadcastSend(const char* to, uint8_t cmd, void* data, size_t data_len) const {
+    teoBroadcastSend(ke->kc, (char*)to, cmd, data, data_len);
+  }
   inline ksnet_arp_data* sendTo(const char* to, uint8_t cmd, void* data, size_t data_len) const {
     return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
   }
