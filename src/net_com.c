@@ -29,6 +29,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
+int cmd_l0_broadcast_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -160,6 +161,12 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #ifdef M_ENAMBE_L0s
         case CMD_L0_TO:
             processed = cmd_l0_to_cb(ke, rd);
+            break;
+        #endif
+
+        #ifdef M_ENAMBE_L0s
+        case CMD_L0_CLIENT_BROADCAST:
+            processed = cmd_l0_broadcast_cb(ke, rd);
             break;
         #endif
 

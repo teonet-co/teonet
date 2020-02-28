@@ -65,6 +65,7 @@ enum ksnCMD {
     CMD_LOGGING,            ///< #98 LOGGING command
     CMD_L0_CLIENT_RESET,    ///< #99 L0 client reset command
     CMD_SUBSCRIBE_RND,      ///< #100 Subscribe command extension. (Send answer for one random peer by type)
+    CMD_L0_CLIENT_BROADCAST,///< #101 Send data to all L0 clients
 
 
     // Application level TR-UDP mode: 128...191
