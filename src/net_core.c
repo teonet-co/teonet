@@ -401,12 +401,14 @@ void teoBroadcastSend(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_
     ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd);
 
     if (!sd.num) {
-        printf("There are no peers with this type!\n");
         return;
     }
 
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG,
+            "send broadcast message by type \"%s\" \n", to);
+    #endif
     for(int i=0; i < sd.num; ++i) {
-        printf("SEND TO %s:%d\n", sd.arp[i]->data.addr, sd.arp[i]->data.port);
         ksnCoreSendto(kc, sd.arp[i]->data.addr, sd.arp[i]->data.port, cmd, data, data_len);
     }
 
