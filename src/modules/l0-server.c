@@ -1571,7 +1571,7 @@ static ssize_t packetCombineClient(trudpChannelData *tcd, char *data, size_t dat
         if (tcd->read_buffer_ptr == 0 &&
             ((teoLNullCPacket *)data)->header_checksum != get_byte_checksum( (uint8_t*) data, headerSize)) {
             if (!tcd->stat.packets_send && !tcd->stat.packets_receive) {
-                trudpChannelDestroy(tcd);
+                // trudpChannelDestroy(tcd);
             }
             return -3;
         }
@@ -1706,7 +1706,19 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     return true;
 }
 
-static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
+/*
+ * Process small or lagre packet
+ * 
+ * @param kl L0 module
+ * @param kld client connection
+ * @param rd pointer to received data
+ * @param tcd pointer to trudpChannelData
+ * @param packet pointer to teoLNullCPacket
+ * @param packet_kind kind of packet string used in logs
+ * 
+ * @return true if processed
+ */
+static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
                       ksnCorePacketData *rd, trudpChannelData *tcd,
                       teoLNullCPacket *packet, const char *packet_kind) {
     const bool was_encrypted = teoLNullPacketIsEncrypted(packet);
@@ -1784,7 +1796,7 @@ static int processCmd(ksnLNullClass *kl, ksnLNullData *kld,
         return 0;
     } break;
 
-        // Process other L0 packets
+    // Process other L0 packets
     default: {
         // Process other L0 TR-UDP packets
         // Send packet to peer
@@ -1822,7 +1834,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         if (kld == NULL) {
             kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
         }
-        return processCmd(kl, kld, rd, tcd, packet_sm, "small"); // Small packet
+        return processPacket(kl, kld, rd, tcd, packet_sm, "small"); // Small packet
     }
 
     // FIXME FIXME FIXME in recvCheck ---> packetCombineClient we could use teoLNullPacketGetFromBuffer
@@ -1833,7 +1845,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
                     "WRONG UDP PACKET %d\n", rc
         );
         #endif
-        return 1;
+        return 1; // TODO: Check this return value (may be it should be 0)
     } else if (rc <= 0) {
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG_VV,
@@ -1850,7 +1862,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
     if (kld == NULL) {
         kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
     }
-    return processCmd(kl, kld, rd, tcd, packet_large, "large"); // Large packet
+    return processPacket(kl, kld, rd, tcd, packet_large, "large"); // Large packet
 }
 
 /**
