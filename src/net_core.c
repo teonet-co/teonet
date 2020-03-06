@@ -441,17 +441,10 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     // Send by type in this network
     else if(!ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd) && sd.num) {
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG,
-                "send to peer by type \"%s\" \n", to);
+        ksn_printf(ke, MODULE, DEBUG, "send to peer by type \"%s\" \n", to);
         #endif
 
-        for(int i=0; i < sd.num; i++) {
-            printf("%s:%d\n", sd.arp[i]->data.addr, sd.arp[i]->data.port);
-        }
-
         int r = rand() % sd.num;
-        printf("=> %s:%d\n", sd.arp[r]->data.addr, sd.arp[r]->data.port);
-
         ksnCoreSendto(kc, sd.arp[r]->data.addr, sd.arp[r]->data.port, cmd, data, data_len);
 
         free(sd.arp);
@@ -463,7 +456,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                 data_len))) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG,
+        ksn_printf(ke, MODULE, DEBUG, 
                 "send to peer \"%s\" at other network\n", to);
         #endif
     }
