@@ -1078,12 +1078,13 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_CONNECT_R (cmd = %u) command, from %s connect address: %s:%d\n",
-            rd->cmd, rd->from, rd->addr, rd->port);
+    ksn_printf(ke, MODULE, DEBUG, 
+        "process CMD_CONNECT_R (cmd = %u) command, from %s (%s:%d)\n",
+        rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 
     // Replay to address we got from peer
-    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, NULL_STR, 1);
+    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, "\0", 2);
 
     // Parse command data
     size_t i, ptr;
