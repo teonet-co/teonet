@@ -715,31 +715,40 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
  */
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
 
-    ksnet_arp_data *r_host_arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, ke->ksn_cfg.r_host_name);
-    static int check_connection_f = 0; // Check r-host connection flag
-
+    // TODO: Posible this commente code don't need more. So it may be removed 
+    // after some release versions.
+    //
+    // ksnet_arp_data *r_host_arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, ke->ksn_cfg.r_host_name);
+    // static int check_connection_f = 0; // Check r-host connection flag
+    //
     // Reset r-host if connection is down
     // *Note:* After host break with general protection failure
     // and than restarted the r-host does not reconnect this host. In this case
     // the triptime == 0.0. In this bloc we detect than r-hosts triptime not
     // changed and send it disconnect command
-    if(ke->ksn_cfg.r_host_addr[0] && ke->ksn_cfg.r_host_name[0] && r_host_arp->triptime == 0.00) {
+    // if(ke->ksn_cfg.r_host_addr[0] && ke->ksn_cfg.r_host_name[0] && r_host_arp->triptime == 0.00) {
 
-        if(!check_connection_f) check_connection_f = 1;
-        else {
-            // Send this host disconnect command to dead peer
-            send_cmd_disconnect_cb(ke->kc->ka, NULL,  r_host_arp, NULL);
+    //     if(!check_connection_f) check_connection_f = 1;
+    //     else {
+    //         printf("not connected to r-host\n");
+    //
+    //         // Send this host disconnect command to dead peer
+    //         send_cmd_disconnect_cb(ke->kc->ka, NULL,  r_host_arp, NULL);
 
-            // Clear r-host name to reconnect at last loop
-            ke->ksn_cfg.r_host_name[0] = '\0';
-        }
-    }
-    else
+    //         // Clear r-host name to reconnect at last loop
+    //         ke->ksn_cfg.r_host_name[0] = '\0';
+    //     }
+    // }
+    // else
 
     // Connect to r-host
     if(ke->ksn_cfg.r_host_addr[0] && !ke->ksn_cfg.r_host_name[0]) {
 
-        check_connection_f = 0;
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG, "connect to r-host: %s\n", ke->ksn_cfg.r_host_addr);
+        #endif
+
+        // check_connection_f = 0;
 
         size_t ptr = 0;
         void *data = NULL;

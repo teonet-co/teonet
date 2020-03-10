@@ -762,14 +762,26 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
     if((rd->arp = ksnetArpGet(kc->ka, rd->from)) == NULL) {
 
         ksnet_arp_data_ext arp;
-
         rd->arp = &arp;
-        int mode = 0;
 
-        // Check r-host connected
-        if(!ke->ksn_cfg.r_host_name[0] &&
-           !strcmp(ke->ksn_cfg.r_host_addr, rd->addr) &&
-           ke->ksn_cfg.r_port == rd->port) {
+        // The "mode" variable (0 by default) sets to 1 when this host connected
+        // to r-host 
+        //
+        // The "connect_r" variable (0 by default) sets to 1 when this host is 
+        // r-host and other peer send connect to r-host command
+        int mode = 0, connect_r = rd->cmd == CMD_CONNECT_R ? 1 : 0;
+
+        // Check that this host connected to r-host
+        if(!ke->ksn_cfg.r_host_name[0] && ke->ksn_cfg.r_port == rd->port &&
+           ( 
+             ((rd->cmd == CMD_NONE || rd->cmd == CMD_HOST_INFO) && rd->data_len == 2) ||
+             !strcmp(ke->ksn_cfg.r_host_addr, rd->addr)
+           )) {
+
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG, "connected to r-host: %s (%s:%d)\n",
+                    rd->from, rd->addr, rd->port);
+            #endif
 
             strncpy(ke->ksn_cfg.r_host_name, rd->from,
                     sizeof(ke->ksn_cfg.r_host_name));
@@ -790,9 +802,8 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
                     rd->from, rd->addr, rd->port);
         #endif
 
-
         // Request host info
-        ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, NULL, 0);
+        ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, "\0", 1 + connect_r);
         peer_type_req_t *type_request = malloc(sizeof(peer_type_req_t));
         type_request->kc = ke->kc;
         type_request->addr = strdup(rd->addr);
