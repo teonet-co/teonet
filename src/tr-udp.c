@@ -2072,7 +2072,7 @@ ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr,
                          socklen_t *addr_len) {
 
-    trudpSendEvent((void*)td, PROCESS_RECEIVE, buffer, buffer_len, 0);
+    trudpSendGlobalEvent(td, PROCESS_RECEIVE, buffer, buffer_len, 0);
 
     return 0;
 }
