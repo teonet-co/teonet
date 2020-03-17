@@ -169,6 +169,7 @@ teobase_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/platform.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/socket.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/time.h \
+  $(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/types.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/windows.h \
 	# end of teobase_HEADERS
 
