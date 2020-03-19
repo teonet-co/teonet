@@ -405,9 +405,9 @@ void teoBroadcastSend(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_
     }
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG,
-            "send broadcast message by type \"%s\" \n", to);
+    ksn_printf(ke, MODULE, DEBUG, "send broadcast message by type \"%s\" \n", to);
     #endif
+    
     for(int i=0; i < sd.num; ++i) {
         ksnCoreSendto(kc, sd.arp[i]->data.addr, sd.arp[i]->data.port, cmd, data, data_len);
     }
