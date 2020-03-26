@@ -159,18 +159,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             if(!make_addr(arp->addr, arp->port, 
                                     (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
-                                #if TRUDP_VERSION == 1
-                                ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, 
-                                        (__CONST_SOCKADDR_ARG) &remaddr);
-                                ksnTRUDPreset(ke->kc->ku, 
-                                        (__CONST_SOCKADDR_ARG) &remaddr, 0);
-                                ksnTRUDPstatReset(ke->kc->ku);
-                                #else
                                 trudpChannelData *tcd;
                                 if((tcd = trudpGetChannel(
                                     ke->kc->ku, (__CONST_SOCKADDR_ARG)&remaddr, 0)) != (void*)-1)
                                         trudp_ChannelSendReset(tcd);
-                                #endif
                             }
                         }
                         

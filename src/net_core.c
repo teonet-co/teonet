@@ -129,11 +129,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     }
 
     // TR-UDP initialize
-    #if TRUDP_VERSION == 1
-    kc->ku = ksnTRUDPinit(kc);
-    #elif TRUDP_VERSION == 2
     kc->ku = trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
-    #endif
 
     // Change this host port number to port changed in ksnCoreBind function
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
@@ -176,14 +172,12 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        #if TRUDP_VERSION == 1
-        ksnTRUDPDestroy(kc->ku);
-        #elif TRUDP_VERSION == 2
         trudpDestroy(kc->ku);
-        #endif
+
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif
+        
         free(kc);
         ke->kc = NULL;
 

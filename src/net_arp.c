@@ -155,13 +155,9 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
         // Remove peer from TR-UDP module 
         // \TODO The 'if(arp)' was added because we drop here. Check why arp may be NULL.
         if(arp) {
-            #if TRUDP_VERSION == 1
-            ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
-                    arp->port, 1);
-            #elif TRUDP_VERSION == 2
             trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->data.addr,
                     arp->data.port, 0);
-            #endif
+
         }
 
         // Remove from Stream module
@@ -196,11 +192,7 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
     ke->ksn_cfg.r_host_name[0] = '\0';
     ka->map = pblMapNewHashMap();
     ksnetArpAddHost(ka);
-    #if TRUDP_VERSION == 1
-    ksnTRUDPremoveAll(ke->kc->ku);
-    #elif TRUDP_VERSION == 2
     trudpChannelDestroyAll(ke->kc->ku);
-    #endif
 }
 
 /**
@@ -535,26 +527,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                     data->last_triptime);
 
             // Get TR-UDP ip map data by key
-            #if TRUDP_VERSION == 1
-            size_t val_len;
-            size_t key_len = KSN_BUFFER_SM_SIZE;
-            char key[key_len];
-            key_len = snprintf(key, key_len, "%s:%d", data->addr, data->port);
-            ip_map_data *ip_map_d = pblMapGet(
-                    ((ksnetEvMgrClass*)ka->ke)->kc->ku->ip_map, key, key_len,
-                    &val_len);
 
-            // Last trip time
-            char *tcp_last_triptime = ip_map_d != NULL ?
-                ksnet_formatMessage("%7.3f / ",
-                    ip_map_d->stat.triptime_last/1000.0) : strdup(null_str);
-
-            // Last 10 max trip time
-            char *tcp_triptime_last10_max = ip_map_d != NULL ?
-                ksnet_formatMessage("%.3f ms",
-                    ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
-
-            #elif TRUDP_VERSION == 2
             // Get TR-UDP by address and port
             trudpChannelData *tcd = trudpGetChannelAddr(
                     ((ksnetEvMgrClass*)ka->ke)->kc->ku,
@@ -572,7 +545,7 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
                 tcp_last_triptime = strdup(null_str);
                 tcp_triptime_last10_max = strdup(null_str);
             }
-            #endif
+
 
             str = ksnet_sformatMessage(str, "%s"
                 "%3d %s%-15s%s %3d   %-15s  %5d   %7s %s  %s%s%s\n",
