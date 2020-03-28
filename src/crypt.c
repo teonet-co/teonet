@@ -278,10 +278,10 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
 void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
                         size_t package_len, size_t *decrypt_len) {
 
-    size_t ptr = 0;
+    size_t ptr = sizeof(uint16_t);
 
-    *decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);
-    unsigned char *decrypted = malloc(package_len - ptr); //*decrypt_len + 1);
+    *decrypt_len = *((uint16_t*)package);
+    unsigned char decrypted[package_len - ptr];
 
     // Decrypt the package
     #ifdef DEBUG_KSNET
@@ -307,8 +307,6 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
         ptr = 0;
         *decrypt_len = package_len;
     }
-
-    free(decrypted);
 
     return package + ptr;
 }

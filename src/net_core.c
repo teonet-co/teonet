@@ -473,7 +473,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                 cmd_l0_data->data_length
         );
 
-        char *buf = malloc(buf_length);
+        char buf[buf_length];
         teoLNullPacketCreate(buf, buf_length,
                 cmd_l0_data->cmd,
                 cmd_l0_data->from,
@@ -481,7 +481,6 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                 (size_t)cmd_l0_data->data_length);
 
         if((snd = ksnLNullPacketSend(ke->kl, fd, buf, buf_length)) >= 0);
-        free(buf);
     }
 
     // Send to r-host
@@ -501,12 +500,11 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
             size_t ptr = 0;
             const size_t to_len = strlen(to) + 1;
             const size_t buf_len = to_len + sizeof(cmd) + data_len;
-            char *buf = malloc(buf_len);
+            char buf[buf_len];
             memcpy(buf + ptr, to, to_len); ptr += to_len;
             memcpy(buf + ptr, &cmd, sizeof(uint8_t)); ptr += sizeof(uint8_t);
             memcpy(buf + ptr, data, data_len); ptr += data_len;
             ksnCoreSendto(kc, arp->addr, arp->port, CMD_RESEND, buf, buf_len);
-            free(buf);
         }
     }
 
@@ -524,21 +522,6 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
  *
  * @return Pointer to packet. Should be free after use.
  */
-//void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
-//                          size_t data_len, size_t *packet_len) {
-//
-//    size_t ptr = 0;
-//    *packet_len = kc->name_len + data_len + PACKET_HEADER_ADD_SIZE;
-//    void *packet = malloc(*packet_len);
-//
-//    // Copy packet data
-//    *((uint8_t *)packet) = kc->name_len; ptr += sizeof(uint8_t); // Name length
-//    memcpy(packet + ptr, kc->name, kc->name_len); ptr += kc->name_len; // Name
-//    *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t); // Command
-//    memcpy(packet + ptr, data, data_len); ptr += data_len; // Data
-//
-//    return packet;
-//}
 inline void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
                           size_t data_len, size_t *packet_len) {
 

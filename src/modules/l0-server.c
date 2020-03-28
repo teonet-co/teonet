@@ -406,7 +406,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
 
     size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length +
             packet->data_length;
-    char *out_data = malloc(out_data_len);
+    char out_data[out_data_len];
     memset(out_data, 0, out_data_len);
     ksnLNullSPacket *spacket = (ksnLNullSPacket*) out_data;
 
@@ -451,8 +451,6 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     // Send packet to peer statistic
     kl->stat.packets_to_peer++;
 
-    free(out_data);
-
     return arp_data;
 }
 
@@ -475,8 +473,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 
     // Create L0 packet
     size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + data_len;
-    //char out_data[out_data_len]; // Buffer
-    char *out_data = malloc(out_data_len);
+    char out_data[out_data_len]; // Buffer
     memset(out_data, 0, out_data_len);
     ksnLNullSPacket *spacket = (ksnLNullSPacket*)out_data;
 
@@ -495,8 +492,6 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     #endif
     int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0_TO,
             out_data, out_data_len);
-
-    free(out_data);
 
     return rv;
 }
@@ -517,22 +512,22 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 int ksnLNullSendEchoToL0(void *ke, char *addr, int port, char *cname,
         size_t cname_length, void *data, size_t data_len) {
 
-    size_t data_e_length;
-    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data,
-            data_len, &data_e_length);
-
+    size_t data_e_length = data_len + sizeof(double);
+    uint8_t data_e[data_e_length];
+    ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, data_len, data_e);
+    
     int retval = ksnLNullSendToL0(ke, addr, port, cname, cname_length, CMD_ECHO,
             data_e, data_e_length);
-    free(data_e);
+
     return retval;
 }
 
 int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
         size_t cname_length, void *data, size_t data_len) {
 
-    size_t data_e_length;
-    void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data,
-            data_len, &data_e_length);
+    size_t data_e_length = data_len + sizeof(double);
+    uint8_t data_e[data_e_length];
+    ksnCommandEchoBuffer(((ksnetEvMgrClass*)ke)->kc->kco, data, data_len, data_e);
 
     ksnCorePacketData rd;
     rd.addr = addr;
@@ -710,7 +705,7 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
     size_t from_len = strlen(from) + 1;
     // Create L0 packet
     size_t packet_len = teoLNullBufferSize(from_len, data_length);
-    char *packet = malloc(packet_len);
+    char *packet[packet_len];
     memset(packet, 0, packet_len);
 
     size_t packet_length =
@@ -718,7 +713,7 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
 
     // Send packet
     ssize_t snd = ksnLNullPacketSend(kl, fd, packet, packet_length);
-    free(packet);
+
     return snd;
 }
 
@@ -965,14 +960,16 @@ void _check_connected(uint32_t id, int type, void *data) {
 
                 // From this host(peer)
                 const char *from = ksnetEvMgrGetHostName(kl->ke);
-                size_t data_e_length, from_len = strlen(from) + 1;
+                size_t from_len = strlen(from) + 1;
 
                 // Create echo buffer
-                void *data_e = ksnCommandEchoBuffer(((ksnetEvMgrClass *)(kl->ke))->kc->kco, "ping", 5, &data_e_length);
+                size_t data_e_length = 5 + sizeof(double);
+                uint8_t data_e[data_e_length];
+                ksnCommandEchoBuffer(((ksnetEvMgrClass *)(kl->ke))->kc->kco, data, 5, data_e);
 
                 // Create L0 packet
                 size_t out_data_len = sizeof(teoLNullCPacket) + from_len + data_e_length;
-                char *out_data = malloc(out_data_len);
+                char out_data[out_data_len];
                 memset(out_data, 0, out_data_len);
 
                 size_t packet_length = teoLNullPacketCreate(
@@ -980,9 +977,6 @@ void _check_connected(uint32_t id, int type, void *data) {
                     data_e, data_e_length);
 
                 ksnLNullPacketSend(kl, *fd, out_data, packet_length);
-
-                free(data_e);
-                free(out_data);
             }
         }
         pblIteratorFree(it);
@@ -1188,7 +1182,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
                     data->data_length;
-            char *out_data = malloc(out_data_len);
+            char out_data[out_data_len];
             memset(out_data, 0, out_data_len);
             size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
                     data->cmd, rd->from, (const uint8_t*)data->from + data->from_length,
@@ -1209,7 +1203,6 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
                 (int)snd, data->from,
                 packet->data_length, packet->peer_name);
             #endif
-            free(out_data);
         }
 
         // The L0 client was disconnected
@@ -1466,7 +1459,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
                     ALLOW_len;
-            char *out_data = malloc(out_data_len);
+            char out_data[out_data_len];
             memset(out_data, 0, out_data_len);
 
             size_t packet_length =
@@ -1474,7 +1467,6 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                                      CMD_L0_AUTH, rd->from, (uint8_t *)ALLOW, ALLOW_len);
             // Send websocket allow message
             if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
-            free(out_data);
             free(ALLOW);
         }
     }
@@ -1621,14 +1613,14 @@ ssize_t recvCheck(trudpChannelData *tcd, char *data, ssize_t data_length)
 */
 static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
     size_t resp_len = teoLNullKEXBufferSize(kld->server_crypt->enc_proto);
-    uint8_t *resp_buf = (uint8_t *)malloc(resp_len);
+    uint8_t resp_buf[resp_len];
 
     bool ok = teoLNullKEXCreate(kld->server_crypt, resp_buf, resp_len) != 0;
     if (ok) {
         const int CMD_L0_KEX_ANSWER = 0;
         ksnLNullSend(kl, fd, CMD_L0_KEX_ANSWER, resp_buf, resp_len);
     }
-    free(resp_buf);
+
     return ok;
 }
 

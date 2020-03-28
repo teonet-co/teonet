@@ -315,7 +315,7 @@ static int check_retrives = 0, timeouts = 0;
         unsigned long t; \
         struct timeval now; \
         struct timespec timeToWait; \
-        const int timeout =  buf ? 150000 : 150000; /* 50000 : 1000 time out for data | time out for check multi thread */ \
+        const int timeout = 150000; /* 50000 : 1000 time out for data | time out for check multi thread */ \
         \
         pthread_mutex_lock(&kev->ta->async_func_mutex); \
         if(MULTITHREADED()) LOCK_CV(); \
@@ -338,7 +338,6 @@ static int check_retrives = 0, timeouts = 0;
     } \
     retval = ud->rv; \
     if(MULTITHREADED()) { free(ud); ud_count--; } \
-    if(buf) free(buf); \
     retval; \
     })
 
@@ -379,10 +378,10 @@ void ksnCoreSendCmdtoA(void *ke, const char *peer, uint8_t cmd, void *data,
 
         // Create buffer: { f_type, cmd, peer_length, peer, data }
         size_t buf_length = sizeof(uint8_t)*3 + peer_length + data_length;
-        void *buf = malloc(buf_length);
-        *(uint8_t*)(buf + ptr) = f_type; ptr++;
-        *(uint8_t*)(buf + ptr) = cmd; ptr++;
-        *(uint8_t*)(buf + ptr) = peer_length; ptr++;
+        uint8_t buf[buf_length];
+        buf[ptr] = f_type; ptr++;
+        buf[ptr] = cmd; ptr++;
+        buf[ptr] = peer_length; ptr++;
         memcpy(buf + ptr, peer, peer_length); ptr += peer_length;
         memcpy(buf + ptr, data, data_length);
 
@@ -406,9 +405,9 @@ void teoSScrSendA(void *ke, uint16_t event, void *data, size_t data_length,
 
         // Create buffer: { f_type, cmd, event, data }
         size_t buf_length = sizeof(uint8_t)*2 + sizeof(uint16_t) + data_length;
-        void *buf = malloc(buf_length);
-        *(uint8_t*)(buf + ptr) = f_type; ptr++;
-        *(uint8_t*)(buf + ptr) = cmd; ptr++;
+        uint8_t buf[buf_length];
+        buf[ptr] = f_type; ptr++;
+        buf[ptr] = cmd; ptr++;
         *(uint16_t*)(buf + ptr) = event; ptr += sizeof(uint16_t);
         memcpy(buf + ptr, data, data_length);
 
@@ -437,12 +436,12 @@ void sendCmdAnswerToBinaryA(void *ke, void *rdp, uint8_t cmd, void *data,
 
         // Create buffer: { f_type, cmd, l0_f, addr_length, from_length, addr, from, port, data }
         size_t buf_length = sizeof(uint8_t)*5 + addr_length + rd->from_len + sizeof(uint32_t) + data_length;
-        void *buf = malloc(buf_length);
-        *(uint8_t*)(buf + ptr) = f_type; ptr++;
-        *(uint8_t*)(buf + ptr) = cmd; ptr++;
-        *(uint8_t*)(buf + ptr) = rd->l0_f; ptr++;
-        *(uint8_t*)(buf + ptr) = addr_length; ptr++;
-        *(uint8_t*)(buf + ptr) = rd->from_len; ptr++;
+        uint8_t buf[buf_length];
+        buf[ptr] = f_type; ptr++;
+        buf[ptr] = cmd; ptr++;
+        buf[ptr] = rd->l0_f; ptr++;
+        buf[ptr] = addr_length; ptr++;
+        buf[ptr] = rd->from_len; ptr++;
         memcpy(buf + ptr, rd->addr, addr_length); ptr += addr_length;
         memcpy(buf + ptr, rd->from, rd->from_len); ptr += rd->from_len;
         *(uint32_t*)(buf + ptr) = rd->port; ptr += sizeof(uint32_t);
@@ -474,10 +473,10 @@ void teoSScrSubscribeA(teoSScrClass *sscr, char *peer, uint16_t ev) {
 
         // Create buffer: { f_type, cmd, peer_length, ev, peer }
         size_t buf_length = sizeof(uint8_t)*3 + sizeof(uint16_t) + peer_length;
-        void *buf = malloc(buf_length);
-        *(uint8_t*)(buf + ptr) = f_type; ptr++;
-        *(uint8_t*)(buf + ptr) = 0; ptr++; // cmd
-        *(uint8_t*)(buf + ptr) = peer_length; ptr++;
+        uint8_t buf[buf_length];
+        buf[ptr] = f_type; ptr++;
+        buf[ptr] = 0; ptr++; // cmd
+        buf[ptr] = peer_length; ptr++;
         *(uint16_t*)(buf + ptr) = ev; ptr += sizeof(uint16_t);
         memcpy(buf + ptr, peer, peer_length);
 

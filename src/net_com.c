@@ -245,17 +245,13 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
  *
  * @return Pointer to ECHO command buffer. SHould be free after use.
  */
-void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, size_t *data_t_len) {
+void ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, uint8_t *data_out) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
     double ct = ksnetEvMgrGetTime(ke);
-    *data_t_len = data_len + sizeof(double);
-    void *data_t = malloc(*data_t_len);
 
-    memcpy(data_t, data, data_len);
-    *((double*)(data_t + data_len)) = ct;
-
-    return data_t;
+    memcpy(data_out, data, data_len);
+    *((double*)(data_out + data_len)) = ct;
 }
 
 /**
@@ -270,17 +266,17 @@ void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, si
  */
 int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, size_t data_len) {
 
-    size_t data_t_len;
-    void *data_t = ksnCommandEchoBuffer(kco, data, data_len, &data_t_len);
-
-    ksnet_arp_data * arp = ksnCoreSendCmdto(kco->kc, to, CMD_ECHO, data_t, data_t_len);
+    size_t data_t_len = data_len + sizeof(double);
+    uint8_t out_data[data_t_len];
+    ksnCommandEchoBuffer(kco, data, data_len, out_data);
+    
+    ksnet_arp_data * arp = ksnCoreSendCmdto(kco->kc, to, CMD_ECHO, out_data, data_t_len);
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
     if(arp != NULL) {
         arp->last_triptime_send = ksnetEvMgrGetTime(ke);
     }
 
-    free(data_t);
     return arp != NULL;
 }
 

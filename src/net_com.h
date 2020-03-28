@@ -129,8 +129,7 @@ void ksnCommandDestroy(ksnCommandClass *kco);
 int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd);
 int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, 
   size_t data_len);
-void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, 
-        size_t *data_t_len);
+void ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, uint8_t *data_out);
 int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name, 
   char *addr, uint32_t port);
 
