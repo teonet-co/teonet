@@ -38,7 +38,7 @@
 // External constants
 extern const char *localhost;
 extern const char *null_str;
-
+extern const int net_core_header_add_size;
 /**
  * KSNet mesh core data
  */

@@ -426,26 +426,27 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         packet->peer_name, spacket->from);
     #endif
 
+    ksnCoreClass *core_obj = ((ksnetEvMgrClass*)kl->ke)->kc;
     // Send to peer
     if(strlen((char*)packet->peer_name) && strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {        
-        arp_data = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0,
+        arp_data = ksnCoreSendCmdto(core_obj, packet->peer_name, CMD_L0,
                 spacket, out_data_len);
     }
     // Send to this host
     else {
         // Create packet
-        size_t pkg_len;
-        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len,
-                    &pkg_len);
+        size_t pkg_len = core_obj->name_len + out_data_len + net_core_header_add_size;
+        uint8_t pkg[pkg_len];
+
+        ksnCoreCreatePacket(core_obj, CMD_L0, spacket, out_data_len, pkg);
         struct sockaddr_in addr;             // address structure
         socklen_t addrlen = sizeof(addr);    // address structure length
-        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr,
+        if(!make_addr(localhost, core_obj->port, (__SOCKADDR_ARG) &addr,
                 &addrlen)) {
 
-            ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
-            arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
+            ksnCoreProcessPacket(core_obj, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
+            arp_data = (ksnet_arp_data *)ksnetArpGet(core_obj->ka, (char*)packet->peer_name);
         }
-        free(pkg);
     }
 
     // Send packet to peer statistic

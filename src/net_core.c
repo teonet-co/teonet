@@ -29,9 +29,8 @@ typedef int socklen_t;
 #include "tr-udp.h"
 #include "tr-udp_.h"
 
-// Constants
 const char *localhost = "127.0.0.1";
-#define PACKET_HEADER_ADD_SIZE 2    // Sizeof from length + Sizeof command
+const int net_core_header_add_size = 2;
 
 #define MODULE _ANSI_GREEN "net_core" _ANSI_GREY
 #define kev ((ksnetEvMgrClass *)ksn_cfg->ke)
@@ -39,9 +38,7 @@ const char *localhost = "127.0.0.1";
 // Local functions
 void host_cb(EV_P_ ev_io *w, int revents);
 int ksnCoreBind(ksnCoreClass *kc);
-void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, size_t *packet_len);
-void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd, char *from, size_t from_len, const void *data,
-        size_t data_len, size_t *packet_len);
+void ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data, size_t data_len, uint8_t *packet);
 int send_cmd_disconnect_peer_cb(ksnetArpClass *ka, char *name, ksnet_arp_data_ext *arp_data, void *data);
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name, ksnet_arp_data_ext *arp_data, void *data);
 int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_data, void *data);
@@ -309,18 +306,14 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
             for(i = 0; i < num_subpackets; i++) {
 
                 // Create packet
-                size_t packet_len;
-                size_t data_len = *(uint16_t*)(packets[i]);
-                void *packet = ksnCoreCreatePacket(kc, CMD_SPLIT,
-                        packets[i] + sizeof(uint16_t),
-                        data_len + sizeof(uint16_t)*2,
-                        &packet_len);
+                size_t split_data_len = *(uint16_t*)(packets[i]);
+                size_t packet_len = kc->name_len + split_data_len + sizeof(uint16_t)*2 + net_core_header_add_size;
+                uint8_t packet[packet_len];
+                ksnCoreCreatePacket(kc, CMD_SPLIT, packets[i] + sizeof(uint16_t), split_data_len + sizeof(uint16_t)*2, packet);
 
                 // Encrypt and send one spitted sub-packet
                 sendto_encrypt(kc, CMD_SPLIT, packet, packet_len);
 
-                // Free memory
-                free(packet);
                 free(packets[i]);
             }
             free(packets);
@@ -330,15 +323,12 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
         else {
 
             // Create packet
-            size_t packet_len;
-            void *packet = ksnCoreCreatePacket(kc, cmd, data, data_len,
-                    &packet_len);
+            size_t packet_len = kc->name_len + data_len + net_core_header_add_size;
+            uint8_t packet[packet_len];
+            ksnCoreCreatePacket(kc, cmd, data, data_len, packet);
 
             // Encrypt and send one not spitted packet
             sendto_encrypt(kc, cmd, packet, packet_len);
-
-            // Free packet
-            free(packet);
         }
 
     }
@@ -511,23 +501,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     return arp;
 }
 
-/**
- * Create ksnet packet
- *
- * @param kc Pointer to ksnCore Class object
- * @param cmd Command ID
- * @param data Pointer to data
- * @param data_len Data length
- * @param [out] packet_len Pointer to packet length
- *
- * @return Pointer to packet. Should be free after use.
- */
-inline void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
-                          size_t data_len, size_t *packet_len) {
 
-    return ksnCoreCreatePacketFrom(kc, cmd, kc->name, kc->name_len, data,
-            data_len, packet_len);
-}
 
 /**
  * Create ksnet packet with from field from another host (Resend)
@@ -545,22 +519,37 @@ inline void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data
  *
  * @return Pointer to packet. Should be free after use.
  */
-void *ksnCoreCreatePacketFrom(ksnCoreClass *kc, uint8_t cmd,
+static void ksnCoreCreatePacketFrom(uint8_t cmd,
         char *from, size_t from_len,
-        const void *data, size_t data_len, size_t *packet_len) {
+        const void *data, size_t data_len, uint8_t *packet) {
 
     size_t ptr = 0;
-    *packet_len = from_len + data_len + PACKET_HEADER_ADD_SIZE;
-    void *packet = malloc(*packet_len);
 
     // Copy packet data
     *((uint8_t *)packet) = from_len; ptr += sizeof(uint8_t); // From name length
     memcpy(packet + ptr, from, from_len); ptr += from_len; // From name
     *((uint8_t *) packet +ptr) = cmd; ptr += sizeof(uint8_t); // Command
     memcpy(packet + ptr, data, data_len); ptr += data_len; // Data
-
-    return packet;
 }
+
+
+/**
+ * Create ksnet packet
+ *
+ * @param kc Pointer to ksnCore Class object
+ * @param cmd Command ID
+ * @param data Pointer to data
+ * @param data_len Data length
+ * @param [out] packet_len Pointer to packet length
+ *
+ * @return Pointer to packet. Should be free after use.
+ */
+inline void ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
+                          size_t data_len, uint8_t *packet) {
+
+    ksnCoreCreatePacketFrom(cmd, kc->name, kc->name_len, data, data_len, packet);
+}
+
 
 /**
  * Parse received data to ksnCoreRecvData structure
@@ -580,7 +569,7 @@ int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *rd) {
 
     rd->from_len = *((uint8_t *)packet); ptr += sizeof(rd->from_len); // From length
     if (rd->from_len &&
-        rd->from_len + PACKET_HEADER_ADD_SIZE <= packet_len &&
+        rd->from_len + net_core_header_add_size <= packet_len &&
         *((char *)(packet + ptr + rd->from_len - 1)) == '\0'
     ) {
       rd->from = (char *)(packet + ptr); ptr += rd->from_len; // From pointer
