@@ -638,6 +638,9 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
 
     for(ifa = ifAddrStruct; ifa != NULL; ifa = ifa->ifa_next ) {
 
+        // Skip interface with empty address
+        if(!ifa ->ifa_addr) continue;
+
         // Check it is IP4
         if(ifa ->ifa_addr->sa_family == AF_INET) {
 
