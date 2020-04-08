@@ -723,29 +723,31 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
  */
 void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 
+    stdin_idle_data *idata = ((stdin_idle_data *)w->data);
+    
     #ifdef DEBUG_KSNET
-    ksn_printf(((stdin_idle_data *)w->data)->ke, MODULE, DEBUG_VV,
+    ksn_printf(idata->ke, MODULE, DEBUG_VV,
                 "STDIN idle (process data) callback (%c)\n", 
-                *((int*)((stdin_idle_data *)w->data)->data));
+                *((int*)idata->data));
     #endif
 
     // Stop this watcher
     ev_idle_stop(EV_A_ w);
 
+    if (!idata->data) {
+        return;
+    }
+
     // Call the hot keys module callback
-    if(!hotkeys_cb(((stdin_idle_data *)w->data)->ke,
-               ((stdin_idle_data *)w->data)->data,
-               w)) {
+    if(!hotkeys_cb(idata->ke, idata->data, w)) {
     
         // Start STDIN watcher
-        ev_io_start(EV_A_ ((stdin_idle_data *)w->data)->stdin_w);
+        ev_io_start(EV_A_ idata->stdin_w);
     }
 
     // Free watchers data
-    if (w->data) {
-        free(((stdin_idle_data *)w->data)->data);
-        free(w->data);
-    }
+    free(idata->data);
+    free(w->data);
 }
 
 /******************************************************************************/
