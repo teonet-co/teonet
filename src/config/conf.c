@@ -302,6 +302,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     free(vpn_dev_name);
     free(r_host_addr);
     free(host_name);
+    free(statsd_ip);
     free(net_key);
     free(filter);
     free(vpn_ip);
