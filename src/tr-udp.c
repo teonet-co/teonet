@@ -2277,7 +2277,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
                 
                     // Remove TR-UDP channel
-                    trudpChannelDestroy(tcd);
+                    trudpChannelDestroyChannel(td, tcd);
                 }
             }
             else {
