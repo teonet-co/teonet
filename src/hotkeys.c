@@ -742,8 +742,10 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
     }
 
     // Free watchers data
-    free(((stdin_idle_data *)w->data)->data);
-    free(w->data);
+    if (w->data) {
+        free(((stdin_idle_data *)w->data)->data);
+        free(w->data);
+    }
 }
 
 /******************************************************************************/
