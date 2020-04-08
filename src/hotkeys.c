@@ -725,18 +725,18 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 
     stdin_idle_data *idata = ((stdin_idle_data *)w->data);
     
+    // Stop this watcher
+    ev_idle_stop(EV_A_ w);
+
+    if (!idata) {
+        return;
+    }
+
     #ifdef DEBUG_KSNET
     ksn_printf(idata->ke, MODULE, DEBUG_VV,
                 "STDIN idle (process data) callback (%c)\n", 
                 *((int*)idata->data));
     #endif
-
-    // Stop this watcher
-    ev_idle_stop(EV_A_ w);
-
-    if (!idata->data) {
-        return;
-    }
 
     // Call the hot keys module callback
     if(!hotkeys_cb(idata->ke, idata->data, w)) {
