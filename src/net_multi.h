@@ -15,7 +15,7 @@
  */
 typedef struct ksnMultiClass {
     
-    PblList* list; ///< Pointer to network list
+    PblMap* list; ///< Pointer to network list
     size_t num; ///< Number of networks
     
 } ksnMultiClass;
@@ -45,7 +45,14 @@ extern "C" {
 
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
 void ksnMultiDestroy(ksnMultiClass *km);
-ksnetEvMgrClass *ksnMultiGet(ksnMultiClass *km, int num);
+ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number);
+ksnetEvMgrClass *ksnMultiGetByNetwork(ksnMultiClass *km, char *network_name);
+
+#define ksnMultiGet(X, Y) _Generic((Y), \
+      int : ksnMultiGetByNumber, \
+      char* : ksnMultiGetByNetwork) \
+      ((X), (Y))
+
 char *ksnMultiShowListStr(ksnMultiClass *km);
 ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd, void *data, 
         size_t data_len);
