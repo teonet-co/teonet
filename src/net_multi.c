@@ -72,7 +72,7 @@ void teoMultiAddNet(ksnMultiClass *km, char *host, char *network) {
     ksnMultiUpdateCountNetworks(km, km->num + 1);
 
     ksnetEvMgrClass *ke_new = ksnetEvMgrInitPort(ke_last->argc, ke_last->argv,
-                ke_last->event_cb, READ_OPTIONS|READ_CONFIGURATION, ke_last->ksn_cfg.port,
+                ke_last->event_cb, READ_OPTIONS|READ_CONFIGURATION, ke_last->ksn_cfg.port+3,
                 NULL);
 
     // Set network parameters
