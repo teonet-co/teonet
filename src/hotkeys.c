@@ -722,14 +722,6 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
  * @param revents
  */
 void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
-    stdin_idle_data *idata = ((stdin_idle_data *)w->data);
-
-    // Stop this watcher
-    ev_idle_stop(EV_A_ w);
-
-    if (!idata) {
-        return;
-    }
 
     stdin_idle_data *idata = ((stdin_idle_data *)w->data);
     
