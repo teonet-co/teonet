@@ -103,7 +103,7 @@ void ksnMultiDestroy(ksnMultiClass *km) {
  * 
  * @return Pointer to ksnetEvMgrClass
  */
-ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number) {
+ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number) {
     PblIterator *it = pblMapIteratorNew(km->list);
     if(!it) return NULL;
 
@@ -125,7 +125,7 @@ ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number) {
  * 
  * @return Pointer to ksnetEvMgrClass or NULL if not found
  */
-ksnetEvMgrClass *ksnMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
+ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
     ksnetEvMgrClass **ke = pblMapGetStr(km->list, network_name, NULL);
     if (ke) return *ke;
 

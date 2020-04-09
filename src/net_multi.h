@@ -46,12 +46,12 @@ extern "C" {
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
 void ksnMultiDestroy(ksnMultiClass *km);
 
-ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number);
-ksnetEvMgrClass *ksnMultiGetByNetwork(ksnMultiClass *km, char *network_name);
+ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number);
+ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name);
 
 #define ksnMultiGet(X, Y) _Generic((Y), \
-      int : ksnMultiGetByNumber, \
-      char* : ksnMultiGetByNetwork) \
+      int : teoMultiGetByNumber, \
+      char* : teoMultiGetByNetwork) \
       ((X), (Y))
 
 char *ksnMultiShowListStr(ksnMultiClass *km);
