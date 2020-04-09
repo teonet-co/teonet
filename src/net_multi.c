@@ -42,9 +42,8 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             ke->km = km; // Pointer to multi net module
             ke->n_num = i; // Set network number
             ke->num_nets = md->num; // Set number of networks
-            strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME); // Host name
-
-            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2); // Network name
+            strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - strlen(ke->ksn_cfg.host_name)); // Host name
+            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - strlen(ke->ksn_cfg.network)); // Network name
             read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
 
             // Add to network list
@@ -127,8 +126,7 @@ ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number) {
  */
 ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
     ksnetEvMgrClass **ke = pblMapGetStr(km->list, network_name, NULL);
-    if (ke) return *ke;
-
+    if(ke) return *ke;
     return NULL;
 }
 
@@ -175,7 +173,7 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
     add_line();
 
     str = ksnet_sformatMessage(str, "%s"
-        "  # Name \t Port\n", str);
+        "  # Name                 Network               Port\n ", str);
     add_line();
 
     PblIterator *it = pblMapIteratorNew(km->list);
@@ -187,17 +185,16 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
 
         str = ksnet_sformatMessage(str, "%s"
-                "%3d %s%s%s\t %s%s%s\t %5d\n",
+                "%3d %s%-20s%s %s%-20s%s %5d\n",
                 str,
                 // Number
                 (*ke)->n_num+1,
                 // Peer name
                 getANSIColor(LIGHTGREEN), (*ke)->ksn_cfg.host_name, getANSIColor(NONE),
-                getANSIColor(LIGHTRED), network_name, getANSIColor(NONE),
+                getANSIColor(LIGHTCYAN), network_name, getANSIColor(NONE),
                 // Port
                 (*ke)->ksn_cfg.port
         );
-
     }
 
     add_line();
@@ -225,7 +222,7 @@ ksnet_arp_data *teoMultiSendCmdToNet(ksnMultiClass *km, char *peer, char *networ
 
 
 /**
- * It will be new function for broadcast sending
+ * \TODO: It will be new function for broadcast sending
  * Send command by name to peer
  *
  * @param km Pointer to ksnMultiClass
@@ -239,7 +236,8 @@ ksnet_arp_data *teoMultiSendCmdToNet(ksnMultiClass *km, char *peer, char *networ
 ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd, 
         void *data, size_t data_len) {
 
-    int i;
+    // \TODO: create body here
+    // int i;
     ksnet_arp_data *arp = NULL;
 
     return arp;
