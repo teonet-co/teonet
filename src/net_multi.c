@@ -14,6 +14,8 @@
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
 
+static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num);
+
 /**
  * Initialize ksnMultiClass object
  * 
@@ -53,14 +55,59 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             // Start network
             ksnetEvMgrRun(ke);
             
-            // Start event manager 
-            if(md->run && i == md->num - 1) ev_run(ke->ev_loop, 0);          
+            // Start event manager
+            if(md->run && i == md->num - 1) ev_run(ke->ev_loop, 0);
         }
         
     }
     
     return km;
 }
+
+
+void teoMultiAddNet(ksnMultiClass *km, char *host, char *network) {
+    ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->num-1);
+
+    // We need to update count of networks for old networks
+    ksnMultiUpdateCountNetworks(km, km->num + 1);
+
+    ksnetEvMgrClass *ke_new = ksnetEvMgrInitPort(ke_last->argc, ke_last->argv,
+                ke_last->event_cb, READ_OPTIONS|READ_CONFIGURATION, ke_last->ksn_cfg.port,
+                NULL);
+
+    // Set network parameters
+    ke_new->km = km; // Pointer to multi net module
+    ke_new->n_num = km->num - 1; // Set network number
+    ke_new->num_nets = km->num; // Set number of networks
+    strncpy(ke_new->ksn_cfg.host_name, host, KSN_MAX_HOST_NAME - strlen(ke_new->ksn_cfg.host_name)); // Host name
+    strncpy(ke_new->ksn_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - strlen(ke_new->ksn_cfg.network)); // Network name
+    read_config(&ke_new->ksn_cfg, ke_new->ksn_cfg.port); // Read configuration file parameters
+
+    // Add to network list
+    pblMapAdd(km->list, (void *)ke_new->ksn_cfg.network, strlen(ke_new->ksn_cfg.network)+1,
+            &ke_new, sizeof(ke_new));
+
+    // Start network
+    ksnetEvMgrRun(ke_new);
+
+    // Start event manager
+    ev_run(ke_new->ev_loop, 0);
+}
+
+
+void teoMultiRemoveNet(ksnMultiClass *km, char *network) {
+
+    ksnetEvMgrClass **ke = pblMapRemoveStr(km->list, network, NULL);
+
+    if(ke == (void *)-1) return;
+
+    ksnetEvMgrStop(*ke);
+    ksnetEvMgrFree(*ke, 2);
+    free(ke);
+
+    ksnMultiUpdateCountNetworks(km, km->num - 1);
+}
+
 
 /**
  * Destroy ksnMultiClass object and networks
@@ -130,6 +177,26 @@ ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
     return NULL;
 }
 
+
+/**
+ * Update number of networks to all old networks
+ *
+ * @param km
+ * @param num
+ */
+static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num) {
+
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return;
+
+    km->num = num; // Set new number of networks in ksnMultiClass
+
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it);
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
+        (*ke)->num_nets = num;
+    }
+}
 
 /**
  * Set number of networks to all modules list networks
