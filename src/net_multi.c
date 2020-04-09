@@ -25,7 +25,7 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     ksnMultiClass *km = teo_malloc(sizeof(ksnMultiClass));
     
     // Create network list
-    km->list = pblListNewArrayList();
+    km->list = pblMapNewHashMap();
     km->num = md->num; // Set number of networks
    
     // Add networks from input data
@@ -43,13 +43,13 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             ke->n_num = i; // Set network number
             ke->num_nets = md->num; // Set number of networks
             strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME); // Host name
-            if(md->networks != NULL && md->networks[i] != NULL) {
-                strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2); // Network name
-                read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
-            }            
-            
+
+            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2); // Network name
+            read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
+
             // Add to network list
-            pblListAdd(km->list, ke);
+            pblMapAdd(km->list, (void *)ke->ksn_cfg.network, strlen(ke->ksn_cfg.network)+1,
+                    &ke, sizeof(ke));
             
             // Start network
             ksnetEvMgrRun(ke);
@@ -64,38 +64,36 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
 }
 
 /**
- * Destroy ksnMultiClass object
+ * Destroy ksnMultiClass object and networks
  * 
  * @param km
  */
 void ksnMultiDestroy(ksnMultiClass *km) {
     
-    if(km != NULL) {
-        
-        int i;
-        int argc = 0;
-        char **argv = NULL;
-        
-        // Destroy networks
-        for(i = km->num-1; i >= 0; i--) {
-            
-            ksnetEvMgrClass *ke = pblListGet(km->list, i);
-            ksnetEvMgrStop(ke);
-            argc = ke->argc;
-            argv = ke->argv;
-            ksnetEvMgrFree(ke, 2);
-        }
-        
-        // Free network list
-        pblListFree(km->list);
-        
-        // Free class memory
-        free(km);
-        
-        // Restart application if need it
-        ksnetEvMgrRestart(argc, argv);          
+    if(!km) return;
+
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return;
+
+    int argc = 0;
+    char **argv = NULL;
+
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it);
+        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
+        ksnetEvMgrStop(ke);
+        argc = ke->argc;
+        argv = ke->argv;
+        ksnetEvMgrFree(ke, 2);
     }
+
+    pblMapFree(km->list);
+    free(km);
+
+    // Restart application if need it
+    ksnetEvMgrRestart(argc, argv);
 }
+
 
 /**
  * Get network by number
@@ -105,10 +103,32 @@ void ksnMultiDestroy(ksnMultiClass *km) {
  * 
  * @return Pointer to ksnetEvMgrClass
  */
-ksnetEvMgrClass *ksnMultiGet(ksnMultiClass *km, int num) {
+ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number) {
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return NULL;
 
-    return pblListGet(km->list, num);
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it); 
+        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
+        if (ke->n_num == number) return ke;
+    }
+
+    return NULL;
 }
+
+
+/**
+ * Get network by network name
+ * 
+ * @param km
+ * @param network_name
+ * 
+ * @return Pointer to ksnetEvMgrClass or NULL if not found
+ */
+ksnetEvMgrClass *ksnMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
+    return (ksnetEvMgrClass*)pblMapGetStr(km->list, network_name, NULL);
+}
+
 
 /**
  * Set number of networks to all modules list networks
@@ -117,16 +137,18 @@ ksnetEvMgrClass *ksnMultiGet(ksnMultiClass *km, int num) {
  * @param num
  */
 void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
-    
-    int i;
-    
+
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return;
+
     km->num = num; // Set new number of networks in ksnMultiClass
-    
-    // Set number of networks and serial number in every lists network
-    for(i = 0; i < km->num; i++ ) {
-        
-        ksnetEvMgrClass *ke = pblListGet(km->list, i);
-        ke->n_num = i;
+
+    int idx = 0;
+
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it);
+        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
+        ke->n_num = idx;
         ke->num_nets = num;
     }
 }
@@ -155,28 +177,51 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
         "  # Name \t Port\n", str);
     add_line();
     
-    for(i = 0; i < km->num; i++) {
-        
-        ksnetEvMgrClass *ke = pblListGet(km->list, i);
-        
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return;
+
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it);
+        char *network_name = pblMapEntryKey(entry);
+        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
+
         str = ksnet_sformatMessage(str, "%s"
                 "%3d %s%s%s\t %5d\n",
                 str,
-                
                 // Number
-                i+1,
-
+                ke->n_num,
                 // Peer name
                 getANSIColor(LIGHTGREEN), ke->ksn_cfg.host_name, getANSIColor(NONE),
-                
                 // Port
                 ke->ksn_cfg.port
         );
-    }    
+
+    }
+
     add_line();
 
     return str;
 }
+
+
+/**
+ * Send command by name and by network
+ * 
+ *
+ * @return Pointer to ksnet_arp_data or NULL if not found
+ */
+ksnet_arp_data *teoMultiSendCmdToNet(ksnMultiClass *km, char *peer, char *network,
+        uint8_t cmd, void *data, size_t data_len) {
+
+    ksnetEvMgrClass *ke = pblMapGetStr(km->list, network, NULL);
+    ksnet_arp_data *arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, peer);
+    if(!arp) return NULL;
+
+    ksnCoreSendto(ke->kc, arp->addr, arp->port, cmd, data, data_len);
+    return arp;
+
+}
+
 
 /**
  * Send command by name to peer
