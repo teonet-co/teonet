@@ -149,7 +149,7 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        (*ke)->n_num = idx;
+        (*ke)->n_num = idx++;
         (*ke)->num_nets = num;
     }
 }
