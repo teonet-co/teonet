@@ -90,8 +90,8 @@ void teoMultiAddNet(ksnMultiClass *km, char *host, char *network) {
     // Start network
     ksnetEvMgrRun(ke_new);
 
-    // Start event manager
-    ev_run(ke_new->ev_loop, 0);
+    // // Start event manager
+    // ev_run(ke_new->ev_loop, 0);
 }
 
 
