@@ -45,6 +45,7 @@ extern "C" {
 
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
 void ksnMultiDestroy(ksnMultiClass *km);
+
 ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number);
 ksnetEvMgrClass *ksnMultiGetByNetwork(ksnMultiClass *km, char *network_name);
 
@@ -54,6 +55,11 @@ ksnetEvMgrClass *ksnMultiGetByNetwork(ksnMultiClass *km, char *network_name);
       ((X), (Y))
 
 char *ksnMultiShowListStr(ksnMultiClass *km);
+
+ksnet_arp_data *teoMultiSendCmdToNet(ksnMultiClass *km, char *peer, char *network,
+        uint8_t cmd, void *data, size_t data_len);
+
+//DEPRECATED! It will be new function for broadcast sending
 ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd, void *data, 
         size_t data_len);
 

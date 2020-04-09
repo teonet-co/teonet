@@ -80,11 +80,11 @@ void ksnMultiDestroy(ksnMultiClass *km) {
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
-        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
-        ksnetEvMgrStop(ke);
-        argc = ke->argc;
-        argv = ke->argv;
-        ksnetEvMgrFree(ke, 2);
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
+        ksnetEvMgrStop(*ke);
+        argc = (*ke)->argc;
+        argv = (*ke)->argv;
+        ksnetEvMgrFree(*ke, 2);
     }
 
     pblMapFree(km->list);
@@ -109,8 +109,8 @@ ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number) {
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it); 
-        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
-        if (ke->n_num == number) return ke;
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
+        if ((*ke)->n_num == number) return *ke;
     }
 
     return NULL;
@@ -126,7 +126,10 @@ ksnetEvMgrClass *ksnMultiGetByNumber(ksnMultiClass *km, int number) {
  * @return Pointer to ksnetEvMgrClass or NULL if not found
  */
 ksnetEvMgrClass *ksnMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
-    return (ksnetEvMgrClass*)pblMapGetStr(km->list, network_name, NULL);
+    ksnetEvMgrClass **ke = pblMapGetStr(km->list, network_name, NULL);
+    if (ke) return *ke;
+
+    return NULL;
 }
 
 
@@ -147,9 +150,9 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
-        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
-        ke->n_num = idx;
-        ke->num_nets = num;
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
+        (*ke)->n_num = idx;
+        (*ke)->num_nets = num;
     }
 }
 
@@ -160,8 +163,7 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
  * @return Pointer to string, should be free after use
  */
 char *ksnMultiShowListStr(ksnMultiClass *km) {
-    
-    int i;
+
     char *str;
 
     #define add_line() \
@@ -169,31 +171,31 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
         "------------------------------------------------------------------\n",\
         str)
 
-
     str = ksnet_formatMessage("");
     add_line();
 
     str = ksnet_sformatMessage(str, "%s"
         "  # Name \t Port\n", str);
     add_line();
-    
+
     PblIterator *it = pblMapIteratorNew(km->list);
-    if(!it) return;
+    if(!it) return NULL;
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
         char *network_name = pblMapEntryKey(entry);
-        ksnetEvMgrClass *ke = pblMapEntryValue(entry);
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
 
         str = ksnet_sformatMessage(str, "%s"
-                "%3d %s%s%s\t %5d\n",
+                "%3d %s%s%s\t %s%s%s\t %5d\n",
                 str,
                 // Number
-                ke->n_num,
+                (*ke)->n_num+1,
                 // Peer name
-                getANSIColor(LIGHTGREEN), ke->ksn_cfg.host_name, getANSIColor(NONE),
+                getANSIColor(LIGHTGREEN), (*ke)->ksn_cfg.host_name, getANSIColor(NONE),
+                getANSIColor(LIGHTRED), network_name, getANSIColor(NONE),
                 // Port
-                ke->ksn_cfg.port
+                (*ke)->ksn_cfg.port
         );
 
     }
@@ -206,53 +208,39 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
 
 /**
  * Send command by name and by network
- * 
+ *
  *
  * @return Pointer to ksnet_arp_data or NULL if not found
  */
 ksnet_arp_data *teoMultiSendCmdToNet(ksnMultiClass *km, char *peer, char *network,
         uint8_t cmd, void *data, size_t data_len) {
 
-    ksnetEvMgrClass *ke = pblMapGetStr(km->list, network, NULL);
-    ksnet_arp_data *arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, peer);
+    ksnetEvMgrClass **ke = pblMapGetStr(km->list, network, NULL);
+    ksnet_arp_data *arp = (ksnet_arp_data *)ksnetArpGet((*ke)->kc->ka, peer);
     if(!arp) return NULL;
 
-    ksnCoreSendto(ke->kc, arp->addr, arp->port, cmd, data, data_len);
+    ksnCoreSendto((*ke)->kc, arp->addr, arp->port, cmd, data, data_len);
     return arp;
-
 }
 
 
 /**
+ * It will be new function for broadcast sending
  * Send command by name to peer
  *
  * @param km Pointer to ksnMultiClass
  * @param to Recipient peer name
- * @param cmd Command 
+ * @param cmd Command
  * @param data Command data
  * @param data_len Data length
- * 
+ *
  * @return Pointer to ksnet_arp_data or NULL if not found
  */
 ksnet_arp_data *ksnMultiSendCmdTo(ksnMultiClass *km, char *to, uint8_t cmd, 
         void *data, size_t data_len) {
-    
+
     int i;
     ksnet_arp_data *arp = NULL;
-    
-    // Find peer in networks
-    for(i = 0; i < km->num; i++) {
-        
-        // Get network and check its arp
-        ksnetEvMgrClass *ke = pblListGet(km->list, i);
-        arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, to);
-        
-        // Send to peer at network
-        if(arp != NULL) {
-            ksnCoreSendto(ke->kc, arp->addr, arp->port, cmd, data, data_len);
-            break;
-        }       
-    }
-                
+
     return arp;
 }
