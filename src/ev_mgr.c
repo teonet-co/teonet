@@ -290,7 +290,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Create run file name
     const char *network = ke->ksn_cfg.network;
-    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE);
+    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE - 1);
     if (network != NULL && network[0]) {
         strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
         strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);

@@ -42,8 +42,8 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             ke->km = km; // Pointer to multi net module
             ke->n_num = i; // Set network number
             ke->num_nets = md->num; // Set number of networks
-            strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - strlen(ke->ksn_cfg.host_name)); // Host name
-            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - strlen(ke->ksn_cfg.network)); // Network name
+            strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - 1); // Host name
+            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - 1); // Network name
             read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
 
             // Add to network list
