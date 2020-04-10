@@ -73,7 +73,7 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
  * @param port Port number
  * @param network Network name
  */ 
-void teoMultiAddNet(ksnMultiClass *km, multi_event_cb e_cb, const char *host, int port, const char *network) {
+void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network) {
     ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->num-1);
 
     // We need to update count of networks for old networks

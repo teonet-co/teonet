@@ -20,7 +20,6 @@ typedef struct ksnMultiClass {
     
 } ksnMultiClass;
 
-typedef void (*multi_event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data);
 
 /**
  * ksnMultiClass initialize input data
@@ -29,7 +28,7 @@ typedef struct ksnMultiData {
 
     int argc; ///< Applications argc
     char** argv; ///< Applications argv
-    multi_event_cb event_cb;
+    ksn_event_cb_type event_cb;
     
     size_t num; ///< Number of networks
     const int *ports; ///< Ports arrays
@@ -46,7 +45,7 @@ extern "C" {
 
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
 void ksnMultiDestroy(ksnMultiClass *km);
-void teoMultiAddNet(ksnMultiClass *km, multi_event_cb e_cb, const char *host, int port, const char *network);
+void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network);
 void teoMultiRemoveNet(ksnMultiClass *km, const char *network);
 
 ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number);
