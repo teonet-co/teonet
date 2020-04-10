@@ -49,7 +49,15 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     
             // Set application type
             teoSetAppType(ke, "teo-gw");
-            teoSetAppVersion(ke, TGW_VERSION);            
+            teoSetAppVersion(ke, TGW_VERSION);
+
+            // start new network
+            if(!strcmp(ke->ksn_cfg.network,"local")) {
+                const char* net = "NEW_NET";
+                ksn_printf(ke, NULL, DEBUG, "Dinamicly add new network %s\n", net);
+                teoMultiAddNet(ke->km, event_cb, "NEW_HOST", net);
+            }
+
             break;
             
         default:
