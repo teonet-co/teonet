@@ -64,9 +64,17 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     return km;
 }
 
-
-void teoMultiAddNet(ksnMultiClass *km, void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
-    char *host, char *network) {
+/**
+ * Add new network
+ * 
+ * @param km
+ * @param event_cb Event callback
+ * @param host Host name
+ * @param network Network name
+ */ 
+void teoMultiAddNet(ksnMultiClass *km, 
+    void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data),
+    const char *host, const char *network) {
     ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->num-1);
 
     // We need to update count of networks for old networks
@@ -75,17 +83,17 @@ void teoMultiAddNet(ksnMultiClass *km, void (*event_cb)(ksnetEvMgrClass *ke, ksn
     ksnetEvMgrClass *ke_new = ksnetEvMgrInitPort(ke_last->argc, ke_last->argv,
                 event_cb, READ_OPTIONS|READ_CONFIGURATION, ke_last->ksn_cfg.port+2,
                 NULL);
-    printf("%d %s\n", ke_last->argc, ke_last->argv[0]);
+    
     // Set network parameters
     ke_new->km = km; // Pointer to multi net module
     ke_new->n_num = km->num - 1; // Set network number
     ke_new->num_nets = km->num; // Set number of networks
-    strncpy(ke_new->ksn_cfg.host_name, host, KSN_MAX_HOST_NAME - strlen(ke_new->ksn_cfg.host_name)); // Host name
-    strncpy(ke_new->ksn_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - strlen(ke_new->ksn_cfg.network)); // Network name
+    strncpy(ke_new->ksn_cfg.host_name, host, KSN_MAX_HOST_NAME - 1); // Host name
+    strncpy(ke_new->ksn_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - 1); // Network name
     read_config(&ke_new->ksn_cfg, ke_new->ksn_cfg.port); // Read configuration file parameters
 
     // Add to network list
-    pblMapAdd(km->list, (void *)ke_new->ksn_cfg.network, strlen(ke_new->ksn_cfg.network)+1,
+    pblMapAdd(km->list, (void *)ke_new->ksn_cfg.network, strlen(ke_new->ksn_cfg.network) + 1,
             &ke_new, sizeof(ke_new));
 
     // Start network
@@ -93,7 +101,12 @@ void teoMultiAddNet(ksnMultiClass *km, void (*event_cb)(ksnetEvMgrClass *ke, ksn
 }
 
 
-void teoMultiRemoveNet(ksnMultiClass *km, char *network) {
+/**
+ * Remove new
+ * 
+ * @param km
+ */ 
+void teoMultiRemoveNet(ksnMultiClass *km, const char *network) {
 
     ksnetEvMgrClass **ke = pblMapRemoveStr(km->list, network, NULL);
 
