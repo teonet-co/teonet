@@ -55,7 +55,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if(!strcmp(ke->ksn_cfg.network,"local")) {
                 const char* net = "NEW_NET";
                 ksn_printf(ke, NULL, DEBUG, "Dinamicly add new network %s\n", net);
-                teoMultiAddNet(ke->km, event_cb, "NEW_HOST", net);
+                teoMultiAddNet(ke->km, event_cb, "NEW_HOST", 0, net);
             }
 
             break;

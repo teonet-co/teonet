@@ -47,7 +47,7 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
 void ksnMultiDestroy(ksnMultiClass *km);
 void teoMultiAddNet(ksnMultiClass *km, 
     void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data), 
-    const char *host, const char *network);
+    const char *host, int port, const char *network);
 void teoMultiRemoveNet(ksnMultiClass *km, const char *network);
 
 ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number);
