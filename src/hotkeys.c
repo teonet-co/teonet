@@ -330,9 +330,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                     
                     // Request string with new network number
                     khv->str_number = 0;
-                    printf("Enter new network number "
-                           "(from 1 to %d, current net is %d): ",  
-                           (int)kev->net_count, (int)kev->net_idx + 1);
+                    printf("Enter new network number :");
                     fflush(stdout);
                     
                     // Switch STDIN to receive string
@@ -357,7 +355,8 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                             
                             // Switch to entered network number 
                             int net_idx = atoi(khv->str[khv->str_number]);
-                            if(net_idx >= 1 && net_idx <= kev->net_count) {
+
+                            if(teoMultiIsNetworkExist(((ksnMultiClass *)kev->km), net_idx-1)) {
                                 
                                 net_idx--;
                                 if(net_idx != kev->net_idx) {

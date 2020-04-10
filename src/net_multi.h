@@ -16,8 +16,9 @@
 typedef struct ksnMultiClass {
     
     PblMap* list; ///< Pointer to network list
-    size_t num; ///< Number of networks
-    
+    size_t net_count; ///< Number of networks
+    size_t last_net_idx; ///< Last network index
+
 } ksnMultiClass;
 
 
@@ -55,6 +56,8 @@ ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name);
       int : teoMultiGetByNumber, \
       char* : teoMultiGetByNetwork) \
       ((X), (Y))
+
+bool teoMultiIsNetworkExist(ksnMultiClass *km, int number);
 
 char *ksnMultiShowListStr(ksnMultiClass *km);
 

@@ -15,7 +15,7 @@
 #include "utils/teo_memory.h"
 
 static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num);
-static inline int teoMultiGetLastNetId(ksnMultiClass *km);
+
 /**
  * Initialize ksnMultiClass object
  * 
@@ -28,8 +28,9 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     
     // Create network list
     km->list = pblMapNewHashMap();
-    km->num = md->num; // Set number of networks
-   
+    km->net_count = md->num; // Set number of networks
+    km->last_net_idx = km->net_count-1;
+
     // Add networks from input data
     if(md != NULL && md->num) {
         
@@ -74,10 +75,11 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
  * @param network Network name
  */ 
 void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network) {
-    ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, teoMultiGetLastNetId(km));
+    ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->last_net_idx);
 
     // We need to update count of networks for old networks
-    ksnMultiUpdateCountNetworks(km, km->num + 1);
+    ksnMultiUpdateCountNetworks(km, km->net_count + 1);
+    km->last_net_idx++;
 
     // If port is 0 use port+2 from last network
     if(!port) {
@@ -89,8 +91,8 @@ void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host,
     
     // Set network parameters
     ke_new->km = km; // Pointer to multi net module
-    ke_new->net_idx = teoMultiGetLastNetId(km); // Set network number
-    ke_new->net_count = km->num; // Set number of networks
+    ke_new->net_idx = km->last_net_idx; // Set network number
+    ke_new->net_count = km->net_count; // Set number of networks
     strncpy(ke_new->ksn_cfg.host_name, host, KSN_MAX_HOST_NAME - 1); // Host name
     strncpy(ke_new->ksn_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - 1); // Network name
     read_config(&ke_new->ksn_cfg, ke_new->ksn_cfg.port); // Read configuration file parameters
@@ -119,12 +121,7 @@ void teoMultiRemoveNet(ksnMultiClass *km, const char *network) {
     ksnetEvMgrFree(*ke, 2);
     free(ke);
 
-    ksnMultiUpdateCountNetworks(km, km->num - 1);
-}
-
-
-static int teoMultiGetLastNetId(ksnMultiClass *km) {
-    return km->num - 1;
+    ksnMultiUpdateCountNetworks(km, km->net_count - 1);
 }
 
 
@@ -197,6 +194,20 @@ ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
 }
 
 
+bool teoMultiIsNetworkExist(ksnMultiClass *km, int number) {
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return false;
+
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it);
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
+        if ((*ke)->net_idx == number) return true;
+    }
+
+    return false;
+}
+
+
 /**
  * Update number of networks to all old networks
  *
@@ -208,7 +219,7 @@ static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num) {
     PblIterator *it = pblMapIteratorNew(km->list);
     if(!it) return;
 
-    km->num = num; // Set new number of networks in ksnMultiClass
+    km->net_count = num; // Set new number of networks in ksnMultiClass
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
@@ -228,7 +239,7 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
     PblIterator *it = pblMapIteratorNew(km->list);
     if(!it) return;
 
-    km->num = num; // Set new number of networks in ksnMultiClass
+    km->net_count = num; // Set new number of networks in ksnMultiClass
 
     int idx = 0;
 
