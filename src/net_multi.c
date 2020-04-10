@@ -113,7 +113,7 @@ void teoMultiRemoveNet(ksnMultiClass *km, const char *network) {
 
     ksnetEvMgrClass **ke = pblMapRemoveStr(km->list, (char *)network, NULL);
 
-    if(ke == (void *)-1) return;
+    if(ke == (void *)-1 || !ke) return;
 
     ksnetEvMgrStop(*ke);
     ksnetEvMgrFree(*ke, 2);
