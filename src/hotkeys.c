@@ -158,7 +158,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             #endif
             , (khv->pt != NULL ? "(running now, press i to stop)" : "")
             , (khv->mt != NULL ? "(running now, press M to stop)" : "")
-            , kev->num_nets > 1 ? " "COLOR_DW"n"COLOR_END" - switch to other network\n" : ""
+            , kev->net_count > 1 ? " "COLOR_DW"n"COLOR_END" - switch to other network\n" : ""
             );
             break;
 
@@ -317,7 +317,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
         // Switch network
         case 'n':
-            if(kev->num_nets > 1) {
+            if(kev->net_count > 1) {
                 
                 if(khv->non_blocking) {
                     
@@ -332,7 +332,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                     khv->str_number = 0;
                     printf("Enter new network number "
                            "(from 1 to %d, current net is %d): ",  
-                           (int)kev->num_nets, (int)kev->n_num + 1);
+                           (int)kev->net_count, (int)kev->net_idx + 1);
                     fflush(stdout);
                     
                     // Switch STDIN to receive string
@@ -356,11 +356,11 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     (char*)data, KSN_BUFFER_SM_SIZE);
                             
                             // Switch to entered network number 
-                            int n_num = atoi(khv->str[khv->str_number]);
-                            if(n_num >= 1 && n_num <= kev->num_nets) {
+                            int net_idx = atoi(khv->str[khv->str_number]);
+                            if(net_idx >= 1 && net_idx <= kev->net_count) {
                                 
-                                n_num--;
-                                if(n_num != kev->n_num) {
+                                net_idx--;
+                                if(net_idx != kev->net_idx) {
                                     
                                     ksnetEvMgrClass *p_ke = ke;
                                     
@@ -371,13 +371,13 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     // Switch to new network (thread theme)
                                     if(p_ke->km == NULL) {
                                         for(;;) {
-                                            if(n_num < p_ke->n_num) p_ke = p_ke->n_prev;
-                                            else if(n_num > p_ke->n_num) p_ke = p_ke->n_next;
+                                            if(net_idx < p_ke->net_idx) p_ke = p_ke->n_prev;
+                                            else if(net_idx > p_ke->net_idx) p_ke = p_ke->n_next;
                                             else {
                                                 // Initialize hotkeys module
                                                 #define switch_to_net(p_ke) \
                                                 p_ke->kh = ksnetHotkeysInit(p_ke); \
-                                                printf("Switched to network #%d\n", n_num + 1); \
+                                                printf("Switched to network #%d\n", net_idx + 1); \
                                                 return 1
 
                                                 switch_to_net(p_ke);
@@ -386,13 +386,13 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     }
                                     // Switch to new network (multi net module theme)
                                     else {
-                                        p_ke = (ksnetEvMgrClass *)ksnMultiGet(p_ke->km, n_num);
+                                        p_ke = (ksnetEvMgrClass *)ksnMultiGet(p_ke->km, net_idx);
                                         switch_to_net(p_ke);
                                     }
                                 }
-                                else printf("Already in network #%d\n", n_num + 1);
+                                else printf("Already in network #%d\n", net_idx + 1);
                             }
-                            else printf("Wrong network number #%d\n", n_num);
+                            else printf("Wrong network number #%d\n", net_idx);
                         }
                         break;
                     }

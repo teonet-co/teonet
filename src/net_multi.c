@@ -42,8 +42,8 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             
             // Set network parameters
             ke->km = km; // Pointer to multi net module
-            ke->n_num = i; // Set network number
-            ke->num_nets = md->num; // Set number of networks
+            ke->net_idx = i; // Set network number
+            ke->net_count = md->num; // Set number of networks
             strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - strlen(ke->ksn_cfg.host_name)); // Host name
             strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - strlen(ke->ksn_cfg.network)); // Network name
             read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
@@ -89,8 +89,8 @@ void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host,
     
     // Set network parameters
     ke_new->km = km; // Pointer to multi net module
-    ke_new->n_num = teoMultiGetLastNetId(km); // Set network number
-    ke_new->num_nets = km->num; // Set number of networks
+    ke_new->net_idx = teoMultiGetLastNetId(km); // Set network number
+    ke_new->net_count = km->num; // Set number of networks
     strncpy(ke_new->ksn_cfg.host_name, host, KSN_MAX_HOST_NAME - 1); // Host name
     strncpy(ke_new->ksn_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - 1); // Network name
     read_config(&ke_new->ksn_cfg, ke_new->ksn_cfg.port); // Read configuration file parameters
@@ -175,7 +175,7 @@ ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number) {
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it); 
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        if ((*ke)->n_num == number) return *ke;
+        if ((*ke)->net_idx == number) return *ke;
     }
 
     return NULL;
@@ -213,7 +213,7 @@ static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num) {
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        (*ke)->num_nets = num;
+        (*ke)->net_count = num;
     }
 }
 
@@ -235,8 +235,8 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        (*ke)->n_num = idx++;
-        (*ke)->num_nets = num;
+        (*ke)->net_idx = idx++;
+        (*ke)->net_count = num;
     }
 }
 
@@ -274,7 +274,7 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
                 "%3d %s%-20s%s %s%-20s%s %5d\n",
                 str,
                 // Number
-                (*ke)->n_num+1,
+                (*ke)->net_idx+1,
                 // Peer name
                 getANSIColor(LIGHTGREEN), (*ke)->ksn_cfg.host_name, getANSIColor(NONE),
                 getANSIColor(LIGHTCYAN), network_name, getANSIColor(NONE),
