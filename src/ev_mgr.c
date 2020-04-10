@@ -119,8 +119,8 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->tp = NULL;
     ke->ks = NULL;
     ke->kl = NULL;
-    ke->num_nets = 1;
-    ke->n_num = 0;
+    ke->net_count = 1;
+    ke->net_idx = 0;
     ke->n_prev = NULL;
     ke->n_next = NULL;
     ke->user_data = user_data;
@@ -303,15 +303,17 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Wait other teonet application to get disconnect signal
     // if this application crash or deployed
-    if ((fp = fopen(run_file, "r"))){
-        usleep(3500000);
-        fclose(fp);
-    }
-    // Create run file
-    else {
-        fp = fopen(run_file, "w");
-        fprintf(fp,"run\n");
-        fclose(fp);
+    if(!ke->net_idx) {
+        if ((fp = fopen(run_file, "r"))){
+            usleep(3500000);
+            fclose(fp);
+        }
+        // Create run file
+        else {
+            fp = fopen(run_file, "w");
+            fprintf(fp,"run\n");
+            fclose(fp);
+        }
     }
 
     ke->timer_val = 0;
@@ -321,15 +323,15 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     // Event loop
     bool loop_already_initialised = ke->ev_loop != NULL;
     if(ke->ev_loop == NULL){
-        struct ev_loop *loop = ke->n_num && ke->km == NULL ? ev_loop_new (0) : EV_DEFAULT;
+        struct ev_loop *loop = ke->net_idx && ke->km == NULL ? ev_loop_new (0) : EV_DEFAULT;
         ke->ev_loop = loop;
     }
 
     // \todo remove this print
     ksn_printf(ke, MODULE, DEBUG_VV,
-        _ANSI_BROWN "event loop initialized as %s " _ANSI_NONE ", ke->n_num = %d\n",
-        ke->n_num && ke->km == NULL ? "ev_loop_new (0)" : "EV_DEFAULT",
-        (int)ke->n_num
+        _ANSI_BROWN "event loop initialized as %s " _ANSI_NONE ", ke->net_idx = %d\n",
+        ke->net_idx && ke->km == NULL ? "ev_loop_new (0)" : "EV_DEFAULT",
+        (int)ke->net_idx
     );
 
 
@@ -350,7 +352,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         ev_timer_start (ke->ev_loop, &ke->timer_w);
 
         // Initialize signals and keyboard watcher for first net (default loop)
-        if(!ke->n_num) {
+        if(!ke->net_idx) {
 
             // Initialize and start signals watchers
             // SIGINT
@@ -500,7 +502,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         modules_destroy(ke);
 
         // Destroy event loop (and free memory)
-        if(ke->km == NULL || !ke->n_num) ev_loop_destroy(ke->ev_loop);
+        if(ke->km == NULL || !ke->net_idx) ev_loop_destroy(ke->ev_loop);
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, MESSAGE,
@@ -1344,7 +1346,7 @@ int modules_init(ksnetEvMgrClass *ke) {
 
     // Hotkeys
     if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
-        if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
+        if(!ke->net_idx) ke->kh = ksnetHotkeysInit(ke);
         // Set filter from parameters
         if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke, ke->ksn_cfg.filter);
     }

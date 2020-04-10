@@ -290,10 +290,10 @@ typedef struct ksnetEvMgrClass {
     pthread_mutex_t async_mutex; ///< Async data queue mutex
     pthread_mutex_t printf_mutex; ///< Printf data queue mutex
 
-    size_t n_num; ///< Network number
+    size_t net_idx; ///< Network index
     void *n_prev; ///< Previouse network
     void *n_next; ///< Next network
-    size_t num_nets; ///< Number of networks
+    size_t net_count; ///< Count of networks
 
     // Define signals watchers
     ev_signal sigint_w;  ///< Signal SIGINT watcher

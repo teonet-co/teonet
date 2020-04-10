@@ -16,8 +16,9 @@
 typedef struct ksnMultiClass {
     
     PblMap* list; ///< Pointer to network list
-    size_t num; ///< Number of networks
-    
+    size_t net_count; ///< Number of networks
+    size_t last_net_idx; ///< Last network index
+
 } ksnMultiClass;
 
 
@@ -28,7 +29,7 @@ typedef struct ksnMultiData {
 
     int argc; ///< Applications argc
     char** argv; ///< Applications argv
-    void (*event_cb)(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data, size_t data_len, void *user_data); ///< Event callback function
+    ksn_event_cb_type event_cb;
     
     size_t num; ///< Number of networks
     const int *ports; ///< Ports arrays
@@ -45,6 +46,8 @@ extern "C" {
 
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
 void ksnMultiDestroy(ksnMultiClass *km);
+void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network);
+void teoMultiRemoveNet(ksnMultiClass *km, const char *network);
 
 ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number);
 ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name);
@@ -53,6 +56,8 @@ ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name);
       int : teoMultiGetByNumber, \
       char* : teoMultiGetByNetwork) \
       ((X), (Y))
+
+bool teoMultiIsNetworkExist(ksnMultiClass *km, int number);
 
 char *ksnMultiShowListStr(ksnMultiClass *km);
 

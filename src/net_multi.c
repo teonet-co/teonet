@@ -14,6 +14,8 @@
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
 
+static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num);
+
 /**
  * Initialize ksnMultiClass object
  * 
@@ -26,8 +28,9 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     
     // Create network list
     km->list = pblMapNewHashMap();
-    km->num = md->num; // Set number of networks
-   
+    km->net_count = md->num; // Set number of networks
+    km->last_net_idx = km->net_count-1;
+
     // Add networks from input data
     if(md != NULL && md->num) {
         
@@ -40,10 +43,10 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             
             // Set network parameters
             ke->km = km; // Pointer to multi net module
-            ke->n_num = i; // Set network number
-            ke->num_nets = md->num; // Set number of networks
-            strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - 1); // Host name
-            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - 1); // Network name
+            ke->net_idx = i; // Set network number
+            ke->net_count = md->num; // Set number of networks
+            strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - strlen(ke->ksn_cfg.host_name)); // Host name
+            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - strlen(ke->ksn_cfg.network)); // Network name
             read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
 
             // Add to network list
@@ -53,14 +56,74 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             // Start network
             ksnetEvMgrRun(ke);
             
-            // Start event manager 
-            if(md->run && i == md->num - 1) ev_run(ke->ev_loop, 0);          
+            // Start event manager
+            if(md->run && i == md->num - 1) ev_run(ke->ev_loop, 0);
         }
         
     }
     
     return km;
 }
+
+/**
+ * Add new network
+ * 
+ * @param km
+ * @param event_cb Event callback
+ * @param host Host name
+ * @param port Port number
+ * @param network Network name
+ */ 
+void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network) {
+    ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->last_net_idx);
+
+    // We need to update count of networks for old networks
+    ksnMultiUpdateCountNetworks(km, km->net_count + 1);
+    km->last_net_idx++;
+
+    // If port is 0 use port+2 from last network
+    if(!port) {
+        port = ke_last->ksn_cfg.port+2;
+    }
+
+    ksnetEvMgrClass *ke_new = ksnetEvMgrInitPort(ke_last->argc, ke_last->argv,
+                e_cb, READ_OPTIONS|READ_CONFIGURATION, port, NULL);
+    
+    // Set network parameters
+    ke_new->km = km; // Pointer to multi net module
+    ke_new->net_idx = km->last_net_idx; // Set network number
+    ke_new->net_count = km->net_count; // Set number of networks
+    strncpy(ke_new->ksn_cfg.host_name, host, KSN_MAX_HOST_NAME - 1); // Host name
+    strncpy(ke_new->ksn_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - 1); // Network name
+    read_config(&ke_new->ksn_cfg, ke_new->ksn_cfg.port); // Read configuration file parameters
+
+    // Add to network list
+    pblMapAdd(km->list, (void *)ke_new->ksn_cfg.network, strlen(ke_new->ksn_cfg.network) + 1,
+            &ke_new, sizeof(ke_new));
+
+    // Start network
+    ksnetEvMgrRun(ke_new);
+}
+
+
+/**
+ * Remove new
+ * 
+ * @param km
+ */ 
+void teoMultiRemoveNet(ksnMultiClass *km, const char *network) {
+
+    ksnetEvMgrClass **ke = pblMapRemoveStr(km->list, (char *)network, NULL);
+
+    if(ke == (void *)-1 || !ke) return;
+
+    ksnetEvMgrStop(*ke);
+    ksnetEvMgrFree(*ke, 2);
+    free(ke);
+
+    ksnMultiUpdateCountNetworks(km, km->net_count - 1);
+}
+
 
 /**
  * Destroy ksnMultiClass object and networks
@@ -109,7 +172,7 @@ ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number) {
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it); 
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        if ((*ke)->n_num == number) return *ke;
+        if ((*ke)->net_idx == number) return *ke;
     }
 
     return NULL;
@@ -131,6 +194,40 @@ ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
 }
 
 
+bool teoMultiIsNetworkExist(ksnMultiClass *km, int number) {
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return false;
+
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it);
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
+        if ((*ke)->net_idx == number) return true;
+    }
+
+    return false;
+}
+
+
+/**
+ * Update number of networks to all old networks
+ *
+ * @param km
+ * @param num
+ */
+static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num) {
+
+    PblIterator *it = pblMapIteratorNew(km->list);
+    if(!it) return;
+
+    km->net_count = num; // Set new number of networks in ksnMultiClass
+
+    while(pblIteratorHasNext(it)) {
+        void *entry = pblIteratorNext(it);
+        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
+        (*ke)->net_count = num;
+    }
+}
+
 /**
  * Set number of networks to all modules list networks
  * 
@@ -142,15 +239,15 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
     PblIterator *it = pblMapIteratorNew(km->list);
     if(!it) return;
 
-    km->num = num; // Set new number of networks in ksnMultiClass
+    km->net_count = num; // Set new number of networks in ksnMultiClass
 
     int idx = 0;
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        (*ke)->n_num = idx++;
-        (*ke)->num_nets = num;
+        (*ke)->net_idx = idx++;
+        (*ke)->net_count = num;
     }
 }
 
@@ -188,7 +285,7 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
                 "%3d %s%-20s%s %s%-20s%s %5d\n",
                 str,
                 // Number
-                (*ke)->n_num+1,
+                (*ke)->net_idx+1,
                 // Peer name
                 getANSIColor(LIGHTGREEN), (*ke)->ksn_cfg.host_name, getANSIColor(NONE),
                 getANSIColor(LIGHTCYAN), network_name, getANSIColor(NONE),
