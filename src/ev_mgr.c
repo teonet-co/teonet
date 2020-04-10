@@ -290,7 +290,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Create run file name
     const char *network = ke->ksn_cfg.network;
-    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE);
+    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE - 1);
     if (network != NULL && network[0]) {
         strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
         strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);
@@ -303,15 +303,17 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Wait other teonet application to get disconnect signal
     // if this application crash or deployed
-    if ((fp = fopen(run_file, "r"))){
-        usleep(3500000);
-        fclose(fp);
-    }
-    // Create run file
-    else {
-        fp = fopen(run_file, "w");
-        fprintf(fp,"run\n");
-        fclose(fp);
+    if(!ke->n_num) {
+        if ((fp = fopen(run_file, "r"))){
+            usleep(3500000);
+            fclose(fp);
+        }
+        // Create run file
+        else {
+            fp = fopen(run_file, "w");
+            fprintf(fp,"run\n");
+            fclose(fp);
+        }
     }
 
     ke->timer_val = 0;
