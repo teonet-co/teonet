@@ -45,6 +45,7 @@ extern "C" {
 #endif
 
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data);
+void teoMultiRun(ksnMultiClass *km);
 void ksnMultiDestroy(ksnMultiClass *km);
 void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network);
 void teoMultiRemoveNet(ksnMultiClass *km, const char *network);

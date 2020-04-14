@@ -55,14 +55,16 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             
             // Start network
             ksnetEvMgrRun(ke);
-            
-            // Start event manager
-            if(md->run && i == md->num - 1) ev_run(ke->ev_loop, 0);
         }
         
     }
-    
+
     return km;
+}
+
+void teoMultiRun(ksnMultiClass *km) {
+    ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->last_net_idx);
+    ev_run(ke_last->ev_loop, 0);
 }
 
 /**
