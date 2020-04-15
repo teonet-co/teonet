@@ -19,7 +19,10 @@ static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num);
 /**
  * Initialize ksnMultiClass object
  * 
- * @param md Pointer to ksnMultiData
+ * @param md Pointer to initialize input data 
+ * @param user_data Pointer to user data added to every teonet network 
+ * 
+ * @return Pointer to ksnMultiClass
  */
 ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     
@@ -62,6 +65,10 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
     return km;
 }
 
+/**
+ * Start teonet event loop (for all functions added with ksnMultiInit)
+ * @param km Pointer to ksnMultiClass
+ */ 
 void teoMultiRun(ksnMultiClass *km) {
     ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->last_net_idx);
     ev_run(ke_last->ev_loop, 0);
@@ -70,11 +77,12 @@ void teoMultiRun(ksnMultiClass *km) {
 /**
  * Add new network
  * 
- * @param km
- * @param event_cb Event callback
+ * @param km Pointer to ksnMultiClass
+ * @param event_cb Teonet event callback
  * @param host Host name
  * @param port Port number
  * @param network Network name
+ * @param user_data Pointer to user data added to this teonet network
  */ 
 void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network, void *user_data) {
     ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->last_net_idx);
@@ -109,9 +117,10 @@ void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host,
 
 
 /**
- * Remove new
+ * Remove network
  * 
- * @param km
+ * @param km Pointer to ksnMultiClass
+ * @param network Network name
  */ 
 void teoMultiRemoveNet(ksnMultiClass *km, const char *network) {
 
@@ -128,9 +137,9 @@ void teoMultiRemoveNet(ksnMultiClass *km, const char *network) {
 
 
 /**
- * Destroy ksnMultiClass object and networks
+ * Destroy ksnMultiClass object and running networks
  * 
- * @param km
+ * @param km Pointer to ksnMultiClass
  */
 void ksnMultiDestroy(ksnMultiClass *km) {
     
@@ -162,8 +171,8 @@ void ksnMultiDestroy(ksnMultiClass *km) {
 /**
  * Get network by number
  * 
- * @param km
- * @param num
+ * @param km Pointer to ksnMultiClass
+ * @param num Number of network
  * 
  * @return Pointer to ksnetEvMgrClass
  */
@@ -184,8 +193,8 @@ ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number) {
 /**
  * Get network by network name
  * 
- * @param km
- * @param network_name
+ * @param km Pointer to ksnMultiClass
+ * @param network_name Network name
  * 
  * @return Pointer to ksnetEvMgrClass or NULL if not found
  */
@@ -195,7 +204,14 @@ ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
     return NULL;
 }
 
-
+/**
+ * Check if network with input number is exist
+ * 
+ * @param km Pointer to ksnMultiClass
+ * @param num Number of network
+ * 
+ * @return true if network with input number is exist
+ */
 bool teoMultiIsNetworkExist(ksnMultiClass *km, int number) {
     PblIterator *it = pblMapIteratorNew(km->list);
     if(!it) return false;
@@ -211,10 +227,10 @@ bool teoMultiIsNetworkExist(ksnMultiClass *km, int number) {
 
 
 /**
- * Update number of networks to all old networks
+ * Update number of networks to all existing networks
  *
- * @param km
- * @param num
+ * @param km Pointer to ksnMultiClass
+ * @param num Number of networks
  */
 static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num) {
 
@@ -233,8 +249,8 @@ static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num) {
 /**
  * Set number of networks to all modules list networks
  * 
- * @param km
- * @param num
+ * @param km Pointer to ksnMultiClass
+ * @param num Number of networks
  */
 void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
 
@@ -256,7 +272,7 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
 /**
  * Show list of networks
  * 
- * @param km
+ * @param km Pointer to ksnMultiClass
  * @return Pointer to string, should be free after use
  */
 char *ksnMultiShowListStr(ksnMultiClass *km) {
@@ -305,8 +321,15 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
 /**
  * Send command by name and by network
  *
- *
- * @return Pointer to ksnet_arp_data or NULL if not found
+ * @param km Pointer to ksnMultiClass
+ * @param peer Peer name
+ * @param network Network name
+ * @param cmd Command ID
+ * @param data Pointer to data
+ * @param data_len Data length
+ * 
+ * @return Pointer to ksnet_arp_data or NULL if peer not found in arp table of 
+ *         selected network
  */
 ksnet_arp_data *teoMultiSendCmdToNet(ksnMultiClass *km, char *peer, char *network,
         uint8_t cmd, void *data, size_t data_len) {
