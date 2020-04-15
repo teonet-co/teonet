@@ -145,19 +145,16 @@ void ksnMultiDestroy(ksnMultiClass *km) {
     
     if(!km) return;
 
-    PblIterator *it = pblMapIteratorNew(km->list);
-    if(!it) return;
-
     int argc = 0;
     char **argv = NULL;
 
-    while(pblIteratorHasNext(it)) {
-        void *entry = pblIteratorNext(it);
-        ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        ksnetEvMgrStop(*ke);
-        argc = (*ke)->argc;
-        argv = (*ke)->argv;
-        ksnetEvMgrFree(*ke, 2);
+    for (int count = km->last_net_idx; count >= 0; --count) {
+        ksnetEvMgrClass *ke_it = teoMultiGetByNumber(km, count);
+        if (!ke_it) continue;
+        ksnetEvMgrStop(ke_it);
+        argc = (ke_it)->argc;
+        argv = (ke_it)->argv;
+        ksnetEvMgrFree(ke_it, 2);
     }
 
     pblMapFree(km->list);
