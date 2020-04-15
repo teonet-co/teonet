@@ -76,7 +76,7 @@ void teoMultiRun(ksnMultiClass *km) {
  * @param port Port number
  * @param network Network name
  */ 
-void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network) {
+void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host, int port, const char *network, void *user_data) {
     ksnetEvMgrClass *ke_last = teoMultiGetByNumber(km, km->last_net_idx);
 
     // We need to update count of networks for old networks
@@ -89,7 +89,7 @@ void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host,
     }
 
     ksnetEvMgrClass *ke_new = ksnetEvMgrInitPort(ke_last->argc, ke_last->argv,
-                e_cb, READ_OPTIONS|READ_CONFIGURATION, port, NULL);
+                e_cb, READ_OPTIONS|READ_CONFIGURATION, port, user_data);
     
     // Set network parameters
     ke_new->km = km; // Pointer to multi net module
