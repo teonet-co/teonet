@@ -319,7 +319,7 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
 
 
 /**
- * Send command by name and by network
+ * Send command by name (or type) and by network
  *
  * @param km Pointer to ksnMultiClass
  * @param peer Peer name
@@ -328,18 +328,16 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
  * @param data Pointer to data
  * @param data_len Data length
  * 
- * @return Pointer to ksnet_arp_data or NULL if peer not found in arp table of 
- *         selected network
+ * @return Pointer to ksnet_arp_data or NULL if network not found or peer not 
+ *         found in arp table of selected network
  */
 ksnet_arp_data *teoMultiSendCmdToNet(ksnMultiClass *km, char *peer, char *network,
         uint8_t cmd, void *data, size_t data_len) {
 
     ksnetEvMgrClass **ke = pblMapGetStr(km->list, network, NULL);
-    ksnet_arp_data *arp = (ksnet_arp_data *)ksnetArpGet((*ke)->kc->ka, peer);
-    if(!arp) return NULL;
-
-    ksnCoreSendto((*ke)->kc, arp->addr, arp->port, cmd, data, data_len);
-    return arp;
+    if(!ke) return NULL;
+    
+    return ksnCoreSendCmdto((*ke)->kc, peer, cmd, data, data_len);
 }
 
 

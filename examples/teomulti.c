@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
     md.run = 1;
     
     ksnMultiClass *km = ksnMultiInit(&md, NULL);
+    teoMultiRun(km);
     
     ksnMultiDestroy(km);
     
