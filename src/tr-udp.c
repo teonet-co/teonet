@@ -2190,11 +2190,11 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
     trudpChannelData *tcd =
         trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG)&remaddr, 0);
     if (tcd == (void *)-1) {
-        fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");
+        fprintf(stderr, "Failed to process non-Trudp packet: channel not found.\n");
         return;
     }
     if (trudpChannelProcessReceivedPacket(tcd, data, recvlen) == -1) {
-        trudpChannelSendEvent(tcd, PROCESS_RECEIVE_NO_TRUDP, data, recvlen, NULL);
+        printf("Received corrupted packet or packet with unknown packet type.\n");
     }
 }
 
@@ -2443,12 +2443,17 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
         } break;
 
+        // Process received not TR-UDP data
+        // @param tcd Pointer to trudpChannelData
+        // @param data Pointer to receive buffer
+        // @param data_length Receive buffer length
+        // @param user_data NULL
         case GOT_DATA_NO_TRUDP: {
             const trudpData *td = tcd->td; // used in kev macro
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
-                       "got %d bytes DATA packet from no trudp chan %s \n",
+                       "got %d bytes DATA packet from no trudp channel %s \n",
                        data_length, tcd->channel_key);
             #endif
 
@@ -2462,26 +2467,6 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case PROCESS_RECEIVE: {
             trudp_process_receive((trudpData *)tcd_pointer, data, data_length);
-        } break;
-
-        // Process received not TR-UDP data
-        // @param tcd Pointer to trudpChannelData
-        // @param data Pointer to receive buffer
-        // @param data_length Receive buffer length
-        // @param user_data NULL
-        case PROCESS_RECEIVE_NO_TRUDP: {
-
-            // Process package
-            const trudpData *td = tcd->td; // used in kev macro
-            #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                "not TR-UDP %d bytes DATA packet received from channel %s\n",
-                data_length,
-                tcd->channel_key);
-            #endif
-            ksnCoreProcessPacket(kev->kc, data, data_length,
-                                 (__SOCKADDR_ARG)&tcd->remaddr);
-
         } break;
 
         // Process send data
