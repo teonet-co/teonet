@@ -1051,8 +1051,8 @@ static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
  * @param arp_data Pointer to ARP data ksnet_arp_data
  * @param data Pointer to ksnCorePacketData
  */
-static int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
-                        ksnet_arp_data_ext *arp, void *data) {
+int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
+                        ksnet_arp_data_ext *arp, void *data) { 
 
     #define rd ((ksnCorePacketData*)data)
 

@@ -813,6 +813,18 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         rd->arp->cque_id_peer_type = cq->id;
         ksnetArpAdd(kc->ka, rd->from, rd->arp);
         rd->arp = ksnetArpGet(kc->ka, rd->from);
+
+        // Send child address to r-host
+        if(mode == 1) {
+            ksnetArpClass *arp_class = ke->kc->ka;
+            ksnCorePacketData rd;
+            rd.from = ke->ksn_cfg.r_host_name;
+            rd.addr = ke->ksn_cfg.r_host_addr;
+            rd.port = ke->ksn_cfg.r_port;
+            int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
+                            ksnet_arp_data_ext *arp, void *data);
+            ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, &rd);
+        }
     }
 }
 
