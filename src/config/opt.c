@@ -87,9 +87,14 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "send_all_logs",  no_argument,       &conf->send_all_logs_f, 1 },
         #endif
 
+        { "statsd_ip",      required_argument, 0, 's' },
+        { "statsd_port",    required_argument, 0, 'S' },
+        { "statsd_peers",   no_argument,       &conf->statsd_peers_f, 1 },
+
         { "sig_segv",       no_argument,       &conf->sig_segv_f, 1 },
         { "log_priority",   required_argument, 0, 'L' }, 
         { "color_output_disable", no_argument, &conf->color_output_disable_f, 1 },
+        { "extended_l0_log", no_argument,      &conf->extended_l0_log_f, 1 },
         { "block_cli_input", no_argument,      &conf->block_cli_input_f, 1 },        
         { "no_multi_thread", no_argument,      &conf->no_multi_thread_f, 1 },
         { "send_ack_event", no_argument,       &conf->send_ack_event_f, 1 },
@@ -222,6 +227,14 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 'm':
           conf->vpn_mtu = atoi(optarg);
+          break;
+
+        case 's':
+          strncpy((char*)conf->statsd_ip, optarg, KSN_BUFFER_SM_SIZE/2);
+          break;
+
+        case 'S':
+          conf->statsd_port = atoi(optarg);
           break;
           
         case 'L':
@@ -409,6 +422,10 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --send_all_logs      Send all logs (by default send only metrics)\n"
     #endif
     "\n"
+    "       --statsd_ip          Metric exporter IP address\n"
+    "       --statsd_port        Metric exporter Port number\n"
+    "       --statsd_peers       Send preers metrics\n"
+    "\n"
     "       --sig_segv           Segmentation fault error processing by library\n"
     "       --log_priority       Syslog priority (Default: 4):\n"
     "                            DEBUG: 4, MESSAGE: 3, CONNECT: 2, ERROR_M: 1,\n"
@@ -416,6 +433,8 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "\n"
     "       --color_output       Disable color output in stdout terminal logs,\n"
     "                            (full flag name is: --color_output_disable)\n"
+    "\n"
+    "       --extended_l0_log    Extends L0 server DEBUG log\n"
     "\n"
     "       --no_multi_thread    Don't check multi thread mode in async calls\n"   
     "       --send_ack_event     Send ACK event when cmd delivered\n"

@@ -178,6 +178,9 @@ public:
    * @param data_len Commands data length
    * @return Pointer to ksnet_arp_data or NULL if to peer is absent
    */
+  void BroadcastSend(const char* to, uint8_t cmd, void* data, size_t data_len) const {
+    teoBroadcastSend(ke->kc, (char*)to, cmd, data, data_len);
+  }
   inline ksnet_arp_data* sendTo(const char* to, uint8_t cmd, void* data, size_t data_len) const {
     return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
   }
@@ -467,6 +470,56 @@ public:
   inline teo::teoPacket* getPacket(void* data) const { return (teo::teoPacket*)data; }
 
   /**
+   * Send counter metric
+   * 
+   * @param name Metric name
+   * @param value Metric counter value 
+   */
+  inline void metricCounter(const std::string &name, int value) {
+    teoMetricCounter(ke->tm, name.c_str(), value);
+  }
+
+  /**
+   * Send counter metric
+   * 
+   * @param name Metric name
+   * @param value Metric counter value 
+   */
+  inline void metricCounter(const std::string &name, double value) {
+    teoMetricCounterf(ke->tm, name.c_str(), value);
+  }
+
+  /**
+   * Send time(ms) metric
+   * 
+   * @param name Metric name
+   * @param value Metric ms value 
+   */
+  inline void metricMs(const std::string &name, double value) {
+    teoMetricMs(ke->tm, name.c_str(), value);
+  }
+
+  /**
+   * Send gauge metric
+   * 
+   * @param name Metric name
+   * @param value Metric gauge value 
+   */
+  inline void metricGauge(const std::string &name, int value) {
+    teoMetricGauge(ke->tm, name.c_str(), value);
+  }
+
+  /**
+   * Send gauge metric
+   * 
+   * @param name Metric name
+   * @param value Metric gauge value 
+   */
+  inline void metricGauge(const std::string &name, double value) {
+    teoMetricGaugef(ke->tm, name.c_str(), value);
+  }
+
+  /**
    * Virtual Teonet event callback
    *
    * @param event
@@ -572,6 +625,10 @@ public:
 
     template <typename T> inline cqueData* add(T timeout = 5.00, void* user_data = NULL) {
       return ksnCQueAdd(kq, NULL, (double)timeout, user_data);
+    }
+
+    inline int remove(uint32_t id) {
+      return ksnCQueRemove(kq, id);
     }
 
     template <typename Callback>

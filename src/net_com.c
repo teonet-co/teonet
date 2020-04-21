@@ -22,12 +22,14 @@
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_stream_cb(ksnStreamClass *ks, ksnCorePacketData *rd);
 int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
+int cmd_l0_broadcast_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd);
 static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -108,6 +110,14 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_echo_answer_cb(kco, rd);
             break;
 
+        case CMD_ECHO_UNRELIABLE:
+            processed = cmd_echo_unr_cb(kco, rd);
+            break;
+
+//        case CMD_ECHO_UNR_ANSWER:
+//            processed = cmd_echo_unr_answer_cb(kco, rd);
+//            break;
+
         case CMD_CONNECT_R:
             processed = cmd_connect_r_cb(kco, rd);
             break;
@@ -151,6 +161,12 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #ifdef M_ENAMBE_L0s
         case CMD_L0_TO:
             processed = cmd_l0_to_cb(ke, rd);
+            break;
+        #endif
+
+        #ifdef M_ENAMBE_L0s
+        case CMD_L0_CLIENT_BROADCAST:
+            processed = cmd_l0_broadcast_cb(ke, rd);
             break;
         #endif
 
@@ -383,6 +399,21 @@ static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     return 1; // Command processed
 }
 
+static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+
+    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_ECHO_UNR (cmd = %u) command, from %s (%s:%d)\n",
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
+    // Send ECHO to L0 user
+    ksnLNullSendToL0(ke, rd->addr, rd->port, rd->from, rd->from_len, CMD_ECHO_UNRELIABLE_ANSWER,
+                rd->data, rd->data_len);
+
+    return 1; // Command processed
+}
 /**
  * Process CMD_PEERS command
  *
@@ -696,6 +727,11 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
             // Add type to arp-table
             rd->arp->type = strdup(type_str);
             free(type_str);
+
+            // Metrics
+            char *met = ksnet_formatMessage("CON.%s", rd->from);
+            teoMetricGauge(ke->tm, met, 1);
+            free(met);
 
             // Send event callback
             if(ke->event_cb != NULL)
@@ -1042,12 +1078,13 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_CONNECT_R (cmd = %u) command, from %s connect address: %s:%d\n",
-            rd->cmd, rd->from, rd->addr, rd->port);
+    ksn_printf(ke, MODULE, DEBUG, 
+        "process CMD_CONNECT_R (cmd = %u) command, from %s (%s:%d)\n",
+        rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 
     // Replay to address we got from peer
-    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, NULL_STR, 1);
+    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, "\0", 2);
 
     // Parse command data
     size_t i, ptr;
@@ -1216,6 +1253,11 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(rd->data != NULL && ((char*)rd->data)[0]) {
         peer_name = rd->data;
     }
+
+    // Metrics
+    char *met = ksnet_formatMessage("CON.%s", peer_name);
+    teoMetricGauge(ke->tm, met, 0);
+    free(met);
 
     // Check r-host disconnected
     int is_rhost = ke->ksn_cfg.r_host_name[0] && !strcmp(ke->ksn_cfg.r_host_name,rd->from);

@@ -22,6 +22,7 @@
 #include "modules/cque.h"
 #include "modules/teodb.h"
 #include "modules/stream.h"
+#include "modules/metric.h"
 #include "modules/net_tcp.h"
 #include "modules/net_tun.h"
 #include "modules/net_term.h"
@@ -266,6 +267,8 @@ typedef struct ksnetEvMgrClass {
 
     teoAsyncClass *ta;  ///< Async calls module
 
+    teoMetricClass *tm; ///< Metric send module
+
     int runEventMgr; ///< Run even manages (stop if 0)
     uint32_t timer_val; ///< Event loop timer value
     uint32_t idle_count; ///< Idle callback count
@@ -287,10 +290,10 @@ typedef struct ksnetEvMgrClass {
     pthread_mutex_t async_mutex; ///< Async data queue mutex
     pthread_mutex_t printf_mutex; ///< Printf data queue mutex
 
-    size_t n_num; ///< Network number
+    size_t net_idx; ///< Network index
     void *n_prev; ///< Previouse network
     void *n_next; ///< Next network
-    size_t num_nets; ///< Number of networks
+    size_t net_count; ///< Count of networks
 
     // Define signals watchers
     ev_signal sigint_w;  ///< Signal SIGINT watcher

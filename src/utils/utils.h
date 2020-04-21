@@ -78,7 +78,6 @@ char *removeTEsc(char *str);
 int calculate_lines(char *str);
 int inarray(int val, const int *arr, int size);
 
-void set_nonblock(int sd);
 int set_reuseaddr(int sd);
 
 const char* getDataPath(void);
@@ -101,6 +100,8 @@ char *ksn_base64_encode(const unsigned char *data,
 unsigned char *ksn_base64_decode(const char *data,
                              size_t input_length,
                              size_t *output_length);
+
+void dump_bytes(char *buffer, int buffer_len, uint8_t* data, int data_len);
 
 #ifdef	__cplusplus
 }

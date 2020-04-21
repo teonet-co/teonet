@@ -25,7 +25,7 @@ extern CU_pSuite pSuite;
 
 size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_len, 
         const char *addr, int port, int cmd, const void *data, size_t data_len);
-uint8_t get_byte_checksum(void *data, size_t data_len);
+uint8_t get_byte_checksum(const uint8_t *data, size_t data_len);
 int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data, 
         size_t data_length);
 

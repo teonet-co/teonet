@@ -518,7 +518,7 @@ int bind_udp(int *port) {
     }
     
     // Set non block mode
-    set_nonblock(sd);
+    teosockSetBlockingMode(sd, TEOSOCK_NON_BLOCKING_MODE);
 
     return sd;
 }

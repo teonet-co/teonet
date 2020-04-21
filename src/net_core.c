@@ -263,9 +263,9 @@ int ksnCoreBind(ksnCoreClass *kc) {
 
         // Set non block mode
         // \todo Test with "Set non block on"
-        //       and set the set_nonblock if it work correct
+        //       and set the TEOSOCK_NON_BLOCKING_MODE if it work correct
         // It was tested and switch back to blocked UDP 2018-05-28
-        //set_nonblock(fd);
+        //teosockSetBlockingMode(fd, TEOSOCK_NON_BLOCKING_MODE);
     }
 
     return !(fd > 0);
@@ -385,6 +385,37 @@ int send_by_type_check_cb(ksnetArpClass *ka, char *peer_name,
 }
 
 /**
+ * Send brodcast command to peers by type
+ *
+ * @param kc Pointer to ksnCoreClass
+ * @param to Peer name to send to
+ * @param cmd Command
+ * @param data Commands data
+ * @param data_len Commands data length
+ * @return Pointer to ksnet_arp_data or NULL if to peer is absent
+ */
+void teoBroadcastSend(ksnCoreClass *kc, char *to, uint8_t cmd, void *data, size_t data_len) {
+    send_by_type_check_t sd = { .name = to, .num = 0 };
+    ksnetEvMgrClass* ke = (ksnetEvMgrClass*)(kc->ke);
+
+    ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd);
+
+    if (!sd.num) {
+        return;
+    }
+
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG, "send broadcast message by type \"%s\" \n", to);
+    #endif
+    
+    for(int i=0; i < sd.num; ++i) {
+        ksnCoreSendto(kc, sd.arp[i]->data.addr, sd.arp[i]->data.port, cmd, data, data_len);
+    }
+
+    free(sd.arp);
+}
+
+/**
  * Send command by name to peer
  *
  * @param kc Pointer to ksnCoreClass
@@ -400,6 +431,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     int fd;
     ksnet_arp_data *arp;
     send_by_type_check_t sd = { .name = to, .num = 0 };
+    ksnetEvMgrClass* ke = (ksnetEvMgrClass*)(kc->ke);
 
     // Send to peer in this network
     if((arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, to)) != NULL/* && arp->mode != -1*/) {
@@ -409,40 +441,33 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     // Send by type in this network
     else if(!ksnetArpGetAll(kc->ka, send_by_type_check_cb, &sd) && sd.num) {
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
-                "send to peer by type \"%s\" \n", to);
+        ksn_printf(ke, MODULE, DEBUG, "send to peer by type \"%s\" \n", to);
         #endif
-        int i = 0;
-        for(i=0; i < sd.num; i++) {
-            printf("%s:%d\n", sd.arp[i]->data.addr, sd.arp[i]->data.port);
-        }
 
         int r = rand() % sd.num;
-        printf("=> %s:%d\n", sd.arp[r]->data.addr, sd.arp[r]->data.port);
-
         ksnCoreSendto(kc, sd.arp[r]->data.addr, sd.arp[r]->data.port, cmd, data, data_len);
 
         free(sd.arp);
     }
 
     // Send to peer at other network
-    else if(((ksnetEvMgrClass*)(kc->ke))->km != NULL &&
-        (arp = ksnMultiSendCmdTo(((ksnetEvMgrClass*)(kc->ke))->km, to, cmd, data,
+    else if(ke->km != NULL &&
+        (arp = ksnMultiSendCmdTo(ke->km, to, cmd, data,
                 data_len))) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
+        ksn_printf(ke, MODULE, DEBUG, 
                 "send to peer \"%s\" at other network\n", to);
         #endif
     }
 
     // Send this message to L0 client
     else if(cmd == CMD_L0 &&
-            ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.l0_allow_f &&
-            (fd = ksnLNullClientIsConnected(((ksnetEvMgrClass*)(kc->ke))->kl, to))) {
+            ke->ksn_cfg.l0_allow_f &&
+            (fd = ksnLNullClientIsConnected(ke->kl, to))) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG_VV,
+        ksn_printf(ke, MODULE, DEBUG_VV,
                 "send command to L0 client \"%s\" to r-host\n", to);
         #endif
 
@@ -458,10 +483,10 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
         teoLNullPacketCreate(buf, buf_length,
                 cmd_l0_data->cmd,
                 cmd_l0_data->from,
-                cmd_l0_data->from + cmd_l0_data->from_length,
-                cmd_l0_data->data_length);
-        //if((snd = write(fd, buf, buf_length)) >= 0);
-        if((snd = ksnLNullPacketSend(((ksnetEvMgrClass*)(kc->ke))->kl, fd, buf, buf_length)) >= 0);
+                (uint8_t *)cmd_l0_data->from + cmd_l0_data->from_length,
+                (size_t)cmd_l0_data->data_length);
+
+        if((snd = ksnLNullPacketSend(ke->kl, fd, buf, buf_length)) >= 0);
         free(buf);
     }
 
@@ -469,11 +494,11 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     else {
 
         // If connected to r-host
-        char *r_host = ((ksnetEvMgrClass*)(kc->ke))->ksn_cfg.r_host_name;
+        char *r_host = ke->ksn_cfg.r_host_name;
         if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) {
 
             #ifdef DEBUG_KSNET
-            ksn_printf(((ksnetEvMgrClass*)(kc->ke)), MODULE, DEBUG,
+            ksn_printf(ke, MODULE, DEBUG,
                     "resend command to peer \"%s\" to r-host\n", to);
             #endif
 
@@ -737,14 +762,26 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
     if((rd->arp = ksnetArpGet(kc->ka, rd->from)) == NULL) {
 
         ksnet_arp_data_ext arp;
-
         rd->arp = &arp;
-        int mode = 0;
 
-        // Check r-host connected
-        if(!ke->ksn_cfg.r_host_name[0] &&
-           !strcmp(ke->ksn_cfg.r_host_addr, rd->addr) &&
-           ke->ksn_cfg.r_port == rd->port) {
+        // The "mode" variable (0 by default) sets to 1 when this host connected
+        // to r-host 
+        //
+        // The "connect_r" variable (0 by default) sets to 1 when this host is 
+        // r-host and other peer send connect to r-host command
+        int mode = 0, connect_r = rd->cmd == CMD_CONNECT_R ? 1 : 0;
+
+        // Check that this host connected to r-host
+        if(!ke->ksn_cfg.r_host_name[0] && ke->ksn_cfg.r_port == rd->port &&
+           ( 
+             ((rd->cmd == CMD_NONE || rd->cmd == CMD_HOST_INFO) && rd->data_len == 2) ||
+             !strcmp(ke->ksn_cfg.r_host_addr, rd->addr)
+           )) {
+
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG, "connected to r-host: %s (%s:%d)\n",
+                    rd->from, rd->addr, rd->port);
+            #endif
 
             strncpy(ke->ksn_cfg.r_host_name, rd->from,
                     sizeof(ke->ksn_cfg.r_host_name));
@@ -765,9 +802,8 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
                     rd->from, rd->addr, rd->port);
         #endif
 
-
         // Request host info
-        ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, NULL, 0);
+        ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, "\0", 1 + connect_r);
         peer_type_req_t *type_request = malloc(sizeof(peer_type_req_t));
         type_request->kc = ke->kc;
         type_request->addr = strdup(rd->addr);
@@ -781,7 +817,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 }
 
 /**
- * Process ksnet packet
+ * Process teonet packet
  *
  * @param vkc Pointer to ksnCoreClass
  * @param buf Buffer with packet
@@ -812,8 +848,10 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         size_t data_len; // Decrypted packet data length
 
         // Decrypt package
-        #if KSNET_CRYPT
+        int encrypted = 0;
+        #if KSNET_CRYPT        
         if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
+            encrypted = 1;
             data = ksnDecryptPackage(kc->kcr, buf, recvlen, &data_len);
         } else { // Use packet without decryption
         #endif
@@ -848,22 +886,21 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         rd.port = port; // Port to integer
 
         // Parse packet and check if it valid
-        if(!ksnCoreParsePacket(data, data_len, &rd)) {
-            rd.from = "";
-            rd.from_len = 1;
-            rd.data = data;
-            rd.data_len = data_len;
-            // Check TR-UDP L0 packet and process it if valid
-            if(!ke->kl || !ksnLNulltrudpCheckPaket(ke->kl, &rd)) {
-                event = EV_K_RECEIVED_WRONG;
-                #ifdef DEBUG_KSNET
-                ksn_printf(ke, MODULE, DEBUG_VV,
-                    "WRONG RECEIVED! cmd = %d, from: %s %s:%d\n", rd.cmd, rd.from, rd.addr, rd.port);
-                #endif
-            }
-
-            command_processed = 1;
-        } else { // Check ARP Table and add peer if not present
+        //    
+        // In this place we check two type of packets one from teonet another 
+        // from teonet client.
+        // 
+        // Teonet packets are encrypte (but only one packet with cmd == CMD_L0 
+        // may be not encrypted) & ksnCoreParsePacket return true.
+        //
+        // Teocli packet is not encrypted and ksnCoreParsePacket return false.
+        // ksnCoreParsePacket sometimes may return false positive. So we use 
+        // additional precautions in this if.
+        //
+        // CMD_L0 => #70 Command from L0 Client    
+        if( ksnCoreParsePacket(data, data_len, &rd) && ( encrypted || rd.cmd == CMD_L0 ) ) {
+ 
+            // Check ARP Table and add peer if not present            
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,
                 "got %d byte data, cmd = %d, from %s %s:%d\n",
@@ -878,6 +915,23 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
 
             // Check & process command
             command_processed = ksnCommandCheck(kc->kco, &rd);
+
+        } else { 
+            
+            rd.from = "";
+            rd.from_len = 1;
+            rd.data = data;
+            rd.data_len = data_len;
+            // Check TR-UDP L0 packet and process it if valid
+            if(!ke->kl || !ksnLNulltrudpCheckPaket(ke->kl, &rd)) {
+                event = EV_K_RECEIVED_WRONG;
+                #ifdef DEBUG_KSNET
+                ksn_printf(ke, MODULE, DEBUG_VV,
+                    "WRONG RECEIVED! cmd = %d, from: %s %s:%d\n", rd.cmd, rd.from, rd.addr, rd.port);
+                #endif
+            }
+
+            command_processed = 1;
         }
 
         // Send event to User level

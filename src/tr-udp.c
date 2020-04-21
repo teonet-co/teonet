@@ -2029,29 +2029,28 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     );
     #endif
 
+    trudpChannelData *tcd = trudpGetChannelCreate(td, addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
+    if(tcd == (void*)-1) {
+        return -1; // what to return in this case?
+    }
+
     // TR-UDP: Check commands array
     if(CMD_TRUDP_CHECK(cmd)) {
-        trudpChannelData *tcd = trudpGetChannelCreate(TD_P(td), addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
-        if(tcd != (void*)-1) trudpChannelSendData(tcd, (void *)buf, buf_len);
-        buf_len = 0;
+        trudpChannelSendData(tcd, (void *)buf, buf_len);
+        return buf_len;
     }
 
-    // Not TR-UDP
-    else {
-        // Show debug messages
-        #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
-                ">> skip this packet, "
-                "send %d bytes direct by UDP to: %s:%d\n",
-                buf_len,
-                inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-                ntohs(((struct sockaddr_in *) addr)->sin_port)
-        );
-        #endif
-    }
+    // UDP
+    ssize_t sent = trudpUdpSendto(td->fd, (void *)buf, buf_len, (__CONST_SOCKADDR_ARG)&tcd->remaddr, sizeof(tcd->remaddr));
 
-    return buf_len > 0 ?
-        teo_sendto(kev, fd, buf, buf_len, flags, addr, addr_len) : buf_len;
+    #ifdef DEBUG_KSNET
+    ksn_printf(kev, MODULE, DEBUG_VV, ">> skip this packet, send %d bytes direct by UDP to: %s:%d\n",
+            sent, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
+            ntohs(((struct sockaddr_in *) addr)->sin_port)
+    );
+    #endif
+
+    return sent;
 }
 
 /**
@@ -2073,7 +2072,7 @@ ssize_t ksnTRUDPrecvfrom(trudpData *td, int fd, void *buffer,
                          size_t buffer_len, int flags, __SOCKADDR_ARG addr,
                          socklen_t *addr_len) {
 
-    trudpSendEvent((void*)td, PROCESS_RECEIVE, buffer, buffer_len, 0);
+    trudpSendEvent(td, PROCESS_RECEIVE, buffer, buffer_len, 0);
 
     return 0;
 }
@@ -2187,17 +2186,15 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
     }
 
     // Process received packet
-    if(recvlen > 0) {
-        size_t data_length;
-        trudpChannelData *tcd = trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG) &remaddr, 0);
-        if(tcd == (void *)-1 ||
-           trudpChannelProcessReceivedPacket(tcd, data, recvlen, &data_length) == (void *)-1) {
-
-            if(tcd == (void *)-1)
-                fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");
-            else
-                trudpSendEvent(tcd, PROCESS_RECEIVE_NO_TRUDP, data, recvlen, NULL);
-        }
+    if (recvlen <= 0) { return; }
+    trudpChannelData *tcd =
+        trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG)&remaddr, 0);
+    if (tcd == (void *)-1) {
+        fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");
+        return;
+    }
+    if (trudpChannelProcessReceivedPacket(tcd, data, recvlen) == -1) {
+        trudpChannelSendEvent(tcd, PROCESS_RECEIVE_NO_TRUDP, data, recvlen, NULL);
     }
 }
 
@@ -2249,9 +2246,8 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case CONNECTED: {
 
             #ifdef DEBUG_KSNET
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
-            ksn_printf(kev, MODULE, DEBUG_VV, "connect channel %s\n", key);
+            const trudpData *td = tcd->td; // used in kev macro
+            ksn_printf(kev, MODULE, DEBUG_VV, "connect channel %s\n", tcd->channel_key);
             #endif
 
         } break;
@@ -2262,15 +2258,14 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case DISCONNECTED: {
 
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
             if(data_length == sizeof(uint32_t)) {
 
                 uint32_t last_received = *(uint32_t*)data;
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
                     "disconnect channel %s, last received: %.6f sec\n",
-                    key, last_received / 1000000.0);
+                    tcd->channel_key, last_received / 1000000.0);
                 #endif
 
                 if(tcd->fd) {
@@ -2278,18 +2273,18 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 }
                 
                 // Remove peer from ARP table
-                const trudpData *td = TD(tcd); // used in kev macro
+                const trudpData *td = tcd->td; // used in kev macro
                 if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
                 
                     // Remove TR-UDP channel
-                    trudpChannelDestroy(tcd);
+                    trudpChannelDestroyChannel(td, tcd);
                 }
             }
             else {
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
                     "disconnect channel %s (Channel destroyed)\n",
-                    key);
+                    tcd->channel_key);
                 #endif
             }
 
@@ -2304,11 +2299,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_RESET: {
 
             #ifdef DEBUG_KSNET
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got TRU_RESET packet from channel %s\n",
-                key);
+                tcd->channel_key);
             #endif
 
         } break;
@@ -2319,15 +2313,14 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case SEND_RESET: {
 
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
 
             if(!data)
                 
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, DEBUG_VV,
                     "send reset to channel %s\n",
-                    key);
+                    tcd->channel_key);
                 #endif
 
             else {
@@ -2339,14 +2332,14 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                     ksn_printf(kev, MODULE, DEBUG_VV,
                         "send reset: "
                         "not expected packet with id = 0 received from channel %s\n",
-                        key);
+                        tcd->channel_key);
                     #endif
                 else
                     #ifdef DEBUG_KSNET
                     ksn_printf(kev, MODULE, DEBUG_VV,
                         "send reset: "
                         "high send packet number (%d) at channel %s\n",
-                        id, key);
+                        id, tcd->channel_key);
                     #endif
                 }
 
@@ -2359,10 +2352,9 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_ACK_RESET: {
 
             #ifdef DEBUG_KSNET
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
             ksn_printf(kev, MODULE, DEBUG_VV, 
-                "got ACK to RESET packet at channel %s\n", key);
+                "got ACK to RESET packet at channel %s\n", tcd->channel_key);
             #endif
 
         } break;
@@ -2374,11 +2366,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case GOT_ACK_PING: {
 
             #ifdef DEBUG_KSNET
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got ACK to PING packet at channel %s, data: %s, %.3f(%.3f) ms\n",
-                key, (char*)data,
+                tcd->channel_key, (char*)data,
                 (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0);
             #endif
 
@@ -2390,11 +2381,10 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_PING: {
             #ifdef DEBUG_KSNET
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got PING packet at channel %s, data: %s\n",
-                key, (char*)data);
+                tcd->channel_key, (char*)data);
             #endif
 
         } break;
@@ -2406,22 +2396,22 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_ACK: {
 
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
+            trudpPacket *packet = (trudpPacket *)data;
 
             #ifdef DEBUG_KSNET
-            int net_lag = trudpGetTimestamp() - trudpPacketGetTimestamp(data);
+            int net_lag = trudpGetTimestamp() - trudpPacketGetTimestamp(packet);
             ksn_printf(kev, MODULE, DEBUG_VV,
-                "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms, network lag %d ms%s`",
-                trudpPacketGetId(data/*trudpPacketGetPacket(data)*/),
-                key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0,
-                (int)net_lag, (net_lag > 50000) ? _ANSI_RED "  Big Lag!" _ANSI_NONE "\n" : "\n" );
+                "got ACK id=%u at channel %s, triptime %.3f(%.3f) ms, network lag %d ms%s\n",
+                trudpPacketGetId(packet),
+                tcd->channel_key, (tcd->triptime)/1000.0, (tcd->triptimeMiddle)/1000.0,
+                (int)net_lag, (net_lag > 50000) ? _ANSI_RED "  Big Lag!" _ANSI_NONE : "" );
             #endif
 
             // Send event ACK to teonet event loop
             if(kev->ksn_cfg.send_ack_event_f)
-                trudp_send_event_ack_to_app(kev, trudpPacketGetId(data),
-                    trudpPacketGetData(data), trudpPacketGetDataLength(data),
+                trudp_send_event_ack_to_app(kev, trudpPacketGetId(packet),
+                    trudpPacketGetData(packet), trudpPacketGetDataLength(packet),
                     (__CONST_SOCKADDR_ARG) &tcd->remaddr);
 
             // Start send queue \todo test and remove it (if tested better)
@@ -2436,51 +2426,42 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case GOT_DATA: {
 
-//            uint32_t id = trudpPacketGetId(trudpPacketGetPacket(data));
-//            size_t length = trudpPacketGetPacketLength(trudpPacketGetPacket(data));
             // Process package
-            const trudpData *td = TD(tcd); // used in kev macro
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
 
-//            ssize_t rc = recvCheck(tcd, data, data_length);
-//            if (!(rc > 0)) {
-//                #ifdef DEBUG_KSNET
-//                ksn_printf(kev, MODULE, DEBUG_VV,
-//                           "%d !!!!!!!!!!!!!!!!!!!\n",
-//                           data_length
-//                );
-//                #endif
-//                break;
-//            }
-//            data_length = rc;
-//            data = tcd->read_buffer;
-//            //teoLNullCPacket *cp = trudpPacketGetData(trudpPacketGetPacket(data));
-//            //printf("!!!!!!!!!!!!!!!!!!!!!!!!!!got %d byte data at channel %s [%.3f(%.3f) ms], id=%u, peer: %s, cmd: %d, data length: %d,data: %s\n", length, key, (double)tcd->triptime / 1000.0, (double)tcd->triptimeMiddle / 1000.0, id, cp->peer_name, cp->cmd, cp->data_length, cp->peer_name + cp->peer_name_length);
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "got %d bytes DATA packet from channel %s\n",
-                data_length, key 
+                data_length, tcd->channel_key
             );
             #endif
 
-            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
+            trudpPacket * packet = (trudpPacket *)data;
+            size_t block_len = trudpPacketGetDataLength(packet);
+            void* block = trudpPacketGetData(packet);
+            ksnCoreProcessPacket(kev->kc, block, block_len, (__SOCKADDR_ARG) &tcd->remaddr);
 
         } break;
-	case GOT_DATA_NO_TRUDP: {
-            const trudpData *td = TD(tcd); // used in kev macro
+
+        case GOT_DATA_NO_TRUDP: {
+            const trudpData *td = tcd->td; // used in kev macro
+
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV, "got %d bytes DATA packet from no trudp \n", data_length);
+            ksn_printf(kev, MODULE, DEBUG_VV,
+                       "got %d bytes DATA packet from no trudp chan %s \n",
+                       data_length, tcd->channel_key);
             #endif
 
-            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG) &tcd->remaddr);
-	} break;
+            ksnCoreProcessPacket(kev->kc, data, data_length, (__SOCKADDR_ARG)&tcd->remaddr);
+        } break;
+
         // Process received data
         // @param tcd Pointer to trudpData
         // @param data Pointer to receive buffer
         // @param data_length Receive buffer length
         // @param user_data NULL
         case PROCESS_RECEIVE: {
-            trudp_process_receive((trudpData *) tcd_pointer, data, data_length);
+            trudp_process_receive((trudpData *)tcd_pointer, data, data_length);
         } break;
 
         // Process received not TR-UDP data
@@ -2491,17 +2472,15 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         case PROCESS_RECEIVE_NO_TRUDP: {
 
             // Process package
-            const trudpData *td = TD(tcd); // used in kev macro         
+            const trudpData *td = tcd->td; // used in kev macro
             #ifdef DEBUG_KSNET
-            const char *key = trudpChannelMakeKey(tcd);
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "not TR-UDP %d bytes DATA packet received from channel %s\n",
                 data_length,
-                key
-            );
-            #endif 
+                tcd->channel_key);
+            #endif
             ksnCoreProcessPacket(kev->kc, data, data_length,
-                    (__SOCKADDR_ARG) &tcd->remaddr);
+                                 (__SOCKADDR_ARG)&tcd->remaddr);
 
         } break;
 
@@ -2511,21 +2490,21 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
         // @param user_data NULL
         case PROCESS_SEND: {
 
-            const trudpData *td = TD(tcd); // used in kev macro
-            #ifdef DEBUG_KSNET
-            const char *key = trudpChannelMakeKey(tcd);
+            const trudpData *td = tcd->td; // used in kev macro
+            trudpPacket *packet = (trudpPacket *)data;
+            #ifdef DEBUG_KSNET 
             ksn_printf(kev, MODULE, DEBUG_VV,
-                "send %d bytes packet ID = %d to channel %s\n",                    
-                data_length,
-                trudpPacketGetId(data),
-                key
+                       "send %d bytes packet ID = %d to channel %s\n",
+                       data_length,
+                       trudpPacketGetId(packet),
+                       tcd->channel_key
             );
             #endif
             teo_sendto(kev, td->fd, data, data_length, 0,
-                    (__CONST_SOCKADDR_ARG) &tcd->remaddr, tcd->addrlen);
+                       (__CONST_SOCKADDR_ARG)&tcd->remaddr, tcd->addrlen);
 
             // Start send queue timer
-            if(trudpPacketGetType(data) == TRU_DATA) {
+            if (trudpPacketGetType(packet) == TRU_DATA) {
                 trudpSendQueueCbStart(td->psq_data, 0);
             }
 

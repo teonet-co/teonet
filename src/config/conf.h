@@ -39,6 +39,7 @@
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
 #define M_ENAMBE_ASYNC 1
+#define M_ENAMBE_METRIC 1
 #define M_ENAMBE_LOGGING_SERVER 1
 #define M_ENAMBE_LOGGING_CLIENT 1
 #define M_ENAMBE_LOG_READER 1
@@ -68,6 +69,7 @@ typedef struct ksnet_cfg {
         log_disable_f,          ///< Disable send log to logging server 
         send_all_logs_f,        ///< Send all logs to logging server (by default only ###)
         color_output_disable_f, ///< Disable color output flag
+        extended_l0_log_f,      ///< Extended L0 log output flag
         no_multi_thread_f;      ///< Don't try multi thread mode in async calls 
     
     // Daemon mode flags
@@ -123,6 +125,11 @@ typedef struct ksnet_cfg {
     
     // Syslog options
     long log_priority;                       ///< Syslog priority 
+
+    // StatsD address
+    char statsd_ip[KSN_BUFFER_SM_SIZE/2];
+    long statsd_port;
+    int statsd_peers_f;
     
     // Helpers
     int pp;

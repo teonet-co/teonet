@@ -16,13 +16,13 @@
 #include <libgen.h>
 #include <signal.h>
 #include <pthread.h>    // For mutex and TEO_TREAD
-
+#include <stdbool.h>
 
 #include "ev_mgr.h"
 #include "net_multi.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
-#include "stdbool.h"
+#include "modules/metric.h"
 
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
 
@@ -37,7 +37,7 @@ extern char** teo_argv;
 const char *null_str = "";
 
 // Run file name and buffer
-#define RUN_NAME "/teonet.run"
+#define RUN_NAME "-teonet.run"
 char run_file[KSN_BUFFER_SIZE];
 
 ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X){return ((ksnetEvMgrClass*)((ksnCoreClass*)X->kc)->ke); }
@@ -59,6 +59,7 @@ int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data);
 
 void teoHotkeySetFilter(void *ke, void *filter);
+void metric_teonet_count(teoMetricClass *tm);
 
 /**
  * Initialize KSNet Event Manager and network
@@ -118,8 +119,8 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     ke->tp = NULL;
     ke->ks = NULL;
     ke->kl = NULL;
-    ke->num_nets = 1;
-    ke->n_num = 0;
+    ke->net_count = 1;
+    ke->net_idx = 0;
     ke->n_prev = NULL;
     ke->n_next = NULL;
     ke->user_data = user_data;
@@ -289,26 +290,30 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Create run file name
     const char *network = ke->ksn_cfg.network;
-    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE);
-    if(network != NULL && network[0]) {
+    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE - 1);
+    if (network != NULL && network[0]) {
         strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
         strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);
     }
+    strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
+    strncat(run_file, ksnetEvMgrGetHostName(ke),
+                KSN_BUFFER_SIZE - strlen(run_file) - 1);
     strncat(run_file, RUN_NAME, KSN_BUFFER_SIZE - strlen(run_file) - 1);
-
     FILE *fp;
 
     // Wait other teonet application to get disconnect signal
     // if this application crash or deployed
-    if ((fp = fopen(run_file, "r"))){
-        usleep(3500000);
-        fclose(fp);
-    }
-    // Create run file
-    else {
-        fp = fopen(run_file, "w");
-        fprintf(fp,"run\n");
-        fclose(fp);
+    if(!ke->net_idx) {
+        if ((fp = fopen(run_file, "r"))){
+            usleep(3500000);
+            fclose(fp);
+        }
+        // Create run file
+        else {
+            fp = fopen(run_file, "w");
+            fprintf(fp,"run\n");
+            fclose(fp);
+        }
     }
 
     ke->timer_val = 0;
@@ -318,15 +323,15 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     // Event loop
     bool loop_already_initialised = ke->ev_loop != NULL;
     if(ke->ev_loop == NULL){
-        struct ev_loop *loop = ke->n_num && ke->km == NULL ? ev_loop_new (0) : EV_DEFAULT;
+        struct ev_loop *loop = ke->net_idx && ke->km == NULL ? ev_loop_new (0) : EV_DEFAULT;
         ke->ev_loop = loop;
     }
 
     // \todo remove this print
     ksn_printf(ke, MODULE, DEBUG_VV,
-        _ANSI_BROWN "event loop initialized as %s " _ANSI_NONE ", ke->n_num = %d\n",
-        ke->n_num && ke->km == NULL ? "ev_loop_new (0)" : "EV_DEFAULT",
-        (int)ke->n_num
+        _ANSI_BROWN "event loop initialized as %s " _ANSI_NONE ", ke->net_idx = %d\n",
+        ke->net_idx && ke->km == NULL ? "ev_loop_new (0)" : "EV_DEFAULT",
+        (int)ke->net_idx
     );
 
 
@@ -347,7 +352,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
         ev_timer_start (ke->ev_loop, &ke->timer_w);
 
         // Initialize signals and keyboard watcher for first net (default loop)
-        if(!ke->n_num) {
+        if(!ke->net_idx) {
 
             // Initialize and start signals watchers
             // SIGINT
@@ -497,7 +502,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
         modules_destroy(ke);
 
         // Destroy event loop (and free memory)
-        if(ke->km == NULL || !ke->n_num) ev_loop_destroy(ke->ev_loop);
+        if(ke->km == NULL || !ke->net_idx) ev_loop_destroy(ke->ev_loop);
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, MESSAGE,
@@ -712,31 +717,40 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
  */
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
 
-    ksnet_arp_data *r_host_arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, ke->ksn_cfg.r_host_name);
-    static int check_connection_f = 0; // Check r-host connection flag
-
+    // TODO: Posible this commente code don't need more. So it may be removed 
+    // after some release versions.
+    //
+    // ksnet_arp_data *r_host_arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, ke->ksn_cfg.r_host_name);
+    // static int check_connection_f = 0; // Check r-host connection flag
+    //
     // Reset r-host if connection is down
     // *Note:* After host break with general protection failure
     // and than restarted the r-host does not reconnect this host. In this case
     // the triptime == 0.0. In this bloc we detect than r-hosts triptime not
     // changed and send it disconnect command
-    if(ke->ksn_cfg.r_host_addr[0] && ke->ksn_cfg.r_host_name[0] && r_host_arp->triptime == 0.00) {
+    // if(ke->ksn_cfg.r_host_addr[0] && ke->ksn_cfg.r_host_name[0] && r_host_arp->triptime == 0.00) {
 
-        if(!check_connection_f) check_connection_f = 1;
-        else {
-            // Send this host disconnect command to dead peer
-            send_cmd_disconnect_cb(ke->kc->ka, NULL,  r_host_arp, NULL);
+    //     if(!check_connection_f) check_connection_f = 1;
+    //     else {
+    //         printf("not connected to r-host\n");
+    //
+    //         // Send this host disconnect command to dead peer
+    //         send_cmd_disconnect_cb(ke->kc->ka, NULL,  r_host_arp, NULL);
 
-            // Clear r-host name to reconnect at last loop
-            ke->ksn_cfg.r_host_name[0] = '\0';
-        }
-    }
-    else
+    //         // Clear r-host name to reconnect at last loop
+    //         ke->ksn_cfg.r_host_name[0] = '\0';
+    //     }
+    // }
+    // else
 
     // Connect to r-host
     if(ke->ksn_cfg.r_host_addr[0] && !ke->ksn_cfg.r_host_name[0]) {
 
-        check_connection_f = 0;
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG, "connect to r-host: %s\n", ke->ksn_cfg.r_host_addr);
+        #endif
+
+        // check_connection_f = 0;
 
         size_t ptr = 0;
         void *data = NULL;
@@ -991,14 +1005,19 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
         // Increment timer value
         ke->timer_val++;
 
-        // Show timer info
-        #ifdef DEBUG_KSNET
+        // Show timer info and send teonet metrics
         if( !(ke->timer_val % show_interval) ) {
+
+            // Show timer info
+            #ifdef DEBUG_KSNET
             ksn_printf(((ksnetEvMgrClass *)w->data), MODULE, DEBUG_VV,
                     "timer (%.1f sec of %f)\n",
                     show_interval * KSNET_EVENT_MGR_TIMER, t);
+            #endif
+
+            // Send teonet metrics
+            metric_teonet_count(ke->tm);
         }
-        #endif
 
         // Send custom timer Event
         if(ke->event_cb != NULL &&
@@ -1031,7 +1050,7 @@ void timer_cb(EV_P_ ev_timer *w, int revents) {
  * @param revents
  */
 void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
-    printf("sigint_cb\n");
+
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     #ifdef DEBUG_KSNET
     ksn_puts(ke, MODULE, DEBUG,
@@ -1327,7 +1346,7 @@ int modules_init(ksnetEvMgrClass *ke) {
 
     // Hotkeys
     if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
-        if(!ke->n_num) ke->kh = ksnetHotkeysInit(ke);
+        if(!ke->net_idx) ke->kh = ksnetHotkeysInit(ke);
         // Set filter from parameters
         if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke, ke->ksn_cfg.filter);
     }
@@ -1397,6 +1416,11 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->ta = teoAsyncInit(ke);
     #endif
 
+    // Metric module
+    #ifdef M_ENAMBE_METRIC
+    ke->tm = teoMetricInit(ke);
+    #endif
+
     return 1;
 }
 
@@ -1406,6 +1430,9 @@ int modules_init(ksnetEvMgrClass *ke) {
  * @param ke
  */
 void modules_destroy(ksnetEvMgrClass *ke) {
+    #ifdef M_ENAMBE_METRIC
+    teoMetricDestroy(ke->tm);
+    #endif
     #ifdef M_ENAMBE_ASYNC
     teoAsyncDestroy(ke->ta);
     #endif

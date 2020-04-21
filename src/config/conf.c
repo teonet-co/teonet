@@ -105,12 +105,18 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     
     // Disable color terminal output
     ksn_cfg->color_output_disable_f = 0;
+
+    // Extended L0 log
+    ksn_cfg->extended_l0_log_f = 0;
     
     // SIGSEGV processing
     ksn_cfg->sig_segv_f = 0;
     
     // Syslog priority
     ksn_cfg->log_priority = DEBUG;
+
+    // Send peers metric flag
+    ksn_cfg->statsd_peers_f = 0;
     
     // Terminal
 //    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
@@ -131,6 +137,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         strncpy(conf->host_name, host_name, KSN_MAX_HOST_NAME); \
         strncpy(conf->r_host_addr, r_host_addr, KSN_BUFFER_SM_SIZE/2); \
         strncpy(conf->vpn_ip, vpn_ip, KSN_MAX_HOST_NAME); \
+        strncpy(conf->statsd_ip, statsd_ip, KSN_BUFFER_SM_SIZE/2); \
         strncpy(conf->vpn_dev_name, vpn_dev_name, KSN_MAX_HOST_NAME); \
         strncpy(conf->vpn_dev_hwaddr, vpn_dev_hwaddr, KSN_MAX_HOST_NAME); \
         strncpy(conf->l0_tcp_ip_remote, l0_tcp_ip_remote, KSN_BUFFER_SM_SIZE/2); \
@@ -140,6 +147,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     char *vpn_ip = strdup(conf->vpn_ip);
     char *filter = strdup(conf->filter);
     char *net_key = strdup(conf->net_key);
+    char *statsd_ip = strdup(conf->statsd_ip);
     char *host_name = strdup(conf->host_name);
     char *r_host_addr = strdup(conf->r_host_addr);
     char *vpn_dev_name = strdup(conf->vpn_dev_name);
@@ -201,13 +209,17 @@ void read_config(ksnet_cfg *conf, int port_param) {
 
         #if M_ENAMBE_LOGGING_CLIENT
         CFG_SIMPLE_BOOL("log_disable_f", (cfg_bool_t*)&conf->log_disable_f),
-        CFG_SIMPLE_BOOL("send_all_logs_f", (cfg_bool_t*)&conf->send_all_logs_f),
-        
+        CFG_SIMPLE_BOOL("send_all_logs_f", (cfg_bool_t*)&conf->send_all_logs_f),        
         #endif        
         
         CFG_SIMPLE_INT("log_priority", &conf->log_priority),
         
         CFG_SIMPLE_BOOL("color_output_disable_f", (cfg_bool_t*)&conf->color_output_disable_f),
+        CFG_SIMPLE_BOOL("extended_l0_log_f", (cfg_bool_t*)&conf->extended_l0_log_f),
+
+        CFG_SIMPLE_STR("statsd_ip", &statsd_ip),
+        CFG_SIMPLE_INT("statsd_port", &conf->statsd_port),
+        CFG_SIMPLE_BOOL("statsd_peers_f", (cfg_bool_t*)&conf->statsd_peers_f),
 
         CFG_END()
     };
@@ -290,6 +302,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     free(vpn_dev_name);
     free(r_host_addr);
     free(host_name);
+    free(statsd_ip);
     free(net_key);
     free(filter);
     free(vpn_ip);

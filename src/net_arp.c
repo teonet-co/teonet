@@ -358,6 +358,23 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
 }
 
 /**
+ * Send arp table metrics
+ */
+void ksnetArpMetrics(ksnetArpClass *ka) {
+
+    #define kev ((ksnetEvMgrClass*)ka->ke)
+    ksnet_arp_data_ar *arp_data_ar = ksnetArpShowData(ka);
+    char met[256];
+    for(int i = 0; i < arp_data_ar->length; i++) {
+        if(arp_data_ar->arp_data[i].data.mode == -1) continue;
+        double val = arp_data_ar->arp_data[i].data.last_triptime;
+        snprintf(met, 255, "PT.%s", arp_data_ar->arp_data[i].name);
+        teoMetricGaugef(kev->tm, met, val);
+    }
+    #undef kev
+}
+
+/**
  * Convert peers data to JSON
  *
  * @param peers_data Pointer to ksnet_arp_data_ar
