@@ -135,6 +135,8 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
   char *addr, uint32_t port);
 
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
+                            ksnet_arp_data_ext *arp, void *data);
 
 #ifdef	__cplusplus
 }

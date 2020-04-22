@@ -784,14 +784,14 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
             #endif
 
             strncpy(ke->ksn_cfg.r_host_name, rd->from,
-                    sizeof(ke->ksn_cfg.r_host_name));
+                    sizeof(ke->ksn_cfg.r_host_name)-1);
 
             mode = 1;
         }
 
         // Add peer to ARP Table
         memset(rd->arp, 0, sizeof(*rd->arp));
-        strncpy(rd->arp->data.addr, rd->addr, sizeof(rd->arp->data.addr));
+        strncpy(rd->arp->data.addr, rd->addr, sizeof(rd->arp->data.addr)-1);
         rd->arp->data.connected_time = ksnetEvMgrGetTime(ke);
         rd->arp->data.port = rd->port;
         rd->arp->data.mode = mode;
@@ -814,16 +814,13 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         ksnetArpAdd(kc->ka, rd->from, rd->arp);
         rd->arp = ksnetArpGet(kc->ka, rd->from);
 
-        // Send child address to r-host
-        if(mode == 1) {
-            ksnetArpClass *arp_class = ke->kc->ka;
+        // Send child address to r-host (useful when connect one r-host to another)
+        if(mode) {
             ksnCorePacketData rd;
             rd.from = ke->ksn_cfg.r_host_name;
             rd.addr = ke->ksn_cfg.r_host_addr;
             rd.port = ke->ksn_cfg.r_port;
-            int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
-                            ksnet_arp_data_ext *arp, void *data);
-            ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, &rd);
+            ksnetArpGetAll(ke->kc->ka, send_cmd_connect_cb_b, &rd);
         }
     }
 }
