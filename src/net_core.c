@@ -23,6 +23,7 @@ typedef int socklen_t;
 #include "ev_mgr.h"
 #include "net_split.h"
 #include "net_multi.h"
+#include "net_com.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
@@ -821,8 +822,6 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
             rd.from = ke->ksn_cfg.r_host_name;
             rd.addr = ke->ksn_cfg.r_host_addr;
             rd.port = ke->ksn_cfg.r_port;
-            int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
-                            ksnet_arp_data_ext *arp, void *data);
             ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, &rd);
         }
     }

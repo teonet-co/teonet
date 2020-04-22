@@ -1032,7 +1032,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
                         ksnet_arp_data_ext *arp, void *data) {
 
-    #define rd ((ksnCorePacketData*)data)
+    ksnCorePacketData *rd = data;
 
     if(strcmp(peer_name, rd->from)) {
         ksnCommandSendCmdConnect( ((ksnetEvMgrClass*) ka->ke)->kc->kco,
@@ -1040,7 +1040,6 @@ static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
     }
 
     return 0;
-    #undef rd
 }
 
 /**
@@ -1054,7 +1053,7 @@ static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
 int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
                         ksnet_arp_data_ext *arp, void *data) { 
 
-    #define rd ((ksnCorePacketData*)data)
+    ksnCorePacketData *rd = data;
 
     if(strcmp(peer_name, rd->from)) {
         ksnCommandSendCmdConnectA( ((ksnetEvMgrClass*) ka->ke)->kc->kco, 
@@ -1062,7 +1061,6 @@ int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
     }
 
     return 0;
-    #undef rd
 }
 
 /**
