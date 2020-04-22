@@ -128,14 +128,15 @@ ksnCommandClass *ksnCommandInit(void *kc);
 void ksnCommandDestroy(ksnCommandClass *kco);
 int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd);
 int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, 
-  size_t data_len);
+    size_t data_len);
 void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, 
-        size_t *data_t_len);
+    size_t *data_t_len);
 int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name, 
-  char *addr, uint32_t port);
+    char *addr, uint32_t port);
 
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-
+int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
+    ksnet_arp_data_ext *arp, void *data);
 #ifdef	__cplusplus
 }
 #endif
