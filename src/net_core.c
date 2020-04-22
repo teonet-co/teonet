@@ -23,6 +23,7 @@ typedef int socklen_t;
 #include "ev_mgr.h"
 #include "net_split.h"
 #include "net_multi.h"
+#include "net_com.h"
 #include "utils/utils.h"
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
