@@ -38,6 +38,8 @@ const char *TEONET_NETWORKS[] = { "local", "teonet" }; // Networks
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
 
+    const ksnCorePacketData *rd = (ksnCorePacketData *) data;
+
     // Switch Teonet event
     switch(event) {
         
@@ -59,7 +61,22 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             }
 
             break;
+
+        // Show connected peers
+        case EV_K_CONNECTED: {
+            // const ksnCorePacketData *rd = (ksnCorePacketData *) data;
+            ksn_printf(ke, NULL, DEBUG, "Peer '%s' connected at network '%s'...\n", 
+                    rd->from, ke->ksn_cfg.network);
+        } break;    
             
+        // Show disconnected peers
+        case EV_K_DISCONNECTED: {
+            // const ksnCorePacketData *rd = (ksnCorePacketData *) data;
+            ksn_printf(ke, NULL, DEBUG, "Peer '%s' disconnected at network '%s'...\n", 
+                    rd->from, ke->ksn_cfg.network);
+        } break;
+
+
         default:
             break;
     }

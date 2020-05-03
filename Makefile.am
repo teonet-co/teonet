@@ -74,4 +74,4 @@ build-tests:
 	tests/test_teonet
 
 test:	tests/test_teonet
-
+	tests/test_teonet
