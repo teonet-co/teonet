@@ -144,7 +144,9 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
 
         ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
         kc->host_w.data = kc;
-        ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
+        // TODO: The code moved to the idle_cb function. Remove this comment 
+        // after some releases
+        // ev_io_start(((ksnetEvMgrClass*)ke)->ev_loop, &kc->host_w);
     }
 
     return kc;
