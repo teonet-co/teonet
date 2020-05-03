@@ -716,7 +716,7 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
  *
  * @param ke Pointer to ksnetEvMgrClass
  */
-void connect_r_host_cb(ksnetEvMgrClass *ke) {
+void    connect_r_host_cb(ksnetEvMgrClass *ke) {
 
     // TODO: Posible this commente code don't need more. So it may be removed 
     // after some release versions.
@@ -962,6 +962,10 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
         // Send event to application
         if(kev->ta) kev->ta->t_id = pthread_self();
         if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
+        // Start host socket in the event manager
+        if(!kev->ksn_cfg.r_tcp_f) {
+            ev_io_start(kev->ev_loop, &kev->kc->host_w);
+        }
     }
     // Idle count max value
     else if(kev->idle_count == UINT32_MAX) kev->idle_count = 0;
