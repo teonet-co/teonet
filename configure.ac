@@ -21,7 +21,7 @@ AC_PREREQ([2.69])
 AC_INIT([teonet], [package_version], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
 
 AC_DEFINE_SUBST(LIBRARY_CURRENT,  2, [teocli dynamic library version])
-AC_DEFINE_SUBST(LIBRARY_REVISION, 17,[teocli dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_REVISION, 18,[teocli dynamic library version])
 AC_DEFINE_SUBST(LIBRARY_AGE,      0, [teocli dynamic library version])
 
 AC_DEFINE_SUBST(PACKAGE_MAJOR_VERSION, [package_major], [pack ver])
