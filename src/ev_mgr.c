@@ -441,34 +441,6 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     return 0;
 }
 
-// void ksnetEvMgrInitialize(ksnetEvMgrClass *ke){
-//     ke->timer_val = 0;
-//     ke->idle_count = 0;
-//     ke->idle_activity_count = 0;
-
-//     if(!modules_init(ke)){
-//         ksnetEvMgrFree(ke, 0); // Free class variables and watchers after run
-//         exit(EXIT_FAILURE);
-//     }
-
-//     // Initialize idle watchers
-//     ev_idle_init (&ke->idle_w, idle_cb);
-//     ke->idle_w.data = ke->kc;
-
-//     // Initialize Check activity watcher
-//     ev_idle_init (&ke->idle_activity_w, idle_activity_cb);
-//     ke->idle_activity_w.data = ke;
-
-//     // Initialize and start main timer watcher, it is a repeated timer
-//     ev_timer_init (&ke->timer_w, timer_cb, 0.0, KSNET_EVENT_MGR_TIMER);
-//     ke->timer_w.data = ke;
-//     ev_timer_start (ke->ev_loop, &ke->timer_w);
-
-//     // Run event loop
-//     ke->runEventMgr = 1;
-// }
-
-
 /**
  * Free ksnetEvMgrClass after run
  *
