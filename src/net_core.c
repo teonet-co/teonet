@@ -800,9 +800,9 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         rd->arp->data.mode = mode;
 
         #ifdef DEBUG_KSNET
-            ksn_printf(ke, MODULE, DEBUG_VV,
-                    "new peer %s (%s:%d) connected\n",
-                    rd->from, rd->addr, rd->port);
+        ksn_printf(ke, MODULE, DEBUG_VV,
+                "new peer %s (%s:%d) connected\n",
+                rd->from, rd->addr, rd->port);
         #endif
 
         // Request host info
@@ -818,13 +818,32 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         rd->arp = ksnetArpGet(kc->ka, rd->from);
 
         // Send child address to r-host (useful when connect one r-host to another)
-        if(mode) {
+        if(mode /*&& ke->is_rhost*/) {
             ksnCorePacketData rd;
             rd.from = ke->ksn_cfg.r_host_name;
             rd.addr = ke->ksn_cfg.r_host_addr;
             rd.port = ke->ksn_cfg.r_port;
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG, "resend child to r-host: %s (%s:%d)\n",
+                    rd.from, rd.addr, rd.port);
+            #endif
             ksnetArpGetAll(ke->kc->ka, send_cmd_connect_cb_b, &rd);
+            ksnetArpGetAll(ke->kc->ka, send_cmd_connect_cb, &rd);
         }
+    } 
+
+    // If existed peer Got CMD_NONE (answer for connect to r-host command) 
+    // than set it as r-host
+    else if(rd->cmd == CMD_NONE && rd->data_len == 2) {
+
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG, "already connect to r-host peer (set as connected to r-host), got from: %s (%s:%d)\n",
+                rd->from, rd->addr, rd->port);
+        #endif
+
+        // ke->is_rhost = true;
+        strncpy(ke->ksn_cfg.r_host_name, rd->from, sizeof(ke->ksn_cfg.r_host_name)-1);
+        rd->arp->data.mode = 1;
     }
 }
 

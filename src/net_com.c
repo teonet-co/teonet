@@ -1029,7 +1029,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @param arp_data Pointer to ARP data ksnet_arp_data
  * @param data Pointer to ksnCorePacketData
  */
-static int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
+int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
                         ksnet_arp_data_ext *arp, void *data) {
 
     ksnCorePacketData *rd = data;
@@ -1081,8 +1081,12 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 
+    // Set flag isRhost
+    ke->is_rhost = true;
+
     // Replay to address we got from peer
-    ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, "\0", 2);
+    // ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, "\0", 2);
+    ksnCoreSendCmdto(kco->kc, rd->from, CMD_NONE, "\0", 2);
 
     // Parse command data
     size_t i, ptr;
