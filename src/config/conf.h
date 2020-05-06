@@ -111,6 +111,7 @@ typedef struct ksnet_cfg {
     long r_port;                            ///< Remote host port
     long r_tcp_port;                        ///< Remote host tcp port
     int r_tcp_f;                            ///< Connect to TCP Proxy R-Host  
+    int r_rhost_f;                          ///< Resend child to r-host. Set this flag to r-host connected to another r-host
 
     // VPN
     char vpn_dev_name[KSN_MAX_HOST_NAME];   ///< VPN Interface device name

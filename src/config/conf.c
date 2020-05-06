@@ -87,6 +87,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     //strncpy(ksn_cfg->r_host_addr, localhost, KSN_BUFFER_SM_SIZE/2); // set default r-host address to localhost
     ksn_cfg->r_tcp_f = 0;
     ksn_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
+    ksn_cfg->r_rhost_f = 0;
 
     // VPN
     ksn_cfg->vpn_dev_name[0] = '\0';
@@ -175,7 +176,8 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_INT("r_port", &conf->r_port),
         
         CFG_SIMPLE_BOOL("r_tcp_f", (cfg_bool_t*)&conf->r_tcp_f),
-        CFG_SIMPLE_INT("r_tcp_port", &conf->r_tcp_port),        
+        CFG_SIMPLE_INT("r_tcp_port", &conf->r_tcp_port),
+        CFG_SIMPLE_BOOL("r_rhost_f", (cfg_bool_t*)&conf->r_rhost_f),
 
         #if KSNET_CRYPT
         CFG_SIMPLE_BOOL("crypt_f", (cfg_bool_t*)&conf->crypt_f),

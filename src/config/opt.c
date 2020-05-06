@@ -56,6 +56,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "port",           required_argument, 0, 'p' },
         { "port_increment", no_argument,       &conf->port_inc_f, 1 },
         { "r_port",         required_argument, 0, 'r' },
+        { "r_rhost",        no_argument,       &conf->r_rhost_f, 1 },
         { "r_tcp_port",     required_argument, 0, 't' },
         { "r_address",      required_argument, 0, 'a' },
         { "r_tcp",          no_argument,       &conf->r_tcp_f, 1 },
@@ -391,8 +392,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --key=value          Set network key\n"            
     "  -p,  --port=value         Set port number (default "KSNET_PORT_DEFAULT")\n"
     "       --port_increment     Increment port if busy\n"
-    "  -a,  --r_address=value    Set remote server address (default localhost)\n"
-    "  -P|r --r_port=value       Set remote server port number (default "KSNET_PORT_DEFAULT")\n"
+    "  -a,  --r_address=value    Set r-host (remote peer) address (default localhost)\n"
+    "  -P|r --r_port=value       Set r-host (remote peer) port number (default "KSNET_PORT_DEFAULT")\n"
+    "       --r_r_host           This is r-host connected to another r-host(resend child to r-host)\n"
     "       --r_tcp              Connect to remote TCP Proxy port\n"            
     "  -t,  --r_tcp_port=value   Set remote server TCP port number (default "KSNET_PORT_DEFAULT")\n"
     "       --tcp_allow          Allow TCP Proxy connection to this server\n"

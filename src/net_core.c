@@ -818,7 +818,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         rd->arp = ksnetArpGet(kc->ka, rd->from);
 
         // Send child address to r-host (useful when connect one r-host to another)
-        if(mode /*&& ke->is_rhost*/) {
+        if(mode && (ke->is_rhost || ke->ksn_cfg.r_rhost_f)) {
             ksnCorePacketData rd;
             rd.from = ke->ksn_cfg.r_host_name;
             rd.addr = ke->ksn_cfg.r_host_addr;
@@ -837,7 +837,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
     else if(rd->cmd == CMD_NONE && rd->data_len == 2) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG, "already connect to r-host peer (set as connected to r-host), got from: %s (%s:%d)\n",
+        ksn_printf(ke, MODULE, DEBUG, "already connected to r-host peer (set as connected to r-host), got from: %s (%s:%d)\n",
                 rd->from, rd->addr, rd->port);
         #endif
 
