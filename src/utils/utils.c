@@ -133,10 +133,21 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         // Show message
         if(show_it) {
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
-            if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00) 
-                printf("%s%f:%s ", 
+            uint64_t raw_time = ct * 1000;
+            time_t e_time = raw_time / 1000;
+            unsigned ms_time = raw_time % 1000;
+            struct tm tm = *localtime(&e_time);
+
+            char t[64];
+            strftime(t, sizeof t, "[%F %T", &tm);
+
+            char timestamp[64];
+            snprintf(timestamp, sizeof timestamp, "%s:%03u]", t, ms_time);
+
+            if(type != DISPLAY_M && ct != 0.00)
+                printf("%s%s%s ",
                        ksn_cfg->color_output_disable_f ? "" : _ANSI_DARKGREY, 
-                       ct, 
+                       timestamp,
                        ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE
                 );
                 
