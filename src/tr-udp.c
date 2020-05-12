@@ -2300,7 +2300,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             #ifdef DEBUG_KSNET
             const trudpData *td = tcd->td; // used in kev macro
-            ksn_printf(kev, MODULE, DEBUG_VV,
+            ksn_printf(kev, MODULE, DEBUG,
                 "got TRU_RESET packet from channel %s\n",
                 tcd->channel_key);
             #endif
@@ -2315,28 +2315,46 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             const trudpData *td = tcd->td; // used in kev macro
 
-            if(!data)
+            if(!data) {
                 
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, DEBUG_VV,
+                ksn_printf(kev, MODULE, DEBUG,
                     "send reset to channel %s\n",
                     tcd->channel_key);
-                #endif
+                #endif                
 
-            else {
+                char *peer_name;
+                ksnet_arp_data_ext *arp;
+                if((arp = (ksnet_arp_data_ext *)ksnetArpFindByAddr(kev->kc->ka, (__CONST_SOCKADDR_ARG) &tcd->remaddr, &peer_name))) {
+                    printf("reconnect need\n");                    
+                }
+
+                // When we received id=0 from existing peer - than that peer 
+                // was restarted after crash:
+                // Remove peer from ARP table and destroy this channel
+                const trudpData *td = tcd->td; // used in kev macro
+                if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
+                
+                    printf("DestroyChannel\n");  
+
+                    // Remove TR-UDP channel
+                    trudpChannelDestroyChannel(td, tcd);
+                }
+
+            } else {
 
                 uint32_t id = (data_length == sizeof(uint32_t)) ? *(uint32_t*)data:0;
 
                 if(!id)
                     #ifdef DEBUG_KSNET
-                    ksn_printf(kev, MODULE, DEBUG_VV,
+                    ksn_printf(kev, MODULE, DEBUG,
                         "send reset: "
                         "not expected packet with id = 0 received from channel %s\n",
                         tcd->channel_key);
                     #endif
                 else
                     #ifdef DEBUG_KSNET
-                    ksn_printf(kev, MODULE, DEBUG_VV,
+                    ksn_printf(kev, MODULE, DEBUG,
                         "send reset: "
                         "high send packet number (%d) at channel %s\n",
                         id, tcd->channel_key);
@@ -2356,6 +2374,13 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             ksn_printf(kev, MODULE, DEBUG_VV, 
                 "got ACK to RESET packet at channel %s\n", tcd->channel_key);
             #endif
+
+            // char *peer_name;
+            // ksnet_arp_data_ext *arp;
+            // if((arp = (ksnet_arp_data_ext *)ksnetArpFindByAddr(kev->kc->ka, (__CONST_SOCKADDR_ARG) &tcd->remaddr, &peer_name))) {
+            //     printf("reconnect need\n");
+            // }
+
 
         } break;
 
