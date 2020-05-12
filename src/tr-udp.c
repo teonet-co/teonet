@@ -2305,6 +2305,18 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 tcd->channel_key);
             #endif
 
+            // When we received RESET - than that peer 
+            // was restarted after crash or connection lost:
+            // Remove peer from ARP table and destroy this channel
+            // const trudpData *td = tcd->td; // used in kev macro
+            if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
+            
+                // printf("DestroyChannel\n");  
+
+                // // Remove TR-UDP channel
+                // trudpChannelDestroyChannel(td, tcd);
+            }
+
         } break;
 
         // SEND_RESET event
@@ -2323,22 +2335,22 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                     tcd->channel_key);
                 #endif                
 
-                char *peer_name;
-                ksnet_arp_data_ext *arp;
-                if((arp = (ksnet_arp_data_ext *)ksnetArpFindByAddr(kev->kc->ka, (__CONST_SOCKADDR_ARG) &tcd->remaddr, &peer_name))) {
-                    printf("reconnect need\n");                    
-                }
+                // char *peer_name;
+                // ksnet_arp_data_ext *arp;
+                // if((arp = (ksnet_arp_data_ext *)ksnetArpFindByAddr(kev->kc->ka, (__CONST_SOCKADDR_ARG) &tcd->remaddr, &peer_name))) {
+                //     printf("reconnect need\n");                    
+                // }
 
                 // When we received id=0 from existing peer - than that peer 
                 // was restarted after crash:
                 // Remove peer from ARP table and destroy this channel
-                const trudpData *td = tcd->td; // used in kev macro
+                // const trudpData *td = tcd->td; // used in kev macro
                 if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
                 
-                    printf("DestroyChannel\n");  
+                    // printf("DestroyChannel\n");  
 
-                    // Remove TR-UDP channel
-                    trudpChannelDestroyChannel(td, tcd);
+                    // // Remove TR-UDP channel
+                    // trudpChannelDestroyChannel(td, tcd);
                 }
 
             } else {
