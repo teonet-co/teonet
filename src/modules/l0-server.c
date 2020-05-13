@@ -632,8 +632,8 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         }
 
         // Remove client with the same name
-        int fd_ex;
-        if((fd_ex = ksnLNullClientIsConnected(kl, name))) {
+        int fd_ex = ksnLNullClientIsConnected(kl, name);
+        if(fd_ex) {
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", name, fd_ex);
             #endif
