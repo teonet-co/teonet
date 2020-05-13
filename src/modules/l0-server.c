@@ -637,13 +637,13 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", name, fd_ex);
             #endif
-            ksnLNullClientDisconnect(kl, fd_ex, 1);
+            if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
         }
 
         // Add client to name map
         kld->name = name;
         kld->name_length = name_length;
-        pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
+        if(fd_ex != fd) pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
         // Send login to authentication application
         // to check this client or register 'wg001' clients
