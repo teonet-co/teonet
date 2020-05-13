@@ -635,7 +635,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd_ex = ksnLNullClientIsConnected(kl, name);
         if(fd_ex) {
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", name, fd_ex);
+            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", name, fd_ex, fd);
             #endif
             if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
         }
