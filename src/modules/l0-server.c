@@ -1166,8 +1166,6 @@ int ksnLNullClientIsConnected(ksnLNullClass *kl, char *client_name) {
  */
 int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
 
-    if(ke->kl == NULL) return 0;
-
     int retval = 1;
     ksnLNullSPacket *data = rd->data;
 
