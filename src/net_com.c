@@ -154,7 +154,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         #ifdef M_ENAMBE_L0s
         case CMD_L0:
-            if(ke->kl) processed = cmd_l0_cb(ke, rd);
+            processed = cmd_l0_cb(ke, rd);
             break;
         #endif
 
