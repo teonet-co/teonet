@@ -621,7 +621,7 @@ void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
 
-    char *name = strdup(packet->peer_name + packet->peer_name_length);
+    char *name = strndup(packet->peer_name + packet->peer_name_length, packet->data_length);
     size_t name_length = strlen(name) + 1;
     if(name_length == packet->data_length) {
 
