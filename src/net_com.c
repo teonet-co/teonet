@@ -160,13 +160,13 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         #ifdef M_ENAMBE_L0s
         case CMD_L0_TO:
-            processed = cmd_l0_to_cb(ke, rd);
+            if(ke->kl) processed = cmd_l0_to_cb(ke, rd);
             break;
         #endif
 
         #ifdef M_ENAMBE_L0s
         case CMD_L0_CLIENT_BROADCAST:
-            processed = cmd_l0_broadcast_cb(ke, rd);
+            if(ke->kl) processed = cmd_l0_broadcast_cb(ke, rd);
             break;
         #endif
 

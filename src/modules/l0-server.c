@@ -621,27 +621,29 @@ void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
 
-    kld->name = strdup(packet->peer_name + packet->peer_name_length);
-    kld->name_length = strlen(kld->name) + 1;
-    if(kld->name_length == packet->data_length) {
+    char *name = strndup(packet->peer_name + packet->peer_name_length, packet->data_length);
+    size_t name_length = strlen(name) + 1;
+    if(name_length == packet->data_length) {
 
         // Create unique name for WG new user
-        if(!strcmp(WG001_NEW, kld->name)) {
-            kld->name = ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke),fd);
-            kld->name_length = strlen(kld->name) + 1;
+        if(!strcmp(WG001_NEW, name)) {
+            name = ksnet_sformatMessage(name, "%s%s-%d", name, ksnetEvMgrGetHostName(kl->ke),fd);
+            name_length = strlen(name) + 1;
         }
 
         // Remove client with the same name
-        int fd_ex;
-        if((fd_ex = ksnLNullClientIsConnected(kl, kld->name))) {
+        int fd_ex = ksnLNullClientIsConnected(kl, name);
+        if(fd_ex) {
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", kld->name, fd_ex);
+            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", name, fd_ex, fd);
             #endif
-            ksnLNullClientDisconnect(kl, fd_ex, 1);
+            if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
         }
 
         // Add client to name map
-        pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
+        kld->name = name;
+        kld->name_length = name_length;
+        if(fd_ex != fd) pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
         // Send login to authentication application
         // to check this client or register 'wg001' clients
@@ -653,6 +655,8 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     }
     else {
         // Wrong Login name received
+        kld->name = name;
+        kld->name_length = name_length;
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG,
             "got login command with wrong name '%s'\n", kld->name
