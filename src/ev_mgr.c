@@ -305,7 +305,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     // if this application crash or deployed
     if(!ke->net_idx) {
         if ((fp = fopen(run_file, "r"))){
-            usleep(3500000);
+            // usleep(3500000);
             fclose(fp);
         }
         // Create run file
@@ -1034,7 +1034,7 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
             "got a signal to stop event manager ...");
     #endif
 
-    trudpSendResetAll(ke->kc->ku);
+    // trudpSendResetAll(ke->kc->ku);
     ((ksnetEvMgrClass *)w->data)->runEventMgr = 0;
 }
 
@@ -1049,7 +1049,7 @@ void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     static int attempt = 0;
-    trudpSendResetAll(ke->kc->ku);
+    // trudpSendResetAll(ke->kc->ku);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, MESSAGE,

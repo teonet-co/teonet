@@ -2305,6 +2305,16 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 tcd->channel_key);
             #endif
 
+            // When we received RESET - than that peer 
+            // was restarted after crash or connection lost:
+            // Remove peer from ARP table and destroy this channel
+            // const trudpData *td = tcd->td; // used in kev macro
+            if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
+            
+                // Remove TR-UDP channel
+                // trudpChannelDestroyChannel(td, tcd);
+            }
+
         } break;
 
         // SEND_RESET event
@@ -2315,15 +2325,25 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
             const trudpData *td = tcd->td; // used in kev macro
 
-            if(!data)
+            if(!data) {
                 
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, DEBUG_VV,
                     "send reset to channel %s\n",
                     tcd->channel_key);
-                #endif
+                #endif                
 
-            else {
+                // When we received id=0 from existing peer - than that peer 
+                // was restarted after crash:
+                // Remove peer from ARP table and destroy this channel
+                // const trudpData *td = tcd->td; // used in kev macro
+                if(1 != remove_peer_addr(kev, (__CONST_SOCKADDR_ARG) &tcd->remaddr)) {
+                
+                    // Remove TR-UDP channel
+                    // trudpChannelDestroyChannel(td, tcd);
+                }
+
+            } else {
 
                 uint32_t id = (data_length == sizeof(uint32_t)) ? *(uint32_t*)data:0;
 
