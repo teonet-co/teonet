@@ -241,6 +241,7 @@ inline const char *teoGetLibteonetVersion() {
  */
 inline void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
 
+    if(ke->kc != NULL) ksnetArpRemoveAll(ke->kc->ka);
     ke->runEventMgr = 0;
 }
 
