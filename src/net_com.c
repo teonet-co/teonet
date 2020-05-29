@@ -725,8 +725,7 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
             }
 
             // Add type to arp-table
-            rd->arp->type = strdup(type_str);
-            free(type_str);
+            rd->arp->type = type_str;
 
             // Metrics
             char *met = ksnet_formatMessage("CON.%s", rd->from);

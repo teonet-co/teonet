@@ -240,7 +240,6 @@ inline const char *teoGetLibteonetVersion() {
  * @param ke Pointer to ksnetEvMgrClass
  */
 inline void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
-
     ke->runEventMgr = 0;
 }
 

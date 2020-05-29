@@ -946,7 +946,6 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
 
             // Check & process command
             command_processed = ksnCommandCheck(kc->kco, &rd);
-
         } else { 
             
             rd.from = "";
