@@ -969,7 +969,6 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
             ke->event_cb(ke, event, (void*)&rd, sizeof(rd), NULL);
         }
 
-        //if (rd.arp->type) free(rd.arp->type);
         free(addr);
     }
 }
