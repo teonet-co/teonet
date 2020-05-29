@@ -371,6 +371,7 @@ void ksnetArpMetrics(ksnetArpClass *ka) {
         snprintf(met, 255, "PT.%s", arp_data_ar->arp_data[i].name);
         teoMetricGaugef(kev->tm, met, val);
     }
+    free(arp_data_ar);
     #undef kev
 }
 
