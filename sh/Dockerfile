@@ -29,7 +29,7 @@ RUN ldconfig
 # build teonet
 RUN cd /teonet && autoreconf --force --install
 RUN ./autogen.sh --prefix=/usr/local
-RUN ./configure --prefix=/usr/local
+RUN ./configure --prefix=/usr/local CXXFLAGS="-g -O0" CFLAGS="-g -O0"
 RUN make
 #RUN make install
 #RUN cp /teonet/src/.libs/libteonet* /usr/lib/
