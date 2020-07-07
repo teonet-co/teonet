@@ -51,7 +51,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
  *
  */
 int main(int argc, char** argv) {
-    mallopt (M_PERTURB, 77);
+
     printf("Teovpn ver " TVPN_VERSION ", based on teonet ver "
             "%s" "\n", teoGetLibteonetVersion());
 
