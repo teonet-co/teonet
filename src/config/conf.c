@@ -118,6 +118,15 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Send peers metric flag
     ksn_cfg->statsd_peers_f = 0;
     
+
+    // Create prefix
+    const char* LOG_PREFIX = "teonet:";
+    const size_t LOG_PREFIX_SIZE = strlen(LOG_PREFIX);
+    size_t prefix_len = LOG_PREFIX_SIZE + strlen(ksn_cfg->app_name) + 1;
+    //ksn_cfg->log_prefix = malloc(prefix_len); // \todo Free this at exit
+    strncpy(ksn_cfg->log_prefix, LOG_PREFIX, prefix_len);
+    strncat(ksn_cfg->log_prefix, ksn_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
+
     // Terminal
 //    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
 //    strncpy(ksn_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
@@ -232,8 +241,16 @@ void read_config(ksnet_cfg *conf, int port_param) {
     // Open and parse common configure file in system and then in data directory
     for(i = 0; i < 2; i++) {
 
-        if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-        else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+        if(!i) {
+            char *ConfigDir = ksnet_getSysConfigDir();
+            strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
+            free(ConfigDir);
+        } else {
+            char *DataPath = getDataPath();
+            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
+            free(DataPath);
+        }
+
         if(conf->network[0]) {
             strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
             strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -246,7 +263,10 @@ void read_config(ksnet_cfg *conf, int port_param) {
 
         // Print the parsed values to save configuration file
         {
-            strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+            char *DataPath = getDataPath();
+            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
+            free(DataPath);
+
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
                 strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -269,8 +289,15 @@ void read_config(ksnet_cfg *conf, int port_param) {
     if(port_param) {
         char *uconf = ksnet_formatMessage("/teonet-%d.conf", port_param);
         for(i = 0; i < 2; i++) {
-            if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-            else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+            if(!i) {
+                char *ConfigDir = ksnet_getSysConfigDir();
+                strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
+                free(ConfigDir);
+            } else {
+                char *DataPath = getDataPath();
+                strncpy(buf, DataPath, KSN_BUFFER_SIZE);
+                free(DataPath);
+            }
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
                 strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -336,8 +363,17 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
     else uconf = ksnet_formatMessage("/teonet.conf");
     for(i = 0; i < 2; i++) {
         if(i != type) continue;
-        if(!i) strncpy(buf, ksnet_getSysConfigDir(), BUF_SIZE);
-        else strncpy(buf, getDataPath(), BUF_SIZE);
+
+        if(!i) {
+            char *ConfigDir = ksnet_getSysConfigDir();
+            strncpy(buf, ConfigDir, BUF_SIZE);
+            free(ConfigDir);
+        } else {
+            char *DataPath = getDataPath();
+            strncpy(buf, DataPath, BUF_SIZE);
+            free(DataPath);
+        }
+
         if(network != NULL && network[0]) {
             strncat(buf, "/", BUF_SIZE);
             strncat(buf, network, BUF_SIZE);

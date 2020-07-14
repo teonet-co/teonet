@@ -78,8 +78,16 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
     for(i = 0; i < 2; i++) {
         
         // Parse parameters
-        if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-        else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+        if(!i) {
+            char *ConfigDir = ksnet_getSysConfigDir();
+            strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
+            free(ConfigDir);
+        } else {
+            char *DataPath = getDataPath();
+            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
+            free(DataPath);
+        }
+
         if(network != NULL && network[0]) {
             strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
             strncat(buf, network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -92,7 +100,10 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
         
         // Print the parsed values to save configuration file
         {
-            strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+            char *DataPath = getDataPath();
+            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
+            free(DataPath);
+
             if(network != NULL && network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
                 strncat(buf, network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -115,8 +126,15 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
     if(port_param) {
         char *uconf = ksnet_formatMessage("/teoweb-%d.conf", port_param);
         for(i = 0; i < 2; i++) {
-            if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-            else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+            if(!i) {
+                char *ConfigDir = ksnet_getSysConfigDir();
+                strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
+                free(ConfigDir);
+            } else {
+                char *DataPath = getDataPath();
+                strncpy(buf, DataPath, KSN_BUFFER_SIZE);
+                free(DataPath);
+            }
             if(network != NULL && network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
                 strncat(buf, network, KSN_BUFFER_SIZE - strlen(buf) - 1);

@@ -453,7 +453,12 @@ public:
    *
    * @return Null terminated static string
    */
-  inline const std::string getPath() { return getDataPath(); }
+  inline const std::string getPath() {
+    char *data_path = getDataPath();
+    std::string data_path_str(data_path);
+    free(data_path);
+    return data_path_str;
+    }
 
   /**
    * Stop Teonet event manager

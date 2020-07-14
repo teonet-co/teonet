@@ -125,7 +125,7 @@ typedef struct ksnet_cfg {
     
     // Syslog options
     long log_priority;                       ///< Syslog priority 
-
+    char log_prefix[KSN_BUFFER_SM_SIZE];
     // StatsD address
     char statsd_ip[KSN_BUFFER_SM_SIZE/2];
     long statsd_port;

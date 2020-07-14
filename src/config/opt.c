@@ -103,16 +103,12 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "kill",           no_argument,       &conf->kflag, 1 },
         { 0, 0, 0, 0 }
     };
-    static const char *data_path = NULL;
 
-    // Get data folder path
-    if(data_path == NULL) {
 
-        data_path = getDataPath();
-        #ifdef DEBUG_KSNET
-        printf("Current data path: %s\n", data_path);
-        #endif
-    }
+    char *data_path = getDataPath();
+    #ifdef DEBUG_KSNET
+    printf("Current data path: %s\n", data_path);
+    #endif
 
     // Create data folder (if absent)
     #ifdef HAVE_MINGW
@@ -120,6 +116,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
     #else
     mkdir(data_path, 0755);
     #endif
+
+    free(data_path);
 
     // initialize random seed
     srand(time(NULL));

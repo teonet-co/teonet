@@ -289,7 +289,11 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Create run file name
     const char *network = ke->ksn_cfg.network;
-    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE - 1);
+
+    char *DataPath = getDataPath();
+    strncpy(run_file, DataPath, KSN_BUFFER_SIZE - 1);
+    free(DataPath);
+
     if (network != NULL && network[0]) {
         strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
         strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);
@@ -1451,6 +1455,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 
     ke->ksn_cfg.port = ke->kc->port;
     ksnetHotkeysDestroy(ke->kh);
+    if(ke->kc != NULL) ksnetArpRemoveAll(ke->kc->ka);
     ksnCoreDestroy(ke->kc);
 
     #if M_ENAMBE_TCP_P
