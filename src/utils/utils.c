@@ -571,22 +571,11 @@ int set_reuseaddr(int sd) {
 /**
  * Getting path to ksnet configuration folder
  *
- * @return NULL terminated static string
+ * @return NULL terminated string
  */
 char *ksnet_getSysConfigDir(void) {
 
-    /*static*/ char* sysConfigDir = NULL;
-
-    if(sysConfigDir == NULL) {
-
-#define LOCAL_CONFIG_DIR "src/conf"
-
-//#if RELEASE_KSNET
-        sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
-//#else
-//        sysConfigDir = strdup(LOCAL_CONFIG_DIR);
-//#endif
-    }
+    char* sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
 
     return sysConfigDir;
 }

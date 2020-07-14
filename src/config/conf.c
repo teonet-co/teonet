@@ -163,6 +163,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
     char *vpn_dev_hwaddr = strdup(conf->vpn_dev_hwaddr);
     char *l0_tcp_ip_remote = strdup(conf->l0_tcp_ip_remote);
 
+    char *config_dir = ksnet_getSysConfigDir();
+    char *data_path = getDataPath();
+
     cfg_opt_t opts[] = {
 
         CFG_SIMPLE_STR("host_name", &host_name),
@@ -242,13 +245,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
     for(i = 0; i < 2; i++) {
 
         if(!i) {
-            char *ConfigDir = ksnet_getSysConfigDir();
-            strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
-            free(ConfigDir);
+            strncpy(buf, config_dir, KSN_BUFFER_SIZE);
         } else {
-            char *DataPath = getDataPath();
-            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
-            free(DataPath);
+            strncpy(buf, data_path, KSN_BUFFER_SIZE);
         }
 
         if(conf->network[0]) {
@@ -290,13 +289,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
         char *uconf = ksnet_formatMessage("/teonet-%d.conf", port_param);
         for(i = 0; i < 2; i++) {
             if(!i) {
-                char *ConfigDir = ksnet_getSysConfigDir();
-                strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
-                free(ConfigDir);
+                strncpy(buf, config_dir, KSN_BUFFER_SIZE);
             } else {
-                char *DataPath = getDataPath();
-                strncpy(buf, DataPath, KSN_BUFFER_SIZE);
-                free(DataPath);
+                strncpy(buf, data_path, KSN_BUFFER_SIZE);
             }
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -334,6 +329,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
     free(filter);
     free(vpn_ip);
 
+    free(data_path);
+    free(config_dir);
+
     // Save file parameters for last use
     conf->pp = port_param;
     strncpy(conf->pn, conf->network, KSN_BUFFER_SM_SIZE);
@@ -358,6 +356,8 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
 
     int i;
     char *uconf;
+    char *config_dir = ksnet_getSysConfigDir();
+    char *data_path = getDataPath();
 
     if(port) uconf = ksnet_formatMessage("/teonet-%d.conf", port);
     else uconf = ksnet_formatMessage("/teonet.conf");
@@ -365,13 +365,9 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
         if(i != type) continue;
 
         if(!i) {
-            char *ConfigDir = ksnet_getSysConfigDir();
-            strncpy(buf, ConfigDir, BUF_SIZE);
-            free(ConfigDir);
+            strncpy(buf, config_dir, BUF_SIZE);
         } else {
-            char *DataPath = getDataPath();
-            strncpy(buf, DataPath, BUF_SIZE);
-            free(DataPath);
+            strncpy(buf, data_path, BUF_SIZE);
         }
 
         if(network != NULL && network[0]) {

@@ -73,19 +73,19 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
     cfg_t *cfg;
     cfg = cfg_init(opts, 0);
     char buf[KSN_BUFFER_SIZE];
+
+    char *config_dir = ksnet_getSysConfigDir();
+    char *data_path = getDataPath();
+
     //
     // Open and parse configure file in system and then in data directory
     for(i = 0; i < 2; i++) {
         
         // Parse parameters
         if(!i) {
-            char *ConfigDir = ksnet_getSysConfigDir();
-            strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
-            free(ConfigDir);
+            strncpy(buf, config_dir, KSN_BUFFER_SIZE);
         } else {
-            char *DataPath = getDataPath();
-            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
-            free(DataPath);
+            strncpy(buf, data_path, KSN_BUFFER_SIZE);
         }
 
         if(network != NULL && network[0]) {
@@ -127,13 +127,9 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
         char *uconf = ksnet_formatMessage("/teoweb-%d.conf", port_param);
         for(i = 0; i < 2; i++) {
             if(!i) {
-                char *ConfigDir = ksnet_getSysConfigDir();
-                strncpy(buf, ConfigDir, KSN_BUFFER_SIZE);
-                free(ConfigDir);
+                strncpy(buf, config_dir, KSN_BUFFER_SIZE);
             } else {
-                char *DataPath = getDataPath();
-                strncpy(buf, DataPath, KSN_BUFFER_SIZE);
-                free(DataPath);
+                strncpy(buf, data_path, KSN_BUFFER_SIZE);
             }
             if(network != NULL && network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -150,6 +146,8 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
     
     cfg_free(cfg);
 
+    free(data_path);
+    free(config_dir);
 //    // Save file parameters for last use
 //    conf->pp = port_param;
 //    strncpy(conf->pn, conf->network, KSN_BUFFER_SM_SIZE);
