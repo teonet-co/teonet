@@ -80,8 +80,8 @@ int inarray(int val, const int *arr, int size);
 
 int set_reuseaddr(int sd);
 
-const char* getDataPath(void);
-const char *ksnet_getSysConfigDir(void);
+char* getDataPath(void);
+char *ksnet_getSysConfigDir(void);
 
 ksnet_stringArr getIPs(ksnet_cfg *conf);
 int ip_is_private(char *ip);

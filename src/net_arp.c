@@ -191,6 +191,18 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
 void ksnetArpRemoveAll(ksnetArpClass *ka) {
 
     ksnetEvMgrClass *ke = ka->ke;
+    PblIterator *it =  pblMapIteratorNew(ka->map);
+    if(it != NULL) {
+
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *name = pblMapEntryKey(entry);
+            ksnet_arp_data_ext *arp = pblMapEntryValue(entry);
+            if(arp->type) free(arp->type);
+        }
+        pblIteratorFree(it);
+    }
 
     pblMapFree(ka->map);
     ke->ksn_cfg.r_host_name[0] = '\0';

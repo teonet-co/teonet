@@ -720,7 +720,6 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
             for (i = 1; i < hid->string_ar_num; i++) {
                 type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"",
                     type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
-
                 ptr += strlen(hid->string_ar + ptr) + 1;
             }
 

@@ -164,18 +164,9 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
             // Open log at first message
             if(!log_opened) {
-
-                // Create prefix
-                const char* LOG_PREFIX = "teonet:";
-                const size_t LOG_PREFIX_SIZE = strlen(LOG_PREFIX);
-                size_t prefix_len = LOG_PREFIX_SIZE + strlen(ksn_cfg->app_name) + 1;
-                char *prefix = malloc(prefix_len); // \todo Free this at exit
-                strncpy(prefix, LOG_PREFIX, prefix_len);
-                strncat(prefix, ksn_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
-
                 // Open log
                 setlogmask (LOG_UPTO (LOG_INFO));
-                openlog (prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+                openlog (ksn_cfg->log_prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
                 log_opened = 1;
             }
 
@@ -258,7 +249,9 @@ char *ksnet_sformatMessage(char *str_to_free, const char *fmt, ...) {
     char *p = ksnet_vformatMessage(fmt, ap);
     va_end(ap);
 
-    if(str_to_free != NULL) free(str_to_free);
+    if(str_to_free != NULL) {
+        free(str_to_free);
+    }
 
     return p;
 }
@@ -270,8 +263,9 @@ char *ksnet_vformatMessage(const char *fmt, va_list ap) {
     va_list ap_copy;
     int n;
 
-    if((p = malloc(size)) == NULL)
+    if((p = malloc(size)) == NULL) {
         return NULL;
+    }
 
     while(1) {
 
@@ -285,16 +279,16 @@ char *ksnet_vformatMessage(const char *fmt, va_list ap) {
             return NULL;
 
         // If that worked, return the string
-        if(n < size)
+        if(n < size) {
             return p;
+        }
 
         // Else try again with more space
         size = n + KSN_BUFFER_SM_SIZE; // Precisely what is needed
         if((np = realloc(p, size)) == NULL) {
             free(p);
             return NULL;
-        }
-        else {
+        } else {
             p = np;
         }
     }
@@ -415,9 +409,9 @@ char *getRandomHostName(void) {
  *
  * @return NULL terminated static string
  */
-const char* getDataPath(void) {
+char* getDataPath(void) {
 
-    static char* dataDir = NULL;
+    char* dataDir = NULL;
 
     if(dataDir == NULL) {
 
@@ -577,22 +571,11 @@ int set_reuseaddr(int sd) {
 /**
  * Getting path to ksnet configuration folder
  *
- * @return NULL terminated static string
+ * @return NULL terminated string
  */
-const char *ksnet_getSysConfigDir(void) {
+char *ksnet_getSysConfigDir(void) {
 
-    static char* sysConfigDir = NULL;
-
-    if(sysConfigDir == NULL) {
-
-#define LOCAL_CONFIG_DIR "src/conf"
-
-//#if RELEASE_KSNET
-        sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
-//#else
-//        sysConfigDir = strdup(LOCAL_CONFIG_DIR);
-//#endif
-    }
+    char* sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
 
     return sysConfigDir;
 }

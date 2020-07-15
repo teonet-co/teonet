@@ -118,6 +118,15 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     // Send peers metric flag
     ksn_cfg->statsd_peers_f = 0;
     
+
+    // Create prefix
+    const char* LOG_PREFIX = "teonet:";
+    const size_t LOG_PREFIX_SIZE = strlen(LOG_PREFIX);
+    size_t prefix_len = LOG_PREFIX_SIZE + strlen(ksn_cfg->app_name) + 1;
+    //ksn_cfg->log_prefix = malloc(prefix_len); // \todo Free this at exit
+    strncpy(ksn_cfg->log_prefix, LOG_PREFIX, prefix_len);
+    strncat(ksn_cfg->log_prefix, ksn_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
+
     // Terminal
 //    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
 //    strncpy(ksn_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
@@ -153,6 +162,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
     char *vpn_dev_name = strdup(conf->vpn_dev_name);
     char *vpn_dev_hwaddr = strdup(conf->vpn_dev_hwaddr);
     char *l0_tcp_ip_remote = strdup(conf->l0_tcp_ip_remote);
+
+    char *config_dir = ksnet_getSysConfigDir();
+    char *data_path = getDataPath();
 
     cfg_opt_t opts[] = {
 
@@ -232,8 +244,12 @@ void read_config(ksnet_cfg *conf, int port_param) {
     // Open and parse common configure file in system and then in data directory
     for(i = 0; i < 2; i++) {
 
-        if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-        else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+        if(!i) {
+            strncpy(buf, config_dir, KSN_BUFFER_SIZE);
+        } else {
+            strncpy(buf, data_path, KSN_BUFFER_SIZE);
+        }
+
         if(conf->network[0]) {
             strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
             strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -246,7 +262,8 @@ void read_config(ksnet_cfg *conf, int port_param) {
 
         // Print the parsed values to save configuration file
         {
-            strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+            strncpy(buf, data_path, KSN_BUFFER_SIZE);
+
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
                 strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -269,8 +286,11 @@ void read_config(ksnet_cfg *conf, int port_param) {
     if(port_param) {
         char *uconf = ksnet_formatMessage("/teonet-%d.conf", port_param);
         for(i = 0; i < 2; i++) {
-            if(!i) strncpy(buf, ksnet_getSysConfigDir(), KSN_BUFFER_SIZE);
-            else strncpy(buf, getDataPath(), KSN_BUFFER_SIZE);
+            if(!i) {
+                strncpy(buf, config_dir, KSN_BUFFER_SIZE);
+            } else {
+                strncpy(buf, data_path, KSN_BUFFER_SIZE);
+            }
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
                 strncat(buf, conf->network, KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -307,6 +327,9 @@ void read_config(ksnet_cfg *conf, int port_param) {
     free(filter);
     free(vpn_ip);
 
+    free(data_path);
+    free(config_dir);
+
     // Save file parameters for last use
     conf->pp = port_param;
     strncpy(conf->pn, conf->network, KSN_BUFFER_SM_SIZE);
@@ -331,13 +354,20 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
 
     int i;
     char *uconf;
+    char *config_dir = ksnet_getSysConfigDir();
+    char *data_path = getDataPath();
 
     if(port) uconf = ksnet_formatMessage("/teonet-%d.conf", port);
     else uconf = ksnet_formatMessage("/teonet.conf");
     for(i = 0; i < 2; i++) {
         if(i != type) continue;
-        if(!i) strncpy(buf, ksnet_getSysConfigDir(), BUF_SIZE);
-        else strncpy(buf, getDataPath(), BUF_SIZE);
+
+        if(!i) {
+            strncpy(buf, config_dir, BUF_SIZE);
+        } else {
+            strncpy(buf, data_path, BUF_SIZE);
+        }
+
         if(network != NULL && network[0]) {
             strncat(buf, "/", BUF_SIZE);
             strncat(buf, network, BUF_SIZE);
@@ -345,6 +375,9 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
         strncat(buf, uconf, BUF_SIZE);
     }
     free(uconf);
+
+    free(data_path);
+    free(config_dir);
 
     return buf;
 }
