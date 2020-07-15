@@ -262,9 +262,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
 
         // Print the parsed values to save configuration file
         {
-            char *DataPath = getDataPath();
-            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
-            free(DataPath);
+            strncpy(buf, data_path, KSN_BUFFER_SIZE);
 
             if(conf->network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
@@ -377,6 +375,9 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
         strncat(buf, uconf, BUF_SIZE);
     }
     free(uconf);
+
+    free(data_path);
+    free(config_dir);
 
     return buf;
 }

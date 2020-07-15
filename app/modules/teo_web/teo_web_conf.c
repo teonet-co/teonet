@@ -100,9 +100,7 @@ void teowebConfigRead(teoweb_config *conf, const char *network, int port_param) 
         
         // Print the parsed values to save configuration file
         {
-            char *DataPath = getDataPath();
-            strncpy(buf, DataPath, KSN_BUFFER_SIZE);
-            free(DataPath);
+            strncpy(buf, data_path, KSN_BUFFER_SIZE);
 
             if(network != NULL && network[0]) {
                 strncat(buf, "/", KSN_BUFFER_SIZE - strlen(buf) - 1);
