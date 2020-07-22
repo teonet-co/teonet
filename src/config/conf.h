@@ -102,7 +102,8 @@ typedef struct ksnet_cfg {
     int  l0_allow_f;                             ///< Allow L0 Server and l0 client connections to this host
     char l0_tcp_ip_remote[KSN_BUFFER_SM_SIZE/2]; ///< L0 Server remote IP address (send clients to connect to server)
     long l0_tcp_port;                            ///< L0 Server TCP port number
-    
+    int skip_auth;                               ///< Skip auth step for connecting clients
+
     // Display log filter
     char filter[KSN_BUFFER_SM_SIZE/2];      ///<  Display log filter
 

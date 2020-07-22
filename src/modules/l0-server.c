@@ -441,7 +441,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         socklen_t addrlen = sizeof(addr);    // address structure length
         if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr,
                 &addrlen)) {
-
+            trudpGetChannelCreate(kev->kc->ku, &addr, 0);
             ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
             arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
         }
@@ -650,8 +650,28 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
+        } else if (kev->ksn_cfg.skip_auth) {
+            size_t snd;
+            char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\", \"networks\": \"%s\" }",
+                    kld->name ? kld->name : "", kev->ksn_cfg.network);
+            size_t ALLOW_len = strlen(ALLOW) + 1;
+            // Create L0 packet
+            //TODO: remove hardcoded peer name
+            size_t out_data_len = sizeof(teoLNullCPacket) + strlen("teo-wg-registrar") + 1 +
+                    ALLOW_len;
+            char *out_data = malloc(out_data_len);
+            memset(out_data, 0, out_data_len);
+
+            size_t packet_length =
+                teoLNullPacketCreate(out_data, out_data_len,
+                                     CMD_L0_AUTH, "teo-wg-registrar", (uint8_t *)ALLOW, ALLOW_len);
+            // Send websocket allow message
+            if((snd = ksnLNullPacketSend(kl, fd, out_data, packet_length)) >= 0);
+            free(out_data);
+            free(ALLOW);
+        } else {
+            _send_subscribe_events(kev, kld->name, kld->name_length);
         }
-        else _send_subscribe_events(kev, kld->name, kld->name_length);
     }
     else {
         // Wrong Login name received
