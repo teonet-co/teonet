@@ -431,13 +431,39 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     else {
         // Create packet
         size_t pkg_len;
-        void *pkg = ksnCoreCreatePacket(ke->kc, CMD_L0, spacket, out_data_len, &pkg_len);
-        struct sockaddr_storage addr;             // address structure
-        socklen_t addrlen = sizeof(addr); // length of addresses
-        if(!make_addr(localhost, ke->kc->port, (__SOCKADDR_ARG) &addr, &addrlen)) {
-            ksnCoreProcessPacket(ke->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
-            arp_data = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, (char*)packet->peer_name);
+        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len,
+                    &pkg_len);
+        struct sockaddr_in addr;             // address structure
+        socklen_t addrlen = sizeof(addr);    // address structure length
+
+        int fd = ksnLNullClientIsConnected(kl, cname);
+        if (fd == 0) {
+            #ifdef DEBUG_KSNET
+            ksn_printf(kev, MODULE, extendedLog(kl),
+                "client \"%s\" is not connected\n",
+                cname);
+            #endif
+        } else {
+            ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
+            if (kld == NULL) {
+                #ifdef DEBUG_KSNET
+                ksn_printf(kev, MODULE, extendedLog(kl),
+                    "client \"%s\", fd: %d connection data not found\n",
+                    cname, fd);
+                #endif
+            } else if(!make_addr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &addr,
+                    &addrlen)) {
+                #ifdef DEBUG_KSNET
+                ksn_printf(kev, MODULE, extendedLog(kl),
+                    "repacked packet from client \"%s\" to CMD_L0 from %s:%d\n",
+                    cname, kld->t_addr, kld->t_port);
+                #endif
+                //trudpGetChannelCreate(kev->kc->ku, &addr, 0);
+                ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
+                arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
+            }
         }
+
         free(pkg);
     }
 
@@ -466,30 +492,65 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
 int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
         size_t cname_length, uint8_t cmd, void *data, size_t data_len) {
 
-    // Create L0 packet
-    size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + data_len;
-    //char out_data[out_data_len]; // Buffer
-    char *out_data = malloc(out_data_len);
-    memset(out_data, 0, out_data_len);
-    ksnLNullSPacket *spacket = (ksnLNullSPacket*)out_data;
+    int fd = 0;
+    int rv = -1;
 
-    // Create teonet L0 packet
-    spacket->cmd = cmd;
-    spacket->client_name_length = cname_length;
-    memcpy(spacket->payload, cname, cname_length);
-    spacket->data_length = data_len;
-    memcpy(spacket->payload + spacket->client_name_length, data, data_len);
+    ksnLNullClass *kl = ((ksnetEvMgrClass*)ke)->kl;
+    if (((ksnetEvMgrClass*)ke)->ksn_cfg.l0_allow_f) {
+        fd = ksnLNullClientIsConnected(kl, cname);
+    }
 
-    // Send command to client of L0 server
-    #ifdef DEBUG_KSNET
-    ksn_printf(((ksnetEvMgrClass*)ke), MODULE, DEBUG_VV,
-        "send command to L0 server for client \"%s\" ...\n",
-        spacket->payload);
-    #endif
-    int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0_TO,
+    if (!fd) {
+        //NOTE: client is connected to some other l0 service
+        // Create  Server L0 packet
+        size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length + data_len;
+        //char out_data[out_data_len]; // Buffer
+        char *out_data = malloc(out_data_len);
+        memset(out_data, 0, out_data_len);
+        ksnLNullSPacket *spacket = (ksnLNullSPacket*)out_data;
+
+        // Create teonet L0 packet
+        spacket->cmd = cmd;
+        spacket->client_name_length = cname_length;
+        memcpy(spacket->payload, cname, cname_length);
+        spacket->data_length = data_len;
+        memcpy(spacket->payload + spacket->client_name_length, data, data_len);
+
+        // Send command to client of L0 server
+        #ifdef DEBUG_KSNET
+        ksn_printf(((ksnetEvMgrClass*)ke), MODULE, DEBUG_VV,
+            "send command to L0 server for client \"%s\" ...\n",
+            cname);
+        #endif
+        rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0_TO,
             out_data, out_data_len);
 
-    free(out_data);
+        free(out_data);
+    } else {
+        // Create Client L0 packet
+        size_t out_data_len = sizeof(teoLNullCPacket) + cname_length + data_len;
+        char *out_data = malloc(out_data_len);
+        memset(out_data, 0, out_data_len);
+        size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
+                cmd, ksnetEvMgrGetHostName((ksnetEvMgrClass*)ke), data, data_len);
+
+        // Send command to L0 client
+        if((rv = ksnLNullPacketSend(kl, fd, out_data, packet_length)) >= 0);
+
+        #ifdef DEBUG_KSNET
+        teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
+        //void *packet_data = packet->peer_name + packet->peer_name_length;
+        ksn_printf((ksnetEvMgrClass*)ke, MODULE, DEBUG_VV,
+            "send %d bytes to \"%s\" L0 client: %d bytes data, "
+            "from peer \"%s\"\n",
+            (int)rv, cname,
+            packet->data_length, packet->peer_name);
+        #endif
+        free(out_data);
+        if (rv > 0) {
+            rv = 0;
+        }
+    }
 
     return rv;
 }
