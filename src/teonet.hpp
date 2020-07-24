@@ -318,6 +318,8 @@ public:
     rd.from_len = cname_length;
     rd.addr = (char*)addr;
     rd.port = port;
+    //NOTE: we mark packet as data that we want to send to the client, later we determine
+    // whether the client is connected to us directly or to some other l0 service
     rd.l0_f = 1;
     sendCmdAnswerToBinaryA((void*)ke, &rd, cmd, data, data_len);
   }
