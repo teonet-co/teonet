@@ -462,7 +462,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
                     "repacked packet from client \"%s\" to CMD_L0 from %s:%d\n",
                     spacket->from, kld->t_addr, kld->t_port);
                 #endif
-                //trudpGetChannelCreate(kev->kc->ku, &addr, 0);
+
                 ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
                 arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
             }
