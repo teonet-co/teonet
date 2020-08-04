@@ -591,23 +591,25 @@ static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const cha
     return kld;
 }
 
-void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
-        size_t name_length) {
+void _send_subscribe_events(ksnetEvMgrClass *ke, const char *payload,
+        size_t payload_length) {
 
     // Send Connected event to all subscribers
     teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED,
-        (void *)name, name_length, 0);
+        (void *)payload, payload_length, 0);
 
     // Add connection to L0 statistic
     ke->kl->stat.visits++; // Increment number of visits
 
+    // This is important code for admin-panel
+    //
     // Send "new visit" event to all subscribers
-    size_t vd_length = sizeof(ksnLNullSVisitsData) + name_length;
-    ksnLNullSVisitsData *vd = malloc(vd_length);
-    vd->visits = ke->kl->stat.visits;
-    memcpy(vd->client, name, name_length);
-    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, vd, vd_length, 0);
-    free(vd);
+    // size_t vd_length = sizeof(ksnLNullSVisitsData) + payload_length;
+    // ksnLNullSVisitsData *vd = malloc(vd_length);
+    // vd->visits = ke->kl->stat.visits;
+    // memcpy(vd->client, payload, payload_length);
+    // teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, vd, vd_length, 0);
+    // free(vd);
 }
 
 /**
@@ -650,8 +652,14 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
+        } else {
+            size_t playload_size = strlen(kld->t_addr) + kld->name_length + 1;
+            char *payload = malloc(playload_size);
+            snprintf(payload, playload_size, "%s,%s", kld->name, kld->t_addr);
+
+            _send_subscribe_events(kev, payload, playload_size);
+            free(payload);
         }
-        else _send_subscribe_events(kev, kld->name, kld->name_length);
     }
     else {
         // Wrong Login name received
