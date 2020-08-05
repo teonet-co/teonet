@@ -591,25 +591,32 @@ static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const cha
     return kld;
 }
 
-void _send_subscribe_events(ksnetEvMgrClass *ke, const char *payload,
+
+/**
+ * Send Connected event to all subscribers
+ *
+ */
+void _send_subscribe_event_connected(ksnetEvMgrClass *ke, const char *payload,
         size_t payload_length) {
 
-    // Send Connected event to all subscribers
-    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED,
-        (void *)payload, payload_length, 0);
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED, (void *)payload, payload_length, 0);
 
-    // Add connection to L0 statistic
-    ke->kl->stat.visits++; // Increment number of visits
+    ke->kl->stat.visits++;
+}
 
-    // This is important code for admin-panel
-    //
-    // Send "new visit" event to all subscribers
-    // size_t vd_length = sizeof(ksnLNullSVisitsData) + payload_length;
-    // ksnLNullSVisitsData *vd = malloc(vd_length);
-    // vd->visits = ke->kl->stat.visits;
-    // memcpy(vd->client, payload, payload_length);
-    // teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, vd, vd_length, 0);
-    // free(vd);
+/**
+ * Send "new visit" event to all subscribers
+ *
+ */
+void _send_subscribe_event_newvisit(ksnetEvMgrClass *ke, const char *payload,
+        size_t payload_length) {
+
+    size_t vd_length = sizeof(ksnLNullSVisitsData) + payload_length;
+    ksnLNullSVisitsData *vd = malloc(vd_length);
+    vd->visits = ke->kl->stat.visits;
+    memcpy(vd->client, payload, payload_length);
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, (void *)vd, vd_length, 0);
+    free(vd);
 }
 
 /**
@@ -657,7 +664,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             char *payload = malloc(playload_size);
             snprintf(payload, playload_size, "%s,%s", kld->name, kld->t_addr);
 
-            _send_subscribe_events(kev, payload, playload_size);
+            _send_subscribe_event_connected(kev, payload, playload_size);
             free(payload);
         }
     }
@@ -1467,7 +1474,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             // Send Connected event to all subscribers
             if(kld->name != NULL && !strcmp(rd->from, TEO_AUTH)) {
-                _send_subscribe_events(kev, kld->name, kld->name_length);
+                _send_subscribe_event_connected(kev, kld->name, kld->name_length);
             }
 
             // Create & Send websocket allow answer message
