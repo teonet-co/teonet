@@ -44,7 +44,18 @@ ksnetArpClass *ksnetArpInit(void *ke) {
  * Destroy ARP table
  */
 void ksnetArpDestroy(ksnetArpClass *ka) {
+    PblIterator *it =  pblMapIteratorNew(ka->map);
+    if(it != NULL) {
 
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *name = pblMapEntryKey(entry);
+            ksnet_arp_data_ext *arp = pblMapEntryValue(entry);
+            if(arp->type) free(arp->type);
+        }
+        pblIteratorFree(it);
+    }
     pblMapFree(ka->map);
     free(ka);
 }
