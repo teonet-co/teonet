@@ -20,7 +20,7 @@ endif
 
 AM_LDFLAGS =  -L/opt/local/lib -L../src
 
-LIBS = -lteonet -lcrypto
+LIBS = -lteonet -lcrypto -pthread
 if TEO_THREAD	
 LIBS += -pthread
 endif

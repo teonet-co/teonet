@@ -46,7 +46,7 @@ endif
 
 LIBS = \
 	../src/libteonet.la \
-	-lcrypto
+	-lcrypto -pthread
 
 if TEO_THREAD
 LIBS += -pthread
