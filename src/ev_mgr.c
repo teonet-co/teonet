@@ -1455,7 +1455,6 @@ void modules_destroy(ksnetEvMgrClass *ke) {
 
     ke->ksn_cfg.port = ke->kc->port;
     ksnetHotkeysDestroy(ke->kh);
-    if(ke->kc != NULL) ksnetArpRemoveAll(ke->kc->ka);
     ksnCoreDestroy(ke->kc);
 
     #if M_ENAMBE_TCP_P
