@@ -86,7 +86,7 @@ template <typename T> struct destroy {
 
 template <typename T> std::unique_ptr<T[], destroy<T*>> make(T* raw_data) {
   std::unique_ptr<T[], destroy<T*>> str_ptr(raw_data);
-  return std::move(str_ptr);
+  return str_ptr;
 }
 } // namespace unique_raw_ptr
 
