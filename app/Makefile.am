@@ -30,6 +30,11 @@ bin_PROGRAMS =
 bin_PROGRAMS += teovpn
 teovpn_SOURCES = teovpn.c ../src/libteonet.la
 
+bin_PROGRAMS += teovpnstarter
+teovpnstarter_SOURCES = teovpnstarter.c ../src/libteonet.la
+teovpnstarter_LDFLAGS = $(AM_LDFLAGS) \
+	-lcurl
+
 bin_PROGRAMS += teodb
 teodb_SOURCES = teodb.c ../src/modules/teodb_com.c
 
