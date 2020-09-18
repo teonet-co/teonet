@@ -107,7 +107,7 @@ int ksnCoreParsePacket(void *packet, size_t packet_len, ksnCorePacketData *recv_
 void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd);
 #define ksnCoreSetEventTime(kc) kc->last_check_event = ksnetEvMgrGetTime(kc->ke)
 
-int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port);
+int ksnCoreBindRaw(int *port, int allow_port_increment_f);
 
 #ifdef	__cplusplus
 }

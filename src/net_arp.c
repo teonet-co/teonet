@@ -309,15 +309,15 @@ int find_arp_by_addr_cb(ksnetArpClass *ka, char *peer_name,
     int retval = 0;
     find_arp_data *fa = data;
 
-    if(ntohs(((struct sockaddr_in *) fa->addr)->sin_port) == arp->data.port &&
-       !strcmp(inet_ntoa(((struct sockaddr_in *) fa->addr)->sin_addr),
-            arp->data.addr)) {
+    addr_port_t *ap_obj = wrap_inet_ntop(fa->addr);
 
+    if(ap_obj->equal(ap_obj, arp->data.addr, arp->data.port) == 1) {
         fa->arp_data = (ksnet_arp_data *)arp;
         fa->peer_name = peer_name;
-
         retval = 1;
     }
+
+    addr_port_free(ap_obj);
 
     return retval;
 }

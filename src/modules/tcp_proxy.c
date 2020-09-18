@@ -972,7 +972,7 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     ksn_printf(kev, MODULE, CONNECT, 
             "create UDP client/server Proxy at port %d ...\n", 
             udp_proxy_port);
-    udp_proxy_fd = ksnCoreBindRaw(&kev->ksn_cfg, &udp_proxy_port);
+    udp_proxy_fd = ksnCoreBindRaw(&udp_proxy_port, kev->ksn_cfg.port_inc_f);
     ksn_printf(kev, MODULE, CONNECT, 
             "UDP client/server Proxy fd %d created at port %d\n", 
             udp_proxy_fd,

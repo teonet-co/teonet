@@ -204,41 +204,69 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
  * @param[out] port Pointer to Port number
  * @return File descriptor or error if return value < 0
  */
-int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
+int ksnCoreBindRaw(int *port, int allow_port_increment_f) {
+    return trudpUdpBindRaw(NULL, port, allow_port_increment_f);
+/*    struct addrinfo hints;
+    struct addrinfo *rp;
+    struct addrinfo *res;
+    memset(&hints, '\0', sizeof(struct addrinfo));
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_protocol = IPPROTO_UDP;
+    hints.ai_canonname = NULL;
+    hints.ai_addr = NULL;
+    hints.ai_next = NULL;
 
-    int i, sd;
-    struct sockaddr_in addr;	// Our address
-
-    // Create a UDP socket
-    if((sd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("cannot create socket\n");
-        return -1;
-    }
-
-    memset((char *)&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
+    int fd, s;
+    void *host = NULL;
     // Bind the socket to any valid IP address and a specific port, increment
     // port if busy
-    for(i=0;;) {
+    for (int i = 0;;) {
+        char port_ch[10];
+        sprintf(port_ch, "%d", *port);
 
-        addr.sin_port = htons(*port);
+        hints.ai_family = !host ? AF_INET6 : AF_UNSPEC;
+        s = getaddrinfo(host, port_ch, &hints, &res);
 
-        if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                    "can't bind on port %d, try next port number ...\n",
-                    *port);
-
-            (*port)++;
-            if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
-            else return -2;
+        if (s != 0) {
+            fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
+            freeaddrinfo(res);
+            return -3;
         }
-        else break;
+
+        for (rp = res; rp != NULL; rp = rp->ai_next) {
+            fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+            if (fd == -1) continue;
+
+            if (bind(fd, rp->ai_addr, rp->ai_addrlen) == 0) {
+                printf("trudpUdpBindRaw SUCCESS Family=%d, SockType=%d, port=%d",rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+                if (!host) {
+                    printf("SOCKOPT SET\n");
+                    int off = 0;
+                    setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off));
+                }
+
+                //_trudpUdpSetNonblock(fd);
+                goto success_bind;
+            }
+
+            close(fd);
+        }
+
+        ++(*port);
+
+        if(allow_port_increment_f && i++ < NUMBER_TRY_PORTS) {
+            continue;
+        } else {
+            freeaddrinfo(res);
+            return -2;
+        }
     }
 
-    return sd;
+success_bind:
+    freeaddrinfo(res);
+    return fd;
+    */
 }
 
 /**
@@ -257,7 +285,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
             "create UDP client/server at port %d ...\n", kc->port);
     #endif
 
-    if((fd = ksnCoreBindRaw(ksn_cfg, &kc->port)) > 0) {
+    if((fd = ksnCoreBindRaw(&kc->port, ksn_cfg->port_inc_f)) > 0) {
 
         kc->fd = fd;
         #ifdef DEBUG_KSNET
@@ -931,7 +959,6 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         //
         // CMD_L0 => #70 Command from L0 Client    
         if( ksnCoreParsePacket(data, data_len, &rd) && ( encrypted || rd.cmd == CMD_L0 ) ) {
- 
             // Check ARP Table and add peer if not present            
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,
