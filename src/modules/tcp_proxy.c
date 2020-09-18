@@ -21,7 +21,6 @@
 
 #include "ev_mgr.h"
 #include "net_core.h"
-#include "tr-udp_.h"
 #include "utils/rlutil.h"
 
 #define MODULE _ANSI_YELLOW "tcp_proxy" _ANSI_NONE

@@ -16,9 +16,8 @@
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
 #include "modules/subscribe.h"
-#if TRUDP_VERSION == 2
 #include "trudp_stat.h"
-#endif
+
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -841,7 +840,6 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
-
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
     #ifdef DEBUG_KSNET
@@ -854,11 +852,7 @@ static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Get TR-UDP info
     size_t data_out_len;
-    #if TRUDP_VERSION == 1
-    void *data_out = ksnTRUDPstatGet(ke->kc->ku, data_type, &data_out_len);
-    #elif TRUDP_VERSION == 2
     void *data_out = trudpStatGet(ke->kc->ku, data_type, &data_out_len);
-    #endif
 
     if(rd->l0_f) {// Send TRUDP_INFO_ANSWER to L0 user
         ksnLNullSendToL0(ke, rd->addr, rd->port, rd->from, rd->from_len, CMD_TRUDP_INFO_ANSWER,

@@ -28,7 +28,6 @@ typedef int socklen_t;
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
 #include "tr-udp.h"
-#include "tr-udp_.h"
 
 // Constants
 const char *localhost = "127.0.0.1";
@@ -105,7 +104,6 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_dat
  * @return Pointer to ksnCoreClass or NULL if error
  */
 ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
-
     ksnCoreClass *kc = teo_malloc(sizeof(ksnCoreClass));
 
     kc->ke = ke;
@@ -130,11 +128,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     }
 
     // TR-UDP initialize
-    #if TRUDP_VERSION == 1
-    kc->ku = ksnTRUDPinit(kc);
-    #elif TRUDP_VERSION == 2
     kc->ku = trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
-    #endif
 
     // Change this host port number to port changed in ksnCoreBind function
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
@@ -160,9 +154,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
  * @param kc Pointer to ksnCore class object
  */
 void ksnCoreDestroy(ksnCoreClass *kc) {
-
     if(kc != NULL) {
-
         ksnetEvMgrClass *ke = kc->ke;
 
         // Send disconnect from peer connected to TCP Proxy command to all
@@ -179,12 +171,8 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        #if TRUDP_VERSION == 1
-        ksnTRUDPDestroy(kc->ku);
-        #elif TRUDP_VERSION == 2
         trudpChannelDestroyAll(kc->ku);
         trudpDestroy(kc->ku);
-        #endif
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif

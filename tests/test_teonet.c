@@ -18,9 +18,6 @@
 
 // Modules functions
 int add_suite_1_tests(void);
-#if TRUDP_VERSION == 1
-int add_suite_2_tests(void);
-#endif
 int add_suite_3_tests(void);
 int add_suite_4_tests(void);
 int add_suite_5_tests(void);
@@ -70,9 +67,6 @@ int main() {
         CU_cleanup_registry();
         return CU_get_error();
     }
-    #if TRUDP_VERSION == 1
-    add_suite_2_tests();
-    #endif
     
     // Add a suite to the registry
     pSuite = CU_add_suite("Teonet DB based at PBL KeyFile module functions", init_suite, clean_suite);

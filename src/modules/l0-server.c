@@ -42,7 +42,6 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
 // Other modules not declared functions
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
         size_t data_len, size_t *packet_len);
-#include "tr-udp_.h"  // ksnTRUDPmakeAddr
 
 // External constants
 extern const char *localhost;
