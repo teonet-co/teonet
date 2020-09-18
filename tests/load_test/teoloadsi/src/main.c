@@ -106,11 +106,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                 if(!strcmp(SERVER_PEER, "none")) server_f = 1;
 
                 if(!server_f) {
-                    ksn_printf(ke, NULL, DEBUG, "Client mode, server name: %s\n\n", SERVER_PEER);
+                    ksn_printf(ke, "", DEBUG, "Client mode, server name: %s\n\n", SERVER_PEER);
                     id = 0;
                     sendCmdT(ke, SERVER_PEER, ++id, 0);
                 }
-                else ksn_puts(ke, NULL, DEBUG, "Server mode\n");
+                else ksn_puts(ke, "", DEBUG, "Server mode\n");
 
                 start_f = 0;
             }
@@ -118,7 +118,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
         // When peer connected
         case EV_K_CONNECTED:
-            ksn_printf(ke, NULL, DEBUG, "EV_K_CONNECTED: %s\n\n", rd->from);
+            ksn_printf(ke, "", DEBUG, "EV_K_CONNECTED: %s\n\n", rd->from);
             break;
 
         // When command received
@@ -130,12 +130,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Answer received with correct id
                     if(d->type == 1 && d->id == id) {
                         if(id == 1 || !(id%NUM_TO_SHOW)) {
-                            ksn_printf(ke, NULL, DEBUG,
+                            ksn_printf(ke, "", DEBUG,
                                 "EV_K_RECEIVED: <<- packet #%d <<- '%s'\n",
                                 d->id, rd->from
                             );
                             if(errors)
-                                ksn_printf(ke, NULL, DEBUG, ", %d - errors",
+                                ksn_printf(ke, "", DEBUG, ", %d - errors",
                                         errors);
                             printf("\n");
                         }
@@ -144,7 +144,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Request received
                     else if(d->type == 0) {
                         if(!(d->id%NUM_TO_SHOW))
-                            ksn_printf(ke, NULL, DEBUG,
+                            ksn_printf(ke, "", DEBUG,
                                 "EV_K_RECEIVED: <<- packet #%d <<- '%s'\n",
                                 d->id, rd->from);
                     }
@@ -152,7 +152,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Answer received with incorrect id
                     else {
                         errors++;
-                        ksn_printf(ke, NULL, ERROR_M,
+                        ksn_printf(ke, "", ERROR_M,
                                "EV_K_RECEIVED: <<- packet #%d <<- '%s'"
                                " - Incorrect packet ID\n",
                                d->id, rd->from);

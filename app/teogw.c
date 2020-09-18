@@ -46,7 +46,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Set default namespace
         case EV_K_STARTED:
             
-            ksn_printf(ke, NULL, DEBUG, "Host '%s' started at network '%s'...\n", 
+            ksn_printf(ke, "", DEBUG, "Host '%s' started at network '%s'...\n", 
                     ksnetEvMgrGetHostName(ke), ke->ksn_cfg.network);
                     
             // Set application type
@@ -56,7 +56,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             // start new network
             if(!strcmp(ke->ksn_cfg.network,"local")) {
                 const char* net = "NEW_NET";
-                ksn_printf(ke, NULL, DEBUG, "Dynamically add new network %s\n", net);
+                ksn_printf(ke, "", DEBUG, "Dynamically add new network %s\n", net);
                 teoMultiAddNet(ke->km, event_cb, "NEW_HOST", 0, net, NULL);
             }
 
@@ -65,14 +65,14 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         // Show connected peers
         case EV_K_CONNECTED: {
             // const ksnCorePacketData *rd = (ksnCorePacketData *) data;
-            ksn_printf(ke, NULL, DEBUG, "Peer '%s' connected at network '%s'...\n", 
+            ksn_printf(ke, "", DEBUG, "Peer '%s' connected at network '%s'...\n", 
                     rd->from, ke->ksn_cfg.network);
         } break;    
             
         // Show disconnected peers
         case EV_K_DISCONNECTED: {
             // const ksnCorePacketData *rd = (ksnCorePacketData *) data;
-            ksn_printf(ke, NULL, DEBUG, "Peer '%s' disconnected at network '%s'...\n", 
+            ksn_printf(ke, "", DEBUG, "Peer '%s' disconnected at network '%s'...\n", 
                     rd->from, ke->ksn_cfg.network);
         } break;
 
