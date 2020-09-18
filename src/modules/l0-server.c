@@ -1842,6 +1842,10 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
     trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    if (tcd == NULL || tcd == (void *)-1) {
+        return 1;
+    }
+
     if(tcd->fd == 0) {
         // Add fd to tr-udp channel data
         tcd->fd = ksnLNullGetNextFakeFd(kl);
