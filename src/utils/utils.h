@@ -16,6 +16,15 @@
 #include "string_arr.h"
 #include "config/conf.h"
 
+typedef struct addr_port {
+    char *addr;
+    uint16_t port;
+    int (*equal)(struct addr_port *, char*, uint16_t);
+} addr_port_t;
+
+addr_port_t *wrap_inet_ntop(const struct sockaddr *sa);
+void addr_port_free(addr_port_t *ap_obj);
+
 /**
  * KSNet printf messages types
  */
