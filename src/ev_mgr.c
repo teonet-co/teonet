@@ -24,7 +24,7 @@
 #include "utils/rlutil.h"
 #include "modules/metric.h"
 
-#define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
+#define MODULE "event_manager"
 
 // Global module variables
 static int teoRestartApp_f = 0; // Restart teonet application before exit
@@ -918,7 +918,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
     ksnetEvMgrClass *ke = ((ksnCoreClass *)w->data)->ke;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, "event_manager", DEBUG_VV, "idle callback %d\n", ke->idle_count);
+    ksn_printf(ke, MODULE, DEBUG_VV, "idle callback %d\n", ke->idle_count);
     #endif
 
     // Stop this watcher
