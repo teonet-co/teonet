@@ -917,9 +917,9 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
 void idle_cb (EV_P_ ev_idle *w, int revents) {
     ksnetEvMgrClass *ke = ((ksnCoreClass *)w->data)->ke;
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "idle callback %d\n", ke->idle_count);
-    #endif
+    // #ifdef DEBUG_KSNET
+    // ksn_printf(ke, MODULE, DEBUG_VV, "idle callback %d\n", ke->idle_count);
+    // #endif
 
     // Stop this watcher
     ev_idle_stop(EV_A_ w);
