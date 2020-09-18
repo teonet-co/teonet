@@ -150,10 +150,9 @@ void *ksnetArpSetHostPort(ksnetArpClass *ka, char* name, int port) {
  *
  * @param ka Pointer to ksnetArpClass
  * @param name Peer name to remove
- * @return True if successfully removed
+ * @return 1 if successfully removed
  */
 int ksnetArpRemove(ksnetArpClass *ka, char* name) {
-
     size_t var_len = 0;
     char* peer_name = strdup(name);
 
@@ -162,17 +161,11 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
 
     // If removed successfully
     if(arp != (void*)-1) {
-
         // Remove peer from TR-UDP module 
         // \TODO The 'if(arp)' was added because we drop here. Check why arp may be NULL.
         if(arp) {
-            #if TRUDP_VERSION == 1
-            ksnTRUDPresetAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->addr,
-                    arp->port, 1);
-            #elif TRUDP_VERSION == 2
             trudpChannelDestroyAddr(((ksnetEvMgrClass*) ka->ke)->kc->ku, arp->data.addr,
                     arp->data.port, 0);
-            #endif
         }
 
         // Remove from Stream module
@@ -187,6 +180,7 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
         if(arp->type) free(arp->type);
         free(arp);
     }
+
     free(peer_name);
 
     return arp ? 1 : 0;
@@ -200,18 +194,17 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name) {
  * @param ka
  */
 void ksnetArpRemoveAll(ksnetArpClass *ka) {
-
     ksnetEvMgrClass *ke = ka->ke;
     PblIterator *it =  pblMapIteratorNew(ka->map);
+
     if(it != NULL) {
-
         while(pblIteratorHasNext(it)) {
-
             void *entry = pblIteratorNext(it);
             char *name = pblMapEntryKey(entry);
             ksnet_arp_data_ext *arp = pblMapEntryValue(entry);
             if(arp->type) free(arp->type);
         }
+
         pblIteratorFree(it);
     }
 
@@ -219,11 +212,7 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
     ke->ksn_cfg.r_host_name[0] = '\0';
     ka->map = pblMapNewHashMap();
     ksnetArpAddHost(ka);
-    #if TRUDP_VERSION == 1
-    ksnTRUDPremoveAll(ke->kc->ku);
-    #elif TRUDP_VERSION == 2
     trudpChannelDestroyAll(ke->kc->ku);
-    #endif
 }
 
 /**
@@ -533,7 +522,6 @@ char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data) {
  * @return String with formated ARP table. Should be free after use
  */
 char *ksnetArpShowStr(ksnetArpClass *ka) {
-
     char *str;
     const char *div = "-------------------------------------------------------"
                       "----------------------------\n";
@@ -548,99 +536,66 @@ char *ksnetArpShowStr(ksnetArpClass *ka) {
 
     PblIterator *it = pblMapIteratorNew(ka->map);
     int num = 0;
+
     if(it != NULL) {
-
         while(pblIteratorHasNext(it)) {
-
             void *entry = pblIteratorNext(it);
             char *name = pblMapEntryKey(entry);
             ksnet_arp_data *data = pblMapEntryValue(entry);
-            char *last_triptime = ksnet_formatMessage("%7.3f",
-                    data->last_triptime);
+            char *last_triptime = ksnet_formatMessage("%7.3f", data->last_triptime);
 
-            // Get TR-UDP ip map data by key
-            #if TRUDP_VERSION == 1
-            size_t val_len;
-            size_t key_len = KSN_BUFFER_SM_SIZE;
-            char key[key_len];
-            key_len = snprintf(key, key_len, "%s:%d", data->addr, data->port);
-            ip_map_data *ip_map_d = pblMapGet(
-                    ((ksnetEvMgrClass*)ka->ke)->kc->ku->ip_map, key, key_len,
-                    &val_len);
-
-            // Last trip time
-            char *tcp_last_triptime = ip_map_d != NULL ?
-                ksnet_formatMessage("%7.3f / ",
-                    ip_map_d->stat.triptime_last/1000.0) : strdup(null_str);
-
-            // Last 10 max trip time
-            char *tcp_triptime_last10_max = ip_map_d != NULL ?
-                ksnet_formatMessage("%.3f ms",
-                    ip_map_d->stat.triptime_last_max/1000.0) : strdup(null_str);
-
-            #elif TRUDP_VERSION == 2
             // Get TR-UDP by address and port
             trudpChannelData *tcd = trudpGetChannelAddr(
                     ((ksnetEvMgrClass*)ka->ke)->kc->ku,
                     data->addr, data->port, 0
             );
+
             // Set Last and Middle trip time
             char *tcp_last_triptime, *tcp_triptime_last10_max;
             if(tcd != (void*)-1) {
-                tcp_last_triptime = ksnet_formatMessage("%7.3f / ",
-                    tcd->triptime/1000.0);
-                tcp_triptime_last10_max = ksnet_formatMessage("%.3f ms",
-                    tcd->triptimeMiddle/1000.0);
-            }
-            else {
+                tcp_last_triptime = ksnet_formatMessage("%7.3f / ", tcd->triptime/1000.0);
+                tcp_triptime_last10_max = ksnet_formatMessage("%.3f ms", tcd->triptimeMiddle/1000.0);
+            } else {
                 tcp_last_triptime = strdup(null_str);
                 tcp_triptime_last10_max = strdup(null_str);
             }
-            #endif
 
             str = ksnet_sformatMessage(str, "%s"
                 "%3d %s%-15s%s %3d   %-15s  %5d   %7s %s  %s%s%s\n",
                 str,
-
                 // Number
                 ++num,
-
                 // Peer name
                 getANSIColor(LIGHTGREEN), name, getANSIColor(NONE),
-
                 // Index
                 data->mode,
-
                 // IP
                 data->addr,
-
                 // Port
                 data->port,
-
                 // Trip time
                 data->mode < 0 ? "" : last_triptime,
-
                 // ARP Trip time type (ms)
                 data->mode < 0 ? "" : "ms",
-
                 // TCP Proxy last trip time type (ms)
                 "",
                 tcp_last_triptime,
                 tcp_triptime_last10_max
-
                 // Rx/Tx
                 //"", //(data->idx >= 0 && data->direct_con ? itoa( (&kn->host->peers[data->idx])->incomingDataTotal) : ""),
                 //"", // (data->idx >= 0 && data->direct_con ? "/" : ""),
                 //"" //(data->idx >= 0 && data->direct_con ? itoa( (&kn->host->peers[data->idx])->outgoingDataTotal) : "")
             );
+
             free(last_triptime);
             free(tcp_last_triptime);
             free(tcp_triptime_last10_max);
         }
+
         pblIteratorFree(it);
     }
-    str = ksnet_sformatMessage(str, "%s%s", str, div);
 
+    str = ksnet_sformatMessage(str, "%s%s", str, div);
 
     return str;
 }
