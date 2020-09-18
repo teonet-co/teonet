@@ -915,51 +915,44 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
  * @param revents
  */
 void idle_cb (EV_P_ ev_idle *w, int revents) {
-
-    #define kev ((ksnetEvMgrClass *)((ksnCoreClass *)w->data)->ke)
+    ksnetEvMgrClass *ke = ((ksnCoreClass *)w->data)->ke;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV, "idle callback %d\n", kev->idle_count);
+    ksn_printf(ke, MODULE, DEBUG_VV, "idle callback %d\n", ke->idle_count);
     #endif
 
     // Stop this watcher
     ev_idle_stop(EV_A_ w);
 
     // Idle count startup (first time run)
-    if(!kev->idle_count) {
+    if(!ke->idle_count) {
         //! \todo: open_local_port(kev);
-        #if TRUDP_VERSION == 1
-        // Set statistic start time
-        if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
-        #endif
         // Connect to R-Host
-        connect_r_host_cb(kev);
+        connect_r_host_cb(ke);
         // Send event to application
-        if(kev->ta) kev->ta->t_id = pthread_self();
-        if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
+        if(ke->ta) ke->ta->t_id = pthread_self();
+        if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STARTED, NULL, 0, NULL);
         // Start host socket in the event manager
-        if(!kev->ksn_cfg.r_tcp_f) {
-            ev_io_start(kev->ev_loop, &kev->kc->host_w);
+        if(!ke->ksn_cfg.r_tcp_f) {
+            ev_io_start(ke->ev_loop, &ke->kc->host_w);
         }
     }
     // Idle count max value
-    else if(kev->idle_count == UINT32_MAX) kev->idle_count = 0;
+    else if(ke->idle_count == UINT32_MAX) ke->idle_count = 0;
 
     // Increment count
-    kev->idle_count++;
+    ke->idle_count++;
 
     // Check host events to send him service information
     //! \todo:    host_cb(EV_A_ (ev_io*)w, revents);
 
     // Send idle Event
-    if(kev->event_cb != NULL) {
-        kev->event_cb(kev, EV_K_IDLE , NULL, 0, NULL);
+    if(ke->event_cb != NULL) {
+        ke->event_cb(ke, EV_K_IDLE , NULL, 0, NULL);
     }
 
     // Set last host event time
-    ksnCoreSetEventTime(kev->kc);
-
-    #undef kev
+    ksnCoreSetEventTime(ke->kc);
 }
 
 /**
