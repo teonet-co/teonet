@@ -88,6 +88,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
     ksn_cfg->r_tcp_f = 0;
     ksn_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
 
+    // Hosts public IPs
     ksn_cfg->l0_public_ipv4[0] = '\0';
     ksn_cfg->l0_public_ipv6[0] = '\0';
 

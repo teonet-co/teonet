@@ -433,6 +433,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --send_all_logs      Send all logs (by default send only metrics)\n"
     #endif
     "\n"
+    "       --l0_public_ipv4     Set public ipv4 (to use in CMD_GET_PUBLIC_IP)\n"
+    "       --l0_public_ipv6     Set public ipv6 (to use in CMD_GET_PUBLIC_IP)\n"
+    "\n"
     "       --statsd_ip          Metric exporter IP address\n"
     "       --statsd_port        Metric exporter Port number\n"
     "       --statsd_peers       Send preers metrics\n"
