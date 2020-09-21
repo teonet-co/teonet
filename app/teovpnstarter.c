@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <assert.h>
 
 static const char* home_env_var = "HOME";
 static const char* public_ipv4_var = "PUBLIC_IPV4";
@@ -25,12 +28,21 @@ size_t save_public_ip_cb(void *ptr, size_t size, size_t nmemb, void *stream){
 
 int main(int argc, char** argv)
 {
+    char* buf = (char*)malloc(1024);
+    memset(buf, '\0', 1024);
+
+    readlink("/proc/self/exe", buf, 1024);
+
+    printf("%s\n", buf);
+
+    free(buf);
+
     CURL *curl;
     CURLcode res;
 
     AppSettings settings;
 
-    settings.public_ipv4 = strdup("192.168.1.33");
+    settings.public_ipv4 = NULL;
 
     /* In windows, this will init the winsock stuff */ 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -46,36 +58,36 @@ int main(int argc, char** argv)
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &settings);
 
     /* Perform the request, res will get the return code */ 
-    res = CURLE_OK;//curl_easy_perform(curl);
+    res = curl_easy_perform(curl);
     /* Check for errors */ 
     if(res != CURLE_OK) {
         printf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
     } else {
-        printf("%s\n", settings.public_ipv4);
+        assert(settings.public_ipv4 != NULL && "public ipv4 not set");
         const char* home_val = getenv(home_env_var);
+        printf("%s\n", home_val);
         size_t buf_size = strlen(home_env_var) + 1 + strlen(home_val) + 1;//HOME=/bla/bla/bla + terminnating 0
         char* home_path_buf = (char*)malloc(buf_size);
         snprintf(home_path_buf, buf_size,"%s=%s", home_env_var, home_val);
         char *env[] = {
-            settings.public_ipv4,
             home_path_buf,
             NULL };
-        char **new_argv = (char**)malloc((argc)*sizeof(char*));
+        char **new_argv = (char**)malloc((argc + 2)*sizeof(char*));//args of starting app + public_ipv4 param
         int i = 0;
         for (; i < argc - 1; ++i) {
             new_argv[i] = strdup(argv[i + 1]);
         }
-        new_argv[i] = NULL;
 
-        pid_t pid = fork();
-        if (pid == -1) {
-             printf("fork error!");
-        } else if (pid == 0) {
-            execve(new_argv[0], new_argv, env);
-        }
+        new_argv[i] = strdup("--l0_public_ipv4");
+        new_argv[i + 1] = strdup(settings.public_ipv4);
+        new_argv[i + 2] = NULL;
 
+        printf("%s\n", new_argv[0]);
+
+        execve(new_argv[0], new_argv, env);
+        perror("execve");
         i = 0;
-        for (; i < argc; ++i) {
+        for (; i < argc + 2; ++i) {
             free(new_argv[i]);
         }
 
