@@ -42,6 +42,7 @@ int cmd_subscribe_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -209,6 +210,10 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
         case CMD_HOST_INFO:
             processed = cmd_host_info_cb(kco, rd);
             break;
+
+        case CMD_GET_PUBLIC_IP:
+            processed = cmd_get_public_ip_cb(kco, rd);
+            break;    
 
         case CMD_HOST_INFO_ANSWER:
             processed = cmd_host_info_answer_cb(kco, rd);
@@ -824,7 +829,8 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         // Send HOST_INFO_ANSWER to peer
         } else {
             ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_HOST_INFO_ANSWER, data_out, data_out_len);
-	}
+	    }
+
         // Free json string data
         if(json_str != NULL) free(json_str);
         free(hid);
@@ -832,6 +838,62 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     return 1; // Command processed
 }
+
+/**
+ * Process CMD_GET_PUBLIC_IP
+ *
+ * @param kco
+ * @param rd
+ * @return
+ */
+static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_GET_PUBLIC_IP (cmd = %u) command, from %s (%s:%d)\n",
+            rd->cmd, rd->from, rd->addr, rd->port);
+    #endif
+
+    void *data_out = NULL;
+    size_t data_out_len = 0;
+
+    // Get type of request: 0 - binary; 1 - JSON
+    const int data_type = rd->data_len &&
+                !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
+
+    // Get public ip
+
+    // JSON data type
+    if(data_type == 1) {
+        data_out = ksnet_formatMessage(
+            "{ "
+                "\"public_v4\": \"%s\", "
+                "\"public_v6\": \"%s\", "
+            " }", 
+            ke->ksn_cfg.l0_public_ipv4, ke->ksn_cfg.l0_public_ipv6);
+        data_out_len = strlen(data_out) + 1;
+    } else {
+        data_out = ksnet_formatMessage(
+            "%s\0%s", 
+            ke->ksn_cfg.l0_public_ipv4, ke->ksn_cfg.l0_public_ipv6);
+        data_out_len = strlen(ke->ksn_cfg.l0_public_ipv4) + strlen(ke->ksn_cfg.l0_public_ipv4) + 2;    
+    }
+  
+
+    // Send PEERS_ANSWER to L0 user
+    if(rd->l0_f) {
+        ksnLNullSendToL0(ke, rd->addr, rd->port, rd->from, rd->from_len, CMD_GET_PUBLIC_IP_ANSWER,
+                data_out, data_out_len);
+    // Send HOST_INFO_ANSWER to peer
+    } else {
+        ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_GET_PUBLIC_IP_ANSWER, data_out, data_out_len);
+    }
+
+    // Free json string data
+    free(data_out);
+
+    return 1; // Command processed
+} 
 
 /**
  * Process CMD_TRUDP_INFO
