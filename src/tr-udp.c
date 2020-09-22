@@ -83,12 +83,13 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     // UDP
     ssize_t sent = trudpUdpSendto(td->fd, (void *)buf, buf_len, (__CONST_SOCKADDR_ARG)&tcd->remaddr, sizeof(tcd->remaddr));
 
+    addr_port_t *ap_obj = wrap_inet_ntop(addr);
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV, ">> skip this packet, send %d bytes direct by UDP to: %s:%d\n",
-            sent, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-            ntohs(((struct sockaddr_in *) addr)->sin_port)
+            sent, ap_obj->addr, ap_obj->port
     );
     #endif
+    addr_port_free(ap_obj);
 
     return sent;
 }
@@ -179,11 +180,13 @@ void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id,
         ksnCorePacketData rd;
         memset(&rd, 0, sizeof(rd));
 
+        addr_port_t *ap_obj = wrap_inet_ntop(addr);
+
         // Remote peer address and port
-        rd.addr = strdup(inet_ntoa(
-                ((struct sockaddr_in*)addr)->sin_addr)); // IP to string
-        rd.port = ntohs(
-                ((struct sockaddr_in*)addr)->sin_port); // Port to integer
+        rd.addr = strdup(ap_obj->addr); // IP to string
+        rd.port = ap_obj->port; // Port to integer
+
+        addr_port_free(ap_obj);
 
         // Parse packet and check if it valid
         if(ksnCoreParsePacket(data, data_length, &rd)) {
@@ -209,7 +212,7 @@ void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id,
  * @param data_length
  */
 void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
-    struct sockaddr_in remaddr; // remote address
+    struct sockaddr_storage remaddr; // remote address
 
     socklen_t addr_len = sizeof(remaddr);
 

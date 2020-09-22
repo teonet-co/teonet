@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <libgen.h>
 #include <syslog.h>
+#include <errno.h>
 
 #include "config/config.h"
 
@@ -19,6 +20,8 @@
 #include "rlutil.h"
 #include "utils.h"
 #include "ev_mgr.h"
+
+#define ADDRSTRLEN 128
 
 //double ksnetEvMgrGetTime(void *ke);
 void teoLoggingClientSend(void *ke, const char *message);
@@ -676,7 +679,7 @@ int addr_port_equal(addr_port_t *ap_obj, char *addr, uint16_t port) {
 
 addr_port_t *addr_port_init() {
     addr_port_t *ptr = malloc(sizeof(addr_port_t));
-    ptr->addr = malloc(128);
+    ptr->addr = malloc(ADDRSTRLEN);
     ptr->port = 0;
     ptr->equal = addr_port_equal;
     return ptr;
@@ -694,8 +697,10 @@ addr_port_t *wr__ntop(const struct sockaddr *sa) {
 	case AF_INET: {
 		struct sockaddr_in	*sin = (struct sockaddr_in *) sa;
 
-		if (inet_ntop(AF_INET, &sin->sin_addr, ptr->addr, sizeof(ptr->addr)) == NULL)
+		if (inet_ntop(AF_INET, &sin->sin_addr, ptr->addr, ADDRSTRLEN) == NULL) {
+            printf("inet_ntop ipv4 conversion error: %s\n", strerror(errno));
 			return NULL;
+        }
 		if (ntohs(sin->sin_port) != 0) {
             ptr->port = ntohs(sin->sin_port);
 		}
@@ -706,8 +711,10 @@ addr_port_t *wr__ntop(const struct sockaddr *sa) {
 	case AF_INET6: {
 		struct sockaddr_in6	*sin6 = (struct sockaddr_in6 *) sa;
 
-		if (inet_ntop(AF_INET6, &sin6->sin6_addr, ptr->addr, sizeof(ptr->addr)) == NULL)
+		if (inet_ntop(AF_INET6, &sin6->sin6_addr, ptr->addr, ADDRSTRLEN) == NULL) {
+            printf("inet_ntop ipv6 conversion error: %s\n", strerror(errno));
 			return NULL;
+        }
 		if (ntohs(sin6->sin6_port) != 0) {
             ptr->port = ntohs(sin6->sin6_port);
 		}
@@ -716,6 +723,8 @@ addr_port_t *wr__ntop(const struct sockaddr *sa) {
 	}
 
 	default:
+            printf("sa family %d\n", sa->sa_family);
+		return NULL;
 		snprintf(ptr->addr, sizeof(ptr->addr), "wr__ntop: unknown AF_xxx: %d", sa->sa_family);
 		return ptr;
 	}

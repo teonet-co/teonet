@@ -18,12 +18,6 @@
 #include <winsock2.h>
 #endif
 
-#ifdef HAVE_DARWIN
-#include <netinet/in.h>
-#define __CONST_SOCKADDR_ARG const struct sockaddr_in *
-#define __SOCKADDR_ARG struct sockaddr_in *
-#endif
-
 #include "net_arp.h"
 #include "net_com.h"
 #include "tr-udp.h"

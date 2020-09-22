@@ -434,13 +434,11 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     else {
         // Create packet
         size_t pkg_len;
-        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len,
-                    &pkg_len);
-        struct sockaddr_in addr;             // address structure
+        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len, &pkg_len);
+        struct sockaddr_storage addr;             // address structure
         socklen_t addrlen = sizeof(addr);    // address structure length
-        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr,
-                &addrlen)) {
 
+        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr, &addrlen)) {
             ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
             arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
         }
@@ -779,10 +777,9 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
 
     } else {    // Send by TR-UDP
         if(kld != NULL) {
-            struct sockaddr_in remaddr;                   ///< Remote address
+            struct sockaddr_storage remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
-            trudpUdpMakeAddr(kld->t_addr, kld->t_port,
-                (__SOCKADDR_ARG) &remaddr, &addrlen);
+            trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, extendedLog(kl),
@@ -1849,7 +1846,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         // Add fd to tr-udp channel data
         tcd->fd = ksnLNullGetNextFakeFd(kl);
     }
-
+    printf("ksnLNulltrudpCheckPaket. %s, %d\n", rd->addr, rd->port);
     teoLNullCPacket *packet_sm = teoLNullPacketGetFromBuffer(rd->data, rd->data_len);
     if (packet_sm != NULL) {
         ksnLNullData *kld = ksnLNullGetClientConnection(kl, tcd->fd);

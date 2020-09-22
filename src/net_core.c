@@ -316,7 +316,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     if(data_len <= MAX_PACKET_LEN - MAX_DATA_LEN) {
 
-        struct sockaddr_in remaddr;         // remote address
+        struct sockaddr_storage remaddr;         // remote address
         socklen_t addrlen = sizeof(remaddr);// length of addresses
         make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
@@ -722,7 +722,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     ksnCoreClass *kc = w->data;             // ksnCore Class object
     ksnetEvMgrClass *ke = kc->ke;           // ksnetEvMgr Class object
 
-    struct sockaddr_in remaddr;             // remote address
+    struct sockaddr_storage remaddr;             // remote address
     socklen_t addrlen = sizeof(remaddr);    // length of addresses
     unsigned char buf[KSN_BUFFER_DB_SIZE];  // Message buffer
     size_t recvlen;                         // # bytes received
@@ -883,9 +883,10 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
 
     // Data received
     if(recvlen > 0) {
-
-        char *addr = strdup(inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr)); // IP to string
-        int port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
+        addr_port_t *ap_obj = wrap_inet_ntop(remaddr);
+        char *addr = strdup(ap_obj->addr); // IP to string
+        int port = ap_obj->port;
+        addr_port_free(ap_obj);
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV,
