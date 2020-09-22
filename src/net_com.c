@@ -868,7 +868,7 @@ static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         data_out = ksnet_formatMessage(
             "{ "
                 "\"public_v4\": \"%s\", "
-                "\"public_v6\": \"%s\", "
+                "\"public_v6\": \"%s\" "
             " }", 
             ke->ksn_cfg.l0_public_ipv4, ke->ksn_cfg.l0_public_ipv6);
         data_out_len = strlen(data_out) + 1;
