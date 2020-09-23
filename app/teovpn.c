@@ -34,7 +34,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
 
     switch(event) {
-
         // Calls after event manager stopped
         case EV_K_STOPPED:
             #ifdef TEO_THREAD
@@ -57,7 +56,6 @@ int main(int argc, char** argv) {
 
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
-
     // Set application type
     teoSetAppType(ke, "teo-vpn");
     teoSetAppVersion(ke, TVPN_VERSION);
