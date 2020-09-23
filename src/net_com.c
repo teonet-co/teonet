@@ -873,12 +873,13 @@ static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             ke->ksn_cfg.l0_public_ipv4, ke->ksn_cfg.l0_public_ipv6);
         data_out_len = strlen(data_out) + 1;
     } else {
-        data_out = ksnet_formatMessage(
-            "%s\0%s", 
-            ke->ksn_cfg.l0_public_ipv4, ke->ksn_cfg.l0_public_ipv6);
-        data_out_len = strlen(ke->ksn_cfg.l0_public_ipv4) + strlen(ke->ksn_cfg.l0_public_ipv4) + 2;    
+        data_out_len = strlen(ke->ksn_cfg.l0_public_ipv4) + strlen(ke->ksn_cfg.l0_public_ipv4) + 2;
+        data_out = malloc(data_out_len*sizeof(char));
+        memcpy(data_out, ke->ksn_cfg.l0_public_ipv4, strlen(ke->ksn_cfg.l0_public_ipv4));
+        ((char*)data_out)[strlen(ke->ksn_cfg.l0_public_ipv4)] = '\0';
+        memcpy((char*)data_out + strlen(ke->ksn_cfg.l0_public_ipv4) + 1, ke->ksn_cfg.l0_public_ipv6, strlen(ke->ksn_cfg.l0_public_ipv6));
+        ((char*)data_out)[data_out_len - 1] = '\0';
     }
-  
 
     // Send PEERS_ANSWER to L0 user
     if(rd->l0_f) {
