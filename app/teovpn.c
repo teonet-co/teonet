@@ -34,12 +34,6 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
 
     switch(event) {
-        case EV_K_STARTED:
-        {
-            if(ke->ksn_cfg.l0_public_ipv4[0]) printf("public ipv4: %s\n", ke->ksn_cfg.l0_public_ipv4);
-            if(ke->ksn_cfg.l0_public_ipv6[0]) printf("public ipv6: %s\n", ke->ksn_cfg.l0_public_ipv6);
-        }
-        break;
         // Calls after event manager stopped
         case EV_K_STOPPED:
             #ifdef TEO_THREAD
