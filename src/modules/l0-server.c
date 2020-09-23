@@ -1846,7 +1846,7 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
         // Add fd to tr-udp channel data
         tcd->fd = ksnLNullGetNextFakeFd(kl);
     }
-    printf("ksnLNulltrudpCheckPaket. %s, %d\n", rd->addr, rd->port);
+
     teoLNullCPacket *packet_sm = teoLNullPacketGetFromBuffer(rd->data, rd->data_len);
     if (packet_sm != NULL) {
         ksnLNullData *kld = ksnLNullGetClientConnection(kl, tcd->fd);
