@@ -212,6 +212,7 @@ void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id,
  * @param data_length
  */
 void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
+
     struct sockaddr_storage remaddr; // remote address
 
     socklen_t addr_len = sizeof(remaddr);
@@ -224,14 +225,15 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
     if (trudpIsPacketPing(data, recvlen) && trudpGetChannel(td, (__CONST_SOCKADDR_ARG) &remaddr, 0) == (void *)-1) {
         trudpChannelData *tcd = trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG) &remaddr, 0);
         trudpChannelSendRESET(tcd, NULL, 0);
-        printf("FIRST PACKET PING\n");
         return;
     }
 
     // Process received packet
     if (recvlen <= 0) { return; }
+
     trudpChannelData *tcd =
         trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG)&remaddr, 0);
+
     if (tcd == (void *)-1) {
         fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");
         return;

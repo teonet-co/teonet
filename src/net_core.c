@@ -30,7 +30,7 @@ typedef int socklen_t;
 #include "tr-udp.h"
 
 // Constants
-const char *localhost = "127.0.0.1";
+const char *localhost = "::1";//"127.0.0.1";
 #define PACKET_HEADER_ADD_SIZE 2    // Sizeof from length + Sizeof command
 
 #define MODULE _ANSI_GREEN "net_core" _ANSI_GREY
