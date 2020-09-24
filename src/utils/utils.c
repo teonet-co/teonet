@@ -624,7 +624,7 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
 
     ksnet_stringArr arr = ksnet_stringArrCreate();
 
-    const int CHECK_IPv6 = 1;
+    const int CHECK_IPv6 = 0;
 
     struct ifaddrs * ifAddrStruct = NULL;
     struct ifaddrs * ifa = NULL;
