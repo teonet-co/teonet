@@ -25,6 +25,22 @@ certificate while accessing https ..." execute git command:
     ./configure
     make
 
+#### Create debian packages and install it
+
+It is possible use deb packages to install teonet instead of `make install` command. To create teonet debian packages use next command:
+
+    make deb-package
+
+To install teonet debian package use next commands (there X.X.X is current teonet version):
+
+    sudo dpkg -i libtuntap-dev_0.3.0_amd64.deb
+    sudo dpkg -i libteonet-dev_X.X.X-1_amd64.deb
+
+ To remove installed debian packages use next commands:
+
+    sudo dpkg -r libteonet-dev
+    sudo dpkg -r libtuntap-dev
+
 ### Manjaro
     autoreconf --force --install
     ./autogen.sh
