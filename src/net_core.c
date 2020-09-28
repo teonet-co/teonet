@@ -194,67 +194,6 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
  */
 int ksnCoreBindRaw(int *port, int allow_port_increment_f) {
     return trudpUdpBindRaw(NULL, port, allow_port_increment_f);
-/*    struct addrinfo hints;
-    struct addrinfo *rp;
-    struct addrinfo *res;
-    memset(&hints, '\0', sizeof(struct addrinfo));
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE;
-    hints.ai_protocol = IPPROTO_UDP;
-    hints.ai_canonname = NULL;
-    hints.ai_addr = NULL;
-    hints.ai_next = NULL;
-
-    int fd, s;
-    void *host = NULL;
-    // Bind the socket to any valid IP address and a specific port, increment
-    // port if busy
-    for (int i = 0;;) {
-        char port_ch[10];
-        sprintf(port_ch, "%d", *port);
-
-        hints.ai_family = !host ? AF_INET6 : AF_UNSPEC;
-        s = getaddrinfo(host, port_ch, &hints, &res);
-
-        if (s != 0) {
-            fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(s));
-            freeaddrinfo(res);
-            return -3;
-        }
-
-        for (rp = res; rp != NULL; rp = rp->ai_next) {
-            fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-            if (fd == -1) continue;
-
-            if (bind(fd, rp->ai_addr, rp->ai_addrlen) == 0) {
-                printf("trudpUdpBindRaw SUCCESS Family=%d, SockType=%d, port=%d",rp->ai_family, rp->ai_socktype, rp->ai_protocol);
-                if (!host) {
-                    printf("SOCKOPT SET\n");
-                    int off = 0;
-                    setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY, (void *)&off, sizeof(off));
-                }
-
-                //_trudpUdpSetNonblock(fd);
-                goto success_bind;
-            }
-
-            close(fd);
-        }
-
-        ++(*port);
-
-        if(allow_port_increment_f && i++ < NUMBER_TRY_PORTS) {
-            continue;
-        } else {
-            freeaddrinfo(res);
-            return -2;
-        }
-    }
-
-success_bind:
-    freeaddrinfo(res);
-    return fd;
-    */
 }
 
 /**

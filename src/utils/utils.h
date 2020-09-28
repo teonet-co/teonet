@@ -24,7 +24,7 @@ typedef struct addr_port {
 
 addr_port_t *wrap_inet_ntop(const struct sockaddr *sa);
 void addr_port_free(addr_port_t *ap_obj);
-
+int ip_type(const char *ip_ch);
 /**
  * KSNet printf messages types
  */

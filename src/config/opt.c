@@ -211,11 +211,19 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 'a': {
           const char *localhost_str = "localhost";
-          const char *localhost_num = "::1";//"127.0.0.1";
+          const char *localhost_num = "::1";
           if (!strncmp(localhost_str, optarg, strlen(localhost_str))) {
               strncpy((char*)conf->r_host_addr, localhost_num, strlen(localhost_num));
           } else {
+            if (ip_type(optarg) == 1) {
+                const char* v6head = "::ffff:";
+                int size = snprintf(NULL, 0, "%s%s", v6head, optarg);
+                char new_rhost[128];
+                snprintf(new_rhost, size+1, "%s%s", v6head, optarg);
+                strncpy((char*)conf->r_host_addr, new_rhost, KSN_BUFFER_SM_SIZE/2);
+            } else {
               strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
+            }
           }
         } break;
 
