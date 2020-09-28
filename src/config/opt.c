@@ -211,8 +211,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
         case 'a': {
           const char *localhost_str = "localhost";
-          const char *localhost_num = "::1";
           if (!strncmp(localhost_str, optarg, strlen(localhost_str))) {
+              const char *localhost_num = "::1";
               strncpy((char*)conf->r_host_addr, localhost_num, strlen(localhost_num));
           } else {
             if (ip_type(optarg) == 1) {
