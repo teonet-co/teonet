@@ -552,7 +552,6 @@ void ksnTCPProxyClientStop(ksnTCPProxyClass *tp) {
  * 
  */
 void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
-    printf("cmd_udpp_read_cb!!!!!!!1\n");
     struct sockaddr_in remaddr; // Remote address
     socklen_t addrlen = sizeof(remaddr); // Length of addresses
     size_t data_len = KSN_BUFFER_DB_SIZE; // Buffer length
@@ -638,7 +637,6 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  */
 void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, 
         int cli_ser) {
-    printf("_cmd_tcpp_read_cb!!!!!!!1\n");
     size_t data_len = KSN_BUFFER_SIZE; // Buffer length
     ksnTCPProxyClass *tp = w->data; // Pointer to ksnTCPProxyClass
     char data[data_len]; // Buffer

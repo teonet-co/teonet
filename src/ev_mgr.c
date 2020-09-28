@@ -773,7 +773,6 @@ void    connect_r_host_cb(ksnetEvMgrClass *ke) {
         }
 
         // Send data to r-host
-        printf("connect_r_host_cb\n");
         ksnCoreSendto(ke->kc, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port,
                       CMD_CONNECT_R, data, ptr);
 
@@ -1281,7 +1280,6 @@ void idle_activity_cb(EV_P_ ev_idle *w, int revents) {
                 "idle activity callback %d\n", kev->idle_activity_count);
     #endif
 
-    //printf("idle_activity_cb. Connect to r-\n");
     // Start(restart) connection to R-Host
     connect_r_host_cb(w->data);
 
