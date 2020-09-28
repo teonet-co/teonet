@@ -146,7 +146,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             struct sockaddr_in remaddr; // remote address
                             socklen_t addrlen = sizeof(remaddr); // length of addresses
 
-                            if(!make_addr(arp->addr, arp->port, (__SOCKADDR_ARG) &remaddr, &addrlen)) {
+                            if(!make_addr(arp->addr, arp->port, (__SOCKADDR_ARG) &remaddr)) {
                                 trudpChannelData *tcd = trudpGetChannel(ke->kc->ku, (__CONST_SOCKADDR_ARG)&remaddr, 0);
                                 if((tcd != (void*)-1) || (tcd != NULL)) {
                                     trudp_ChannelSendReset(tcd);
@@ -168,8 +168,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
                             socklen_t addrlen = sizeof(remaddr); // length of addresses
-                            if(!make_addr(arp_data->addr, arp_data->port, 
-                                    (__SOCKADDR_ARG) &remaddr, &addrlen)) {
+                            if(!make_addr(arp_data->addr, arp_data->port, (__SOCKADDR_ARG) &remaddr)) {
                                 
                                 //Make command string
                                 char *command = ksnet_formatMessage("%s %d", 

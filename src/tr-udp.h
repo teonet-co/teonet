@@ -12,7 +12,7 @@
 
 #include "trudp.h"
 
-#define make_addr(addr_str, port, addr, addrlen) trudpUdpMakeAddr(addr_str, port, addr, addrlen)
+#define make_addr(addr_str, port, addr) trudpUdpMakeAddr(addr_str, port, addr)
 
 #ifdef	__cplusplus
 extern "C" {

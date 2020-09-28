@@ -436,9 +436,8 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         size_t pkg_len;
         void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len, &pkg_len);
         struct sockaddr_storage addr;             // address structure
-        socklen_t addrlen = sizeof(addr);    // address structure length
 
-        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr, &addrlen)) {
+        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr)) {
             ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
             arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
         }
@@ -779,7 +778,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
         if(kld != NULL) {
             struct sockaddr_storage remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
-            trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr, &addrlen);
+            trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr);
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, extendedLog(kl),

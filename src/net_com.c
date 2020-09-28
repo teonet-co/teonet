@@ -1153,8 +1153,7 @@ static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
 
         char *peer_name = "";        
         struct sockaddr_storage remaddr;         // remote address
-        socklen_t addr_len = sizeof(remaddr);// length of addresses
-        make_addr(cqd->addr, cqd->port, (__SOCKADDR_ARG) &remaddr, &addr_len);
+        make_addr(cqd->addr, cqd->port, (__SOCKADDR_ARG) &remaddr);
         ksnet_arp_data *arp = ksnetArpFindByAddr(cqd->ke->kc->ka, (__CONST_SOCKADDR_ARG) &remaddr, &peer_name);
         #ifdef DEBUG_KSNET
         ksn_printf(cqd->ke, MODULE, DEBUG_VV, 
