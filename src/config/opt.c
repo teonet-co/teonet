@@ -217,10 +217,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           } else {
             if (ip_type(optarg) == 1) {
                 const char* v6head = "::ffff:";
-                int size = snprintf(NULL, 0, "%s%s", v6head, optarg);
-                char new_rhost[128];
-                snprintf(new_rhost, size+1, "%s%s", v6head, optarg);
-                strncpy((char*)conf->r_host_addr, new_rhost, strlen(new_rhost)+1);
+                snprintf((char*)conf->r_host_addr, KSN_BUFFER_SM_SIZE/2, "%s%s", v6head, optarg);
             } else {
               strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
             }

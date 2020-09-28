@@ -84,13 +84,13 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     // UDP
     ssize_t sent = trudpUdpSendto(td->fd, (void *)buf, buf_len, (__CONST_SOCKADDR_ARG)&tcd->remaddr, sizeof(tcd->remaddr));
 
-    addr_port_t *ap_obj = wrap_inet_ntop(addr);
     #ifdef DEBUG_KSNET
+    addr_port_t *ap_obj = wrap_inet_ntop(addr);
     ksn_printf(kev, MODULE, DEBUG_VV, ">> skip this packet, send %d bytes direct by UDP to: %s:%d\n",
             sent, ap_obj->addr, ap_obj->port
     );
-    #endif
     addr_port_free(ap_obj);
+    #endif
 
     return sent;
 }
@@ -312,7 +312,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, DEBUG_VV, /*CONNECT,*/
                     "disconnect channel %s, last received: %.6f sec\n",
-                    tcd->channel_key, last_received / 1000000.0, tcd);
+                    tcd->channel_key, last_received / 1000000.0);
                 #endif
 
                 if(tcd->fd) {

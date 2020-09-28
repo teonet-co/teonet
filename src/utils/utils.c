@@ -705,6 +705,7 @@ int addr_port_equal(addr_port_t *ap_obj, char *addr, uint16_t port) {
 addr_port_t *addr_port_init() {
     addr_port_t *ptr = malloc(sizeof(addr_port_t));
     ptr->addr = malloc(ADDRSTRLEN);
+    ptr->addr[0] = '\0';
     ptr->port = 0;
     ptr->equal = addr_port_equal;
     return ptr;
