@@ -220,7 +220,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
                 int size = snprintf(NULL, 0, "%s%s", v6head, optarg);
                 char new_rhost[128];
                 snprintf(new_rhost, size+1, "%s%s", v6head, optarg);
-                strncpy((char*)conf->r_host_addr, new_rhost, KSN_BUFFER_SM_SIZE/2);
+                strncpy((char*)conf->r_host_addr, new_rhost, strlen(new_rhost)+1);
             } else {
               strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
             }
