@@ -7,22 +7,18 @@
 #include <assert.h>
 
 static const char* home_env_var = "HOME";
-static const char* public_ipv4_var = "PUBLIC_IPV4";
-static const char* public_ipv6_var = "PUBLIC_IPV6";
 
 typedef struct AppSettings
 {
     char* public_ipv4;
 } AppSettings;
 
-size_t save_public_ip_cb(void *ptr, size_t size, size_t nmemb, void *stream){
+size_t save_public_ip_cb(void *ptr, size_t size, size_t nmemb, void *stream) {
     AppSettings* settings = (AppSettings*)stream;
-    size_t buffer_size = strlen(public_ipv4_var) + 1 + nmemb + 1;//PUBLIC_IPV4=111.111.111.111 + terminating 0
+    size_t buffer_size = nmemb + 1; //111.111.111.111 + terminating 0
     settings->public_ipv4 = (char*)malloc(buffer_size);
-    snprintf(settings->public_ipv4, buffer_size, "%s=", public_ipv4_var);
-    memcpy(settings->public_ipv4 + strlen(public_ipv4_var) + 1, ptr, nmemb);
+    memcpy(settings->public_ipv4, ptr, nmemb);
     settings->public_ipv4[buffer_size - 1] = '\0';
-
     return nmemb;
 }
 
@@ -44,22 +40,22 @@ int main(int argc, char** argv)
 
     settings.public_ipv4 = NULL;
 
-    /* In windows, this will init the winsock stuff */ 
+    /* In windows, this will init the winsock stuff */
     curl_global_init(CURL_GLOBAL_ALL);
 
-    /* get a curl handle */ 
+    /* get a curl handle */
     curl = curl_easy_init();
     if(curl) {
     /* First set the URL that is about to receive our POST. This URL can
         just as well be a https:// URL if that is what should receive the
-        data. */ 
+        data. */
     curl_easy_setopt(curl, CURLOPT_URL, "http://169.254.169.254/latest/meta-data/public-ipv4");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, save_public_ip_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &settings);
 
-    /* Perform the request, res will get the return code */ 
+    /* Perform the request, res will get the return code */
     res = curl_easy_perform(curl);
-    /* Check for errors */ 
+    /* Check for errors */
     if(res != CURLE_OK) {
         printf("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
     } else {
@@ -99,7 +95,7 @@ int main(int argc, char** argv)
         free(settings.public_ipv4);
     }
 
-    /* always cleanup */ 
+    /* always cleanup */
     curl_easy_cleanup(curl);
     }
     curl_global_cleanup();
