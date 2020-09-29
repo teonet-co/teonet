@@ -14,15 +14,6 @@ typedef struct AppSettings
     char *public_ipv6;
 } AppSettings;
 
-size_t save_public_ipv4_cb(void *ptr, size_t size, size_t nmemb, void *stream){
-    AppSettings* settings = (AppSettings*)stream;
-    size_t buffer_size = nmemb + 1;//111.111.111.111 + terminating 0
-    settings->public_ipv4 = (char*)malloc(buffer_size);
-    memcpy(settings->public_ipv4, ptr, nmemb);
-    settings->public_ipv4[buffer_size - 1] = '\0';
-    return nmemb;
-}
-
 size_t save_data_cb(void *ptr, size_t size, size_t nmemb, void *stream){
     int buffer_size = nmemb + 1;
     char** buffer_ptr = (char**)stream;
@@ -35,18 +26,32 @@ size_t save_data_cb(void *ptr, size_t size, size_t nmemb, void *stream){
 }
 
 int request_public_ipv4(CURL *curl, AppSettings *settings) {
+    char *buffer = NULL;
+
     curl_easy_setopt(curl, CURLOPT_URL, "http://169.254.169.254/latest/meta-data/public-ipv4");
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, save_public_ipv4_cb);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, settings);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, save_data_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
 
     /* Perform the request, res will get the return code */
     CURLcode res = curl_easy_perform(curl);
 
     if (res != CURLE_OK) {
         printf("request_public_ipv4 failed: %s\n", curl_easy_strerror(res));
+        return 0;
     }
 
-    return res == CURLE_OK;
+    long response_code = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
+
+    if (response_code == 200) {
+        settings->public_ipv4 = strdup(buffer);
+    } else {
+        settings->public_ipv4 = NULL;
+    }
+
+    free(buffer);
+
+    return 1;
 }
 
 int request_public_ipv6(CURL *curl, AppSettings *settings) {
@@ -95,7 +100,7 @@ int request_public_ipv6(CURL *curl, AppSettings *settings) {
     if (response_code == 200) {
         settings->public_ipv6 = strdup(buffer);
     } else {
-        settings->public_ipv6 = strdup("");
+        settings->public_ipv6 = NULL;
     }
 
     free(ipv6_url_request_buffer);
@@ -105,10 +110,12 @@ int request_public_ipv6(CURL *curl, AppSettings *settings) {
 }
 
 void launch_app(AppSettings* settings, int argc, char** argv) {
-    assert(settings->public_ipv4 != NULL && "public ipv4 not set");
-    assert(settings->public_ipv6 != NULL && "public ipv6 not set");
+    int has_public_ipv4_addr = settings->public_ipv4 != NULL;
+    int has_public_ipv6_addr = settings->public_ipv6 != NULL;
+    assert((has_public_ipv4_addr || has_public_ipv6_addr) && "public ip not set");
 
     printf("%s\n%s\n", settings->public_ipv4, settings->public_ipv6);
+
     const char* home_val = getenv(home_env_var);
     printf("%s\n", home_val);
     size_t buf_size = strlen(home_env_var) + 1 + strlen(home_val) + 1;//HOME=/bla/bla/bla + terminnating 0
@@ -117,22 +124,41 @@ void launch_app(AppSettings* settings, int argc, char** argv) {
     char *env[] = {
         home_path_buf,
         NULL };
-    char **new_argv = (char**)malloc((argc + 2)*sizeof(char*));//args of starting app + public_ipv4 param
+    size_t arg_num = argc;
+    if (has_public_ipv4_addr) {
+        arg_num += 2;//--l0_public_ipv4 + ip
+    }
+
+    if (has_public_ipv6_addr) {
+        arg_num += 2;//--l0_public_ipv6 + ip
+    }
+
+    char **new_argv = (char**)malloc((arg_num)*sizeof(char*));
     int i = 0;
     for (; i < argc - 1; ++i) {
         new_argv[i] = strdup(argv[i + 1]);
     }
 
-    new_argv[i] = strdup("--l0_public_ipv4");
-    new_argv[i + 1] = strdup(settings->public_ipv4);
-    new_argv[i + 2] = NULL;
+    if (has_public_ipv4_addr) {
+        new_argv[i] = strdup("--l0_public_ipv4");
+        new_argv[i + 1] = strdup(settings->public_ipv4);
+        i += 2;
+    }
+
+    if (has_public_ipv6_addr) {
+        new_argv[i] = strdup("--l0_public_ipv6");
+        new_argv[i + 1] = strdup(settings->public_ipv6);
+        i += 2;
+    }
+
+    new_argv[i] = NULL;
 
     printf("%s\n", new_argv[0]);
 
     execve(new_argv[0], new_argv, env);
     perror("execve");
     i = 0;
-    for (; i < argc + 2; ++i) {
+    for (; i < arg_num; ++i) {
         free(new_argv[i]);
     }
 
