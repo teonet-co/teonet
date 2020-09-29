@@ -20,7 +20,6 @@ size_t save_public_ipv4_cb(void *ptr, size_t size, size_t nmemb, void *stream){
     settings->public_ipv4 = (char*)malloc(buffer_size);
     memcpy(settings->public_ipv4, ptr, nmemb);
     settings->public_ipv4[buffer_size - 1] = '\0';
-
     return nmemb;
 }
 
