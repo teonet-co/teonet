@@ -104,6 +104,7 @@ int request_public_ipv4(CURL *curl, AppSettings *settings) {
 
     if (res != CURLE_OK) {
         printf("request_public_ipv4 failed: %s\n", curl_easy_strerror(res));
+        destroy_buffer(&data_buffer);
         return 0;
     }
 
@@ -133,6 +134,7 @@ int request_public_ipv6(CURL *curl, AppSettings *settings) {
 
     if (res != CURLE_OK) {
         printf("request macs failed: %s\n", curl_easy_strerror(res));
+        destroy_buffer(&data_buffer);
         return 0;
     }
 
@@ -158,6 +160,7 @@ int request_public_ipv6(CURL *curl, AppSettings *settings) {
     if (res != CURLE_OK) {
         printf("request_public_ipv6 failed: %s\n", curl_easy_strerror(res));
         free(ipv6_url_request_buffer);
+        destroy_buffer(&data_buffer);
         return 0;
     }
 
