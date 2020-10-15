@@ -146,7 +146,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                             struct sockaddr_in remaddr; // remote address
                             if(!make_addr(arp->addr, arp->port, (__SOCKADDR_ARG) &remaddr)) {
                                 trudpChannelData *tcd = trudpGetChannel(ke->kc->ku, (__CONST_SOCKADDR_ARG)&remaddr, 0);
-                                if((tcd != (void*)-1) || (tcd != NULL)) {
+                                if((tcd != (void*)-1) && (tcd != NULL)) {
                                     trudp_ChannelSendReset(tcd);
                                 }
                             }
