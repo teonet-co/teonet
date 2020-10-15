@@ -24,6 +24,7 @@ nbproject/
 /.f1/
 /.teonet_tst/
 /.teovpn/
+/.teovpnstarter/
 /.teosend/
 /.teolarge/
 /.teofossa/
@@ -77,6 +78,7 @@ nbproject/
 /po/POTFILES
 /po/stamp-it
 /app/teovpn
+/app/teovpnstarter
 /tests/teonet_tst
 /teonet-*/
 /teonet-*.gz

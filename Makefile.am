@@ -75,3 +75,7 @@ build-tests:
 
 test:	tests/test_teonet
 	tests/test_teonet
+
+deb-package:
+	sh/make_libtuntap.sh
+	sh/make_deb.sh @PACKAGE_VERSION@

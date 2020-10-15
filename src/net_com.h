@@ -67,6 +67,8 @@ enum ksnCMD {
     CMD_SUBSCRIBE_RND,      ///< #100 Subscribe command extension. (Send answer for one random peer by type)
     CMD_L0_CLIENT_BROADCAST,///< #101 Send data to all L0 clients
 
+    CMD_GET_PUBLIC_IP,         ///< #102 Request public IPs, which set by l0_public_ipv4, l0_public_ipv6 parameters
+    CMD_GET_PUBLIC_IP_ANSWER,  ///< #103 Public IPs answer
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
