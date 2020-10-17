@@ -90,12 +90,6 @@ int main(int argc, char** argv) {
         return (EXIT_FAILURE);
     }
 
-    // DEB specific
-    if(b_type == 1) {
-
-        // Import repository keys
-        if(system("sh/make_deb_keys_add.sh")) return (EXIT_FAILURE);
-    }
 
     // Get build ID from GitLab CI environment variable
     char version[KSN_BUFFER_SM_SIZE];
