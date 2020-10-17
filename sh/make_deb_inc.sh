@@ -298,13 +298,12 @@ EOF
         cat << EOF > $REPO/conf/options
 
 verbose
-ask-passphrase
 basedir .
 
 EOF
 
         # Create the repository tree
-        reprepro --ask-passphrase -Vb $REPO export
+        reprepro -Vb $REPO export
 
         REPO_JUST_CREATED=1
         echo ""
