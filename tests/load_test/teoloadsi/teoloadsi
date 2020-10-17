@@ -1,3 +1,0 @@
-sudo src/teoloadsi teo-load-si none -p 9900 -d && src/teoloadsi teo-load-si-2 teo-load-si -a localhost -r 9900
-echo "Result:" $?
-sudo killall lt-teoloadsi
