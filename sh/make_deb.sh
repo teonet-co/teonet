@@ -75,13 +75,10 @@ echo ""
 echo $ANSI_BROWN"Install reprepro:0"$ANSI_NONE
 
 echo $ANSI_BROWN"Install reprepro:1"$ANSI_NONE
-# Add dependences to the repository
-if [ $REPO_JUST_CREATED = 1 ]; then
-    echo $ANSI_BROWN"Install reprepro:2"$ANSI_NONE
-    # Make and add libtuntap
-    sh/make_libtuntap.sh
+echo $ANSI_BROWN"Install reprepro:2"$ANSI_NONE
+# Make and add libtuntap
+sh/make_libtuntap.sh
 
-fi
 echo $ANSI_BROWN"Install reprepro:3"$ANSI_NONE
 # Create deb package ----------------------------------------------------------
 
