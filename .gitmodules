@@ -1,0 +1,10 @@
+[submodule "embedded/teocli"]
+	path = embedded/teocli
+	url = https://github.com/teonet-co/teocli.git
+	ignore = dirty
+
+[submodule "app/embedded/jsmn"]
+	path = app/embedded/jsmn
+	url = https://github.com/zserge/jsmn.git
+	ignore = dirty
+

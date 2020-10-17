@@ -1,0 +1,82 @@
+version: 2
+jobs:
+  testing:
+    machine:
+      docker_layer_caching: false
+    environment:
+      AWS_REGION: eu-west-1
+      AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
+      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
+
+  tagged-build:
+    machine:
+      docker_layer_caching: false
+    environment:
+      AWS_REGION: eu-west-1
+      AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
+      YC_YCR_REPONAME: cr.yandex/crp8ph86e05bgnsgjbb8/teonet
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
+      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
+
+      # login to ECR
+      - run: $(aws --region $AWS_REGION ecr get-login --no-include-email)
+
+      # push image to ECR
+      - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:$CIRCLE_TAG
+      - run: docker push ${AWS_ECR_REPONAME}:$CIRCLE_TAG
+      - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:latest
+      - run: docker push ${AWS_ECR_REPONAME}:latest
+
+  # Build and Publish deb packages and Source doxygen documentation to repository
+  # (publishing)
+  publish-ubuntu:
+    docker:
+      - image: teonet-co-docker-d.bintray.io/ci/ubuntu_teonet
+    steps:
+      - checkout
+      - run: git submodule update --init --recursive
+
+      # Install dependences
+      - run: if [ -e sh/build-ubuntu.sh ]; then apt-get install -y sudo && sh/build-ubuntu.sh; fi
+
+      # Make
+      - run: ./autogen.sh
+      - run: ./configure --prefix=/usr
+      - run: make
+
+      # Test
+      #- run: app/teovpn -?
+      - run: make test
+
+      # Buid binary deb package
+      #- run: git clone git@github.com:teonet-co/ci-build.git
+      - run: sh/make_package deb
+
+workflows:
+  version: 2
+  untagged:
+    jobs: 
+     - testing
+  tagged:
+    jobs:
+      - publish-ubuntu:
+          context: CI_BUILD
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+      - tagged-build:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+          

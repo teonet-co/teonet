@@ -1,0 +1,156 @@
+# version 0.0.3
+
+# Run before each script
+before_script:
+#  - docker info
+#  - echo ~/
+#  - ls -all ~/.ssh
+#  - git submodule init
+
+# Update project submodules
+  - git submodule update --init --recursive
+
+types:
+  - build
+  - deploy
+
+#build_image:
+#  type: build
+#  script:
+#    - docker build -t ubuntu:14:04
+#    - docker run ubuntu:14:04 apt-get install git
+
+# Image host voulume definition:
+# /path/to/bind/from/host:/path/to/bind/in/container:rw
+    
+# Build    
+job_ubuntu:
+  type: build
+  image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
+  #volumes (defined in /etc/gitlab-runner/config.toml): /home/kirill/_repo_:/builds/ksnet/repo:rw
+  tags:
+    - docker_image_run
+  script:
+    # Test volumes
+    #- cp ./autogen.sh ../repo
+    #- printenv
+    # Make  
+    #- sh/build-ubuntu.sh
+    #- pwd
+    - ./autogen.sh
+    - make
+    - app/teovpn -?
+    # Test
+    - make test
+    # Build DEB package and upload it to repository
+    - sh/make_package deb
+  only:
+    - tags  
+#    - master
+    
+job_centos:
+  type: build
+  image: gitlab.ksproject.org:5000/ci/centos_teonet
+  tags:
+    - docker_image_run
+  script:
+    # Make
+    #- sh/build-centos.sh
+    - ./autogen.sh
+    - make
+    - app/teovpn -?
+    # Test
+    - make test
+    # Build RPM package and upload it to repository
+    - sh/make_package yum
+  only:
+    - tags  
+#    - master
+
+job_fedora:
+  type: build
+  image: gitlab.ksproject.org:5000/ci/fedora_teonet
+  tags:
+    - docker_image_run
+  script:
+    # Make
+    #- sh/build-centos.sh
+    - ./autogen.sh
+    - make
+    - app/teovpn -?
+    # Test
+    - make test
+  only:
+    - tags  
+#    - master
+    
+job_opensuse:
+  type: build
+  image: gitlab.ksproject.org:5000/ci/opensuse_teonet
+  tags:
+    - docker_image_run
+  script:
+    # Make
+    #- sh/build-opensuse.sh
+    - ./autogen.sh
+    - make
+    - app/teovpn -?
+    # Test
+    - make test
+    # Build RPM package and upload it to repository
+    - sh/make_package zyp
+  only:
+    - tags  
+#    - master
+
+# Test
+
+# Deploy
+#job_ubuntu_deploy:
+#  type: deploy
+#  image: ubuntu_teonet
+#  tags:
+#    - docker_image_run
+#  script:
+#    # Build DEB package and upload it to repository
+#    - ./autogen.sh
+#    - cd sh; make; cd ..
+#    - sh/make_package deb
+#  only:
+#    - tags  
+##    - master
+    
+#job_centos_deploy:
+#  type: deploy
+#  image: centos_teonet
+#  tags:
+#    - docker_image_run
+#  script:
+#    # Build RPM package and upload it to repository
+#    - ./autogen.sh
+#    - cd sh; make; cd ..
+#    - sh/make_package yum
+#  only:
+#    - tags  
+##    - master
+
+# Build teonet docker image and upload it to Docker HUB
+build_teonet_image:
+  type: deploy
+  tags:
+      - docker_image_build
+  script:
+    - cd sh  
+    #- ls -all
+    #- sudo apt-get -y update
+    - docker build --no-cache .
+    - docker build -t kscherba/teonet .
+    - docker login --username=kscherba --password=$CI_TEONET_DOCKER_PWD #--email=kirill@scherba.ru
+    - docker push kscherba/teonet
+    - docker tag kscherba/teonet gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG
+    - docker push gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG
+    # update latest
+    - docker tag gitlab.ksproject.org:5000/teonet/teonet:$CI_BUILD_TAG gitlab.ksproject.org:5000/teonet/teonet:latest
+    - docker push gitlab.ksproject.org:5000/teonet/teonet:latest
+  only:
+    - tags  
