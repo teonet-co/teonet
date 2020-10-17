@@ -14,7 +14,7 @@
 
 # Function ---------------------------------------------------------------------
 
-# Check parameters and set defaults (specific for libteonet)
+# Check parameters
 # Parameters:
 # @param $1 Version (required)
 # @param $2 Library HI version (default 0)
@@ -24,6 +24,8 @@
 # @param $6 Reserved
 # @param $7 Package name (default libteonet-dev)
 # @param $8 Package description (default ...)
+# @param $9 Package Maintainer
+# @param $10 Package Dependence
 # Set global variables:
 # VER_ONLY=$1
 # LIBRARY_HI_VERSION=$2
@@ -33,6 +35,10 @@
 # VER=$1-$RELEASE
 # PACKET_NAME=$7
 # PACKET_DESCRIPTION=$8
+# MAINTAINER=$9
+# DEPENDS=$10
+# LICENSES=$11
+# VCS_URL=$12
 check_param()
 {
     # The first parameter is required
@@ -77,27 +83,61 @@ check_param()
 
     # $7
     if [ -z "$7" ]; then
-        PACKET_NAME="libteonet-dev"
+        echo The PACKET NAME parameter is required
+        exit 1
     else
         PACKET_NAME=$7
     fi
 
     # $8
     if [ -z "$8" ]; then
-        PACKET_DESCRIPTION="Teonet library version $VER
-     Mesh network library."
+        echo The PACKET DESCRIPTION parameter is required
+        exit 1
     else
-        PACKET_DESCRIPTION=$8
+        PACKET_DESCRIPTION=$8 #$descr #$8
+    fi
+
+    # $9
+    if [ -z "$9" ]; then
+        echo The MAINTAINER parameter is required
+        exit 1
+    else
+        MAINTAINER=$9
+    fi
+
+    # $10
+    if [ -z "${10}" ]; then        
+        echo The DEPENDS parameter is required
+        exit 1
+    else
+        DEPENDS=${10} #$depen #$10
+    fi
+
+    # $11
+    if [ -z "${11}" ]; then        
+        echo The LICENSES parameter is required
+        exit 1
+    else
+        LICENSES=${11}
+    fi
+
+    # $12
+    if [ -z "${12}" ]; then        
+        VCS_URL=$VCS_URL_DEFAULT
+        echo The LVCS URL parameter is required
+        exit 1
+    else
+        VCS_URL=${12}
     fi
 }
 
 # Update and upgrade build host
 update_host()
 {
-    #echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
-    #echo ""
-    #sudo apt-get update
-    #sudo apt-get -y upgrade
+    echo $ANSI_BROWN"Update and upgrade build host:"$ANSI_NONE
+    echo ""
+    sudo apt-get update
+    sudo apt-get -y upgrade
     echo ""
 }
 
@@ -276,7 +316,7 @@ EOF
     fi
 }
 
-# Add DEB packages to local repository
+# Add DEB packages to Local repository
 # Parameters:
 # @param $1 Repository folder with sub-folder
 # @param $2 Repository code name
@@ -289,4 +329,36 @@ add_deb_package()
     echo ""
 }
 
-#-------------------------------------------------------------------------------
+# Upload DEB package to Bintray repository
+# Parameters:
+# @param $1 Distribution
+upload_deb_bintray()
+{
+
+    # Upload file
+    echo "Upload $1 DEB package: " $PACKAGE_NAME.deb   
+    curl -X PUT -T $PACKAGE_NAME.deb -u$CI_BINTRAY_USER:$CI_BINTRAY_API_KEY "https://api.bintray.com/content/teonet-co/u/"$PACKET_NAME"/"$VER"/"$PACKAGE_NAME"_"$1".deb;deb_distribution="$1";deb_component=main;deb_architecture="$ARCH";override=1;publish=1;bt_package="$PACKET_NAME";bt_version="$VER
+    echo "\n"
+}
+
+# Allow Bintray DEB package direct download
+# Parameters:
+# @param $1 Distribution
+allow_deb_binary_download()
+{
+    sleep 30
+    curl -X PUT -H "Content-Type: application/json" -d '{"list_in_downloads":true}' -u$CI_BINTRAY_USER:$CI_BINTRAY_API_KEY  "https://api.bintray.com/file_metadata/teonet-co/u/"$PACKET_NAME"/"$VER"/"$PACKAGE_NAME"_"$1".deb"
+}
+
+# Create packet if not exists
+create_package_bintray()
+{
+    # Create packet if not exists
+    if [ $(curl -X GET -u$CI_BINTRAY_USER:$CI_BINTRAY_API_KEY "https://api.bintray.com/packages/teonet-co/u/$PACKET_NAME" | jq -r ".name") != "$PACKET_NAME" ]; then
+        echo $ANSI_BROWN"Create package "$PACKET_NAME" in Bintray repository:"$ANSI_NONE
+        echo ""
+        curl -vvf -X POST -u$CI_BINTRAY_USER:$CI_BINTRAY_API_KEY -H "Content-Type:application/json" https://api.bintray.com/packages/teonet-co/u --data '{"name":"'$PACKET_NAME'","licenses":'$LICENSES',"vcs_url": "'$VCS_URL'"}'        
+        echo ""
+    fi;
+    echo ""
+}

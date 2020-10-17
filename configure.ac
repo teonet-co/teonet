@@ -18,7 +18,7 @@ m4_define([package_version], [package_major[.]package_minor[.]package_patch])
 
 AC_PREREQ([2.69])
 
-AC_INIT([teonet], [package_version], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
+AC_INIT([libteonet-dev], [package_version], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
 
 AC_DEFINE_SUBST(LIBRARY_CURRENT,  2, [teocli dynamic library version])
 AC_DEFINE_SUBST(LIBRARY_REVISION, 25,[teocli dynamic library version])
