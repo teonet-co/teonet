@@ -296,11 +296,28 @@ SignWith: yes
 EOF
 
         cat << EOF > $REPO/conf/options
-
 verbose
 basedir .
-
 EOF
+
+        # Import repository keys to this host
+        # #echo "Before Import repository keys..."
+        # str=`gpg --list-keys | grep "repository <repo@ksproject.org>"`
+        # if [ -z "$str" ]; then
+        #   echo $ANSI_BROWN"Add repository keys to this host:"$ANSI_NONE
+        #   gpg --allow-secret-key-import --import $5/deb-sec.gpg.key
+        #   gpg --import $5/deb.gpg.key
+        # fi
+        # #echo "After Import repository keys..."
+
+        # # Remove keys from this host
+        # # gpg --delete-secret-key  "repository <repo@ksproject.org>"
+        # # gpg --delete-key  "repository <repo@ksproject.org>"
+
+        # # Export key to repository folder
+        # mkdir $REPO/key
+        # gpg --armor --export repository repo@ksproject.org >> $REPO/key/deb.gpg.key
+        # gpg --armor --export-secret-key repository repo@ksproject.org >> $REPO/key/deb-sec.gpg.key
 
         # Create the repository tree
         reprepro -Vb $REPO export
