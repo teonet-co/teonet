@@ -101,23 +101,34 @@ int main(int argc, char** argv) {
 
     // Execute build packet script
     char cmd[KSN_BUFFER_SM_SIZE];
-    snprintf(cmd, KSN_BUFFER_SM_SIZE, "sh/make_%s.sh %s %d %d.0.0 %s %s %s",
-            b_type == DEB ? argv[1] : "rpm",  // 0
-            // Script parameters
-            version,                // $1 Version
-            LIBRARY_MAJOR_VERSION,  // $2 Library major version
-            LIBRARY_MAJOR_VERSION,  // $3 Library version
-            CI_BUILD_ID != NULL ? CI_BUILD_ID : (CIRCLE_BUILD_NUM != NULL ? CIRCLE_BUILD_NUM : "1"), // $4 Build
-            argc >= 3 ? argv[2] : b_type == DEB ? "amd64" : "x86_64", // $5 Architecture
-            b_type > DEB ? argv[1] : "deb", // $6 RPM subtype
-      PACKAGE_NAME,                     // $7 Package name (default: libteonet)
-      PACKAGE_DESCRIPTION,              // $8 Package description (default: ...)
-      PACKAGE_BUGREPORT,                // $9 Package Maintainer
-      PACKAGE_DEPENDENCIES,             // $10 Package dependencies
-      LICENSES,
-      VCS_URL
-    ) < 0 ? abort() : (void)0;
+    printf("LIBRARY MAJOR %d\n", LIBRARY_MAJOR_VERSION);
+    // Execute build packet script
+    snprintf(
+        cmd, KSN_BUFFER_SM_SIZE,
+        "tools/make_%s.sh %s %d %d.0.0 %s %s %s %s '%s' '%s' '%s' '%s' '%s'",
+        b_type == DEB ? argv[1] : "rpm", // Script type
+        // Script parameters
+        version,               // $1 Version
+        LIBRARY_MAJOR_VERSION, // $2 Library major version
+        LIBRARY_MAJOR_VERSION, // $3 Library version
+        CI_BUILD_ID != NULL && CI_BUILD_ID[0]
+            ? CI_BUILD_ID
+            : (CIRCLE_BUILD_NUM != NULL && CIRCLE_BUILD_NUM[0] ? CIRCLE_BUILD_NUM
+                                                                : "1"), // $4 Build
+        argc >= 3 ? argv[2]
+                    : b_type == DEB ? "amd64" : "x86_64", // $5 Architecture
+        b_type > DEB ? argv[1] : "deb",                 // $6 RPM subtype
+        PACKAGE_NAME,                     // $7 Package name (default: libteonet)
+        PACKAGE_DESCRIPTION,              // $8 Package description (default: ...)
+        PACKAGE_BUGREPORT,                // $9 Package Maintainer
+        PACKAGE_DEPENDENCIES,             // $10 Package dependencies
+        LICENSES,
+        VCS_URL
+        ) < 0
+        ? abort()
+        : (void)0;
 
+    printf("%s\n\n", cmd);
     rv = system(cmd);
 
     return rv != 0;
