@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
     // Execute build packet script
     snprintf(
         cmd, KSN_BUFFER_SM_SIZE,
-        "tools/make_%s.sh %s %d %d.0.0 %s %s %s %s '%s' '%s' '%s' '%s' '%s'",
+        "sh/make_%s.sh %s %d %d.0.0 %s %s %s %s '%s' '%s' '%s' '%s' '%s'",
         b_type == DEB ? argv[1] : "rpm", // Script type
         // Script parameters
         version,               // $1 Version
