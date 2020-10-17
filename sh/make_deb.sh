@@ -101,22 +101,6 @@ build_deb_package $PACKAGE_NAME
 
 
 
-# Upload repository to remote host, test install and run application ----------
-if [ ! -z "$CI_BUILD_REF" ]; then
-
-    echo $ANSI_BROWN"Upload DEB package:"$ANSI_NONE
-    echo ""
-
-    # Add DEB packages to local repository	
-    add_deb_package $REPO/ubuntu teonet $PACKAGE_NAME
-
-    # Upload repository to remote host by ftp:
-    sh/make_remote_upload.sh
-    
-    # Install packet from remote repository
-    sh/make_remote_install.sh
-fi
-
 # Upload DEB packages to Bintray  ---------------------------------------------
 if [ ! -z "$CI_BUILD_REF_BT" ]; then
 
