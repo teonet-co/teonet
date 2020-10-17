@@ -28,6 +28,10 @@ AC_DEFINE_SUBST(PACKAGE_MAJOR_VERSION, [package_major], [pack ver])
 AC_DEFINE_SUBST(PACKAGE_MINOR_VERSION, [package_minor], [pack ver])
 AC_DEFINE_SUBST(PACKAGE_PATCH_VERSION, [package_patch], [pack ver])
 
+AC_DEFINE([PACKAGE_DESCRIPTION], ["Teonet Library. Mesh network library"], [Application description])
+AC_DEFINE([PACKAGE_DEPENDENCIES], [""], [Application dependencies])
+AC_DEFINE([LICENSES], ["[[\"MIT\",\"LGPL-3.0\"]]"], [Application package licenses])
+AC_DEFINE([VCS_URL], ["https://github.com/teonet-co/teonet.git"], [Git URL])
 AC_DEFINE(COPYRIGHT, ["(c) Teonet co., 1996-2020"], [Teonet library copyright])
 
 AC_CONFIG_HEADERS([src/config/config.h])
