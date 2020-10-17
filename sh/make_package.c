@@ -109,9 +109,13 @@ int main(int argc, char** argv) {
             LIBRARY_MAJOR_VERSION,  // $3 Library version
             CI_BUILD_ID != NULL ? CI_BUILD_ID : (CIRCLE_BUILD_NUM != NULL ? CIRCLE_BUILD_NUM : "1"), // $4 Build
             argc >= 3 ? argv[2] : b_type == DEB ? "amd64" : "x86_64", // $5 Architecture
-            b_type > DEB ? argv[1] : "deb" // $6 RPM subtype
-            //"", // $7 Package name (default: libteonet)
-            //""  // $8 Package description (default: ...)
+            b_type > DEB ? argv[1] : "deb", // $6 RPM subtype
+      PACKAGE_NAME,                     // $7 Package name (default: libteonet)
+      PACKAGE_DESCRIPTION,              // $8 Package description (default: ...)
+      PACKAGE_BUGREPORT,                // $9 Package Maintainer
+      PACKAGE_DEPENDENCIES,             // $10 Package dependencies
+      LICENSES,
+      VCS_URL
     ) < 0 ? abort() : (void)0;
 
     rv = system(cmd);
