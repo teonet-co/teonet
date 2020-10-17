@@ -114,34 +114,34 @@ make
 make install DESTDIR=$PWD/$PACKAGE_NAME
 echo ""
 
-# # Create package
-# if [ $RPM_SUBTYPE = "deb" ]; then
+# Create package
+if [ $RPM_SUBTYPE = "deb" ]; then
 
-#     # Create DEBIAN control file
-#     create_deb_control $PACKAGE_NAME $PACKET_NAME $VER $ARCH "${DEPENDS}" "${MAINTAINER}" "${PACKET_DESCRIPTION}"
+    # Create DEBIAN control file
+    create_deb_control $PACKAGE_NAME $PACKET_NAME $VER $ARCH "${DEPENDS}" "${MAINTAINER}" "${PACKET_DESCRIPTION}"
 
-#     # Build package
-#     build_deb_package $PACKAGE_NAME
+    # Build package
+    build_deb_package $PACKAGE_NAME
 
-#     # Add DEB packages to local repository
-#     add_deb_package $REPO/$REPO_DEB teonet $PACKAGE_NAME
+    # Add DEB packages to local repository
+    add_deb_package $REPO/$REPO_DEB teonet $PACKAGE_NAME
 
-# else
+else
 
-#     # Create binary tarball
-#     build_rpm_tarball $PACKAGE_NAME
+    # Create binary tarball
+    build_rpm_tarball $PACKAGE_NAME
 
-#     # Copy tarball to the sources folder and create spec file
-#     RPM_FILES="/usr/include/tuntap.h
-# /usr/lib/libtuntap.a
-# /usr/lib/libtuntap.so
-# /usr/lib/libtuntap.so.2.1"
-#     create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
+    # Copy tarball to the sources folder and create spec file
+    RPM_FILES="/usr/include/tuntap.h
+/usr/lib/libtuntap.a
+/usr/lib/libtuntap.so
+/usr/lib/libtuntap.so.2.1"
+    create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
-#     # Build the source and the binary RPM
-#     build_rpm "${INST}$RPM_DEV" $RPMBUILD $PACKET_NAME
+    # Build the source and the binary RPM
+    build_rpm "${INST}$RPM_DEV" $RPMBUILD $PACKET_NAME
 
-# fi
+fi
 
 cd ..
 cp libtuntap-master/*.deb ./
