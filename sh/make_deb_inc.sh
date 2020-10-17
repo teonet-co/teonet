@@ -41,6 +41,27 @@
 # VCS_URL=$12
 check_param()
 {
+    PACKET_NAME_DEFAULT="libteonet-dev"
+    MAINTAINER_DEFAULT="kirill@scherba.ru"
+    DEPENDS_DEFAULT=""
+    PACKET_DESCRIPTION_DEFAULT="Teonet"
+    LICENSES_DEFAULT='["MIT"]'
+    VCS_URL_DEFAULT="https://github.com"
+
+    #  Replace characters in $8 and $10
+    #echo "$@"
+    #echo .
+    # ${parameter//pattern/string}
+    # descr="$8"
+    # descr=`echo $descr| sed -e 's/_/ /g'`
+    #echo "$descr"
+    #echo .
+    # depen="$10"
+    # depen=`echo $depen| sed -e 's/!/ /g'`
+    #echo "$depen"
+
+    #exit 1
+
     # The first parameter is required
     # $1
     if [ -z "$1" ]; then
@@ -83,40 +104,35 @@ check_param()
 
     # $7
     if [ -z "$7" ]; then
-        echo The PACKET NAME parameter is required
-        exit 1
+        PACKET_NAME=$PACKET_NAME_DEFAULT
     else
         PACKET_NAME=$7
     fi
 
     # $8
     if [ -z "$8" ]; then
-        echo The PACKET DESCRIPTION parameter is required
-        exit 1
+        PACKET_DESCRIPTION="$PACKET_DESCRIPTION_DEFAULT, Version $VER"
     else
         PACKET_DESCRIPTION=$8 #$descr #$8
     fi
 
     # $9
     if [ -z "$9" ]; then
-        echo The MAINTAINER parameter is required
-        exit 1
+        MAINTAINER=$MAINTAINER_DEFAULT
     else
         MAINTAINER=$9
     fi
 
     # $10
     if [ -z "${10}" ]; then        
-        echo The DEPENDS parameter is required
-        exit 1
+        DEPENDS=$DEPENDS_DEFAULT
     else
         DEPENDS=${10} #$depen #$10
     fi
 
     # $11
     if [ -z "${11}" ]; then        
-        echo The LICENSES parameter is required
-        exit 1
+        LICENSES=$LICENSES_DEFAULT
     else
         LICENSES=${11}
     fi
@@ -124,8 +140,6 @@ check_param()
     # $12
     if [ -z "${12}" ]; then        
         VCS_URL=$VCS_URL_DEFAULT
-        echo The LVCS URL parameter is required
-        exit 1
     else
         VCS_URL=${12}
     fi
