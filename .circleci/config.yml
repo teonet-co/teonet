@@ -22,6 +22,7 @@ jobs:
     steps:
       - checkout
       - run: git submodule update --init --recursive
+      - run: if [ -e sh/build-ubuntu.sh ]; then apt-get install -y sudo && sh/build-ubuntu.sh; fi
       - run: ./autogen.sh
       - run: ./configure --prefix=/usr
       - run: make
@@ -32,7 +33,7 @@ jobs:
 
       # Buid binary deb package
       #- run: git clone git@github.com:teonet-co/ci-build.git
-      - run: tools/make_package deb
+      - run: sh/make_package deb
 
       - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
       - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
