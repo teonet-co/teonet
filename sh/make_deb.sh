@@ -72,9 +72,8 @@ echo $ANSI_BROWN"Install reprepro:"$ANSI_NONE
 echo ""
 sudo apt-get install -y reprepro
 echo ""
+echo $ANSI_BROWN"Install reprepro:0"$ANSI_NONE
 
-# Create DEB repository
-create_deb_repo $REPO ubuntu Teonet teonet sh/gpg_key
 echo $ANSI_BROWN"Install reprepro:1"$ANSI_NONE
 # Add dependences to the repository
 if [ $REPO_JUST_CREATED = 1 ]; then
