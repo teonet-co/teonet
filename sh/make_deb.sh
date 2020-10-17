@@ -63,7 +63,7 @@ echo $ANSI_BROWN"Create debian packet $PACKET_NAME""_$VER_ARCH.deb"$ANSI_NONE
 echo ""
 
 # Update and upgrade build host
-update_host
+#update_host
 
 # Create deb repository -------------------------------------------------------
 
@@ -75,15 +75,15 @@ echo ""
 
 # Create DEB repository
 create_deb_repo $REPO ubuntu Teonet teonet sh/gpg_key
-
+echo $ANSI_BROWN"Install reprepro:1"$ANSI_NONE
 # Add dependences to the repository
 if [ $REPO_JUST_CREATED = 1 ]; then
-
+    echo $ANSI_BROWN"Install reprepro:2"$ANSI_NONE
     # Make and add libtuntap
     sh/make_libtuntap.sh
 
 fi
-
+echo $ANSI_BROWN"Install reprepro:3"$ANSI_NONE
 # Create deb package ----------------------------------------------------------
 
 # Configure and make auto configure project (in current folder)
