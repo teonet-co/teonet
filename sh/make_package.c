@@ -12,6 +12,16 @@
 #include <unistd.h>
 #include <string.h>
 
+#undef PACKAGE
+#undef VERSION
+#undef GETTEXT_PACKAGE
+#undef PACKAGE_VERSION
+#undef PACKAGE_TARNAME
+#undef PACKAGE_STRING
+#undef PACKAGE_NAME
+#undef PACKAGE_BUGREPORT
+#undef PACKAGE_DESCRIPTION
+#undef PACKAGE_DEPENDENCIES
 #include "../src/config/conf.h"
 #include "../src/config/config.h"
 
