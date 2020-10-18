@@ -320,7 +320,7 @@ EOF
         # gpg --armor --export-secret-key repository repo@ksproject.org >> $REPO/key/deb-sec.gpg.key
 
         # Create the repository tree
-        reprepro -Vb $REPO export
+        #reprepro -Vb $REPO export
 
         REPO_JUST_CREATED=1
         echo ""
