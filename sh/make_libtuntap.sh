@@ -124,6 +124,8 @@ if [ $RPM_SUBTYPE = "deb" ]; then
     build_deb_package $PACKAGE_NAME
 
     # Add DEB packages to local repository
+    echo "!!!!!!!!!HUI!"
+    echo $REPO/$REPO_DEB teonet $PACKAGE_NAME
     add_deb_package $REPO/$REPO_DEB teonet $PACKAGE_NAME
 
 else

@@ -335,8 +335,8 @@ EOF
 add_deb_package()
 {
     echo $ANSI_BROWN"Add DEB package to local repository:"$ANSI_NONE
-    echo ""
-    reprepro --ask-passphrase -Vb $1 includedeb $2 $3.deb
+    echo $1 includedeb $2 $3.deb
+    reprepro -Vb $1 includedeb $2 $3.deb
     echo ""
 }
 
