@@ -25,6 +25,8 @@ SUBDIRS = \
 	po \
 	# end of SUBDIRS
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = src/libteonet.pc
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \

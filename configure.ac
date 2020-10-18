@@ -34,6 +34,8 @@ AC_DEFINE([LICENSES], ["[[\"MIT\",\"LGPL-3.0\"]]"], [Application package license
 AC_DEFINE([VCS_URL], ["https://github.com/teonet-co/teonet.git"], [Git URL])
 AC_DEFINE(COPYRIGHT, ["(c) Teonet co., 1996-2020"], [Teonet library copyright])
 
+PKG_INSTALLDIR
+
 AC_CONFIG_HEADERS([src/config/config.h])
 AC_CONFIG_SRCDIR([src/teonet.hpp])
 AC_CONFIG_MACRO_DIR([m4])
@@ -292,7 +294,7 @@ LT_INIT
 AC_CONFIG_FILES([
     Makefile
     po/Makefile.in
-    src/libteonet.pc
+    src/libteonet.pc:src/libteonet.pc.in
     src/Makefile
     app/Makefile
     tests/Makefile

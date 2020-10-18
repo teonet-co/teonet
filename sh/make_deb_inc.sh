@@ -320,7 +320,7 @@ EOF
         # gpg --armor --export-secret-key repository repo@ksproject.org >> $REPO/key/deb-sec.gpg.key
 
         # Create the repository tree
-        #reprepro -Vb $REPO export
+        reprepro -Vb $REPO export
 
         REPO_JUST_CREATED=1
         echo ""
@@ -336,7 +336,7 @@ add_deb_package()
 {
     echo $ANSI_BROWN"Add DEB package to local repository:"$ANSI_NONE
     echo $1 includedeb $2 $3.deb
-    #reprepro -Vb $1 includedeb $2 $3.deb
+    reprepro -Vb $1 includedeb $2 $3.deb
     echo ""
 }
 

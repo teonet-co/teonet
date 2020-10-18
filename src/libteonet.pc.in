@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: @PACKAGE_NAME@
 Description: P2P low-latency UDP full mesh networking library supporting optional reliability
 Version: @PACKAGE_VERSION@
-Cflags: -I${includedir}
+Cflags: -I${includedir}/teonet
 Libs: -L${libdir} -lteonet

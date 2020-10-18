@@ -11,9 +11,6 @@
 
 # SUBDIRS = app
 
-pkgconfigdir = $(libdir)/pkgconfig
-#nodist_pkgconfig_DATA = libteonet.pc
-
 if RELEASE_TEONET
   DRELEASE_TEONET = -DRELEASE_TEONET=1
 else
@@ -160,7 +157,7 @@ teonetinclude_HEADERS = \
 
 
 ####################
-teobasedir = $(pkgincludedir)/teobase
+teobasedir = $(teonetincludedir)/teobase
 teobase_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/api.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/logging.h \
@@ -172,7 +169,7 @@ teobase_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teobase/include/teobase/windows.h \
 	# end of teobase_HEADERS
 
-teoccldir = $(pkgincludedir)/teoccl
+teoccldir = $(teonetincludedir)/teoccl
 teoccl_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/array_list.h \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/hash.h \
@@ -181,18 +178,18 @@ teoccl_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtrudp/libs/teoccl/include/teoccl/queue.h \
 	# end of teoccl_HEADERS
 
-tinyaesdir = $(pkgincludedir)/libtinycrypt/tiny-AES-c/
+tinyaesdir = $(teonetincludedir)/libtinycrypt/tiny-AES-c/
 tinyaes_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtinycrypt/tiny-AES-c/aes.hpp \
 	$(top_srcdir)/embedded/teocli/libtinycrypt/tiny-AES-c/aes.h \
 	# end of tinyaes_HEADERS
 
-tinyecdhdir = $(pkgincludedir)/libtinycrypt/tiny-ECDH-c/
+tinyecdhdir = $(teonetincludedir)/libtinycrypt/tiny-ECDH-c/
 tinyecdh_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtinycrypt/tiny-ECDH-c/ecdh.h \
 	# end of tinyecdh_HEADERS
 
-tinycryptdir = $(pkgincludedir)/libtinycrypt
+tinycryptdir = $(teonetincludedir)/libtinycrypt
 tinycrypt_HEADERS = \
 	$(top_srcdir)/embedded/teocli/libtinycrypt/tinycrypt.h \
 	# end of tinycrypt_HEADERS

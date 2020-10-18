@@ -72,10 +72,7 @@ echo $ANSI_BROWN"Install reprepro:"$ANSI_NONE
 echo ""
 sudo apt-get install -y reprepro
 echo ""
-echo $ANSI_BROWN"Install reprepro:0"$ANSI_NONE
 
-echo $ANSI_BROWN"Install reprepro:1"$ANSI_NONE
-echo $ANSI_BROWN"Install reprepro:2"$ANSI_NONE
 # Create DEB repository
 create_deb_repo $REPO ubuntu Teonet teonet
 
@@ -87,7 +84,6 @@ if [ $REPO_JUST_CREATED = 1 ]; then
 
 fi
 
-echo $ANSI_BROWN"Install reprepro:3"$ANSI_NONE
 # Create deb package ----------------------------------------------------------
 
 # Configure and make auto configure project (in current folder)
