@@ -193,7 +193,7 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
  * @return File descriptor or error if return value < 0
  */
 int ksnCoreBindRaw(int *port, int allow_port_increment_f) {
-    return trudpUdpBindRaw(NULL, port, allow_port_increment_f);
+    return trudpUdpBindRaw(port, allow_port_increment_f);
 }
 
 /**
