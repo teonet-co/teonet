@@ -182,6 +182,7 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         #if TRUDP_VERSION == 1
         ksnTRUDPDestroy(kc->ku);
         #elif TRUDP_VERSION == 2
+        trudpChannelDestroyAll(kc->ku);
         trudpDestroy(kc->ku);
         #endif
         #if KSNET_CRYPT

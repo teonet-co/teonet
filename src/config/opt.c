@@ -88,6 +88,9 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "send_all_logs",  no_argument,       &conf->send_all_logs_f, 1 },
         #endif
 
+        { "l0_public_ipv4",   required_argument, 0, '4' },
+        { "l0_public_ipv6",   required_argument, 0, '6' },
+
         { "statsd_ip",      required_argument, 0, 's' },
         { "statsd_port",    required_argument, 0, 'S' },
         { "statsd_peers",   no_argument,       &conf->statsd_peers_f, 1 },
@@ -220,6 +223,16 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           }
         } break;
 
+        case '4':
+        {
+          strncpy((char*)conf->l0_public_ipv4, optarg, KSN_BUFFER_SM_SIZE/2);
+        }
+        break;
+        case '6':
+        {
+          strncpy((char*)conf->l0_public_ipv6, optarg, KSN_BUFFER_SM_SIZE/2);
+        }
+        break;
         case 'i':
           strncpy((char*)conf->vpn_ip, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
@@ -421,6 +434,9 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --log_disable        Disable send logs to logging servers\n"
     "       --send_all_logs      Send all logs (by default send only metrics)\n"
     #endif
+    "\n"
+    "       --l0_public_ipv4     Set public ipv4 (to use in CMD_GET_PUBLIC_IP)\n"
+    "       --l0_public_ipv6     Set public ipv6 (to use in CMD_GET_PUBLIC_IP)\n"
     "\n"
     "       --statsd_ip          Metric exporter IP address\n"
     "       --statsd_port        Metric exporter Port number\n"
