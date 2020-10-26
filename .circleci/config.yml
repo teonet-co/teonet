@@ -38,7 +38,7 @@ jobs:
   # (publishing)
   publish-ubuntu:
     docker:
-      - image: teonet-co-docker-d.bintray.io/ci/ubuntu_teonet
+      - image: buildpack-deps:focal
     steps:
       - checkout
       - run: git submodule update --init --recursive

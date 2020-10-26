@@ -112,10 +112,10 @@ if [ ! -z "$CI_BUILD_REF_BT" ]; then
     create_package_bintray
     sleep 30
     # Upload file distribution wheezy, bionic, focal, groovy
-    upload_deb_bintray wheezy
-    upload_deb_bintray bionic
+#    upload_deb_bintray wheezy
+#    upload_deb_bintray bionic
     upload_deb_bintray focal
-    upload_deb_bintray groovy
+#    upload_deb_bintray groovy
 fi
 
 # Make and upload documentation  ----------------------------------------------
@@ -128,18 +128,18 @@ if [ ! -z "$CI_BUILD_REF_BT" ] && [ -z "$CI_SKIP_DOWNLOADS"  ]; then
 
     echo $ANSI_BROWN"Add DEB packages to Bintray download list:"$ANSI_NONE
     echo ""
-    
+
     # Add "wheezy" to direct download list
-    allow_deb_binary_download wheezy
-    
+    #allow_deb_binary_download wheezy
+
     # Add "bionic" to direct download list
-    allow_deb_binary_download bionic
+    #allow_deb_binary_download bionic
 
     # Add "focal" to direct download list
     allow_deb_binary_download focal
 
     # Add "groovy" to direct download list
-    allow_deb_binary_download groovy
+    #allow_deb_binary_download groovy
 fi
 
 # circleci local execute --job un-tagged-build-ubuntu -e CI_BUILD_REF_BT=1234567 -e CI_BINTRAY_USER=kirill-scherba -e CI_BINTRAY_API_KEY=fc6f1cae3022da43a10350552028763343bc7474 -e CI_SKIP_DOCS=true -e CI_SKIP_DOWNLOADS=true --skip-checkout
