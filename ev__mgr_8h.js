@@ -9,10 +9,10 @@ var ev__mgr_8h =
     [ "NULL_STR", "ev__mgr_8h.html#a4e344b56b80d155c5821a556099f96a7", null ],
     [ "event_cb_t", "ev__mgr_8h.html#aad85384b834cfdd4f54373adbe80b348", null ],
     [ "ksn_event_cb_type", "ev__mgr_8h.html#ae71a81dc4a0c7b28c114f5fd6d29dfd5", null ],
-    [ "ksnetEvMgrAppParam", "ev__mgr_8h.html#a9b6275866bee954cbbfa830f778a6724", null ],
-    [ "ksnetEvMgrClass", "ev__mgr_8h.html#ae74e0481d2173a1dadffbc3c260f31fe", null ],
-    [ "ksnetEvMgrEvents", "ev__mgr_8h.html#ac27a1562c80621488b2f8ba7d9e16c66", null ],
-    [ "stdin_idle_data", "ev__mgr_8h.html#ac0772d535434ecc5427cf2c138b9e839", null ],
+    [ "ksnetEvMgrAppParam", "ev__mgr_8h.html#a68b7e814464ff4030d8164108d49b4c6", null ],
+    [ "ksnetEvMgrClass", "ev__mgr_8h.html#a09fad128ba8f3a243cbe6dddd8c6b5a9", null ],
+    [ "ksnetEvMgrEvents", "ev__mgr_8h.html#a2fa41b8fe39d46f7aae806e8365e1b30", null ],
+    [ "stdin_idle_data", "ev__mgr_8h.html#aeb26c7b309f26dee22dc2f312337726f", null ],
     [ "EventManagerStatus", "ev__mgr_8h.html#af3788d9dd598bc3c82454097ba6259f5", [
       [ "kEventMgrStopped", "ev__mgr_8h.html#af3788d9dd598bc3c82454097ba6259f5acf0461466b3595d5b91fd0ae59aa78f4", null ],
       [ "kEventMgrRunning", "ev__mgr_8h.html#af3788d9dd598bc3c82454097ba6259f5a099cafee9abb7e3eb657e491a72127a3", null ]

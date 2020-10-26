@@ -4,7 +4,7 @@ var net__split_8h =
     [ "LAST_PACKET_FLAG", "net__split_8h.html#a394277edfcc77aa0fd92eb0b5009c10c", null ],
     [ "MAX_DATA_LEN", "net__split_8h.html#a0c00a96baa89438d6b732b92a1ba11b9", null ],
     [ "MAX_PACKET_LEN", "net__split_8h.html#a65f2af54195a74dd91a96ddb0254dbf8", null ],
-    [ "ksnSplitClass", "net__split_8h.html#a2e61935f7a407466a27056f2e272a97c", null ],
+    [ "ksnSplitClass", "net__split_8h.html#a8a04a710ab8f711a490faf9c6fc74435", null ],
     [ "ksnSplitCombine", "net__split_8h.html#a02d6085d08ea1ea1313ae6d588c2a428", null ],
     [ "ksnSplitDestroy", "net__split_8h.html#ad64784e851640b501135f2c773a23e0f", null ],
     [ "ksnSplitFreeRds", "net__split_8h.html#ad11677be340f12f11e3b62fe970c0c47", null ],

@@ -2,8 +2,8 @@ var net__tcp_8h =
 [
     [ "ksnTcpClass", "structksnTcpClass.html", "structksnTcpClass" ],
     [ "ev_ksnet_io", "structev__ksnet__io.html", "structev__ksnet__io" ],
-    [ "ev_ksnet_io", "net__tcp_8h.html#aba2647d658476b6c446c44ac504d559a", null ],
-    [ "ksnTcpClass", "net__tcp_8h.html#ab878127ffa9698d5d39f7734bf1a8406", null ],
+    [ "ev_ksnet_io", "net__tcp_8h.html#ab0492fe420e3754c257a7e6b24e25096", null ],
+    [ "ksnTcpClass", "net__tcp_8h.html#a4ace5ac0a7b74286fac1fc8768165e78", null ],
     [ "ksnTcpCb", "net__tcp_8h.html#aaeefbad266a0eedf8d05099cedaff62e", null ],
     [ "ksnTcpCbStop", "net__tcp_8h.html#ae501f48bc6b9b83ac3c1195c60fb1a2c", null ],
     [ "ksnTcpClientCreate", "net__tcp_8h.html#ae3c784a3aba8bf4fe15fcce690cd2c26", null ],

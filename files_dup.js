@@ -1,4 +1,4 @@
-var files =
+var files_dup =
 [
     [ "async_calls.c", "async__calls_8c.html", "async__calls_8c" ],
     [ "async_calls.h", "async__calls_8h.html", "async__calls_8h" ],

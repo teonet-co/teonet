@@ -3,7 +3,7 @@ var net__core_8h =
     [ "ksnCoreClass", "structksnCoreClass.html", "structksnCoreClass" ],
     [ "ksnCoreSetEventTime", "net__core_8h.html#a57aa02b0e0a69d144a02d75d95888c4a", null ],
     [ "sendCmdAnswerTo", "net__core_8h.html#a122aece373dffc52963679217cc4eb2a", null ],
-    [ "ksnCoreClass", "net__core_8h.html#a1017fb0d9788b04dcf76c196816a85bc", null ],
+    [ "ksnCoreClass", "net__core_8h.html#a7421fe49470fba01182f29ac12589b25", null ],
     [ "ksnCoreBindRaw", "net__core_8h.html#a421a44308806a62fcbf2a2f55085e215", null ],
     [ "ksnCoreCheckNewPeer", "net__core_8h.html#a41b7955c5af9c1c64ebfac9d48809496", null ],
     [ "ksnCoreDestroy", "net__core_8h.html#ac4d3a84dc0177e9df6d00d5e33b656c3", null ],

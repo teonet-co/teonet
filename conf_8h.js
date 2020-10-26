@@ -28,7 +28,7 @@ var conf_8h =
     [ "M_ENAMBE_VPN", "conf_8h.html#a9e6c9b09078d84ea4f159b9a8cf168e9", null ],
     [ "NUMBER_TRY_PORTS", "conf_8h.html#a8fb21ffe6533192c5dcf264584aed326", null ],
     [ "TRUE", "conf_8h.html#aa8cecfc5c5c054d2875c03e77b7be15d", null ],
-    [ "ksnet_cfg", "conf_8h.html#aaff2e57818bdb81f0848936f2a9a909c", null ],
+    [ "ksnet_cfg", "conf_8h.html#a7f8cd129d481b93ff26a04466517d4e2", null ],
     [ "ksnet_addHWAddrConfig", "conf_8h.html#a9ee24fbb883387cb32566b047e7ea59d", null ],
     [ "ksnet_configInit", "conf_8h.html#afbfa921eaca3d6ead446315ccf332fe7", null ],
     [ "read_config", "conf_8h.html#a946b31f664331db23ed0522cdc0c474e", null ]

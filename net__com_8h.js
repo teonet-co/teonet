@@ -3,8 +3,8 @@ var net__com_8h =
     [ "ksnCommandClass", "structksnCommandClass.html", "structksnCommandClass" ],
     [ "ksnCorePacketData", "structksnCorePacketData.html", "structksnCorePacketData" ],
     [ "CMD_TRUDP_CHECK", "net__com_8h.html#a7a34139fbc7791f4daa2c7acbc97df85", null ],
-    [ "ksnCommandClass", "net__com_8h.html#a3a7d224bf075f21acffde77321d27101", null ],
-    [ "ksnCorePacketData", "net__com_8h.html#ac35dc3aa22e4d741e5ca0ad29b05be21", null ],
+    [ "ksnCommandClass", "net__com_8h.html#ac6675a51df53132e359ddbb365dfdfa2", null ],
+    [ "ksnCorePacketData", "net__com_8h.html#a87775585a6f243ec91ed5d898b56d6ee", null ],
     [ "ksnCMD", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20d", [
       [ "CMD_NONE", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da93c1ce1fac89139d9f4df4b6db21b1cc", null ],
       [ "CMD_1_RESERVED", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20dac08fd6de73a264646949df3dad3e1610", null ],
