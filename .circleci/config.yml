@@ -44,6 +44,8 @@ jobs:
       - run: git submodule update --init --recursive
 
       # Install dependences
+      - run: apt-get update
+      - run: apt-get -y install sudo
       - run: sh/build-ubuntu.sh
 
       # Make
