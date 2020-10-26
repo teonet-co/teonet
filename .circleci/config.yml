@@ -44,7 +44,7 @@ jobs:
       - run: git submodule update --init --recursive
 
       # Install dependences
-      - run: if [ -e sh/build-ubuntu.sh ]; then apt-get install -y sudo && sh/build-ubuntu.sh; fi
+      - run: sh/build-ubuntu.sh
 
       # Make
       - run: ./autogen.sh
