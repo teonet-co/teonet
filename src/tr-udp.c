@@ -69,7 +69,7 @@ ssize_t ksnTRUDPsendto(trudpData *td, int resend_flg, uint32_t id,
     );
     #endif
 
-    trudpChannelData *tcd = trudpGetChannelCreate(td, addr, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
+    trudpChannelData *tcd = trudpGetChannelCreate(td, addr, addr_len, 0); // The trudpCheckRemoteAddr (instead of trudpGetChannel) function need to connect web socket server with l0-server
 
     if(tcd == (void*)-1) {
         return -1; // what to return in this case?
@@ -223,8 +223,8 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
             td->fd, data, data_length, 0 /* int flags*/,
             (__SOCKADDR_ARG)&remaddr, &addr_len);
 
-    if (trudpIsPacketPing(data, recvlen) && trudpGetChannel(td, (__CONST_SOCKADDR_ARG) &remaddr, 0) == (void *)-1) {
-        trudpChannelData *tcd = trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG) &remaddr, 0);
+    if (trudpIsPacketPing(data, recvlen) && trudpGetChannel(td, (__CONST_SOCKADDR_ARG) &remaddr, addr_len, 0) == (void *)-1) {
+        trudpChannelData *tcd = trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG) &remaddr, addr_len, 0);
         trudpChannelSendRESET(tcd, NULL, 0);
         return;
     }
@@ -233,7 +233,7 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
     if (recvlen <= 0) { return; }
 
     trudpChannelData *tcd =
-        trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG)&remaddr, 0);
+        trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG)&remaddr, addr_len, 0);
 
     if (tcd == (void *)-1) {
         fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");

@@ -257,7 +257,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
         struct sockaddr_storage remaddr;         // remote address
         socklen_t addrlen = sizeof(remaddr);// length of addresses
-        make_addr(addr, port, (__SOCKADDR_ARG) &remaddr);
+        make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
         // Split large packet
         void **packets;

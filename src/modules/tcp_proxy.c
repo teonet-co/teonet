@@ -152,7 +152,7 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
             if(!make_addr(
                     ke->tp->packet.buffer + sizeof(ksnTCPProxyHeader), 
                     ke->tp->packet.header->port, 
-                    addr)) {
+                    addr, addr_len)) {
 
                 recvlen = ke->tp->packet.header->packet_length;
                 
@@ -723,7 +723,7 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
                 // Make address from string
                 struct sockaddr_in remaddr; // remote address
                 socklen_t addrlen = sizeof(remaddr); // length of addresses 
-                if(!make_addr(addr, port, (__SOCKADDR_ARG) &remaddr)) {
+                if(!make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen)) {
 
                     // Execute TCP Proxy packet command
                     switch(packet->header->command) {

@@ -78,7 +78,7 @@ inline int ksnTRUDPqueuesShow(trudpData *td) {
             
             int port; //,type;
             //uint32_t id = trudpPacketGetId(data);
-            char *addr = trudpUdpGetAddr((__CONST_SOCKADDR_ARG)&tcd->remaddr, &port);
+            char *addr = trudpUdpGetAddr((__CONST_SOCKADDR_ARG)&tcd->remaddr, tcd->addrlen, &port);
             printf("--------------------------------------------------------------\n" 
                    "TR-UDP channel "_ANSI_BROWN"%s:%d:%d"_ANSI_NONE" queues:\n\n", 
                    addr, port, tcd->channel);
