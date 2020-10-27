@@ -113,7 +113,7 @@ if [ ! -z "$CI_BUILD_REF_BT" ]; then
     sleep 30
     # Upload file distribution wheezy, bionic, focal, groovy
 #    upload_deb_bintray wheezy
-#    upload_deb_bintray bionic
+    upload_deb_bintray bionic
     upload_deb_bintray focal
 #    upload_deb_bintray groovy
 fi
@@ -133,7 +133,7 @@ if [ ! -z "$CI_BUILD_REF_BT" ] && [ -z "$CI_SKIP_DOWNLOADS"  ]; then
     #allow_deb_binary_download wheezy
 
     # Add "bionic" to direct download list
-    #allow_deb_binary_download bionic
+    allow_deb_binary_download bionic
 
     # Add "focal" to direct download list
     allow_deb_binary_download focal
