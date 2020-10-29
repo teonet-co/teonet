@@ -718,24 +718,22 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
         } else if (kev->ksn_cfg.skip_auth) {
-            size_t snd;
-            char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\", \"networks\": \"%s\" }",
-                    kld->name ? kld->name : "", kev->ksn_cfg.network);
-            size_t ALLOW_len = strlen(ALLOW) + 1;
+            size_t snd = 0;
             // Create L0 packet
-            //TODO: remove hardcoded peer name
-            size_t out_data_len = sizeof(teoLNullCPacket) + strlen("teo-wg-registrar") + 1 +
-                    ALLOW_len;
+            size_t out_data_len = sizeof(teoLNullCPacket) + strlen(kev->ksn_cfg.host_name) + 1 + kld->name_length + 1;
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
 
             size_t packet_length =
                 teoLNullPacketCreate(out_data, out_data_len,
-                                     CMD_L0_AUTH, "teo-wg-registrar", (uint8_t *)ALLOW, ALLOW_len);
-            // Send websocket allow message
-            if((snd = ksnLNullPacketSend(kl, fd, out_data, packet_length)) >= 0);
+                                     CMD_CONFIRM_BATTLE_AUTH, kev->ksn_cfg.host_name, (uint8_t*)kld->name, kld->name_length + 1);
+
+            // Send confirmation of the client name
+            if((snd = ksnLNullPacketSend(kl, fd, out_data, packet_length)) >= 0) {
+                //do nothing
+            }
+
             free(out_data);
-            free(ALLOW);
         } else {
             size_t playload_size = strlen(kld->t_addr) + kld->name_length + 1;
             char *payload = malloc(playload_size);
