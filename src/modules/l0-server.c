@@ -656,9 +656,16 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
         } else {
-            size_t playload_size = strlen(kld->t_addr) + kld->name_length + 1;
+            size_t playload_size = kld->name_length + 1;
+            if (kld->t_addr) playload_size += strlen(kld->t_addr);
             char *payload = malloc(playload_size);
-            snprintf(payload, playload_size, "%s,%s", kld->name, kld->t_addr);
+            strcpy(payload, kld->name);
+
+            if (kld->t_addr) {
+                const char *comma = ",";
+                strcat(payload, comma);
+                strcat(payload, kld->t_addr);
+            }
 
             _send_subscribe_event_connected(kev, payload, playload_size);
             free(payload);
