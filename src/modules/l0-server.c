@@ -659,12 +659,12 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             size_t playload_size = kld->name_length + 1;
             if (kld->t_addr) playload_size += strlen(kld->t_addr);
             char *payload = malloc(playload_size);
-            strcpy(payload, kld->name);
+            strncpy(payload, kld->name, kld->name_length - 1);
 
             if (kld->t_addr) {
                 const char *comma = ",";
-                strcat(payload, comma);
-                strcat(payload, kld->t_addr);
+                strncat(payload, comma, 1);
+                strncat(payload, kld->t_addr, strlen(kld->t_addr));
             }
 
             _send_subscribe_event_connected(kev, payload, playload_size);
