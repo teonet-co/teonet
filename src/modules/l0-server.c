@@ -656,8 +656,8 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
         } else {
-            size_t playload_size = kld->name_length + 1;
-            if (kld->t_addr) playload_size += strlen(kld->t_addr);
+            size_t playload_size = kld->name_length;
+            if (kld->t_addr) playload_size += (strlen(kld->t_addr) + 1);
             char *payload = malloc(playload_size);
             strncpy(payload, kld->name, playload_size);
 
