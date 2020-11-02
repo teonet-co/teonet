@@ -659,7 +659,7 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             size_t playload_size = kld->name_length + 1;
             if (kld->t_addr) playload_size += strlen(kld->t_addr);
             char *payload = malloc(playload_size);
-            strncpy(payload, kld->name, kld->name_length - 1);
+            strncpy(payload, kld->name, playload_size);
 
             if (kld->t_addr) {
                 const char *comma = ",";
