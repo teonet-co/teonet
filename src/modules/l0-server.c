@@ -528,11 +528,12 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
         free(out_data);
     } else {
         // Create Client L0 packet
-        size_t out_data_len = sizeof(teoLNullCPacket) + cname_length + data_len;
+        const char* host_name = ksnetEvMgrGetHostName((ksnetEvMgrClass*)ke);
+        size_t out_data_len = sizeof(teoLNullCPacket) + strlen(host_name) + 1 + data_len;
         char *out_data = malloc(out_data_len);
         memset(out_data, 0, out_data_len);
         size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
-                cmd, ksnetEvMgrGetHostName((ksnetEvMgrClass*)ke), data, data_len);
+                cmd, host_name, data, data_len);
 
         // Send command to L0 client
         if((rv = ksnLNullPacketSend(kl, fd, out_data, packet_length)) >= 0);
