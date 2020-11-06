@@ -17,7 +17,7 @@
 #define KSN_BUFFER_64_SIZE 64          ///< Size of small buffer for string
 #define KSN_BUFFER_32_SIZE 32          ///< Size of small buffer for string
 
-#define KSN_MAX_HOST_NAME 31
+#define KSN_MAX_HOST_NAME 42
 #define NUMBER_TRY_PORTS 1000
 
 //#ifndef RELEASE_KSNET
