@@ -719,7 +719,6 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
         } else if (kev->ksn_cfg.skip_auth) {
-            size_t snd = 0;
             // Create L0 packet
             size_t out_data_len = sizeof(teoLNullCPacket) + strlen(kev->ksn_cfg.host_name) + 1 + kld->name_length + 1;
             char *out_data = malloc(out_data_len);
@@ -730,9 +729,8 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
                                      CMD_CONFIRM_BATTLE_AUTH, kev->ksn_cfg.host_name, (uint8_t*)kld->name, kld->name_length + 1);
 
             // Send confirmation of the client name
-            if((snd = ksnLNullPacketSend(kl, fd, out_data, packet_length)) >= 0) {
-                //do nothing
-            }
+            ssize_t send_size = ksnLNullPacketSend(kl, fd, out_data, packet_length);
+            (void)send_size;
 
             free(out_data);
         } else {
