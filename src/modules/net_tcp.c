@@ -338,7 +338,7 @@ void ksnTcpServerStopAll(ksnTcpClass *kt) {
  * @return
  */
 int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
-
+    /*IPV6_later*/
     int sd = 0;
 
     #ifdef KSNET_IPV6_ENABLE
@@ -426,7 +426,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
  * @param revents
  */
 void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
-
+    /*IPV6_later*/
     ev_ksnet_io *watcher = (ev_ksnet_io *) w;
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *) watcher->io.data;
 
@@ -538,7 +538,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
  * @return Socket description: > 0 - success connection
  */
 int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
-
+    /*IPV6_later*/
     /* Variable and structure definitions. */
     int sd, rc;
     struct sockaddr_in serveraddr;

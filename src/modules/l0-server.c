@@ -42,7 +42,6 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
 // Other modules not declared functions
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
         size_t data_len, size_t *packet_len);
-#include "tr-udp_.h"  // ksnTRUDPmakeAddr
 
 // External constants
 extern const char *localhost;
@@ -435,13 +434,10 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     else {
         // Create packet
         size_t pkg_len;
-        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len,
-                    &pkg_len);
-        struct sockaddr_in addr;             // address structure
-        socklen_t addrlen = sizeof(addr);    // address structure length
-        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr,
-                &addrlen)) {
-
+        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len, &pkg_len);
+        struct sockaddr_storage addr;             // address structure
+        socklen_t addrlen = sizeof(addr); // length of addresses
+        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr, &addrlen)) {
             ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
             arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
         }
@@ -788,10 +784,9 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
 
     } else {    // Send by TR-UDP
         if(kld != NULL) {
-            struct sockaddr_in remaddr;                   ///< Remote address
+            struct sockaddr_storage remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
-            trudpUdpMakeAddr(kld->t_addr, kld->t_port,
-                (__SOCKADDR_ARG) &remaddr, &addrlen);
+            trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, extendedLog(kl),
@@ -1853,6 +1848,10 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
     trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    if (tcd == NULL || tcd == (void *)-1) {
+        return 1;
+    }
+
     if(tcd->fd == 0) {
         // Add fd to tr-udp channel data
         tcd->fd = ksnLNullGetNextFakeFd(kl);

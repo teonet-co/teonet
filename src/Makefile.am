@@ -108,7 +108,6 @@ nobase_teonetinclude_HEADERS = \
     net_recon.h \
     net_split.h \
     tr-udp.h \
-    tr-udp_.h \
     tr-udp_stat.h \
     pidfile.h \
     teonet.hpp \

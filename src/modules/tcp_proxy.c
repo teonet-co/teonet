@@ -21,7 +21,6 @@
 
 #include "ev_mgr.h"
 #include "net_core.h"
-#include "tr-udp_.h"
 #include "utils/rlutil.h"
 
 #define MODULE _ANSI_YELLOW "tcp_proxy" _ANSI_NONE
@@ -134,7 +133,7 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     }
 
     ssize_t recvlen = 0; 
-    
+
     // Get data from TCP Proxy buffer 
     if(!fd && ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
         
@@ -168,22 +167,18 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
             else recvlen = -3; // Wrong address error
         }
         else recvlen = -2; // Buffer too small error
-    } 
-    
-    // Get data from UDP 
-    else if(fd) {  
-        
+    } else if(fd) { // Get data from UDP
         recvlen = recvfrom(fd, buffer, buffer_len, flags, addr, addr_len);
-        
+
+        addr_port_t *ap_obj = wrap_inet_ntop(addr);
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV,
                 "<< got %d bytes packet by UDP, from %s:%d\n",
-                (int)recvlen, inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-                ntohs(((struct sockaddr_in *) addr)->sin_port)
-        );
-        #endif        
+                (int)recvlen, ap_obj->addr, ap_obj->port);
+        #endif
+        addr_port_free(ap_obj);
     }
-    
+
     return recvlen;
 }
 
@@ -205,9 +200,11 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
             __CONST_SOCKADDR_ARG addr, socklen_t addr_len) {
     
     ssize_t sendlen = 0;
-    
+
     // Sent data to TCP Proxy
     if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
+        // Send TCP package
+        sendlen = ksnTCPProxySendTo(ke, CMD_TCPP_PROXY, buffer, buffer_len, addr);
         
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, 
@@ -216,24 +213,18 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
             inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
             ntohs(((struct sockaddr_in *) addr)->sin_port));
         #endif            
-        
-        // Send TCP package
-        sendlen = ksnTCPProxySendTo(ke, CMD_TCPP_PROXY, buffer, buffer_len, addr);
-    }
-    
-    // Sent data to UDP
-    else {
+    } else { // Sent data to UDP
         sendlen = sendto(fd, buffer, buffer_len, flags, addr, addr_len);
         
+        addr_port_t *ap_obj = wrap_inet_ntop(addr);
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, 
             ">> send %d (of %d) bytes by UDP, fd %d, to (%s:%d)\n", 
-            sendlen, buffer_len, fd, 
-            inet_ntoa(((struct sockaddr_in *) addr)->sin_addr),
-            ntohs(((struct sockaddr_in *) addr)->sin_port));
-        #endif 
+            sendlen, buffer_len, fd, ap_obj->addr, ap_obj->port);
+        #endif
+        addr_port_free(ap_obj);
     }
-    
+
     return sendlen;
 }
 
@@ -561,7 +552,6 @@ void ksnTCPProxyClientStop(ksnTCPProxyClass *tp) {
  * 
  */
 void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
-    
     struct sockaddr_in remaddr; // Remote address
     socklen_t addrlen = sizeof(remaddr); // Length of addresses
     size_t data_len = KSN_BUFFER_DB_SIZE; // Buffer length
@@ -647,7 +637,6 @@ void cmd_udpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  */
 void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents, 
         int cli_ser) {
-
     size_t data_len = KSN_BUFFER_SIZE; // Buffer length
     ksnTCPProxyClass *tp = w->data; // Pointer to ksnTCPProxyClass
     char data[data_len]; // Buffer
@@ -734,8 +723,7 @@ void _cmd_tcpp_read_cb(struct ev_loop *loop, struct ev_io *w, int revents,
                 // Make address from string
                 struct sockaddr_in remaddr; // remote address
                 socklen_t addrlen = sizeof(remaddr); // length of addresses 
-                if(!make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, 
-                        &addrlen)) {
+                if(!make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen)) {
 
                     // Execute TCP Proxy packet command
                     switch(packet->header->command) {
@@ -972,7 +960,7 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     ksn_printf(kev, MODULE, CONNECT, 
             "create UDP client/server Proxy at port %d ...\n", 
             udp_proxy_port);
-    udp_proxy_fd = ksnCoreBindRaw(&kev->ksn_cfg, &udp_proxy_port);
+    udp_proxy_fd = ksnCoreBindRaw(&udp_proxy_port, kev->ksn_cfg.port_inc_f);
     ksn_printf(kev, MODULE, CONNECT, 
             "UDP client/server Proxy fd %d created at port %d\n", 
             udp_proxy_fd,

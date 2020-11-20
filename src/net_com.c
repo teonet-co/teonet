@@ -16,9 +16,8 @@
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
 #include "modules/subscribe.h"
-#if TRUDP_VERSION == 2
 #include "trudp_stat.h"
-#endif
+
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -906,7 +905,6 @@ static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
-
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
     #ifdef DEBUG_KSNET
@@ -919,11 +917,7 @@ static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Get TR-UDP info
     size_t data_out_len;
-    #if TRUDP_VERSION == 1
-    void *data_out = ksnTRUDPstatGet(ke->kc->ku, data_type, &data_out_len);
-    #elif TRUDP_VERSION == 2
     void *data_out = trudpStatGet(ke->kc->ku, data_type, &data_out_len);
-    #endif
 
     if(rd->l0_f) {// Send TRUDP_INFO_ANSWER to L0 user
         ksnLNullSendToL0(ke, rd->addr, rd->port, rd->from, rd->from_len, CMD_TRUDP_INFO_ANSWER,
@@ -1139,7 +1133,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG, 
+    ksn_printf(ke, MODULE, DEBUG_VV,
         "process CMD_CONNECT_R (cmd = %u) command, from %s (%s:%d)\n",
         rd->cmd, rd->from, rd->addr, rd->port);
     #endif
@@ -1223,9 +1217,9 @@ static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
         cmd_connect_cque_cb_data *cqd = data;
 
         char *peer_name = "";        
-        struct sockaddr_in remaddr;         // remote address
-        socklen_t addr_len = sizeof(remaddr);// length of addresses
-        make_addr(cqd->addr, cqd->port, (__SOCKADDR_ARG) &remaddr, &addr_len);        
+        struct sockaddr_storage remaddr;         // remote address
+        socklen_t addrlen = sizeof(remaddr); // length of addresses
+        make_addr(cqd->addr, cqd->port, (__SOCKADDR_ARG) &remaddr, &addrlen);
         ksnet_arp_data *arp = ksnetArpFindByAddr(cqd->ke->kc->ka, (__CONST_SOCKADDR_ARG) &remaddr, &peer_name);
         #ifdef DEBUG_KSNET
         ksn_printf(cqd->ke, MODULE, DEBUG_VV, 

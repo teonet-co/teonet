@@ -545,7 +545,7 @@ public:
                type != DISPLAY_M ? _ksn_printf_format_(format)                                     \
                                  : _ksn_printf_format_display_m(format),                           \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->ksn_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0, __VA_ARGS__)
 
@@ -554,7 +554,7 @@ public:
                type != DISPLAY_M ? _ksn_printf_format_(format) "\n"                                \
                                  : _ksn_printf_format_display_m(format) "\n",                      \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->ksn_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0)
 
@@ -850,7 +850,7 @@ public:
             delete(ud);
           },
           timeout, ud);
-      teo_printf(NULL, DEBUG, "Register callback id %u\n", cq->id);
+      teo_printf("", DEBUG, "Register callback id %u\n", cq->id);
       return sendTDD(cmd, key, key_len, NULL, 0, cq->id);
     }
 
@@ -867,7 +867,7 @@ public:
       // Add callback to queue and wait timeout after 5 sec ...
       std::cout << "!!! cqueCallback !!!\n";
       auto cq = cque.add(cb, timeout, user_data);
-      teo_printf(NULL, DEBUG, "Register simple callback id %u\n", cq->id);
+      teo_printf("", DEBUG, "Register simple callback id %u\n", cq->id);
       return sendTDD(cmd, key, key_len, NULL, 0, cq->id);
     }
 
@@ -1138,8 +1138,8 @@ public:
     foo.str();                                                                                     \
   })
 
-#define showMessage(mtype, msg) teo_printf(NULL, mtype, "%s", msg_to_string(msg).c_str())
-#define showMessageLn(mtype, msg) teo_printf(NULL, mtype, "%s\n", msg_to_string(msg).c_str())
+#define showMessage(mtype, msg) teo_printf("", mtype, "%s", msg_to_string(msg).c_str())
+#define showMessageLn(mtype, msg) teo_printf("", mtype, "%s\n", msg_to_string(msg).c_str())
 
 #define watch(x) std::cout << (#x) << " = " << (x) << std::endl
 
