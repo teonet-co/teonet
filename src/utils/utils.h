@@ -16,6 +16,15 @@
 #include "string_arr.h"
 #include "config/conf.h"
 
+typedef struct addr_port {
+    char *addr;
+    uint16_t port;
+    int (*equal)(struct addr_port *, char*, uint16_t);
+} addr_port_t;
+
+addr_port_t *wrap_inet_ntop(const struct sockaddr *sa);
+void addr_port_free(addr_port_t *ap_obj);
+int ip_type(const char *ip_ch);
 /**
  * KSNet printf messages types
  */
@@ -47,14 +56,14 @@ typedef enum ksnet_printf_type {
     ksnet_printf(&((ke)->ksn_cfg), type, \
         _ksn_printf_format_(format), \
         _ksn_printf_type_(type), \
-        module == NULL ? (ke)->ksn_cfg.app_name : module, \
+        module[0] == '\0' ? (ke)->ksn_cfg.app_name : module, \
         __func__, __FILE__, __LINE__, __VA_ARGS__)
 
 #define ksn_puts(ke, module, type, format) \
     ksnet_printf(&((ke)->ksn_cfg), type, \
         _ksn_printf_format_(format) "\n", \
         _ksn_printf_type_(type), \
-        module == NULL ? (ke)->ksn_cfg.app_name : module, \
+        module[0] == '\0' ? (ke)->ksn_cfg.app_name : module, \
         __func__, __FILE__, __LINE__)
 
 

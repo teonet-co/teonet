@@ -28,10 +28,9 @@ typedef int socklen_t;
 #include "utils/rlutil.h"
 #include "utils/teo_memory.h"
 #include "tr-udp.h"
-#include "tr-udp_.h"
 
 // Constants
-const char *localhost = "127.0.0.1";
+const char *localhost = "::1";//"127.0.0.1";
 #define PACKET_HEADER_ADD_SIZE 2    // Sizeof from length + Sizeof command
 
 #define MODULE _ANSI_GREEN "net_core" _ANSI_GREY
@@ -105,7 +104,6 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_dat
  * @return Pointer to ksnCoreClass or NULL if error
  */
 ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
-
     ksnCoreClass *kc = teo_malloc(sizeof(ksnCoreClass));
 
     kc->ke = ke;
@@ -130,11 +128,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     }
 
     // TR-UDP initialize
-    #if TRUDP_VERSION == 1
-    kc->ku = ksnTRUDPinit(kc);
-    #elif TRUDP_VERSION == 2
     kc->ku = trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
-    #endif
 
     // Change this host port number to port changed in ksnCoreBind function
     ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
@@ -160,9 +154,7 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
  * @param kc Pointer to ksnCore class object
  */
 void ksnCoreDestroy(ksnCoreClass *kc) {
-
     if(kc != NULL) {
-
         ksnetEvMgrClass *ke = kc->ke;
 
         // Send disconnect from peer connected to TCP Proxy command to all
@@ -179,12 +171,8 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
         if(kc->addr != NULL) free(kc->addr);
         ksnetArpDestroy(kc->ka);
         ksnCommandDestroy(kc->kco);
-        #if TRUDP_VERSION == 1
-        ksnTRUDPDestroy(kc->ku);
-        #elif TRUDP_VERSION == 2
         trudpChannelDestroyAll(kc->ku);
         trudpDestroy(kc->ku);
-        #endif
         #if KSNET_CRYPT
         ksnCryptDestroy(kc->kcr);
         #endif
@@ -204,41 +192,8 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
  * @param[out] port Pointer to Port number
  * @return File descriptor or error if return value < 0
  */
-int ksnCoreBindRaw(ksnet_cfg *ksn_cfg, int *port) {
-
-    int i, sd;
-    struct sockaddr_in addr;	// Our address
-
-    // Create a UDP socket
-    if((sd = ksn_socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("cannot create socket\n");
-        return -1;
-    }
-
-    memset((char *)&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    // Bind the socket to any valid IP address and a specific port, increment
-    // port if busy
-    for(i=0;;) {
-
-        addr.sin_port = htons(*port);
-
-        if(ksn_bind(sd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                    "can't bind on port %d, try next port number ...\n",
-                    *port);
-
-            (*port)++;
-            if(ksn_cfg->port_inc_f && i++ < NUMBER_TRY_PORTS) continue;
-            else return -2;
-        }
-        else break;
-    }
-
-    return sd;
+int ksnCoreBindRaw(int *port, int allow_port_increment_f) {
+    return trudpUdpBindRaw(port, allow_port_increment_f);
 }
 
 /**
@@ -257,7 +212,7 @@ int ksnCoreBind(ksnCoreClass *kc) {
             "create UDP client/server at port %d ...\n", kc->port);
     #endif
 
-    if((fd = ksnCoreBindRaw(ksn_cfg, &kc->port)) > 0) {
+    if((fd = ksnCoreBindRaw(&kc->port, ksn_cfg->port_inc_f)) > 0) {
 
         kc->fd = fd;
         #ifdef DEBUG_KSNET
@@ -300,7 +255,7 @@ int ksnCoreSendto(ksnCoreClass *kc, char *addr, int port, uint8_t cmd,
 
     if(data_len <= MAX_PACKET_LEN - MAX_DATA_LEN) {
 
-        struct sockaddr_in remaddr;         // remote address
+        struct sockaddr_storage remaddr;         // remote address
         socklen_t addrlen = sizeof(remaddr);// length of addresses
         make_addr(addr, port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
@@ -706,7 +661,7 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     ksnCoreClass *kc = w->data;             // ksnCore Class object
     ksnetEvMgrClass *ke = kc->ke;           // ksnetEvMgr Class object
 
-    struct sockaddr_in remaddr;             // remote address
+    struct sockaddr_storage remaddr;             // remote address
     socklen_t addrlen = sizeof(remaddr);    // length of addresses
     unsigned char buf[KSN_BUFFER_DB_SIZE];  // Message buffer
     size_t recvlen;                         // # bytes received
@@ -867,9 +822,10 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
 
     // Data received
     if(recvlen > 0) {
-
-        char *addr = strdup(inet_ntoa(((struct sockaddr_in*)remaddr)->sin_addr)); // IP to string
-        int port = ntohs(((struct sockaddr_in*)remaddr)->sin_port); // Port to integer
+        addr_port_t *ap_obj = wrap_inet_ntop(remaddr);
+        char *addr = strdup(ap_obj->addr); // IP to string
+        int port = ap_obj->port;
+        addr_port_free(ap_obj);
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV,
@@ -931,7 +887,6 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         //
         // CMD_L0 => #70 Command from L0 Client    
         if( ksnCoreParsePacket(data, data_len, &rd) && ( encrypted || rd.cmd == CMD_L0 ) ) {
- 
             // Check ARP Table and add peer if not present            
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,

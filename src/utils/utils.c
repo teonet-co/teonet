@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <libgen.h>
 #include <syslog.h>
+#include <errno.h>
 
 #include "config/config.h"
 
@@ -19,6 +20,8 @@
 #include "rlutil.h"
 #include "utils.h"
 #include "ev_mgr.h"
+
+#define ADDRSTRLEN 128
 
 //double ksnetEvMgrGetTime(void *ke);
 void teoLoggingClientSend(void *ke, const char *message);
@@ -642,7 +645,7 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
             tmpAddrPtr = &((struct sockaddr_in *) ifa->ifa_addr)->sin_addr;
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-//            printf("%s IP Address: %s\n", ifa->ifa_name, addressBuffer);
+            //printf("%s IP Address: %s\n", ifa->ifa_name, addressBuffer);
 
             // Skip VPN IP
             if(!strcmp(addressBuffer, conf->vpn_ip)) continue;
@@ -655,7 +658,7 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
             tmpAddrPtr = &((struct sockaddr_in6 *) ifa->ifa_addr)->sin6_addr;
             char addressBuffer[INET6_ADDRSTRLEN];
             inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-            //            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+            //printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
             ksnet_stringArrAdd(&arr, addressBuffer);
         }
     }
@@ -664,6 +667,101 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
     #endif
 
     return arr;
+}
+
+int ip_type(const char *ip_ch) {
+    struct addrinfo hint, *res = NULL;
+    int ret_type = -1;
+
+    memset(&hint, '\0', sizeof hint);
+
+    hint.ai_family = PF_UNSPEC;
+    hint.ai_flags = AI_NUMERICHOST;
+
+    int ret = getaddrinfo(ip_ch, NULL, &hint, &res);
+    if (ret) {
+        fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
+        exit(1);
+    }
+
+    if(res->ai_family == AF_INET) {
+        ret_type = 1;// TODO: enum need
+    } else if (res->ai_family == AF_INET6) {
+        ret_type = 2;
+    }
+
+   freeaddrinfo(res);
+   return ret_type;
+}
+
+int addr_port_equal(addr_port_t *ap_obj, char *addr, uint16_t port) {
+    if (ap_obj->port == port && !strcmp(ap_obj->addr, addr)) {
+        return 1;
+    }
+
+    return 0;
+}
+
+addr_port_t *addr_port_init() {
+    addr_port_t *ptr = malloc(sizeof(addr_port_t));
+    ptr->addr = malloc(ADDRSTRLEN);
+    ptr->addr[0] = '\0';
+    ptr->port = 0;
+    ptr->equal = addr_port_equal;
+    return ptr;
+}
+
+void addr_port_free(addr_port_t *ap_obj) {
+    free(ap_obj->addr);
+    free(ap_obj);
+}
+
+addr_port_t *wr__ntop(const struct sockaddr *sa) {
+    addr_port_t *ptr = addr_port_init();
+
+	switch (sa->sa_family) {
+	case AF_INET: {
+		struct sockaddr_in	*sin = (struct sockaddr_in *) sa;
+
+		if (inet_ntop(AF_INET, &sin->sin_addr, ptr->addr, ADDRSTRLEN) == NULL) {
+            printf("inet_ntop ipv4 conversion error: %s\n", strerror(errno));
+			return NULL;
+        }
+		if (ntohs(sin->sin_port) != 0) {
+            ptr->port = ntohs(sin->sin_port);
+		}
+
+		return ptr;
+	}
+
+	case AF_INET6: {
+		struct sockaddr_in6	*sin6 = (struct sockaddr_in6 *) sa;
+
+		if (inet_ntop(AF_INET6, &sin6->sin6_addr, ptr->addr, ADDRSTRLEN) == NULL) {
+            printf("inet_ntop ipv6 conversion error: %s\n", strerror(errno));
+			return NULL;
+        }
+		if (ntohs(sin6->sin6_port) != 0) {
+            ptr->port = ntohs(sin6->sin6_port);
+		}
+
+		return ptr;
+	}
+
+	default:
+		return NULL;
+	}
+    return NULL;
+}
+
+addr_port_t *wrap_inet_ntop(const struct sockaddr *sa) {
+    addr_port_t *ptr;
+	if ( (ptr = wr__ntop(sa)) == NULL) {
+        fprintf(stderr, "wrap_inet_ntop error\n");
+        exit(1);
+    }
+
+    return ptr;
 }
 
 /**

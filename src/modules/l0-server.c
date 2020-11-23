@@ -42,7 +42,6 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
 // Other modules not declared functions
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
         size_t data_len, size_t *packet_len);
-#include "tr-udp_.h"  // ksnTRUDPmakeAddr
 
 // External constants
 extern const char *localhost;
@@ -651,6 +650,11 @@ static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const cha
 }
 
 
+void _send_subscribe_event_disconnected(ksnetEvMgrClass *ke, const char *payload,
+        size_t payload_length) {
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_DISCONNECTED, (void *)payload, payload_length, 0);
+}
+
 /**
  * Send Connected event to all subscribers
  *
@@ -734,11 +738,14 @@ static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 
             free(out_data);
         } else {
-            size_t playload_size = strlen(kld->t_addr) + kld->name_length + 1;
-            char *payload = malloc(playload_size);
-            snprintf(payload, playload_size, "%s,%s", kld->name, kld->t_addr);
+            // TODO: I must use kl->stat.clients or ke->kl->stat.visits ????? instead pblMapSize(kl->map)
+            int playload_size = snprintf(0, 0, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
+            char *payload = malloc(playload_size + 1);
+            snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
 
-            _send_subscribe_event_connected(kev, payload, playload_size);
+            _send_subscribe_event_connected(kev, payload, playload_size + 1);
             free(payload);
         }
     }
@@ -854,10 +861,9 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
 
     } else {    // Send by TR-UDP
         if(kld != NULL) {
-            struct sockaddr_in remaddr;                   ///< Remote address
+            struct sockaddr_storage remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
-            trudpUdpMakeAddr(kld->t_addr, kld->t_port,
-                (__SOCKADDR_ARG) &remaddr, &addrlen);
+            trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, extendedLog(kl),
@@ -907,9 +913,6 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd, const char *remote_
     ksn_printf(kev, MODULE, DEBUG_VV,
                "L0 client with fd %d connected from %s:%d\n",
                fd, remote_addr, remote_port);
-
-    // Send Connected event to all subscribers
-    //teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, "", 1, 0);
 
     // Register client in clients map
     ksnLNullData* kld = ksnLNullClientRegister(kl, fd, remote_addr, remote_port);
@@ -963,9 +966,15 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         kl->stat.clients--;
 
         // Send Disconnect event to all subscribers
-        if(kld->name != NULL  && remove_f != 2)
-            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name,
-                kld->name_length, 0);
+        if(kld->name != NULL  && remove_f != 2) {
+            int playload_size = snprintf(0, 0, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", kl->stat.clients);
+            char *payload = malloc(playload_size + 1);
+            snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", kl->stat.clients);
+            _send_subscribe_event_disconnected(kev, payload, playload_size + 1);
+            free(payload);
+        }
 
         // Free name
         if(kld->name != NULL) {
@@ -1916,6 +1925,10 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
     trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    if (tcd == NULL || tcd == (void *)-1) {
+        return 1;
+    }
+
     if(tcd->fd == 0) {
         // Add fd to tr-udp channel data
         tcd->fd = ksnLNullGetNextFakeFd(kl);
