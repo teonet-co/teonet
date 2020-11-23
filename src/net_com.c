@@ -436,7 +436,7 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     // Get peers data
-    ksnet_arp_data_ar *peers_data = ksnetArpShowData(arp_class);
+    ksnet_arp_data_ext_ar *peers_data = teoArpGetExtendedArpTable(arp_class);
     size_t peers_data_length = ksnetArpShowDataLength(peers_data);
 
     // Get type of request: 0 - binary; 1 - JSON
@@ -446,10 +446,10 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(data_type == 1) {
 
         size_t peers_json_len;
-        char *peers_json = ksnetArpShowDataJson(peers_data, &peers_json_len);
+        char *peers_json = teoArpGetExtendedArpTable_json(peers_data, &peers_json_len);
 
         free(peers_data);
-        peers_data = (ksnet_arp_data_ar *)peers_json;
+        peers_data = (ksnet_arp_data_ext_ar *)peers_json;
         peers_data_length = peers_json_len;
     }
 

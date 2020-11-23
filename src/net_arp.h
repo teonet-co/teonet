@@ -19,40 +19,20 @@
 #include "net_core.h"
 #include "teonet_l0_client.h"
 
-///**
-// * KSNet ARP table data structure
-// */
-//typedef struct ksnet_arp_data {
-//
-//    int16_t mode;       ///< Peers mode: -1 - This host, -2 undefined host, 0 - peer , 1 - r-host, 2 - TCP Proxy peer
-//    char addr[40];      ///< Peer IP address
-//    int16_t port;       ///< Peer port
-//
-//    double last_acrivity;           ///< Last time receved data from peer
-//    double last_triptime_send;      ///< Last time when triptime request send
-//    double last_triptime_got;       ///< Last time when triptime received
-//
-//    double last_triptime;           ///< Last triptime
-//    double triptime;                ///< Middle triptime
-//
-//    double monitor_time;            ///< Monitor ping time
-//
-//} ksnet_arp_data;
-//
-///**
-// * KSNet ARP table whole data array
-// */
-//typedef struct ksnet_arp_data_ar {
-//    
-//    uint32_t length;
-//    struct _arp_data {
-//        
-//        char name[40];
-//        ksnet_arp_data data;
-//        
-//    } arp_data[];
-//    
-//} ksnet_arp_data_ar;
+#pragma pack(push)
+#pragma pack(1)
+typedef struct ksnet_arp_data_ext_ar {
+
+    uint32_t length;
+    struct _ext_arp_data {
+
+        char name[ARP_TABLE_IP_SIZE];
+        ksnet_arp_data_ext data;
+
+    } arp_data[];
+
+} ksnet_arp_data_ext_ar;
+#pragma pack(pop)
 
 /**
  * KSNet ARP functions data
@@ -88,9 +68,13 @@ int ksnetArpGetAll_(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, c
 int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data);
 int ksnetArpGetAllH(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data);
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr, char **peer_name);
+
 ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka);
-size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);
+ksnet_arp_data_ext_ar *teoArpGetExtendedArpTable(ksnetArpClass *ka);
 char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data, size_t *peers_data_json_len);
+char *teoArpGetExtendedArpTable_json(ksnet_arp_data_ext_ar *peers_data, size_t *peers_data_json_len);
+
+size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);
 char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data);
 char *ksnetArpShowHeader(int header_f);
 void ksnetArpMetrics(ksnetArpClass *ka);
