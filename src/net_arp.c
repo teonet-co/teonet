@@ -348,9 +348,8 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
     data_ar->length = length;
 
     PblIterator *it = pblMapIteratorNew(ka->map);
-    int i = 0;
     if(it != NULL) {
-
+        int i = 0;
         while(pblIteratorHasNext(it)) {
 
             void *entry = pblIteratorNext(it);
@@ -359,7 +358,38 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka) {
             strncpy(data_ar->arp_data[i].name, name, sizeof(data_ar->arp_data[i].name));
             memcpy(&data_ar->arp_data[i].data, data, sizeof(data_ar->arp_data[i].data));
             data_ar->arp_data[i].data.connected_time = ksnetEvMgrGetTime(ka->ke) - data_ar->arp_data[i].data.connected_time;
-            i++;
+            ++i;
+        }
+
+        pblIteratorFree(it);
+    }
+
+    return data_ar;
+}
+
+/**
+ * Return extended ARP table
+ *
+ * @param ka Pointer to the ksnetArpClass
+ * @return Return pointer to the ksnet_arp_data_ext_ar data with extended ARP table data.
+ * Should be free after use.
+ */
+ksnet_arp_data_ext_ar *teoArpGetExtendedArpTable(ksnetArpClass *ka) {
+    uint32_t length = pblMapSize(ka->map);
+    ksnet_arp_data_ext_ar *data_ar = teo_malloc(sizeof(ksnet_arp_data_ext_ar) + length * sizeof(data_ar->arp_data[0]));
+    data_ar->length = length;
+
+    PblIterator *it = pblMapIteratorNew(ka->map);
+    if(it != NULL) {
+        int i = 0;
+        while(pblIteratorHasNext(it)) {
+
+            void *entry = pblIteratorNext(it);
+            char *name = pblMapEntryKey(entry);
+            ksnet_arp_data_ext *data = pblMapEntryValue(entry);
+            strncpy(data_ar->arp_data[i].name, name, sizeof(data_ar->arp_data[i].name));
+            memcpy(&data_ar->arp_data[i].data, data, sizeof(data_ar->arp_data[i].data));
+            ++i;
         }
 
         pblIteratorFree(it);
@@ -400,8 +430,8 @@ char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data,
     size_t data_str_len = sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length;
     char *data_str = malloc(data_str_len);
     int ptr = snprintf(data_str, data_str_len, "{ \"length\": %d, \"arp_data_ar\": [ ", arp_data_ar->length);
-    int i = 0;
-    for(i = 0; i < arp_data_ar->length; i++) {
+
+    for(int i = 0; i < arp_data_ar->length; ++i) {
         ptr += snprintf(data_str + ptr, data_str_len - ptr,
                 "%s{ "
                 "\"name\": \"%s\", "
@@ -418,6 +448,42 @@ char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data,
                 arp_data_ar->arp_data[i].data.port,
                 arp_data_ar->arp_data[i].data.last_triptime,
                 arp_data_ar->arp_data[i].data.connected_time // uptime
+        );
+    }
+    snprintf(data_str + ptr,  data_str_len - ptr, " ] }");
+
+    if(peers_data_json_len != NULL) *peers_data_json_len = strlen(data_str) + 1;
+
+    return data_str;
+}
+
+char *teoArpGetExtendedArpTable_json(ksnet_arp_data_ext_ar *peers_data,
+        size_t *peers_data_json_len) {
+
+    ksnet_arp_data_ext_ar *arp_data_ar = (ksnet_arp_data_ext_ar *) peers_data;
+    size_t data_str_len = sizeof(arp_data_ar->arp_data[0]) * 2 * arp_data_ar->length;
+    char *data_str = malloc(data_str_len);
+    int ptr = snprintf(data_str, data_str_len, "{ \"length\": %d, \"arp_data_ar\": [ ", arp_data_ar->length);
+
+    for(int i = 0; i < arp_data_ar->length; ++i) {
+        ptr += snprintf(data_str + ptr, data_str_len - ptr,
+                "%s{ "
+                "\"name\": \"%s\", "
+                "\"type\": [%s], "
+                "\"mode\": %d, "
+                "\"addr\": \"%s\", "
+                "\"port\": %d, "
+                "\"triptime\": %.3f,"
+                "\"uptime\": %.3f"
+                " }",
+                i ? ", " : "",
+                arp_data_ar->arp_data[i].name,
+                arp_data_ar->arp_data[i].data.type ? arp_data_ar->arp_data[i].data.type : "",
+                arp_data_ar->arp_data[i].data.data.mode,
+                arp_data_ar->arp_data[i].data.data.addr,
+                arp_data_ar->arp_data[i].data.data.port,
+                arp_data_ar->arp_data[i].data.data.last_triptime,
+                arp_data_ar->arp_data[i].data.data.connected_time // uptime
         );
     }
     snprintf(data_str + ptr,  data_str_len - ptr, " ] }");
