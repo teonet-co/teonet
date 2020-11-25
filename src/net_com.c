@@ -437,17 +437,15 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Get peers data
     ksnet_arp_data_ext_ar *peers_data = teoArpGetExtendedArpTable(arp_class);
-    size_t peers_data_length = ksnetArpShowDataLength(peers_data);
+    size_t peers_data_length = ARP_TABLE_DATA_LENGTH(peers_data);
 
     // Get type of request: 0 - binary; 1 - JSON
     const int data_type = rd->data_len && !strncmp(rd->data, JSON, rd->data_len)  ? 1 : 0;
 
     // Convert data to JSON format
     if(data_type == 1) {
-
         size_t peers_json_len;
         char *peers_json = teoArpGetExtendedArpTable_json(peers_data, &peers_json_len);
-
         free(peers_data);
         peers_data = (ksnet_arp_data_ext_ar *)peers_json;
         peers_data_length = peers_json_len;
@@ -718,14 +716,7 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
         if(!rd->arp->type) {
             
             host_info_data *hid = (host_info_data *)rd->data;
-            int i;
-            size_t ptr     = strlen(hid->string_ar) + 1;
-            char *type_str = strdup(null_str);
-            for (i = 1; i < hid->string_ar_num; i++) {
-                type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"",
-                    type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
-                ptr += strlen(hid->string_ar + ptr) + 1;
-            }
+            char *type_str = teoGetFullAppTypeFromHostInfo(hid);
 
             // Add type to arp-table
             rd->arp->type = type_str;
@@ -788,15 +779,15 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         if(data_type == 1) {
 
             // Combine types
-            int i;
             size_t ptr = strlen(hid->string_ar) + 1;
             char *type_str = strdup(null_str);
-            for(i = 1; i < hid->string_ar_num; i++) {
+            for(int i = 1; i < hid->string_ar_num; i++) {
 
                 type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"",
                         type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
                 ptr += strlen(hid->string_ar + ptr) + 1;
             }
+
             char *app_version = hid->string_ar + ptr; // Last element is app_version
             ptr += strlen(hid->string_ar + ptr) + 1;
             json_str = ksnet_formatMessage(

@@ -92,7 +92,6 @@ int ksnetArpSize(ksnetArpClass *ka) {
  * @param data
  */
 void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data_ext *data) {
-
     pblMapAdd(
         ka->map,
         (void *) name, strlen(name) + 1,
@@ -106,12 +105,11 @@ void ksnetArpAdd(ksnetArpClass *ka, char* name, ksnet_arp_data_ext *data) {
  * @param ka
  */
 void ksnetArpAddHost(ksnetArpClass *ka) {
-
     ksnetEvMgrClass *ke = ka->ke;
     ksnet_arp_data_ext arp;
 
     char* name = ke->ksn_cfg.host_name;
-    char *addr = (char*)localhost; //"0.0.0.0";
+    char *addr = (char*)localhost;
     int port = ke->kc->port;
 
     memset(&arp, 0, sizeof(arp));
@@ -119,6 +117,14 @@ void ksnetArpAddHost(ksnetArpClass *ka) {
     strncpy(arp.data.addr, addr, sizeof(arp.data.addr));
     arp.data.port = port;
     arp.data.mode = -1;
+
+    size_t hid_len;
+    host_info_data *hid = teoGetHostInfo(ke, &hid_len);
+
+    if(hid != NULL) {
+        arp.type = teoGetFullAppTypeFromHostInfo(hid);
+        free(hid);
+    }
 
     ksnetArpAdd(ka, name, &arp);
 }
@@ -388,7 +394,9 @@ ksnet_arp_data_ext_ar *teoArpGetExtendedArpTable(ksnetArpClass *ka) {
             char *name = pblMapEntryKey(entry);
             ksnet_arp_data_ext *data = pblMapEntryValue(entry);
             strncpy(data_ar->arp_data[i].name, name, sizeof(data_ar->arp_data[i].name));
-            memcpy(&data_ar->arp_data[i].data, data, sizeof(data_ar->arp_data[i].data));
+            memcpy(&data_ar->arp_data[i].data.data, &data->data, sizeof(data_ar->arp_data[i].data.data));
+            strncpy(data_ar->arp_data[i].data.type, data->type, sizeof(data_ar->arp_data[i].data.type));
+            data_ar->arp_data[i].data.cque_id_peer_type = data->cque_id_peer_type;
             ++i;
         }
 
@@ -500,12 +508,20 @@ char *teoArpGetExtendedArpTable_json(ksnet_arp_data_ext_ar *peers_data,
  * @return Size of ksnet_arp_data_ar data
  */
 inline size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data) {
-
-    return peers_data != NULL ?
-        sizeof(ksnet_arp_data_ar) + peers_data->length * sizeof(peers_data->arp_data[0])
-            : 0;
+    return peers_data ? sizeof(ksnet_arp_data_ar) + peers_data->length * sizeof(peers_data->arp_data[0]) : 0;
 }
 
+inline size_t teoArpGetExtendedArpTableLength(ksnet_arp_data_ext_ar *peers_data) {
+    if(!peers_data) return 0;
+
+    size_t out = sizeof(ksnet_arp_data_ext_ar);
+    for (int i = 0; i<peers_data->length; ++i) {
+        out += sizeof(peers_data->arp_data[i]);
+        out += (strlen(peers_data->arp_data[i].data.type) + 1);
+    }
+
+    return out;
+}
 
 /**
  * Show (return string) with KSNet ARP table header
