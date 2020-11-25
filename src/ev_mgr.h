@@ -314,8 +314,10 @@ typedef struct ksnetEvMgrClass {
     int argc;         ///< Applications argc
     char** argv;      ///< Applications argv
 
-    char *app_type;         ///< Application type
+    char *app_type;     ///< Application type
     char *app_version;  ///< Application version
+
+    bool is_rhost;      ///< This host is rhost flag
 
 } ksnetEvMgrClass;
 
@@ -388,7 +390,6 @@ const char *teoGetAppVersion(ksnetEvMgrClass *ke);
 
 int remove_peer_addr(ksnetEvMgrClass *ke, __CONST_SOCKADDR_ARG addr);
 int ksnetAllowAckEvent(ksnetEvMgrClass* ke, int allow);
-void ksnetEvMgrInitialize(ksnetEvMgrClass *ke);
 
 #ifdef	__cplusplus
 }

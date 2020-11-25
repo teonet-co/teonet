@@ -6,7 +6,6 @@ jobs:
     environment:
       AWS_REGION: eu-west-1
       AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
-      YC_YCR_REPONAME: cr.yandex/crp8ph86e05bgnsgjbb8/teonet
     steps:
       - checkout
       - run: git submodule update --init --recursive
@@ -34,15 +33,6 @@ jobs:
       - run: docker push ${AWS_ECR_REPONAME}:$CIRCLE_TAG
       - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:latest
       - run: docker push ${AWS_ECR_REPONAME}:latest
-      
-      # Login to Yandex Container Registry (YCR)
-      - run: docker login --username $YC_AUTH --password $YC_TOKEN cr.yandex
-      
-      # Push to Yandex Container Registry (YCR)
-      - run: docker tag $CIRCLE_PROJECT_REPONAME ${YC_YCR_REPONAME}:$CIRCLE_TAG
-      - run: docker push ${YC_YCR_REPONAME}:$CIRCLE_TAG
-      - run: docker tag ${CIRCLE_PROJECT_REPONAME} ${YC_YCR_REPONAME}:latest
-      - run: docker push ${YC_YCR_REPONAME}:latest
 
 workflows:
   version: 2

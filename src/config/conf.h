@@ -110,7 +110,11 @@ typedef struct ksnet_cfg {
     char r_host_addr[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address
     long r_port;                            ///< Remote host port
     long r_tcp_port;                        ///< Remote host tcp port
-    int r_tcp_f;                            ///< Connect to TCP Proxy R-Host  
+    int r_tcp_f;                            ///< Connect to TCP Proxy R-Host
+
+    //public ips
+    char l0_public_ipv4[KSN_BUFFER_SM_SIZE/2]; ///< L0 Server public IPv4 address (send clients to connect to server)
+    char l0_public_ipv6[KSN_BUFFER_SM_SIZE/2]; ///< L0 Server public IPv6 address (send clients to connect to server)
 
     // VPN
     char vpn_dev_name[KSN_MAX_HOST_NAME];   ///< VPN Interface device name
@@ -125,7 +129,7 @@ typedef struct ksnet_cfg {
     
     // Syslog options
     long log_priority;                       ///< Syslog priority 
-
+    char log_prefix[KSN_BUFFER_SM_SIZE];
     // StatsD address
     char statsd_ip[KSN_BUFFER_SM_SIZE/2];
     long statsd_port;

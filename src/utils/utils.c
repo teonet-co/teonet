@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <libgen.h>
 #include <syslog.h>
+#include <errno.h>
 
 #include "config/config.h"
 
@@ -19,6 +20,8 @@
 #include "rlutil.h"
 #include "utils.h"
 #include "ev_mgr.h"
+
+#define ADDRSTRLEN 128
 
 //double ksnetEvMgrGetTime(void *ke);
 void teoLoggingClientSend(void *ke, const char *message);
@@ -133,10 +136,21 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
         // Show message
         if(show_it) {
             double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
-            if(/*type != MESSAGE &&*/ type != DISPLAY_M && ct != 0.00) 
-                printf("%s%f:%s ", 
+            uint64_t raw_time = ct * 1000;
+            time_t e_time = raw_time / 1000;
+            unsigned ms_time = raw_time % 1000;
+            struct tm tm = *localtime(&e_time);
+
+            char t[64];
+            strftime(t, sizeof t, "[%F %T", &tm);
+
+            char timestamp[64];
+            snprintf(timestamp, sizeof timestamp, "%s:%03u]", t, ms_time);
+
+            if(type != DISPLAY_M && ct != 0.00)
+                printf("%s%s%s ",
                        ksn_cfg->color_output_disable_f ? "" : _ANSI_DARKGREY, 
-                       ct, 
+                       timestamp,
                        ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE
                 );
                 
@@ -153,18 +167,9 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
             // Open log at first message
             if(!log_opened) {
-
-                // Create prefix
-                const char* LOG_PREFIX = "teonet:";
-                const size_t LOG_PREFIX_SIZE = strlen(LOG_PREFIX);
-                size_t prefix_len = LOG_PREFIX_SIZE + strlen(ksn_cfg->app_name) + 1;
-                char *prefix = malloc(prefix_len); // \todo Free this at exit
-                strncpy(prefix, LOG_PREFIX, prefix_len);
-                strncat(prefix, ksn_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
-
                 // Open log
                 setlogmask (LOG_UPTO (LOG_INFO));
-                openlog (prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+                openlog (ksn_cfg->log_prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
                 log_opened = 1;
             }
 
@@ -247,7 +252,9 @@ char *ksnet_sformatMessage(char *str_to_free, const char *fmt, ...) {
     char *p = ksnet_vformatMessage(fmt, ap);
     va_end(ap);
 
-    if(str_to_free != NULL) free(str_to_free);
+    if(str_to_free != NULL) {
+        free(str_to_free);
+    }
 
     return p;
 }
@@ -259,8 +266,9 @@ char *ksnet_vformatMessage(const char *fmt, va_list ap) {
     va_list ap_copy;
     int n;
 
-    if((p = malloc(size)) == NULL)
+    if((p = malloc(size)) == NULL) {
         return NULL;
+    }
 
     while(1) {
 
@@ -274,16 +282,16 @@ char *ksnet_vformatMessage(const char *fmt, va_list ap) {
             return NULL;
 
         // If that worked, return the string
-        if(n < size)
+        if(n < size) {
             return p;
+        }
 
         // Else try again with more space
         size = n + KSN_BUFFER_SM_SIZE; // Precisely what is needed
         if((np = realloc(p, size)) == NULL) {
             free(p);
             return NULL;
-        }
-        else {
+        } else {
             p = np;
         }
     }
@@ -404,9 +412,9 @@ char *getRandomHostName(void) {
  *
  * @return NULL terminated static string
  */
-const char* getDataPath(void) {
+char* getDataPath(void) {
 
-    static char* dataDir = NULL;
+    char* dataDir = NULL;
 
     if(dataDir == NULL) {
 
@@ -566,22 +574,11 @@ int set_reuseaddr(int sd) {
 /**
  * Getting path to ksnet configuration folder
  *
- * @return NULL terminated static string
+ * @return NULL terminated string
  */
-const char *ksnet_getSysConfigDir(void) {
+char *ksnet_getSysConfigDir(void) {
 
-    static char* sysConfigDir = NULL;
-
-    if(sysConfigDir == NULL) {
-
-#define LOCAL_CONFIG_DIR "src/conf"
-
-//#if RELEASE_KSNET
-        sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
-//#else
-//        sysConfigDir = strdup(LOCAL_CONFIG_DIR);
-//#endif
-    }
+    char* sysConfigDir = strdup(TEONET_SYS_CONFIG_DIR);
 
     return sysConfigDir;
 }
@@ -648,7 +645,7 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
             tmpAddrPtr = &((struct sockaddr_in *) ifa->ifa_addr)->sin_addr;
             char addressBuffer[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, tmpAddrPtr, addressBuffer, INET_ADDRSTRLEN);
-//            printf("%s IP Address: %s\n", ifa->ifa_name, addressBuffer);
+            //printf("%s IP Address: %s\n", ifa->ifa_name, addressBuffer);
 
             // Skip VPN IP
             if(!strcmp(addressBuffer, conf->vpn_ip)) continue;
@@ -661,7 +658,7 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
             tmpAddrPtr = &((struct sockaddr_in6 *) ifa->ifa_addr)->sin6_addr;
             char addressBuffer[INET6_ADDRSTRLEN];
             inet_ntop(AF_INET6, tmpAddrPtr, addressBuffer, INET6_ADDRSTRLEN);
-            //            printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
+            //printf("%s IP Address %s\n", ifa->ifa_name, addressBuffer);
             ksnet_stringArrAdd(&arr, addressBuffer);
         }
     }
@@ -670,6 +667,101 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
     #endif
 
     return arr;
+}
+
+int ip_type(const char *ip_ch) {
+    struct addrinfo hint, *res = NULL;
+    int ret_type = -1;
+
+    memset(&hint, '\0', sizeof hint);
+
+    hint.ai_family = PF_UNSPEC;
+    hint.ai_flags = AI_NUMERICHOST;
+
+    int ret = getaddrinfo(ip_ch, NULL, &hint, &res);
+    if (ret) {
+        fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
+        exit(1);
+    }
+
+    if(res->ai_family == AF_INET) {
+        ret_type = 1;// TODO: enum need
+    } else if (res->ai_family == AF_INET6) {
+        ret_type = 2;
+    }
+
+   freeaddrinfo(res);
+   return ret_type;
+}
+
+int addr_port_equal(addr_port_t *ap_obj, char *addr, uint16_t port) {
+    if (ap_obj->port == port && !strcmp(ap_obj->addr, addr)) {
+        return 1;
+    }
+
+    return 0;
+}
+
+addr_port_t *addr_port_init() {
+    addr_port_t *ptr = malloc(sizeof(addr_port_t));
+    ptr->addr = malloc(ADDRSTRLEN);
+    ptr->addr[0] = '\0';
+    ptr->port = 0;
+    ptr->equal = addr_port_equal;
+    return ptr;
+}
+
+void addr_port_free(addr_port_t *ap_obj) {
+    free(ap_obj->addr);
+    free(ap_obj);
+}
+
+addr_port_t *wr__ntop(const struct sockaddr *sa) {
+    addr_port_t *ptr = addr_port_init();
+
+	switch (sa->sa_family) {
+	case AF_INET: {
+		struct sockaddr_in	*sin = (struct sockaddr_in *) sa;
+
+		if (inet_ntop(AF_INET, &sin->sin_addr, ptr->addr, ADDRSTRLEN) == NULL) {
+            printf("inet_ntop ipv4 conversion error: %s\n", strerror(errno));
+			return NULL;
+        }
+		if (ntohs(sin->sin_port) != 0) {
+            ptr->port = ntohs(sin->sin_port);
+		}
+
+		return ptr;
+	}
+
+	case AF_INET6: {
+		struct sockaddr_in6	*sin6 = (struct sockaddr_in6 *) sa;
+
+		if (inet_ntop(AF_INET6, &sin6->sin6_addr, ptr->addr, ADDRSTRLEN) == NULL) {
+            printf("inet_ntop ipv6 conversion error: %s\n", strerror(errno));
+			return NULL;
+        }
+		if (ntohs(sin6->sin6_port) != 0) {
+            ptr->port = ntohs(sin6->sin6_port);
+		}
+
+		return ptr;
+	}
+
+	default:
+		return NULL;
+	}
+    return NULL;
+}
+
+addr_port_t *wrap_inet_ntop(const struct sockaddr *sa) {
+    addr_port_t *ptr;
+	if ( (ptr = wr__ntop(sa)) == NULL) {
+        fprintf(stderr, "wrap_inet_ntop error\n");
+        exit(1);
+    }
+
+    return ptr;
 }
 
 /**

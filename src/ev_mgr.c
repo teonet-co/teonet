@@ -24,7 +24,7 @@
 #include "utils/rlutil.h"
 #include "modules/metric.h"
 
-#define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
+#define MODULE "event_manager"
 
 // Global module variables
 static int teoRestartApp_f = 0; // Restart teonet application before exit
@@ -240,7 +240,6 @@ inline const char *teoGetLibteonetVersion() {
  * @param ke Pointer to ksnetEvMgrClass
  */
 inline void ksnetEvMgrStop(ksnetEvMgrClass *ke) {
-
     ke->runEventMgr = 0;
 }
 
@@ -290,7 +289,11 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     // Create run file name
     const char *network = ke->ksn_cfg.network;
-    strncpy(run_file, getDataPath(), KSN_BUFFER_SIZE - 1);
+
+    char *DataPath = getDataPath();
+    strncpy(run_file, DataPath, KSN_BUFFER_SIZE - 1);
+    free(DataPath);
+
     if (network != NULL && network[0]) {
         strncat(run_file, "/", KSN_BUFFER_SIZE - strlen(run_file) - 1);
         strncat(run_file, network, KSN_BUFFER_SIZE - strlen(run_file) - 1);
@@ -305,7 +308,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     // if this application crash or deployed
     if(!ke->net_idx) {
         if ((fp = fopen(run_file, "r"))){
-            usleep(3500000);
+            // usleep(3500000);
             fclose(fp);
         }
         // Create run file
@@ -429,6 +432,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
         // Run event loop
         ke->runEventMgr = 1;
+        ev_idle_start(ke->ev_loop, & ke->idle_w);
         if(ke->km == NULL && loop_already_initialised == false) ev_run(ke->ev_loop, 0);
         else return 0;
 
@@ -439,34 +443,6 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
 
     return 0;
 }
-
-void ksnetEvMgrInitialize(ksnetEvMgrClass *ke){
-    ke->timer_val = 0;
-    ke->idle_count = 0;
-    ke->idle_activity_count = 0;
-
-    if(!modules_init(ke)){
-        ksnetEvMgrFree(ke, 0); // Free class variables and watchers after run
-        exit(EXIT_FAILURE);
-    }
-
-    // Initialize idle watchers
-    ev_idle_init (&ke->idle_w, idle_cb);
-    ke->idle_w.data = ke->kc;
-
-    // Initialize Check activity watcher
-    ev_idle_init (&ke->idle_activity_w, idle_activity_cb);
-    ke->idle_activity_w.data = ke;
-
-    // Initialize and start main timer watcher, it is a repeated timer
-    ev_timer_init (&ke->timer_w, timer_cb, 0.0, KSNET_EVENT_MGR_TIMER);
-    ke->timer_w.data = ke;
-    ev_timer_start (ke->ev_loop, &ke->timer_w);
-
-    // Run event loop
-    ke->runEventMgr = 1;
-}
-
 
 /**
  * Free ksnetEvMgrClass after run
@@ -715,7 +691,7 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
  *
  * @param ke Pointer to ksnetEvMgrClass
  */
-void connect_r_host_cb(ksnetEvMgrClass *ke) {
+void    connect_r_host_cb(ksnetEvMgrClass *ke) {
 
     // TODO: Posible this commente code don't need more. So it may be removed 
     // after some release versions.
@@ -856,7 +832,6 @@ static void remove_peer(ksnetEvMgrClass *ke, char *peer_name, ksnet_arp_data_ext
     rd.addr = arp->data.addr;
     rd.port = arp->data.port;
     rd.arp = arp;
-
     cmd_disconnected_cb(ke->kc->kco, &rd);
 }
 
@@ -939,47 +914,44 @@ int check_connected_cb(ksnetArpClass *ka, char *peer_name,
  * @param revents
  */
 void idle_cb (EV_P_ ev_idle *w, int revents) {
-
-    #define kev ((ksnetEvMgrClass *)((ksnCoreClass *)w->data)->ke)
+    ksnetEvMgrClass *ke = ((ksnCoreClass *)w->data)->ke;
 
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV, "idle callback %d\n", kev->idle_count);
+    ksn_printf(ke, MODULE, DEBUG_VV, "idle callback %d\n", ke->idle_count);
     #endif
 
     // Stop this watcher
     ev_idle_stop(EV_A_ w);
 
     // Idle count startup (first time run)
-    if(!kev->idle_count) {
+    if(!ke->idle_count) {
         //! \todo: open_local_port(kev);
-        #if TRUDP_VERSION == 1
-        // Set statistic start time
-        if(!kev->kc->ku->started) kev->kc->ku->started = ksnetEvMgrGetTime(kev);
-        #endif
         // Connect to R-Host
-        connect_r_host_cb(kev);
+        connect_r_host_cb(ke);
         // Send event to application
-        if(kev->ta) kev->ta->t_id = pthread_self();
-        if(kev->event_cb != NULL) kev->event_cb(kev, EV_K_STARTED, NULL, 0, NULL);
+        if(ke->ta) ke->ta->t_id = pthread_self();
+        if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STARTED, NULL, 0, NULL);
+        // Start host socket in the event manager
+        if(!ke->ksn_cfg.r_tcp_f) {
+            ev_io_start(ke->ev_loop, &ke->kc->host_w);
+        }
     }
     // Idle count max value
-    else if(kev->idle_count == UINT32_MAX) kev->idle_count = 0;
+    else if(ke->idle_count == UINT32_MAX) ke->idle_count = 0;
 
     // Increment count
-    kev->idle_count++;
+    ke->idle_count++;
 
     // Check host events to send him service information
     //! \todo:    host_cb(EV_A_ (ev_io*)w, revents);
 
     // Send idle Event
-    if(kev->event_cb != NULL) {
-        kev->event_cb(kev, EV_K_IDLE , NULL, 0, NULL);
+    if(ke->event_cb != NULL) {
+        ke->event_cb(ke, EV_K_IDLE , NULL, 0, NULL);
     }
 
     // Set last host event time
-    ksnCoreSetEventTime(kev->kc);
-
-    #undef kev
+    ksnCoreSetEventTime(ke->kc);
 }
 
 /**
@@ -1057,7 +1029,7 @@ void sigint_cb (struct ev_loop *loop, ev_signal *w, int revents) {
             "got a signal to stop event manager ...");
     #endif
 
-    trudpSendResetAll(ke->kc->ku);
+    // trudpSendResetAll(ke->kc->ku);
     ((ksnetEvMgrClass *)w->data)->runEventMgr = 0;
 }
 
@@ -1072,7 +1044,7 @@ void sigusr2_cb (struct ev_loop *loop, ev_signal *w, int revents) {
 
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)w->data;
     static int attempt = 0;
-    trudpSendResetAll(ke->kc->ku);
+    // trudpSendResetAll(ke->kc->ku);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, MESSAGE,

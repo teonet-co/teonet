@@ -30,7 +30,7 @@ endif
 
 LIBS = \
 	../src/libteonet.la \
-	-lcrypto -lcunit -lev
+	-lcrypto -lcunit -lev -pthread
 
 if TEO_THREAD	
 LIBS += -pthread
@@ -42,7 +42,6 @@ teonet_tst_SOURCES  = teonet_tst.c
 
 test_teonet_SOURCES = \
 	test_teonet.c \
-	test_tr-udp.c \
 	test_crypt.c \
 	test_cque.c \
 	test_teodb.c \

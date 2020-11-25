@@ -86,7 +86,7 @@ template <typename T> struct destroy {
 
 template <typename T> std::unique_ptr<T[], destroy<T*>> make(T* raw_data) {
   std::unique_ptr<T[], destroy<T*>> str_ptr(raw_data);
-  return std::move(str_ptr);
+  return str_ptr;
 }
 } // namespace unique_raw_ptr
 
@@ -453,7 +453,12 @@ public:
    *
    * @return Null terminated static string
    */
-  inline const std::string getPath() { return getDataPath(); }
+  inline const std::string getPath() {
+    char *data_path = getDataPath();
+    std::string data_path_str(data_path);
+    free(data_path);
+    return data_path_str;
+    }
 
   /**
    * Stop Teonet event manager
@@ -540,7 +545,7 @@ public:
                type != DISPLAY_M ? _ksn_printf_format_(format)                                     \
                                  : _ksn_printf_format_display_m(format),                           \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->ksn_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0, __VA_ARGS__)
 
@@ -549,7 +554,7 @@ public:
                type != DISPLAY_M ? _ksn_printf_format_(format) "\n"                                \
                                  : _ksn_printf_format_display_m(format) "\n",                      \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module == NULL ? (getKe())->ksn_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->ksn_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0)
 
@@ -845,7 +850,7 @@ public:
             delete(ud);
           },
           timeout, ud);
-      teo_printf(NULL, DEBUG, "Register callback id %u\n", cq->id);
+      teo_printf("", DEBUG, "Register callback id %u\n", cq->id);
       return sendTDD(cmd, key, key_len, NULL, 0, cq->id);
     }
 
@@ -862,7 +867,7 @@ public:
       // Add callback to queue and wait timeout after 5 sec ...
       std::cout << "!!! cqueCallback !!!\n";
       auto cq = cque.add(cb, timeout, user_data);
-      teo_printf(NULL, DEBUG, "Register simple callback id %u\n", cq->id);
+      teo_printf("", DEBUG, "Register simple callback id %u\n", cq->id);
       return sendTDD(cmd, key, key_len, NULL, 0, cq->id);
     }
 
@@ -1133,8 +1138,8 @@ public:
     foo.str();                                                                                     \
   })
 
-#define showMessage(mtype, msg) teo_printf(NULL, mtype, "%s", msg_to_string(msg).c_str())
-#define showMessageLn(mtype, msg) teo_printf(NULL, mtype, "%s\n", msg_to_string(msg).c_str())
+#define showMessage(mtype, msg) teo_printf("", mtype, "%s", msg_to_string(msg).c_str())
+#define showMessageLn(mtype, msg) teo_printf("", mtype, "%s\n", msg_to_string(msg).c_str())
 
 #define watch(x) std::cout << (#x) << " = " << (x) << std::endl
 

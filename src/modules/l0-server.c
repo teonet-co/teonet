@@ -42,7 +42,6 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
 // Other modules not declared functions
 void *ksnCoreCreatePacket(ksnCoreClass *kc, uint8_t cmd, const void *data,
         size_t data_len, size_t *packet_len);
-#include "tr-udp_.h"  // ksnTRUDPmakeAddr
 
 // External constants
 extern const char *localhost;
@@ -435,13 +434,10 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     else {
         // Create packet
         size_t pkg_len;
-        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len,
-                    &pkg_len);
-        struct sockaddr_in addr;             // address structure
-        socklen_t addrlen = sizeof(addr);    // address structure length
-        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr,
-                &addrlen)) {
-
+        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len, &pkg_len);
+        struct sockaddr_storage addr;             // address structure
+        socklen_t addrlen = sizeof(addr); // length of addresses
+        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr, &addrlen)) {
             ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
             arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
         }
@@ -591,22 +587,36 @@ static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const cha
     return kld;
 }
 
-void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
-        size_t name_length) {
 
-    // Send Connected event to all subscribers
-    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED,
-        (void *)name, name_length, 0);
+void _send_subscribe_event_disconnected(ksnetEvMgrClass *ke, const char *payload,
+        size_t payload_length) {
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_DISCONNECTED, (void *)payload, payload_length, 0);
+}
 
-    // Add connection to L0 statistic
-    ke->kl->stat.visits++; // Increment number of visits
+/**
+ * Send Connected event to all subscribers
+ *
+ */
+void _send_subscribe_event_connected(ksnetEvMgrClass *ke, const char *payload,
+        size_t payload_length) {
 
-    // Send "new visit" event to all subscribers
-    size_t vd_length = sizeof(ksnLNullSVisitsData) + name_length;
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED, (void *)payload, payload_length, 0);
+
+    ke->kl->stat.visits++;
+}
+
+/**
+ * Send "new visit" event to all subscribers
+ *
+ */
+void _send_subscribe_event_newvisit(ksnetEvMgrClass *ke, const char *payload,
+        size_t payload_length) {
+
+    size_t vd_length = sizeof(ksnLNullSVisitsData) + payload_length;
     ksnLNullSVisitsData *vd = malloc(vd_length);
     vd->visits = ke->kl->stat.visits;
-    memcpy(vd->client, name, name_length);
-    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, vd, vd_length, 0);
+    memcpy(vd->client, payload, payload_length);
+    teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_NEW_VISIT, (void *)vd, vd_length, 0);
     free(vd);
 }
 
@@ -621,38 +631,51 @@ void _send_subscribe_events(ksnetEvMgrClass *ke, const char *name,
 static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
 
-    kld->name = strdup(packet->peer_name + packet->peer_name_length);
-    kld->name_length = strlen(kld->name) + 1;
-    if(kld->name_length == packet->data_length) {
+    char *name = strndup(packet->peer_name + packet->peer_name_length, packet->data_length);
+    size_t name_length = strlen(name) + 1;
+    if(name_length == packet->data_length) {
 
         // Create unique name for WG new user
-        if(!strcmp(WG001_NEW, kld->name)) {
-            kld->name = ksnet_sformatMessage(kld->name, "%s%s-%d", kld->name, ksnetEvMgrGetHostName(kl->ke),fd);
-            kld->name_length = strlen(kld->name) + 1;
+        if(!strcmp(WG001_NEW, name)) {
+            name = ksnet_sformatMessage(name, "%s%s-%d", name, ksnetEvMgrGetHostName(kl->ke),fd);
+            name_length = strlen(name) + 1;
         }
 
         // Remove client with the same name
-        int fd_ex;
-        if((fd_ex = ksnLNullClientIsConnected(kl, kld->name))) {
+        int fd_ex = ksnLNullClientIsConnected(kl, name);
+        if(fd_ex) {
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd: %d\n", kld->name, fd_ex);
+            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", name, fd_ex, fd);
             #endif
-            ksnLNullClientDisconnect(kl, fd_ex, 1);
+            if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
         }
 
         // Add client to name map
-        pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
+        kld->name = name;
+        kld->name_length = name_length;
+        if(fd_ex != fd) pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 
         // Send login to authentication application
         // to check this client or register 'wg001' clients
         if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
             ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
                     kld->name, kld->name_length);
+        } else {
+            // TODO: I must use kl->stat.clients or ke->kl->stat.visits ????? instead pblMapSize(kl->map)
+            int playload_size = snprintf(0, 0, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
+            char *payload = malloc(playload_size + 1);
+            snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
+
+            _send_subscribe_event_connected(kev, payload, playload_size + 1);
+            free(payload);
         }
-        else _send_subscribe_events(kev, kld->name, kld->name_length);
     }
     else {
         // Wrong Login name received
+        kld->name = name;
+        kld->name_length = name_length;
         #ifdef DEBUG_KSNET
         ksn_printf(kev, MODULE, DEBUG,
             "got login command with wrong name '%s'\n", kld->name
@@ -761,10 +784,9 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
 
     } else {    // Send by TR-UDP
         if(kld != NULL) {
-            struct sockaddr_in remaddr;                   ///< Remote address
+            struct sockaddr_storage remaddr;                   ///< Remote address
             socklen_t addrlen = sizeof(remaddr);          ///< Remote address length
-            trudpUdpMakeAddr(kld->t_addr, kld->t_port,
-                (__SOCKADDR_ARG) &remaddr, &addrlen);
+            trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, extendedLog(kl),
@@ -814,9 +836,6 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd, const char *remote_
     ksn_printf(kev, MODULE, DEBUG_VV,
                "L0 client with fd %d connected from %s:%d\n",
                fd, remote_addr, remote_port);
-
-    // Send Connected event to all subscribers
-    //teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_CONNECTED, "", 1, 0);
 
     // Register client in clients map
     ksnLNullData* kld = ksnLNullClientRegister(kl, fd, remote_addr, remote_port);
@@ -870,9 +889,15 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         kl->stat.clients--;
 
         // Send Disconnect event to all subscribers
-        if(kld->name != NULL  && remove_f != 2)
-            teoSScrSend(kev->kc->kco->ksscr, EV_K_L0_DISCONNECTED, kld->name,
-                kld->name_length, 0);
+        if(kld->name != NULL  && remove_f != 2) {
+            int playload_size = snprintf(0, 0, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", kl->stat.clients);
+            char *payload = malloc(playload_size + 1);
+            snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+                kld->name, kld->t_addr ? kld->t_addr : "error", kl->stat.clients);
+            _send_subscribe_event_disconnected(kev, payload, playload_size + 1);
+            free(payload);
+        }
 
         // Free name
         if(kld->name != NULL) {
@@ -1455,7 +1480,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             // Send Connected event to all subscribers
             if(kld->name != NULL && !strcmp(rd->from, TEO_AUTH)) {
-                _send_subscribe_events(kev, kld->name, kld->name_length);
+                _send_subscribe_event_connected(kev, kld->name, kld->name_length);
             }
 
             // Create & Send websocket allow answer message
@@ -1823,6 +1848,10 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
 
     trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    if (tcd == NULL || tcd == (void *)-1) {
+        return 1;
+    }
+
     if(tcd->fd == 0) {
         // Add fd to tr-udp channel data
         tcd->fd = ksnLNullGetNextFakeFd(kl);

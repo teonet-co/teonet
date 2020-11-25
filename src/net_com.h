@@ -67,6 +67,8 @@ enum ksnCMD {
     CMD_SUBSCRIBE_RND,      ///< #100 Subscribe command extension. (Send answer for one random peer by type)
     CMD_L0_CLIENT_BROADCAST,///< #101 Send data to all L0 clients
 
+    CMD_GET_PUBLIC_IP,         ///< #102 Request public IPs, which set by l0_public_ipv4, l0_public_ipv6 parameters
+    CMD_GET_PUBLIC_IP_ANSWER,  ///< #103 Public IPs answer
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
@@ -128,14 +130,17 @@ ksnCommandClass *ksnCommandInit(void *kc);
 void ksnCommandDestroy(ksnCommandClass *kco);
 int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd);
 int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, 
-  size_t data_len);
+    size_t data_len);
 void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, 
-        size_t *data_t_len);
+    size_t *data_t_len);
 int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name, 
-  char *addr, uint32_t port);
+    char *addr, uint32_t port);
 
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-
+int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
+    ksnet_arp_data_ext *arp, void *data);
+int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
+    ksnet_arp_data_ext *arp, void *data);
 #ifdef	__cplusplus
 }
 #endif

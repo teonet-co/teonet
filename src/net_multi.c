@@ -174,16 +174,22 @@ void ksnMultiDestroy(ksnMultiClass *km) {
  * @return Pointer to ksnetEvMgrClass
  */
 ksnetEvMgrClass *teoMultiGetByNumber(ksnMultiClass *km, int number) {
+    ksnetEvMgrClass *ev_mgr = NULL;
     PblIterator *it = pblMapIteratorNew(km->list);
     if(!it) return NULL;
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it); 
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        if ((*ke)->net_idx == number) return *ke;
+        if ((*ke)->net_idx == number) {
+            ev_mgr = *ke;
+            break;
+        }
     }
 
-    return NULL;
+    pblIteratorFree(it);
+
+    return ev_mgr;
 }
 
 
@@ -210,16 +216,23 @@ ksnetEvMgrClass *teoMultiGetByNetwork(ksnMultiClass *km, char *network_name) {
  * @return true if network with input number is exist
  */
 bool teoMultiIsNetworkExist(ksnMultiClass *km, int number) {
+    bool net_check = false;
+
     PblIterator *it = pblMapIteratorNew(km->list);
     if(!it) return false;
 
     while(pblIteratorHasNext(it)) {
         void *entry = pblIteratorNext(it);
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
-        if ((*ke)->net_idx == number) return true;
+        if ((*ke)->net_idx == number) {
+            net_check = true;
+            break;
+        }
     }
 
-    return false;
+    pblIteratorFree(it);
+
+    return net_check;
 }
 
 
@@ -241,6 +254,8 @@ static void ksnMultiUpdateCountNetworks(ksnMultiClass *km, int num) {
         ksnetEvMgrClass **ke = pblMapEntryValue(entry);
         (*ke)->net_count = num;
     }
+
+    pblIteratorFree(it);
 }
 
 /**
@@ -264,6 +279,8 @@ void ksnMultiSetNumNets(ksnMultiClass *km, int num) {
         (*ke)->net_idx = idx++;
         (*ke)->net_count = num;
     }
+
+    pblIteratorFree(it);
 }
 
 /**
@@ -308,6 +325,8 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
                 (*ke)->ksn_cfg.port
         );
     }
+
+    pblIteratorFree(it);
 
     add_line();
 

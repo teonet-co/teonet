@@ -191,9 +191,11 @@ int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
 
     ksnet_cfg *conf = &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg;
 
+    char *DataPath = getDataPath();
+
     char *buffer = ksnet_formatMessage(
         "%s%s%s/%s %s %s %d",
-        getDataPath(),
+        DataPath,
         conf->network[0] ? "/" : "",
         conf->network[0] ? conf->network : "",
         script,
@@ -203,7 +205,7 @@ int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
     );
     int rv = system(buffer);
     free(buffer);
-
+    free(DataPath);
     return rv != 0;
 }
 

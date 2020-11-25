@@ -20,7 +20,7 @@ RUN cd /teonet/distr && \
     unzip libtuntap.zip && \
     cd libtuntap-master && \
     cmake ./ && \
-    make && \
+    make -j6 && \
     make install
 
 # Update system dynamic libraries configuration
@@ -29,8 +29,8 @@ RUN ldconfig
 # build teonet
 RUN cd /teonet && autoreconf --force --install
 RUN ./autogen.sh --prefix=/usr/local
-RUN ./configure --prefix=/usr/local
-RUN make
+RUN ./configure --prefix=/usr/local CXXFLAGS="-g -O0" CFLAGS="-g -O0"
+RUN make -j6
 #RUN make install
 #RUN cp /teonet/src/.libs/libteonet* /usr/lib/
 
