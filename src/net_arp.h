@@ -19,21 +19,6 @@
 #include "net_core.h"
 #include "teonet_l0_client.h"
 
-#pragma pack(push)
-#pragma pack(1)
-typedef struct ksnet_arp_data_ext_ar {
-
-    uint32_t length;
-    struct _ext_arp_data {
-
-        char name[ARP_TABLE_IP_SIZE];
-        ksnet_arp_data_ext data;
-
-    } arp_data[];
-
-} ksnet_arp_data_ext_ar;
-#pragma pack(pop)
-
 /**
  * KSNet ARP functions data
  */
@@ -75,6 +60,12 @@ char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data, size_t *peers_data_jso
 char *teoArpGetExtendedArpTable_json(ksnet_arp_data_ext_ar *peers_data, size_t *peers_data_json_len);
 
 size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);
+size_t teoArpGetExtendedArpTableLength(ksnet_arp_data_ext_ar *peers_data);
+#define ARP_TABLE_DATA_LENGTH(X) _Generic((X), \
+      ksnet_arp_data_ar* : ksnetArpShowDataLength, \
+      ksnet_arp_data_ext_ar* : teoArpGetExtendedArpTableLength \
+      ) (X)
+
 char *ksnetArpShowLine(int num, char *name, ksnet_arp_data* data);
 char *ksnetArpShowHeader(int header_f);
 void ksnetArpMetrics(ksnetArpClass *ka);
