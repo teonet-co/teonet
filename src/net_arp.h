@@ -58,7 +58,7 @@ ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka);
 ksnet_arp_data_ext_ar *teoArpGetExtendedArpTable(ksnetArpClass *ka);
 char *ksnetArpShowDataJson(ksnet_arp_data_ar *peers_data, size_t *peers_data_json_len);
 char *teoArpGetExtendedArpTable_json(ksnet_arp_data_ext_ar *peers_data, size_t *peers_data_json_len);
-
+void teoArpGetExtendedArpTable_json_delete(char *obj);
 size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);
 size_t teoArpGetExtendedArpTableLength(ksnet_arp_data_ext_ar *peers_data);
 #define ARP_TABLE_DATA_LENGTH(X) _Generic((X), \

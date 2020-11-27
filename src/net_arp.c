@@ -501,6 +501,9 @@ char *teoArpGetExtendedArpTable_json(ksnet_arp_data_ext_ar *peers_data,
     return data_str;
 }
 
+void teoArpGetExtendedArpTable_json_delete(char *obj) {
+    free(obj);
+}
 /**
  * Return size of ksnet_arp_data_ar data
  *
