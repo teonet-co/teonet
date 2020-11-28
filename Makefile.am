@@ -25,6 +25,8 @@ SUBDIRS = \
 	po \
 	# end of SUBDIRS
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = src/libteonet.pc
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
@@ -62,8 +64,15 @@ DISTCLEANFILES = intltool-extract \
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
 
+
+install-exec-hook:
+	$(MKDIR_P) $(DESTDIR)$(libdir)/cmake/teonet
+	cp -f cmake/libteonet-config.cmake $(DESTDIR)$(libdir)/cmake/teonet
+	cp -f cmake/libteonet-config-version.cmake $(DESTDIR)$(libdir)/cmake/teonet
+
 # Remove doc directory on un-install
 uninstall-local:
+	-rm -r $(DESTDIR)$(libdir)/cmake/teonet
 	-rm -r $(teonetdocdir)
 	-rm -r $(teonetsysconfdir)
 
