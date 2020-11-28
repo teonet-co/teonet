@@ -20,7 +20,7 @@ set_and_check (TEONET_INCLUDE_DIRS "${PACKAGE_PREFIX_DIR}/include/teonet")
 # We want to provide an absolute path to the library and we know the
 # directory and the base name, but not the suffix, so we use CMake's
 # find_library() to pick that up.  Users can override this by configuring
-# BSON_LIBRARY themselves.
+# themselves.
 find_library(TEONET_LIBRARY libteonet-dev PATHS "${PACKAGE_PREFIX_DIR}/lib" NO_DEFAULT_PATH)
 
 set (TEONET_LIBRARIES ${TEONET_LIBRARY})
