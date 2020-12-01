@@ -8,3 +8,6 @@
 	url = https://github.com/zserge/jsmn.git
 	ignore = dirty
 
+[submodule "libs/libtuntap"]
+	path = libs/libtuntap
+	url = https://github.com/teonet-co/libtuntap.git
