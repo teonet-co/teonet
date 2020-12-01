@@ -1,18 +1,4 @@
-# bin_PROGRAMS = ksmqtt_broker echo_server echo_client timer_watcher
-#
-# AM_CFLAGS = -I../include
-
-# ksmqtt_broker_SOURCES = ksmqtt_broker.c
-# timer_watcher_SOURCES = timer_watcher.c
-# echo_serv_SOURCES = echo_serv.c
-# echo_client_SOURCES = echo_client.c
-#
-# LIBS = -L../lib ../lib/libev.a -lm
-
-# SUBDIRS = app
-
 pkgconfigdir = $(libdir)/pkgconfig
-#nodist_pkgconfig_DATA = libteonet.pc
 
 if RELEASE_TEONET
   DRELEASE_TEONET = -DRELEASE_TEONET=1
@@ -71,7 +57,6 @@ LIBS = -lev -lcrypt -ltuntap \
 	../embedded/libpbl/src/libpbl.a \
 	# end of LIBS
 
-#	../embedded/teocli/linux/.libs/libteocli.la 
 
 # Not embed confuse flag
 if NOT_E_CONFUSE

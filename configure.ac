@@ -289,8 +289,6 @@ AC_CONFIG_FILES([
     Makefile
     po/Makefile.in
     src/libteonet.pc:src/libteonet.pc.in
-    cmake/libteonet-config.cmake
-    cmake/libteonet-config-version.cmake
     src/Makefile
     app/Makefile
     tests/Makefile
