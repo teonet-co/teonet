@@ -13,7 +13,7 @@ AC_SUBST([$1], ['$2'])
 
 m4_define([package_major], [0])
 m4_define([package_minor], [4])
-m4_define([package_patch], [2])
+m4_define([package_patch], [3])
 m4_define([package_version], [package_major[.]package_minor[.]package_patch])
 
 AC_PREREQ([2.69])
@@ -21,7 +21,7 @@ AC_PREREQ([2.69])
 AC_INIT([teonet], [package_version], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
 
 AC_DEFINE_SUBST(LIBRARY_CURRENT,  3, [teocli dynamic library version])
-AC_DEFINE_SUBST(LIBRARY_REVISION, 2,[teocli dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_REVISION, 3,[teocli dynamic library version])
 AC_DEFINE_SUBST(LIBRARY_AGE,      0, [teocli dynamic library version])
 
 AC_DEFINE_SUBST(PACKAGE_MAJOR_VERSION, [package_major], [pack ver])
