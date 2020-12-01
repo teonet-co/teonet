@@ -395,7 +395,7 @@ ksnet_arp_data_ext_ar *teoArpGetExtendedArpTable(ksnetArpClass *ka) {
             ksnet_arp_data_ext *data = pblMapEntryValue(entry);
             strncpy(data_ar->arp_data[i].name, name, sizeof(data_ar->arp_data[i].name));
             memcpy(&data_ar->arp_data[i].data.data, &data->data, sizeof(data_ar->arp_data[i].data.data));
-            strncpy(data_ar->arp_data[i].data.type, data->type, sizeof(data_ar->arp_data[i].data.type));
+            strncpy(data_ar->arp_data[i].data.type, data->type ? data->type : "no-type", sizeof(data_ar->arp_data[i].data.type));
             data_ar->arp_data[i].data.cque_id_peer_type = data->cque_id_peer_type;
             ++i;
         }
