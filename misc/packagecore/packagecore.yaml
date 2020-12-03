@@ -26,4 +26,5 @@ packages:
       - libev-dev
       - libconfuse-dev
       - uuid-dev
-      - libcurl4-openssl-dev 
+      - libcurl4-openssl-dev
+      - libglib2.0-dev
