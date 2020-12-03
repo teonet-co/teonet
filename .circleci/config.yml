@@ -66,6 +66,7 @@ jobs:
       - run: DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" sudo apt-get -y install tzdata
       - run: sudo apt install -y make pkg-config libtool autoconf intltool doxygen gcc g++ libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev cpputest libcurl4-openssl-dev 
       - checkout
+      - run: git submodule update --init --recursive
       - run:
           name: "package with packagecore"
           command: |
@@ -91,7 +92,6 @@ jobs:
       - run:
           name: "publish docs to GitHub"
           command: |
-            git submodule update --init --recursive
             ./autogen.sh
             ./configure
             ./misc/make_remote_doc_upload.sh teonet   
