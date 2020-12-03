@@ -16,6 +16,7 @@ DX_CLEANFILES = -rf @DX_DOCDIR@/*
 endif
 
 SUBDIRS = \
+	libs/libtuntap \
 	embedded/libpbl/src \
 	src \
 	app \
