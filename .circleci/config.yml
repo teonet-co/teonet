@@ -12,6 +12,30 @@ jobs:
       - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
       - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
 
+  compile:
+    docker:
+      - image: ubuntu:20.04
+        working_directory: ~/teonet
+        environment:
+          CI_FORCE_TEST: 1
+    steps:
+      - run:
+          command: |
+            apt update -qq
+            DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt-get -y install tzdata
+            apt install -y --no-install-recommends software-properties-common wget gpg-agent shellcheck
+            apt install -y --no-install-recommends git make pkg-config libtool autoconf intltool
+            apt install -y --no-install-recommends gcc gcc-7 gcc-8 gcc-10
+            apt install -y --no-install-recommends g++ g++-7 g++-8 g++-10
+            apt install -y --no-install-recommends libglib2.0-dev doxygen checkinstall libcunit1-dev libcpputest-dev libssl-dev libev-dev libconfuse-dev uuid-dev cpputest libcurl4-openssl-dev
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: ./autogen.sh
+      - run: ./configure --prefix=/usr
+      - run: CC=gcc-10 CXX=g++-10 make
+      - run: CC=gcc-10 CXX=g++-10 make test
+      - run: make clean
+
   tagged-build:
     machine:
       docker_layer_caching: false
@@ -34,13 +58,59 @@ jobs:
       - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:latest
       - run: docker push ${AWS_ECR_REPONAME}:latest
 
+  package-and-publish-release:
+    machine: true
+    working_directory: ~/teonet
+    steps:
+      - run: sudo apt-get update && sudo apt-get install -y openssh-client git
+      - run: DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" sudo apt-get -y install tzdata
+      - run: sudo apt install -y make pkg-config libtool autoconf intltool doxygen gcc g++ libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev cpputest libcurl4-openssl-dev 
+      - checkout
+      - run:
+          name: "package with packagecore"
+          command: |
+            # Clean up
+            rm -rf ./dist/*
+            # Pack source
+            git archive -o ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz --format tar.gz --prefix=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG#v}/ ${CIRCLE_TAG}
+            # Use latest installed python3 from pyenv
+            export PYENV_VERSION="$(pyenv versions | grep -Po '\b3\.\d+\.\d+' | tail -1)"
+            pip install packagecore
+            packagecore -c misc/packagecore/packagecore.yaml -o ./dist/ ${CIRCLE_TAG#v} ${CIRCLE_BUILD_NUM}
+            # Move source pack to dist
+            mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz dist/
+      - run:
+          name: "publish to GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t "${GITHUB_API_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" -c "${CIRCLE_SHA1}" -body "$(cat ./misc/RELEASE_BODY)" ${CIRCLE_TAG} ./dist/
+      - run:
+          name: "publish to Bintray"
+          command: |
+            BINTRAY_USER=${CI_BINTRAY_USER} BINTRAY_PASS=${CI_BINTRAY_API_KEY} BINTRAY_COMPONENT=release BINTRAY_ORG=teonet-co python ./misc/bintray/bintray.py publish ./dist
+      - run:
+          name: "publish docs to GitHub"
+          command: |
+            git submodule update --init --recursive
+            ./autogen.sh
+            ./configure
+            ./misc/make_remote_doc_upload.sh teonet   
+
 workflows:
   version: 2
   untagged:
     jobs: 
      - testing
-  tagged:
+     - compile
+  tagged-build:
     jobs:
+      - package-and-publish-release:
+          context: CI_BUILD
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
       - tagged-build:
           filters:
             branches:

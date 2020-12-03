@@ -1,0 +1,30 @@
+name: libteonet
+maintainer: Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>
+license: GPL-3.0
+summary: Teonet network library
+homepage: https://github.com/teonet-co/teonet
+commands:
+  compile:
+    - git submodule update --init --recursive
+    - ./autogen.sh
+    - ./configure
+    - make
+  install:
+    - make PREFIX="/usr" install DESTDIR="${BP_DESTDIR}"
+packages:
+  ubuntu20.04:
+    builddeps:
+      - libtool
+      - autoconf
+      - intltool
+      - make
+      - gcc
+      - g++
+      - pkg-config
+      - libcunit1-dev
+      - libcpputest-dev
+      - libssl-dev
+      - libev-dev
+      - libconfuse-dev
+      - uuid-dev
+      - libcurl4-openssl-dev 
