@@ -108,7 +108,7 @@ workflows:
           context: CI_BUILD
           filters:
             tags:
-              only: /^v.*/
+              only: /^v\d+\.\d+\.\d+/
             branches:
               ignore: /.*/
       - tagged-build:
