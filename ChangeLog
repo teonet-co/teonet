@@ -1,4 +1,11 @@
-Version 0.1.74 at 2016-08-10 20:40
+Version v0.4.5
+==============
+
+  - IpV6
+  - tcp fixed
+  - new interface for node wrapper
+
+Version 0.1.74
 ============== 
 
   - the EV_A_INTERVAL event added, this event used in teonet-node-angular 
@@ -6,7 +13,7 @@ Version 0.1.74 at 2016-08-10 20:40
   - option block_cli_input_f (block CLI input) added, configuration parameter 
     BLOCK_CLI_INPUT can be added to the Teonet initialize functions as option.
 
-Version 0.1.73 at 2016-06-29 14:25
+Version 0.1.73
 ============== 
 
   - teodb binary list request always return all keys fixed
