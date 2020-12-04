@@ -16,6 +16,7 @@ DX_CLEANFILES = -rf @DX_DOCDIR@/*
 endif
 
 SUBDIRS = \
+	libs/libtuntap \
 	embedded/libpbl/src \
 	src \
 	app \
@@ -25,6 +26,8 @@ SUBDIRS = \
 	po \
 	# end of SUBDIRS
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = src/libteonet.pc
 
 teonetdocdir = ${prefix}/doc/teonet
 teonetdoc_DATA = \
@@ -61,6 +64,7 @@ DISTCLEANFILES = intltool-extract \
 	# end of DISTCLEANFILES
 
 MOSTLYCLEANFILES = $(DX_CLEANFILES)
+
 
 # Remove doc directory on un-install
 uninstall-local:

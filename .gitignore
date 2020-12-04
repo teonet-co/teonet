@@ -117,6 +117,7 @@ nbproject/
 /examples/go/TestPage.txt
 examples/go/teogo/teogo
 /sh/temp
+/cmake/*.cmake
 /app/teodsp
 /app/teogw
 /examples/teotru_load

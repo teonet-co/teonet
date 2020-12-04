@@ -1,18 +1,4 @@
-# bin_PROGRAMS = ksmqtt_broker echo_server echo_client timer_watcher
-#
-# AM_CFLAGS = -I../include
-
-# ksmqtt_broker_SOURCES = ksmqtt_broker.c
-# timer_watcher_SOURCES = timer_watcher.c
-# echo_serv_SOURCES = echo_serv.c
-# echo_client_SOURCES = echo_client.c
-#
-# LIBS = -L../lib ../lib/libev.a -lm
-
-# SUBDIRS = app
-
 pkgconfigdir = $(libdir)/pkgconfig
-#nodist_pkgconfig_DATA = libteonet.pc
 
 if RELEASE_TEONET
   DRELEASE_TEONET = -DRELEASE_TEONET=1
@@ -41,6 +27,7 @@ AM_CFLAGS = \
 	 -I../embedded/teocli/libtrudp/libs/teoccl/include \
 	 -I../embedded/teocli \
 	 -I../app/embedded/jsmn \
+	 -I../libs/libtuntap \
 	 -I/usr/include/libev \
 	 -DEV_USE_EPOLL=1 \
 	 -fno-strict-aliasing \
@@ -67,11 +54,11 @@ AM_CXXFLAGS = \
 
 AM_LDFLAGS = -L/opt/local/lib
 
-LIBS = -lev -lcrypt -ltuntap \
+LIBS = -lev -lcrypt \
 	../embedded/libpbl/src/libpbl.a \
+	../libs/libtuntap/libtuntap.a \
 	# end of LIBS
 
-#	../embedded/teocli/linux/.libs/libteocli.la 
 
 # Not embed confuse flag
 if NOT_E_CONFUSE
@@ -135,10 +122,11 @@ nobase_teonetinclude_HEADERS = \
     utils/string_arr.h \
     utils/utils.h \
     utils/rlutil.h \
-		# end of nobase_teonetinclude_HEADERS
+    # end of nobase_teonetinclude_HEADERS
 
 teonetinclude_HEADERS = \
 	../embedded/libpbl/src/pbl.h \
+	../libs/libtuntap/tuntap.h \
 	../embedded/teocli/libteol0/teocli_api.h \
 	../embedded/teocli/libteol0/teonet_l0_client_crypt.h \
 	../embedded/teocli/libteol0/teonet_l0_client_options.h \

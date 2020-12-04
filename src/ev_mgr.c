@@ -213,6 +213,20 @@ inline const char *teoGetAppType(ksnetEvMgrClass *ke) {
     return (const char *)ke->app_type;
 }
 
+char *teoGetFullAppTypeFromHostInfo(host_info_data *hid) {
+    // Combine types
+    size_t ptr = strlen(hid->string_ar) + 1;
+    char *type_str = strdup(null_str);
+    for(int i = 1; i < hid->string_ar_num; i++) {
+
+        type_str = ksnet_sformatMessage(type_str, "%s%s\"%s\"",
+                type_str, i > 1 ? ", " : "", hid->string_ar + ptr);
+        ptr += strlen(hid->string_ar + ptr) + 1;
+    }
+
+    return type_str;
+}
+
 /**
  * Get current application version
  *
