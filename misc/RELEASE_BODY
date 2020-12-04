@@ -1,14 +1,5 @@
 Changes:
-  - Fix SIZE_T_MAX is always equals to UINT_MAX.
-  - new version v0.1.4
-  - tool script
-  - map.c: fix resize map
-  - Add Visual Studio solution and project fie.
-  - Fixed tests.
-  - Changes in map: change buffer type to uint8_t* and add const qualifiers to constant buffers.
-  - Removed dangerous pointer arithmetics.
-  - Update types in hash. Use constant pointers for input data.
-  - Add test for lru
-  - algs/lru_cache.c: lru cache interface
-  - Fix struct alias usage
+  - IpV6
+  - tcp fixed
+  - new interface for node wrapper
 

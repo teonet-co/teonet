@@ -11,19 +11,10 @@ die () {
     exit 1
 }
 
-# Empty line
-echo "\n" | cat - ChangeLog > temp && mv temp ChangeLog
-
-# List of changes
-git log --pretty=format:'  - %s' $1..HEAD | cat - ChangeLog > temp && mv temp ChangeLog
-
-# Empty line
-echo "" | cat - ChangeLog > temp && mv temp ChangeLog
-
-# Last tag
-git describe --tags | cat - ChangeLog > temp && mv temp ChangeLog
-echo "### " | cat - ChangeLog > temp && mv temp ChangeLog
-
-# git rev-parse v0.1.39-1-g197cc61
-# git describe --tags
-#
+echo -n "Version " >ChangeLog.tmp
+git describe --tags >>ChangeLog.tmp
+echo "==============\n" >>ChangeLog.tmp
+git log --pretty=format:'  - %s' $1..HEAD >>ChangeLog.tmp
+echo "\n" >> ChangeLog.tmp
+cat ChangeLog >>ChangeLog.tmp
+mv ChangeLog.tmp ChangeLog
