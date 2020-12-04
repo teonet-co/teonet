@@ -1,7 +1,7 @@
 var metric_8h =
 [
     [ "teoMetricClass", "structteoMetricClass.html", "structteoMetricClass" ],
-    [ "teoMetricClass", "metric_8h.html#a1adb21c4ed167e363ab6cc9c4f005275", null ],
+    [ "teoMetricClass", "metric_8h.html#ae66f10a47809384faa95c53b7ed4731a", null ],
     [ "teoMetricCounter", "metric_8h.html#a47f8575313da7838b00e13e9ec648149", null ],
     [ "teoMetricCounterf", "metric_8h.html#a5784093cdb4fc60480ab2619cecdd48a", null ],
     [ "teoMetricDestroy", "metric_8h.html#a1d9c5a16d2668c848ab4d30c569c4474", null ],

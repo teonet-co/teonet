@@ -1,7 +1,8 @@
 var net__arp_8h =
 [
     [ "ksnetArpClass", "structksnetArpClass.html", "structksnetArpClass" ],
-    [ "ksnetArpClass", "net__arp_8h.html#a190f1a49ffa1c6449dd319fd0808b996", null ],
+    [ "ARP_TABLE_DATA_LENGTH", "net__arp_8h.html#a341ebb19d19b5b68a1763fda2b91489b", null ],
+    [ "ksnetArpClass", "net__arp_8h.html#a03f1441168f6b59312011a008de70edc", null ],
     [ "ksnetArpAdd", "net__arp_8h.html#a37f40a6aba795fed35af1c63e1a038e4", null ],
     [ "ksnetArpAddHost", "net__arp_8h.html#ac3dce08eaa140ee4b29b6f6c240cf697", null ],
     [ "ksnetArpDestroy", "net__arp_8h.html#a14d93c42fd628b4810b778c41d2d9f4e", null ],
@@ -22,5 +23,9 @@ var net__arp_8h =
     [ "ksnetArpShowHeader", "net__arp_8h.html#af40918001db338d838159ae3d270ee18", null ],
     [ "ksnetArpShowLine", "net__arp_8h.html#a02b8240a3083bf71fdbdb336ab7168df", null ],
     [ "ksnetArpShowStr", "net__arp_8h.html#aae96fb94738679fc08c56cba039a53b6", null ],
-    [ "ksnetArpSize", "net__arp_8h.html#ad142033ef6faa313185355829320ed08", null ]
+    [ "ksnetArpSize", "net__arp_8h.html#ad142033ef6faa313185355829320ed08", null ],
+    [ "teoArpGetExtendedArpTable", "net__arp_8h.html#a4db8566e248be0285d16e41a638d766a", null ],
+    [ "teoArpGetExtendedArpTable_json", "net__arp_8h.html#a2d4fb59ab9a72162ea7ad0e68667f0d3", null ],
+    [ "teoArpGetExtendedArpTable_json_delete", "net__arp_8h.html#af9e253bfd6ff551a13550df5be095431", null ],
+    [ "teoArpGetExtendedArpTableLength", "net__arp_8h.html#a4dd5acdd81c5eba7b3d5ad7372b50146", null ]
 ];

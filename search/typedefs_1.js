@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['addr_5fport_5ft_3669',['addr_port_t',['../src_2utils_2utils_8h.html#a50ba71a2429c91c2b2178b0360565e09',1,'utils.h']]],
-  ['async_5fdata_3670',['async_data',['../async__calls_8c.html#ac1ee3aff120ae6bdd9231d4739f21c7c',1,'async_calls.c']]]
+  ['addr_5fport_5ft',['addr_port_t',['../src_2utils_2utils_8h.html#aa9594ea5ac88e623e07e9e449ee22f88',1,'utils.h']]],
+  ['appsettings',['AppSettings',['../teovpnstarter_8c.html#a83815d173440ba101b9aa7f37f67d538',1,'teovpnstarter.c']]],
+  ['async_5fdata',['async_data',['../async__calls_8c.html#a4a126d23fc1426c8b094abea66da650f',1,'async_calls.c']]]
 ];

@@ -4,9 +4,9 @@ var stream_8h =
     [ "ksnStreamData", "structksnStreamData.html", "structksnStreamData" ],
     [ "stream_packet", "structstream__packet.html", "structstream__packet" ],
     [ "ksnStreamClass", "structksnStreamClass.html", "structksnStreamClass" ],
-    [ "ksnStreamClass", "stream_8h.html#a8ecdb7e36df782c879b4c5835a7ce471", null ],
-    [ "ksnStreamData", "stream_8h.html#a998655ead043972962049c92872b50e3", null ],
-    [ "ksnStreamMapData", "stream_8h.html#aa19ff0ed40d4851c95ce69749c68ad0a", null ],
+    [ "ksnStreamClass", "stream_8h.html#a5e82cf610cc30a2fedd56fa8591cffb1", null ],
+    [ "ksnStreamData", "stream_8h.html#add4c7d5259aa3edd9eedcbe86d88c1dc", null ],
+    [ "ksnStreamMapData", "stream_8h.html#a55be5b3bb92402056ea963ce80219fda", null ],
     [ "stream_cmd", "stream_8h.html#ace8fdb5727b492f5d9d47379bf13f6aa", [
       [ "CMD_ST_NONE", "stream_8h.html#ace8fdb5727b492f5d9d47379bf13f6aaaad8552125f4ee411cbb7fc8343cac198", null ],
       [ "CMD_ST_CREATE", "stream_8h.html#ace8fdb5727b492f5d9d47379bf13f6aaafa44b776e514e77919557ac6457e8d3b", null ],

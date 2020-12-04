@@ -2,9 +2,9 @@ var log__reader_8h =
 [
     [ "teoLogReaderClass", "structteoLogReaderClass.html", "structteoLogReaderClass" ],
     [ "teoLogReaderWatcher", "structteoLogReaderWatcher.html", "structteoLogReaderWatcher" ],
-    [ "_teoLogReaderFlag", "log__reader_8h.html#ac241a60565b9381ddb4fd6b768a5b0e5", null ],
-    [ "teoLogReaderCallback", "log__reader_8h.html#ac357cbfe57edc2da68d14c72fb7a00c7", null ],
-    [ "teoLogReaderClass", "log__reader_8h.html#a0508365bb5809a254954aae01e4d31dc", null ],
+    [ "_teoLogReaderFlag", "log__reader_8h.html#ac726c306c7893d1b1a28f8afcfa31805", null ],
+    [ "teoLogReaderCallback", "log__reader_8h.html#a9dab82ddeca8f3f191fed0c540c48079", null ],
+    [ "teoLogReaderClass", "log__reader_8h.html#a1d4fcf62113c914e17da388fa7246317", null ],
     [ "teoLogReaderFlag", "log__reader_8h.html#a82c8bb360c9b54ce615585b82356d42a", null ],
     [ "teoLogReaderWatcher", "log__reader_8h.html#a35f0e8aec2b8f8f3f7b1a40ea7a167dc", null ],
     [ "_teoLogReaderFlag", "log__reader_8h.html#a75c4dd1743fac64378e09ce21fd1a3e3", [

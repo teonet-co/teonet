@@ -1,7 +1,7 @@
 var net__com_8c =
 [
     [ "MODULE", "net__com_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486", null ],
-    [ "cmd_connect_cque_cb_data", "net__com_8c.html#a85c7b41e60a39af2f7fca0a63050bbc0", null ],
+    [ "cmd_connect_cque_cb_data", "net__com_8c.html#a6f12bdf930d8ef7af4e5a9932b348376", null ],
     [ "cmd_disconnected_cb", "net__com_8c.html#af3662e6097c5fc9f51c103111092202c", null ],
     [ "cmd_l0_broadcast_cb", "net__com_8c.html#a2e968c5070e988ebf187a999c556276d", null ],
     [ "cmd_l0_cb", "net__com_8c.html#a1058011b31157f448884a0f5d7aadb06", null ],

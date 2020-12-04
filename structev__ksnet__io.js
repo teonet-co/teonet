@@ -5,6 +5,6 @@ var structev__ksnet__io =
     [ "events", "structev__ksnet__io.html#a84950544c0c7910df17b20168f3839e0", null ],
     [ "fd", "structev__ksnet__io.html#ade3c94b1d796ab37a4ac4726e2522d0b", null ],
     [ "io", "structev__ksnet__io.html#a2b31e6ca87db51fc5662dff9ff2f734c", null ],
-    [ "ksnet_cb", "structev__ksnet__io.html#aaf98eb26227944159f853c7c5e53ac54", null ],
-    [ "tcpServerAccept_cb", "structev__ksnet__io.html#adc005396857f72f4b5068348bfbfc3ed", null ]
+    [ "ksnet_cb", "structev__ksnet__io.html#afa589ecdaca710b55c494d30e7185b4d", null ],
+    [ "tcpServerAccept_cb", "structev__ksnet__io.html#a001ea42e33f328c4f054aed0a670d47f", null ]
 ];

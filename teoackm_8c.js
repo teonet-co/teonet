@@ -13,5 +13,5 @@ var teoackm_8c =
     [ "app_state", "teoackm_8c.html#a3d6733a7db1f1a71a4d4f27c280220f5", null ],
     [ "PRESS_A", "teoackm_8c.html#aa5ddcede77e422bec2eace4745592295", null ],
     [ "show_data_or_statistic_at_server", "teoackm_8c.html#a4bedaefa7d8b7870f5958904d184f010", null ],
-    [ "state", "teoackm_8c.html#a1a7c2c640f5448700d9c31cda2f1e872", null ]
+    [ "state", "teoackm_8c.html#aae2e5315ba9ea0c3b531141973e529ae", null ]
 ];

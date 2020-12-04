@@ -2,8 +2,8 @@ var subscribe_8h =
 [
     [ "teoSScrClass", "structteoSScrClass.html", "structteoSScrClass" ],
     [ "teoSScrListData", "structteoSScrListData.html", "structteoSScrListData" ],
-    [ "teoSScrClass", "subscribe_8h.html#a15941857bd515e9d0f40cb500af5335b", null ],
-    [ "teoSScrListData", "subscribe_8h.html#a526b486657411c9d4430d23d59b409aa", null ],
+    [ "teoSScrClass", "subscribe_8h.html#a35d0a69c227bae189a58bd1818754907", null ],
+    [ "teoSScrListData", "subscribe_8h.html#ab29a229a135682216702fb24a7b72df4", null ],
     [ "teoSScrDestroy", "subscribe_8h.html#ac4a7ae09dc173716b7d4df02dce1c195", null ],
     [ "teoSScrInit", "subscribe_8h.html#a72e0c79038d1e3992c83b114aa53d046", null ],
     [ "teoSScrNumberOfSubscribers", "subscribe_8h.html#a62ba3e33ddac32e715a33a1619617387", null ],

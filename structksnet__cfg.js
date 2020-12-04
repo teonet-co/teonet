@@ -16,6 +16,8 @@ var structksnet__cfg =
     [ "ke", "structksnet__cfg.html#a196707497ab9d243e42375ed57aac0d2", null ],
     [ "kflag", "structksnet__cfg.html#a3e12570afc0d8297f38a9cc3ea3d75cc", null ],
     [ "l0_allow_f", "structksnet__cfg.html#aeaaa2087873520e5cccfce0695393dbd", null ],
+    [ "l0_public_ipv4", "structksnet__cfg.html#aa0af1ba85353089fc9b7c4738ce55869", null ],
+    [ "l0_public_ipv6", "structksnet__cfg.html#a0cdc53c5a612e219af50d8fe92d0d18e", null ],
     [ "l0_tcp_ip_remote", "structksnet__cfg.html#a128d54fd5ce304e24e80e31d73e1cc61", null ],
     [ "l0_tcp_port", "structksnet__cfg.html#ad2a79fbc3e75323d212b6e77e1163436", null ],
     [ "log_disable_f", "structksnet__cfg.html#a926f2580b07544925d3ed044f11df656", null ],

@@ -2,7 +2,7 @@ var teo__web_8h =
 [
     [ "ksnHTTPClass", "structksnHTTPClass.html", "structksnHTTPClass" ],
     [ "teoweb_data", "structteoweb__data.html", "structteoweb__data" ],
-    [ "ksnHTTPClass", "teo__web_8h.html#a2c127919d76486503f596b2929351727", null ],
+    [ "ksnHTTPClass", "teo__web_8h.html#a4978c491a050e5453d8dad3991e26ffe", null ],
     [ "WS_CMD", "teo__web_8h.html#aa06ec6fa938d8c027001c8da0f3bcf5d", [
       [ "WS_CONNECTED", "teo__web_8h.html#aa06ec6fa938d8c027001c8da0f3bcf5daf9564bb4cc0e631f03b8a7d7c1a204c9", null ],
       [ "WS_MESSAGE", "teo__web_8h.html#aa06ec6fa938d8c027001c8da0f3bcf5da0499ed94f03287952ad487a9d0ab21d2", null ],

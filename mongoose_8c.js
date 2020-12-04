@@ -228,6 +228,6 @@ var mongoose_8c =
     [ "mg_dns_server", "mongoose_8c.html#a7769d1f3da89c4e1c67eff535faf50af", null ],
     [ "mime_type", "mongoose_8c.html#a12139285594e136f3f40ec07d2fdc5c5", null ],
     [ "s_cs_log_level", "mongoose_8c.html#a495b3da89aa71c66f1b9a4b639f46991", null ],
-    [ "test_calloc", "mongoose_8c.html#a12cc4a5838eaa43d1094e8b7d346551b", null ],
-    [ "test_malloc", "mongoose_8c.html#ac26633d0c7b645f4f91608e9a7f14d9c", null ]
+    [ "test_calloc", "mongoose_8c.html#acc775f01eef6b4adc3327d92d471d084", null ],
+    [ "test_malloc", "mongoose_8c.html#a9e1eaa316cc64db9629f7f9bc92ed12a", null ]
 ];

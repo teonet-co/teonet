@@ -6,8 +6,8 @@ var src_2utils_2utils_8h =
     [ "_ksn_printf_type_", "src_2utils_2utils_8h.html#ae795d69b6a93b1f014818e901cc51143", null ],
     [ "ksn_printf", "src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549", null ],
     [ "ksn_puts", "src_2utils_2utils_8h.html#a1d4bfc4aa271c99a29c2790777fe5125", null ],
-    [ "addr_port_t", "src_2utils_2utils_8h.html#a50ba71a2429c91c2b2178b0360565e09", null ],
-    [ "ksnet_printf_type", "src_2utils_2utils_8h.html#a0c3a89e67f124820f12bf92edcb197e5", null ],
+    [ "addr_port_t", "src_2utils_2utils_8h.html#aa9594ea5ac88e623e07e9e449ee22f88", null ],
+    [ "ksnet_printf_type", "src_2utils_2utils_8h.html#a05bfef789a8503ec246ecfd44385be77", null ],
     [ "ksnet_printf_type", "src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbd", [
       [ "NONE_LOG", "src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda50ef370e9c006b9a9656cc7bc04da9f9", null ],
       [ "ERROR_M", "src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda3190f2d6f2519a385b432ab3857ea8fc", null ],

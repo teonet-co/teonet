@@ -11,7 +11,7 @@ var net__core_8c =
     [ "rd", "net__core_8c.html#a2b916b583d6a51b414c74ecaf5b7bc72", null ],
     [ "sendto_encrypt", "net__core_8c.html#a6b91f4fa1c745ad314e476956a55f3f7", null ],
     [ "peer_type_req_t", "net__core_8c.html#a83a25c7c9a2f642b7b703435912925c3", null ],
-    [ "send_by_type_check_t", "net__core_8c.html#a0e8d2bef5c1cbb6094148f607b345547", null ],
+    [ "send_by_type_check_t", "net__core_8c.html#a4c21109808394e399024c2062d7f9ae6", null ],
     [ "host_cb", "net__core_8c.html#a54221c7a8c0ad7c0df3017e283554f91", null ],
     [ "ksnCoreBind", "net__core_8c.html#a20578428928f50986245933135f4bac5", null ],
     [ "ksnCoreBindRaw", "net__core_8c.html#a421a44308806a62fcbf2a2f55085e215", null ],

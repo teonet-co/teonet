@@ -9,7 +9,7 @@ var structksnetEvMgrClass =
     [ "cli", "structksnetEvMgrClass.html#a338a4c1ddc302133b0de2331365d4f02", null ],
     [ "custom_timer_interval", "structksnetEvMgrClass.html#ae80573e2232b5e4920391b81d49a11de", null ],
     [ "ev_loop", "structksnetEvMgrClass.html#a807f92107f1e71f865daab99f75b7701", null ],
-    [ "event_cb", "structksnetEvMgrClass.html#a379e9689542bfa3849a62c4e0c63d0d1", null ],
+    [ "event_cb", "structksnetEvMgrClass.html#a7f690ef58c82e2920698eb636c4e1ff0", null ],
     [ "idle_activity_count", "structksnetEvMgrClass.html#a594e00850a14d26968489b8600557753", null ],
     [ "idle_activity_w", "structksnetEvMgrClass.html#a24ad0241db4dceaedde2e024bbf778a9", null ],
     [ "idle_async_w", "structksnetEvMgrClass.html#a8ee4ca4303ff2a8df61a9791f1297725", null ],

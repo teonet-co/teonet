@@ -36,7 +36,6 @@ var config_8h =
     [ "HAVE_LIBCUNIT", "config_8h.html#a09ebec871dfd4496c1f187570d57491c", null ],
     [ "HAVE_LIBCURL", "config_8h.html#a151e9d1457283690bdc29e08bc8f8e69", null ],
     [ "HAVE_LIBEV", "config_8h.html#afd1b417061e4149b30eb8f02d008ef62", null ],
-    [ "HAVE_LIBTUNTAP", "config_8h.html#a5cdca261bf1e091c46707d251ad18659", null ],
     [ "HAVE_LIBUUID", "config_8h.html#a89a79bf5cbac1baec5241267c89a604e", null ],
     [ "HAVE_LIMITS_H", "config_8h.html#ac70f0930238c8d095d7cc2ee8b522c77", null ],
     [ "HAVE_LINUX", "config_8h.html#a2705a32a66a706ddd0b8588d884b1a93", null ],
@@ -97,12 +96,9 @@ var config_8h =
     [ "LIBRARY_AGE", "config_8h.html#aa001016c3baf1ed0f0572120717f66ae", null ],
     [ "LIBRARY_CURRENT", "config_8h.html#a93720535bc57373c4a07b8cb110ca536", null ],
     [ "LIBRARY_REVISION", "config_8h.html#a11d795da3059964520c0bffa6c0d9fc6", null ],
-    [ "LICENSES", "config_8h.html#af920c62caba124bca20ce0bba01200a8", null ],
     [ "LT_OBJDIR", "config_8h.html#ac2d5925d76379847dd9fc4747b061659", null ],
     [ "PACKAGE", "config_8h.html#aca8570fb706c81df371b7f9bc454ae03", null ],
     [ "PACKAGE_BUGREPORT", "config_8h.html#a1d1d2d7f8d2f95b376954d649ab03233", null ],
-    [ "PACKAGE_DEPENDENCIES", "config_8h.html#ad2f0b3e8ed548f3cf0aa09a834b49fbf", null ],
-    [ "PACKAGE_DESCRIPTION", "config_8h.html#a714627d9e7b71b55548e2ddda429d3fb", null ],
     [ "PACKAGE_MAJOR_VERSION", "config_8h.html#aafc8d567bf8a12eff2c9aa45dd449059", null ],
     [ "PACKAGE_MINOR_VERSION", "config_8h.html#a6f029aa4a026f43ca1a63cbbe663bbee", null ],
     [ "PACKAGE_NAME", "config_8h.html#a1c0439e4355794c09b64274849eb0279", null ],
@@ -112,6 +108,5 @@ var config_8h =
     [ "PACKAGE_URL", "config_8h.html#a5c93853116d5a50307b6744f147840aa", null ],
     [ "PACKAGE_VERSION", "config_8h.html#aa326a05d5e30f9e9a4bb0b4469d5d0c0", null ],
     [ "STDC_HEADERS", "config_8h.html#a550e5c272cc3cf3814651721167dcd23", null ],
-    [ "VCS_URL", "config_8h.html#ab355eb06e2a02bf2bc912f6ee3b7287b", null ],
     [ "VERSION", "config_8h.html#a1c6d5de492ac61ad29aec7aa9a436bbf", null ]
 ];

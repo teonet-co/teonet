@@ -8,6 +8,7 @@ var hierarchy =
     [ "cs_base64_ctx", "structcs__base64__ctx.html", null ],
     [ "cs_sha1_ctx", "structcs__sha1__ctx.html", null ],
     [ "teo::unique_raw_ptr::destroy< T >", "structteo_1_1unique__raw__ptr_1_1destroy.html", null ],
+    [ "device", "structdevice.html", null ],
     [ "ev_ksnet_io", "structev__ksnet__io.html", null ],
     [ "teo::HostInfo", "structteo_1_1HostInfo.html", null ],
     [ "http_message", "structhttp__message.html", null ],

@@ -1,7 +1,7 @@
 var teodb_8h =
 [
     [ "ksnTDBClass", "structksnTDBClass.html", "structksnTDBClass" ],
-    [ "ksnTDBClass", "teodb_8h.html#a34388fc6ae470c14213558835ed02e14", null ],
+    [ "ksnTDBClass", "teodb_8h.html#a4eb92194ade56db618e3dd2f61f18c4e", null ],
     [ "ksnTDBdelete", "teodb_8h.html#a2fd6906a6d6b7a7794e03cd52c4364cb", null ],
     [ "ksnTDBdeleteNs", "teodb_8h.html#ac51058193cf83073a96ff770fcb5d85a", null ],
     [ "ksnTDBdeleteNsStr", "teodb_8h.html#a7fffc8ccda8b88e9fed874feae552fed", null ],

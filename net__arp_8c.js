@@ -2,7 +2,7 @@ var net__arp_8c =
 [
     [ "kev", "net__arp_8c.html#a55ab7585b0d009e2560407590c060ef6", null ],
     [ "kev", "net__arp_8c.html#a55ab7585b0d009e2560407590c060ef6", null ],
-    [ "find_arp_data", "net__arp_8c.html#a824c22d979e11e9d0d51c7af822d327c", null ],
+    [ "find_arp_data", "net__arp_8c.html#a3aab02b25effa0c4bf72cf45f3702f48", null ],
     [ "find_arp_by_addr_cb", "net__arp_8c.html#afad4f0be79da08f901fbd313f1ddd4bc", null ],
     [ "ksnetArpAdd", "net__arp_8c.html#a37f40a6aba795fed35af1c63e1a038e4", null ],
     [ "ksnetArpAddHost", "net__arp_8c.html#ac3dce08eaa140ee4b29b6f6c240cf697", null ],
@@ -24,5 +24,9 @@ var net__arp_8c =
     [ "ksnetArpShowHeader", "net__arp_8c.html#af40918001db338d838159ae3d270ee18", null ],
     [ "ksnetArpShowLine", "net__arp_8c.html#a02b8240a3083bf71fdbdb336ab7168df", null ],
     [ "ksnetArpShowStr", "net__arp_8c.html#aae96fb94738679fc08c56cba039a53b6", null ],
-    [ "ksnetArpSize", "net__arp_8c.html#ad142033ef6faa313185355829320ed08", null ]
+    [ "ksnetArpSize", "net__arp_8c.html#ad142033ef6faa313185355829320ed08", null ],
+    [ "teoArpGetExtendedArpTable", "net__arp_8c.html#a4db8566e248be0285d16e41a638d766a", null ],
+    [ "teoArpGetExtendedArpTable_json", "net__arp_8c.html#a2d4fb59ab9a72162ea7ad0e68667f0d3", null ],
+    [ "teoArpGetExtendedArpTable_json_delete", "net__arp_8c.html#af9e253bfd6ff551a13550df5be095431", null ],
+    [ "teoArpGetExtendedArpTableLength", "net__arp_8c.html#a4dd5acdd81c5eba7b3d5ad7372b50146", null ]
 ];

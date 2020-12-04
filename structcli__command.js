@@ -1,6 +1,6 @@
 var structcli__command =
 [
-    [ "callback", "structcli__command.html#af1c29e040d892e931c32038730193e20", null ],
+    [ "callback", "structcli__command.html#a8153493a9e6321bde49bf02963205a3f", null ],
     [ "children", "structcli__command.html#a08afffab39a89ddc55383ebf253ae18f", null ],
     [ "command", "structcli__command.html#a211c3ae32fe71c75d516bc30d345b7ff", null ],
     [ "help", "structcli__command.html#a3cef8edc2340ee3dd2808a60d55787f0", null ],
