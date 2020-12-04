@@ -11,6 +11,60 @@ commands:
   install:
     - make PREFIX="/usr" install DESTDIR="${BP_DESTDIR}"
 packages:
+  debian9:
+    builddeps:
+      - libtool
+      - autoconf
+      - intltool
+      - make
+      - gcc
+      - g++
+      - pkg-config
+      - libcunit1-dev
+      - libcpputest-dev
+      - libssl-dev
+      - libev-dev
+      - libconfuse-dev
+      - uuid-dev
+      - libcurl4-openssl-dev
+      - libglib2.0-dev
+      - doxygen
+  debian10:
+    builddeps:
+      - libtool
+      - autoconf
+      - intltool
+      - make
+      - gcc
+      - g++
+      - pkg-config
+      - libcunit1-dev
+      - libcpputest-dev
+      - libssl-dev
+      - libev-dev
+      - libconfuse-dev
+      - uuid-dev
+      - libcurl4-openssl-dev
+      - libglib2.0-dev
+      - doxygen
+  ubuntu18.04:
+    builddeps:
+      - libtool
+      - autoconf
+      - intltool
+      - make
+      - gcc
+      - g++
+      - pkg-config
+      - libcunit1-dev
+      - libcpputest-dev
+      - libssl-dev
+      - libev-dev
+      - libconfuse-dev
+      - uuid-dev
+      - libcurl4-openssl-dev
+      - libglib2.0-dev
+      - doxygen
   ubuntu20.04:
     builddeps:
       - libtool
