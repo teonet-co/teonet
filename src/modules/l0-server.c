@@ -1805,8 +1805,8 @@ bool authSecretCheck(char *net_key, uint8_t *data, uint32_t current_time) {
     free(id);
     free(sign);
     free(timestamp);
-    free(localAuth);
     return true;
+
 cleanup:
     if (id) free(id);
     if (sign) free(sign);
