@@ -1730,6 +1730,89 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     kld->server_crypt->state = SESCRYPT_ESTABLISHED;
     return true;
 }
+#include "jsmn.h"
+#include <openssl/md5.h>
+
+static int json_eq(const char *json, jsmntok_t *tok, const char *s) {
+	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+		return 0;
+	}
+	return -1;
+}
+
+bool authSecretCheck(char *net_key, uint8_t *data, uint32_t current_time) {
+    char *jsondata = (char *)data;
+	jsmn_parser p;
+	jsmntok_t tokens[128];
+
+	jsmn_init(&p);
+	int r = jsmn_parse(&p, jsondata, strlen(jsondata), tokens, sizeof(tokens)/sizeof(tokens[0]));
+	if (r < 0) {
+		printf("Failed to parse JSON: %d\n", r);
+		return false;
+	}
+
+	if (r < 1 || tokens[0].type != JSMN_OBJECT) {
+		printf("Object expected\n");
+		return false;
+	}
+
+    char *id = NULL;
+    char *sign = NULL;
+    char *timestamp = NULL;
+	for (int i = 1; i < r; i++) {
+		if (json_eq(jsondata, &tokens[i], "_id") == 0) {
+			printf("ID: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
+            id = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+			i++;
+		} else if (json_eq(jsondata, &tokens[i], "sign") == 0) {
+			printf("SIGN: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
+            sign = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+			i++;
+        } else if (json_eq(jsondata, &tokens[i], "timestamp") == 0) {
+			printf("- UID: %.*s\n", tokens[i+1].end - tokens[i+1].start,
+					jsondata + tokens[i+1].start);
+            timestamp = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+			i++;
+		}
+    }
+
+    char *endptr;
+    long timestamp_l = strtol(timestamp, &endptr, 10);
+    if (current_time > timestamp_l) goto cleanup;
+    if (!id || !sign || !timestamp) goto cleanup;
+
+    int len = snprintf(0, 0, "%s%s%s", id, net_key, timestamp);
+    char *localAuth = malloc(len);
+    snprintf(localAuth, len, "%s%s%s", id, net_key, timestamp);
+
+    unsigned char digarray[16];
+    MD5_CTX ctx;
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, localAuth, strlen(localAuth));
+    MD5_Final(digarray, &ctx);
+    
+    char md5str[33];
+    for(int i = 0; i < 16; ++i) {
+        sprintf(&md5str[i*2], "%02x", (unsigned int)digarray[i]);
+    }
+
+    free(localAuth);
+
+    if (strncmp(md5str, sign, sizeof(md5str)) != 0) goto cleanup;
+
+    free(id);
+    free(sign);
+    free(timestamp);
+    free(localAuth);
+    return true;
+cleanup:
+    if (id) free(id);
+    if (sign) free(sign);
+    if (timestamp) free(timestamp);
+    return false;
+}
 
 /*
  * Process small or lagre packet
@@ -1807,13 +1890,24 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
             } else {
                 // process login here
                 size_t expected_len = packet->data_length - 1;
+
+                ksnetEvMgrClass *ke = kl->ke;
+                bool secret_check = true;
+                if (ke->ksn_cfg.net_key[0] != '\0') {
+                    secret_check = authSecretCheck(ke->ksn_cfg.net_key, data, ksnetEvMgrGetTime(ke));
+                }
+                
                 if (expected_len > 0 && data[expected_len] == 0 &&
-                    strlen((const char *)data) == expected_len) {
+                    strlen((const char *)data) == expected_len && secret_check) {
+
                     ksnLNullClientAuthCheck(kl, kld, tcd->fd, packet);
                 } else {
                     ksn_printf(kev, MODULE, ERROR_M,
                                "got invalid login packet from %s:%d\n", 
                                kld->t_addr, kld->t_port);
+                    // Failed. disconnect user
+                    trudp_ChannelSendReset(tcd);
+                    ksnLNullClientDisconnect(kl, tcd->fd, 1);
                 }
             }
             return 1;
@@ -1861,6 +1955,10 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
     if (packet_sm != NULL) {
         ksnLNullData *kld = ksnLNullGetClientConnection(kl, tcd->fd);
         if (kld == NULL) {
+            if (rd->cmd != 0) {
+                ksnLNullClientDisconnect(kl, tcd->fd, 1);
+                return 0;
+            }
             kld = ksnLNullClientRegister(kl, tcd->fd, rd->addr, rd->port);
         }
         return processPacket(kl, kld, rd, tcd, packet_sm, "small"); // Small packet
