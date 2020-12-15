@@ -20,6 +20,8 @@
 
 #include "teonet_l0_client_crypt.h"
 
+#include <openssl/md5.h>
+
 #define MODULE _ANSI_LIGHTCYAN "l0_server" _ANSI_NONE
 #define TEO_AUTH "teo-auth"
 #define WG001 "wg001-"
@@ -1730,52 +1732,50 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     kld->server_crypt->state = SESCRYPT_ESTABLISHED;
     return true;
 }
-#include "jsmn.h"
-#include <openssl/md5.h>
 
 static int json_eq(const char *json, jsmntok_t *tok, const char *s) {
-	if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
-			strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-		return 0;
-	}
-	return -1;
+    if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+            strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+        return 0;
+    }
+    return -1;
 }
 
 bool authSecretCheck(char *net_key, uint8_t *data, uint32_t current_time) {
     char *jsondata = (char *)data;
-	jsmn_parser p;
-	jsmntok_t tokens[128];
+    jsmn_parser p;
+    jsmntok_t tokens[128];
 
-	jsmn_init(&p);
-	int r = jsmn_parse(&p, jsondata, strlen(jsondata), tokens, sizeof(tokens)/sizeof(tokens[0]));
-	if (r < 0) {
-		printf("Failed to parse JSON: %d\n", r);
-		return false;
-	}
+    jsmn_init(&p);
+    int r = jsmn_parse(&p, jsondata, strlen(jsondata), tokens, sizeof(tokens)/sizeof(tokens[0]));
+    if (r < 0) {
+        printf("Failed to parse JSON: %d\n", r);
+        return false;
+    }
 
-	if (r < 1 || tokens[0].type != JSMN_OBJECT) {
-		printf("Object expected\n");
-		return false;
-	}
+    if (r < 1 || tokens[0].type != JSMN_OBJECT) {
+        printf("Object expected\n");
+        return false;
+    }
 
     char *id = NULL;
     char *sign = NULL;
     char *timestamp = NULL;
-	for (int i = 1; i < r; i++) {
-		if (json_eq(jsondata, &tokens[i], "_id") == 0) {
-			printf("ID: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
+    for (int i = 1; i < r; i++) {
+        if (json_eq(jsondata, &tokens[i], "_id") == 0) {
+            printf("ID: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
             id = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
-			i++;
-		} else if (json_eq(jsondata, &tokens[i], "sign") == 0) {
-			printf("SIGN: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
+            i++;
+        } else if (json_eq(jsondata, &tokens[i], "sign") == 0) {
+            printf("SIGN: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
             sign = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
-			i++;
+            i++;
         } else if (json_eq(jsondata, &tokens[i], "timestamp") == 0) {
-			printf("- UID: %.*s\n", tokens[i+1].end - tokens[i+1].start,
-					jsondata + tokens[i+1].start);
+            printf("- UID: %.*s\n", tokens[i+1].end - tokens[i+1].start,
+                    jsondata + tokens[i+1].start);
             timestamp = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
-			i++;
-		}
+            i++;
+        }
     }
 
     char *endptr;
