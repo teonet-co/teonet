@@ -721,8 +721,8 @@ static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, char 
     }
 
     int client_name_len = snprintf(0, 0, "%s%s", WG001, name);
-    char *client_name = malloc(client_name_len);
-    snprintf(client_name, client_name_len, "%s%s", WG001, name);
+    char *client_name = malloc(client_name_len + 1);
+    snprintf(client_name, client_name_len + 1, "%s%s", WG001, name);
 
     // Add client to name map
     kld->name = client_name;
