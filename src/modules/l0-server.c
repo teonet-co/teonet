@@ -700,6 +700,12 @@ static bool checkAuthData(
         string_view *sign,
         const char *secret) {
 
+    if (sign->len != MD5_DIGEST_LENGTH*2) {
+        ksn_printf(kev, MODULE, DEBUG, "Invalid signature length:  %.*s\n",
+            sign->len, sign->data);
+        return false;
+    }
+
     char current_time_str[64];
     //TODO: not sure that this cast to int is valid
     int current_time = ksnetEvMgrGetTime(((ksnetEvMgrClass*)kl->ke));
@@ -727,7 +733,7 @@ static bool checkAuthData(
         sprintf(&md5str[i*2], "%02x", (unsigned int)digarray[i]);
     }
 
-    return sign->len == MD5_DIGEST_LENGTH*2 && strncmp(md5str, sign->data, MD5_DIGEST_LENGTH*2) == 0;
+    return strncmp(md5str, sign->data, MD5_DIGEST_LENGTH*2) == 0;
 }
 
 static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, string_view *name) {
