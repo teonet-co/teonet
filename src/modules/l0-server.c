@@ -794,7 +794,7 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     }
 
     if (!checkAuthData(kl, name, auth_data_valid_until, sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key)) {
-        ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature received from fd %d\n", fd);
+        ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature '%s' - '%s' - '%s' received from fd %d\n", name, auth_data_valid_until, sign,  fd);
         ksnLNullClientDisconnect(kl, fd, 1);
         free(name);
         free(sign);
