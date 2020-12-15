@@ -692,13 +692,13 @@ static bool checkAuthData(
     }
 
     int len = snprintf(0, 0, "%s%s%s", name, secret, auth_data_valid_until);
-    char *localAuth = malloc(len);
-    snprintf(localAuth, len, "%s%s%s", name, secret, auth_data_valid_until);
+    char *localAuth = malloc(len + 1);
+    snprintf(localAuth, len + 1, "%s%s%s", name, secret, auth_data_valid_until);
 
     unsigned char digarray[MD5_DIGEST_LENGTH];
 
     //NOTE: return value is digarray, so ignore it
-    MD5((const unsigned char*)localAuth, len - 1, digarray);
+    MD5((const unsigned char*)localAuth, len, digarray);
 
     char md5str[MD5_DIGEST_LENGTH*2 + 1];
     for(int i = 0; i < MD5_DIGEST_LENGTH; ++i) {
