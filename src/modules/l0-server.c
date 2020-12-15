@@ -35,7 +35,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
 static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port);
 static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data, size_t data_length);
 static int ksnLNullSendBroadcast(ksnLNullClass *kl, uint8_t cmd, void* data, size_t data_length);
-static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, int fd, teoLNullCPacket *packet);
+static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld, int fd, teoLNullCPacket *packet);
 static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd);
 static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
         KeyExchangePayload_Common *kex, size_t kex_length);
@@ -622,6 +622,143 @@ void _send_subscribe_event_newvisit(ksnetEvMgrClass *ke, const char *payload,
     free(vd);
 }
 
+static int json_eq(const char *json, jsmntok_t *tok, const char *s) {
+    if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
+            strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+        return 0;
+    }
+    return -1;
+}
+
+static bool parseAuthPayload(ksnLNullClass *kl, uint8_t *payload, char **name, char **sign, char **auth_data_valid_until) {
+    if (name == NULL || sign == NULL || auth_data_valid_until == NULL) {
+        ksn_printf(kev, MODULE, DEBUG, "Missing output params: name=%p, sign=%p, valid_ts=%p\n", name, sign, auth_data_valid_until);
+        return false;
+    }
+
+    char *jsondata = (char *)payload;
+    jsmn_parser p;
+    jsmntok_t tokens[128];
+
+    jsmn_init(&p);
+    int token_num = jsmn_parse(&p, jsondata, strlen(jsondata), tokens, sizeof(tokens)/sizeof(tokens[0]));
+    if (token_num < 0) {
+        printf("Failed to parse JSON: %d\n", token_num);
+        return false;
+    }
+
+    if (token_num < 1 || tokens[0].type != JSMN_OBJECT) {
+        printf("Object expected\n");
+        return false;
+    }
+
+    *sign = NULL;
+    *name = NULL;
+    *auth_data_valid_until = NULL;
+
+    for (int i = 1; i < token_num; i++) {
+        if (json_eq(jsondata, &tokens[i], "userId") == 0) {
+            printf("ID: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
+            *name = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+            i++;
+        } else if (json_eq(jsondata, &tokens[i], "sign") == 0) {
+            printf("SIGN: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
+            *sign = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+            i++;
+        } else if (json_eq(jsondata, &tokens[i], "timestamp") == 0) {
+            printf("TS: %.*s\n", tokens[i+1].end - tokens[i+1].start,
+                    jsondata + tokens[i+1].start);
+            *auth_data_valid_until= strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+            i++;
+        }
+    }
+
+    return *auth_data_valid_until != NULL && *sign != NULL && *name != NULL;
+}
+
+static bool checkAuthData(
+        ksnLNullClass *kl,
+        const char *name,
+        const char *auth_data_valid_until,
+        const char *sign,
+        const char *secret) {
+
+    long timestamp = strtol(auth_data_valid_until, NULL, 10);
+    //TODO: not sure that this cast to int is valid
+    int current_time = ksnetEvMgrGetTime(((ksnetEvMgrClass*)kl->ke));
+    if (current_time > timestamp) {
+        ksn_printf(kev, MODULE, DEBUG, "timestamp %s outdated, current time: %d\n", auth_data_valid_until, current_time);
+        return false;
+    }
+
+    int len = snprintf(0, 0, "%s%s%s", name, secret, auth_data_valid_until);
+    char *localAuth = malloc(len);
+    snprintf(localAuth, len, "%s%s%s", name, secret, auth_data_valid_until);
+
+    unsigned char digarray[MD5_DIGEST_LENGTH];
+
+    //NOTE: return value is digarray, so ignore it
+    MD5((const unsigned char*)localAuth, len - 1, digarray);
+
+    char md5str[MD5_DIGEST_LENGTH*2 + 1];
+    for(int i = 0; i < MD5_DIGEST_LENGTH; ++i) {
+        sprintf(&md5str[i*2], "%02x", (unsigned int)digarray[i]);
+    }
+
+    free(localAuth);
+
+    return strncmp(md5str, sign, sizeof(md5str)) == 0;
+}
+
+static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, char *name) {
+    // Remove client with the same name
+    int fd_ex = ksnLNullClientIsConnected(kl, name);
+    if(fd_ex) {
+        #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", name, fd_ex, fd);
+        #endif
+        if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
+    }
+
+    int client_name_len = snprintf(0, 0, "%s%s", WG001, name);
+    char *client_name = malloc(client_name_len);
+    snprintf(client_name, client_name_len, "%s%s", WG001, name);
+
+    // Add client to name map
+    kld->name = client_name;
+    kld->name_length = strlen(client_name) + 1;
+    if(fd_ex != fd) pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
+}
+
+static void sendConnectedEvent(ksnLNullClass *kl, ksnLNullData *kld) {
+    // TODO: I must use kl->stat.clients or ke->kl->stat.visits ????? instead pblMapSize(kl->map)
+    int playload_size = snprintf(0, 0, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+        kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
+    char *payload = malloc(playload_size + 1);
+    snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
+        kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
+
+    _send_subscribe_event_connected(kev, payload, playload_size + 1);
+    free(payload);
+}
+
+static void confirmAuth(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
+    // Create L0 packet
+    size_t out_data_len = sizeof(teoLNullCPacket) + strlen(kev->ksn_cfg.host_name) + 1 + kld->name_length + 1;
+    char *out_data = malloc(out_data_len);
+    memset(out_data, 0, out_data_len);
+
+    size_t packet_length =
+        teoLNullPacketCreate(out_data, out_data_len,
+                                CMD_CONFIRM_AUTH, kev->ksn_cfg.host_name, (uint8_t*)kld->name, kld->name_length + 1);
+
+    // Send confirmation of the client name
+    ssize_t send_size = ksnLNullPacketSend(kl, fd, out_data, packet_length);
+    (void)send_size;
+
+    free(out_data);
+}
+
 /**
  * Set client name and check it in auth server
  *
@@ -630,60 +767,50 @@ void _send_subscribe_event_newvisit(ksnetEvMgrClass *ke, const char *payload,
  * @param fd TCP client connection file descriptor
  * @param packet Pointer to teoLNullCPacket
  */
-static void ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
+static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
 
-    char *name = strndup(packet->peer_name + packet->peer_name_length, packet->data_length);
-    size_t name_length = strlen(name) + 1;
-    if(name_length == packet->data_length) {
-
-        // Create unique name for WG new user
-        if(!strcmp(WG001_NEW, name)) {
-            name = ksnet_sformatMessage(name, "%s%s-%d", name, ksnetEvMgrGetHostName(kl->ke),fd);
-            name_length = strlen(name) + 1;
-        }
-
-        // Remove client with the same name
-        int fd_ex = ksnLNullClientIsConnected(kl, name);
-        if(fd_ex) {
-            #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", name, fd_ex, fd);
-            #endif
-            if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
-        }
-
-        // Add client to name map
-        kld->name = name;
-        kld->name_length = name_length;
-        if(fd_ex != fd) pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
-
-        // Send login to authentication application
-        // to check this client or register 'wg001' clients
-        if(strncmp(WG001, kld->name, sizeof(WG001) - 1)) {
-            ksnCoreSendCmdto(kev->kc, TEO_AUTH, CMD_USER,
-                    kld->name, kld->name_length);
-        } else {
-            // TODO: I must use kl->stat.clients or ke->kl->stat.visits ????? instead pblMapSize(kl->map)
-            int playload_size = snprintf(0, 0, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
-                kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
-            char *payload = malloc(playload_size + 1);
-            snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
-                kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
-
-            _send_subscribe_event_connected(kev, payload, playload_size + 1);
-            free(payload);
-        }
+    if (((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key[0] == '\0') {
+        ksn_printf(kev, MODULE, DEBUG, "secret not provided, disconnect %d\n", fd);
+        ksnLNullClientDisconnect(kl, fd, 1);
+        return false;
     }
-    else {
-        // Wrong Login name received
-        kld->name = name;
-        kld->name_length = name_length;
-        #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG,
-            "got login command with wrong name '%s'\n", kld->name
-        );
-        #endif
+
+    uint8_t *payload = teoLNullPacketGetPayload(packet);
+
+    ksn_printf(kev, MODULE, DEBUG,"Checking payload from fd %d:\n%s\n", fd, (const char*)payload);
+
+    char *name = NULL;
+    char *sign = NULL;
+    char *auth_data_valid_until = NULL;
+
+    if (!parseAuthPayload(kl, payload, &name, &sign, &auth_data_valid_until)) {
+        ksn_printf(kev, MODULE, DEBUG,"Invalid payload received from fd %d:\n%s\n", fd, (const char*)payload);
+        ksnLNullClientDisconnect(kl, fd, 1);
+        free(name);
+        free(sign);
+        free(auth_data_valid_until);
+        return false;
     }
+
+    if (!checkAuthData(kl, name, auth_data_valid_until, sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key)) {
+        ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature received from fd %d\n", fd);
+        ksnLNullClientDisconnect(kl, fd, 1);
+        free(name);
+        free(sign);
+        free(auth_data_valid_until);
+        return false;
+    }
+
+    updateClientName(kl, kld, fd, name);
+    sendConnectedEvent(kl, kld);
+    confirmAuth(kl, kld, fd);
+
+    free(name);
+    free(sign);
+    free(auth_data_valid_until);
+
+    return true;
 }
 
 /**
@@ -933,8 +1060,9 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
         }
 
         // Remove data from map
-        if(remove_f)
+        if(remove_f) {
             pblMapRemoveFree(kl->map, &fd, sizeof(fd), &valueLength);
+        }
     }
 }
 
@@ -986,8 +1114,8 @@ void _check_connected(uint32_t id, int type, void *data) {
                 ksn_printf(kev, MODULE, DEBUG, "Disconnect client by timeout, fd: %d, name: %s\n", *fd, data->name);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
-            // Send echo to client
-            else if(ksnetEvMgrGetTime(kl->ke) - data->last_time >= SEND_PING_TIMEOUT) {
+            // Send echo to client, if authorized
+            else if(data->name != NULL && ksnetEvMgrGetTime(kl->ke) - data->last_time >= SEND_PING_TIMEOUT) {
                 ksn_printf(kev, MODULE, DEBUG, "Send ping to client by timeout, fd: %d, name: %s\n", *fd, data->name);
 
                 // From this host(peer)
@@ -1733,15 +1861,7 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     return true;
 }
 
-static int json_eq(const char *json, jsmntok_t *tok, const char *s) {
-    if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
-            strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-        return 0;
-    }
-    return -1;
-}
-
-bool authSecretCheck(char *net_key, uint8_t *data, uint32_t current_time) {
+bool authSecretCheck(char *secret, uint8_t *data, uint32_t current_time) {
     char *jsondata = (char *)data;
     jsmn_parser p;
     jsmntok_t tokens[128];
@@ -1762,7 +1882,7 @@ bool authSecretCheck(char *net_key, uint8_t *data, uint32_t current_time) {
     char *sign = NULL;
     char *timestamp = NULL;
     for (int i = 1; i < r; i++) {
-        if (json_eq(jsondata, &tokens[i], "_id") == 0) {
+        if (json_eq(jsondata, &tokens[i], "userId") == 0) {
             printf("ID: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
             id = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
             i++;
@@ -1783,9 +1903,9 @@ bool authSecretCheck(char *net_key, uint8_t *data, uint32_t current_time) {
     if (current_time > timestamp_l) goto cleanup;
     if (!id || !sign || !timestamp) goto cleanup;
 
-    int len = snprintf(0, 0, "%s%s%s", id, net_key, timestamp);
+    int len = snprintf(0, 0, "%s%s%s", id, secret, timestamp);
     char *localAuth = malloc(len);
-    snprintf(localAuth, len, "%s%s%s", id, net_key, timestamp);
+    snprintf(localAuth, len, "%s%s%s", id, secret, timestamp);
 
     unsigned char digarray[16];
     MD5_CTX ctx;
@@ -1891,16 +2011,12 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
                 // process login here
                 size_t expected_len = packet->data_length - 1;
 
-                ksnetEvMgrClass *ke = kl->ke;
-                bool secret_check = true;
-                if (ke->ksn_cfg.net_key[0] != '\0') {
-                    secret_check = authSecretCheck(ke->ksn_cfg.net_key, data, ksnetEvMgrGetTime(ke));
-                }
-                
                 if (expected_len > 0 && data[expected_len] == 0 &&
-                    strlen((const char *)data) == expected_len && secret_check) {
+                    strlen((const char *)data) == expected_len) {
 
-                    ksnLNullClientAuthCheck(kl, kld, tcd->fd, packet);
+                    if (!ksnLNullClientAuthCheck(kl, kld, tcd->fd, packet)) {
+                        trudp_ChannelSendReset(tcd);
+                    }
                 } else {
                     ksn_printf(kev, MODULE, ERROR_M,
                                "got invalid login packet from %s:%d\n", 
@@ -1923,6 +2039,7 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
             kld->last_time = ksnetEvMgrGetTime(kl->ke);
             ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
         } else {
+            //TODO: do we want to disconnect client here?
             trudp_ChannelSendReset(tcd);
         }
         return 1;
