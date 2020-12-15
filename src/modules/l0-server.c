@@ -815,7 +815,14 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     }
 
     if (!checkAuthData(kl, &name, &auth_data_valid_until, &sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key)) {
-        ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature received from fd %d\n", fd);
+        ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature '%.*s' - '%.*s' - '%.*s' received from fd %d\n",
+            name.len,
+            name.data,
+            auth_data_valid_until.len,
+            auth_data_valid_until.data,
+            sign.len,
+            sign.data,
+            fd);
         ksnLNullClientDisconnect(kl, fd, 1);
         return false;
     }
