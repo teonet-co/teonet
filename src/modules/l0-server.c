@@ -630,7 +630,21 @@ static int json_eq(const char *json, jsmntok_t *tok, const char *s) {
     return -1;
 }
 
-static bool parseAuthPayload(ksnLNullClass *kl, uint8_t *payload, char **name, char **sign, char **auth_data_valid_until) {
+typedef struct string_view
+{
+    char *data;
+    size_t len;
+} string_view;
+
+static void stringViewReset(string_view *s) {
+    if (s == NULL) { return; }
+
+    s->data = NULL;
+    s->len = 0;
+}
+
+
+static bool parseAuthPayload(ksnLNullClass *kl, uint8_t *payload, string_view *name, string_view *sign, string_view *auth_data_valid_until) {
     if (name == NULL || sign == NULL || auth_data_valid_until == NULL) {
         ksn_printf(kev, MODULE, DEBUG, "Missing output params: name=%p, sign=%p, valid_ts=%p\n", name, sign, auth_data_valid_until);
         return false;
@@ -652,81 +666,90 @@ static bool parseAuthPayload(ksnLNullClass *kl, uint8_t *payload, char **name, c
         return false;
     }
 
-    *sign = NULL;
-    *name = NULL;
-    *auth_data_valid_until = NULL;
+    stringViewReset(name);
+    stringViewReset(sign);
+    stringViewReset(auth_data_valid_until);
 
     for (int i = 1; i < token_num; i++) {
         if (json_eq(jsondata, &tokens[i], "userId") == 0) {
             printf("ID: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
-            *name = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+            name->data = (char*)jsondata + tokens[i+1].start;
+            name->len = tokens[i+1].end - tokens[i+1].start;
             i++;
         } else if (json_eq(jsondata, &tokens[i], "sign") == 0) {
             printf("SIGN: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
-            *sign = strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+            sign->data = (char*)jsondata + tokens[i+1].start;
+            sign->len = tokens[i+1].end - tokens[i+1].start;
             i++;
         } else if (json_eq(jsondata, &tokens[i], "timestamp") == 0) {
             printf("TS: %.*s\n", tokens[i+1].end - tokens[i+1].start,
                     jsondata + tokens[i+1].start);
-            *auth_data_valid_until= strndup((char*)jsondata + tokens[i+1].start, tokens[i+1].end - tokens[i+1].start);
+            auth_data_valid_until->data = (char*)jsondata + tokens[i+1].start;
+            auth_data_valid_until->len = tokens[i+1].end - tokens[i+1].start;
             i++;
         }
     }
 
-    return *auth_data_valid_until != NULL && *sign != NULL && *name != NULL;
+    return auth_data_valid_until->data != NULL && sign->data != NULL && name->data != NULL;
 }
 
 static bool checkAuthData(
         ksnLNullClass *kl,
-        const char *name,
-        const char *auth_data_valid_until,
-        const char *sign,
+        string_view *name,
+        string_view *auth_data_valid_until,
+        string_view *sign,
         const char *secret) {
 
-    long timestamp = strtol(auth_data_valid_until, NULL, 10);
+    char current_time_str[64];
     //TODO: not sure that this cast to int is valid
     int current_time = ksnetEvMgrGetTime(((ksnetEvMgrClass*)kl->ke));
-    if (current_time > timestamp) {
-        ksn_printf(kev, MODULE, DEBUG, "timestamp %s outdated, current time: %d\n", auth_data_valid_until, current_time);
+    snprintf(current_time_str, sizeof(current_time_str), "%d", current_time);
+
+    int current_time_str_len = strlen(current_time_str);
+    if ((current_time_str_len > auth_data_valid_until->len) ||
+            (current_time_str_len == auth_data_valid_until->len &&
+            strncmp(auth_data_valid_until->data, current_time_str, auth_data_valid_until->len) < 0)) {
+        ksn_printf(kev, MODULE, DEBUG, "timestamp %.*s outdated, current time: %d\n",
+            auth_data_valid_until->len, auth_data_valid_until->data, current_time);
         return false;
     }
 
-    int len = snprintf(0, 0, "%s%s%s", name, secret, auth_data_valid_until);
-    char *localAuth = malloc(len + 1);
-    snprintf(localAuth, len + 1, "%s%s%s", name, secret, auth_data_valid_until);
-
     unsigned char digarray[MD5_DIGEST_LENGTH];
-
-    //NOTE: return value is digarray, so ignore it
-    MD5((const unsigned char*)localAuth, len, digarray);
+    MD5_CTX ctx;
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, name->data, name->len);
+    MD5_Update(&ctx, secret, strlen(secret));
+    MD5_Update(&ctx, auth_data_valid_until->data, auth_data_valid_until->len);
+    MD5_Final(digarray, &ctx);
 
     char md5str[MD5_DIGEST_LENGTH*2 + 1];
     for(int i = 0; i < MD5_DIGEST_LENGTH; ++i) {
         sprintf(&md5str[i*2], "%02x", (unsigned int)digarray[i]);
     }
 
-    free(localAuth);
-
-    return strncmp(md5str, sign, sizeof(md5str)) == 0;
+    return sign->len == MD5_DIGEST_LENGTH*2 && strncmp(md5str, sign->data, MD5_DIGEST_LENGTH*2) == 0;
 }
 
-static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, char *name) {
+static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, string_view *name) {
+    int wg001_len = strlen(WG001);
+    int client_name_len = wg001_len + name->len + 1;//wg001-name + terminating null
+    char *client_name = malloc(client_name_len);
+    strncpy(client_name, WG001, wg001_len);
+    strncpy(client_name + wg001_len, name->data, name->len);
+    client_name[client_name_len - 1] = '\0';
+
     // Remove client with the same name
-    int fd_ex = ksnLNullClientIsConnected(kl, name);
+    int fd_ex = ksnLNullClientIsConnected(kl, client_name);
     if(fd_ex) {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", name, fd_ex, fd);
+        ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", client_name, fd_ex, fd);
         #endif
         if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
     }
 
-    int client_name_len = snprintf(0, 0, "%s%s", WG001, name);
-    char *client_name = malloc(client_name_len);
-    snprintf(client_name, client_name_len, "%s%s", WG001, name);
-
     // Add client to name map
     kld->name = client_name;
-    kld->name_length = strlen(client_name) + 1;
+    kld->name_length = client_name_len;
     if(fd_ex != fd) pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
 }
 
@@ -780,35 +803,26 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
 
     ksn_printf(kev, MODULE, DEBUG,"Checking payload from fd %d:\n%s\n", fd, (const char*)payload);
 
-    char *name = NULL;
-    char *sign = NULL;
-    char *auth_data_valid_until = NULL;
+    //NOTE: string_views will be reseted inside parseAuthPayload
+    string_view name;
+    string_view sign;
+    string_view auth_data_valid_until;
 
     if (!parseAuthPayload(kl, payload, &name, &sign, &auth_data_valid_until)) {
         ksn_printf(kev, MODULE, DEBUG,"Invalid payload received from fd %d:\n%s\n", fd, (const char*)payload);
         ksnLNullClientDisconnect(kl, fd, 1);
-        free(name);
-        free(sign);
-        free(auth_data_valid_until);
         return false;
     }
 
-    if (!checkAuthData(kl, name, auth_data_valid_until, sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key)) {
+    if (!checkAuthData(kl, &name, &auth_data_valid_until, &sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key)) {
         ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature received from fd %d\n", fd);
         ksnLNullClientDisconnect(kl, fd, 1);
-        free(name);
-        free(sign);
-        free(auth_data_valid_until);
         return false;
     }
 
-    updateClientName(kl, kld, fd, name);
+    updateClientName(kl, kld, fd, &name);
     sendConnectedEvent(kl, kld);
     confirmAuth(kl, kld, fd);
-
-    free(name);
-    free(sign);
-    free(auth_data_valid_until);
 
     return true;
 }
