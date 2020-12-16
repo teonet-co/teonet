@@ -47,6 +47,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
 
     strncpy(ksn_cfg->network, "local", KSN_BUFFER_SM_SIZE/2);
     ksn_cfg->net_key[0] = '\0';
+    ksn_cfg->auth_secret[0] = '\0';
 
     // Show info at console flags
     ksn_cfg->show_connect_f = 1;
@@ -147,6 +148,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     // Save values back to structure
     #define save_conf_back() \
         strncpy(conf->net_key, net_key, KSN_BUFFER_SM_SIZE/2); \
+        strncpy(conf->auth_secret, auth_secret, KSN_BUFFER_SM_SIZE/2); \
         strncpy(conf->host_name, host_name, KSN_MAX_HOST_NAME); \
         strncpy(conf->r_host_addr, r_host_addr, KSN_BUFFER_SM_SIZE/2); \
         strncpy(conf->vpn_ip, vpn_ip, KSN_MAX_HOST_NAME); \
@@ -162,6 +164,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     char *vpn_ip = strdup(conf->vpn_ip);
     char *filter = strdup(conf->filter);
     char *net_key = strdup(conf->net_key);
+    char *auth_secret = strdup(conf->auth_secret);
     char *statsd_ip = strdup(conf->statsd_ip);
     char *host_name = strdup(conf->host_name);
     char *r_host_addr = strdup(conf->r_host_addr);
@@ -181,6 +184,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
         CFG_SIMPLE_BOOL("port_inc_f", (cfg_bool_t*)&conf->port_inc_f),
         
         CFG_SIMPLE_STR("key", &net_key),
+        CFG_SIMPLE_STR("auth_secret", &auth_secret),
         
         CFG_SIMPLE_INT("tcp_port", &conf->tcp_port),
         CFG_SIMPLE_BOOL("tcp_allow_f", (cfg_bool_t*)&conf->tcp_allow_f),
@@ -336,6 +340,7 @@ void read_config(ksnet_cfg *conf, int port_param) {
     free(host_name);
     free(statsd_ip);
     free(net_key);
+    free(auth_secret);
     free(filter);
     free(vpn_ip);
 

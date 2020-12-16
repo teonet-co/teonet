@@ -61,6 +61,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         { "r_tcp",          no_argument,       &conf->r_tcp_f, 1 },
         { "network",        required_argument, 0, 'n' },
         { "key",            required_argument, 0, 'e' },
+        { "auth_secret",    required_argument, 0, 'u' },
         { "tcp_allow",      no_argument,       &conf->tcp_allow_f, 1 },
         { "tcp_port",       required_argument, 0, 'o' },
         { "l0_allow",           no_argument,       &conf->l0_allow_f, 1 },
@@ -289,6 +290,10 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
         case 'k':
           // Kill application started in Daemon mode
           conf->kflag = 1;
+          break;
+
+        case 'u'://NOTE: both a and s are already used, so aUth_secret
+          strncpy((char*)conf->auth_secret, optarg, KSN_BUFFER_SM_SIZE/2);
           break;
       }
     }

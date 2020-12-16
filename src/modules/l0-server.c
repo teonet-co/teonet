@@ -799,7 +799,7 @@ static void confirmAuth(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
 static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
 
-    if (((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key[0] == '\0') {
+    if (((ksnetEvMgrClass*)kl->ke)->ksn_cfg.auth_secret[0] == '\0') {
         ksn_printf(kev, MODULE, DEBUG, "secret not provided, disconnect %d\n", fd);
         ksnLNullClientDisconnect(kl, fd, 1);
         return false;
@@ -820,7 +820,7 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         return false;
     }
 
-    if (!checkAuthData(kl, &name, &auth_data_valid_until, &sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.net_key)) {
+    if (!checkAuthData(kl, &name, &auth_data_valid_until, &sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.auth_secret)) {
         ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature '%.*s' - '%.*s' - '%.*s' received from fd %d\n",
             name.len,
             name.data,
