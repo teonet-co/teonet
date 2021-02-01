@@ -415,7 +415,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
     "       --tcp_allow          Allow TCP Proxy connection to this server\n"
     "  -o,  --tcp_port=value     TCP Proxy port number (default "KSNET_PORT_DEFAULT")\n"
     "       --l0_allow           Allow L0 Server and l0 clients connection\n"
-    "       --skip_auth          Skip auth check step on client loging\n"
+    "       --skip_auth          Skip auth check step on client login\n"
     "  -l,  --l0_tcp_port=value  L0 Server TCP port number (default "KSNET_PORT_DEFAULT")\n"
     "  -I,  --l0_tcp_ip=value    L0 Server remote IP address (send to clients)\n"
     "  -f,  --filter=value       Set display log filter\n"
