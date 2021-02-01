@@ -669,31 +669,6 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
     return arr;
 }
 
-int ip_type(const char *ip_ch) {
-    struct addrinfo hint, *res = NULL;
-    int ret_type = -1;
-
-    memset(&hint, '\0', sizeof hint);
-
-    hint.ai_family = PF_UNSPEC;
-    hint.ai_flags = AI_NUMERICHOST;
-
-    int ret = getaddrinfo(ip_ch, NULL, &hint, &res);
-    if (ret) {
-        fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
-        exit(1);
-    }
-
-    if(res->ai_family == AF_INET) {
-        ret_type = 1;// TODO: enum need
-    } else if (res->ai_family == AF_INET6) {
-        ret_type = 2;
-    }
-
-   freeaddrinfo(res);
-   return ret_type;
-}
-
 int addr_port_equal(addr_port_t *ap_obj, char *addr, uint16_t port) {
     if (ap_obj->port == port && !strcmp(ap_obj->addr, addr)) {
         return 1;

@@ -219,12 +219,21 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
               const char *localhost_num = "::1";
               strncpy((char*)conf->r_host_addr, localhost_num, strlen(localhost_num));
           } else {
-            if (ip_type(optarg) == 1) {
-                const char* v6head = "::ffff:";
-                snprintf((char*)conf->r_host_addr, KSN_BUFFER_SM_SIZE/2, "%s%s", v6head, optarg);
-            } else {
-              strncpy((char*)conf->r_host_addr, optarg, KSN_BUFFER_SM_SIZE/2);
+            struct addrinfo hint, *res = NULL;
+            memset(&hint, '\0', sizeof hint);
+
+            hint.ai_family = PF_UNSPEC;
+
+            int ret = getaddrinfo(optarg, NULL, &hint, &res);
+            if (ret) {
+                fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
+                exit(1);
             }
+
+            addr_port_t *ap_obj = wrap_inet_ntop(res->ai_addr);
+
+            strncpy((char*)conf->r_host_addr, ap_obj->addr, KSN_BUFFER_SM_SIZE/2);
+            addr_port_free(ap_obj);
           }
         } break;
 
