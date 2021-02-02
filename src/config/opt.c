@@ -234,6 +234,7 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
 
             strncpy((char*)conf->r_host_addr, ap_obj->addr, KSN_BUFFER_SM_SIZE/2);
             addr_port_free(ap_obj);
+            freeaddrinfo(res);
           }
         } break;
 
