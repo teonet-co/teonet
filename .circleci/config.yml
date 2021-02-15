@@ -15,7 +15,6 @@ jobs:
   compile:
     docker:
       - image: ubuntu:20.04
-        working_directory: ~/teonet
         environment:
           CI_FORCE_TEST: 1
     steps:
