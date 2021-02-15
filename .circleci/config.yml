@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   testing:
     machine:
@@ -97,7 +97,7 @@ jobs:
             ./misc/make_remote_doc_upload.sh teonet   
 
 workflows:
-  version: 2
+  version: 2.1
   untagged:
     jobs: 
      - testing
