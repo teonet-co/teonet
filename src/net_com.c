@@ -1150,22 +1150,17 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     // Parse command data
-    size_t i, ptr;
-    ksnCorePacketData lrd;
     uint8_t *num_ip = rd->data; // Number of IPs
 
     // For UDP connection resend received IPs to child
     if(*num_ip) {
-        ptr = sizeof(uint8_t);
-        lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t)));
-        lrd.from = rd->from;
-
         // Send peer address to child
         ksnetArpGetAll(arp_class, send_cmd_connect_cb, rd);
         // Send child address to peer
         ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, rd);
     } else {// For TCP proxy connection resend this host IPs to child
         rd->arp->data.mode = 2;
+        ksnCorePacketData lrd;
         lrd.port = rd->arp->data.port;
         lrd.from = rd->from;
 
