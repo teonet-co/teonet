@@ -95,6 +95,8 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
     switch(rd->cmd) {
 
         case CMD_NONE:
+            ksn_printf(ke, MODULE, DEBUG_VV, "recieve CMD_NONE = %u from %s (%s:%d).\n",
+                CMD_NONE, rd->from, rd->addr, rd->port);
             processed = 1;
             break;
 
@@ -310,12 +312,15 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
     // Create command data
     size_t ptr = 0;
     char data[KSN_BUFFER_DB_SIZE];
+
     fillConnectData(data, &ptr, name, addr, port);
+
     // TODO: duplicate code
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT (cmd = 5) command to peer %s\n", to);
+    ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by name %s. (Connect to peer: %s, addr: %s:%d)\n",
+        CMD_CONNECT, to, name, addr, port);
     #endif
 
     return ksnCoreSendCmdto(kco->kc, to, CMD_CONNECT, data, ptr) != NULL;
@@ -343,8 +348,8 @@ int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *to_addr, uint32_t to_p
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT (cmd = 5) command to peer by address %s:%d\n",
-            to_addr, to_port);
+    ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by address %s:%d. (Connect to peer: %s, addr: %s:%d)\n",
+        CMD_CONNECT, to_addr, to_port, name, addr, port);
     #endif
 
     return ksnCoreSendto(kco->kc, to_addr, to_port, CMD_CONNECT, data, ptr);
@@ -758,7 +763,7 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_HOST_INFO (cmd = %u) command, from %s (%s:%d)\n",
+    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_HOST_INFO = %u command, from %s (%s:%d)\n",
             rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 
@@ -819,6 +824,10 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         // Send HOST_INFO_ANSWER to peer
         } else {
             ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_HOST_INFO_ANSWER, data_out, data_out_len);
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_HOST_INFO_ANSWER = %u command to (%s:%d)\n",
+                CMD_HOST_INFO_ANSWER, rd->addr, rd->port);
+            #endif
 	    }
 
         // Free json string data
@@ -1125,7 +1134,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV,
-        "process CMD_CONNECT_R (cmd = %u) command, from %s (%s:%d)\n",
+        "process CMD_CONNECT_R = %u command, from %s (%s:%d)\n",
         rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 
@@ -1135,38 +1144,23 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Replay to address we got from peer
     // ksnCoreSendto(kco->kc, rd->addr, rd->port, CMD_NONE, "\0", 2);
     ksnCoreSendCmdto(kco->kc, rd->from, CMD_NONE, "\0", 2);
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_NONE = %u to (%s:%d).\n",
+            CMD_NONE, rd->addr, rd->port);
+    #endif
 
     // Parse command data
-    size_t i, ptr;
-    ksnCorePacketData lrd;
     uint8_t *num_ip = rd->data; // Number of IPs
 
     // For UDP connection resend received IPs to child
     if(*num_ip) {
-    	for(int j=0; j < 1; j++) {
-            ptr = sizeof(uint8_t);
-    	    lrd.port = *((uint32_t*)(rd->data + rd->data_len - sizeof(uint32_t)));
-    	    lrd.from = rd->from;
-
-            for(i = 0; i <= *num_ip; i++ ) {
-            	if(!i) {
-                    lrd.addr = (char*)localhost;
-                } else {
-            	    lrd.addr = rd->data + ptr; ptr += strlen(lrd.addr) + 1;
-        	    }
-
-            	// Send local IP address and port to child
-            	ksnetArpGetAll(arp_class, send_cmd_connect_cb, &lrd);
-    	    }
-
-    	    // Send peer address to child
-    	    ksnetArpGetAll(arp_class, send_cmd_connect_cb, rd);
-            
-            // Send child address to peer
-            ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, rd);
-        }
+        // Send peer address to child
+        ksnetArpGetAll(arp_class, send_cmd_connect_cb, rd);
+        // Send child address to peer
+        ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, rd);
     } else {// For TCP proxy connection resend this host IPs to child
         rd->arp->data.mode = 2;
+        ksnCorePacketData lrd;
         lrd.port = rd->arp->data.port;
         lrd.from = rd->from;
 
@@ -1255,19 +1249,21 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     pd.port = *((uint32_t *)(rd->data + ptr));
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_CONNECT (cmd = %u) to %s (%s:%d), got from %s (%s:%d)\n", 
-            rd->cmd, pd.name, pd.addr, pd.port, rd->from, rd->addr, rd->port);
+    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_CONNECT = %u from %s (%s:%d). (Connect to %s (%s:%d))\n", 
+            rd->cmd, rd->from, rd->addr, rd->port, pd.name, pd.addr, pd.port);
     #endif
 
     // Check ARP
     if(ksnetArpGet(arp_class, pd.name) == NULL) {
         // Send CMD_NONE to remote peer to connect to it
         ksnCoreSendto(kco->kc, pd.addr, pd.port, CMD_NONE, NULL_STR, 1);
+        ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_NONE = %u to (%s:%d).\n", 
+            CMD_NONE, pd.addr, pd.port);
     } else {
-        #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG_VV, "processing CMD_CONNECT from already existing peer %s (%s:%d) - ignore it\n",
-                pd.name, pd.addr, pd.port);
-        #endif
+        //#ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG_VV, "warning! We ignore this command CMD_CONNECT = %u, because peer %s (%s:%d) already connected\n",
+                CMD_CONNECT, pd.name, pd.addr, pd.port);
+        //#endif
     }
     
     // Wait connection 2 sec and remove TRUDP channel in callback if not connected
@@ -1294,7 +1290,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_DISCONNECTED (cmd = %u) command, from %s (%s:%d)\n",
+    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_DISCONNECTED = %u command, from %s (%s:%d)\n",
             rd->cmd, rd->from, rd->addr, rd->port);
     #endif
 

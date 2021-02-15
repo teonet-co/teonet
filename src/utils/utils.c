@@ -149,7 +149,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
             if(type != DISPLAY_M && ct != 0.00)
                 printf("%s%s%s ",
-                       ksn_cfg->color_output_disable_f ? "" : _ANSI_DARKGREY, 
+                       ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE,
                        timestamp,
                        ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE
                 );
