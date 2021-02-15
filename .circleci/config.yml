@@ -17,6 +17,7 @@ jobs:
       - image: ubuntu:20.04
         environment:
           CI_FORCE_TEST: 1
+    working_directory: ~/teonet
     steps:
       - run:
           command: |
