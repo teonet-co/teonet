@@ -773,7 +773,6 @@ void    connect_r_host_cb(ksnetEvMgrClass *ke) {
 
                 if(ip_is_private(ips[i])) {
                     int ip_len =  strlen(ips[i]) + 1;
-                    printf("%d) IP: %s\n", i, ips[i]);
                     memcpy(data + ptr, ips[i], ip_len); ptr += ip_len;
                     (*num)++;
                 }
