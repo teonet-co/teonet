@@ -112,6 +112,7 @@ workflows:
             branches:
               ignore: /.*/
       - tagged-build:
+          context: CI_BUILD
           filters:
             branches:
               ignore: /.*/
