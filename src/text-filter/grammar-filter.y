@@ -1,24 +1,28 @@
 %{
 #include <string.h>
 #include <stdio.h>
-void yyerror(char *);
+void yyerror(char *s) {
+        fprintf(stderr, "%s\n", s);
+}
 int yylex(void);
-int sym[26];
-char* log_line;
+int yylex_destroy(void);
+void *yy_scan_string(const char*);
+int result;
+char log_line[1024];
 %}
 %union {
     char *sValue;
     int iValue;
 }
 
-%token <iValue> BOOLEAN
 %token <sValue> STRING
-%token VARIABLE LOGVAR
+%token <sValue> WORD 
+
+%token LOGVAR
 %token AND OR NOT
 %left AND OR NOT
 
-%type<iValue> expr 
-%type<iValue> VARIABLE
+%type <iValue> expr 
 %%
 
 prog :
@@ -26,42 +30,37 @@ prog logassigned '\n' statement '\n'
 |
 ;
 statement :
-expr { printf("%d\n", $1); }
-| VARIABLE '=' expr { sym[$1] = $3; }
-| statement ',' statement
+expr { result = $1; printf("%d\n", $1); }
 ;
 
 logassigned :
-LOGVAR '=' STRING { log_line = $3; /*printf("KEK %s\n", log_line);*/ }
+LOGVAR '=' STRING { printf("LOGVAR GRAM\n"); strcpy(log_line, $3); free($3); }
 ;
 
 
 expr:
-//BOOLEAN
-STRING { if (strstr(log_line, $1) != NULL) {
+WORD { if (strstr(log_line, $1) != NULL) {
                 printf("%s is substring of %s\n", $1, log_line);
                 $$ = 1;
          } else {
                  printf("%s doesn't substring of %s\n", $1, log_line);
                  $$ = 0;
          }
+
+         free($1);
        }
-       
 | expr OR expr { if ($1 == 1 || $3 == 1) { $$ = 1; } else { $$ = 0; } }
 | expr AND expr { $$ = $1 * $3; }
 | NOT expr { if ($2 == 1) { $$ = 0; } else { $$ = 1; } }
 | '(' expr ')' { $$ = $2; }
 ;
 %%
-#include "lex.yy.c"
-void yyerror(char *s) {
-        fprintf(stderr, "%s\n", s);
-}
 
-int main(void) {
-//        yy_scan_string("((1 or 0) and 0)\n");
+int log_string_match(char *str) {
+        yy_scan_string(str);
         yyparse();
-//        yylex_destroy();
-
-return 0;
+        yylex_destroy();
+        if (result) return 88;
+        return 14;
 }
+
