@@ -1327,24 +1327,24 @@ yyreduce:
     {
   case 4:
 #line 33 "grammar-filter.y"
-     { result = (yyvsp[0].iValue); printf("%d\n", (yyvsp[0].iValue)); }
+     { result = (yyvsp[0].iValue); /* printf("%d\n", $1); */ }
 #line 1332 "grammar-filter.c"
     break;
 
   case 5:
 #line 37 "grammar-filter.y"
-                  { printf("LOGVAR GRAM\n"); strcpy(log_line, (yyvsp[0].sValue)); free((yyvsp[0].sValue)); }
+                  { /* printf("LOGVAR GRAM\n"); */ strcpy(log_line, (yyvsp[0].sValue)); free((yyvsp[0].sValue)); }
 #line 1338 "grammar-filter.c"
     break;
 
   case 6:
 #line 42 "grammar-filter.y"
      { if (strstr(log_line, (yyvsp[0].sValue)) != NULL) {
-                printf("%s is substring of %s\n", (yyvsp[0].sValue), log_line);
+                /* printf("%s is substring of %s\n", $1, log_line); */
                 (yyval.iValue) = 1;
          } else {
-                 printf("%s doesn't substring of %s\n", (yyvsp[0].sValue), log_line);
-                 (yyval.iValue) = 0;
+                /* printf("%s doesn't substring of %s\n", $1, log_line); */
+                (yyval.iValue) = 0;
          }
 
          free((yyvsp[0].sValue));
@@ -1612,11 +1612,15 @@ yyreturn:
 #line 57 "grammar-filter.y"
 
 
-int log_string_match(char *str) {
-        yy_scan_string(str);
+int log_string_match(char *log, char *match) {
+        int len = snprintf(0, 0, "logvar=\"%s\"\n%s\n", log, match);
+        char *final_log = malloc(len + 1);
+        snprintf(final_log, len + 1, "logvar=\"%s\"\n%s\n", log, match);
+        yy_scan_string(final_log);
         yyparse();
         yylex_destroy();
-        if (result) return 88;
-        return 14;
+        free(final_log);
+        if (result) return 1;
+        return 0;
 }
 

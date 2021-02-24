@@ -10,7 +10,6 @@
 #ifndef TEXT_FILTER_H
 #define TEXT_FILTER_H
 
-int log_string_match(char *str);
+int log_string_match(char *log, char *match);
 
-int yyparse(void);
 #endif

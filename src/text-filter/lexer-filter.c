@@ -381,7 +381,7 @@ static const YY_CHAR yy_ec[256] =
         7,    1,    1,    1,    9,   10,   10,   10,   10,   10,
        11,   10,   10,   10,   10,   12,   10,   10,   13,   10,
        10,   14,   10,   10,   10,   15,   10,   10,   10,   10,
-        1,    1,    1,    1,    1,    1,   16,   10,   10,   10,
+        1,    1,    1,    1,   10,    1,   16,   10,   10,   10,
 
        10,   10,   17,   10,   10,   10,   10,   18,   10,   10,
        19,   10,   10,   20,   10,   10,   10,   21,   10,   10,
@@ -751,7 +751,7 @@ case 2:
 YY_RULE_SETUP
 #line 14 "lexer-filter.l"
 {
-        printf("LEX: & parsed\n");
+        /* printf("LEX: & parsed\n"); */
         return AND;
 }
 	YY_BREAK
@@ -759,7 +759,7 @@ case 3:
 YY_RULE_SETUP
 #line 19 "lexer-filter.l"
 {
-        printf("LEX: | parsed\n");
+        /* printf("LEX: | parsed\n"); */
         return OR;
 }
 	YY_BREAK
@@ -767,7 +767,7 @@ case 4:
 YY_RULE_SETUP
 #line 25 "lexer-filter.l"
 {
-        printf("LEX: logvar parsed\n");
+        /* printf("LEX: logvar parsed\n"); */
         return LOGVAR;
 }
 	YY_BREAK
@@ -776,7 +776,7 @@ YY_RULE_SETUP
 #line 29 "lexer-filter.l"
 {
         yylval.sValue = strdup(yytext);
-        printf("LEX: word parsed: .%s.\n", yylval.sValue);
+        /* printf("LEX: word parsed: .%s.\n", yylval.sValue); */
         return WORD;
 }
 	YY_BREAK
@@ -788,7 +788,7 @@ YY_RULE_SETUP
         yylval.sValue = malloc(yyleng - 1);
         memcpy(yylval.sValue, yytext + 1, yyleng - 2);
         yylval.sValue[yyleng - 2] = 0;
-        printf("LEX: string parsed: .%s.\n", yylval.sValue);
+        /* printf("LEX: string parsed: .%s.\n", yylval.sValue); */
         return STRING;
 }
 	YY_BREAK
@@ -801,7 +801,7 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 45 "lexer-filter.l"
-{ printf("LEX: SPACE parsed and skipped\n");} ;
+{ /* printf("LEX: SPACE parsed and skipped\n"); */ } ;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP

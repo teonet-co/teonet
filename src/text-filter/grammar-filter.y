@@ -30,21 +30,21 @@ prog logassigned '\n' statement '\n'
 |
 ;
 statement :
-expr { result = $1; printf("%d\n", $1); }
+expr { result = $1; /* printf("%d\n", $1); */ }
 ;
 
 logassigned :
-LOGVAR '=' STRING { printf("LOGVAR GRAM\n"); strcpy(log_line, $3); free($3); }
+LOGVAR '=' STRING { /* printf("LOGVAR GRAM\n"); */ strcpy(log_line, $3); free($3); }
 ;
 
 
 expr:
 WORD { if (strstr(log_line, $1) != NULL) {
-                printf("%s is substring of %s\n", $1, log_line);
+                /* printf("%s is substring of %s\n", $1, log_line); */
                 $$ = 1;
          } else {
-                 printf("%s doesn't substring of %s\n", $1, log_line);
-                 $$ = 0;
+                /* printf("%s doesn't substring of %s\n", $1, log_line); */
+                $$ = 0;
          }
 
          free($1);
@@ -56,11 +56,15 @@ WORD { if (strstr(log_line, $1) != NULL) {
 ;
 %%
 
-int log_string_match(char *str) {
-        yy_scan_string(str);
+int log_string_match(char *log, char *match) {
+        int len = snprintf(0, 0, "logvar=\"%s\"\n%s\n", log, match);
+        char *final_log = malloc(len + 1);
+        snprintf(final_log, len + 1, "logvar=\"%s\"\n%s\n", log, match);
+        yy_scan_string(final_log);
         yyparse();
         yylex_destroy();
-        if (result) return 88;
-        return 14;
+        free(final_log);
+        if (result) return 1;
+        return 0;
 }
 

@@ -58,7 +58,6 @@ void modules_destroy(ksnetEvMgrClass *ke); // Deinitialize modules
 int send_cmd_disconnect_cb(ksnetArpClass *ka, char *name,
                             ksnet_arp_data *arp_data, void *data);
 
-void teoHotkeySetFilter(void *ke, void *filter);
 void metric_teonet_count(teoMetricClass *tm);
 
 /**
@@ -1335,7 +1334,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
         if(!ke->net_idx) ke->kh = ksnetHotkeysInit(ke);
         // Set filter from parameters
-        if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke, ke->ksn_cfg.filter);
+        if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke->kh, ke->ksn_cfg.filter);
     }
 
     // Callback QUEUE
