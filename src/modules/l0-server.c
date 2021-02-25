@@ -609,7 +609,6 @@ void _send_subscribe_event_connected(ksnetEvMgrClass *ke, const char *payload,
 
 /**
  * Send "new visit" event to all subscribers
- *
  */
 void _send_subscribe_event_newvisit(ksnetEvMgrClass *ke, const char *payload,
         size_t payload_length) {
@@ -622,6 +621,9 @@ void _send_subscribe_event_newvisit(ksnetEvMgrClass *ke, const char *payload,
     free(vd);
 }
 
+/**
+ * \TODO: move this function to utils
+ */
 static bool json_eq(const char *json, jsmntok_t *tok, const char *s) {
     if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
             strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
@@ -754,6 +756,7 @@ static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, strin
     }
 
     // Add client to name map
+    if (kld->name) free(kld->name);
     kld->name = client_name;
     kld->name_length = client_name_len;
     if(fd_ex != fd) pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
