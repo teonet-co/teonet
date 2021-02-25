@@ -622,12 +622,12 @@ void _send_subscribe_event_newvisit(ksnetEvMgrClass *ke, const char *payload,
     free(vd);
 }
 
-static int json_eq(const char *json, jsmntok_t *tok, const char *s) {
+static bool json_eq(const char *json, jsmntok_t *tok, const char *s) {
     if (tok->type == JSMN_STRING && (int) strlen(s) == tok->end - tok->start &&
             strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-        return 0;
+        return true;
     }
-    return -1;
+    return false;
 }
 
 typedef struct string_view
@@ -671,17 +671,17 @@ static bool parseAuthPayload(ksnLNullClass *kl, uint8_t *payload, string_view *n
     stringViewReset(auth_data_valid_until);
 
     for (int i = 1; i < token_num; i++) {
-        if (json_eq(jsondata, &tokens[i], "userId") == 0) {
+        if (json_eq(jsondata, &tokens[i], "userId")) {
             printf("ID: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
             name->data = (char*)jsondata + tokens[i+1].start;
             name->len = tokens[i+1].end - tokens[i+1].start;
             i++;
-        } else if (json_eq(jsondata, &tokens[i], "sign") == 0) {
+        } else if (json_eq(jsondata, &tokens[i], "sign")) {
             printf("SIGN: %.*s\n", tokens[i+1].end - tokens[i+1].start, jsondata + tokens[i+1].start);
             sign->data = (char*)jsondata + tokens[i+1].start;
             sign->len = tokens[i+1].end - tokens[i+1].start;
             i++;
-        } else if (json_eq(jsondata, &tokens[i], "timestamp") == 0) {
+        } else if (json_eq(jsondata, &tokens[i], "timestamp")) {
             printf("TS: %.*s\n", tokens[i+1].end - tokens[i+1].start,
                     jsondata + tokens[i+1].start);
             auth_data_valid_until->data = (char*)jsondata + tokens[i+1].start;
