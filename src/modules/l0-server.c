@@ -61,6 +61,8 @@ void teoLNullPacketCheckMiscrypted(ksnLNullClass *kl, ksnLNullData *kld,
         return;
     }
 
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
+
     uint8_t *p_data = teoLNullPacketGetPayload(packet);
     uint8_t data_check = get_byte_checksum(p_data, packet->data_length);
     if (data_check == 0) { data_check++; }
@@ -71,7 +73,7 @@ void teoLNullPacketCheckMiscrypted(ksnLNullClass *kl, ksnLNullData *kld,
     char hexdump[92];
     dump_bytes(hexdump, sizeof(hexdump), p_data, packet->data_length);
 
-    ksn_printf(kev, MODULE, DEBUG,
+    ksn_printf(ke, MODULE, DEBUG,
                "FAILED " _ANSI_RED "POST DECRYPTION " _ANSI_YELLOW
                "CHECK from %s:%d" _ANSI_LIGHTCYAN
                " cmd %u, peer '%s', data_length %d, checksum %d, "
@@ -169,12 +171,13 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
     size_t data_len = KSN_BUFFER_DB_SIZE; // Buffer length
     ksnLNullClass *kl = w->data; // Pointer to ksnLNullClass
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
     char data[data_len]; // Buffer
 
     // Read TCP data
     ssize_t received = read(w->fd, data, data_len);
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG_VV,
+    ksn_printf(ke, MODULE, DEBUG_VV,
             "Got something from fd %d w->events = %d, received = %d ...\n",
             w->fd, w->events, (int)received);
     #endif
@@ -184,7 +187,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
     if(!received) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
+        ksn_printf(ke, MODULE, DEBUG_VV,
             "Connection closed. Stop listening fd %d ...\n",
             w->fd
         );
@@ -202,7 +205,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
 //        #ifdef DEBUG_KSNET
 //        ksnet_printf(
-//            &kev->ksn_cfg, DEBUG,
+//            &ke->ksn_cfg, DEBUG,
 //            "%sl0 Server:%s "
 //            "Read error ...%s\n",
 //            ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE
@@ -231,7 +234,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     kld->read_buffer = malloc(kld->read_buffer_size);
 
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, DEBUG_VV,
+                ksn_printf(ke, MODULE, DEBUG_VV,
                     "%s" "increase read buffer to new size: %d bytes ...%s\n",
                     ANSI_DARKGREY, kld->read_buffer_size,
                     ANSI_NONE);
@@ -277,13 +280,13 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                                 if (processKeyExchange(kl, kld, w->fd, kex,
                                                        packet->data_length)) {
                                     #ifdef DEBUG_KSNET
-                                    ksn_printf(kev, MODULE, DEBUG_VV,
+                                    ksn_printf(ke, MODULE, DEBUG_VV,
                                                "Encription established for fd %d ...\n",
                                                w->fd);
                                     #endif
                                 } else {
                                     #ifdef DEBUG_KSNET
-                                    ksn_printf(kev, MODULE, DEBUG_VV,
+                                    ksn_printf(ke, MODULE, DEBUG_VV,
                                                "Key exchange failed. Stop listening fd %d ...\n",
                                                w->fd);
                                     #endif
@@ -300,7 +303,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                                     // Set temporary name (it will be changed after TEO_AUTH answer)
                                     ksnLNullClientAuthCheck(kl, kld, w->fd, packet);
                                 } else {
-                                    ksn_printf(kev, MODULE, ERROR_M,
+                                    ksn_printf(ke, MODULE, ERROR_M,
                                         "Invalid login packet from %s:%d\n",
                                         kld->t_addr, kld->t_port);
                                 }
@@ -315,7 +318,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                             // Drop wrong packet
                             else {
                                 #ifdef DEBUG_KSNET
-                                ksn_printf(kev, MODULE, DEBUG,
+                                ksn_printf(ke, MODULE, DEBUG,
                                     "%s" "got valid packet from fd: %d before login command; packet ignored ...%s\n",
                                     ANSI_RED, w->fd, ANSI_NONE);
                                 #endif
@@ -323,7 +326,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         }
                     } else {
                         #ifdef DEBUG_KSNET
-                        ksn_printf(kev, MODULE, DEBUG,
+                        ksn_printf(ke, MODULE, DEBUG,
                                    _ANSI_RED
                                    "FAILED decrypt packet from "
                                    "fd: %d; packet ignored ..." _ANSI_NONE "\n",
@@ -335,7 +338,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 // Wrong checksum - drop this packet
                 else {
                     #ifdef DEBUG_KSNET
-                    ksn_printf(kev, MODULE, DEBUG,
+                    ksn_printf(ke, MODULE, DEBUG,
                         "%s" "got wrong packet %d bytes length, from fd: %d; packet dropped ...%s\n",
                         ANSI_RED, len, w->fd, ANSI_NONE);
                     #endif
@@ -349,7 +352,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             if(kld->read_buffer_ptr - ptr > 0) {
 
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, DEBUG_VV,
+                ksn_printf(ke, MODULE, DEBUG_VV,
                     "%s" "wait next part of packet, now it has %d bytes ...%s\n",
                     ANSI_DARKGREY, kld->read_buffer_ptr - ptr,
                     ANSI_NONE);
@@ -387,7 +390,8 @@ ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl) {
  */ 
 static int extendedLog(ksnLNullClass *kl) {
     int log_level = DEBUG_VV;
-    if(kev->ksn_cfg.l0_allow_f && kev->ksn_cfg.extended_l0_log_f) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
+    if(ke->ksn_cfg.l0_allow_f && ke->ksn_cfg.extended_l0_log_f) {
         log_level = DEBUG;
     }
     return log_level;
@@ -404,7 +408,7 @@ static int extendedLog(ksnLNullClass *kl) {
  */
 static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *packet,
         char *cname, size_t cname_length) {
-
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
     size_t out_data_len = sizeof(ksnLNullSPacket) + cname_length +
             packet->data_length;
     char *out_data = malloc(out_data_len);
@@ -422,26 +426,26 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     // Send teonet L0 packet
     ksnet_arp_data *arp_data = NULL;
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, extendedLog(kl),
+    ksn_printf(ke, MODULE, extendedLog(kl),
         "send packet to peer \"%s\" from L0 client \"%s\" ...\n",
         packet->peer_name, spacket->payload);
     #endif
 
     // Send to peer
-    if(strlen((char*)packet->peer_name) && strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(kev))) {        
-        arp_data = ksnCoreSendCmdto(kev->kc, packet->peer_name, CMD_L0,
+    if(strlen((char*)packet->peer_name) && strcmp((char*)packet->peer_name, ksnetEvMgrGetHostName(ke))) {        
+        arp_data = ksnCoreSendCmdto(ke->kc, packet->peer_name, CMD_L0,
                 spacket, out_data_len);
     }
     // Send to this host
     else {
         // Create packet
         size_t pkg_len;
-        void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len, &pkg_len);
+        void *pkg = ksnCoreCreatePacket(ke->kc, CMD_L0, spacket, out_data_len, &pkg_len);
         struct sockaddr_storage addr;             // address structure
         socklen_t addrlen = sizeof(addr); // length of addresses
-        if(!make_addr(localhost, kev->kc->port, (__SOCKADDR_ARG) &addr, &addrlen)) {
-            ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
-            arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
+        if(!make_addr(localhost, ke->kc->port, (__SOCKADDR_ARG) &addr, &addrlen)) {
+            ksnCoreProcessPacket(ke->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
+            arp_data = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, (char*)packet->peer_name);
         }
         free(pkg);
     }
@@ -559,6 +563,7 @@ int ksnLNullSendEchoToL0A(void *ke, char *addr, int port, char *cname,
  * @return client, pointer to ksnLNullData
  */
 static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     ksnLNullData data;
     data.name = NULL;
@@ -576,7 +581,7 @@ static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const cha
     ksnLNullData* kld = ksnLNullGetClientConnection(kl, fd);
     // #ifdef DEBUG_KSNET
     if (kld == NULL) {
-        ksn_printf(kev, MODULE, ERROR_M,
+        ksn_printf(ke, MODULE, ERROR_M,
                    "Failed L0 client registration with fd %d from %s:%d\n",
                    fd, remote_addr, remote_port);
         return NULL;
@@ -647,8 +652,9 @@ static void stringViewReset(string_view *s) {
 
 
 static bool parseAuthPayload(ksnLNullClass *kl, uint8_t *payload, string_view *name, string_view *sign, string_view *auth_data_valid_until) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
     if (name == NULL || sign == NULL || auth_data_valid_until == NULL) {
-        ksn_printf(kev, MODULE, DEBUG, "Missing output params: name=%p, sign=%p, valid_ts=%p\n", name, sign, auth_data_valid_until);
+        ksn_printf(ke, MODULE, DEBUG, "Missing output params: name=%p, sign=%p, valid_ts=%p\n", name, sign, auth_data_valid_until);
         return false;
     }
 
@@ -695,15 +701,11 @@ static bool parseAuthPayload(ksnLNullClass *kl, uint8_t *payload, string_view *n
     return auth_data_valid_until->data != NULL && sign->data != NULL && name->data != NULL;
 }
 
-static bool checkAuthData(
-        ksnLNullClass *kl,
-        string_view *name,
-        string_view *auth_data_valid_until,
-        string_view *sign,
-        const char *secret) {
+static bool checkAuthData(ksnLNullClass *kl, string_view *name, string_view *auth_data_valid_until, string_view *sign, const char *secret) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     if (sign->len != MD5_DIGEST_LENGTH*2) {
-        ksn_printf(kev, MODULE, DEBUG, "Invalid signature length:  %.*s\n",
+        ksn_printf(ke, MODULE, DEBUG, "Invalid signature length:  %.*s\n",
             sign->len, sign->data);
         return false;
     }
@@ -717,7 +719,7 @@ static bool checkAuthData(
     if ((current_time_str_len > auth_data_valid_until->len) ||
             (current_time_str_len == auth_data_valid_until->len &&
             strncmp(auth_data_valid_until->data, current_time_str, auth_data_valid_until->len) < 0)) {
-        ksn_printf(kev, MODULE, DEBUG, "timestamp %.*s outdated, current time: %d\n",
+        ksn_printf(ke, MODULE, DEBUG, "timestamp %.*s outdated, current time: %d\n",
             auth_data_valid_until->len, auth_data_valid_until->data, current_time);
         return false;
     }
@@ -739,6 +741,8 @@ static bool checkAuthData(
 }
 
 static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, string_view *name) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
+
     int wg001_len = strlen(WG001);
     int client_name_len = wg001_len + name->len + 1;//wg001-name + terminating null
     char *client_name = malloc(client_name_len);
@@ -750,7 +754,7 @@ static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, strin
     int fd_ex = ksnLNullClientIsConnected(kl, client_name);
     if(fd_ex) {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", client_name, fd_ex, fd);
+        ksn_printf(ke, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", client_name, fd_ex, fd);
         #endif
         if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
     }
@@ -763,6 +767,7 @@ static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, strin
 }
 
 static void sendConnectedEvent(ksnLNullClass *kl, ksnLNullData *kld) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
     // TODO: I must use kl->stat.clients or ke->kl->stat.visits ????? instead pblMapSize(kl->map)
     int playload_size = snprintf(0, 0, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
         kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
@@ -770,19 +775,21 @@ static void sendConnectedEvent(ksnLNullClass *kl, ksnLNullData *kld) {
     snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
         kld->name, kld->t_addr ? kld->t_addr : "error", pblMapSize(kl->map));
 
-    _send_subscribe_event_connected(kev, payload, playload_size + 1);
+    _send_subscribe_event_connected(ke, payload, playload_size + 1);
     free(payload);
 }
 
 static void confirmAuth(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
+
     // Create L0 packet
-    size_t out_data_len = sizeof(teoLNullCPacket) + strlen(kev->ksn_cfg.host_name) + 1 + kld->name_length + 1;
+    size_t out_data_len = sizeof(teoLNullCPacket) + strlen(ke->ksn_cfg.host_name) + 1 + kld->name_length + 1;
     char *out_data = malloc(out_data_len);
     memset(out_data, 0, out_data_len);
 
     size_t packet_length =
         teoLNullPacketCreate(out_data, out_data_len,
-                                CMD_CONFIRM_AUTH, kev->ksn_cfg.host_name, (uint8_t*)kld->name, kld->name_length + 1);
+                                CMD_CONFIRM_AUTH, ke->ksn_cfg.host_name, (uint8_t*)kld->name, kld->name_length + 1);
 
     // Send confirmation of the client name
     ssize_t send_size = ksnLNullPacketSend(kl, fd, out_data, packet_length);
@@ -801,16 +808,17 @@ static void confirmAuth(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
  */
 static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     if (((ksnetEvMgrClass*)kl->ke)->ksn_cfg.auth_secret[0] == '\0') {
-        ksn_printf(kev, MODULE, DEBUG, "secret not provided, disconnect %d\n", fd);
+        ksn_printf(ke, MODULE, DEBUG, "secret not provided, disconnect %d\n", fd);
         ksnLNullClientDisconnect(kl, fd, 1);
         return false;
     }
 
     uint8_t *payload = teoLNullPacketGetPayload(packet);
 
-    ksn_printf(kev, MODULE, DEBUG,"Checking payload from fd %d:\n%s\n", fd, (const char*)payload);
+    ksn_printf(ke, MODULE, DEBUG,"Checking payload from fd %d:\n%s\n", fd, (const char*)payload);
 
     //NOTE: string_views will be reseted inside parseAuthPayload
     string_view name;
@@ -818,13 +826,13 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     string_view auth_data_valid_until;
 
     if (!parseAuthPayload(kl, payload, &name, &sign, &auth_data_valid_until)) {
-        ksn_printf(kev, MODULE, DEBUG,"Invalid payload received from fd %d:\n%s\n", fd, (const char*)payload);
+        ksn_printf(ke, MODULE, DEBUG,"Invalid payload received from fd %d:\n%s\n", fd, (const char*)payload);
         ksnLNullClientDisconnect(kl, fd, 1);
         return false;
     }
 
     if (!checkAuthData(kl, &name, &auth_data_valid_until, &sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.auth_secret)) {
-        ksn_printf(kev, MODULE, DEBUG,"Failed to verify signature '%.*s' - '%.*s' - '%.*s' received from fd %d\n",
+        ksn_printf(ke, MODULE, DEBUG,"Failed to verify signature '%.*s' - '%.*s' - '%.*s' received from fd %d\n",
             name.len,
             name.data,
             auth_data_valid_until.len,
@@ -915,6 +923,7 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
  */
 ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                            size_t pkg_length) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
     teoLNullCPacket *packet = (teoLNullCPacket *)pkg;
     #ifdef DEBUG_KSNET
     char hexdump[32];
@@ -948,7 +957,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
             trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, extendedLog(kl),
+            ksn_printf(ke, MODULE, extendedLog(kl),
                        "send packet to trudp addr: %s:%d, cmd = %u, from "
                        "peer: %s, data: %s \n",
                        kld->t_addr, kld->t_port, (unsigned)packet->cmd,
@@ -988,11 +997,12 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
  * @param remote_port remote port
  */
 static void ksnLNullClientConnect(ksnLNullClass *kl, int fd, const char *remote_addr, int remote_port) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     // Set TCP_NODELAY option
     teosockSetTcpNodelay(fd);
 
-    ksn_printf(kev, MODULE, DEBUG_VV,
+    ksn_printf(ke, MODULE, DEBUG_VV,
                "L0 client with fd %d connected from %s:%d\n",
                fd, remote_addr, remote_port);
 
@@ -1003,7 +1013,7 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd, const char *remote_
         ev_init (&kld->w, cmd_l0_read_cb);
         ev_io_set (&kld->w, fd, EV_READ);
         kld->w.data = kl;
-        ev_io_start (kev->ev_loop, &kld->w);
+        ev_io_start (ke->ev_loop, &kld->w);
 
     } else {
         // Error: can't register TCP fd in tcp proxy map
@@ -1026,6 +1036,7 @@ static void ksnLNullClientConnect(ksnLNullClass *kl, int fd, const char *remote_
  *
  */
 void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     size_t valueLength;
 
@@ -1036,12 +1047,12 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
 
         // Stop L0 client watcher
         if(fd < MAX_FD_NUMBER) {
-            ev_io_stop(kev->ev_loop, &kld->w);
+            ev_io_stop(ke->ev_loop, &kld->w);
             if(remove_f != 2) close(fd);
         }
         if (kld->name != NULL  && !strstr(kld->name, "-new-")) {
             // Show disconnect message
-            ksn_printf(kev, MODULE, CONNECT, "### 0005,%s\n", kld->name);
+            ksn_printf(ke, MODULE, CONNECT, "### 0005,%s\n", kld->name);
         }
 
         // L0 statistic - client disconnect
@@ -1054,7 +1065,7 @@ void ksnLNullClientDisconnect(ksnLNullClass *kl, int fd, int remove_f) {
             char *payload = malloc(playload_size + 1);
             snprintf(payload, playload_size + 1, "{\"client_name\":\"%s\",\"trudp_ip\":\"%s\",\"count_of_clients\":%d}",
                 kld->name, kld->t_addr ? kld->t_addr : "error", kl->stat.clients);
-            _send_subscribe_event_disconnected(kev, payload, playload_size + 1);
+            _send_subscribe_event_disconnected(ke, payload, playload_size + 1);
             free(payload);
         }
 
@@ -1131,6 +1142,7 @@ static void cmd_l0_accept_cb(struct ev_loop *loop, struct ev_ksnet_io *w,
 void _check_connected(uint32_t id, int type, void *data) {
 
     ksnLNullClass *kl = data;
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     // Disconnect all clients which don't send nothing during timeout
     PblIterator *it = pblMapIteratorReverseNew(kl->map);
@@ -1141,12 +1153,12 @@ void _check_connected(uint32_t id, int type, void *data) {
             int *fd = (int *) pblMapEntryKey(entry);
             // Disconnect client
             if(ksnetEvMgrGetTime(kl->ke) - data->last_time >= DISCONNECT_TIMEOUT) {
-                ksn_printf(kev, MODULE, DEBUG, "Disconnect client by timeout, fd: %d, name: %s\n", *fd, data->name);
+                ksn_printf(ke, MODULE, DEBUG, "Disconnect client by timeout, fd: %d, name: %s\n", *fd, data->name);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
             // Send echo to client, if authorized
             else if(data->name != NULL && ksnetEvMgrGetTime(kl->ke) - data->last_time >= SEND_PING_TIMEOUT) {
-                ksn_printf(kev, MODULE, DEBUG, "Send ping to client by timeout, fd: %d, name: %s\n", *fd, data->name);
+                ksn_printf(ke, MODULE, DEBUG, "Send ping to client by timeout, fd: %d, name: %s\n", *fd, data->name);
 
                 // From this host(peer)
                 const char *from = ksnetEvMgrGetHostName(kl->ke);
@@ -1186,25 +1198,26 @@ void _check_connected(uint32_t id, int type, void *data) {
  * @return If return value > 0 than server was created successfully
  */
 static int ksnLNullStart(ksnLNullClass *kl) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     int fd = 0;
 
-    if(kev->ksn_cfg.l0_allow_f) {
+    if(ke->ksn_cfg.l0_allow_f) {
 
         // Create l0 server at port, which will wait client connections
         int port_created;
         if((fd = ksnTcpServerCreate(
-                    kev->kt,
-                    kev->ksn_cfg.l0_tcp_port,
+                    ke->kt,
+                    ke->ksn_cfg.l0_tcp_port,
                     cmd_l0_accept_cb,
                     kl,
                     &port_created)) > 0) {
 
-            ksn_printf(kev, MODULE, MESSAGE,
+            ksn_printf(ke, MODULE, MESSAGE,
                     "l0 server fd %d started at port %d\n",
                     fd, port_created);
 
-            kev->ksn_cfg.l0_tcp_port = port_created;
+            ke->ksn_cfg.l0_tcp_port = port_created;
             kl->fd = fd;
 
             // Init check clients cque
@@ -1225,9 +1238,10 @@ static int ksnLNullStart(ksnLNullClass *kl) {
  *
  */
 static void ksnLNullStop(ksnLNullClass *kl) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     // If server started
-    if(kev->ksn_cfg.l0_allow_f && kl->fd) {
+    if(ke->ksn_cfg.l0_allow_f && kl->fd) {
 
         // Disconnect all clients
         PblIterator *it = pblMapIteratorReverseNew(kl->map);
@@ -1247,7 +1261,7 @@ static void ksnLNullStop(ksnLNullClass *kl) {
         ksnCQueDestroy(kl->cque); // Init check clients cque
 
         // Stop the server
-        ksnTcpServerStop(kev->kt, kl->fd);
+        ksnTcpServerStop(ke->kt, kl->fd);
     }
 }
 
@@ -1560,9 +1574,9 @@ static int json_parse(char *data, json_param *jp) {
  * @return
  */
 int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     int retval = 0;
-    ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
 
     // Parse request
     char *json_data_unesc = rd->data;
@@ -1583,7 +1597,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     int fd_old;
     if(jp.userId && (fd_old = ksnLNullClientIsConnected(kl, jp.userId))) {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
+        ksn_printf(ke, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
         #endif
 
         // Send 99 command to user
@@ -1625,7 +1639,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             if (kld->name != NULL) {
                 #ifdef DEBUG_KSNET
-                ksn_printf(kev, MODULE, DEBUG,
+                ksn_printf(ke, MODULE, DEBUG,
                     "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
                     kld->name, kld->t_addr, jp.username);
                 #endif
@@ -1638,7 +1652,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
             // Send Connected event to all subscribers
             if(kld->name != NULL && !strcmp(rd->from, TEO_AUTH)) {
-                _send_subscribe_event_connected(kev, kld->name, kld->name_length);
+                _send_subscribe_event_connected(ke, kld->name, kld->name_length);
             }
 
             // Create & Send websocket allow answer message
@@ -1679,10 +1693,11 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     teonet_client_data_ar *data_ar = NULL;
 
-    if(kl != NULL && kev->ksn_cfg.l0_allow_f && kl->fd) {
+    if(kl != NULL && ke->ksn_cfg.l0_allow_f && kl->fd) {
 
         uint32_t length = pblMapSize(kl->map);
         data_ar = malloc(sizeof(teonet_client_data_ar) +
@@ -1833,13 +1848,14 @@ static bool sendKEXResponse(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
 static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
                                KeyExchangePayload_Common *kex,
                                size_t kex_length) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     if (kld->server_crypt == NULL) {
         // Create compatible encryption context
         size_t crypt_size = teoLNullEncryptionContextSize(kex->protocolId);
         if (crypt_size == 0) {
             #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, ERROR_M,
+            ksn_printf(ke, MODULE, ERROR_M,
                        "Invalid KEX from %s:%d - can't create ctx(%d); disconnecting\n",
                        kld->t_addr, kld->t_port, (int)kex->protocolId);
             #endif
@@ -1855,7 +1871,7 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     if (!teoLNullKEXValidate(kld->server_crypt, kex, kex_length)) {
         #ifdef DEBUG_KSNET
         ksn_printf(
-            kev, MODULE, ERROR_M,
+            ke, MODULE, ERROR_M,
             "Invalid KEX from %s:%d - failed validation; disconnecting\n",
             kld->t_addr, kld->t_port);
         #endif
@@ -1866,7 +1882,7 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     if (!teoLNullEncryptionContextApplyKEX(kld->server_crypt, kex,
                                            kex_length)) {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, ERROR_M,
+        ksn_printf(ke, MODULE, ERROR_M,
                    "Invalid KEX from %s:%d - can't apply; disconnecting\n",
                    kld->t_addr, kld->t_port);
         #endif
@@ -1877,7 +1893,7 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
     kld->server_crypt->state = SESCRYPT_PENDING;
     if (!sendKEXResponse(kl, kld, fd)) {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, ERROR_M,
+        ksn_printf(ke, MODULE, ERROR_M,
                    "Failed to send KEX response to %s:%d; disconnecting\n",
                    kld->t_addr, kld->t_port);
         #endif
@@ -1904,9 +1920,11 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
 static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
                       ksnCorePacketData *rd, trudpChannelData *tcd,
                       teoLNullCPacket *packet, const char *packet_kind) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
+
     const bool was_encrypted = teoLNullPacketIsEncrypted(packet);
     if (!teoLNullPacketDecrypt(kld->server_crypt, packet)) {
-        ksn_printf(kev, MODULE, ERROR_M,
+        ksn_printf(ke, MODULE, ERROR_M,
                    "teoLNullPacketDecrypt failed fd %d/ ctx %p\n", tcd->fd,
                    kld->server_crypt);
         return 0;
@@ -1923,7 +1941,7 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
         strcpy(hexdump, "(null)");
     }
     const char *str_enc = was_encrypted ? " encrypted" : "";
-    ksn_printf(kev, MODULE, extendedLog(kl),
+    ksn_printf(ke, MODULE, extendedLog(kl),
                "got %s%s trudp packet, from: %s:%d, fd: %d, "
                "cmd: %u, to peer: %s, data: %s\n",
                packet_kind, str_enc, rd->addr, rd->port, tcd->fd,
@@ -1957,7 +1975,7 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
                     char saltdump[62];
                     uint8_t *salt = kld->server_crypt->keys.sessionsalt.data;
                     dump_bytes(saltdump, sizeof(saltdump), salt, sizeof(salt));
-                    ksn_printf(kev, MODULE, DEBUG_VV,
+                    ksn_printf(ke, MODULE, DEBUG_VV,
                                "got valid kex from %s:%d salt %s state %d\n",
                                kld->t_addr, kld->t_port, saltdump,
                                kld->server_crypt->state);
@@ -1973,7 +1991,7 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
                         trudp_ChannelSendReset(tcd);
                     }
                 } else {
-                    ksn_printf(kev, MODULE, ERROR_M,
+                    ksn_printf(ke, MODULE, ERROR_M,
                                "got invalid login packet from %s:%d\n", 
                                kld->t_addr, kld->t_port);
                     // Failed. disconnect user
@@ -2012,8 +2030,9 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
  * @return
  */
 int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
-    trudpChannelData *tcd = trudpGetChannelAddr(kev->kc->ku, rd->addr, rd->port, 0);
+    trudpChannelData *tcd = trudpGetChannelAddr(ke->kc->ku, rd->addr, rd->port, 0);
     if (tcd == NULL || tcd == (void *)-1) {
         return 1;
     }
@@ -2040,14 +2059,12 @@ int ksnLNulltrudpCheckPaket(ksnLNullClass *kl, ksnCorePacketData *rd) {
     ssize_t rc = recvCheck(tcd, rd->data, rd->data_len);
     if (rc == -3) {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
-                    "WRONG UDP PACKET %d\n", rc
-        );
+        ksn_printf(ke, MODULE, DEBUG_VV, "WRONG UDP PACKET %d\n", rc);
         #endif
         return 1; // TODO: Check this return value (may be it should be 0)
     } else if (rc <= 0) {
         #ifdef DEBUG_KSNET
-        ksn_printf(kev, MODULE, DEBUG_VV,
+        ksn_printf(ke, MODULE, DEBUG_VV,
                     "Wait next part of large packet %d status = %d\n",
                     rd->data_len, rc
         );
@@ -2077,4 +2094,3 @@ teoLNullEncryptionContext *ksnLNullClientGetCrypto(ksnLNullClass *kl, int fd) {
     return (kld == NULL) ? NULL : kld->server_crypt;
 }
 
-#undef kev

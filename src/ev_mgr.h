@@ -322,10 +322,12 @@ typedef struct ksnetEvMgrClass {
 } ksnetEvMgrClass;
 
 ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X);
+ksnetEvMgrClass* __ke_from_L0_class(ksnLNullClass *X);
 ksnetArpClass* __arp_from_command_class(ksnCommandClass *X);
 
-#define EVENT_MANAGER_CLASS(X) _Generic((X), \
-      ksnCommandClass* : __ke_from_command_class) (X)
+#define EVENT_MANAGER_OBJECT(X) _Generic((X), \
+      ksnCommandClass* : __ke_from_command_class, \
+      ksnLNullClass *  : __ke_from_L0_class) (X)
 
 #define ARP_TABLE_CLASS(X) _Generic((X), \
       ksnCommandClass* : __arp_from_command_class) (X)
