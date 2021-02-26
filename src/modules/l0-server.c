@@ -13,10 +13,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "jsmn.h"
 #include "ev_mgr.h"
 #include "l0-server.h"
 #include "utils/rlutil.h"
+#include "jsmn.h"
 
 #include "teonet_l0_client_crypt.h"
 
@@ -413,10 +413,10 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
 
     // Create teonet L0 packet
     spacket->cmd = packet->cmd;
-    spacket->from_length = cname_length;
-    memcpy(spacket->from, cname, cname_length);
+    spacket->client_name_length = cname_length;
+    memcpy(spacket->payload, cname, cname_length);
     spacket->data_length = packet->data_length;
-    memcpy(spacket->from + spacket->from_length,
+    memcpy(spacket->payload + spacket->client_name_length,
         packet->peer_name + packet->peer_name_length, spacket->data_length);
 
     // Send teonet L0 packet
@@ -424,7 +424,7 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, extendedLog(kl),
         "send packet to peer \"%s\" from L0 client \"%s\" ...\n",
-        packet->peer_name, spacket->from);
+        packet->peer_name, spacket->payload);
     #endif
 
     // Send to peer
@@ -480,16 +480,16 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 
     // Create teonet L0 packet
     spacket->cmd = cmd;
-    spacket->from_length = cname_length;
-    memcpy(spacket->from, cname, cname_length);
+    spacket->client_name_length = cname_length;
+    memcpy(spacket->payload, cname, cname_length);
     spacket->data_length = data_len;
-    memcpy(spacket->from + spacket->from_length, data, data_len);
+    memcpy(spacket->payload + spacket->client_name_length, data, data_len);
 
     // Send command to client of L0 server
     #ifdef DEBUG_KSNET
     ksn_printf(((ksnetEvMgrClass*)ke), MODULE, DEBUG_VV,
         "send command to L0 server for client \"%s\" ...\n",
-        spacket->from);
+        spacket->payload);
     #endif
     int rv = ksnCoreSendto(((ksnetEvMgrClass*)ke)->kc, addr, port, CMD_L0_TO,
             out_data, out_data_len);
@@ -1290,34 +1290,32 @@ int cmd_l0_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
        (data->cmd >= CMD_USER && data->cmd < CMD_192_RESERVED) ||
        (data->cmd >= CMD_USER_NR && data->cmd < CMD_LAST)) {
 
+        // \TODO: char *client_name = data->payload;
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV,
             "got valid command No %d from %s client with %d bytes data ...\n",
-            data->cmd, data->from, data->data_length);
+            data->cmd, data->payload, data->data_length);
         #endif
 
         ksnCorePacketData *rds = rd;
 
         // Process command
         rds->cmd = data->cmd;
-        rds->from = data->from;
-        rds->from_len = data->from_length;
-        rds->data = data->from + data->from_length;
+        rds->from = data->payload;
+        rds->from_len = data->client_name_length;
+        rds->data = data->payload + data->client_name_length;
         rds->data_len = data->data_length;
         rds->l0_f = 1;
 
         // Execute L0 client command
         retval = ksnCommandCheck(ke->kc->kco, rds);
-    }
-    // Wrong command
-    else {
-
+    } else {
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV,
             "%s" "got wrong command No %d from %s client with %d bytes data, "
             "the command skipped ...%s\n",
             ANSI_RED,
-            data->cmd, data->from, data->data_length,
+            data->cmd, data->payload, data->data_length,
             ANSI_NONE);
         #endif
     }
@@ -1358,7 +1356,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     ksn_printf(ke, MODULE, extendedLog(ke->kl),
         "got command No %d for \"%s\" L0 client from peer \"%s\" "
         "with %d bytes data\n",
-        data->cmd, data->from, rd->from, data->data_length);
+        data->cmd, data->payload, rd->from, data->data_length);
     #endif
 
     // Got packet from peer statistic
@@ -1367,7 +1365,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     // If l0 module is initialized
     if(ke->kl) {
 
-        int fd = ksnLNullClientIsConnected(ke->kl, data->from);
+        int fd = ksnLNullClientIsConnected(ke->kl, data->payload);
         if (fd) {
 
             // Create L0 packet
@@ -1376,7 +1374,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
             char *out_data = malloc(out_data_len);
             memset(out_data, 0, out_data_len);
             size_t packet_length = teoLNullPacketCreate(out_data, out_data_len,
-                    data->cmd, rd->from, (const uint8_t*)data->from + data->from_length,
+                    data->cmd, rd->from, (const uint8_t*)data->payload + data->client_name_length,
                     data->data_length);
 
             // Send command to L0 client
@@ -1391,7 +1389,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
             ksn_printf(ke, MODULE, DEBUG_VV,
                 "send %d bytes to \"%s\" L0 client: %d bytes data, "
                 "from peer \"%s\"\n",
-                (int)snd, data->from,
+                (int)snd, data->payload,
                 packet->data_length, packet->peer_name);
             #endif
             free(out_data);
@@ -1403,7 +1401,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,
                 "%s" "the \"%s\" L0 client has not connected to the server%s\n",
-                ANSI_RED, data->from, ANSI_NONE);
+                ANSI_RED, data->payload, ANSI_NONE);
             #endif
         }
     }
@@ -1413,7 +1411,7 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
         #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, ERROR_M,
                 "can't resend command %d to L0 client \"%s\" from peer \"%s\": " "%s" "the L0 module has not been initialized at this host%s\n",
-                data->cmd, data->from, rd->from, ANSI_RED, ANSI_NONE);
+                data->cmd, data->payload, rd->from, ANSI_RED, ANSI_NONE);
         #endif
     }
 
@@ -1644,7 +1642,6 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             }
 
             // Create & Send websocket allow answer message
-            size_t snd;
             char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\", \"networks\": %s }",
                     kld->name ? kld->name : "", jp.networks ? jp.networks : "null");
             size_t ALLOW_len = strlen(ALLOW) + 1;
@@ -1658,7 +1655,8 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 teoLNullPacketCreate(out_data, out_data_len,
                                      CMD_L0_AUTH, rd->from, (uint8_t *)ALLOW, ALLOW_len);
             // Send websocket allow message
-            if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
+            ssize_t snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length);
+            (void)snd;
             free(out_data);
             free(ALLOW);
         }

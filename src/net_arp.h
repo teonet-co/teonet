@@ -16,7 +16,6 @@
 
 #include <pbl.h>
 
-#include "net_core.h"
 #include "teonet_l0_client.h"
 
 /**
