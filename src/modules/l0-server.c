@@ -741,8 +741,6 @@ static bool checkAuthData(ksnLNullClass *kl, string_view *name, string_view *aut
 }
 
 static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, string_view *name) {
-    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
-
     int wg001_len = strlen(WG001);
     int client_name_len = wg001_len + name->len + 1;//wg001-name + terminating null
     char *client_name = malloc(client_name_len);
@@ -754,6 +752,7 @@ static void updateClientName(ksnLNullClass *kl, ksnLNullData *kld, int fd, strin
     int fd_ex = ksnLNullClientIsConnected(kl, client_name);
     if(fd_ex) {
         #ifdef DEBUG_KSNET
+        ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
         ksn_printf(ke, MODULE, DEBUG,"User with name(id): %s is already connected, fd_ex: %d, fd: %d\n", client_name, fd_ex, fd);
         #endif
         if(fd_ex != fd) ksnLNullClientDisconnect(kl, fd_ex, 1);
