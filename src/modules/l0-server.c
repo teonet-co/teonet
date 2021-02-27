@@ -169,13 +169,13 @@ void ksnLNullDestroy(ksnLNullClass *kl) {
  */
 static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
 
-    size_t data_len = KSN_BUFFER_DB_SIZE; // Buffer length
+    size_t buffer_len = KSN_BUFFER_DB_SIZE; // Buffer length
     ksnLNullClass *kl = w->data; // Pointer to ksnLNullClass
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
-    char data[data_len]; // Buffer
+    char buffer[buffer_len]; // Buffer
 
     // Read TCP data
-    ssize_t received = read(w->fd, data, data_len);
+    ssize_t received = read(w->fd, buffer, buffer_len);
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV,
             "Got something from fd %d w->events = %d, received = %d ...\n",
@@ -194,28 +194,19 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         #endif
 
         ksnLNullClientDisconnect(kl, w->fd, 1);
-    }
-
-    // \todo Process reading error
-    else if (received < 0) {
-
+    } else if (received < 0) { // \TODO: Process reading error
         //        if( errno == EINTR ) {
         //            // OK, just skip it
         //        }
-
-//        #ifdef DEBUG_KSNET
-//        ksnet_printf(
-//            &ke->ksn_cfg, DEBUG,
-//            "%sl0 Server:%s "
-//            "Read error ...%s\n",
-//            ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE
-//        );
-//        #endif
-    }
-
-    // Success read. Process package and resend it to teonet
-    else {
-
+        //        #ifdef DEBUG_KSNET
+        //        ksnet_printf(
+        //            &ke->ksn_cfg, DEBUG,
+        //            "%sl0 Server:%s "
+        //            "Read error ...%s\n",
+        //            ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE
+        //        );
+        //        #endif
+    } else { // Success read. Process package and resend it to teonet
         ksnLNullData* kld = ksnLNullGetClientConnection(kl, w->fd);
         if(kld != NULL) {
 
@@ -226,7 +217,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
             if(received > kld->read_buffer_size - kld->read_buffer_ptr) {
 
                 // Increase read buffer size
-                kld->read_buffer_size += data_len; //received;
+                kld->read_buffer_size += buffer_len; //received;
                 if(kld->read_buffer != NULL)
                     kld->read_buffer = realloc(kld->read_buffer,
                             kld->read_buffer_size);
@@ -240,7 +231,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                     ANSI_NONE);
                 #endif
             }
-            memmove(kld->read_buffer + kld->read_buffer_ptr, data, received);
+            memmove((uint8_t *)kld->read_buffer + kld->read_buffer_ptr, buffer, received);
             kld->read_buffer_ptr += received;
 
             teoLNullCPacket *packet = (teoLNullCPacket *)kld->read_buffer;
@@ -345,7 +336,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 }
 
                 ptr += len;
-                packet = (void*)packet + len;
+                packet = (void *)((uint8_t*)packet + len);
             }
 
             // Check end of buffer
@@ -359,7 +350,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                 #endif
 
                 kld->read_buffer_ptr = kld->read_buffer_ptr - ptr;
-                memmove(kld->read_buffer, kld->read_buffer + ptr,
+                memmove(kld->read_buffer, (uint8_t *)kld->read_buffer + ptr,
                         kld->read_buffer_ptr);
             }
             else kld->read_buffer_ptr = 0;
@@ -595,7 +586,7 @@ static ksnLNullData* ksnLNullClientRegister(ksnLNullClass *kl, int fd, const cha
 }
 
 
-void _send_subscribe_event_disconnected(ksnetEvMgrClass *ke, const char *payload,
+void _send_subscribe_event_disconnected(ksnetEvMgrClass *ke, char *payload,
         size_t payload_length) {
     teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_DISCONNECTED, (void *)payload, payload_length, 0);
 }
@@ -604,7 +595,7 @@ void _send_subscribe_event_disconnected(ksnetEvMgrClass *ke, const char *payload
  * Send Connected event to all subscribers
  *
  */
-void _send_subscribe_event_connected(ksnetEvMgrClass *ke, const char *payload,
+void _send_subscribe_event_connected(ksnetEvMgrClass *ke, char *payload,
         size_t payload_length) {
 
     teoSScrSend(ke->kc->kco->ksscr, EV_K_L0_CONNECTED, (void *)payload, payload_length, 0);
@@ -922,7 +913,6 @@ static ssize_t ksnLNullSend(ksnLNullClass *kl, int fd, uint8_t cmd, void* data,
  */
 ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                            size_t pkg_length) {
-    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
     teoLNullCPacket *packet = (teoLNullCPacket *)pkg;
     #ifdef DEBUG_KSNET
     char hexdump[32];
@@ -956,6 +946,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
             trudpUdpMakeAddr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &remaddr, &addrlen);
 
             #ifdef DEBUG_KSNET
+            ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
             ksn_printf(ke, MODULE, extendedLog(kl),
                        "send packet to trudp addr: %s:%d, cmd = %u, from "
                        "peer: %s, data: %s \n",
@@ -971,7 +962,7 @@ ssize_t ksnLNullPacketSend(ksnLNullClass *kl, int fd, void *pkg,
                     (__CONST_SOCKADDR_ARG) &remaddr, addrlen);
                 pkg_length -= len;
                 if(!pkg_length) break;
-                pkg += len;
+                pkg = (uint8_t *)pkg + len;
             }
         }
     }
@@ -1148,16 +1139,16 @@ void _check_connected(uint32_t id, int type, void *data) {
     if(it != NULL) {
         while(pblIteratorHasPrevious(it) > 0) {
             void *entry = pblIteratorPrevious(it);
-            ksnLNullData *data = pblMapEntryValue(entry);
+            ksnLNullData *l0_data = pblMapEntryValue(entry);
             int *fd = (int *) pblMapEntryKey(entry);
             // Disconnect client
-            if(ksnetEvMgrGetTime(kl->ke) - data->last_time >= DISCONNECT_TIMEOUT) {
-                ksn_printf(ke, MODULE, DEBUG, "Disconnect client by timeout, fd: %d, name: %s\n", *fd, data->name);
+            if(ksnetEvMgrGetTime(kl->ke) - l0_data->last_time >= DISCONNECT_TIMEOUT) {
+                ksn_printf(ke, MODULE, DEBUG, "Disconnect client by timeout, fd: %d, name: %s\n", *fd, l0_data->name);
                 ksnLNullClientDisconnect(kl, *fd, 1);
             }
             // Send echo to client, if authorized
-            else if(data->name != NULL && ksnetEvMgrGetTime(kl->ke) - data->last_time >= SEND_PING_TIMEOUT) {
-                ksn_printf(ke, MODULE, DEBUG, "Send ping to client by timeout, fd: %d, name: %s\n", *fd, data->name);
+            else if(l0_data->name != NULL && ksnetEvMgrGetTime(kl->ke) - l0_data->last_time >= SEND_PING_TIMEOUT) {
+                ksn_printf(ke, MODULE, DEBUG, "Send ping to client by timeout, fd: %d, name: %s\n", *fd, l0_data->name);
 
                 // From this host(peer)
                 const char *from = ksnetEvMgrGetHostName(kl->ke);
@@ -1391,10 +1382,8 @@ int cmd_l0_to_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
                     data->data_length);
 
             // Send command to L0 client
-            size_t snd;
-
-            //if((snd = write(*fd, out_data, packet_length)) >= 0);
-            if((snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length)) >= 0);
+            ssize_t snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length);
+            (void)snd;
 
             #ifdef DEBUG_KSNET
             teoLNullCPacket *packet = (teoLNullCPacket *)out_data;
@@ -1613,8 +1602,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // Authorize new user
     int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
     if(fd) {
-        size_t vl;
-        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &vl);
+        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), NULL);
         if(kld != NULL) {
 
             // Rename client
@@ -1622,8 +1610,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
                 // Remove existing name
                 if(kld->name != NULL) {
-                    size_t vl;
-                    pblMapRemoveFree(kl->map_n, kld->name, kld->name_length, &vl);
+                    pblMapRemoveFree(kl->map_n, kld->name, kld->name_length, NULL);
                     free(kld->name);
                 }
                 // Set new name
@@ -1642,7 +1629,6 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                     "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
                     kld->name, kld->t_addr, jp.username);
                 #endif
-                ksnetEvMgrClass *ke = (ksnetEvMgrClass*)kl->ke;
                 // Show connected message
                 // #ifdef DEBUG_KSNET
                 ksn_printf(ke, MODULE, CONNECT, "### 0001,%s,%s\n", kld->name, kld->t_addr);
@@ -1848,7 +1834,7 @@ static bool processKeyExchange(ksnLNullClass *kl, ksnLNullData *kld, int fd,
                                KeyExchangePayload_Common *kex,
                                size_t kex_length) {
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
-
+    (void)ke;
     if (kld->server_crypt == NULL) {
         // Create compatible encryption context
         size_t crypt_size = teoLNullEncryptionContextSize(kex->protocolId);
@@ -1958,9 +1944,9 @@ static int processPacket(ksnLNullClass *kl, ksnLNullData *kld,
     case 0: {
         if (packet->peer_name_length == 1 && !packet->peer_name[0] &&
             packet->data_length) {
-            uint8_t *data = teoLNullPacketGetPayload(packet);
+            uint8_t *l0_data = teoLNullPacketGetPayload(packet);
             KeyExchangePayload_Common *kex =
-                teoLNullKEXGetFromPayload(data, packet->data_length);
+                teoLNullKEXGetFromPayload(l0_data, packet->data_length);
             if (kex) {
                 // received client keys
                 // must be first time or exactly the same as previous
