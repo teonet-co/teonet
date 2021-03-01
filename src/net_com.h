@@ -73,6 +73,7 @@ enum ksnCMD {
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
     CMD_USER,               ///< #129 User command
+    CMD_CONFIRM_AUTH = 147, ///< #147 Confirm auth
 
     // Application level not TR-UDP mode: 192...254
     CMD_192_RESERVED = 192, ///< #192 Reserver for future use

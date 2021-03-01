@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   testing:
     machine:
@@ -15,9 +15,9 @@ jobs:
   compile:
     docker:
       - image: ubuntu:20.04
-        working_directory: ~/teonet
         environment:
           CI_FORCE_TEST: 1
+    working_directory: ~/teonet
     steps:
       - run:
           command: |
@@ -97,7 +97,7 @@ jobs:
             ./misc/make_remote_doc_upload.sh teonet   
 
 workflows:
-  version: 2
+  version: 2.1
   untagged:
     jobs: 
      - testing
@@ -112,6 +112,7 @@ workflows:
             branches:
               ignore: /.*/
       - tagged-build:
+          context: CI_BUILD
           filters:
             branches:
               ignore: /.*/

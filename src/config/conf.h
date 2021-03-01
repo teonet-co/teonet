@@ -79,6 +79,7 @@ typedef struct ksnet_cfg {
     // Network
     char network[KSN_BUFFER_SM_SIZE/2];     ///< Network
     char net_key[KSN_BUFFER_SM_SIZE/2];     ///< Network key
+    char auth_secret[KSN_BUFFER_SM_SIZE/2];     ///< Auth secret
 
     // Application name
     char app_prompt[KSN_BUFFER_SM_SIZE/2];      ///< Application prompt

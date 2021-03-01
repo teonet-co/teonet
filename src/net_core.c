@@ -744,7 +744,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
             strncpy(ke->ksn_cfg.r_host_name, rd->from,
                     sizeof(ke->ksn_cfg.r_host_name)-1);
-
+            strncpy(ke->ksn_cfg.r_host_addr, rd->addr, sizeof(ke->ksn_cfg.r_host_addr) - 1);
             mode = 1;
         }
 
@@ -763,6 +763,10 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         // Request host info
         ksnCoreSendto(ke->kc, rd->addr, rd->port, CMD_HOST_INFO, "\0", 1 + connect_r);
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_HOST_INFO = %u command to (%s:%d)\n",
+                CMD_HOST_INFO, rd->addr, rd->port);
+        #endif
         peer_type_req_t *type_request = malloc(sizeof(peer_type_req_t));
         type_request->kc = ke->kc;
         type_request->addr = strdup(rd->addr);
@@ -775,16 +779,16 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         // Send child address to r-host (useful when connect one r-host to another)
         if(mode /*&& ke->is_rhost*/) {
-            ksnCorePacketData rd;
-            rd.from = ke->ksn_cfg.r_host_name;
-            rd.addr = ke->ksn_cfg.r_host_addr;
-            rd.port = ke->ksn_cfg.r_port;
+            ksnCorePacketData rd_;
+            rd_.from = rd->from;
+            rd_.addr = rd->addr;
+            rd_.port = rd->port;
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG, "resend child to r-host: %s (%s:%d)\n",
-                    rd.from, rd.addr, rd.port);
+                    rd_.from, rd_.addr, rd_.port);
             #endif
-            ksnetArpGetAll(ke->kc->ka, send_cmd_connect_cb_b, &rd);
-            ksnetArpGetAll(ke->kc->ka, send_cmd_connect_cb, &rd);
+            ksnetArpGetAll(ke->kc->ka, send_cmd_connect_cb_b, &rd_);
+            ksnetArpGetAll(ke->kc->ka, send_cmd_connect_cb, &rd_);
         }
     } 
 
@@ -890,8 +894,8 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
             // Check ARP Table and add peer if not present            
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV,
-                "got %d byte data, cmd = %d, from %s %s:%d\n",
-                rd.data_len, rd.cmd, rd.from, rd.addr, rd.port);
+                "recieve command = %d, from %s (%s:%d). (%d byte)\n",
+                rd.cmd, rd.from, rd.addr, rd.port, rd.data_len);
             #endif
 
             // Check new peer connected

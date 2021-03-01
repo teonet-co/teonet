@@ -758,11 +758,7 @@ void    connect_r_host_cb(ksnetEvMgrClass *ke) {
             uint8_t *num = (uint8_t *) data; // Pointer to number of IPs
             ptr = sizeof(uint8_t); // Pointer (to first IP)
             *num = 0; // Number of IPs
-        }
-
-        // Create data for UDP connection
-        else {
-
+        } else { // Create data for UDP connection
             // Create data with list of local IPs and port
             ips = getIPs(&ke->ksn_cfg); // IPs array
             uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
@@ -773,22 +769,26 @@ void    connect_r_host_cb(ksnetEvMgrClass *ke) {
             *num = 0; // Number of IPs
 
             // Fill data with IPs and Port
-            int i, ip_len;
-            for(i=0; i < len; i++) {
+            for(int i=0; i < len; i++) {
 
                 if(ip_is_private(ips[i])) {
-
-                    ip_len =  strlen(ips[i]) + 1;
+                    int ip_len =  strlen(ips[i]) + 1;
                     memcpy(data + ptr, ips[i], ip_len); ptr += ip_len;
                     (*num)++;
                 }
+
             }
+
             *((uint32_t *)(data + ptr)) = ke->kc->port; ptr += sizeof(uint32_t); // Port
         }
 
         // Send data to r-host
         ksnCoreSendto(ke->kc, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port,
                       CMD_CONNECT_R, data, ptr);
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT_R = %u to r-host peer by address %s:%d.\n",
+            CMD_CONNECT_R, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port);
+        #endif
 
         free(data);
         ksnet_stringArrFree(&ips);
@@ -817,10 +817,11 @@ void open_local_port(ksnetEvMgrClass *ke) {
                                                ip_arr[1], ip_arr[2]);
 
             // Send to IP to open port
-            ksnCoreSendto(ke->kc, ip_str, ke->ksn_cfg.r_port, CMD_NONE,
-                    NULL_STR, 1);
-
-            printf("Send to: %s:%d\n", ip_str, (int)ke->ksn_cfg.r_port);
+            ksnCoreSendto(ke->kc, ip_str, ke->ksn_cfg.r_port, CMD_NONE, NULL_STR, 1);
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_NONE = %u to (%s:%d).\n",
+                CMD_NONE, ip_str, ke->ksn_cfg.r_port);
+            #endif
 
             free(ip_str);
         }

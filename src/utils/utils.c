@@ -149,7 +149,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
             if(type != DISPLAY_M && ct != 0.00)
                 printf("%s%s%s ",
-                       ksn_cfg->color_output_disable_f ? "" : _ANSI_DARKGREY, 
+                       ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE,
                        timestamp,
                        ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE
                 );
@@ -667,31 +667,6 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
     #endif
 
     return arr;
-}
-
-int ip_type(const char *ip_ch) {
-    struct addrinfo hint, *res = NULL;
-    int ret_type = -1;
-
-    memset(&hint, '\0', sizeof hint);
-
-    hint.ai_family = PF_UNSPEC;
-    hint.ai_flags = AI_NUMERICHOST;
-
-    int ret = getaddrinfo(ip_ch, NULL, &hint, &res);
-    if (ret) {
-        fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
-        exit(1);
-    }
-
-    if(res->ai_family == AF_INET) {
-        ret_type = 1;// TODO: enum need
-    } else if (res->ai_family == AF_INET6) {
-        ret_type = 2;
-    }
-
-   freeaddrinfo(res);
-   return ret_type;
 }
 
 int addr_port_equal(addr_port_t *ap_obj, char *addr, uint16_t port) {
