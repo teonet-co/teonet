@@ -14,6 +14,7 @@ var searchData=
   ['cmd_5fam',['CMD_AM',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20dac77191576777169e34f5f990f7fc42fe',1,'net_com.h']]],
   ['cmd_5fauth',['CMD_AUTH',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da80830ebabf8ad703040c68307a44b8a8',1,'net_com.h']]],
   ['cmd_5fauth_5fanswer',['CMD_AUTH_ANSWER',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da8c6455de8e144b3774cd85f7591b71d2',1,'net_com.h']]],
+  ['cmd_5fconfirm_5fauth',['CMD_CONFIRM_AUTH',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da1800091f78691e41582f7c820c9af2d0',1,'net_com.h']]],
   ['cmd_5fconnect',['CMD_CONNECT',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da0c7199178f41b307f34eecfde9abafd6',1,'net_com.h']]],
   ['cmd_5fconnect_5fr',['CMD_CONNECT_R',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da3b44e387f05fc1e4567f8cc0a750cd94',1,'net_com.h']]],
   ['cmd_5fd_5ferror_5fanswer',['CMD_D_ERROR_ANSWER',['../teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a58644fe7fb892f497e9054b98e39d119',1,'teodb_com.h']]],

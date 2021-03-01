@@ -12,7 +12,6 @@ var utils_8c =
     [ "inarray", "utils_8c.html#a2dcb1060b4e3925da8df95199020f01f", null ],
     [ "ip_is_private", "utils_8c.html#af4d0b14da954cccc23ff83710b8bc0fb", null ],
     [ "ip_to_array", "utils_8c.html#a33df12397ad019873479d5cf4f007ced", null ],
-    [ "ip_type", "utils_8c.html#a4c4312d75a624d93be7b9a173f6d2026", null ],
     [ "KSN_GET_TEST_MODE", "utils_8c.html#a4219194ad1bdfed98e919ede71f83200", null ],
     [ "KSN_SET_TEST_MODE", "utils_8c.html#a666c275a2e08a64bccde92f0102e3641", null ],
     [ "ksnet_formatMessage", "utils_8c.html#a2867b1f632e7b37625ed2090fc1abe70", null ],

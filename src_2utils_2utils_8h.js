@@ -28,7 +28,6 @@ var src_2utils_2utils_8h =
     [ "inarray", "src_2utils_2utils_8h.html#a2dcb1060b4e3925da8df95199020f01f", null ],
     [ "ip_is_private", "src_2utils_2utils_8h.html#af4d0b14da954cccc23ff83710b8bc0fb", null ],
     [ "ip_to_array", "src_2utils_2utils_8h.html#a33df12397ad019873479d5cf4f007ced", null ],
-    [ "ip_type", "src_2utils_2utils_8h.html#a4c4312d75a624d93be7b9a173f6d2026", null ],
     [ "ksn_base64_decode", "src_2utils_2utils_8h.html#a8805216304faa5d9f323df799a1e3fbf", null ],
     [ "ksn_base64_encode", "src_2utils_2utils_8h.html#a89249af8b34c60f134fecc687904cbed", null ],
     [ "KSN_GET_TEST_MODE", "src_2utils_2utils_8h.html#a4219194ad1bdfed98e919ede71f83200", null ],

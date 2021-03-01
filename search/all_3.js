@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['c',['c',['../ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f',1,'ChangeLog']]],
   ['c_5fsnprintf',['c_snprintf',['../mongoose_8c.html#ae4734131cbe11bd6c058ddb8fc1bff5f',1,'c_snprintf(char *buf, size_t buf_size, const char *fmt,...):&#160;mongoose.c'],['../mongoose_8h.html#abaea0687eb05744ac151ae014cb20046',1,'c_snprintf(char *buf, size_t buf_size, const char *format,...):&#160;mongoose.c']]],
   ['c_5fsnprintf_5fappend_5fchar',['C_SNPRINTF_APPEND_CHAR',['../mongoose_8c.html#af362f9835397a95e89c09d620a56b228',1,'mongoose.c']]],
   ['c_5fsnprintf_5fflag_5fzero',['C_SNPRINTF_FLAG_ZERO',['../mongoose_8c.html#abe0356dc9779eb6bce76b870a328a5d6',1,'mongoose.c']]],
@@ -115,6 +116,7 @@ var searchData=
   ['cmd_5fam',['CMD_AM',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20dac77191576777169e34f5f990f7fc42fe',1,'net_com.h']]],
   ['cmd_5fauth',['CMD_AUTH',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da80830ebabf8ad703040c68307a44b8a8',1,'net_com.h']]],
   ['cmd_5fauth_5fanswer',['CMD_AUTH_ANSWER',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da8c6455de8e144b3774cd85f7591b71d2',1,'net_com.h']]],
+  ['cmd_5fconfirm_5fauth',['CMD_CONFIRM_AUTH',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da1800091f78691e41582f7c820c9af2d0',1,'net_com.h']]],
   ['cmd_5fconnect',['CMD_CONNECT',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da0c7199178f41b307f34eecfde9abafd6',1,'net_com.h']]],
   ['cmd_5fconnect_5fcque_5fcb_5fdata',['cmd_connect_cque_cb_data',['../net__com_8c.html#a6f12bdf930d8ef7af4e5a9932b348376',1,'net_com.c']]],
   ['cmd_5fconnect_5fr',['CMD_CONNECT_R',['../net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da3b44e387f05fc1e4567f8cc0a750cd94',1,'net_com.h']]],

@@ -25,5 +25,6 @@ var searchData=
   ['async_5fqueue',['async_queue',['../structksnetEvMgrClass.html#a29ea8a43279e3ca015d63f29b0a86d40',1,'ksnetEvMgrClass']]],
   ['auth_5fcallback',['auth_callback',['../structcli__def.html#a25d532b9ae4021986a19b3cd0d42e247',1,'cli_def']]],
   ['auth_5fdomain',['auth_domain',['../structmg__serve__http__opts.html#a669d52169dca38a9ac7f7830a3f6cf85',1,'mg_serve_http_opts']]],
+  ['auth_5fsecret',['auth_secret',['../structksnet__cfg.html#ad0abfddbfe90d5e9d112f0c16b0a74a0',1,'ksnet_cfg']]],
   ['auth_5fserver_5furl',['auth_server_url',['../structteoweb__config.html#affab6851dbbfec524abaf9cfc6a0e3c5',1,'teoweb_config']]]
 ];

@@ -5,5 +5,6 @@ var searchData=
   ['sock_5ft',['sock_t',['../mongoose_8h.html#ae5faf8a8d23da59c3e3025a62039d8c1',1,'mongoose.h']]],
   ['ssl',['SSL',['../mongoose_8h.html#ae80dea9224302f498eb4fd1b3666cbb3',1,'mongoose.h']]],
   ['ssl_5fctx',['SSL_CTX',['../mongoose_8h.html#a8e2df11b01b80733ad053d505f876d10',1,'mongoose.h']]],
-  ['stdin_5fidle_5fdata',['stdin_idle_data',['../ev__mgr_8h.html#ac0772d535434ecc5427cf2c138b9e839',1,'ev_mgr.h']]]
+  ['stdin_5fidle_5fdata',['stdin_idle_data',['../ev__mgr_8h.html#ac0772d535434ecc5427cf2c138b9e839',1,'ev_mgr.h']]],
+  ['string_5fview',['string_view',['../l0-server_8c.html#a0db0713c451eda325aaa1fd2d00aaac5',1,'l0-server.c']]]
 ];

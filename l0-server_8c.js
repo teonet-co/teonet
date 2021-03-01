@@ -12,6 +12,7 @@ var l0_server_8c =
     [ "WG001", "l0-server_8c.html#ae7e1e8fabfb3b12ed50f7f586e0d30d9", null ],
     [ "WG001_NEW", "l0-server_8c.html#a7db34a5aae715a3befdce9b27e83e19c", null ],
     [ "json_param", "l0-server_8c.html#a0514c0a48f88213559b7517da74dd9ca", null ],
+    [ "string_view", "l0-server_8c.html#a0db0713c451eda325aaa1fd2d00aaac5", null ],
     [ "_check_connected", "l0-server_8c.html#a57240478951a94d34dbe8e4060fb8b08", null ],
     [ "_send_subscribe_event_connected", "l0-server_8c.html#a755e3d017fb1f6ed59d357f8567bca53", null ],
     [ "_send_subscribe_event_disconnected", "l0-server_8c.html#a6b89975497519feaf094f16e895980af", null ],

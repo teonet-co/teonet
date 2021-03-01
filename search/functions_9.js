@@ -10,6 +10,5 @@ var searchData=
   ['init_5fsuite',['init_suite',['../test__teonet_8c.html#a11244ab0910e8dbcdf132f10630dea91',1,'test_teonet.c']]],
   ['ip_5fis_5fprivate',['ip_is_private',['../utils_8c.html#af4d0b14da954cccc23ff83710b8bc0fb',1,'ip_is_private(char *ip):&#160;utils.c'],['../src_2utils_2utils_8h.html#af4d0b14da954cccc23ff83710b8bc0fb',1,'ip_is_private(char *ip):&#160;utils.c']]],
   ['ip_5fto_5farray',['ip_to_array',['../utils_8c.html#a33df12397ad019873479d5cf4f007ced',1,'ip_to_array(char *ip, uint8_t *arr):&#160;utils.c'],['../src_2utils_2utils_8h.html#a33df12397ad019873479d5cf4f007ced',1,'ip_to_array(char *ip, uint8_t *arr):&#160;utils.c']]],
-  ['ip_5ftype',['ip_type',['../utils_8c.html#a4c4312d75a624d93be7b9a173f6d2026',1,'ip_type(const char *ip_ch):&#160;utils.c'],['../src_2utils_2utils_8h.html#a4c4312d75a624d93be7b9a173f6d2026',1,'ip_type(const char *ip_ch):&#160;utils.c']]],
   ['iterator',['iterator',['../classteo_1_1StringArray_1_1iterator.html#af730862ade2dae93f810b31504865efa',1,'teo::StringArray::iterator']]]
 ];

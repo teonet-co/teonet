@@ -57,6 +57,7 @@ var net__com_8h =
       [ "CMD_GET_PUBLIC_IP_ANSWER", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da77f13313b6f80a651d661d5ecf04bcc7", null ],
       [ "CMD_128_RESERVED", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20daed6a1ac9edb5d86f1f35e0277a94ee8d", null ],
       [ "CMD_USER", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da32cc0ced6082e9bb5bd223936afd2b9a", null ],
+      [ "CMD_CONFIRM_AUTH", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da1800091f78691e41582f7c820c9af2d0", null ],
       [ "CMD_192_RESERVED", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20dac5a50487238d37696617cc80c4ab9637", null ],
       [ "CMD_USER_NR", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da03c4a98812e722a57a43c0414dc1cea1", null ],
       [ "CMD_ECHO_UNRELIABLE", "net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20daa242ffee740876e01847350e77ec21a7", null ],

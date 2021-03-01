@@ -5,6 +5,7 @@ var structksnet__cfg =
     [ "app_description", "structksnet__cfg.html#a6a2b18316afbf126600296397f07db97", null ],
     [ "app_name", "structksnet__cfg.html#a76638c0e58e48d1b5296d788d6075a14", null ],
     [ "app_prompt", "structksnet__cfg.html#a898bdd0f629a8a619f3dd1fdb9e12426", null ],
+    [ "auth_secret", "structksnet__cfg.html#ad0abfddbfe90d5e9d112f0c16b0a74a0", null ],
     [ "block_cli_input_f", "structksnet__cfg.html#a83df76b3c5d49240c676b8eef086f9f5", null ],
     [ "color_output_disable_f", "structksnet__cfg.html#a4286fd22c05cdcc6115939766261511c", null ],
     [ "crypt_f", "structksnet__cfg.html#aa507570ffdbdac8197ed7530cbc75db6", null ],

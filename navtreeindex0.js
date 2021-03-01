@@ -1,15 +1,17 @@
 var NAVTREEINDEX0 =
 {
 "ChangeLog.html":[11,0,3],
-"ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576":[11,0,3,2],
-"ChangeLog.html#a38d4fcd6e00c994fd24584936d869adc":[11,0,3,8],
-"ChangeLog.html#a4da007d31c09aaa85bfb4c882cd8149c":[11,0,3,5],
+"ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576":[11,0,3,3],
+"ChangeLog.html#a38d4fcd6e00c994fd24584936d869adc":[11,0,3,10],
+"ChangeLog.html#a4091af9fd908a83ad8826f25410928cf":[11,0,3,6],
+"ChangeLog.html#a4da007d31c09aaa85bfb4c882cd8149c":[11,0,3,7],
 "ChangeLog.html#a5edd1ee74d3be86b709b893238b00db5":[11,0,3,1],
-"ChangeLog.html#a90cdc42e519d15a45a00e192bb941170":[11,0,3,7],
-"ChangeLog.html#aa19bfeb6b40c7a6d5de8d1bdee6d264b":[11,0,3,6],
+"ChangeLog.html#a70936d1a1fc4aef018da25cae1f5a37d":[11,0,3,4],
+"ChangeLog.html#a90cdc42e519d15a45a00e192bb941170":[11,0,3,9],
+"ChangeLog.html#aa19bfeb6b40c7a6d5de8d1bdee6d264b":[11,0,3,8],
 "ChangeLog.html#ac8445b368ba4a17d33d2c944924e5a4f":[11,0,3,0],
-"ChangeLog.html#ad5dc45bb04ddfeb98a1e44ef8cd105e4":[11,0,3,4],
-"ChangeLog.html#af97ebea6586e537a1fe0aaa17bd31c92":[11,0,3,3],
+"ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f":[11,0,3,2],
+"ChangeLog.html#af97ebea6586e537a1fe0aaa17bd31c92":[11,0,3,5],
 "annotated.html":[10,0],
 "app_2teodb_8c.html":[11,0,103],
 "app_2teodb_8c.html#a0514c0a48f88213559b7517da74dd9ca":[11,0,103,7],
@@ -247,7 +249,5 @@ var NAVTREEINDEX0 =
 "config_8h.html#a0302094a0ee567c610a36c63104ebda5":[11,0,12,52],
 "config_8h.html#a0303d495acf6b63ce28b3c707b6a70d3":[11,0,12,71],
 "config_8h.html#a0938658b988a082864efcee2d1b2bfd2":[11,0,12,49],
-"config_8h.html#a09ebec871dfd4496c1f187570d57491c":[11,0,12,33],
-"config_8h.html#a0e6b9a04ae66b7846715e51a0a2dccff":[11,0,12,59],
-"config_8h.html#a0ee1617ff2f6885ef384a3dd46f9b9d7":[11,0,12,14]
+"config_8h.html#a09ebec871dfd4496c1f187570d57491c":[11,0,12,33]
 };

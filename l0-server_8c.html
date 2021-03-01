@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.5</span>
+   &#160;<span id="projectnumber">0.4.6</span>
    </div>
   </td>
  </tr>
@@ -123,11 +123,12 @@ $(document).ready(function(){initNavTree('l0-server_8c.html','');});
 <code>#include &quot;<a class="el" href="l0-server_8h_source.html">l0-server.h</a>&quot;</code><br/>
 <code>#include &quot;<a class="el" href="rlutil_8h_source.html">utils/rlutil.h</a>&quot;</code><br/>
 <code>#include &quot;teonet_l0_client_crypt.h&quot;</code><br/>
+<code>#include &lt;openssl/md5.h&gt;</code><br/>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>&#160;&#160;&#160;<a class="el" href="rlutil_8h.html#a4d7c3b4aa136ed3a93f69a52901f1296">_ANSI_LIGHTCYAN</a> &quot;l0_server&quot; _ANSI_NONE</td></tr>
-<tr class="memdesc:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="mdescLeft">&#160;</td><td class="mdescRight">File: <a class="el" href="l0-server_8c.html">l0-server.c</a> Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a>  <a href="#a2c63ae95fe7c6106ae1ec9c283afa486">More...</a><br/></td></tr>
+<tr class="memdesc:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="mdescLeft">&#160;</td><td class="mdescRight">File: l0-server.c Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a>  <a href="#a2c63ae95fe7c6106ae1ec9c283afa486">More...</a><br/></td></tr>
 <tr class="separator:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a394518eb967e5286c091247b5e907e50"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="l0-server_8c.html#a394518eb967e5286c091247b5e907e50">TEO_AUTH</a>&#160;&#160;&#160;&quot;teo-auth&quot;</td></tr>
 <tr class="separator:a394518eb967e5286c091247b5e907e50"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,6 +155,8 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
 Typedefs</h2></td></tr>
+<tr class="memitem:a0db0713c451eda325aaa1fd2d00aaac5"><td class="memItemLeft" align="right" valign="top">typedef struct string_view&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="l0-server_8c.html#a0db0713c451eda325aaa1fd2d00aaac5">string_view</a></td></tr>
+<tr class="separator:a0db0713c451eda325aaa1fd2d00aaac5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0514c0a48f88213559b7517da74dd9ca"><td class="memItemLeft" align="right" valign="top">typedef struct json_param&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="l0-server_8c.html#a0514c0a48f88213559b7517da74dd9ca">json_param</a></td></tr>
 <tr class="memdesc:a0514c0a48f88213559b7517da74dd9ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">JSON request parameters structure.  <a href="#a0514c0a48f88213559b7517da74dd9ca">More...</a><br/></td></tr>
 <tr class="separator:a0514c0a48f88213559b7517da74dd9ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -358,7 +361,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>File: <a class="el" href="l0-server_8c.html">l0-server.c</a> Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a> </p>
+<p>File: l0-server.c Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a> </p>
 <p>L0 Server module</p>
 <p>Created on October 8, 2015, 1:38 PM </p>
 
@@ -431,6 +434,18 @@ Variables</h2></td></tr>
 
 <p>JSON request parameters structure. </p>
 <p>userId  clientId  username  accessToken </p>
+
+</div>
+</div>
+<a class="anchor" id="a0db0713c451eda325aaa1fd2d00aaac5"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef struct string_view  string_view</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -851,7 +866,7 @@ Variables</h2></td></tr>
 
 <p>References <a class="el" href="l0-server_8c.html#a6b89975497519feaf094f16e895980af">_send_subscribe_event_disconnected()</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda20391dd2915a0e64343d24c2f2e40b95">CONNECT</a>, <a class="el" href="l0-server_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnLNullData.html#a706e17d1302768ba0e47cd44dad4fe71">ksnLNullData::name</a>, <a class="el" href="structksnLNullData.html#a459376f1ca60e0cc021800daab3c429e">ksnLNullData::name_length</a>, <a class="el" href="cque_8c.html#aa7c3bfc442bf065008e56c1b18e83b1d">pblMapRemoveFree()</a>, <a class="el" href="structksnLNullData.html#a9cfb38c9b228610457e814d1434591a9">ksnLNullData::read_buffer</a>, <a class="el" href="structksnLNullData.html#a457ed62275058d872b0a1652ed92e8af">ksnLNullData::read_buffer_ptr</a>, <a class="el" href="structksnLNullData.html#af74285e63eb110aed3b4c4777bfc32ca">ksnLNullData::read_buffer_size</a>, <a class="el" href="structksnLNullData.html#af8be8a100c81e314654fe065c852ba22">ksnLNullData::server_crypt</a>, <a class="el" href="structksnLNullClass.html#a22acdf10b59a277108394b2b48dc44c5">ksnLNullClass::stat</a>, <a class="el" href="structksnLNullData.html#a1431997987170724114c391dcd2d8489">ksnLNullData::t_addr</a>, and <a class="el" href="structksnLNullData.html#aea8620cf4526b4b5f0cb393ee75eaddf">ksnLNullData::w</a>.</p>
 
-<p>Referenced by <a class="el" href="l0-server_8c.html#a57240478951a94d34dbe8e4060fb8b08">_check_connected()</a>, <a class="el" href="net__com_8c.html#a4ce6aa59fbc0daa3ed638f7bad0bcf95">cmd_l0_check_cb()</a>, and <a class="el" href="tr-udp_8h.html#a63fc4942e6d0afe175ebda203afabf14">trudp_event_cb()</a>.</p>
+<p>Referenced by <a class="el" href="l0-server_8c.html#a57240478951a94d34dbe8e4060fb8b08">_check_connected()</a>, <a class="el" href="net__com_8c.html#a4ce6aa59fbc0daa3ed638f7bad0bcf95">cmd_l0_check_cb()</a>, <a class="el" href="l0-server_8h.html#afe41a76f35e9f8155a6c6c2658433764">ksnLNulltrudpCheckPaket()</a>, and <a class="el" href="tr-udp_8h.html#a63fc4942e6d0afe175ebda203afabf14">trudp_event_cb()</a>.</p>
 
 </div>
 </div>
@@ -1386,7 +1401,7 @@ Variables</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p>References <a class="el" href="structksnCorePacketData.html#a24ca04a53c440b1c862844d953178d52">ksnCorePacketData::addr</a>, <a class="el" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">ksnCorePacketData::data</a>, <a class="el" href="structksnCorePacketData.html#a712f5a7dc02e86ee0576e0d2b2ff12f0">ksnCorePacketData::data_len</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda275f992601832b227b6738e3caa9fec0">DEBUG_VV</a>, <a class="el" href="structksnLNullClass.html#abab81c6a2f8e900abada745ef1fd0f55">ksnLNullClass::fd</a>, <a class="el" href="l0-server_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnCorePacketData.html#a2b762760d172f4c52f9925ca4338df3b">ksnCorePacketData::port</a>, and <a class="el" href="l0-server_8c.html#a71b87fd6b342d24ac1808637df85a89f">recvCheck()</a>.</p>
+<p>References <a class="el" href="structksnCorePacketData.html#a24ca04a53c440b1c862844d953178d52">ksnCorePacketData::addr</a>, <a class="el" href="structksnCorePacketData.html#a8eb43740395e420d2b5b575678c4b6ea">ksnCorePacketData::cmd</a>, <a class="el" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">ksnCorePacketData::data</a>, <a class="el" href="structksnCorePacketData.html#a712f5a7dc02e86ee0576e0d2b2ff12f0">ksnCorePacketData::data_len</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda275f992601832b227b6738e3caa9fec0">DEBUG_VV</a>, <a class="el" href="structksnLNullClass.html#abab81c6a2f8e900abada745ef1fd0f55">ksnLNullClass::fd</a>, <a class="el" href="l0-server_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="l0-server_8c.html#abec9d5aaceab9bb5b0110e8047b90dae">ksnLNullClientDisconnect()</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnCorePacketData.html#a2b762760d172f4c52f9925ca4338df3b">ksnCorePacketData::port</a>, and <a class="el" href="l0-server_8c.html#a71b87fd6b342d24ac1808637df85a89f">recvCheck()</a>.</p>
 
 <p>Referenced by <a class="el" href="net__core_8h.html#abc445677c3da25dfbb9800a156e86ef4">ksnCoreProcessPacket()</a>.</p>
 
@@ -1483,7 +1498,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_ddb4d7e95cc2d6c8e1ade10a20d7247d.html">modules</a></li><li class="navelem"><a class="el" href="l0-server_8c.html">l0-server.c</a></li>
-    <li class="footer">Generated on Fri Dec 4 2020 10:27:31 for Teonet library by
+    <li class="footer">Generated on Mon Mar 1 2021 10:50:00 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
