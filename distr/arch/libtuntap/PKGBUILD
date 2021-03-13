@@ -1,4 +1,4 @@
-# This is the cpputes PKGBUILD file. Use the `makepkg -si --noconfirm` command 
+# This is the libtuntap PKGBUILD file. Use the `makepkg -si --noconfirm` command 
 # to create and install this package. 
 
 # Maintainer: Kirill Scherba <kirill@scherba.ru>
