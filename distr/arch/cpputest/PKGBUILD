@@ -1,0 +1,50 @@
+# This is the cpputes PKGBUILD file. Use the `makepkg -si --noconfirm` command 
+# to create and install this package. 
+
+# Maintainer: Kirill Scherba <kirill@scherba.ru>
+pkgname=cpputest
+pkgver=3.8
+pkgrel=1
+epoch=
+pkgdesc="CPP unit test library"
+arch=('i686' 'x86_64')
+url=""
+license=('GPL')
+groups=()
+depends=()
+makedepends=()
+checkdepends=()
+optdepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source=("https://github.com/cpputest/cpputest/releases/download/v$pkgver/$pkgname-$pkgver.tar.gz")
+noextract=()
+md5sums=('SKIP')
+validpgpkeys=()
+
+prepare() {
+	cd "$pkgname-$pkgver"
+	autoreconf -i
+}
+
+build() {
+	cd "$pkgname-$pkgver"
+	./configure --prefix=/usr
+	make
+}
+
+#check() {
+#	cd "$pkgname-$pkgver"
+#	make -k check
+#}
+
+package() {
+	cd "$pkgname-$pkgver"
+	make DESTDIR="$pkgdir/" install
+}
+
