@@ -11,8 +11,8 @@ arch=('i686' 'x86_64')
 url=""
 license=('GPL')
 groups=()
-depends=()
-makedepends=()
+depends=("libev" "confuse" "cunit")
+makedepends=("cmake" "intltool" "doxygen")
 checkdepends=()
 optdepends=()
 provides=()
@@ -29,7 +29,7 @@ validpgpkeys=()
 
 prepare() {
 	cd "$pkgname-$pkgver"
-	sh/build-arch.sh
+	sh/build-arch.sh --none
 	./autogen.sh
 	./configure --prefix=/usr
 }
@@ -39,10 +39,10 @@ build() {
 	make
 }
 
-#check() {
-#	cd "$pkgname-$pkgver"
-#	make -k check
-#}
+check() {
+	cd "$pkgname-$pkgver"
+	make test
+}
 
 package() {
 	cd "$pkgname-$pkgver"
