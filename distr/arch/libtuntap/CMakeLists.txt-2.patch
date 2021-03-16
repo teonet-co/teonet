@@ -1,10 +1,24 @@
---- CMakeLists.txt	2021-03-13 16:18:50.385324097 +0300
-+++ CMakeLists_new.txt	2021-03-13 16:18:07.508207726 +0300
-@@ -40,6 +40,7 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a541b21..f225273 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -10,8 +10,8 @@ option(ENABLE_REGRESS "Enable the regression tests" OFF)
+ 
+ # CMake Configuration
+ # ------------------
+-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
++set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
++set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+ set(CMAKE_INSTALL_PREFIX "/usr/local/")
+ set(${CMAKE_SYSTEM_NAME} True)
+ 
+@@ -40,6 +40,8 @@ if(UNIX)
  	# Unix specific definitions
  	# ------------------
    	add_definitions(-DUnix)
 +  	add_definitions(-fcommon)
++  	add_definitions(-fPIC)
  
  	# Unix specific source files
  	# ------------------

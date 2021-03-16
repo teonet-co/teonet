@@ -11,3 +11,4 @@
 [submodule "libs/libtuntap"]
 	path = libs/libtuntap
 	url = https://github.com/teonet-co/libtuntap.git
+	ignory = dirty

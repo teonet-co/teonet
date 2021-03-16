@@ -14,11 +14,11 @@ cd ../../..
 # tuntap
 #
 # package
-cd distr/arch/libtuntap
-cp ../../libtuntap.zip ./
-makepkg -si --noconfirm
-rm -rf pkg src libtuntap*
-cd ../../..
+#cd distr/arch/libtuntap
+#cp ../../libtuntap.zip ./
+#makepkg -si --noconfirm
+#rm -rf pkg src libtuntap*
+#cd ../../..
 #
 # local source code
 cd libs/libtuntap
