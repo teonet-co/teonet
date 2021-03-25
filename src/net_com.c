@@ -88,7 +88,7 @@ void ksnCommandDestroy(ksnCommandClass *kco) {
  */
 int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
  
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     int processed = 0;
 
@@ -254,7 +254,7 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, size_t *data_t_len) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     double ct = ksnetEvMgrGetTime(ke);
     *data_t_len = data_len + sizeof(double);
     void *data_t = malloc(*data_t_len);
@@ -282,7 +282,7 @@ int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, size_t dat
 
     ksnet_arp_data * arp = ksnCoreSendCmdto(kco->kc, to, CMD_ECHO, data_t, data_t_len);
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     if(arp != NULL) {
         arp->last_triptime_send = ksnetEvMgrGetTime(ke);
     }
@@ -316,7 +316,7 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
     fillConnectData(data, &ptr, name, addr, port);
 
     // TODO: duplicate code
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by name %s. (Connect to peer: %s, addr: %s:%d)\n",
@@ -345,7 +345,7 @@ int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *to_addr, uint32_t to_p
     char data[KSN_BUFFER_DB_SIZE];
     fillConnectData(data, &ptr, name, addr, port);
     // TODO: duplicate code
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by address %s:%d. (Connect to peer: %s, addr: %s:%d)\n",
@@ -390,7 +390,7 @@ static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_ECHO (cmd = %u) command, from %s (%s:%d)\n",
@@ -410,7 +410,7 @@ static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
 static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_ECHO_UNR (cmd = %u) command, from %s (%s:%d)\n",
@@ -432,7 +432,7 @@ static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
@@ -478,7 +478,7 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
@@ -528,7 +528,7 @@ static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_L0_CLIENTS (cmd = %u) command, from %s (%s:%d)\n",
@@ -565,7 +565,7 @@ static int cmd_l0_clients_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_L0_CLIENTS_N (cmd = %u) command, from %s (%s:%d)\n",
@@ -610,7 +610,7 @@ static int cmd_l0_clients_n_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_L0_INFO (cmd = %u) command, from %s (%s:%d)\n",
@@ -657,7 +657,7 @@ static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_L0_STAT (cmd = %u) command, from %s (%s:%d)\n",
@@ -708,7 +708,7 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     const int not_json = rd->data_len && ((char*)rd->data)[0] != '{' && ((char*)rd->data)[rd->data_len-1] != '}';
@@ -760,7 +760,7 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
  */
 static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_HOST_INFO = %u command, from %s (%s:%d)\n",
@@ -846,7 +846,7 @@ static int cmd_host_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_GET_PUBLIC_IP (cmd = %u) command, from %s (%s:%d)\n",
@@ -905,7 +905,7 @@ static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_TRUDP_INFO (cmd = %u) command, from %s (%s:%d)\n",
@@ -944,7 +944,7 @@ static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_RESEND (cmd = %u) command, from %s (%s:%d)\n",
@@ -987,7 +987,7 @@ static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 inline int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_RECONNECT (cmd = %u) command, from %s (%s:%d)\n",
@@ -1006,7 +1006,7 @@ inline int cmd_reconnect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 inline static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_RECONNECT_ANSWER (cmd = %u) command, from %s (%s:%d)\n",
@@ -1025,7 +1025,7 @@ inline static int cmd_reconnect_answer_cb(ksnCommandClass *kco, ksnCorePacketDat
  */
 static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_ECHO_ANSWER (cmd = %u) command, from %s (%s:%d)\n",
@@ -1129,7 +1129,7 @@ int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
  */
 static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
@@ -1226,7 +1226,7 @@ static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
  */
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     /**
@@ -1286,7 +1286,7 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
 
     #ifdef DEBUG_KSNET
@@ -1338,7 +1338,7 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  */
 static int cmd_split_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
-    ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_SPLIT (cmd = %u) command, from %s (%s:%d)\n",

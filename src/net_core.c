@@ -430,22 +430,22 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
                 "send command to L0 client \"%s\" to r-host\n", to);
         #endif
 
-        ssize_t snd;
-        ksnLNullSPacket *cmd_l0_data = data;
+        ksnLNullSPacket *spacket = data;
 
         const size_t buf_length = teoLNullBufferSize(
-                cmd_l0_data->from_length,
-                cmd_l0_data->data_length
+                spacket->client_name_length,
+                spacket->data_length
         );
 
         char *buf = malloc(buf_length);
         teoLNullPacketCreate(buf, buf_length,
-                cmd_l0_data->cmd,
-                cmd_l0_data->from,
-                (uint8_t *)cmd_l0_data->from + cmd_l0_data->from_length,
-                (size_t)cmd_l0_data->data_length);
+                spacket->cmd,
+                spacket->payload,
+                (uint8_t *)spacket->payload + spacket->client_name_length,
+                (size_t)spacket->data_length);
 
-        if((snd = ksnLNullPacketSend(ke->kl, fd, buf, buf_length)) >= 0);
+        ssize_t snd = ksnLNullPacketSend(ke->kl, fd, buf, buf_length);
+        (void)snd;
         free(buf);
     }
 

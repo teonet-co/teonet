@@ -135,7 +135,8 @@ public:
     ke = ksnetEvMgrInitPort(
         argc, argv,
         [](ksnetEvMgrClass* ke, teoEvents e, void* data, size_t data_len, void* user_data) {
-          ((Teonet*)ke->teo_class)->eventCb(e, data, data_len, user_data);
+          auto teonet_ptr = static_cast<Teonet*>(ke->teo_class);
+          teonet_ptr->eventCb(e, data, data_len, user_data);
         },
         options, port, user_data);
     if(ke) ke->teo_class = this;
@@ -587,7 +588,7 @@ public:
     ksnCQueClass* kq;
 
   public:
-    CQue(Teonet* t, bool send_event = false)
+    explicit CQue(Teonet* t, bool send_event = false)
         : teo(t), kq(ksnCQueInit(t->getKe(), send_event)) { /*std::cout << "CQue::CQue\n";*/
     }
     CQue(const CQue& obj) : teo(obj.teo), kq(obj.kq) { /*std::cout << "CQue::CQue copy\n";*/
@@ -615,7 +616,7 @@ public:
       userData* ud = new userData{user_data, cb};
       return ksnCQueAdd(kq,
                         [](uint32_t id, int type, void* data) {
-                          userData* ud = (userData*)data;
+                          userData* ud = static_cast<userData*>(data);
                           ud->cb(id, type, ud->user_data);
                           delete(ud);
                         },
@@ -697,7 +698,7 @@ public:
         void* user_data;
         void* cb;
       };
-      auto ud = (userData*)ksnCQueGetData(kq, id);
+      auto ud = static_cast<userData*>(ksnCQueGetData(kq, id));
       if(ud) {
         ud->user_data = data;
         retval = 0;
@@ -844,9 +845,9 @@ public:
       auto ud = new userData{user_data, cb};
       auto cq = cque.add(
           [](uint32_t id, int type, void* data) {
-            userData* ud = (userData*)data;
+            userData* ud = static_cast<userData*>(data);
             ud->cb(id, type, ud->user_data);
-            delete((TeoDB::teoDbCQueData*)ud->user_data);
+            delete(static_cast<TeoDB::teoDbCQueData*>(ud->user_data));
             delete(ud);
           },
           timeout, ud);
@@ -934,8 +935,8 @@ public:
     Teonet& teo;
 
   public:
-    LogReader(Teonet& teo) : teo(teo) {}
-    LogReader(Teonet* teo) : teo(*teo) {}
+    explicit LogReader(Teonet& teo) : teo(teo) {}
+    explicit LogReader(Teonet* teo) : teo(*teo) {}
 
     struct PUserData {
       virtual ~PUserData() { std::cout << "~PUserData" << std::endl; }
@@ -946,19 +947,20 @@ public:
                          const AnyCallback& cb = nullptr) const {
       struct UserData : PUserData {
         AnyCallback cb;
-        UserData(const AnyCallback& cb) : cb(cb) {}
+        explicit UserData(const AnyCallback& cb) : cb(cb) {}
         virtual ~UserData() { std::cout << "~UserData" << std::endl; }
       };
       auto ud = new UserData(cb);
       return teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, flags,
                                   [](void* data, size_t data_length, Watcher* wd) {
-                                    ((UserData*)wd->user_data)->cb(data, data_length, wd);
+                                    auto ud = static_cast<UserData*>(wd->user_data);
+                                    ud->cb(data, data_length, wd);
                                   },
                                   ud);
     }
 
     inline int close(Watcher* wd) const {
-      if(wd->user_data) delete(PUserData*)wd->user_data;
+      if(wd->user_data) delete static_cast<PUserData*>(wd->user_data);
       return teoLogReaderClose(wd);
     }
   };
@@ -988,7 +990,7 @@ struct HostInfo {
     }
   }
 
-  HostInfo(void* data) {
+  explicit HostInfo(void* data) {
     auto host_info = (host_info_data*)data;
     makeTeonetVersion(host_info->ver);
     size_t ptr = 0;
@@ -1032,21 +1034,21 @@ public:
   }
 
   // Split from const char* constructor
-  StringArray(const char* str, const char* separators = ",", bool with_empty = true,
+  explicit StringArray(const char* str, const char* separators = ",", bool with_empty = true,
               int max_parts = 0) {
     // std::cout << "Split from const char* constructor" << std::endl;
     sa = split(str, separators, with_empty, max_parts);
   }
 
   // Split from std::string constructor
-  StringArray(const std::string& str, const std::string& separators = ",", bool with_empty = true,
+  explicit StringArray(const std::string& str, const std::string& separators = ",", bool with_empty = true,
               int max_parts = 0)
       : StringArray(str.c_str(), separators.c_str(), with_empty, max_parts) {
     // std::cout << "Split from std::string constructor" << std::endl;
   }
 
   // Combine from std::vector constructor
-  StringArray(const std::vector<const char*>& vstr, const char* separators = ",") {
+  explicit StringArray(const std::vector<const char*>& vstr, const char* separators = ",") {
     // std::cout << "Combine from std::vector constructor" << std::endl;
     sa = create();
     sep = separators;

@@ -41,6 +41,8 @@ const char *null_str = "";
 char run_file[KSN_BUFFER_SIZE];
 
 ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X){return ((ksnetEvMgrClass*)((ksnCoreClass*)X->kc)->ke); }
+ksnetEvMgrClass* __ke_from_L0_class(ksnLNullClass *X){return ((ksnetEvMgrClass*)X->ke); };
+
 ksnetArpClass* __arp_from_command_class(ksnCommandClass *X){return ((ksnetArpClass*)((ksnCoreClass*)X->kc)->ka); }
 
 // Local functions

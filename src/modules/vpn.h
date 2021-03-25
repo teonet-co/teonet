@@ -11,10 +11,10 @@
 #ifndef VPN_H
 #define	VPN_H
 
+#include <ev.h>
 #include <stdio.h>
 #include <pbl.h>
 
-#include "ev_mgr.h"
 
 /**
  * KSNet VPN Class data
