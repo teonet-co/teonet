@@ -433,7 +433,7 @@ static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_PEERS (cmd = %u) command, from %s (%s:%d)\n",
@@ -479,7 +479,7 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_GET_NUM_PEERS (cmd = %u) command, from %s (%s:%d)\n",
@@ -709,7 +709,7 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     const int not_json = rd->data_len && ((char*)rd->data)[0] != '{' && ((char*)rd->data)[rd->data_len-1] != '}';
     
@@ -964,7 +964,7 @@ static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // If we resend command from sender, than sender don't know about the peer,
     // try send connect command to peer to direct connect sender with peer
     ksnet_arp_data *arp;
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
     if((arp = (ksnet_arp_data *)ksnetArpGet(arp_class, to)) != NULL) {
 
         // Send connect command request to peer
@@ -1061,7 +1061,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         ksnet_printf(&ke->ksn_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             (int)rd->data_len, rd->from, triptime);
 
-        ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+        ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
         // Set monitor time
         ksnet_arp_data_ext *arp = ksnetArpGet(arp_class, rd->from);
         arp->data.monitor_time = time_got - time_send;
@@ -1130,7 +1130,7 @@ int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
 static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV,
@@ -1227,7 +1227,7 @@ static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     /**
      * KSNet CMD_PEER command data
@@ -1287,7 +1287,7 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_DISCONNECTED = %u command, from %s (%s:%d)\n",

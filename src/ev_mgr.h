@@ -329,7 +329,7 @@ ksnetArpClass* __arp_from_command_class(ksnCommandClass *X);
       ksnCommandClass* : __ke_from_command_class, \
       ksnLNullClass *  : __ke_from_L0_class) (X)
 
-#define ARP_TABLE_CLASS(X) _Generic((X), \
+#define ARP_TABLE_OBJECT(X) _Generic((X), \
       ksnCommandClass* : __arp_from_command_class) (X)
 
 /**
