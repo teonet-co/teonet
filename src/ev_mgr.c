@@ -24,6 +24,8 @@
 #include "utils/rlutil.h"
 #include "modules/metric.h"
 
+#include "commands_creator.h"
+
 #define MODULE "event_manager"
 
 // Global module variables
@@ -718,7 +720,8 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         // check_connection_f = 0;
 
         size_t ptr = 0;
-        void *data = NULL;
+        size_t packet_size = 0;
+        uint8_t *data = NULL;
         ksnet_stringArr ips = NULL;
 
         // Start TCP Proxy client connection if it is allowed and is not connected
@@ -734,6 +737,8 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
             ptr = sizeof(uint8_t); // Pointer (to first IP)
             *num = 0; // Number of IPs
         } else { // Create data for UDP connection
+
+            data = createCmdConnectRPacketUdp(ke, &packet_size);
             // Create data with list of local IPs and port
             ips = getIPs(&ke->teo_cfg); // IPs array
             uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
