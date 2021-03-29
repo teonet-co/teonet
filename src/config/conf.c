@@ -23,118 +23,118 @@
 extern const char *localhost, *null_str;
 
 // Local function
-void set_defaults(ksnet_cfg *ksn_cfg);
+void set_defaults(teonet_cfg *teo_cfg);
 
 /**
  * Get configuration parameters
  */
-void ksnet_configInit(ksnet_cfg *ksn_cfg, void *ke) {
+void ksnet_configInit(teonet_cfg *teo_cfg, void *ke) {
 
-    ksn_cfg->ke = ke;
-    set_defaults(ksn_cfg);
+    teo_cfg->ke = ke;
+    set_defaults(teo_cfg);
     //! \todo: Set port param
     //int port_param = 0;
-    //read_config(ksn_cfg, port_param);
+    //read_config(teo_cfg, port_param);
 }
 
 /**
  * Set default configuration parameters
  */
-void set_defaults(ksnet_cfg *ksn_cfg) {
+void set_defaults(teonet_cfg *teo_cfg) {
 
     // Encrypt/Decrypt packets
-    ksn_cfg->crypt_f = KSNET_CRYPT;
+    teo_cfg->crypt_f = KSNET_CRYPT;
 
-    strncpy(ksn_cfg->network, "local", KSN_BUFFER_SM_SIZE/2);
-    ksn_cfg->net_key[0] = '\0';
-    ksn_cfg->auth_secret[0] = '\0';
+    strncpy(teo_cfg->network, "local", KSN_BUFFER_SM_SIZE/2);
+    teo_cfg->net_key[0] = '\0';
+    teo_cfg->auth_secret[0] = '\0';
 
     // Show info at console flags
-    ksn_cfg->show_connect_f = 1;
-    ksn_cfg->show_debug_f = 1;
-    ksn_cfg->show_debug_vv_f = 0;
-    ksn_cfg->show_debug_vvv_f = 0;
-    ksn_cfg->show_peers_f = 0;
-    ksn_cfg->show_tr_udp_f = 0;
+    teo_cfg->show_connect_f = 1;
+    teo_cfg->show_debug_f = 1;
+    teo_cfg->show_debug_vv_f = 0;
+    teo_cfg->show_debug_vvv_f = 0;
+    teo_cfg->show_peers_f = 0;
+    teo_cfg->show_tr_udp_f = 0;
     
     // Other flags
-    ksn_cfg->send_ack_event_f = 0;
-    ksn_cfg->block_cli_input_f = 0;
-    ksn_cfg->no_multi_thread_f = 0;
+    teo_cfg->send_ack_event_f = 0;
+    teo_cfg->block_cli_input_f = 0;
+    teo_cfg->no_multi_thread_f = 0;
 
     // This host
-    ksn_cfg->port = atoi(KSNET_PORT_DEFAULT);
-    ksn_cfg->port_inc_f = 1;
+    teo_cfg->port = atoi(KSNET_PORT_DEFAULT);
+    teo_cfg->port_inc_f = 1;
     char *name = getRandomHostName();
-    strncpy(ksn_cfg->host_name, name, KSN_MAX_HOST_NAME);
+    strncpy(teo_cfg->host_name, name, KSN_MAX_HOST_NAME);
     free(name);
     
     // TCP Proxy
-    ksn_cfg->tcp_allow_f = 0;
-    ksn_cfg->tcp_port = ksn_cfg->port;
+    teo_cfg->tcp_allow_f = 0;
+    teo_cfg->tcp_port = teo_cfg->port;
     
     // L0 Server
-    ksn_cfg->l0_allow_f = 0;
-    ksn_cfg->l0_tcp_port = ksn_cfg->port;
-    ksn_cfg->l0_tcp_ip_remote[0] = '\0';
+    teo_cfg->l0_allow_f = 0;
+    teo_cfg->l0_tcp_port = teo_cfg->port;
+    teo_cfg->l0_tcp_ip_remote[0] = '\0';
     
     // Display log filter
-    ksn_cfg->filter[0] = '\0';
+    teo_cfg->filter[0] = '\0';
             
     // Remote host default
-    ksn_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
-    ksn_cfg->r_host_name[0] = '\0';
-    ksn_cfg->r_host_addr[0] = '\0';
-    //strncpy(ksn_cfg->r_host_addr, localhost, KSN_BUFFER_SM_SIZE/2); // set default r-host address to localhost
-    ksn_cfg->r_tcp_f = 0;
-    ksn_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
+    teo_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
+    teo_cfg->r_host_name[0] = '\0';
+    teo_cfg->r_host_addr[0] = '\0';
+    //strncpy(teo_cfg->r_host_addr, localhost, KSN_BUFFER_SM_SIZE/2); // set default r-host address to localhost
+    teo_cfg->r_tcp_f = 0;
+    teo_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
 
     // Hosts public IPs
-    ksn_cfg->l0_public_ipv4[0] = '\0';
-    ksn_cfg->l0_public_ipv6[0] = '\0';
+    teo_cfg->l0_public_ipv4[0] = '\0';
+    teo_cfg->l0_public_ipv6[0] = '\0';
 
     // VPN
-    ksn_cfg->vpn_dev_name[0] = '\0';
-    //strncpy(ksn_cfg->vpn_dev_name, "teonet", KSN_MAX_HOST_NAME); // set default vpn device name to "teonet"
-    ksn_cfg->vpn_dev_hwaddr[0] = '\0';
-    ksn_cfg->vpn_ip[0] = '\0';
-    ksn_cfg->vpn_ip_net = 24;
-    ksn_cfg->vpn_connect_f = 0;
-    ksn_cfg->vpn_mtu = 0;
+    teo_cfg->vpn_dev_name[0] = '\0';
+    //strncpy(teo_cfg->vpn_dev_name, "teonet", KSN_MAX_HOST_NAME); // set default vpn device name to "teonet"
+    teo_cfg->vpn_dev_hwaddr[0] = '\0';
+    teo_cfg->vpn_ip[0] = '\0';
+    teo_cfg->vpn_ip_net = 24;
+    teo_cfg->vpn_connect_f = 0;
+    teo_cfg->vpn_mtu = 0;
     
     // Logging server
-    ksn_cfg->logging_f = 0;
+    teo_cfg->logging_f = 0;
     
     // Disable send logs to logging server
-    ksn_cfg->log_disable_f = 0;
+    teo_cfg->log_disable_f = 0;
     
     // Disable color terminal output
-    ksn_cfg->color_output_disable_f = 0;
+    teo_cfg->color_output_disable_f = 0;
 
     // Extended L0 log
-    ksn_cfg->extended_l0_log_f = 0;
+    teo_cfg->extended_l0_log_f = 0;
     
     // SIGSEGV processing
-    ksn_cfg->sig_segv_f = 0;
+    teo_cfg->sig_segv_f = 0;
     
     // Syslog priority
-    ksn_cfg->log_priority = DEBUG;
+    teo_cfg->log_priority = DEBUG;
 
     // Send peers metric flag
-    ksn_cfg->statsd_peers_f = 0;
+    teo_cfg->statsd_peers_f = 0;
     
 
     // Create prefix
     const char* LOG_PREFIX = "teonet:";
     const size_t LOG_PREFIX_SIZE = strlen(LOG_PREFIX);
-    size_t prefix_len = LOG_PREFIX_SIZE + strlen(ksn_cfg->app_name) + 1;
-    //ksn_cfg->log_prefix = malloc(prefix_len); // \todo Free this at exit
-    strncpy(ksn_cfg->log_prefix, LOG_PREFIX, prefix_len);
-    strncat(ksn_cfg->log_prefix, ksn_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
+    size_t prefix_len = LOG_PREFIX_SIZE + strlen(teo_cfg->app_name) + 1;
+    //teo_cfg->log_prefix = malloc(prefix_len); // \todo Free this at exit
+    strncpy(teo_cfg->log_prefix, LOG_PREFIX, prefix_len);
+    strncat(teo_cfg->log_prefix, teo_cfg->app_name, prefix_len - LOG_PREFIX_SIZE);
 
     // Terminal
-//    strncpy(ksn_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
-//    strncpy(ksn_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
+//    strncpy(teo_cfg->t_username, "fred", KSN_BUFFER_SM_SIZE/2);
+//    strncpy(teo_cfg->t_password, "nerk", KSN_BUFFER_SM_SIZE/2);
 }
 
 /**
@@ -143,7 +143,7 @@ void set_defaults(ksnet_cfg *ksn_cfg) {
  * @param conf
  * @param port_param
  */
-void read_config(ksnet_cfg *conf, int port_param) {
+void read_config(teonet_cfg *conf, int port_param) {
 
     // Save values back to structure
     #define save_conf_back() \
@@ -405,7 +405,7 @@ char* uconfigFileName(char *buf, const int BUF_SIZE, const int type,
  *
  * @param hwaddr
  */
-void ksnet_addHWAddrConfig(ksnet_cfg *conf, char *hwaddr) {
+void ksnet_addHWAddrConfig(teonet_cfg *conf, char *hwaddr) {
 
     // Open configuration file to append
     char buf[KSN_BUFFER_SM_SIZE];

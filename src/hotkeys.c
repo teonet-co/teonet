@@ -152,9 +152,9 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             , ""
             #endif
             #ifdef DEBUG_KSNET
-            , (kev->ksn_cfg.show_debug_f ? SHOW : DONT_SHOW)
-            , (kev->ksn_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
-            , (kev->ksn_cfg.show_debug_vvv_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_vvv_f ? SHOW : DONT_SHOW)
             #endif
             , (khv->pt != NULL ? "(running now, press i to stop)" : "")
             , (khv->mt != NULL ? "(running now, press M to stop)" : "")
@@ -247,31 +247,31 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
         // Show debug
         case 'd':
-            if(kev->ksn_cfg.show_debug_vv_f || kev->ksn_cfg.show_debug_vvv_f)
-                kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f = 0;
+            if(kev->teo_cfg.show_debug_vv_f || kev->teo_cfg.show_debug_vvv_f)
+                kev->teo_cfg.show_debug_vv_f = kev->teo_cfg.show_debug_vvv_f = 0;
             else {
-                kev->ksn_cfg.show_debug_f = !kev->ksn_cfg.show_debug_f;
+                kev->teo_cfg.show_debug_f = !kev->teo_cfg.show_debug_f;
                 printf("Show debug messages switch %s\n",
-                     (kev->ksn_cfg.show_debug_f ? ON :OFF));
+                     (kev->teo_cfg.show_debug_f ? ON :OFF));
             }  
             break;
 
         // Show debug_vv
         case 'w':
-            if(!kev->ksn_cfg.show_debug_vvv_f) {
-              kev->ksn_cfg.show_debug_vv_f = !kev->ksn_cfg.show_debug_vv_f;
+            if(!kev->teo_cfg.show_debug_vvv_f) {
+              kev->teo_cfg.show_debug_vv_f = !kev->teo_cfg.show_debug_vv_f;
             }  
-            kev->ksn_cfg.show_debug_vvv_f = 0;
+            kev->teo_cfg.show_debug_vvv_f = 0;
             printf("Show debug_vv messages switch %s\n",
-                   (kev->ksn_cfg.show_debug_vv_f ? ON :OFF));
+                   (kev->teo_cfg.show_debug_vv_f ? ON :OFF));
             break;
 
         // Show debug_vvv
         case 'c':
-            kev->ksn_cfg.show_debug_vvv_f = !kev->ksn_cfg.show_debug_vvv_f;
-            kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f;
+            kev->teo_cfg.show_debug_vvv_f = !kev->teo_cfg.show_debug_vvv_f;
+            kev->teo_cfg.show_debug_vv_f = kev->teo_cfg.show_debug_vvv_f;
             printf("Show debug_vvv messages switch %s\n",
-                   (kev->ksn_cfg.show_debug_vvv_f ? ON :OFF));
+                   (kev->teo_cfg.show_debug_vvv_f ? ON :OFF));
             break;
 
         // Send message
@@ -630,13 +630,13 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     ev_idle_init (&kh->idle_stdin_w, idle_stdin_cb);
 
     // Start show peer
-    if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_peers_f) {
+    if(((ksnetEvMgrClass*)ke)->teo_cfg.show_peers_f) {
         kh->pet = peer_timer_init( ((ksnetEvMgrClass*)ke)->kc );
         kh->peer_m = 1;
     }
     // Start show TR-UDP statistic
     else
-    if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_tr_udp_f) {
+    if(((ksnetEvMgrClass*)ke)->teo_cfg.show_tr_udp_f) {
         kh->put = tr_udp_timer_init( ((ksnetEvMgrClass*)ke)->kc );
         kh->tr_udp_m = 1;
     }

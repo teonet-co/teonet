@@ -34,7 +34,7 @@ const char *localhost = "::1";//"127.0.0.1";
 #define PACKET_HEADER_ADD_SIZE 2    // Sizeof from length + Sizeof command
 
 #define MODULE _ANSI_GREEN "net_core" _ANSI_GREY
-#define kev ((ksnetEvMgrClass *)ksn_cfg->ke)
+#define kev ((ksnetEvMgrClass *)teo_cfg->ke)
 
 // Local functions
 void host_cb(EV_P_ ev_io *w, int revents);
@@ -71,7 +71,7 @@ int send_cmd_connected_cb(ksnetArpClass *ka, char *name, ksnet_arp_data *arp_dat
 #if KSNET_CRYPT
 #define sendto_encrypt(kc, cmd, DATA, D_LEN) \
     { \
-        if(((ksnetEvMgrClass*)kc->ke)->ksn_cfg.crypt_f) { \
+        if(((ksnetEvMgrClass*)kc->ke)->teo_cfg.crypt_f) { \
             size_t data_len; \
             char *buffer = NULL; /*[KSN_BUFFER_DB_SIZE];*/ \
             void *data = ksnEncryptPackage(kc->kcr, DATA, D_LEN, buffer, &data_len); \
@@ -131,10 +131,10 @@ ksnCoreClass *ksnCoreInit(void* ke, char *name, int port, char* addr) {
     kc->ku = trudpInit(kc->fd, kc->port, trudp_event_cb, ke);
 
     // Change this host port number to port changed in ksnCoreBind function
-    ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->ksn_cfg.host_name, kc->port);
+    ksnetArpSetHostPort(kc->ka, ((ksnetEvMgrClass*)ke)->teo_cfg.host_name, kc->port);
 
     // Add host socket to the event manager
-    if(!((ksnetEvMgrClass*)ke)->ksn_cfg.r_tcp_f) {
+    if(!((ksnetEvMgrClass*)ke)->teo_cfg.r_tcp_f) {
 
         ev_io_init(&kc->host_w, host_cb, kc->fd, EV_READ);
         kc->host_w.data = kc;
@@ -188,7 +188,7 @@ void ksnCoreDestroy(ksnCoreClass *kc) {
 /**
  * Create and bind UDP socket for client/server
  *
- * @param[in] ksn_cfg Pointer to teonet configuration: ksnet_cfg
+ * @param[in] teo_cfg Pointer to teonet configuration: teonet_cfg
  * @param[out] port Pointer to Port number
  * @return File descriptor or error if return value < 0
  */
@@ -205,14 +205,14 @@ int ksnCoreBindRaw(int *port, int allow_port_increment_f) {
 int ksnCoreBind(ksnCoreClass *kc) {
 
     int fd;
-    ksnet_cfg *ksn_cfg = & ((ksnetEvMgrClass*)kc->ke)->ksn_cfg;
+    teonet_cfg *teo_cfg = & ((ksnetEvMgrClass*)kc->ke)->teo_cfg;
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG_VV,
             "create UDP client/server at port %d ...\n", kc->port);
     #endif
 
-    if((fd = ksnCoreBindRaw(&kc->port, ksn_cfg->port_inc_f)) > 0) {
+    if((fd = ksnCoreBindRaw(&kc->port, teo_cfg->port_inc_f)) > 0) {
 
         kc->fd = fd;
         #ifdef DEBUG_KSNET
@@ -422,7 +422,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
 
     // Send this message to L0 client
     else if(cmd == CMD_L0 &&
-            ke->ksn_cfg.l0_allow_f &&
+            ke->teo_cfg.l0_allow_f &&
             (fd = ksnLNullClientIsConnected(ke->kl, to))) {
 
         #ifdef DEBUG_KSNET
@@ -453,7 +453,7 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     else {
 
         // If connected to r-host
-        char *r_host = ke->ksn_cfg.r_host_name;
+        char *r_host = ke->teo_cfg.r_host_name;
         if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) {
 
             #ifdef DEBUG_KSNET
@@ -731,10 +731,10 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         int mode = 0, connect_r = rd->cmd == CMD_CONNECT_R ? 1 : 0;
 
         // Check that this host connected to r-host
-        if(!ke->ksn_cfg.r_host_name[0] && ke->ksn_cfg.r_port == rd->port &&
+        if(!ke->teo_cfg.r_host_name[0] && ke->teo_cfg.r_port == rd->port &&
            ( 
              ((rd->cmd == CMD_NONE || rd->cmd == CMD_HOST_INFO) && rd->data_len == 2) ||
-             !strcmp(ke->ksn_cfg.r_host_addr, rd->addr)
+             !strcmp(ke->teo_cfg.r_host_addr, rd->addr)
            )) {
 
             #ifdef DEBUG_KSNET
@@ -742,9 +742,9 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
                     rd->from, rd->addr, rd->port);
             #endif
 
-            strncpy(ke->ksn_cfg.r_host_name, rd->from,
-                    sizeof(ke->ksn_cfg.r_host_name)-1);
-            strncpy(ke->ksn_cfg.r_host_addr, rd->addr, sizeof(ke->ksn_cfg.r_host_addr) - 1);
+            strncpy(ke->teo_cfg.r_host_name, rd->from,
+                    sizeof(ke->teo_cfg.r_host_name)-1);
+            strncpy(ke->teo_cfg.r_host_addr, rd->addr, sizeof(ke->teo_cfg.r_host_addr) - 1);
             mode = 1;
         }
 
@@ -802,7 +802,7 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         #endif
 
         // ke->is_rhost = true;
-        strncpy(ke->ksn_cfg.r_host_name, rd->from, sizeof(ke->ksn_cfg.r_host_name)-1);
+        strncpy(ke->teo_cfg.r_host_name, rd->from, sizeof(ke->teo_cfg.r_host_name)-1);
         rd->arp->data.mode = 1;
     }
 }
@@ -842,7 +842,7 @@ void ksnCoreProcessPacket (void *vkc, void *buf, size_t recvlen, __SOCKADDR_ARG 
         // Decrypt package
         int encrypted = 0;
         #if KSNET_CRYPT        
-        if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
+        if(ke->teo_cfg.crypt_f && ksnCheckEncrypted(buf, recvlen)) {
             encrypted = 1;
             data = ksnDecryptPackage(kc->kcr, buf, recvlen, &data_len);
         } else { // Use packet without decryption

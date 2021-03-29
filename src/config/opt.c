@@ -34,7 +34,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv);
  *
  * @param argc Number of command line arguments
  * @param argv String array with command line arguments
- * @param conf Pointer to ksnet_cfg structure to read configuration and
+ * @param conf Pointer to teonet_cfg structure to read configuration and
  *             command line parameters to
  * @param app_argc Number of application arguments
  * @param app_argv String array with application arguments names
@@ -43,7 +43,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv);
  *
  * @return Entered application arguments
  */
-char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
+char ** ksnet_optRead(int argc, char **argv, teonet_cfg *conf,
         int app_argc, char **app_argv, char **app_argv_descr, int show_arg) {
 
     int option_index = 0, opt;
@@ -487,7 +487,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
  *
  * Set application name, prompt and description (use it before ksnet_optRead)
  */
-void ksnet_optSetApp(ksnet_cfg *conf,
+void ksnet_optSetApp(teonet_cfg *conf,
                      const char* app_name,
                      const char* app_prompt,
                      const char* app_description) {

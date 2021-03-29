@@ -73,7 +73,7 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             // Client send subscribe command to server                
             char *peer = ((ksnCorePacketData*)data)->from;
-            if(!strcmp(peer, ke->ksn_cfg.app_argv[1])) {
+            if(!strcmp(peer, ke->teo_cfg.app_argv[1])) {
 
                 printf("The peer: '%s' was connected\n", peer);
 
@@ -88,7 +88,7 @@ void event_cb_client(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_TIMER:
         {
             // Client send CMD_USER command to server
-            ksnCoreSendCmdto(ke->kc, ke->ksn_cfg.app_argv[1], CMD_USER, 
+            ksnCoreSendCmdto(ke->kc, ke->teo_cfg.app_argv[1], CMD_USER, 
                         "Hello!", 7);
         }
         break;
@@ -195,10 +195,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             printf("Type of this application: "); 
             
             // Client
-            if(strcmp(ke->ksn_cfg.app_argv[1], "null")) {
+            if(strcmp(ke->teo_cfg.app_argv[1], "null")) {
                 
                 printf("Client peer subscribed to '%s' peer\n", 
-                        ke->ksn_cfg.app_argv[1]);       
+                        ke->teo_cfg.app_argv[1]);       
                 
                 app_type = 0;
             }

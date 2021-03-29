@@ -622,15 +622,15 @@ static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Get L0 info
     if(ke->kl != NULL) {
-        if(ke->ksn_cfg.l0_allow_f) {
-            if(ke->ksn_cfg.l0_tcp_ip_remote[0]) {
+        if(ke->teo_cfg.l0_allow_f) {
+            if(ke->teo_cfg.l0_tcp_ip_remote[0]) {
 
-                size_t l0_tcp_ip_remote_len =  strlen(ke->ksn_cfg.l0_tcp_ip_remote) + 1;
+                size_t l0_tcp_ip_remote_len =  strlen(ke->teo_cfg.l0_tcp_ip_remote) + 1;
                 info_d_len = sizeof(l0_info_data) + l0_tcp_ip_remote_len;
                 info_d = malloc(info_d_len);
 
-                memcpy(info_d->l0_tcp_ip_remote, ke->ksn_cfg.l0_tcp_ip_remote, l0_tcp_ip_remote_len);
-                info_d->l0_tcp_port = ke->ksn_cfg.l0_tcp_port;
+                memcpy(info_d->l0_tcp_ip_remote, ke->teo_cfg.l0_tcp_ip_remote, l0_tcp_ip_remote_len);
+                info_d->l0_tcp_port = ke->teo_cfg.l0_tcp_port;
             }
         }
     }
@@ -869,16 +869,16 @@ static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 "\"public_v4\": \"%s\", "
                 "\"public_v6\": \"%s\" "
             " }", 
-            ke->ksn_cfg.l0_public_ipv4, ke->ksn_cfg.l0_public_ipv6);
+            ke->teo_cfg.l0_public_ipv4, ke->teo_cfg.l0_public_ipv6);
         data_out_len = strlen(data_out) + 1;
     } else {
-        size_t ipv4_len = strlen(ke->ksn_cfg.l0_public_ipv4);
-        size_t ipv6_len = strlen(ke->ksn_cfg.l0_public_ipv6);
+        size_t ipv4_len = strlen(ke->teo_cfg.l0_public_ipv4);
+        size_t ipv6_len = strlen(ke->teo_cfg.l0_public_ipv6);
         data_out_len = ipv4_len + ipv6_len + 2;
         data_out = malloc(data_out_len*sizeof(char));
-        memcpy(data_out, ke->ksn_cfg.l0_public_ipv4, ipv4_len);
+        memcpy(data_out, ke->teo_cfg.l0_public_ipv4, ipv4_len);
         ((char*)data_out)[ipv4_len] = '\0';
-        memcpy((char*)data_out + ipv4_len + 1, ke->ksn_cfg.l0_public_ipv6, ipv6_len);
+        memcpy((char*)data_out + ipv4_len + 1, ke->teo_cfg.l0_public_ipv6, ipv6_len);
         ((char*)data_out)[data_out_len - 1] = '\0';
     }
 
@@ -1046,7 +1046,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Show command message
         //#ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
+        ksnet_printf(&ke->teo_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             (int)rd->data_len, rd->from, triptime);
         //#endif
     }
@@ -1058,7 +1058,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Monitor answer
     else if(!strcmp(rd->data, MONITOR)) {
-        ksnet_printf(&ke->ksn_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
+        ksnet_printf(&ke->teo_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             (int)rd->data_len, rd->from, triptime);
 
         ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
@@ -1165,7 +1165,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         lrd.from = rd->from;
 
         // Get this server IPs array
-        ksnet_stringArr ips = getIPs(&ke->ksn_cfg);
+        ksnet_stringArr ips = getIPs(&ke->teo_cfg);
         uint8_t ips_len = ksnet_stringArrLength(ips); // Number of IPs
         int i;
         for(i = 0; i <= ips_len; i++) {
@@ -1306,9 +1306,9 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     free(met);
 
     // Check r-host disconnected
-    int is_rhost = ke->ksn_cfg.r_host_name[0] && !strcmp(ke->ksn_cfg.r_host_name,rd->from);
+    int is_rhost = ke->teo_cfg.r_host_name[0] && !strcmp(ke->teo_cfg.r_host_name,rd->from);
     if(is_rhost) {
-        ke->ksn_cfg.r_host_name[0] = '\0';
+        ke->teo_cfg.r_host_name[0] = '\0';
     }
 
     // Try to reconnect, send CMD_RECONNECT command

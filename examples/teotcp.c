@@ -139,10 +139,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
         {
             // Type of application (client or server)
-            printf("Type of application: %s\n",  ke->ksn_cfg.app_argv[1]); 
+            printf("Type of application: %s\n",  ke->teo_cfg.app_argv[1]); 
             
             // Server
-            if(!strcmp(ke->ksn_cfg.app_argv[1], "server")) {
+            if(!strcmp(ke->teo_cfg.app_argv[1], "server")) {
                 
                 // Start TCP server
                 int port_created;
@@ -151,7 +151,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             }
             
             //Client
-            else if(!strcmp(ke->ksn_cfg.app_argv[1], "client")) {
+            else if(!strcmp(ke->teo_cfg.app_argv[1], "client")) {
                 printf("Client mode example is under construction yet,\n"
                        "trying system telnet application ...\n"); 
                 char *buffer = ksnet_formatMessage("telnet 0 %d", SERVER_PORT);

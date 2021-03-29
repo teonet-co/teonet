@@ -47,16 +47,16 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             if(data != NULL) {
                 
-                if(!strcmp(((ksnCorePacketData*)data)->from, ke->ksn_cfg.app_argv[1])) {
+                if(!strcmp(((ksnCorePacketData*)data)->from, ke->teo_cfg.app_argv[1])) {
                     
                     printf("Peer \"%s\" was connected\n", ((ksnCorePacketData*)data)->from);
 
                     printf("Create stream name \"%s\" with peer \"%s\" ...\n",  
-                        ke->ksn_cfg.app_argv[2], ke->ksn_cfg.app_argv[1]); 
+                        ke->teo_cfg.app_argv[2], ke->teo_cfg.app_argv[1]); 
 
                     // Send create stream request
-                    ksnStreamCreate(ke->ks, ke->ksn_cfg.app_argv[1], 
-                        ke->ksn_cfg.app_argv[2],  CMD_ST_CREATE);
+                    ksnStreamCreate(ke->ks, ke->teo_cfg.app_argv[1], 
+                        ke->teo_cfg.app_argv[2],  CMD_ST_CREATE);
                 }
             
             }

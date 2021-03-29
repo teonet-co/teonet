@@ -108,7 +108,7 @@ void send_to_all(ksnVpnClass *kvpn, void *data, size_t data_len);
  */
 void* ksnVpnInit(void *ke) {
 
-    if(!((ksnetEvMgrClass*)ke)->ksn_cfg.vpn_connect_f) return NULL;
+    if(!((ksnetEvMgrClass*)ke)->teo_cfg.vpn_connect_f) return NULL;
 
     ksnVpnClass *kvpn = malloc(sizeof(ksnVpnClass));
 
@@ -189,7 +189,7 @@ void ksnVpnDestroy(void *vpn) {
  */
 int ksnVpnRunShell(ksnVpnClass *kvpn, char *script) {
 
-    ksnet_cfg *conf = &((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg;
+    teonet_cfg *conf = &((ksnetEvMgrClass*)kvpn->ke)->teo_cfg;
 
     char *DataPath = getDataPath();
 
@@ -270,8 +270,8 @@ int cmd_vpn_cb(ksnVpnClass *kvpn, char *from, void *data, size_t data_len) {
                 );
 
         #ifdef DEBUG_KSNET
-        if(((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg.show_debug_vv_f || 
-           ((ksnetEvMgrClass*)kvpn->ke)->ksn_cfg.show_debug_vvv_f)
+        if(((ksnetEvMgrClass*)kvpn->ke)->teo_cfg.show_debug_vv_f || 
+           ((ksnetEvMgrClass*)kvpn->ke)->teo_cfg.show_debug_vvv_f)
             
             ksnVpnListShow(kvpn);
         
@@ -431,27 +431,27 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         ksnetEvMgrClass *ke = kvpn->ke;
 
         // Set interface name
-        if(ke->ksn_cfg.vpn_dev_name[0] != '\0') {
-            size_t len = strlen(ke->ksn_cfg.vpn_dev_name);
-            char *name = isdigit(ke->ksn_cfg.vpn_dev_name[len-1]) ?
-                strdup(ke->ksn_cfg.vpn_dev_name) :
-                ksnet_formatMessage("%s0", ke->ksn_cfg.vpn_dev_name);
+        if(ke->teo_cfg.vpn_dev_name[0] != '\0') {
+            size_t len = strlen(ke->teo_cfg.vpn_dev_name);
+            char *name = isdigit(ke->teo_cfg.vpn_dev_name[len-1]) ?
+                strdup(ke->teo_cfg.vpn_dev_name) :
+                ksnet_formatMessage("%s0", ke->teo_cfg.vpn_dev_name);
             tuntap_set_ifname(kvpn->ksn_tap_dev, name);
             free(name);
             kvpn->tuntap_name = tuntap_get_ifname(kvpn->ksn_tap_dev);
         }
 
         // Set interface Hardware address
-        if(ke->ksn_cfg.vpn_dev_hwaddr[0] != '\0') {
-            tuntap_set_hwaddr(kvpn->ksn_tap_dev, ke->ksn_cfg.vpn_dev_hwaddr);
+        if(ke->teo_cfg.vpn_dev_hwaddr[0] != '\0') {
+            tuntap_set_hwaddr(kvpn->ksn_tap_dev, ke->teo_cfg.vpn_dev_hwaddr);
             tuntap_haddr = tuntap_get_hwaddr(kvpn->ksn_tap_dev);
         } else {
-            ksnet_addHWAddrConfig(&ke->ksn_cfg, tuntap_haddr);
+            ksnet_addHWAddrConfig(&ke->teo_cfg, tuntap_haddr);
         }
 
         // Set MTU
-        if(ke->ksn_cfg.vpn_mtu) {
-            tuntap_set_mtu(kvpn->ksn_tap_dev, ke->ksn_cfg.vpn_mtu);
+        if(ke->teo_cfg.vpn_mtu) {
+            tuntap_set_mtu(kvpn->ksn_tap_dev, ke->teo_cfg.vpn_mtu);
         }
 
         // Show success message
@@ -459,7 +459,7 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
                      "interface %s (addr: %s, mtu: %d) opened ...\n",
                      kvpn->tuntap_name,
                      tuntap_haddr,
-                     ke->ksn_cfg.vpn_mtu ? ke->ksn_cfg.vpn_mtu : 1500);
+                     ke->teo_cfg.vpn_mtu ? ke->teo_cfg.vpn_mtu : 1500);
 
         // Interface Up
         if (tuntap_up(kvpn->ksn_tap_dev) == -1) {
@@ -468,14 +468,14 @@ int ksnVpnStart(ksnVpnClass *kvpn) {
         } else {
 
             // Set IP and mask
-            if(tuntap_set_ip(kvpn->ksn_tap_dev, ke->ksn_cfg.vpn_ip,
-                             ke->ksn_cfg.vpn_ip_net) == -1) {
+            if(tuntap_set_ip(kvpn->ksn_tap_dev, ke->teo_cfg.vpn_ip,
+                             ke->teo_cfg.vpn_ip_net) == -1) {
     //		ret = 1;
             }
             else {
                 ksn_printf(ke, MODULE, MESSAGE,
                              "VPN IP set to: %s/%d\n\n",
-                             ke->ksn_cfg.vpn_ip, ke->ksn_cfg.vpn_ip_net);
+                             ke->teo_cfg.vpn_ip, ke->teo_cfg.vpn_ip_net);
 
                 // Execute if-up.sh script
                 ksnVpnRunShell(kvpn, "if-up.sh");

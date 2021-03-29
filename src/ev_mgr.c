@@ -161,17 +161,17 @@ ksnetEvMgrClass *ksnetEvMgrInitPort(
     }
 
     // Initial configuration, set defaults, read defaults from command line
-    ksnet_configInit(&ke->ksn_cfg, ke); // Set configuration default
-    if(port) ke->ksn_cfg.port = port; // Set port default
+    ksnet_configInit(&ke->teo_cfg, ke); // Set configuration default
+    if(port) ke->teo_cfg.port = port; // Set port default
     char **argv_ret = NULL;
-    ksnet_optSetApp(&ke->ksn_cfg, basename(argv[0]), basename(argv[0]), null_str);
-    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, app_argv_descr, 1); // Read command line parameters (to use it as default)
-    if(options&BLOCK_CLI_INPUT) ke->ksn_cfg.block_cli_input_f = 1; // Set Block CLI Input from options
-    if(options&READ_CONFIGURATION) read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
-    if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->ksn_cfg, app_argc, app_argv, app_argv_descr, 0); // Read command line parameters (to replace configuration file)
+    ksnet_optSetApp(&ke->teo_cfg, basename(argv[0]), basename(argv[0]), null_str);
+    if(options&READ_OPTIONS) ksnet_optRead(argc, argv, &ke->teo_cfg, app_argc, app_argv, app_argv_descr, 1); // Read command line parameters (to use it as default)
+    if(options&BLOCK_CLI_INPUT) ke->teo_cfg.block_cli_input_f = 1; // Set Block CLI Input from options
+    if(options&READ_CONFIGURATION) read_config(&ke->teo_cfg, ke->teo_cfg.port); // Read configuration file parameters
+    if(options&READ_OPTIONS) argv_ret = ksnet_optRead(argc, argv, &ke->teo_cfg, app_argc, app_argv, app_argv_descr, 0); // Read command line parameters (to replace configuration file)
 
-    ke->ksn_cfg.app_argc = app_argc;
-    ke->ksn_cfg.app_argv = argv_ret;
+    ke->teo_cfg.app_argc = app_argc;
+    ke->teo_cfg.app_argv = argv_ret;
 //
 //    if(options&APP_PARAM && user_data != NULL &&
 //       ((ksnetEvMgrAppParam*)user_data)->app_argc > 1) {
@@ -275,7 +275,7 @@ typedef void (*set_sigaction_h) (int, siginfo_t *, void *);
 static void set_sigaction(ksnetEvMgrClass *ke, int sig,
         set_sigaction_h sigsegv_cb_h) {
 
-    if(ke->ksn_cfg.sig_segv_f) {
+    if(ke->teo_cfg.sig_segv_f) {
 
         struct sigaction sa;
         sa.sa_flags = SA_NOMASK; //SA_SIGINFO; //
@@ -304,7 +304,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
     #endif
 
     // Create run file name
-    const char *network = ke->ksn_cfg.network;
+    const char *network = ke->teo_cfg.network;
 
     char *DataPath = getDataPath();
     strncpy(run_file, DataPath, KSN_BUFFER_SIZE - 1);
@@ -417,7 +417,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             // SIGSEGV
             #ifdef SIGSEGV
             #ifdef DEBUG_KSNET
-            if(ke->ksn_cfg.sig_segv_f) {
+            if(ke->teo_cfg.sig_segv_f) {
                 ksn_puts(ke, MODULE, MESSAGE, "set SIGSEGV signal handler");
             }
             #endif
@@ -428,7 +428,7 @@ int ksnetEvMgrRun(ksnetEvMgrClass *ke) {
             // SIGABRT
             #ifdef SIGABRT
             #ifdef DEBUG_KSNET
-            if(ke->ksn_cfg.sig_segv_f)
+            if(ke->teo_cfg.sig_segv_f)
                 ksn_puts(ke, MODULE, MESSAGE, "set SIGABRT signal handler");
             #endif
             // Libev can't process this signal properly
@@ -498,7 +498,7 @@ int ksnetEvMgrFree(ksnetEvMgrClass *ke, int free_async) {
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, MESSAGE,
-                "at port %d stopped.\n", (int)ke->ksn_cfg.port);
+                "at port %d stopped.\n", (int)ke->teo_cfg.port);
         #endif
 
         // Send stopped event to user level
@@ -569,7 +569,7 @@ void ksnetEvMgrSetCustomTimer(ksnetEvMgrClass *ke, double time_interval) {
  */
 inline char* ksnetEvMgrGetHostName(ksnetEvMgrClass *ke) {
 
-    return ke->ksn_cfg.host_name;
+    return ke->teo_cfg.host_name;
 }
 
 /**
@@ -630,7 +630,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
 
         // Add fill services
         // L0 server
-        if(ke->ksn_cfg.l0_allow_f) {
+        if(ke->teo_cfg.l0_allow_f) {
             const char *l0 = "teo-l0";
             size_t l0_len = strlen(l0) + 1;
             *hd_len += l0_len;
@@ -639,7 +639,7 @@ host_info_data *teoGetHostInfo(ksnetEvMgrClass *ke, size_t *hd_len) {
             hd->string_ar_num++;
         }
         // VPN
-        if(ke->ksn_cfg.vpn_connect_f) {
+        if(ke->teo_cfg.vpn_connect_f) {
             const char *vpn = "teo-vpn";
             size_t vpn_len = strlen(vpn) + 1;
             *hd_len += vpn_len;
@@ -709,10 +709,10 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
  */
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
     // Connect to r-host
-    if(ke->ksn_cfg.r_host_addr[0] && !ke->ksn_cfg.r_host_name[0]) {
+    if(ke->teo_cfg.r_host_addr[0] && !ke->teo_cfg.r_host_name[0]) {
 
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG, "connect to r-host: %s\n", ke->ksn_cfg.r_host_addr);
+        ksn_printf(ke, MODULE, DEBUG, "connect to r-host: %s\n", ke->teo_cfg.r_host_addr);
         #endif
 
         // check_connection_f = 0;
@@ -722,7 +722,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         ksnet_stringArr ips = NULL;
 
         // Start TCP Proxy client connection if it is allowed and is not connected
-        if(ke->tp != NULL && ke->ksn_cfg.r_tcp_f) {
+        if(ke->tp != NULL && ke->teo_cfg.r_tcp_f) {
             // Start TCP proxy client
             if(ke->tp->fd_client == 0) {
                 ksnTCPProxyClientConnect(ke->tp);
@@ -735,7 +735,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
             *num = 0; // Number of IPs
         } else { // Create data for UDP connection
             // Create data with list of local IPs and port
-            ips = getIPs(&ke->ksn_cfg); // IPs array
+            ips = getIPs(&ke->teo_cfg); // IPs array
             uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
             const size_t MAX_IP_STR_LEN = 16; // Max IPs string length
             data = malloc(len * MAX_IP_STR_LEN + sizeof(uint8_t) + sizeof(uint32_t)); // Data
@@ -758,11 +758,11 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         }
 
         // Send data to r-host
-        ksnCoreSendto(ke->kc, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port,
+        ksnCoreSendto(ke->kc, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port,
                       CMD_CONNECT_R, data, ptr);
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT_R = %u to r-host peer by address %s:%d.\n",
-            CMD_CONNECT_R, ke->ksn_cfg.r_host_addr, ke->ksn_cfg.r_port);
+            CMD_CONNECT_R, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port);
         #endif
 
         free(data);
@@ -776,7 +776,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
 void open_local_port(ksnetEvMgrClass *ke) {
 
     // Create data with list of local IPs and port
-    ksnet_stringArr ips = getIPs(&ke->ksn_cfg); // IPs array
+    ksnet_stringArr ips = getIPs(&ke->teo_cfg); // IPs array
     uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
 
     // Send to local IPs and Port
@@ -792,10 +792,10 @@ void open_local_port(ksnetEvMgrClass *ke) {
                                                ip_arr[1], ip_arr[2]);
 
             // Send to IP to open port
-            ksnCoreSendto(ke->kc, ip_str, ke->ksn_cfg.r_port, CMD_NONE, NULL_STR, 1);
+            ksnCoreSendto(ke->kc, ip_str, ke->teo_cfg.r_port, CMD_NONE, NULL_STR, 1);
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_NONE = %u to (%s:%d).\n",
-                CMD_NONE, ip_str, ke->ksn_cfg.r_port);
+                CMD_NONE, ip_str, ke->teo_cfg.r_port);
             #endif
 
             free(ip_str);
@@ -922,7 +922,7 @@ void idle_cb (EV_P_ ev_idle *w, int revents) {
         if(ke->ta) ke->ta->t_id = pthread_self();
         if(ke->event_cb != NULL) ke->event_cb(ke, EV_K_STARTED, NULL, 0, NULL);
         // Start host socket in the event manager
-        if(!ke->ksn_cfg.r_tcp_f) {
+        if(!ke->teo_cfg.r_tcp_f) {
             ev_io_start(ke->ev_loop, &ke->kc->host_w);
         }
     }
@@ -1304,13 +1304,13 @@ int modules_init(ksnetEvMgrClass *ke) {
     ke->kh = NULL;
 
     // Teonet core module
-    if((ke->kc = ksnCoreInit(ke, ke->ksn_cfg.host_name, ke->ksn_cfg.port, NULL)) == NULL) return 0;
+    if((ke->kc = ksnCoreInit(ke, ke->teo_cfg.host_name, ke->teo_cfg.port, NULL)) == NULL) return 0;
 
     // Hotkeys
-    if(!ke->ksn_cfg.block_cli_input_f && !ke->ksn_cfg.dflag) {
+    if(!ke->teo_cfg.block_cli_input_f && !ke->teo_cfg.dflag) {
         if(!ke->net_idx) ke->kh = ksnetHotkeysInit(ke);
         // Set filter from parameters
-        if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke, ke->ksn_cfg.filter);
+        if(ke->teo_cfg.filter[0]) teoHotkeySetFilter(ke, ke->teo_cfg.filter);
     }
 
     // Callback QUEUE
@@ -1435,7 +1435,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     ksnLNullDestroy(ke->kl);
     #endif
 
-    ke->ksn_cfg.port = ke->kc->port;
+    ke->teo_cfg.port = ke->kc->port;
     ksnetHotkeysDestroy(ke->kh);
     ksnCoreDestroy(ke->kc);
 

@@ -53,17 +53,17 @@ typedef enum ksnet_printf_type {
 #define _ksn_printf_format_display_m(format) "%s%s%s%s%d\b" format
 
 #define ksn_printf(ke, module, type, format, ...) \
-    ksnet_printf(&((ke)->ksn_cfg), type, \
+    ksnet_printf(&((ke)->teo_cfg), type, \
         _ksn_printf_format_(format), \
         _ksn_printf_type_(type), \
-        module[0] == '\0' ? (ke)->ksn_cfg.app_name : module, \
+        module[0] == '\0' ? (ke)->teo_cfg.app_name : module, \
         __func__, __FILE__, __LINE__, __VA_ARGS__)
 
 #define ksn_puts(ke, module, type, format) \
-    ksnet_printf(&((ke)->ksn_cfg), type, \
+    ksnet_printf(&((ke)->teo_cfg), type, \
         _ksn_printf_format_(format) "\n", \
         _ksn_printf_type_(type), \
-        module[0] == '\0' ? (ke)->ksn_cfg.app_name : module, \
+        module[0] == '\0' ? (ke)->teo_cfg.app_name : module, \
         __func__, __FILE__, __LINE__)
 
 
@@ -71,8 +71,8 @@ typedef enum ksnet_printf_type {
 extern "C" {
 #endif
 
-int teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message);        
-int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...);       
+int teoLogPuts(teonet_cfg *teo_cfg, const char* module , int type, const char* message);        
+int ksnet_printf(teonet_cfg *teo_cfg, int type, const char* format, ...);       
 char *ksnet_formatMessage(const char *fmt, ...);
 char *ksnet_sformatMessage(char *str_to_free, const char *fmt, ...);
 char *ksnet_vformatMessage(const char *fmt, va_list ap);
@@ -92,7 +92,7 @@ int set_reuseaddr(int sd);
 char* getDataPath(void);
 char *ksnet_getSysConfigDir(void);
 
-ksnet_stringArr getIPs(ksnet_cfg *conf);
+ksnet_stringArr getIPs(teonet_cfg *conf);
 int ip_is_private(char *ip);
 int ip_to_array(char* ip, uint8_t *arr);
 

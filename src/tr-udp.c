@@ -36,8 +36,8 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
  * @return Previous state
  */
 inline int ksnetAllowAckEvent(ksnetEvMgrClass* ke, int allow) {
-    int rv = ke->ksn_cfg.send_ack_event_f;
-    ke->ksn_cfg.send_ack_event_f = allow;
+    int rv = ke->teo_cfg.send_ack_event_f;
+    ke->teo_cfg.send_ack_event_f = allow;
     return rv;
 }
 
@@ -171,7 +171,7 @@ void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id,
     if(ke->event_cb != NULL) {
 
         #if KSNET_CRYPT
-        if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(
+        if(ke->teo_cfg.crypt_f && ksnCheckEncrypted(
                 data, data_length)) {
 
             data = ksnDecryptPackage(ke->kc->kcr, data,
@@ -475,7 +475,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             #endif
 
             // Send event ACK to teonet event loop
-            if(kev->ksn_cfg.send_ack_event_f)
+            if(kev->teo_cfg.send_ack_event_f)
                 trudp_send_event_ack_to_app(kev, trudpPacketGetId(packet),
                     trudpPacketGetData(packet), trudpPacketGetDataLength(packet),
                     (__CONST_SOCKADDR_ARG) &tcd->remaddr);

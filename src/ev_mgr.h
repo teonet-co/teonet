@@ -258,7 +258,7 @@ typedef struct ksnetEvMgrClass {
     ksnTDBClass *kf; ///< PBL KeyFile class
     ksnStreamClass *ks; ///< Stream class
 
-    ksnet_cfg ksn_cfg; ///< KSNet configuration
+    teonet_cfg teo_cfg; ///< KSNet configuration
 
     teoLoggingServerClass *ls; ///< Logging server class // \TODO move it up after testing
     teoLoggingClientClass *lc; ///< Logging client class // \TODO move it up after testing

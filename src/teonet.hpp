@@ -437,7 +437,7 @@ public:
    * @return
    */
   inline const char* getParam(int parm_number) const {
-    return getKe()->ksn_cfg.app_argv[parm_number];
+    return getKe()->teo_cfg.app_argv[parm_number];
   }
 
   /**
@@ -542,20 +542,20 @@ public:
 
 #ifdef DEBUG_KSNET
 #define teo_printf(module, type, format, ...)                                                      \
-  ksnet_printf(&((getKe())->ksn_cfg), type,                                                        \
+  ksnet_printf(&((getKe())->teo_cfg), type,                                                        \
                type != DISPLAY_M ? _ksn_printf_format_(format)                                     \
                                  : _ksn_printf_format_display_m(format),                           \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->ksn_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->teo_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0, __VA_ARGS__)
 
 #define teo_puts(module, type, format)                                                             \
-  ksnet_printf(&((getKe())->ksn_cfg), type,                                                        \
+  ksnet_printf(&((getKe())->teo_cfg), type,                                                        \
                type != DISPLAY_M ? _ksn_printf_format_(format) "\n"                                \
                                  : _ksn_printf_format_display_m(format) "\n",                      \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->ksn_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->teo_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0)
 

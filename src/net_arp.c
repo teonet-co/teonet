@@ -108,7 +108,7 @@ void ksnetArpAddHost(ksnetArpClass *ka) {
     ksnetEvMgrClass *ke = ka->ke;
     ksnet_arp_data_ext arp;
 
-    char* name = ke->ksn_cfg.host_name;
+    char* name = ke->teo_cfg.host_name;
     char *addr = (char*)localhost;
     int port = ke->kc->port;
 
@@ -214,7 +214,7 @@ void ksnetArpRemoveAll(ksnetArpClass *ka) {
     }
 
     pblMapFree(ka->map);
-    ke->ksn_cfg.r_host_name[0] = '\0';
+    ke->teo_cfg.r_host_name[0] = '\0';
     ka->map = pblMapNewHashMap();
     ksnetArpAddHost(ka);
     trudpChannelDestroyAll(ke->kc->ku);
@@ -696,10 +696,10 @@ int ksnetArpShow(ksnetArpClass *ka) {
     int num_line = 0;
     char *str = ksnetArpShowStr(ka);
 
-    ksnet_cfg *ksn_cfg = &((ksnetEvMgrClass*)ka->ke)->ksn_cfg;
-    ksnet_printf(ksn_cfg, DISPLAY_M, 
+    teonet_cfg *teo_cfg = &((ksnetEvMgrClass*)ka->ke)->teo_cfg;
+    ksnet_printf(teo_cfg, DISPLAY_M, 
             "%s%s", 
-            ksn_cfg->color_output_disable_f ? "" : _ANSI_CLS"\033[0;0H", str
+            teo_cfg->color_output_disable_f ? "" : _ANSI_CLS"\033[0;0H", str
     );
     num_line = calculate_lines(str);
 
