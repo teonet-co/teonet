@@ -29,6 +29,8 @@ typedef int socklen_t;
 #include "utils/teo_memory.h"
 #include "tr-udp.h"
 
+#include "commands_creator.h"
+
 // Constants
 const char *localhost = "::1";//"127.0.0.1";
 #define PACKET_HEADER_ADD_SIZE 2    // Sizeof from length + Sizeof command
@@ -678,19 +680,17 @@ void host_cb(EV_P_ ev_io *w, int revents) {
     ksnCoreSetEventTime(kc);
 }
 
-struct peer_type_req {
+typedef struct peer_type_req {
     ksnCoreClass *kc;
     char *addr;
     char *from;
     int port;
-};
-
-typedef struct peer_type_req peer_type_req_t;
+} peer_type_req_t;
 
 void peer_type_cb(uint32_t id, int type, void *data) {
     peer_type_req_t *type_req = data;
     if (!type) {//timeout // TODO: rename type
-        ksnet_arp_data_ext *arp_cque =  ksnetArpGet(type_req->kc->ka, type_req->from);
+        ksnet_arp_data_ext *arp_cque = ksnetArpGet(type_req->kc->ka, type_req->from);
         if (arp_cque) {
             ksnCoreSendto(type_req->kc, type_req->addr, type_req->port, CMD_HOST_INFO, NULL, 0);
             ksnetEvMgrClass *ke = type_req->kc->ke;
@@ -728,7 +728,8 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         //
         // The "connect_r" variable (0 by default) sets to 1 when this host is 
         // r-host and other peer send connect to r-host command
-        int mode = 0, connect_r = rd->cmd == CMD_CONNECT_R ? 1 : 0;
+        int mode = 0;
+        int connect_r = rd->cmd == CMD_CONNECT_R ? 1 : 0;
 
         // Check that this host connected to r-host
         if(!ke->teo_cfg.r_host_name[0] && ke->teo_cfg.r_port == rd->port &&
@@ -774,7 +775,17 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
         type_request->port = rd->port;
         ksnCQueData *cq = ksnCQueAdd(ke->kq, peer_type_cb, 1, type_request);
         rd->arp->cque_id_peer_type = cq->id;
+
+        if(rd->cmd == CMD_CONNECT_R) {
+            connect_r_packet_t *packet = rd->data;
+            printf("!!!!!!!%d, %d, %s, %s\n", packet->port, packet->ip_counts, packet->type, packet->ips);
+            rd->arp->type = strdup(packet->type);
+        }
+
         ksnetArpAdd(kc->ka, rd->from, rd->arp);
+
+
+
         rd->arp = ksnetArpGet(kc->ka, rd->from);
 
         // Send child address to r-host (useful when connect one r-host to another)

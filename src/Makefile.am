@@ -94,6 +94,7 @@ nobase_teonetinclude_HEADERS = \
     net_multi.h \
     net_recon.h \
     net_split.h \
+    commands_creator.h \
     tr-udp.h \
     tr-udp_stat.h \
     pidfile.h \
@@ -199,6 +200,7 @@ libteonet_la_SOURCES = \
     net_multi.c \
     net_recon.c \
     net_split.c \
+    commands_creator.c \
     tr-udp.c \
     tr-udp_stat.c \
     pidfile.c \

@@ -722,7 +722,6 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         size_t ptr = 0;
         size_t packet_size = 0;
         uint8_t *data = NULL;
-        ksnet_stringArr ips = NULL;
 
         // Start TCP Proxy client connection if it is allowed and is not connected
         if(ke->tp != NULL && ke->teo_cfg.r_tcp_f) {
@@ -731,47 +730,20 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
                 ksnTCPProxyClientConnect(ke->tp);
             }
 
-            // Create data with empty list of local IPs and port
-            data = malloc(sizeof(uint8_t));
-            uint8_t *num = (uint8_t *) data; // Pointer to number of IPs
-            ptr = sizeof(uint8_t); // Pointer (to first IP)
-            *num = 0; // Number of IPs
+            data = createCmdConnectRPacketTcp(ke, &packet_size);
         } else { // Create data for UDP connection
-
             data = createCmdConnectRPacketUdp(ke, &packet_size);
-            // Create data with list of local IPs and port
-            ips = getIPs(&ke->teo_cfg); // IPs array
-            uint8_t len = ksnet_stringArrLength(ips); // Max number of IPs
-            const size_t MAX_IP_STR_LEN = 16; // Max IPs string length
-            data = malloc(len * MAX_IP_STR_LEN + sizeof(uint8_t) + sizeof(uint32_t)); // Data
-            ptr = sizeof(uint8_t); // Pointer (to first IP)
-            uint8_t *num = (uint8_t *) data; // Pointer to number of IPs
-            *num = 0; // Number of IPs
-
-            // Fill data with IPs and Port
-            for(int i=0; i < len; i++) {
-
-                if(ip_is_private(ips[i])) {
-                    int ip_len =  strlen(ips[i]) + 1;
-                    memcpy(data + ptr, ips[i], ip_len); ptr += ip_len;
-                    (*num)++;
-                }
-
-            }
-
-            *((uint32_t *)(data + ptr)) = ke->kc->port; ptr += sizeof(uint32_t); // Port
         }
 
         // Send data to r-host
         ksnCoreSendto(ke->kc, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port,
-                      CMD_CONNECT_R, data, ptr);
+                      CMD_CONNECT_R, data, packet_size);
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT_R = %u to r-host peer by address %s:%d.\n",
             CMD_CONNECT_R, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port);
         #endif
 
         free(data);
-        ksnet_stringArrFree(&ips);
     }
 }
 

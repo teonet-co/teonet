@@ -18,6 +18,7 @@
 #include "modules/subscribe.h"
 #include "trudp_stat.h"
 
+#include "commands_creator.h"
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -719,21 +720,24 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
         ksnCQueExec(ke->kq, arp_cque->cque_id_peer_type);
     
         if(!rd->arp->type) {
-            
+            printf("No type!\n");
             host_info_data *hid = (host_info_data *)rd->data;
             char *type_str = teoGetFullAppTypeFromHostInfo(hid);
 
             // Add type to arp-table
             rd->arp->type = type_str;
-
+        } else {
+            printf("Type: %s\n", rd->arp->type);
+        }
             // Metrics
             char *met = ksnet_formatMessage("CON.%s", rd->from);
             teoMetricGauge(ke->tm, met, 1);
             free(met);
 
             // Send event callback
-            if(ke->event_cb != NULL)
+            if(ke->event_cb != NULL) {
                 ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
+            }
 
             // Send event to subscribers
             teoSScrSend(kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
@@ -745,7 +749,6 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
                 rd->cmd, rd->from, rd->addr, rd->port, rd->arp->data.addr, rd->arp->data.port, rd->arp->type);
             #endif
             retval = 1;
-        }
     }
 
     return retval; // Command send to user level
@@ -1130,7 +1133,7 @@ int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
 static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
+    ksnetArpClass *arp_obj = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV,
@@ -1148,16 +1151,14 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_NONE = %u to (%s:%d).\n",
             CMD_NONE, rd->addr, rd->port);
     #endif
-
-    // Parse command data
-    uint8_t *num_ip = rd->data; // Number of IPs
+    connect_r_packet_t *packet = rd->data;
 
     // For UDP connection resend received IPs to child
-    if(*num_ip) {
+    if(packet->ip_counts) {
         // Send peer address to child
-        ksnetArpGetAll(arp_class, send_cmd_connect_cb, rd);
+        ksnetArpGetAll(arp_obj, send_cmd_connect_cb, rd);
         // Send child address to peer
-        ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, rd);
+        ksnetArpGetAll(arp_obj, send_cmd_connect_cb_b, rd);
     } else {// For TCP proxy connection resend this host IPs to child
         rd->arp->data.mode = 2;
         ksnCorePacketData lrd;
@@ -1178,14 +1179,14 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             }
 
             // Send local addresses for child
-            ksnetArpGetAll(arp_class, send_cmd_connect_cb, &lrd);
+            ksnetArpGetAll(arp_obj, send_cmd_connect_cb, &lrd);
         }
 
         ksnet_stringArrFree(&ips);
 
         // Send main peer address to child
         lrd.addr = rd->arp->data.addr;
-        ksnetArpGetAll(arp_class, send_cmd_connect_cb, &lrd);
+        ksnetArpGetAll(arp_obj, send_cmd_connect_cb, &lrd);
     }
 
     return 1;
