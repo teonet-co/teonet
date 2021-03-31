@@ -112,6 +112,8 @@ unsigned char *ksn_base64_decode(const char *data,
 
 void dump_bytes(char *buffer, int buffer_len, uint8_t* data, int data_len);
 
+void printHexDump(void *addr, size_t len);
+
 #ifdef	__cplusplus
 }
 #endif

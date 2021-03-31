@@ -766,6 +766,45 @@ int ip_to_array(char* ip, uint8_t *arr) {
     return i;
 }
 
+void printHexDump(void *addr, size_t len)  {
+    unsigned char buf[17];
+    unsigned char *pc = addr;
+    size_t i = 0;
+    for (i = 0; i < len; i++) {
+        if ((i % 16) == 0) {
+            if (i != 0) {
+                printf("  %s\n", buf);
+            }
+
+            // print offset.
+            printf("  %04lx ", i);
+        }
+
+        // Now the hex code for the specific character.
+        printf(" %02x", pc[i]);
+        if ((i % 8) == 0) {
+            printf("  ");
+        }
+
+        // And store a printable ASCII character for later.
+        if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
+            buf[i % 16] = '.';
+        } else {
+            buf[i % 16] = pc[i];
+        }
+
+        buf[(i % 16) + 1] = '\0';
+    }
+
+
+    while ((i % 16) != 0) {
+        printf("   ");
+        i++;
+    }
+
+    printf("    %s\n", buf);
+}
+
 /**
  * Detect if input IP address is private
  *

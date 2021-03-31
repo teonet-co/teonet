@@ -735,11 +735,13 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         // Send data to r-host
         ksnCoreSendto(ke->kc, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port,
                       CMD_CONNECT_R, data, packet_size);
+
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT_R = %u to r-host peer by address %s:%d.\n",
             CMD_CONNECT_R, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port);
         #endif
 
+        printHexDump(data, packet_size);
         free(data);
     }
 }
