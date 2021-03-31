@@ -717,9 +717,6 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         ksn_printf(ke, MODULE, DEBUG, "connect to r-host: %s\n", ke->teo_cfg.r_host_addr);
         #endif
 
-        // check_connection_f = 0;
-
-        size_t ptr = 0;
         size_t packet_size = 0;
         uint8_t *data = NULL;
 
