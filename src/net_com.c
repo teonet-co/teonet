@@ -720,14 +720,14 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
         ksnCQueExec(ke->kq, arp_cque->cque_id_peer_type);
     
         if(!rd->arp->type) {
-            printf("No type!\n");
             host_info_data *hid = (host_info_data *)rd->data;
             char *type_str = teoGetFullAppTypeFromHostInfo(hid);
 
             // Add type to arp-table
             rd->arp->type = type_str;
+            printf("notype... Peername %s, Type: %s\n", rd->from, rd->arp->type);
         } else {
-            printf("Type: %s\n", rd->arp->type);
+            printf("Peername %s, Type: %s\n", rd->from, rd->arp->type);
         }
             // Metrics
             char *met = ksnet_formatMessage("CON.%s", rd->from);

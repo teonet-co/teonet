@@ -20,7 +20,17 @@ uint8_t* createCmdConnectRPacketUdp(ksnetEvMgrClass *event_manager, size_t *size
     packet->port = event_manager->kc->port;
 
     const char* type = teoGetAppType(event_manager);
-    strncpy(packet->type, type, sizeof(packet->type));
+
+    size_t hid_len;
+    host_info_data *hid = teoGetHostInfo(event_manager, &hid_len);
+
+    if(hid != NULL) {
+        char* full_type = teoGetFullAppTypeFromHostInfo(hid);
+        strncpy(packet->type, full_type, sizeof(packet->type));
+        free(hid);
+    } else {
+        strncpy(packet->type, type, sizeof(packet->type));
+    }
 
     size_t ptr = 0;
 

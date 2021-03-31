@@ -778,14 +778,10 @@ void ksnCoreCheckNewPeer(ksnCoreClass *kc, ksnCorePacketData *rd) {
 
         if(rd->cmd == CMD_CONNECT_R) {
             connect_r_packet_t *packet = rd->data;
-            printf("!!!!!!!%d, %d, %s, %s\n", packet->port, packet->ip_counts, packet->type, packet->ips);
             rd->arp->type = strdup(packet->type);
         }
 
         ksnetArpAdd(kc->ka, rd->from, rd->arp);
-
-
-
         rd->arp = ksnetArpGet(kc->ka, rd->from);
 
         // Send child address to r-host (useful when connect one r-host to another)
