@@ -543,17 +543,6 @@ char *getExecPath (char *path, size_t dest_len, char *argv0) {
 #endif
 
 #ifndef HAVE_MINGW
-// Moved to teonet_lo_client.c
-///**
-// * Set socket or FD to non blocking mode
-// */
-//void set_nonblock(int fd) {
-//
-//    int flags;
-//
-//    flags = fcntl(fd, F_GETFL, 0);
-//    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-//}
 
 /**
  * Make socket reusable
@@ -766,6 +755,21 @@ int ip_to_array(char* ip, uint8_t *arr) {
     return i;
 }
 
+
+/*
+    Example of output printHexDump function for connect_r_packet_t struct
+
+  0000  8a 1b 00 00 04 22 74 65   6f 2d 76 70 6e 22 2c 20    ....."teo-vpn", 
+  0010  22 74 65 6f 2d 6c 30 22   00 00 00 00 00 00 00 00    "teo-l0"........
+  0020  00 00 00 00 00 00 00 00   00 00 00 00 00 00 00 00    ................
+  0030  00 00 00 00 00 00 00 00   00 00 00 00 00 00 00 00    ................
+  0040  00 00 00 00 00 31 39 32   2e 31 36 38 2e 31 2e 36    .....192.168.1.6
+  0050  39 00 31 39 32 2e 31 36   38 2e 31 32 32 2e 31 00    9.192.168.122.1.
+  0060  31 37 32 2e 31 37 2e 30   2e 31 00 31 30 2e 31 33    172.17.0.1.10.13
+  0070  35 2e 31 34 32 2e 38 33   00 00 00 00 00 00 00 00    5.142.83........
+  0080  00 00 00 00 00 00 00 00   00 00 00 00 00 00 00 00    ................
+  0090  00 00 00 00 00                                       .....
+*/
 void printHexDump(void *addr, size_t len)  {
     unsigned char buf[17];
     unsigned char *pc = addr;
@@ -782,7 +786,7 @@ void printHexDump(void *addr, size_t len)  {
 
         // Now the hex code for the specific character.
         printf(" %02x", pc[i]);
-        if ((i % 8) == 0) {
+        if (((i+1) % 8) == 0) {
             printf("  ");
         }
 
@@ -802,7 +806,7 @@ void printHexDump(void *addr, size_t len)  {
         i++;
     }
 
-    printf("    %s\n", buf);
+    printf("      %s\n", buf);
 }
 
 /**

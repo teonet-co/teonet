@@ -1135,11 +1135,11 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
     ksnetArpClass *arp_obj = ARP_TABLE_OBJECT(kco);
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV,
+    //#ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG,
         "process CMD_CONNECT_R = %u command, from %s (%s:%d)\n",
         rd->cmd, rd->from, rd->addr, rd->port);
-    #endif
+    //#endif
 
     // Set flag isRhost
     ke->is_rhost = true;
@@ -1152,7 +1152,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             CMD_NONE, rd->addr, rd->port);
     #endif
     connect_r_packet_t *packet = rd->data;
-
+    printHexDump(packet, rd->data_len);
     // For UDP connection resend received IPs to child
     if(packet->ip_counts) {
         // Send peer address to child
@@ -1249,10 +1249,10 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     pd.addr = rd->data + ptr; ptr += strlen(pd.addr) + 1;
     pd.port = *((uint32_t *)(rd->data + ptr));
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_CONNECT = %u from %s (%s:%d). (Connect to %s (%s:%d))\n", 
+    // #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG, "process CMD_CONNECT = %u from %s (%s:%d). (Connect to %s (%s:%d))\n",
             rd->cmd, rd->from, rd->addr, rd->port, pd.name, pd.addr, pd.port);
-    #endif
+    // #endif
 
     // Check ARP
     if(ksnetArpGet(arp_class, pd.name) == NULL) {

@@ -15,7 +15,7 @@ uint8_t* createCmdConnectRPacketUdp(ksnetEvMgrClass *event_manager, size_t *size
 
     *size_out = sizeof(connect_r_packet_t) + len * MAX_IP_STR_LEN;
     connect_r_packet_t *packet = malloc(*size_out);
-
+    memset(packet, '\0', *size_out);
     packet->ip_counts = 0;
     packet->port = event_manager->kc->port;
 
