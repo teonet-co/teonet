@@ -3,7 +3,7 @@
 * \author max
 * Created on Mon Mar 29 17:14:47 2021
 */
-
+#include <assert.h>
 #include "commands_creator.h"
 
 uint8_t* createCmdConnectRPacketUdp(ksnetEvMgrClass *event_manager, size_t *size_out) {
@@ -33,7 +33,9 @@ uint8_t* createCmdConnectRPacketUdp(ksnetEvMgrClass *event_manager, size_t *size
     // Fill data with IPs and Port
     for(int i = 0; i < len; i++) {
         if(ip_is_private(ips[i])) {
+            assert((len * MAX_IP_STR_LEN) > ptr);
             int ip_len =  strlen(ips[i]) + 1;
+            assert((ptr + ip_len) <= (len * MAX_IP_STR_LEN));
             memcpy(packet->ips + ptr, ips[i], ip_len);
             ptr += ip_len;
             packet->ip_counts++;

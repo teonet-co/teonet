@@ -723,7 +723,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         // Start TCP Proxy client connection if it is allowed and is not connected
         if(ke->tp != NULL && ke->teo_cfg.r_tcp_f) {
             // Start TCP proxy client
-            if(ke->tp->fd_client == 0) {
+            if(!(ke->tp->fd_client > 0)) {
                 ksnTCPProxyClientConnect(ke->tp);
             }
 
