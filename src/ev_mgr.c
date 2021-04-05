@@ -718,7 +718,7 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
         #endif
 
         size_t packet_size = 0;
-        uint8_t *data = NULL;
+        uint8_t *packet = NULL;
 
         // Start TCP Proxy client connection if it is allowed and is not connected
         if(ke->tp != NULL && ke->teo_cfg.r_tcp_f) {
@@ -727,22 +727,22 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
                 ksnTCPProxyClientConnect(ke->tp);
             }
 
-            data = createCmdConnectRPacketTcp(ke, &packet_size);
+            packet = createCmdConnectRPacketTcp(ke, &packet_size);
         } else { // Create data for UDP connection
-            data = createCmdConnectRPacketUdp(ke, &packet_size);
+            packet = createCmdConnectRPacketUdp(ke, &packet_size);
         }
 
         // Send data to r-host
         ksnCoreSendto(ke->kc, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port,
-                      CMD_CONNECT_R, data, packet_size);
+                      CMD_CONNECT_R, packet, packet_size);
 
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT_R = %u to r-host peer by address %s:%d.\n",
             CMD_CONNECT_R, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port);
         #endif
 
-        printHexDump(data, packet_size);
-        free(data);
+        printHexDump(packet, packet_size);
+        free(packet);
     }
 }
 

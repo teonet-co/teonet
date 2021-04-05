@@ -802,11 +802,14 @@ void printHexDump(void *addr, size_t len)  {
 
 
     while ((i % 16) != 0) {
+        if (((i+1) % 8) == 0) {
+            printf("  ");
+        }
         printf("   ");
         i++;
     }
 
-    printf("      %s\n", buf);
+    printf("  %s\n", buf);
 }
 
 /**
