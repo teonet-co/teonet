@@ -1151,7 +1151,6 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     #endif
 
     connect_r_packet_t *packet = rd->data;
-    printHexDump(packet, rd->data_len);
 
     // For UDP connection resend received IPs to child
     if(packet->ip_counts) {

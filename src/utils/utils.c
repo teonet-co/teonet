@@ -812,6 +812,32 @@ void printHexDump(void *addr, size_t len)  {
     printf("  %s\n", buf);
 }
 
+void resolveDnsName(teonet_cfg *conf) {
+    memset(conf->r_host_addr, '\0', sizeof(conf->r_host_addr));
+
+    const char *localhost_str = "localhost";
+    if (!strncmp(localhost_str, conf->r_host_addr_opt, strlen(localhost_str))) {
+        const char *localhost_num = "::1";
+        strncpy((char*)conf->r_host_addr, localhost_num, strlen(localhost_num));
+    } else {
+        struct addrinfo hint;
+        struct addrinfo *res = NULL;
+        memset(&hint, '\0', sizeof hint);
+
+        hint.ai_family = PF_UNSPEC;
+
+        int ret = getaddrinfo(conf->r_host_addr_opt, NULL, &hint, &res);
+        if (ret) {
+            fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
+            exit(1);
+        }
+
+        addr_port_t *ap_obj = wrap_inet_ntop(res->ai_addr);
+        strncpy((char*)conf->r_host_addr, ap_obj->addr, KSN_BUFFER_SM_SIZE/2);
+        addr_port_free(ap_obj);
+        freeaddrinfo(res);
+    }
+}
 /**
  * Detect if input IP address is private
  *

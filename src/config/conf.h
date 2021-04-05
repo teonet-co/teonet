@@ -108,6 +108,7 @@ typedef struct teonet_cfg {
     char filter[KSN_BUFFER_SM_SIZE/2];      ///<  Display log filter
 
     // R-Host
+    char r_host_addr_opt[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address or dns name derived from options
     char r_host_addr[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address
     long r_port;                            ///< Remote host port
     long r_tcp_port;                        ///< Remote host tcp port
