@@ -135,7 +135,7 @@ ssize_t teo_recvfrom (ksnetEvMgrClass* ke,
     ssize_t recvlen = 0; 
 
     // Get data from TCP Proxy buffer 
-    if(!fd && ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
+    if(!fd && ke->teo_cfg.r_tcp_f && ke->tp->fd_client > 0) {
         
         if(buffer_len >= ke->tp->packet.header->packet_length) {
 
@@ -202,7 +202,7 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
     ssize_t sendlen = 0;
 
     // Sent data to TCP Proxy
-    if(ke->ksn_cfg.r_tcp_f && ke->tp->fd_client > 0) {
+    if(ke->teo_cfg.r_tcp_f && ke->tp->fd_client > 0) {
         // Send TCP package
         sendlen = ksnTCPProxySendTo(ke, CMD_TCPP_PROXY, buffer, buffer_len, addr);
         
@@ -472,7 +472,7 @@ void cmd_tcppc_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
  */
 int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
    
-    if(kev->ksn_cfg.r_tcp_f) {
+    if(kev->teo_cfg.r_tcp_f) {
         
         // Initialize client input packet buffer parameters
         tp->packet.ptr = 0; // Pointer to data end in packet buffer
@@ -483,11 +483,11 @@ int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
         // Connect to R-Host TCP Server
         int fd_client = ksnTcpClientCreate(
                 kev->kt, // Pointer to ksnTcpClass
-                kev->ksn_cfg.r_tcp_port, // Remote host TCP port number
-                kev->ksn_cfg.r_host_addr // Remote host net address
+                kev->teo_cfg.r_tcp_port, // Remote host TCP port number
+                kev->teo_cfg.r_host_addr // Remote host net address
         );
         
-        if(fd_client > 0) {
+        if(fd_client >= 0) {
             
             // Set TCP_NODELAY option
             teosockSetTcpNodelay(fd_client);
@@ -506,7 +506,7 @@ int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG, 
                 "TCP Proxy client fd %d started at port %d\n", 
-                fd_client, kev->ksn_cfg.r_tcp_port);
+                fd_client, kev->teo_cfg.r_tcp_port);
             #endif
         }
     }
@@ -523,7 +523,7 @@ int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
  */
 void ksnTCPProxyClientStop(ksnTCPProxyClass *tp) {
     
-    if(kev->ksn_cfg.r_tcp_f) {
+    if(kev->teo_cfg.r_tcp_f) {
         
         if(tp->fd_client > 0) {
             
@@ -872,13 +872,13 @@ int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
     
     int fd = 0;
     
-    if(kev->ksn_cfg.tcp_allow_f) {
+    if(kev->teo_cfg.tcp_allow_f) {
         
         // Create TCP server at port, which will wait client connections
         int port_created;
         if((fd = ksnTcpServerCreate(
                     kev->kt, 
-                    kev->ksn_cfg.tcp_port,
+                    kev->teo_cfg.tcp_port,
                     cmd_tcpp_accept_cb, 
                     tp, 
                     &port_created)) > 0) {
@@ -887,7 +887,7 @@ int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
                     "TCP Proxy server fd %d started at port %d\n", 
                     fd, port_created);
 
-            kev->ksn_cfg.tcp_port = port_created;
+            kev->teo_cfg.tcp_port = port_created;
             tp->fd = fd;
         }
     }
@@ -908,7 +908,7 @@ int ksnTCPProxyServerStart(ksnTCPProxyClass *tp) {
 void ksnTCPProxyServerStop(ksnTCPProxyClass *tp) {
     
     // If server started
-    if(kev->ksn_cfg.tcp_allow_f && tp->fd) {
+    if(kev->teo_cfg.tcp_allow_f && tp->fd) {
         
         // Disconnect all clients
         PblIterator *it = pblMapIteratorReverseNew(tp->map);
@@ -952,7 +952,7 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     // Set TCP_NODELAY option
     teosockSetTcpNodelay(fd);
 
-    int udp_proxy_fd, udp_proxy_port = kev->ksn_cfg.port;
+    int udp_proxy_fd, udp_proxy_port = kev->teo_cfg.port;
 
     ksn_printf(kev, MODULE, CONNECT, "TCP Proxy client fd %d connected\n", fd);
 
@@ -960,7 +960,7 @@ void ksnTCPProxyServerClientConnect(ksnTCPProxyClass *tp, int fd) {
     ksn_printf(kev, MODULE, CONNECT, 
             "create UDP client/server Proxy at port %d ...\n", 
             udp_proxy_port);
-    udp_proxy_fd = ksnCoreBindRaw(&udp_proxy_port, kev->ksn_cfg.port_inc_f);
+    udp_proxy_fd = ksnCoreBindRaw(&udp_proxy_port, kev->teo_cfg.port_inc_f);
     ksn_printf(kev, MODULE, CONNECT, 
             "UDP client/server Proxy fd %d created at port %d\n", 
             udp_proxy_fd,

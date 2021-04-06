@@ -35,8 +35,8 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data,
 #define ke_emul() \
   ksnetEvMgrClass ke_obj; \
   ksnetEvMgrClass *ke = &ke_obj; \
-  ke->ksn_cfg.tcp_allow_f = 0; \
-  ke->ksn_cfg.r_tcp_f = 0
+  ke->teo_cfg.tcp_allow_f = 0; \
+  ke->teo_cfg.r_tcp_f = 0
 
 //! Initialize/Destroy TCP Proxy module
 void test_5_1() {

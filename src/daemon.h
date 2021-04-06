@@ -14,7 +14,7 @@
 extern "C" {
 #endif
 
-void start_stop_daemon(char **argv, ksnet_cfg *conf);
+void start_stop_daemon(char **argv, teonet_cfg *conf);
 
 #ifdef	__cplusplus
 }

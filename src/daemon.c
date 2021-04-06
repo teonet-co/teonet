@@ -65,9 +65,9 @@ void kill_other (char **argv, int other_pid) {
  * Start or stop daemon mode
  *
  * @param argv Application argv argument
- * @param conf Pointer to ksnet_cfg structure
+ * @param conf Pointer to teonet_cfg structure
  */
-void start_stop_daemon(char **argv, ksnet_cfg *conf) {
+void start_stop_daemon(char **argv, teonet_cfg *conf) {
 
     if(!(conf->dflag || conf->kflag)) return;
 

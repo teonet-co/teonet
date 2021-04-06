@@ -35,9 +35,9 @@ static void send_auth_answer(void *nc_p, char* err, char *result);
  */
 #define nc ((struct mg_connection *)nc_p)
 /**
- * Pointer to ksnet_cfg structure
+ * Pointer to teonet_cfg structure
  */
-//#define ksn_conf &((ksnetEvMgrClass*)kws->kh->ke)->ksn_cfg
+//#define ksn_conf &((ksnetEvMgrClass*)kws->kh->ke)->teo_cfg
 #define kev ((ksnetEvMgrClass*)kws->kh->ke)
 /**
  * This module label

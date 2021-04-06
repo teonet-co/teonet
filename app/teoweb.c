@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
     teoSetAppVersion(ke, TWEB_VERSION);
 
     // Read teoweb configuration
-    teowebConfigRead(tm.tw_cfg, ke->ksn_cfg.network, ke->ksn_cfg.port);
+    teowebConfigRead(tm.tw_cfg, ke->teo_cfg.network, ke->teo_cfg.port);
     
     // Start teonet
     ksnetEvMgrRun(ke);

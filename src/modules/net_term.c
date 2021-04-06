@@ -50,7 +50,7 @@ ksnTermClass *ksnTermInit(void *ke) {
     // Check configuration, create TCP server and start Terminal telnet CLI server
     //! \todo: Check configuration
     int fd, port_created, // port = CLI_PORT,
-        port = kev->ksn_cfg.port;
+        port = kev->teo_cfg.port;
 
     // Start TCP server
     if((fd = ksnTcpServerCreate(((ksnetEvMgrClass*)ke)->kt, port, ksnet_accept_cb, kter,
@@ -182,10 +182,10 @@ int cmd_ksnet_show(struct cli_def *cli, const char *command, char *argv[], int a
             "Host port:       %18d\n"
             "Remote address:  %18s\n"
             "Remote port:     %18d\n"
-            , cli->ke->ksn_cfg.host_name
-            , (int) cli->ke->ksn_cfg.port
-            , cli->ke->ksn_cfg.r_host_addr
-            , (int) cli->ke->ksn_cfg.r_port
+            , cli->ke->teo_cfg.host_name
+            , (int) cli->ke->teo_cfg.port
+            , cli->ke->teo_cfg.r_host_addr
+            , (int) cli->ke->teo_cfg.r_port
     );
 
     return CLI_OK;
@@ -208,7 +208,7 @@ int cmd_ksnet_set_peers_f(struct cli_def *cli, const char *command, char *argv[]
     }
     else {
         int show_peers_f = atoi(argv[0]);
-        cli->ke->ksn_cfg.show_peers_f = show_peers_f != 0;
+        cli->ke->teo_cfg.show_peers_f = show_peers_f != 0;
     }
 
     return CLI_OK;
@@ -224,7 +224,7 @@ int cmd_ksnet_set_tr_udp_f(struct cli_def *cli, const char *command, char *argv[
     }
     else {
         int show_tr_udp_f = atoi(argv[0]);
-        cli->ke->ksn_cfg.show_tr_udp_f = show_tr_udp_f != 0;
+        cli->ke->teo_cfg.show_tr_udp_f = show_tr_udp_f != 0;
     }
 
     return CLI_OK;
@@ -245,14 +245,14 @@ int cmd_ksnet_set_debug_f(struct cli_def *cli, const char *command, char *argv[]
     if (argc < 1 || strcmp(argv[0], "?") == 0) {
         cli_print(cli,
             "Specify show debug messages value: 0 - don't show; 1 - show\n"
-            "(current value is: %d)", cli->ke->ksn_cfg.show_debug_f);
+            "(current value is: %d)", cli->ke->teo_cfg.show_debug_f);
         return CLI_OK;
     }
     else {
         int show_debug_f = atoi(argv[0]);
-        cli->ke->ksn_cfg.show_debug_f = show_debug_f != 0;
+        cli->ke->teo_cfg.show_debug_f = show_debug_f != 0;
         cli_print(cli, "Teonet debug flag was set to: %d",
-                  cli->ke->ksn_cfg.show_debug_f);
+                  cli->ke->teo_cfg.show_debug_f);
     }
 
     return CLI_OK;
@@ -273,14 +273,14 @@ int cmd_ksnet_extend_l0_log_f(struct cli_def *cli, const char *command, char *ar
     if (argc < 1 || strcmp(argv[0], "?") == 0) {
         cli_print(cli,
             "Specify extend L0 DEBUG logs flag value: 0 - don't show; 1 - show\n"
-            "(current value is: %d)", cli->ke->ksn_cfg.extended_l0_log_f);
+            "(current value is: %d)", cli->ke->teo_cfg.extended_l0_log_f);
         return CLI_OK;
     }
     else {
         int extended_l0_log_f = atoi(argv[0]);
-        cli->ke->ksn_cfg.extended_l0_log_f = extended_l0_log_f != 0;
+        cli->ke->teo_cfg.extended_l0_log_f = extended_l0_log_f != 0;
         cli_print(cli, "Teonet extend L0 DEBUG logs flag was set to: %d",
-                  cli->ke->ksn_cfg.extended_l0_log_f);
+                  cli->ke->teo_cfg.extended_l0_log_f);
     }
 
     return CLI_OK;
@@ -301,14 +301,14 @@ int cmd_ksnet_set_debug_vv_f(struct cli_def *cli, const char *command, char *arg
     if (argc < 1 || strcmp(argv[0], "?") == 0) {
         cli_print(cli,
             "Specify show debug_vv messages value: 0 - don't show; 1 - show\n"
-            "(current value is: %d)", cli->ke->ksn_cfg.show_debug_vv_f);
+            "(current value is: %d)", cli->ke->teo_cfg.show_debug_vv_f);
         return CLI_OK;
     }
     else {
         int show_debug_vv_f = atoi(argv[0]);
-        cli->ke->ksn_cfg.show_debug_vv_f = show_debug_vv_f != 0;
+        cli->ke->teo_cfg.show_debug_vv_f = show_debug_vv_f != 0;
         cli_print(cli, "Teonet debug_vv flag was set to: %d",
-                  cli->ke->ksn_cfg.show_debug_vv_f);
+                  cli->ke->teo_cfg.show_debug_vv_f);
     }
 
     return CLI_OK;
@@ -552,7 +552,7 @@ struct cli_def *ksnTermCliInit(ksnTermClass *kter) {
 
     cli_set_banner(cli, "Teonet terminal server environment, ver. " VERSION
                         "\n(press Ctrl+D to quit)");
-    cli_set_hostname(cli, kev->ksn_cfg.host_name);
+    cli_set_hostname(cli, kev->teo_cfg.host_name);
     cli_telnet_protocol(cli, 1);
     cli_regular(cli, regular_callback);
     cli_regular_interval(cli, 5); // Defaults to 1 second

@@ -97,7 +97,7 @@ ksnLNullClass *ksnLNullInit(void *ke) {
 
     ksnLNullClass *kl = NULL;
 
-    if(((ksnetEvMgrClass*)ke)->ksn_cfg.l0_allow_f) {
+    if(((ksnetEvMgrClass*)ke)->teo_cfg.l0_allow_f) {
 
         kl = malloc(sizeof(ksnLNullClass));
         if(kl != NULL)  {
@@ -200,7 +200,7 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
         //        }
         //        #ifdef DEBUG_KSNET
         //        ksnet_printf(
-        //            &ke->ksn_cfg, DEBUG,
+        //            &ke->teo_cfg, DEBUG,
         //            "%sl0 Server:%s "
         //            "Read error ...%s\n",
         //            ANSI_LIGHTCYAN, ANSI_RED, ANSI_NONE
@@ -382,7 +382,7 @@ ksnLNullSStat *ksnLNullStat(ksnLNullClass *kl) {
 static int extendedLog(ksnLNullClass *kl) {
     int log_level = DEBUG_VV;
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
-    if(ke->ksn_cfg.l0_allow_f && ke->ksn_cfg.extended_l0_log_f) {
+    if(ke->teo_cfg.l0_allow_f && ke->teo_cfg.extended_l0_log_f) {
         log_level = DEBUG;
     }
     return log_level;
@@ -773,13 +773,13 @@ static void confirmAuth(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     // Create L0 packet
-    size_t out_data_len = sizeof(teoLNullCPacket) + strlen(ke->ksn_cfg.host_name) + 1 + kld->name_length + 1;
+    size_t out_data_len = sizeof(teoLNullCPacket) + strlen(ke->teo_cfg.host_name) + 1 + kld->name_length + 1;
     char *out_data = malloc(out_data_len);
     memset(out_data, 0, out_data_len);
 
     size_t packet_length =
         teoLNullPacketCreate(out_data, out_data_len,
-                                CMD_CONFIRM_AUTH, ke->ksn_cfg.host_name, (uint8_t*)kld->name, kld->name_length + 1);
+                                CMD_CONFIRM_AUTH, ke->teo_cfg.host_name, (uint8_t*)kld->name, kld->name_length + 1);
 
     // Send confirmation of the client name
     ssize_t send_size = ksnLNullPacketSend(kl, fd, out_data, packet_length);
@@ -800,7 +800,7 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         int fd, teoLNullCPacket *packet) {
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
-    if (((ksnetEvMgrClass*)kl->ke)->ksn_cfg.auth_secret[0] == '\0') {
+    if (((ksnetEvMgrClass*)kl->ke)->teo_cfg.auth_secret[0] == '\0') {
         ksn_printf(ke, MODULE, DEBUG, "secret not provided, disconnect %d\n", fd);
         ksnLNullClientDisconnect(kl, fd, 1);
         return false;
@@ -821,7 +821,7 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
         return false;
     }
 
-    if (!checkAuthData(kl, &name, &auth_data_valid_until, &sign, ((ksnetEvMgrClass*)kl->ke)->ksn_cfg.auth_secret)) {
+    if (!checkAuthData(kl, &name, &auth_data_valid_until, &sign, ((ksnetEvMgrClass*)kl->ke)->teo_cfg.auth_secret)) {
         ksn_printf(ke, MODULE, DEBUG,"Failed to verify signature '%.*s' - '%.*s' - '%.*s' received from fd %d\n",
             name.len,
             name.data,
@@ -1192,13 +1192,13 @@ static int ksnLNullStart(ksnLNullClass *kl) {
 
     int fd = 0;
 
-    if(ke->ksn_cfg.l0_allow_f) {
+    if(ke->teo_cfg.l0_allow_f) {
 
         // Create l0 server at port, which will wait client connections
         int port_created;
         if((fd = ksnTcpServerCreate(
                     ke->kt,
-                    ke->ksn_cfg.l0_tcp_port,
+                    ke->teo_cfg.l0_tcp_port,
                     cmd_l0_accept_cb,
                     kl,
                     &port_created)) > 0) {
@@ -1207,7 +1207,7 @@ static int ksnLNullStart(ksnLNullClass *kl) {
                     "l0 server fd %d started at port %d\n",
                     fd, port_created);
 
-            ke->ksn_cfg.l0_tcp_port = port_created;
+            ke->teo_cfg.l0_tcp_port = port_created;
             kl->fd = fd;
 
             // Init check clients cque
@@ -1231,7 +1231,7 @@ static void ksnLNullStop(ksnLNullClass *kl) {
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kl);
 
     // If server started
-    if(ke->ksn_cfg.l0_allow_f && kl->fd) {
+    if(ke->teo_cfg.l0_allow_f && kl->fd) {
 
         // Disconnect all clients
         PblIterator *it = pblMapIteratorReverseNew(kl->map);
@@ -1264,7 +1264,7 @@ static void ksnLNullStop(ksnLNullClass *kl) {
  */
 int cmd_l0_broadcast_cb(ksnetEvMgrClass *ke, ksnCorePacketData *rd) {
     int retval = 0;
-    if(ke->ksn_cfg.l0_allow_f) {
+    if(ke->teo_cfg.l0_allow_f) {
         ksnLNullSendBroadcast(ke->kl, rd->cmd, rd->data, rd->data_len);
         retval = 1;
     }
@@ -1682,7 +1682,7 @@ teonet_client_data_ar *ksnLNullClientsList(ksnLNullClass *kl) {
 
     teonet_client_data_ar *data_ar = NULL;
 
-    if(kl != NULL && ke->ksn_cfg.l0_allow_f && kl->fd) {
+    if(kl != NULL && ke->teo_cfg.l0_allow_f && kl->fd) {
 
         uint32_t length = pblMapSize(kl->map);
         data_ar = malloc(sizeof(teonet_client_data_ar) +

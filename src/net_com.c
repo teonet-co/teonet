@@ -18,6 +18,7 @@
 #include "modules/subscribe.h"
 #include "trudp_stat.h"
 
+#include "commands_creator.h"
 
 // Local functions
 static int cmd_echo_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
@@ -291,13 +292,9 @@ int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, size_t dat
     return arp != NULL;
 }
 
-void fillConnectData(char *data, size_t *ptr, char *name, char *addr, uint32_t port) {
-    strncpy(data, name, KSN_BUFFER_DB_SIZE); *ptr = strlen(name) + 1;
-    strncpy(data + *ptr, addr, KSN_BUFFER_DB_SIZE - *ptr); *ptr += strlen(addr) + 1;
-    *((uint32_t *)(data + *ptr)) = port; *ptr += sizeof(uint32_t);
-}
+
 /**
- * Send CONNECTED command to peer
+ * Send CMD_CONNECT command to peer
  *
  * @param kco Pointer to ksnCommandClass
  * @param to Send command to peer name
@@ -309,21 +306,21 @@ void fillConnectData(char *data, size_t *ptr, char *name, char *addr, uint32_t p
 int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
         char *addr, uint32_t port) {
 
-    // Create command data
-    size_t ptr = 0;
-    char data[KSN_BUFFER_DB_SIZE];
+    ksnetEvMgrClass *event_manager = EVENT_MANAGER_OBJECT(kco);
 
-    fillConnectData(data, &ptr, name, addr, port);
-
-    // TODO: duplicate code
-    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
+    size_t packet_size = 0;
+    uint8_t *packet = createCmdConnectPacket(event_manager, name, addr, port, &packet_size);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by name %s. (Connect to peer: %s, addr: %s:%d)\n",
+    ksn_printf(event_manager, MODULE, DEBUG, "send CMD_CONNECT = %u to peer by name %s. (Connect to peer: %s, addr: %s:%d)\n",
         CMD_CONNECT, to, name, addr, port);
     #endif
 
-    return ksnCoreSendCmdto(kco->kc, to, CMD_CONNECT, data, ptr) != NULL;
+    int ret = ksnCoreSendCmdto(kco->kc, to, CMD_CONNECT, packet, packet_size) != NULL;
+
+    free(packet);
+
+    return ret;
 }
 
 /**
@@ -340,19 +337,21 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
 int ksnCommandSendCmdConnectA(ksnCommandClass *kco, char *to_addr, uint32_t to_port, 
         char *name, char *addr, uint32_t port) {
 
-    // Create command data
-    size_t ptr = 0;
-    char data[KSN_BUFFER_DB_SIZE];
-    fillConnectData(data, &ptr, name, addr, port);
-    // TODO: duplicate code
-    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
+    ksnetEvMgrClass *event_manager = EVENT_MANAGER_OBJECT(kco);
+
+    size_t packet_size = 0;
+    uint8_t *packet = createCmdConnectPacket(event_manager, name, addr, port, &packet_size);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by address %s:%d. (Connect to peer: %s, addr: %s:%d)\n",
+    ksn_printf(event_manager, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by address %s:%d. (Connect to peer: %s, addr: %s:%d)\n",
         CMD_CONNECT, to_addr, to_port, name, addr, port);
     #endif
 
-    return ksnCoreSendto(kco->kc, to_addr, to_port, CMD_CONNECT, data, ptr);
+    int ret = ksnCoreSendto(kco->kc, to_addr, to_port, CMD_CONNECT, packet, packet_size);
+
+    free(packet);
+
+    return ret;
 }
 
 /**
@@ -433,7 +432,7 @@ static int cmd_echo_unr_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_PEERS (cmd = %u) command, from %s (%s:%d)\n",
@@ -479,7 +478,7 @@ static int cmd_peers_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int cmd_peers_num_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_GET_NUM_PEERS (cmd = %u) command, from %s (%s:%d)\n",
@@ -622,15 +621,15 @@ static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Get L0 info
     if(ke->kl != NULL) {
-        if(ke->ksn_cfg.l0_allow_f) {
-            if(ke->ksn_cfg.l0_tcp_ip_remote[0]) {
+        if(ke->teo_cfg.l0_allow_f) {
+            if(ke->teo_cfg.l0_tcp_ip_remote[0]) {
 
-                size_t l0_tcp_ip_remote_len =  strlen(ke->ksn_cfg.l0_tcp_ip_remote) + 1;
+                size_t l0_tcp_ip_remote_len =  strlen(ke->teo_cfg.l0_tcp_ip_remote) + 1;
                 info_d_len = sizeof(l0_info_data) + l0_tcp_ip_remote_len;
                 info_d = malloc(info_d_len);
 
-                memcpy(info_d->l0_tcp_ip_remote, ke->ksn_cfg.l0_tcp_ip_remote, l0_tcp_ip_remote_len);
-                info_d->l0_tcp_port = ke->ksn_cfg.l0_tcp_port;
+                memcpy(info_d->l0_tcp_ip_remote, ke->teo_cfg.l0_tcp_ip_remote, l0_tcp_ip_remote_len);
+                info_d->l0_tcp_port = ke->teo_cfg.l0_tcp_port;
             }
         }
     }
@@ -709,7 +708,7 @@ static int cmd_l0_stat_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     const int not_json = rd->data_len && ((char*)rd->data)[0] != '{' && ((char*)rd->data)[rd->data_len-1] != '}';
     
@@ -719,21 +718,24 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
         ksnCQueExec(ke->kq, arp_cque->cque_id_peer_type);
     
         if(!rd->arp->type) {
-            
             host_info_data *hid = (host_info_data *)rd->data;
             char *type_str = teoGetFullAppTypeFromHostInfo(hid);
 
             // Add type to arp-table
             rd->arp->type = type_str;
-
+            printf("notype... Peername %s, Type: %s\n", rd->from, rd->arp->type);
+        } else {
+            printf("Peername %s, Type: %s\n", rd->from, rd->arp->type);
+        }
             // Metrics
             char *met = ksnet_formatMessage("CON.%s", rd->from);
             teoMetricGauge(ke->tm, met, 1);
             free(met);
 
             // Send event callback
-            if(ke->event_cb != NULL)
+            if(ke->event_cb != NULL) {
                 ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
+            }
 
             // Send event to subscribers
             teoSScrSend(kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
@@ -745,7 +747,6 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
                 rd->cmd, rd->from, rd->addr, rd->port, rd->arp->data.addr, rd->arp->data.port, rd->arp->type);
             #endif
             retval = 1;
-        }
     }
 
     return retval; // Command send to user level
@@ -869,16 +870,16 @@ static int cmd_get_public_ip_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
                 "\"public_v4\": \"%s\", "
                 "\"public_v6\": \"%s\" "
             " }", 
-            ke->ksn_cfg.l0_public_ipv4, ke->ksn_cfg.l0_public_ipv6);
+            ke->teo_cfg.l0_public_ipv4, ke->teo_cfg.l0_public_ipv6);
         data_out_len = strlen(data_out) + 1;
     } else {
-        size_t ipv4_len = strlen(ke->ksn_cfg.l0_public_ipv4);
-        size_t ipv6_len = strlen(ke->ksn_cfg.l0_public_ipv6);
+        size_t ipv4_len = strlen(ke->teo_cfg.l0_public_ipv4);
+        size_t ipv6_len = strlen(ke->teo_cfg.l0_public_ipv6);
         data_out_len = ipv4_len + ipv6_len + 2;
         data_out = malloc(data_out_len*sizeof(char));
-        memcpy(data_out, ke->ksn_cfg.l0_public_ipv4, ipv4_len);
+        memcpy(data_out, ke->teo_cfg.l0_public_ipv4, ipv4_len);
         ((char*)data_out)[ipv4_len] = '\0';
-        memcpy((char*)data_out + ipv4_len + 1, ke->ksn_cfg.l0_public_ipv6, ipv6_len);
+        memcpy((char*)data_out + ipv4_len + 1, ke->teo_cfg.l0_public_ipv6, ipv6_len);
         ((char*)data_out)[data_out_len - 1] = '\0';
     }
 
@@ -964,7 +965,7 @@ static int cmd_resend_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     // If we resend command from sender, than sender don't know about the peer,
     // try send connect command to peer to direct connect sender with peer
     ksnet_arp_data *arp;
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
     if((arp = (ksnet_arp_data *)ksnetArpGet(arp_class, to)) != NULL) {
 
         // Send connect command request to peer
@@ -1046,7 +1047,7 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         // Show command message
         //#ifdef DEBUG_KSNET
-        ksnet_printf(&ke->ksn_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
+        ksnet_printf(&ke->teo_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             (int)rd->data_len, rd->from, triptime);
         //#endif
     }
@@ -1058,10 +1059,10 @@ static int cmd_echo_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     // Monitor answer
     else if(!strcmp(rd->data, MONITOR)) {
-        ksnet_printf(&ke->ksn_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
+        ksnet_printf(&ke->teo_cfg, DISPLAY_M, "%d bytes from %s: cmd=cmd_echo ttl=57 time=%.3f ms\n",
             (int)rd->data_len, rd->from, triptime);
 
-        ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+        ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
         // Set monitor time
         ksnet_arp_data_ext *arp = ksnetArpGet(arp_class, rd->from);
         arp->data.monitor_time = time_got - time_send;
@@ -1130,10 +1131,10 @@ int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
 static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_obj = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV,
+    ksn_printf(ke, MODULE, DEBUG,
         "process CMD_CONNECT_R = %u command, from %s (%s:%d)\n",
         rd->cmd, rd->from, rd->addr, rd->port);
     #endif
@@ -1149,15 +1150,14 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             CMD_NONE, rd->addr, rd->port);
     #endif
 
-    // Parse command data
-    uint8_t *num_ip = rd->data; // Number of IPs
+    connect_r_packet_t *packet = rd->data;
 
     // For UDP connection resend received IPs to child
-    if(*num_ip) {
+    if(packet->ip_counts) {
         // Send peer address to child
-        ksnetArpGetAll(arp_class, send_cmd_connect_cb, rd);
+        ksnetArpGetAll(arp_obj, send_cmd_connect_cb, rd);
         // Send child address to peer
-        ksnetArpGetAll(arp_class, send_cmd_connect_cb_b, rd);
+        ksnetArpGetAll(arp_obj, send_cmd_connect_cb_b, rd);
     } else {// For TCP proxy connection resend this host IPs to child
         rd->arp->data.mode = 2;
         ksnCorePacketData lrd;
@@ -1165,7 +1165,7 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         lrd.from = rd->from;
 
         // Get this server IPs array
-        ksnet_stringArr ips = getIPs(&ke->ksn_cfg);
+        ksnet_stringArr ips = getIPs(&ke->teo_cfg);
         uint8_t ips_len = ksnet_stringArrLength(ips); // Number of IPs
         int i;
         for(i = 0; i <= ips_len; i++) {
@@ -1178,14 +1178,14 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             }
 
             // Send local addresses for child
-            ksnetArpGetAll(arp_class, send_cmd_connect_cb, &lrd);
+            ksnetArpGetAll(arp_obj, send_cmd_connect_cb, &lrd);
         }
 
         ksnet_stringArrFree(&ips);
 
         // Send main peer address to child
         lrd.addr = rd->arp->data.addr;
-        ksnetArpGetAll(arp_class, send_cmd_connect_cb, &lrd);
+        ksnetArpGetAll(arp_obj, send_cmd_connect_cb, &lrd);
     }
 
     return 1;
@@ -1227,7 +1227,7 @@ static void cmd_connect_cque_cb(uint32_t id, int type, void *data) {
 static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     /**
      * KSNet CMD_PEER command data
@@ -1236,6 +1236,7 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
         char *name;     ///< Peer name
         char *addr;     ///< Peer IP address
+        char *full_type;
         uint32_t port;  ///< Peer port
 
     } ksnCmdPeerData;
@@ -1246,12 +1247,13 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     size_t ptr = 0;
     pd.name = rd->data; ptr += strlen(pd.name) + 1;
     pd.addr = rd->data + ptr; ptr += strlen(pd.addr) + 1;
+    pd.full_type = rd->data + ptr; ptr += strlen(pd.full_type) + 1;
     pd.port = *((uint32_t *)(rd->data + ptr));
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_CONNECT = %u from %s (%s:%d). (Connect to %s (%s:%d))\n", 
-            rd->cmd, rd->from, rd->addr, rd->port, pd.name, pd.addr, pd.port);
-    #endif
+    // #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG, "process CMD_CONNECT = %u from %s (%s:%d). (Connect to %s (%s:%d), peer type = %s)\n",
+            rd->cmd, rd->from, rd->addr, rd->port, pd.name, pd.addr, pd.port, pd.full_type);
+    // #endif
 
     // Check ARP
     if(ksnetArpGet(arp_class, pd.name) == NULL) {
@@ -1287,7 +1289,7 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-    ksnetArpClass *arp_class = ARP_TABLE_CLASS(kco);
+    ksnetArpClass *arp_class = ARP_TABLE_OBJECT(kco);
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_DISCONNECTED = %u command, from %s (%s:%d)\n",
@@ -1306,9 +1308,9 @@ int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     free(met);
 
     // Check r-host disconnected
-    int is_rhost = ke->ksn_cfg.r_host_name[0] && !strcmp(ke->ksn_cfg.r_host_name,rd->from);
+    int is_rhost = ke->teo_cfg.r_host_name[0] && !strcmp(ke->teo_cfg.r_host_name,rd->from);
     if(is_rhost) {
-        ke->ksn_cfg.r_host_name[0] = '\0';
+        ke->teo_cfg.r_host_name[0] = '\0';
     }
 
     // Try to reconnect, send CMD_RECONNECT command

@@ -34,7 +34,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv);
  *
  * @param argc Number of command line arguments
  * @param argv String array with command line arguments
- * @param conf Pointer to ksnet_cfg structure to read configuration and
+ * @param conf Pointer to teonet_cfg structure to read configuration and
  *             command line parameters to
  * @param app_argc Number of application arguments
  * @param app_argv String array with application arguments names
@@ -43,38 +43,38 @@ void opt_usage(char *app_name, int app_argc, char** app_argv);
  *
  * @return Entered application arguments
  */
-char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
+char ** ksnet_optRead(int argc, char **argv, teonet_cfg *conf,
         int app_argc, char **app_argv, char **app_argv_descr, int show_arg) {
 
     int option_index = 0, opt;
     struct option loptions[] = {
-        { "help",           no_argument,       0, 'h' },
-        { "version",        no_argument,       0, 'v' },
-        { "app_name",       no_argument,       0,  0  },
-        { "app_description",no_argument,       0,  0  },
-        { "uuid",           no_argument,       0,  0  },
-        { "port",           required_argument, 0, 'p' },
-        { "port_increment", no_argument,       &conf->port_inc_f, 1 },
-        { "r_port",         required_argument, 0, 'r' },
-        { "r_tcp_port",     required_argument, 0, 't' },
-        { "r_address",      required_argument, 0, 'a' },
-        { "r_tcp",          no_argument,       &conf->r_tcp_f, 1 },
-        { "network",        required_argument, 0, 'n' },
-        { "key",            required_argument, 0, 'e' },
-        { "auth_secret",    required_argument, 0, 'u' },
-        { "tcp_allow",      no_argument,       &conf->tcp_allow_f, 1 },
-        { "tcp_port",       required_argument, 0, 'o' },
-        { "l0_allow",           no_argument,       &conf->l0_allow_f, 1 },
-        { "l0_tcp_port",        required_argument, 0, 'l' },
-        { "l0_tcp_ip_remote",   required_argument, 0, 'I' },
-        { "filter",         required_argument, 0, 'f' },
-        { "hot_keys",       no_argument,       &conf->hot_keys_f, 1 },
-        { "show_debug",     no_argument,       &conf->show_debug_f, 1 },
-        { "show_debug_vv",  no_argument,       &conf->show_debug_vv_f, 1 },
-        { "show_debug_vvv", no_argument,       &conf->show_debug_vvv_f, 1 },
-        { "show_connect",   no_argument,       &conf->show_connect_f, 1 },
-        { "show_peers",     no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
-        { "show_trudp",     no_argument,       &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
+        { "help",                   no_argument,       0, 'h' },
+        { "version",                no_argument,       0, 'v' },
+        { "app_name",               no_argument,       0,  0  },
+        { "app_description",        no_argument,       0,  0  },
+        { "uuid",                   no_argument,       0,  0  },
+        { "port",                   required_argument, 0, 'p' },
+        { "port_increment_disable", no_argument,       &conf->port_inc_f, 0 },
+        { "r_port",                 required_argument, 0, 'r' },
+        { "r_tcp_port",             required_argument, 0, 't' },
+        { "r_address",              required_argument, 0, 'a' },
+        { "r_tcp",                  no_argument,       &conf->r_tcp_f, 1 },
+        { "network",                required_argument, 0, 'n' },
+        { "key",                    required_argument, 0, 'e' },
+        { "auth_secret",            required_argument, 0, 'u' },
+        { "tcp_allow",              no_argument,       &conf->tcp_allow_f, 1 },
+        { "tcp_port",               required_argument, 0, 'o' },
+        { "l0_allow",               no_argument,       &conf->l0_allow_f, 1 },
+        { "l0_tcp_port",            required_argument, 0, 'l' },
+        { "l0_tcp_ip_remote",       required_argument, 0, 'I' },
+        { "filter",                 required_argument, 0, 'f' },
+        { "hot_keys",               no_argument,       &conf->hot_keys_f, 1 },
+        { "show_debug",             no_argument,       &conf->show_debug_f, 1 },
+        { "show_debug_vv",          no_argument,       &conf->show_debug_vv_f, 1 },
+        { "show_debug_vvv",         no_argument,       &conf->show_debug_vvv_f, 1 },
+        { "show_connect",           no_argument,       &conf->show_connect_f, 1 },
+        { "show_peers",             no_argument,       &conf->show_peers_f, SHOW_PEER_CONTINUOSLY },
+        { "show_trudp",             no_argument,       &conf->show_tr_udp_f, SHOW_PEER_CONTINUOSLY },
         #if M_ENAMBE_VPN
         { "vpn_start",      no_argument,       &conf->vpn_connect_f, 1 },
         { "vpn_ip",         required_argument, 0, 'i' },
@@ -214,28 +214,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
           break;
 
         case 'a': {
-          const char *localhost_str = "localhost";
-          if (!strncmp(localhost_str, optarg, strlen(localhost_str))) {
-              const char *localhost_num = "::1";
-              strncpy((char*)conf->r_host_addr, localhost_num, strlen(localhost_num));
-          } else {
-            struct addrinfo hint, *res = NULL;
-            memset(&hint, '\0', sizeof hint);
-
-            hint.ai_family = PF_UNSPEC;
-
-            int ret = getaddrinfo(optarg, NULL, &hint, &res);
-            if (ret) {
-                fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
-                exit(1);
-            }
-
-            addr_port_t *ap_obj = wrap_inet_ntop(res->ai_addr);
-
-            strncpy((char*)conf->r_host_addr, ap_obj->addr, KSN_BUFFER_SM_SIZE/2);
-            addr_port_free(ap_obj);
-            freeaddrinfo(res);
-          }
+          strncpy((char*)conf->r_host_addr_opt, optarg, KSN_BUFFER_SM_SIZE/2);
+          resolveDnsName(conf);
         } break;
 
         case '4':
@@ -487,7 +467,7 @@ void opt_usage(char *app_name, int app_argc, char** app_argv) {
  *
  * Set application name, prompt and description (use it before ksnet_optRead)
  */
-void ksnet_optSetApp(ksnet_cfg *conf,
+void ksnet_optSetApp(teonet_cfg *conf,
                      const char* app_name,
                      const char* app_prompt,
                      const char* app_description) {

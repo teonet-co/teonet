@@ -23,20 +23,20 @@
 teoMetricClass *teoMetricInit(void *kep) {
 
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)kep;
-    if (ke->ksn_cfg.statsd_ip[0] == 0 || ke->ksn_cfg.statsd_port == 0)
+    if (ke->teo_cfg.statsd_ip[0] == 0 || ke->teo_cfg.statsd_port == 0)
         return NULL;
 
     ksn_printf(ke, MODULE, MESSAGE, 
         "started, and ready to send metrics to statsd exporter at address: %s:%ld\n",
-        ke->ksn_cfg.statsd_ip, ke->ksn_cfg.statsd_port);
+        ke->teo_cfg.statsd_ip, ke->teo_cfg.statsd_port);
 
     teoMetricClass *tm = malloc(sizeof(teoMetricClass));
     tm->ke = ke;
 
     memset(&tm->to, 0, sizeof(tm->to));
     tm->to.sin_family = AF_INET;
-    tm->to.sin_addr.s_addr = inet_addr(ke->ksn_cfg.statsd_ip);
-    tm->to.sin_port = htons(ke->ksn_cfg.statsd_port);
+    tm->to.sin_addr.s_addr = inet_addr(ke->teo_cfg.statsd_ip);
+    tm->to.sin_port = htons(ke->teo_cfg.statsd_port);
 
     return tm;
 }
@@ -67,7 +67,7 @@ static void teoMetric(teoMetricClass *tm, const char *name, const char *type,
 
     char buffer[256];
     const char *fmt = "teonet.%s.%s.%s.%s:%d|%s";
-    int len = snprintf(buffer, 255, fmt, type, ke->ksn_cfg.network,
+    int len = snprintf(buffer, 255, fmt, type, ke->teo_cfg.network,
                        ke->kc->name, name, value, type);
 
     sendto(ke->kc->fd, buffer, len, 0, (struct sockaddr *)&tm->to,
@@ -90,7 +90,7 @@ static void teoMetricf(teoMetricClass *tm, const char *name, const char *type,
 
     char buffer[256];
     const char *fmt = "teonet.%s.%s.%s.%s:%f|%s";
-    int len = snprintf(buffer, 255, fmt, type, ke->ksn_cfg.network,
+    int len = snprintf(buffer, 255, fmt, type, ke->teo_cfg.network,
                        ke->kc->name, name, value, type);
 
     sendto(ke->kc->fd, buffer, len, 0, (struct sockaddr *)&tm->to,
@@ -173,7 +173,7 @@ void metric_teonet_count(teoMetricClass *tm) {
 
     // ARP table metrics
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *)tm->ke;
-    if(ke->ksn_cfg.statsd_peers_f) {
+    if(ke->teo_cfg.statsd_peers_f) {
         ksnetArpMetrics(ke->kc->ka);
     }
 
