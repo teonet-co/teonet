@@ -354,8 +354,8 @@ char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
     }
 
     // Set Host name
-    strncpy(conf->host_name, argv[optind], KSN_MAX_HOST_NAME - 1);
-    
+    strncpy(conf->host_name, argv[optind], KSN_MAX_HOST_NAME);
+    conf->host_name[KSN_MAX_HOST_NAME - 1] = '0';
     // Show arguments
     if(show_arg) {
 
