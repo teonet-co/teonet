@@ -80,3 +80,23 @@ uint8_t* createCmdConnectPacket(ksnetEvMgrClass *event_manager, char *name, char
 
     return (uint8_t *)packet;
 }
+
+
+// Create resend command buffer and Send command to r-host
+// Command data format: to, cmd, data, data_len
+uint8_t* createCmdResendPacket(char *to, uint8_t cmd, void *data, size_t data_len, size_t *size_out) {
+
+
+    size_t ptr = 0;
+    const size_t to_len = strlen(to) + 1;
+
+    *size_out = to_len + sizeof(cmd) + data_len;
+    uint8_t *packet = malloc(*size_out);
+    memset(packet, '\0', *size_out);
+
+    memcpy(packet + ptr, to,    to_len); ptr += to_len;
+    memcpy(packet + ptr, &cmd,  sizeof(uint8_t)); ptr += sizeof(uint8_t);
+    memcpy(packet + ptr, data,  data_len); ptr += data_len;
+
+    return (uint8_t*)packet;
+}

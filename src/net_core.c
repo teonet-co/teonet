@@ -454,27 +454,6 @@ ksnet_arp_data *ksnCoreSendCmdto(ksnCoreClass *kc, char *to, uint8_t cmd,
     // Send to r-host
     else {
         ksn_printf(ke, MODULE, DEBUG, "Sending a command %d is not possible, because peer: \"%s\" not found.\n", (int)cmd, to);
-        // If connected to r-host
-        // char *r_host = ke->teo_cfg.r_host_name;
-        // if(r_host[0] && (arp = (ksnet_arp_data *)ksnetArpGet(kc->ka, r_host)) != NULL) {
-
-        //     #ifdef DEBUG_KSNET
-        //     ksn_printf(ke, MODULE, DEBUG,
-        //             "resend command to peer \"%s\" to r-host\n", to);
-        //     #endif
-
-        //     // Create resend command buffer and Send command to r-host
-        //     // Command data format: to, cmd, data, data_len
-        //     size_t ptr = 0;
-        //     const size_t to_len = strlen(to) + 1;
-        //     const size_t buf_len = to_len + sizeof(cmd) + data_len;
-        //     char *buf = malloc(buf_len);
-        //     memcpy(buf + ptr, to, to_len); ptr += to_len;
-        //     memcpy(buf + ptr, &cmd, sizeof(uint8_t)); ptr += sizeof(uint8_t);
-        //     memcpy(buf + ptr, data, data_len); ptr += data_len;
-        //     ksnCoreSendto(kc, arp->addr, arp->port, CMD_RESEND, buf, buf_len);
-        //     free(buf);
-        // }
     }
 
     return arp;
