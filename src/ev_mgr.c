@@ -712,7 +712,7 @@ double ksnetEvMgrGetTime(ksnetEvMgrClass *ke) {
 void connect_r_host_cb(ksnetEvMgrClass *ke) {
     // Connect to r-host
     if(ke->teo_cfg.r_host_addr[0] && !ke->teo_cfg.r_host_name[0]) {
-
+        resolveDnsName(&ke->teo_cfg);
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG, "connect to r-host: %s\n", ke->teo_cfg.r_host_addr);
         #endif
@@ -741,7 +741,6 @@ void connect_r_host_cb(ksnetEvMgrClass *ke) {
             CMD_CONNECT_R, ke->teo_cfg.r_host_addr, ke->teo_cfg.r_port);
         #endif
 
-        printHexDump(packet, packet_size);
         free(packet);
     }
 }

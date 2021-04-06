@@ -85,7 +85,7 @@ void set_defaults(teonet_cfg *teo_cfg) {
     teo_cfg->r_port = atoi(KSNET_PORT_DEFAULT);
     teo_cfg->r_host_name[0] = '\0';
     teo_cfg->r_host_addr[0] = '\0';
-    //strncpy(teo_cfg->r_host_addr, localhost, KSN_BUFFER_SM_SIZE/2); // set default r-host address to localhost
+    teo_cfg->r_host_addr_opt[0] = '\0';
     teo_cfg->r_tcp_f = 0;
     teo_cfg->r_tcp_port = atoi(KSNET_PORT_DEFAULT);
 
@@ -95,7 +95,6 @@ void set_defaults(teonet_cfg *teo_cfg) {
 
     // VPN
     teo_cfg->vpn_dev_name[0] = '\0';
-    //strncpy(teo_cfg->vpn_dev_name, "teonet", KSN_MAX_HOST_NAME); // set default vpn device name to "teonet"
     teo_cfg->vpn_dev_hwaddr[0] = '\0';
     teo_cfg->vpn_ip[0] = '\0';
     teo_cfg->vpn_ip_net = 24;

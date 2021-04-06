@@ -113,7 +113,7 @@ unsigned char *ksn_base64_decode(const char *data,
 void dump_bytes(char *buffer, int buffer_len, uint8_t* data, int data_len);
 
 void printHexDump(void *addr, size_t len);
-
+void resolveDnsName(teonet_cfg *conf);
 #ifdef	__cplusplus
 }
 #endif
