@@ -487,7 +487,7 @@ int ksnTCPProxyClientConnect(ksnTCPProxyClass *tp) {
                 kev->teo_cfg.r_host_addr // Remote host net address
         );
         
-        if(fd_client > 0) {
+        if(fd_client >= 0) {
             
             // Set TCP_NODELAY option
             teosockSetTcpNodelay(fd_client);
