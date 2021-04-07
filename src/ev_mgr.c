@@ -1284,7 +1284,7 @@ int modules_init(ksnetEvMgrClass *ke) {
     if(!ke->teo_cfg.block_cli_input_f && !ke->teo_cfg.dflag) {
         if(!ke->net_idx) ke->kh = ksnetHotkeysInit(ke);
         // Set filter from parameters
-        if(ke->ksn_cfg.filter[0]) teoHotkeySetFilter(ke->kh, ke->ksn_cfg.filter);
+        if(ke->teo_cfg.filter[0]) teoHotkeySetFilter(ke->kh, ke->teo_cfg.filter);
     }
 
     // Callback QUEUE
