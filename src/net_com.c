@@ -47,6 +47,7 @@ static int cmd_reset_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_l0_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 static int cmd_trudp_info_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
 int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
+int cmd_l0_kick_client(ksnCommandClass *kco, ksnCorePacketData *rd);
 
 // Constant
 const char *JSON = "JSON";
@@ -236,6 +237,9 @@ int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
             processed = cmd_l0_check_cb(kco, rd);
             break;
 
+        case CMD_L0_CLIENT_RESET:
+            processed = cmd_l0_kick_client(kco, rd);
+            break;
         default:
             break;
     }

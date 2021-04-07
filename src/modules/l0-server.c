@@ -835,8 +835,14 @@ static bool ksnLNullClientAuthCheck(ksnLNullClass *kl, ksnLNullData *kld,
     }
 
     updateClientName(kl, kld, fd, &name);
-    sendConnectedEvent(kl, kld);
-    confirmAuth(kl, kld, fd);
+    //NOTE: if there're any subs, then we have some work to be done before client enters
+    // so we wait for external auth confirm, otherwise confirm instantly
+    int connected_subs_num = teoSScrNumberOfEventSubscribers(ke->kc->kco->ksscr, EV_K_L0_CONNECTED);
+    if (connected_subs_num > 0) {
+        sendConnectedEvent(kl, kld);
+    } else {
+        confirmAuth(kl, kld, fd);
+    }
 
     return true;
 }
@@ -1564,7 +1570,63 @@ static int json_parse(char *data, json_param *jp) {
 int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
-    int retval = 0;
+    // Parse request
+    char *json_data_unesc = rd->data;
+    json_param jp;
+    json_parse(json_data_unesc, &jp);
+
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG,
+        "got %d bytes auth confirmation from %s authentication application, "
+            "username: %s\n%s\n",
+        rd->data_len, rd->from, jp.userId, rd->data
+    );
+    #endif
+
+    ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
+
+    // Authorize new user
+    int fd = ksnLNullClientIsConnected(kl, jp.userId);
+    if(fd) {
+        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), NULL);
+        if(kld != NULL) {
+            confirmAuth(kl, kld, fd);
+        } else {
+            #ifdef DEBUG_KSNET
+            ksn_printf(ke, MODULE, DEBUG,
+                "can't confirm auth of the client %s. kld not found.\n",
+                rd->data_len, rd->from, jp.userId, rd->data
+            );
+            #endif
+        }
+    } else {
+        #ifdef DEBUG_KSNET
+        ksn_printf(ke, MODULE, DEBUG,
+            "can't confirm auth of the client %s. Client not connected.\n",
+            rd->data_len, rd->from, jp.userId, rd->data
+        );
+        #endif
+    }
+
+    // Free json tags
+    if(jp.accessToken != NULL) free(jp.accessToken);
+    if(jp.clientId != NULL) free(jp.clientId);
+    if(jp.userId != NULL) free(jp.userId);
+    if(jp.username != NULL) free(jp.username);
+    if(jp.networks != NULL) free(jp.networks);
+
+    return 1;
+}
+
+/**
+ * Kick l0 client
+ *
+ * @param kco Pointer to ksnCommandClass
+ * @param rd Pointer to ksnCorePacketData
+ * @return
+ */
+int cmd_l0_kick_client(ksnCommandClass *kco, ksnCorePacketData *rd) {
+    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
 
     // Parse request
     char *json_data_unesc = rd->data;
@@ -1573,7 +1635,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(ke, MODULE, DEBUG,
-        "got %d bytes answer from %s authentication application, "
+        "got %d bytes kick command from %s authentication application, "
             "username: %s\n%s\n",
         rd->data_len, rd->from, jp.username, rd->data
     );
@@ -1582,82 +1644,20 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
 
     // Remove old user
-    int fd_old;
-    if(jp.userId && (fd_old = ksnLNullClientIsConnected(kl, jp.userId))) {
+    int fd = -1;
+    if(jp.userId && (fd = ksnLNullClientIsConnected(kl, jp.userId))) {
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd_old);
+        ksn_printf(ke, MODULE, DEBUG, "User with name(id): %s is already connected, fd: %d\n", jp.userId, fd);
         #endif
 
         // Send 99 command to user
-        ksnLNullSend(kl, fd_old, CMD_L0_CLIENT_RESET, "2", 2);
+        ksnLNullSend(kl, fd, CMD_L0_CLIENT_RESET, "2", 2);
 
         // Check user already connected
         size_t valueLength;
-        ksnLNullData* kld = pblMapGet(kl->map, &fd_old, sizeof(fd_old), &valueLength);
+        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), &valueLength);
         if(kld != NULL) {
-            ksnLNullClientDisconnect(kl, fd_old, 2);
-        }
-    }
-
-    // Authorize new user
-    int fd = ksnLNullClientIsConnected(kl, jp.accessToken);
-    if(fd) {
-        ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), NULL);
-        if(kld != NULL) {
-
-            // Rename client
-            if(jp.userId != NULL) { // && jp.clientId != NULL) {
-
-                // Remove existing name
-                if(kld->name != NULL) {
-                    pblMapRemoveFree(kl->map_n, kld->name, kld->name_length, NULL);
-                    free(kld->name);
-                }
-                // Set new name
-                kld->name = ksnet_formatMessage("%s%s%s",
-                    jp.userId,
-                    jp.clientId ? ":" : "" ,
-                    jp.clientId ? jp.clientId : ""
-                );
-                kld->name_length = strlen(kld->name) + 1;
-                pblMapAdd(kl->map_n, kld->name, kld->name_length, &fd, sizeof(fd));
-            }
-
-            if (kld->name != NULL) {
-                #ifdef DEBUG_KSNET
-                ksn_printf(ke, MODULE, DEBUG,
-                    "connection initialized, client name is: %s, ip: %s, (username: %s)\n",
-                    kld->name, kld->t_addr, jp.username);
-                #endif
-                // Show connected message
-                // #ifdef DEBUG_KSNET
-                ksn_printf(ke, MODULE, CONNECT, "### 0001,%s,%s\n", kld->name, kld->t_addr);
-                // #endif
-            }
-
-            // Send Connected event to all subscribers
-            if(kld->name != NULL && !strcmp(rd->from, TEO_AUTH)) {
-                _send_subscribe_event_connected(ke, kld->name, kld->name_length);
-            }
-
-            // Create & Send websocket allow answer message
-            char *ALLOW = ksnet_formatMessage("{ \"name\": \"%s\", \"networks\": %s }",
-                    kld->name ? kld->name : "", jp.networks ? jp.networks : "null");
-            size_t ALLOW_len = strlen(ALLOW) + 1;
-            // Create L0 packet
-            size_t out_data_len = sizeof(teoLNullCPacket) + rd->from_len +
-                    ALLOW_len;
-            char *out_data = malloc(out_data_len);
-            memset(out_data, 0, out_data_len);
-
-            size_t packet_length =
-                teoLNullPacketCreate(out_data, out_data_len,
-                                     CMD_L0_AUTH, rd->from, (uint8_t *)ALLOW, ALLOW_len);
-            // Send websocket allow message
-            ssize_t snd = ksnLNullPacketSend(ke->kl, fd, out_data, packet_length);
-            (void)snd;
-            free(out_data);
-            free(ALLOW);
+            ksnLNullClientDisconnect(kl, fd, 2);
         }
     }
 
@@ -1668,7 +1668,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(jp.username != NULL) free(jp.username);
     if(jp.networks != NULL) free(jp.networks);
 
-    return retval;
+    return 1;
 }
 
 /**
