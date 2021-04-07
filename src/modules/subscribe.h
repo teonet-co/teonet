@@ -51,6 +51,7 @@ void teoSScrSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev);
 void teoSScrUnSubscribe(teoSScrClass *sscr, char *peer_name, uint16_t ev);
 void teoSScrSend(teoSScrClass *sscr, uint16_t ev, void *data, size_t data_length, uint8_t cmd);
 int teoSScrNumberOfSubscribers(teoSScrClass *sscr);
+int teoSScrNumberOfEventSubscribers(teoSScrClass *sscr, uint16_t event);
 
 #ifdef	__cplusplus
 }

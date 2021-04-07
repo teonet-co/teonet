@@ -197,6 +197,22 @@ int teoSScrNumberOfSubscribers(teoSScrClass *sscr) {
 }
 
 /**
+ * Calculate number of subscribers to particular event
+ *
+ * @param sscr
+ * @return
+ */
+int teoSScrNumberOfEventSubscribers(teoSScrClass *sscr, uint16_t event) {
+    size_t valueLength;
+    teoSScrMapData *sscr_map_data = pblMapGet(sscr->map, &event, sizeof(event),
+            &valueLength);
+
+    if(sscr_map_data == NULL) { return 0; }
+
+    return pblListSize(sscr_map_data->list);
+}
+
+/**
  * Free list element
  *
  * @param sscr Pointer to teoSScrClass
