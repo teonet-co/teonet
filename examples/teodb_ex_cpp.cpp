@@ -21,7 +21,7 @@
 #define TDB_VERSION "0.0.2"
 #define APPNAME _ANSI_MAGENTA "teodb_ex" _ANSI_NONE
 
-#define TEODB_PEER teo.getKe()->ksn_cfg.app_argv[1]
+#define TEODB_PEER teo.getKe()->teo_cfg.app_argv[1]
 #define TEODB_EX_KEY "teo_db_ex"
 #define TEST_KEY "test"
 #define TEST_VALUE "{ \"name\": \"1\" }"

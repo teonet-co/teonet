@@ -565,7 +565,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG,
-            "connecting to the f***ing %s, port %d ...\n", server, port);
+            "connecting to the %s, port %d ...\n", server, port);
     #endif
 
     memset(&serveraddr, 0x00, sizeof(struct sockaddr_in));

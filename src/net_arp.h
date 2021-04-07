@@ -16,26 +16,24 @@
 
 #include <pbl.h>
 
-#include "net_core.h"
 #include "teonet_l0_client.h"
 
 /**
  * KSNet ARP functions data
  */
 typedef struct ksnetArpClass {
-
     PblMap* map;    ///< Hash Map to store KSNet ARP table
     void *ke;       ///< Pointer to Event Manager class object
-
 } ksnetArpClass;
 
 
-//typedef void (*peer_remove_cb_t)(ksnCoreClass *kn, char *name, size_t name_len, int ch);
+
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
+typedef int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data);
 
 // Peers ARP table functions
 ksnetArpClass *ksnetArpInit(void *ke);
@@ -49,9 +47,9 @@ int ksnetArpRemove(ksnetArpClass *ka, char* name);
 void ksnetArpRemoveAll(ksnetArpClass *ka);
 int ksnetArpShow(ksnetArpClass *ka);
 char *ksnetArpShowStr(ksnetArpClass *ka);
-int ksnetArpGetAll_(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data, int flag);
-int ksnetArpGetAll(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data);
-int ksnetArpGetAllH(ksnetArpClass *ka, int (*peer_callback)(ksnetArpClass *ka, char *peer_name, ksnet_arp_data_ext *arp_data, void *data), void *data);
+int ksnetArpGetAll_(ksnetArpClass *ka, peer_callback cb, void *data, int flag);
+int ksnetArpGetAll(ksnetArpClass *ka, peer_callback cb, void *data);
+int ksnetArpGetAllH(ksnetArpClass *ka, peer_callback cb, void *data);
 ksnet_arp_data *ksnetArpFindByAddr(ksnetArpClass *ka, __CONST_SOCKADDR_ARG addr, char **peer_name);
 
 ksnet_arp_data_ar *ksnetArpShowData(ksnetArpClass *ka);
@@ -61,6 +59,7 @@ char *teoArpGetExtendedArpTable_json(ksnet_arp_data_ext_ar *peers_data, size_t *
 void teoArpGetExtendedArpTable_json_delete(char *obj);
 size_t ksnetArpShowDataLength(ksnet_arp_data_ar *peers_data);
 size_t teoArpGetExtendedArpTableLength(ksnet_arp_data_ext_ar *peers_data);
+
 #define ARP_TABLE_DATA_LENGTH(X) _Generic((X), \
       ksnet_arp_data_ar* : ksnetArpShowDataLength, \
       ksnet_arp_data_ext_ar* : teoArpGetExtendedArpTableLength \

@@ -36,8 +36,8 @@ ssize_t teo_sendto (ksnetEvMgrClass* ke,
  * @return Previous state
  */
 inline int ksnetAllowAckEvent(ksnetEvMgrClass* ke, int allow) {
-    int rv = ke->ksn_cfg.send_ack_event_f;
-    ke->ksn_cfg.send_ack_event_f = allow;
+    int rv = ke->teo_cfg.send_ack_event_f;
+    ke->teo_cfg.send_ack_event_f = allow;
     return rv;
 }
 
@@ -171,7 +171,7 @@ void trudp_send_event_ack_to_app(ksnetEvMgrClass *ke, uint32_t id,
     if(ke->event_cb != NULL) {
 
         #if KSNET_CRYPT
-        if(ke->ksn_cfg.crypt_f && ksnCheckEncrypted(
+        if(ke->teo_cfg.crypt_f && ksnCheckEncrypted(
                 data, data_length)) {
 
             data = ksnDecryptPackage(ke->kc->kcr, data,
@@ -236,12 +236,12 @@ void trudp_process_receive(trudpData *td, void *data, size_t data_length) {
         trudpGetChannelCreate(td, (__CONST_SOCKADDR_ARG)&remaddr, addr_len, 0);
 
     if (tcd == (void *)-1) {
-        fprintf(stderr, "!!! can't PROCESS_RECEIVE_NO_TRUDP\n");
+        fprintf(stderr, "Failed to process non-Trudp packet: channel not found.\n");
         return;
     }
 
     if (trudpChannelProcessReceivedPacket(tcd, data, recvlen) == -1) {
-        trudpChannelSendEvent(tcd, PROCESS_RECEIVE_NO_TRUDP, data, recvlen, NULL);
+        printf("Received corrupted packet or packet with unknown packet type.\n");
     }
 }
 
@@ -475,7 +475,7 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             #endif
 
             // Send event ACK to teonet event loop
-            if(kev->ksn_cfg.send_ack_event_f)
+            if(kev->teo_cfg.send_ack_event_f)
                 trudp_send_event_ack_to_app(kev, trudpPacketGetId(packet),
                     trudpPacketGetData(packet), trudpPacketGetDataLength(packet),
                     (__CONST_SOCKADDR_ARG) &tcd->remaddr);
@@ -511,12 +511,17 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
 
         } break;
 
+        // Process received not TR-UDP data
+        // @param tcd Pointer to trudpChannelData
+        // @param data Pointer to receive buffer
+        // @param data_length Receive buffer length
+        // @param user_data NULL
         case GOT_DATA_NO_TRUDP: {
             const trudpData *td = tcd->td; // used in kev macro
 
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, DEBUG_VV,
-                       "got %d bytes DATA packet from no trudp chan %s \n",
+                       "got %d bytes DATA packet from no trudp channel %s \n",
                        data_length, tcd->channel_key);
             #endif
 
@@ -535,26 +540,6 @@ void trudp_event_cb(void *tcd_pointer, int event, void *data, size_t data_length
             ksn_printf(kev, MODULE, DEBUG_VV,
                 "PROCESS_RECEIVE. type packet %s\n", STRING_trudpPacketType(trudpPacketGetType(packet)));
             trudp_process_receive((trudpData *)tcd_pointer, data, data_length);
-        } break;
-
-        // Process received not TR-UDP data
-        // @param tcd Pointer to trudpChannelData
-        // @param data Pointer to receive buffer
-        // @param data_length Receive buffer length
-        // @param user_data NULL
-        case PROCESS_RECEIVE_NO_TRUDP: {
-
-            // Process package
-            const trudpData *td = tcd->td; // used in kev macro
-            #ifdef DEBUG_KSNET
-            ksn_printf(kev, MODULE, DEBUG_VV,
-                "not TR-UDP %d bytes DATA packet received from channel %s\n",
-                data_length,
-                tcd->channel_key);
-            #endif
-            ksnCoreProcessPacket(kev->kc, data, data_length,
-                                 (__SOCKADDR_ARG)&tcd->remaddr);
-
         } break;
 
         // Process send data

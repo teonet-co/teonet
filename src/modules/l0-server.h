@@ -8,7 +8,10 @@
 #ifndef L0_SERVER_H
 #define	L0_SERVER_H
 
+#include <ev.h>
 #include <pbl.h>
+#include "modules/cque.h"
+#include "net_com.h"
 #include "subscribe.h"
 #include "teonet_l0_client.h"
 
@@ -16,36 +19,33 @@
  * L0 Server map data structure
  * 
  */
-typedef struct ksnLNullData {
+typedef struct ksnLNullData { // \TODO: will be renamed to teoL0Data
+    ev_io   w;                 ///< TCP Client watcher
+    char   *name;              ///< Clients name
+    size_t  name_length;       ///< Clients name length
+    void   *read_buffer;       ///< Pointer to saved buffer
+    size_t  read_buffer_ptr;   ///< Pointer in read buffer
+    size_t  read_buffer_size;  ///< Read buffer size
     
-    ev_io w;                  ///< TCP Client watcher
-    char *name;               ///< Clients name
-    size_t name_length;       ///< Clients name length
-    void *read_buffer;        ///< Pointer to saved buffer
-    size_t read_buffer_ptr;   ///< Pointer in read buffer
-    size_t read_buffer_size;  ///< Read buffer size
-    
-    char *t_addr;             ///< TR-UDP IP address
-    int t_port;               ///< TR-UDP port
-    int t_channel;            ///< TR-UDP channel
-    double last_time;
+    char   *t_addr;            ///< TR-UDP IP address
+    int     t_port;            ///< TR-UDP port
+    int     t_channel;         ///< TR-UDP channel
+    double  last_time;
 
-    teoLNullEncryptionContext *server_crypt;
+    teoLNullEncryptionContext *server_crypt; // \TODO: will be renamed to teoL0EncryptionContext
 } ksnLNullData;
 
 /**
  * ksnLNull Class structure definition
  */
-typedef struct  ksnLNullClass {
-    
-    void *ke;           ///< Pointer to ksnEvMgrClass
-    PblMap *map;        ///< Pointer to the L0 clients map (by fd)
-    PblMap *map_n;      ///< Pointer to the L0 FDs map (by name)
-    int fd;             ///< L0 TCP Server FD
-    ksnLNullSStat stat; ///< L0 server statistic
-    int fd_trudp;       ///< Last free TR-UDP L0 FD
-    ksnCQueClass *cque; ///< CQUe to check dead clients
-    
+typedef struct  ksnLNullClass { // \TODO: will be renamed to teoL0Class
+    void           *ke;         ///< Pointer to ksnEvMgrClass
+    PblMap         *map;        ///< Pointer to the L0 clients map (by fd)
+    PblMap         *map_n;      ///< Pointer to the L0 FDs map (by name)
+    int             fd;         ///< L0 TCP Server FD
+    ksnLNullSStat   stat;       ///< L0 server statistic
+    int             fd_trudp;   ///< Last free TR-UDP L0 FD
+    ksnCQueClass   *cque;       ///< CQUe to check dead clients
 } ksnLNullClass;
 
 #pragma pack(push)
@@ -55,13 +55,11 @@ typedef struct  ksnLNullClass {
  * L0 Server resend to peer packet data structure
  * 
  */        
-typedef struct ksnLNullSPacket {
-
-    uint8_t cmd; ///< Command
-    uint8_t from_length; ///< From client name length (include leading zero)
-    uint16_t data_length; ///< Packet data length
-    char from[]; ///< From client name (include leading zero) + packet data
-
+typedef struct ksnLNullSPacket { // \TODO: will be renamed to teoL0SPacket
+    uint8_t     cmd;                ///< Command number
+    uint8_t     client_name_length; ///< Client name length (includes null terminated)
+    uint16_t    data_length;        ///< Packet data length
+    char        payload[];          ///< Сlient name (includes null terminated) + packet data
 } ksnLNullSPacket;
 
 #pragma pack(pop)

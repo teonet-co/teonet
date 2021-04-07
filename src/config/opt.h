@@ -26,10 +26,10 @@ enum ksnetEvMgrOpts {
 extern "C" {
 #endif
 
-char ** ksnet_optRead(int argc, char **argv, ksnet_cfg *conf,
+char ** ksnet_optRead(int argc, char **argv, teonet_cfg *conf,
         int app_argc, char** app_argv, char **app_argv_descr, int show_opt);
 
-void ksnet_optSetApp(ksnet_cfg *conf,
+void ksnet_optSetApp(teonet_cfg *conf,
                      const char* app_name,
                      const char* app_prompt,
                      const char* app_description);

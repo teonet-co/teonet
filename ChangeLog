@@ -1,3 +1,33 @@
+Version v0.4.6
+==============
+
+  - src/modules/l0-server.c: fix memleak
+  - l0-server.c: change return type and value of json_eq function
+  - Merge pull request #112 from teonet-co/fix/remove-invalid-callback
+  - fix reconnect (#175)
+  - Merge pull request #170 from teonet-co/fix/dns-names
+  - Update src/config/opt.c
+  - opt.c: fix dns names
+  - Merge pull request #169 from teonet-co/fix/unknown_type_arp_table
+  - Add special argument for passing auth secret.
+  - Check signature length before other stuff.
+  - Merge fixes.
+  - Remove almost all allocations from auth check process.
+  - Add more logging to auth verification errors.
+  - Fix result client name building
+  - Remove old check function.
+  - Fix authdata string building.
+  - Add new auth check scheme.
+  - Fix tab indentation, remove duplicate include, move include to the beginning of the file.
+  - Set empty type in extended arp table if type of a peer is not known.
+  - double free fix
+  - l0-server.c: new auth 
+  - Merge pull request #167 from teonet-co/feature/packetsize-increase
+  - net_split.h: increase max packet size to 5MB
+  - update regular exp and libtuntap
+  - Feature/package (#163)
+  - Remove PROCESS_RECEIVE_NO_TRUDP callback that was never called.
+
 Version v0.4.5
 ==============
 

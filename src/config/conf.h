@@ -48,7 +48,7 @@
 #define TRUE  1
 #define FALSE 0
 
-typedef struct ksnet_cfg {
+typedef struct teonet_cfg {
 
     void *ke; ///< Poiner to ksnetEventManager
 
@@ -108,6 +108,7 @@ typedef struct ksnet_cfg {
     char filter[KSN_BUFFER_SM_SIZE/2];      ///<  Display log filter
 
     // R-Host
+    char r_host_addr_opt[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address or dns name derived from options
     char r_host_addr[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address
     long r_port;                            ///< Remote host port
     long r_tcp_port;                        ///< Remote host tcp port
@@ -141,15 +142,15 @@ typedef struct ksnet_cfg {
     char pn[KSN_BUFFER_SM_SIZE];
     char r_host_name[KSN_MAX_HOST_NAME];    ///< Remote host name (if connected)
 
-} ksnet_cfg;
+} teonet_cfg;
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-void ksnet_addHWAddrConfig(ksnet_cfg *conf, char *hwaddr);
-void read_config(ksnet_cfg *conf, int port_param);
-void ksnet_configInit(ksnet_cfg *ksn_cfg, void *ke);
+void ksnet_addHWAddrConfig(teonet_cfg *conf, char *hwaddr);
+void read_config(teonet_cfg *conf, int port_param);
+void ksnet_configInit(teonet_cfg *teo_cfg, void *ke);
 
 #ifdef	__cplusplus
 }

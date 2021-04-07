@@ -13,6 +13,10 @@
 
 //#include "net_recon.h"
 
+
+#include "net_arp.h"
+#include "teonet_l0_client.h"
+#include <stdint.h>
 enum ksnCMD {
 
     // Core level not TR-UDP mode: 0...63

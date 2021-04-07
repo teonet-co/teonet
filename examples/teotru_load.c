@@ -65,7 +65,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
         {
             // Server mode
-            if(!ke->ksn_cfg.app_argv[1][0] || !strcmp(ke->ksn_cfg.app_argv[1], "server")) {
+            if(!ke->teo_cfg.app_argv[1][0] || !strcmp(ke->teo_cfg.app_argv[1], "server")) {
 
                 printf("Server mode application started\n");
                 printf("Wait for client connected ...\n");
@@ -76,7 +76,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             else {
 
                 printf("Client mode application started ...\n");
-                printf("Wait connection to server \"%s\" ...\n", ke->ksn_cfg.app_argv[1]);
+                printf("Wait connection to server \"%s\" ...\n", ke->teo_cfg.app_argv[1]);
                 app_mode = 0;
             }
 
@@ -89,7 +89,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if(app_mode == 0) {
                 if(start_test_01) {
                     start_test_01 = 0;
-                    test_01(ke, ke->ksn_cfg.app_argv[1]);
+                    test_01(ke, ke->teo_cfg.app_argv[1]);
                 }
             }
         } break;
@@ -102,10 +102,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     rd->from, rd->addr, rd->port);
 
             // Client mode
-            if(!strcmp(rd->from, ke->ksn_cfg.app_argv[1])) {
+            if(!strcmp(rd->from, ke->teo_cfg.app_argv[1])) {
                 printf("Connected to server \"%s\" ...\n\n"
                        "Press A to start/stop \"Test 01\"\n\n",
-                        ke->ksn_cfg.app_argv[1]);
+                        ke->teo_cfg.app_argv[1]);
             }
 
         } break;
