@@ -14,13 +14,11 @@
  * Teoweb configuration structure
  */
 typedef struct teoweb_config {
-
     long http_port;
     char document_root[KSN_BUFFER_SM_SIZE];
     char l0_server_name[KSN_BUFFER_SM_SIZE];
     long l0_server_port;
     char auth_server_url[KSN_BUFFER_SM_SIZE];
-    
 } teoweb_config;
 
 #ifdef	__cplusplus

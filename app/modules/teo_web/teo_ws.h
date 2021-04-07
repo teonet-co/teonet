@@ -17,7 +17,6 @@ typedef struct teoWSClass teoWSClass;
  * Websocket L0 connector class data
  */
 struct teoWSClass {
-    
     ksnHTTPClass *kh; ///< Pointer to ksnHTTPClass
     PblMap* map; ///< Hash Map to store websocket clients
     
@@ -95,17 +94,14 @@ struct teoWSClass {
      * @return  True if message processed
      */    
     int (*processMsg)(teoWSClass *kws, void *nc_p, void *data, size_t data_length);
-
 };
 
 /**
  * Websocket L0 connector map data
  */
 typedef struct teoWSmapData {
-    
     teoLNullConnectData *con; ///< Pointer to L0 client connect data
     ev_io w; ///< L0 client watcher
-    
 } teoWSmapData;
 
 #ifdef	__cplusplus

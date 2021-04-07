@@ -18,9 +18,9 @@
   exit 1
 }
 
-echo "\n" Running autoreconf --verbose --install --force "\n"
+printf  "\n%s %s %s %s %s\n" Running autoreconf --verbose --install --force
 autoreconf --verbose --install --force
 intltoolize --force
 
-echo "\n" Removing autom4te.cache "\n"
+printf "\n%s %s\n" Removing autom4te.cache
 rm -rf autom4te.cache

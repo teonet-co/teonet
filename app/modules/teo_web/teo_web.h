@@ -34,18 +34,15 @@ typedef struct ksnHTTPClass {
  * Teonet HTTP module async event commands
  */
 enum WS_CMD {
-    
     WS_CONNECTED, ///< Websocket connected
     WS_MESSAGE, ///< Websocket send message
     WS_DISCONNECTED ///< Websocket disconnected
-            
 };
 
 /**
  * Teonet HTTP module async data structure
  */
 struct teoweb_data {
-    
     uint16_t cmd; ///< Teonet HTTP module async event commands
     size_t data_len; ///< Legth of websocket data
     char data[]; ///< Websocket data
