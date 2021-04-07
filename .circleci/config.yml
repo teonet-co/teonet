@@ -64,7 +64,7 @@ jobs:
     steps:
       - run: sudo apt-get update && sudo apt-get install -y openssh-client git
       - run: DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" sudo apt-get -y install tzdata
-      - run: sudo apt install -y make pkg-config libtool autoconf intltool doxygen gcc g++ libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev cpputest libcurl4-openssl-dev 
+      - run: sudo apt install -y make pkg-config libtool autoconf intltool doxygen gcc g++ libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev cpputest libcurl4-openssl-dev
       - checkout
       - run: git submodule update --init --recursive
       - run:
@@ -94,12 +94,12 @@ jobs:
           command: |
             ./autogen.sh
             ./configure
-            ./misc/make_remote_doc_upload.sh teonet   
+            ./misc/make_remote_doc_upload.sh teonet 
 
 workflows:
   version: 2.1
   untagged:
-    jobs: 
+    jobs:
      - testing
      - compile
   tagged-build:
@@ -118,4 +118,3 @@ workflows:
               ignore: /.*/
             tags:
               only: /^v.*/
-          

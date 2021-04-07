@@ -19,7 +19,6 @@
  * HTTP module class data
  */
 typedef struct ksnHTTPClass {
-    
     void *ke; ///< Ponter to ksnetEvMgrClass
     void *kws; ///< Pointer to teoWSClass
     void *ta; ///< Pointer to teoAuthClass
@@ -29,7 +28,6 @@ typedef struct ksnHTTPClass {
     pthread_t tid; ///< HTTP thread id
     int stop; ///< Stop HTTP server flag
     int stopped; ///< HTTP server is stopped
-    
 } ksnHTTPClass;
 
 /**
