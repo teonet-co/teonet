@@ -1,7 +1,7 @@
 AC_PREREQ([2.69])
 AC_INIT([grammar-filter], [1.0], [m@n.com])
 #AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_SRCDIR([main.c])
+AC_CONFIG_SRCDIR([text-filter-example.c])
 AM_INIT_AUTOMAKE([1.9 tar-pax subdir-objects foreign -Wall])
 AM_SILENT_RULES([yes])
 

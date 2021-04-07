@@ -71,18 +71,20 @@ const char
 #define khv  kev->kh   // Hotkeys class
 #define kc  kev->kc   // Net core class
 
-void teoHotkeySetFilter(ksnetHotkeysClass *hotkeys, char *filter) {
+void hotkeysResetFilter(ksnetHotkeysClass *hotkeys) {
     if (hotkeys->filter != NULL) {
         free(hotkeys->filter);
+        hotkeys->filter = NULL;
     }
+ }
+
+void teoHotkeySetFilter(ksnetHotkeysClass *hotkeys, char *filter) {
+    hotkeysResetFilter(hotkeys);
     hotkeys->filter = malloc(strlen(filter) + 1);
     strncpy(hotkeys->filter, filter, strlen(filter) + 1);
-    // if (khv->filter_arr != NULL) {
-    //     ksnet_stringArrFree(&khv->filter_arr);
-    // }
-    // khv->filter_arr = ksnet_stringArrSplit((char *)filter, "|", 0, 0);
-}
+ }
 
+ 
 unsigned char teoFilterFlagCheck(void *ke) {
     if (khv != NULL) {
         if (khv->filter_f) {
@@ -497,9 +499,6 @@ int hotkeys_cb(ksnetEvMgrClass *ke, void *data, ev_idle *w) {
                 // Got hot key
             if(khv->non_blocking) {
                 khv->str_number = 0;
-                if(khv->filter_arr) {
-                    printf("Current filter: %s\n",ksnet_stringArrCombine(khv->filter_arr, "|"));
-                }
                 printf("Enter word filter: ");
                 fflush(stdout);
                 _keys_non_blocking_stop(khv); // Switch STDIN to string
@@ -516,7 +515,7 @@ int hotkeys_cb(ksnetEvMgrClass *ke, void *data, ev_idle *w) {
                         teoHotkeySetFilter(ke->kh, (char*)data);
                     } else {
                         printf("FILTER was reset\n");
-                        teoHotkeySetFilter(ke->kh, " ");
+                        hotkeysResetFilter(ke->kh);
                     }
                     _keys_non_blocking_start(khv); // Switch STDIN to hot key
                 }
@@ -617,7 +616,6 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->mt = NULL;
     kh->pet = NULL;
     kh->put = NULL;
-    kh->filter_arr = NULL;
     kh->filter = NULL;
     kh->filter_f = 1;
     kh->ke = ke;
@@ -661,7 +659,6 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
         
         ev_io_stop (ke->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
-        ksnet_stringArrFree(&kh->filter_arr);
         free(kh);
         ke->kh = NULL;
     }

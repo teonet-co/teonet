@@ -4,7 +4,7 @@ AM_LFLAGS = -i
 
 BUILT_SOURCES = grammar-filter.h 
 noinst_HEADERS = text-filter.h
-bin_PROGRAMS = text_filter
-text_filter_SOURCES = lexer-filter.l grammar-filter.y text-filter.c
+bin_PROGRAMS = text-filter-example
+text_filter_example_SOURCES = lexer-filter.l grammar-filter.y text-filter-example.c
 
 

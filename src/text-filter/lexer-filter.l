@@ -36,7 +36,7 @@ void yyerror(char *);
         yylval.sValue = malloc(yyleng - 1);
         memcpy(yylval.sValue, yytext + 1, yyleng - 2);
         yylval.sValue[yyleng - 2] = 0;
-        /* printf("LEX: string parsed: .%s.\n", yylval.sValue); */
+        /*printf("LEX: string parsed: .%s.\n", yylval.sValue);*/
         return STRING;
 }
 

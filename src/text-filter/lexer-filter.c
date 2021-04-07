@@ -1,5 +1,6 @@
+#line 2 "lexer-filter.c"
 
-#line 3 "lexer-filter.c"
+#line 4 "lexer-filter.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -378,14 +379,14 @@ static const YY_CHAR yy_ec[256] =
         1,    2,    4,    5,    1,    1,    1,    6,    1,    7,
         7,    1,    1,    8,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        7,    1,    1,    1,    9,   10,   10,   10,   10,   10,
-       11,   10,   10,   10,   10,   12,   10,   10,   13,   10,
-       10,   14,   10,   10,   10,   15,   10,   10,   10,   10,
-        1,    1,    1,    1,   10,    1,   16,   10,   10,   10,
+        7,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    9,    1,   10,    9,    9,    9,
 
-       10,   10,   17,   10,   10,   10,   10,   18,   10,   10,
-       19,   10,   10,   20,   10,   10,   10,   21,   10,   10,
-       10,   10,    1,   22,    1,    1,    1,    1,    1,    1,
+        9,    9,   11,    9,    9,    9,    9,   12,    9,    9,
+       13,    9,    9,   14,    9,    9,    9,   15,    9,    9,
+        9,    9,    1,   16,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -402,18 +403,17 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static const YY_CHAR yy_meta[23] =
+static const YY_CHAR yy_meta[17] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    2,    2,
-        2,    2,    2,    2,    2,    2,    2,    2,    2,    2,
-        2,    1
+        2,    2,    2,    2,    2,    1
     } ;
 
 static const flex_int16_t yy_base[26] =
     {   0,
-        0,    0,   38,   39,   39,   39,   39,   32,   39,   39,
-       39,    0,   10,   39,   27,   39,    0,   13,   10,   17,
-       14,    0,   39,   34,   25
+        0,    0,   27,   28,   28,   28,   28,   21,   28,   28,
+       28,    0,   12,   28,   19,   28,    0,   12,    7,   11,
+        6,    0,   28,   16,   17
     } ;
 
 static const flex_int16_t yy_def[26] =
@@ -423,26 +423,22 @@ static const flex_int16_t yy_def[26] =
        25,   25,    0,   23,   23
     } ;
 
-static const flex_int16_t yy_nxt[62] =
+static const flex_int16_t yy_nxt[45] =
     {   0,
         4,    5,    6,    7,    8,    9,   10,   11,   12,   12,
-       12,   13,   12,   12,   12,   12,   12,   13,   12,   12,
-       12,   14,   18,   19,   20,   21,   17,   22,   18,   19,
-       20,   16,   21,   22,   15,   15,   16,   23,    3,   23,
+       12,   13,   12,   12,   12,   14,   15,   15,   17,   22,
+       21,   20,   19,   16,   18,   16,   23,    3,   23,   23,
        23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
-       23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
-       23
+       23,   23,   23,   23
     } ;
 
-static const flex_int16_t yy_chk[62] =
+static const flex_int16_t yy_chk[45] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,   13,   18,   19,   20,   25,   21,   13,   18,
-       19,   15,   20,   21,   24,   24,    8,    3,   23,   23,
+        1,    1,    1,    1,    1,    1,   24,   24,   25,   21,
+       20,   19,   18,   15,   13,    8,    3,   23,   23,   23,
        23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
-       23,   23,   23,   23,   23,   23,   23,   23,   23,   23,
-       23
+       23,   23,   23,   23
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -464,9 +460,9 @@ char *yytext;
 
 #include "grammar-filter.h"
 void yyerror(char *);
-#line 468 "lexer-filter.c"
+#line 464 "lexer-filter.c"
 #define YY_NO_INPUT 1
-#line 470 "lexer-filter.c"
+#line 466 "lexer-filter.c"
 
 #define INITIAL 0
 
@@ -683,7 +679,7 @@ YY_DECL
 	{
 #line 9 "lexer-filter.l"
 
-#line 687 "lexer-filter.c"
+#line 683 "lexer-filter.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -716,7 +712,7 @@ yy_match:
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 39 );
+		while ( yy_base[yy_current_state] != 28 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -788,7 +784,7 @@ YY_RULE_SETUP
         yylval.sValue = malloc(yyleng - 1);
         memcpy(yylval.sValue, yytext + 1, yyleng - 2);
         yylval.sValue[yyleng - 2] = 0;
-        /* printf("LEX: string parsed: .%s.\n", yylval.sValue); */
+        /*printf("LEX: string parsed: .%s.\n", yylval.sValue);*/
         return STRING;
 }
 	YY_BREAK
@@ -818,7 +814,7 @@ YY_RULE_SETUP
 #line 48 "lexer-filter.l"
 ECHO;
 	YY_BREAK
-#line 822 "lexer-filter.c"
+#line 818 "lexer-filter.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
