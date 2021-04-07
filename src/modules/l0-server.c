@@ -775,6 +775,9 @@ static void sendConnectedEvent(ksnLNullClass *kl, ksnLNullData *kld) {
 }
 
 static void confirmAuth(ksnLNullClass *kl, ksnLNullData *kld, int fd) {
+    #ifdef DEBUG_KSNET
+        ksn_printf(kev, MODULE, DEBUG,"Confirm auth for user %s\n", kld->name);
+    #endif
     // Create L0 packet
     size_t out_data_len = sizeof(teoLNullCPacket) + strlen(kev->ksn_cfg.host_name) + 1 + kld->name_length + 1;
     char *out_data = malloc(out_data_len);
@@ -1568,8 +1571,6 @@ static int json_parse(char *data, json_param *jp) {
  * @return
  */
 int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
-
-    int retval = 0;
     ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
 
     // Parse request
@@ -1585,11 +1586,12 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     );
     #endif
 
-    ksnLNullClass *kl = ((ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke))->kl;
+    ksnLNullClass *kl = ke->kl;
 
     // Authorize new user
-    int fd = ksnLNullClientIsConnected(kl, jp.userId);
-    if(fd) {
+    int fd = -1;
+    
+    if(jp.userId && (fd = ksnLNullClientIsConnected(kl, jp.userId))) {
         ksnLNullData* kld = pblMapGet(kl->map, &fd, sizeof(fd), NULL);
         if(kld != NULL) {
             confirmAuth(kl, kld, fd);
@@ -1597,7 +1599,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             #ifdef DEBUG_KSNET
             ksn_printf(ke, MODULE, DEBUG,
                 "can't confirm auth of the client %s. kld not found.\n",
-                rd->data_len, rd->from, jp.userId, rd->data
+                jp.userId
             );
             #endif
         }
@@ -1605,7 +1607,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
         #ifdef DEBUG_KSNET
         ksn_printf(ke, MODULE, DEBUG,
             "can't confirm auth of the client %s. Client not connected.\n",
-            rd->data_len, rd->from, jp.userId, rd->data
+            jp.userId
         );
         #endif
     }
@@ -1617,7 +1619,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(jp.username != NULL) free(jp.username);
     if(jp.networks != NULL) free(jp.networks);
 
-    return retval;
+    return 1;
 }
 
 /**
@@ -1628,9 +1630,7 @@ int cmd_l0_check_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
  * @return
  */
 int cmd_l0_kick_client(ksnCommandClass *kco, ksnCorePacketData *rd) {
-    ksnetEvMgrClass *ke = EVENT_MANAGER_OBJECT(kco);
-
-    int retval = 0;
+    ksnetEvMgrClass *ke = (ksnetEvMgrClass*)(((ksnCoreClass*)kco->kc)->ke);
 
     // Parse request
     char *json_data_unesc = rd->data;
@@ -1641,7 +1641,7 @@ int cmd_l0_kick_client(ksnCommandClass *kco, ksnCorePacketData *rd) {
     ksn_printf(ke, MODULE, DEBUG,
         "got %d bytes kick command from %s authentication application, "
             "username: %s\n%s\n",
-        rd->data_len, rd->from, jp.username, rd->data
+        rd->data_len, rd->from, jp.userId, rd->data
     );
     #endif
 
@@ -1672,7 +1672,7 @@ int cmd_l0_kick_client(ksnCommandClass *kco, ksnCorePacketData *rd) {
     if(jp.username != NULL) free(jp.username);
     if(jp.networks != NULL) free(jp.networks);
 
-    return retval;
+    return 1;
 }
 
 /**
