@@ -143,9 +143,9 @@ int ksnet_printf(teonet_cfg *teo_cfg, int type, const char* format, ...) {
             struct tm tm = *localtime(&e_time);
 
             char t[64];
-            strftime(t, sizeof t, "[%F %T", &tm);
+            strftime(t, sizeof(t), "[%F %T", &tm);
 
-            char timestamp[64];
+            char timestamp[128];
             snprintf(timestamp, sizeof timestamp, "%s:%03u]", t, ms_time);
 
             if(type != DISPLAY_M && ct != 0.00)

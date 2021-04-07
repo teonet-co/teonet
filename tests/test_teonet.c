@@ -22,6 +22,7 @@ int add_suite_3_tests(void);
 int add_suite_4_tests(void);
 int add_suite_5_tests(void);
 int add_suite_6_tests(void);
+int add_suite_filter_tests(void);
 
 // Global variables
 CU_pSuite pSuite = NULL;
@@ -99,6 +100,14 @@ int main() {
         return CU_get_error();
     }
     add_suite_6_tests();
+
+    // Add a suite to the registry
+    pSuite = CU_add_suite("Text-filter module functions", init_suite, clean_suite);
+    if (NULL == pSuite) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    add_suite_filter_tests();
 
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);
