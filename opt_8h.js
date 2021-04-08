@@ -8,6 +8,6 @@ var opt_8h =
       [ "APP_PARAM", "opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a614fc57f814388d30e4a646c0ccdea2c", null ],
       [ "BLOCK_CLI_INPUT", "opt_8h.html#a58bddb20a24cd2ff78726ae910628a52ad682c4f8adc313c3c6416b3b7cb47107", null ]
     ] ],
-    [ "ksnet_optRead", "opt_8h.html#a2a845429ecc10d367e77cc4ffc548f24", null ],
-    [ "ksnet_optSetApp", "opt_8h.html#a748df229e8c07bc5d71acb1425196cf5", null ]
+    [ "ksnet_optRead", "opt_8h.html#a4cbb19df3014862142b29d50e87392b5", null ],
+    [ "ksnet_optSetApp", "opt_8h.html#a0003916316cbd1fc914c8a21f7f4bb18", null ]
 ];

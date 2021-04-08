@@ -10,7 +10,7 @@ var net__core_8c =
     [ "PACKET_HEADER_ADD_SIZE", "net__core_8c.html#a44877c18deb591aee0ea5e8a4c78dc4e", null ],
     [ "rd", "net__core_8c.html#a2b916b583d6a51b414c74ecaf5b7bc72", null ],
     [ "sendto_encrypt", "net__core_8c.html#a6b91f4fa1c745ad314e476956a55f3f7", null ],
-    [ "peer_type_req_t", "net__core_8c.html#a83a25c7c9a2f642b7b703435912925c3", null ],
+    [ "peer_type_req_t", "net__core_8c.html#a8b187a0518ff95415cdaae34998749bd", null ],
     [ "send_by_type_check_t", "net__core_8c.html#a4c21109808394e399024c2062d7f9ae6", null ],
     [ "host_cb", "net__core_8c.html#a54221c7a8c0ad7c0df3017e283554f91", null ],
     [ "ksnCoreBind", "net__core_8c.html#a20578428928f50986245933135f4bac5", null ],

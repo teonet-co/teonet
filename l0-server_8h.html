@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -112,7 +112,10 @@ $(document).ready(function(){initNavTree('l0-server_8h.html','');});
 <div class="title">l0-server.h File Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;pbl.h&gt;</code><br/>
+<div class="textblock"><code>#include &lt;ev.h&gt;</code><br/>
+<code>#include &lt;pbl.h&gt;</code><br/>
+<code>#include &quot;<a class="el" href="cque_8h_source.html">modules/cque.h</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="net__com_8h_source.html">net_com.h</a>&quot;</code><br/>
 <code>#include &quot;<a class="el" href="subscribe_8h_source.html">subscribe.h</a>&quot;</code><br/>
 <code>#include &quot;teonet_l0_client.h&quot;</code><br/>
 </div>
@@ -269,9 +272,9 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>References <a class="el" href="l0-server_8c.html#a6b89975497519feaf094f16e895980af">_send_subscribe_event_disconnected()</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda20391dd2915a0e64343d24c2f2e40b95">CONNECT</a>, <a class="el" href="l0-server_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnLNullData.html#a706e17d1302768ba0e47cd44dad4fe71">ksnLNullData::name</a>, <a class="el" href="structksnLNullData.html#a459376f1ca60e0cc021800daab3c429e">ksnLNullData::name_length</a>, <a class="el" href="cque_8c.html#aa7c3bfc442bf065008e56c1b18e83b1d">pblMapRemoveFree()</a>, <a class="el" href="structksnLNullData.html#a9cfb38c9b228610457e814d1434591a9">ksnLNullData::read_buffer</a>, <a class="el" href="structksnLNullData.html#a457ed62275058d872b0a1652ed92e8af">ksnLNullData::read_buffer_ptr</a>, <a class="el" href="structksnLNullData.html#af74285e63eb110aed3b4c4777bfc32ca">ksnLNullData::read_buffer_size</a>, <a class="el" href="structksnLNullData.html#af8be8a100c81e314654fe065c852ba22">ksnLNullData::server_crypt</a>, <a class="el" href="structksnLNullClass.html#a22acdf10b59a277108394b2b48dc44c5">ksnLNullClass::stat</a>, <a class="el" href="structksnLNullData.html#a1431997987170724114c391dcd2d8489">ksnLNullData::t_addr</a>, and <a class="el" href="structksnLNullData.html#aea8620cf4526b4b5f0cb393ee75eaddf">ksnLNullData::w</a>.</p>
+<p>References <a class="el" href="l0-server_8c.html#a2d12160f8c5f4b22b117055fd006d1e9">_send_subscribe_event_disconnected()</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda20391dd2915a0e64343d24c2f2e40b95">CONNECT</a>, <a class="el" href="structksnetEvMgrClass.html#a807f92107f1e71f865daab99f75b7701">ksnetEvMgrClass::ev_loop</a>, <a class="el" href="ev__mgr_8h.html#af13a093a2b028a718fd851e58406d31c">EVENT_MANAGER_OBJECT</a>, <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnLNullData.html#a706e17d1302768ba0e47cd44dad4fe71">ksnLNullData::name</a>, <a class="el" href="structksnLNullData.html#a459376f1ca60e0cc021800daab3c429e">ksnLNullData::name_length</a>, <a class="el" href="cque_8c.html#aa7c3bfc442bf065008e56c1b18e83b1d">pblMapRemoveFree()</a>, <a class="el" href="structksnLNullData.html#a9cfb38c9b228610457e814d1434591a9">ksnLNullData::read_buffer</a>, <a class="el" href="structksnLNullData.html#a457ed62275058d872b0a1652ed92e8af">ksnLNullData::read_buffer_ptr</a>, <a class="el" href="structksnLNullData.html#af74285e63eb110aed3b4c4777bfc32ca">ksnLNullData::read_buffer_size</a>, <a class="el" href="structksnLNullData.html#af8be8a100c81e314654fe065c852ba22">ksnLNullData::server_crypt</a>, <a class="el" href="structksnLNullClass.html#a22acdf10b59a277108394b2b48dc44c5">ksnLNullClass::stat</a>, <a class="el" href="structksnLNullData.html#a1431997987170724114c391dcd2d8489">ksnLNullData::t_addr</a>, and <a class="el" href="structksnLNullData.html#aea8620cf4526b4b5f0cb393ee75eaddf">ksnLNullData::w</a>.</p>
 
-<p>Referenced by <a class="el" href="l0-server_8c.html#a57240478951a94d34dbe8e4060fb8b08">_check_connected()</a>, <a class="el" href="net__com_8c.html#a4ce6aa59fbc0daa3ed638f7bad0bcf95">cmd_l0_check_cb()</a>, <a class="el" href="l0-server_8h.html#afe41a76f35e9f8155a6c6c2658433764">ksnLNulltrudpCheckPaket()</a>, and <a class="el" href="tr-udp_8h.html#a63fc4942e6d0afe175ebda203afabf14">trudp_event_cb()</a>.</p>
+<p>Referenced by <a class="el" href="l0-server_8c.html#a57240478951a94d34dbe8e4060fb8b08">_check_connected()</a>, <a class="el" href="net__com_8c.html#abba901e0a3823161123dc7f9fc87720f">cmd_l0_kick_client()</a>, <a class="el" href="l0-server_8h.html#afe41a76f35e9f8155a6c6c2658433764">ksnLNulltrudpCheckPaket()</a>, and <a class="el" href="tr-udp_8h.html#a63fc4942e6d0afe175ebda203afabf14">trudp_event_cb()</a>.</p>
 
 </div>
 </div>
@@ -349,7 +352,7 @@ Functions</h2></td></tr>
 
 <p>References <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>.</p>
 
-<p>Referenced by <a class="el" href="net__com_8c.html#a4ce6aa59fbc0daa3ed638f7bad0bcf95">cmd_l0_check_cb()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, and <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>.</p>
+<p>Referenced by <a class="el" href="net__com_8c.html#a4ce6aa59fbc0daa3ed638f7bad0bcf95">cmd_l0_check_cb()</a>, <a class="el" href="net__com_8c.html#abba901e0a3823161123dc7f9fc87720f">cmd_l0_kick_client()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, and <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>.</p>
 
 </div>
 </div>
@@ -376,7 +379,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p>References <a class="el" href="structksnLNullClass.html#abab81c6a2f8e900abada745ef1fd0f55">ksnLNullClass::fd</a>, <a class="el" href="l0-server_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, and <a class="el" href="structksnLNullData.html#a706e17d1302768ba0e47cd44dad4fe71">ksnLNullData::name</a>.</p>
+<p>References <a class="el" href="ev__mgr_8h.html#af13a093a2b028a718fd851e58406d31c">EVENT_MANAGER_OBJECT</a>, <a class="el" href="structksnLNullClass.html#abab81c6a2f8e900abada745ef1fd0f55">ksnLNullClass::fd</a>, <a class="el" href="structteonet__cfg.html#aebbbfec153826b40dd354f954e045ea8">teonet_cfg::l0_allow_f</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, <a class="el" href="structksnLNullData.html#a706e17d1302768ba0e47cd44dad4fe71">ksnLNullData::name</a>, and <a class="el" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">ksnetEvMgrClass::teo_cfg</a>.</p>
 
 </div>
 </div>
@@ -435,7 +438,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>References <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, and <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>.</p>
+<p>References <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, and <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>.</p>
 
 <p>Referenced by <a class="el" href="ev__mgr_8c.html#a4e08bd79e7fee48449a51e64631fa46d">modules_destroy()</a>.</p>
 
@@ -464,7 +467,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to created <a class="el" href="structksnLNullClass.html" title="ksnLNull Class structure definition ">ksnLNullClass</a> or NULL if error occurred </dd></dl>
 
-<p>References <a class="el" href="structksnLNullClass.html#abf82ec224083878d081976a163fd8060">ksnLNullClass::fd_trudp</a>, <a class="el" href="structksnLNullClass.html#afbe9ed9b77051f4960d9b3bcae5beb78">ksnLNullClass::ke</a>, <a class="el" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>, and <a class="el" href="structksnLNullClass.html#a22acdf10b59a277108394b2b48dc44c5">ksnLNullClass::stat</a>.</p>
+<p>References <a class="el" href="structksnLNullClass.html#abf82ec224083878d081976a163fd8060">ksnLNullClass::fd_trudp</a>, <a class="el" href="structksnLNullClass.html#afbe9ed9b77051f4960d9b3bcae5beb78">ksnLNullClass::ke</a>, <a class="el" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, <a class="el" href="structksnLNullClass.html#af9c148fc066cea71df4b08fdc630cf6e">ksnLNullClass::map</a>, <a class="el" href="structksnLNullClass.html#abe09e6b9f3e38c2ccdeaa4a1c448462a">ksnLNullClass::map_n</a>, and <a class="el" href="structksnLNullClass.html#a22acdf10b59a277108394b2b48dc44c5">ksnLNullClass::stat</a>.</p>
 
 <p>Referenced by <a class="el" href="ev__mgr_8c.html#abe177e6ac7c5b8e31c8f5cae3eea47a2">modules_init()</a>.</p>
 
@@ -519,9 +522,9 @@ Functions</h2></td></tr>
 <p>&lt; Remote address</p>
 <p>&lt; Remote address length </p>
 
-<p>References <a class="el" href="net__com_8h.html#a7a34139fbc7791f4daa2c7acbc97df85">CMD_TRUDP_CHECK</a>, <a class="el" href="src_2utils_2utils_8h.html#a1e39deabc1f0f1553a6a139140d5174c">dump_bytes()</a>, <a class="el" href="structksnLNullClass.html#afbe9ed9b77051f4960d9b3bcae5beb78">ksnLNullClass::ke</a>, <a class="el" href="l0-server_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="tr-udp_8c.html#a075d6499d338b67279f963fd075a5023">ksnTRUDPsendto()</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnLNullData.html#af8be8a100c81e314654fe065c852ba22">ksnLNullData::server_crypt</a>, <a class="el" href="structksnLNullClass.html#a22acdf10b59a277108394b2b48dc44c5">ksnLNullClass::stat</a>, <a class="el" href="structksnLNullData.html#a1431997987170724114c391dcd2d8489">ksnLNullData::t_addr</a>, and <a class="el" href="structksnLNullData.html#a9a809857375bf308c0f398ed0a49cf31">ksnLNullData::t_port</a>.</p>
+<p>References <a class="el" href="net__com_8h.html#a7a34139fbc7791f4daa2c7acbc97df85">CMD_TRUDP_CHECK</a>, <a class="el" href="src_2utils_2utils_8h.html#a1e39deabc1f0f1553a6a139140d5174c">dump_bytes()</a>, <a class="el" href="ev__mgr_8h.html#af13a093a2b028a718fd851e58406d31c">EVENT_MANAGER_OBJECT</a>, <a class="el" href="structksnLNullClass.html#afbe9ed9b77051f4960d9b3bcae5beb78">ksnLNullClass::ke</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="tr-udp_8c.html#a075d6499d338b67279f963fd075a5023">ksnTRUDPsendto()</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnLNullData.html#af8be8a100c81e314654fe065c852ba22">ksnLNullData::server_crypt</a>, <a class="el" href="structksnLNullClass.html#a22acdf10b59a277108394b2b48dc44c5">ksnLNullClass::stat</a>, <a class="el" href="structksnLNullData.html#a1431997987170724114c391dcd2d8489">ksnLNullData::t_addr</a>, and <a class="el" href="structksnLNullData.html#a9a809857375bf308c0f398ed0a49cf31">ksnLNullData::t_port</a>.</p>
 
-<p>Referenced by <a class="el" href="l0-server_8c.html#a57240478951a94d34dbe8e4060fb8b08">_check_connected()</a>, <a class="el" href="net__com_8c.html#a4ce6aa59fbc0daa3ed638f7bad0bcf95">cmd_l0_check_cb()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, and <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>.</p>
+<p>Referenced by <a class="el" href="l0-server_8c.html#a57240478951a94d34dbe8e4060fb8b08">_check_connected()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, and <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>.</p>
 
 </div>
 </div>
@@ -594,7 +597,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Return 0 if success; -1 if data length is too lage (more than 32319) </dd></dl>
 
-<p>References <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da629d266cd7f0823a8936fd71f92238d3">CMD_ECHO</a>, <a class="el" href="hotkeys_8c.html#a988a7f8f7bd16c1a203757c49e876668">kc</a>, <a class="el" href="net__com_8c.html#a95a203bd6684c134158f32aba901faca">ksnCommandEchoBuffer()</a>, and <a class="el" href="l0-server_8c.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>.</p>
+<p>References <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da629d266cd7f0823a8936fd71f92238d3">CMD_ECHO</a>, <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, <a class="el" href="hotkeys_8c.html#a988a7f8f7bd16c1a203757c49e876668">kc</a>, <a class="el" href="net__com_8c.html#a95a203bd6684c134158f32aba901faca">ksnCommandEchoBuffer()</a>, and <a class="el" href="l0-server_8c.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>.</p>
 
 <p>Referenced by <a class="el" href="classteo_1_1Teonet.html#ac9e3852f0d5f503eb4b7d59defd04884">teo::Teonet::sendEchoToL0()</a>.</p>
 
@@ -654,7 +657,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>References <a class="el" href="structksnCorePacketData.html#a24ca04a53c440b1c862844d953178d52">ksnCorePacketData::addr</a>, <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da629d266cd7f0823a8936fd71f92238d3">CMD_ECHO</a>, <a class="el" href="structksnCorePacketData.html#a1459437bf7557b3598b381c886f4d089">ksnCorePacketData::from</a>, <a class="el" href="structksnCorePacketData.html#a700469d2975715e1c17b4d42f908ded0">ksnCorePacketData::from_len</a>, <a class="el" href="hotkeys_8c.html#a988a7f8f7bd16c1a203757c49e876668">kc</a>, <a class="el" href="net__com_8c.html#a95a203bd6684c134158f32aba901faca">ksnCommandEchoBuffer()</a>, <a class="el" href="structksnCorePacketData.html#a7e5c638642eb2456317e30121df4fcaf">ksnCorePacketData::l0_f</a>, <a class="el" href="structksnCorePacketData.html#a2b762760d172f4c52f9925ca4338df3b">ksnCorePacketData::port</a>, <a class="el" href="net__core_8c.html#a2b916b583d6a51b414c74ecaf5b7bc72">rd</a>, and <a class="el" href="async__calls_8c.html#ae923d04dabc6922227d7a032eb54d282">sendCmdAnswerToBinaryA()</a>.</p>
+<p>References <a class="el" href="structksnCorePacketData.html#a24ca04a53c440b1c862844d953178d52">ksnCorePacketData::addr</a>, <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da629d266cd7f0823a8936fd71f92238d3">CMD_ECHO</a>, <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, <a class="el" href="structksnCorePacketData.html#a1459437bf7557b3598b381c886f4d089">ksnCorePacketData::from</a>, <a class="el" href="structksnCorePacketData.html#a700469d2975715e1c17b4d42f908ded0">ksnCorePacketData::from_len</a>, <a class="el" href="hotkeys_8c.html#a988a7f8f7bd16c1a203757c49e876668">kc</a>, <a class="el" href="net__com_8c.html#a95a203bd6684c134158f32aba901faca">ksnCommandEchoBuffer()</a>, <a class="el" href="structksnCorePacketData.html#a7e5c638642eb2456317e30121df4fcaf">ksnCorePacketData::l0_f</a>, <a class="el" href="structksnCorePacketData.html#a2b762760d172f4c52f9925ca4338df3b">ksnCorePacketData::port</a>, <a class="el" href="net__core_8c.html#a2b916b583d6a51b414c74ecaf5b7bc72">rd</a>, and <a class="el" href="async__calls_8c.html#ae923d04dabc6922227d7a032eb54d282">sendCmdAnswerToBinaryA()</a>.</p>
 
 <p>Referenced by <a class="el" href="classteo_1_1Teonet.html#aa2e856eb126602663170037456352f75">teo::Teonet::sendEchoToL0A()</a>.</p>
 
@@ -737,7 +740,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Return 0 if success; -1 if data length is too lage (more than 32319) </dd></dl>
 
-<p>References <a class="el" href="structksnLNullSPacket.html#a2ae993b4e9e063d9cc63929da101a59a">ksnLNullSPacket::cmd</a>, <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20daf02ee42a4d1b5e994843267918e133e1">CMD_L0_TO</a>, <a class="el" href="structksnLNullSPacket.html#a1cb09115e08d5ff60bece1edc364b4d9">ksnLNullSPacket::data_length</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda275f992601832b227b6738e3caa9fec0">DEBUG_VV</a>, <a class="el" href="structksnLNullSPacket.html#a923acec5f277efc9b19c177db1c76b49">ksnLNullSPacket::from</a>, <a class="el" href="structksnLNullSPacket.html#ab89ee3c1b098942165305b41efaa5c81">ksnLNullSPacket::from_length</a>, <a class="el" href="hotkeys_8c.html#a988a7f8f7bd16c1a203757c49e876668">kc</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="net__core_8c.html#a84c962faa94fb561da16d474cf3247e6">ksnCoreSendto()</a>, and <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>.</p>
+<p>References <a class="el" href="structksnLNullSPacket.html#aff1a71872e1eeba00020fac1b7a3c571">ksnLNullSPacket::client_name_length</a>, <a class="el" href="structksnLNullSPacket.html#a2ae993b4e9e063d9cc63929da101a59a">ksnLNullSPacket::cmd</a>, <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20daf02ee42a4d1b5e994843267918e133e1">CMD_L0_TO</a>, <a class="el" href="structksnLNullSPacket.html#a1cb09115e08d5ff60bece1edc364b4d9">ksnLNullSPacket::data_length</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda275f992601832b227b6738e3caa9fec0">DEBUG_VV</a>, <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, <a class="el" href="hotkeys_8c.html#a988a7f8f7bd16c1a203757c49e876668">kc</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="net__core_8c.html#a84c962faa94fb561da16d474cf3247e6">ksnCoreSendto()</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, and <a class="el" href="structksnLNullSPacket.html#aa13861fd9d9f4a7d9c3a83b4b0479081">ksnLNullSPacket::payload</a>.</p>
 
 <p>Referenced by <a class="el" href="l0-server_8h.html#ab39c60078d17453ae21dcf770c216b3c">ksnLNullSendEchoToL0()</a>, <a class="el" href="async__calls_8h.html#a72ba5519c2673ea7afd8b3b5170ed923">sendCmdAnswerToBinaryA()</a>, <a class="el" href="classteo_1_1Teonet.html#a28b3fe6fbd95f5669824fbe021c9a720">teo::Teonet::sendToL0()</a>, and <a class="el" href="subscribe_8h.html#ab1e743bb5814a9219a3e0708006ff854">teoSScrSend()</a>.</p>
 
@@ -806,7 +809,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p>References <a class="el" href="structksnCorePacketData.html#a24ca04a53c440b1c862844d953178d52">ksnCorePacketData::addr</a>, <a class="el" href="structksnCorePacketData.html#a8eb43740395e420d2b5b575678c4b6ea">ksnCorePacketData::cmd</a>, <a class="el" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">ksnCorePacketData::data</a>, <a class="el" href="structksnCorePacketData.html#a712f5a7dc02e86ee0576e0d2b2ff12f0">ksnCorePacketData::data_len</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda275f992601832b227b6738e3caa9fec0">DEBUG_VV</a>, <a class="el" href="structksnLNullClass.html#abab81c6a2f8e900abada745ef1fd0f55">ksnLNullClass::fd</a>, <a class="el" href="l0-server_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="l0-server_8c.html#abec9d5aaceab9bb5b0110e8047b90dae">ksnLNullClientDisconnect()</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnCorePacketData.html#a2b762760d172f4c52f9925ca4338df3b">ksnCorePacketData::port</a>, and <a class="el" href="l0-server_8c.html#a71b87fd6b342d24ac1808637df85a89f">recvCheck()</a>.</p>
+<p>References <a class="el" href="structksnCorePacketData.html#a24ca04a53c440b1c862844d953178d52">ksnCorePacketData::addr</a>, <a class="el" href="structksnCorePacketData.html#a8eb43740395e420d2b5b575678c4b6ea">ksnCorePacketData::cmd</a>, <a class="el" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">ksnCorePacketData::data</a>, <a class="el" href="structksnCorePacketData.html#a712f5a7dc02e86ee0576e0d2b2ff12f0">ksnCorePacketData::data_len</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda275f992601832b227b6738e3caa9fec0">DEBUG_VV</a>, <a class="el" href="ev__mgr_8h.html#af13a093a2b028a718fd851e58406d31c">EVENT_MANAGER_OBJECT</a>, <a class="el" href="structksnLNullClass.html#abab81c6a2f8e900abada745ef1fd0f55">ksnLNullClass::fd</a>, <a class="el" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">ksnetEvMgrClass::kc</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="l0-server_8c.html#abec9d5aaceab9bb5b0110e8047b90dae">ksnLNullClientDisconnect()</a>, <a class="el" href="structksnCoreClass.html#a46c00e72a67faefdf14cfb9bd442d222">ksnCoreClass::ku</a>, <a class="el" href="l0-server_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, <a class="el" href="structksnCorePacketData.html#a2b762760d172f4c52f9925ca4338df3b">ksnCorePacketData::port</a>, and <a class="el" href="l0-server_8c.html#a71b87fd6b342d24ac1808637df85a89f">recvCheck()</a>.</p>
 
 <p>Referenced by <a class="el" href="net__core_8h.html#abc445677c3da25dfbb9800a156e86ef4">ksnCoreProcessPacket()</a>.</p>
 
@@ -818,7 +821,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_ddb4d7e95cc2d6c8e1ade10a20d7247d.html">modules</a></li><li class="navelem"><a class="el" href="l0-server_8h.html">l0-server.h</a></li>
-    <li class="footer">Generated on Mon Mar 1 2021 10:50:00 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:50 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

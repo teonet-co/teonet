@@ -15,7 +15,8 @@ var hotkeys_8c =
       [ "Y_QUIT", "hotkeys_8c.html#a4774ec7c23fe6b697176fdbb919392d0ab8c54fa1e6726aee2015878104b6e5d8", null ]
     ] ],
     [ "_keys_non_blocking_start", "hotkeys_8c.html#ab12606cd4a22285a1720df802f63a49c", null ],
-    [ "hotkeys_cb", "hotkeys_8c.html#ae7fe8ed317a2611ac0efa9f8a23fc39c", null ],
+    [ "hotkeys_cb", "hotkeys_8c.html#abdc782885e864c22fb43c62c6e4a70c7", null ],
+    [ "hotkeysResetFilter", "hotkeys_8c.html#ad7dc62cfe072545fe31b75364a77980d", null ],
     [ "idle_stdin_cb", "hotkeys_8c.html#af63d44378b7b8a2483301fa6c56d8acc", null ],
     [ "ksnetHotkeysDestroy", "hotkeys_8c.html#a73b3ae7b67f540835a09458cd607e178", null ],
     [ "ksnetHotkeysInit", "hotkeys_8c.html#a02f8dad9c57d93157d89b9aebe8475ac", null ],
@@ -32,7 +33,7 @@ var hotkeys_8c =
     [ "ping_timer_stop", "hotkeys_8c.html#a0db9196ab3285a487c3446aa898942e0", null ],
     [ "stdin_cb", "hotkeys_8c.html#a27ef90c1f0e43f7588e81b85b7ad3dc0", null ],
     [ "teoFilterFlagCheck", "hotkeys_8c.html#a018f1ad2695f431293203129be2d8e01", null ],
-    [ "teoHotkeySetFilter", "hotkeys_8c.html#a18ca0d1a9b8209ad5c69b07e5239b74d", null ],
+    [ "teoHotkeySetFilter", "hotkeys_8c.html#af9084250b7ec9c9d204fd3383386c840", null ],
     [ "teoLogCheck", "hotkeys_8c.html#ad498144d14cf8a03072de8b374358355", null ],
     [ "tr_udp_idle_cb", "hotkeys_8c.html#a0209b5bb631eb2b8f1ac1336842f350d", null ],
     [ "tr_udp_timer_cb", "hotkeys_8c.html#ada8081a4c8c3e647fe52103f235819be", null ],

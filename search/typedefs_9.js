@@ -9,7 +9,6 @@ var searchData=
   ['ksncquecompare',['ksnCQueCompare',['../cque_8h.html#a280a59e4bfeda73cc45d15c0b2b56a13',1,'cque.h']]],
   ['ksncquedata',['ksnCQueData',['../cque_8h.html#aa620bb493d9fabed1fc32d5c4be09b3e',1,'cque.h']]],
   ['ksncryptclass',['ksnCryptClass',['../crypt_8h.html#a6be2d1b547ff7105bf76c8145f79f61c',1,'crypt.h']]],
-  ['ksnet_5fcfg',['ksnet_cfg',['../conf_8h.html#aaff2e57818bdb81f0848936f2a9a909c',1,'conf.h']]],
   ['ksnet_5fprintf_5ftype',['ksnet_printf_type',['../src_2utils_2utils_8h.html#a05bfef789a8503ec246ecfd44385be77',1,'utils.h']]],
   ['ksnet_5fstringarr',['ksnet_stringArr',['../string__arr_8h.html#a4f96825637af7f2ebe665b42b12feaa8',1,'string_arr.h']]],
   ['ksnetarpclass',['ksnetArpClass',['../net__arp_8h.html#a03f1441168f6b59312011a008de70edc',1,'net_arp.h']]],

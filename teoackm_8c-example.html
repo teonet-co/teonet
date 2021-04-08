@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -138,7 +138,7 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line"><span class="keywordtype">void</span> <a name="a7"></a><a class="code" href="teoackm_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb</a>(<a name="_a8"></a><a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *<a name="a9"></a><a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>, <a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fe">ksnetEvMgrEvents</a> event, <span class="keywordtype">void</span> *<a name="a10"></a><a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>,</div>
 <div class="line">              <span class="keywordtype">size_t</span> data_len, <span class="keywordtype">void</span> *user_data) {</div>
 <div class="line">    </div>
-<div class="line">    <span class="keywordtype">char</span> *peer_to = ke-&gt;<a name="a11"></a><a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a name="a12"></a><a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[1]; </div>
+<div class="line">    <span class="keywordtype">char</span> *peer_to = ke-&gt;<a name="a11"></a><a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a name="a12"></a><a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[1]; </div>
 <div class="line">    </div>
 <div class="line">    <span class="keywordflow">switch</span>(event) {</div>
 <div class="line">        </div>
@@ -265,7 +265,7 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line">                                );</div>
 <div class="line">                                </div>
 <div class="line">                                <span class="comment">// Free command string memory</span></div>
-<div class="line">                                free(command);</div>
+<div class="line">                                <a name="a41"></a><a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(command);</div>
 <div class="line">                            }</div>
 <div class="line">                        }</div>
 <div class="line">                        </div>
@@ -283,14 +283,14 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line">            </div>
 <div class="line">        <span class="comment">// Send by timer</span></div>
 <div class="line">        <span class="keywordflow">case</span> <a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea83ecf09ce66a51ed07986c40f71aa3de">EV_K_USER</a>:    </div>
-<div class="line">        <span class="keywordflow">case</span> <a name="a41"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea10cd7f1eaba7dd8a8eae39d569695c81">EV_K_TIMER</a>:</div>
+<div class="line">        <span class="keywordflow">case</span> <a name="a42"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea10cd7f1eaba7dd8a8eae39d569695c81">EV_K_TIMER</a>:</div>
 <div class="line">        {</div>
-<div class="line">            <span class="keywordflow">if</span>(strcmp(peer_to, <a name="a42"></a><a class="code" href="ev__mgr_8c.html#a17e4a431d7e028b5daa5c4b57657d967">ksnetEvMgrGetHostName</a>(ke))) {</div>
+<div class="line">            <span class="keywordflow">if</span>(strcmp(peer_to, <a name="a43"></a><a class="code" href="ev__mgr_8c.html#a17e4a431d7e028b5daa5c4b57657d967">ksnetEvMgrGetHostName</a>(ke))) {</div>
 <div class="line"></div>
 <div class="line">                <span class="comment">// If peer_to is connected</span></div>
 <div class="line">                <span class="keywordflow">if</span> (<a class="code" href="net__arp_8c.html#a860dc759f1b00329776793b09306b140">ksnetArpGet</a>(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>-&gt;<a class="code" href="structksnCoreClass.html#ad2e38aed23819a832a9ef470cf2fd03c">ka</a>, peer_to) != NULL) {</div>
 <div class="line"></div>
-<div class="line">                    <a name="a43"></a><a class="code" href="ev__mgr_8c.html#acafc2a8a224e15b3acd4f48b7aa49356">ksnetEvMgrSetCustomTimer</a>(ke, 0.00); <span class="comment">// Stop timer</span></div>
+<div class="line">                    <a name="a44"></a><a class="code" href="ev__mgr_8c.html#acafc2a8a224e15b3acd4f48b7aa49356">ksnetEvMgrSetCustomTimer</a>(ke, 0.00); <span class="comment">// Stop timer</span></div>
 <div class="line">                    </div>
 <div class="line">                    printf(<span class="stringliteral">&quot;\n&quot;</span></div>
 <div class="line">                           <span class="stringliteral">&quot;Multi send test menu:\n&quot;</span></div>
@@ -313,17 +313,17 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line">        <span class="keywordflow">break</span>;            </div>
 <div class="line">        </div>
 <div class="line">        <span class="comment">// Send when DATA received</span></div>
-<div class="line">        <span class="keywordflow">case</span> <a name="a44"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea1b81a2f6285f921944de12733076a25b">EV_K_RECEIVED</a>:</div>
+<div class="line">        <span class="keywordflow">case</span> <a name="a45"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea1b81a2f6285f921944de12733076a25b">EV_K_RECEIVED</a>:</div>
 <div class="line">        {</div>
 <div class="line">            <span class="comment">// DATA event</span></div>
 <div class="line">            <a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a> *rd = <a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>;</div>
 <div class="line">            </div>
-<div class="line">            <span class="keywordflow">switch</span>(rd-&gt;<a name="a45"></a><a class="code" href="structksnCorePacketData.html#a8eb43740395e420d2b5b575678c4b6ea">cmd</a>) {</div>
+<div class="line">            <span class="keywordflow">switch</span>(rd-&gt;<a name="a46"></a><a class="code" href="structksnCorePacketData.html#a8eb43740395e420d2b5b575678c4b6ea">cmd</a>) {</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// Server got DATA from client</span></div>
 <div class="line">                <span class="keywordflow">case</span> <a class="code" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da32cc0ced6082e9bb5bd223936afd2b9a">CMD_USER</a>:</div>
 <div class="line">                    <span class="keywordflow">if</span>(strcmp(peer_to, <a class="code" href="teoackm_8c.html#af00aa3c79fe31d435739c34e4c989835">SERVER_NAME</a>) || <a class="code" href="teoackm_8c.html#a4bedaefa7d8b7870f5958904d184f010">show_data_or_statistic_at_server</a>) {</div>
-<div class="line">                        printf(<span class="stringliteral">&quot;Got DATA: %s\n&quot;</span>, (<span class="keywordtype">char</span>*)rd-&gt;<a name="a46"></a><a class="code" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">data</a>); </div>
+<div class="line">                        printf(<span class="stringliteral">&quot;Got DATA: %s\n&quot;</span>, (<span class="keywordtype">char</span>*)rd-&gt;<a name="a47"></a><a class="code" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">data</a>); </div>
 <div class="line">                    }</div>
 <div class="line">                    <span class="keywordflow">break</span>;</div>
 <div class="line">                </div>
@@ -336,7 +336,7 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line">                        <span class="keywordtype">char</span> *stat = ksnTRUDPstatShowStr(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>-&gt;<a class="code" href="structksnCoreClass.html#a46c00e72a67faefdf14cfb9bd442d222">ku</a>, 0);</div>
 <div class="line">                        <a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>, rd-&gt;<a class="code" href="structksnCorePacketData.html#a1459437bf7557b3598b381c886f4d089">from</a>, </div>
 <div class="line">                                <a class="code" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da32cc0ced6082e9bb5bd223936afd2b9a">CMD_USER</a> + 2, stat, strlen(stat)+1);</div>
-<div class="line">                        free(stat);</div>
+<div class="line">                        <a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(stat);</div>
 <div class="line">                    }</div>
 <div class="line">                    </div>
 <div class="line">                    <span class="comment">// Show data or statistic</span></div>
@@ -352,11 +352,11 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line">                        <span class="comment">// Show DATA - stop TR-UDP statistic</span></div>
 <div class="line">                        <span class="keywordflow">if</span>(<a class="code" href="teoackm_8c.html#a4bedaefa7d8b7870f5958904d184f010">show_data_or_statistic_at_server</a>) {</div>
 <div class="line">                            </div>
-<div class="line">                            ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a name="a47"></a><a class="code" href="structksnet__cfg.html#a8d24bd80780c3f1bae33912e52b2b858">show_tr_udp_f</a> = 0;</div>
+<div class="line">                            ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a name="a48"></a><a class="code" href="structteonet__cfg.html#a70e6058f43b43f087ce266273a19a7c0">show_tr_udp_f</a> = 0;</div>
 <div class="line">                        }</div>
 <div class="line">                        <span class="comment">//Show Statistic - start TR-UDP statistic</span></div>
 <div class="line">                        <span class="keywordflow">else</span> {</div>
-<div class="line">                            ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a class="code" href="structksnet__cfg.html#a8d24bd80780c3f1bae33912e52b2b858">show_tr_udp_f</a> = 1;</div>
+<div class="line">                            ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a class="code" href="structteonet__cfg.html#a70e6058f43b43f087ce266273a19a7c0">show_tr_udp_f</a> = 1;</div>
 <div class="line">                        }</div>
 <div class="line">                    }</div>
 <div class="line">                }    </div>
@@ -371,7 +371,7 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line">        <span class="keywordflow">break</span>;</div>
 <div class="line">            </div>
 <div class="line">        <span class="comment">// Teo ACK received use ksnetAllowAckEvent to allow this event</span></div>
-<div class="line">        <span class="keywordflow">case</span> <a name="a48"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea805b8e8e632bc571f5eb3ba489308d46">EV_K_RECEIVED_ACK</a>: </div>
+<div class="line">        <span class="keywordflow">case</span> <a name="a49"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea805b8e8e632bc571f5eb3ba489308d46">EV_K_RECEIVED_ACK</a>: </div>
 <div class="line">        {</div>
 <div class="line">            <span class="comment">// ACK event</span></div>
 <div class="line">            <a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a> *rd = <a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>;</div>
@@ -389,31 +389,31 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <div class="line">    }</div>
 <div class="line">}        </div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">int</span> <a name="a49"></a><a class="code" href="teoackm_8c.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv) {</div>
+<div class="line"><span class="keywordtype">int</span> <a name="a50"></a><a class="code" href="teoackm_8c.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv) {</div>
 <div class="line"></div>
-<div class="line">    printf(<span class="stringliteral">&quot;Teoack multi example ver &quot;</span> <a name="a50"></a><a class="code" href="teoackm_8c.html#a2e5e1509361d6485e88041ff61a6afa7">TACKM_VERSION</a> <span class="stringliteral">&quot;, based on teonet ver. &quot;</span></div>
-<div class="line">            <a name="a51"></a><a class="code" href="config_8h.html#a1c6d5de492ac61ad29aec7aa9a436bbf">VERSION</a> <span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line">    printf(<span class="stringliteral">&quot;Teoack multi example ver &quot;</span> <a name="a51"></a><a class="code" href="teoackm_8c.html#a2e5e1509361d6485e88041ff61a6afa7">TACKM_VERSION</a> <span class="stringliteral">&quot;, based on teonet ver. &quot;</span></div>
+<div class="line">            <a name="a52"></a><a class="code" href="config_8h.html#a1c6d5de492ac61ad29aec7aa9a436bbf">VERSION</a> <span class="stringliteral">&quot;\n&quot;</span>);</div>
 <div class="line">    </div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Application parameters</span></div>
 <div class="line">    <span class="keyword">const</span> <span class="keywordtype">char</span> *app_argv[] = { <span class="stringliteral">&quot;&quot;</span>, <span class="stringliteral">&quot;peer_to&quot;</span>}; </div>
-<div class="line">    <a name="_a52"></a><a class="code" href="structksnetEvMgrAppParam.html">ksnetEvMgrAppParam</a> app_param;</div>
-<div class="line">    app_param.<a name="a53"></a><a class="code" href="structksnetEvMgrAppParam.html#a80df19a75dfa72153c6a4714b5900a33">app_argc</a> = 2;</div>
-<div class="line">    app_param.<a name="a54"></a><a class="code" href="structksnetEvMgrAppParam.html#a2c40aad4d1d21f64176bc09bae4433dd">app_argv</a> = app_argv;</div>
-<div class="line">    app_param.<a name="a55"></a><a class="code" href="structksnetEvMgrAppParam.html#ae30aef8a198fba67cca98f6bbda47912">app_descr</a> = NULL;</div>
+<div class="line">    <a name="_a53"></a><a class="code" href="structksnetEvMgrAppParam.html">ksnetEvMgrAppParam</a> app_param;</div>
+<div class="line">    app_param.<a name="a54"></a><a class="code" href="structksnetEvMgrAppParam.html#a80df19a75dfa72153c6a4714b5900a33">app_argc</a> = 2;</div>
+<div class="line">    app_param.<a name="a55"></a><a class="code" href="structksnetEvMgrAppParam.html#a2c40aad4d1d21f64176bc09bae4433dd">app_argv</a> = app_argv;</div>
+<div class="line">    app_param.<a name="a56"></a><a class="code" href="structksnetEvMgrAppParam.html#ae30aef8a198fba67cca98f6bbda47912">app_descr</a> = NULL;</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Initialize teonet event manager and Read configuration</span></div>
-<div class="line">    <a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *ke = <a name="a56"></a><a class="code" href="ev__mgr_8c.html#a58b76ddf87caaa144dea07253c0093e1">ksnetEvMgrInitPort</a>(argc, argv, <a class="code" href="teoackm_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb</a>,</div>
-<div class="line">            <a name="a57"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a38be3912a5e6ee901b88e30578767495">READ_OPTIONS</a>|<a name="a58"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a1e7b07122cfca9e3416d778e0d0e53a7">READ_CONFIGURATION</a>|<a name="a59"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a614fc57f814388d30e4a646c0ccdea2c">APP_PARAM</a>, 0, &amp;app_param);</div>
+<div class="line">    <a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *ke = <a name="a57"></a><a class="code" href="ev__mgr_8c.html#a58b76ddf87caaa144dea07253c0093e1">ksnetEvMgrInitPort</a>(argc, argv, <a class="code" href="teoackm_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb</a>,</div>
+<div class="line">            <a name="a58"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a38be3912a5e6ee901b88e30578767495">READ_OPTIONS</a>|<a name="a59"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a1e7b07122cfca9e3416d778e0d0e53a7">READ_CONFIGURATION</a>|<a name="a60"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a614fc57f814388d30e4a646c0ccdea2c">APP_PARAM</a>, 0, &amp;app_param);</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Set custom timer interval</span></div>
 <div class="line">    <a class="code" href="ev__mgr_8c.html#acafc2a8a224e15b3acd4f48b7aa49356">ksnetEvMgrSetCustomTimer</a>(ke, 1.00);</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Allow ACK event</span></div>
-<div class="line">    <a name="a60"></a><a class="code" href="ev__mgr_8h.html#a2480f0d47e4abcb1ccc1a87efdfad59a">ksnetAllowAckEvent</a>(ke, 1);</div>
+<div class="line">    <a name="a61"></a><a class="code" href="ev__mgr_8h.html#a2480f0d47e4abcb1ccc1a87efdfad59a">ksnetAllowAckEvent</a>(ke, 1);</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Start teonet</span></div>
-<div class="line">    <a name="a61"></a><a class="code" href="ev__mgr_8c.html#a8ffac4000b1d506c83b333b7c5a34bd7">ksnetEvMgrRun</a>(ke);</div>
+<div class="line">    <a name="a62"></a><a class="code" href="ev__mgr_8c.html#a8ffac4000b1d506c83b333b7c5a34bd7">ksnetEvMgrRun</a>(ke);</div>
 <div class="line">        </div>
 <div class="line">    <span class="keywordflow">return</span> (EXIT_SUCCESS);</div>
 <div class="line">}</div>
@@ -422,7 +422,7 @@ $(document).ready(function(){initNavTree('teoackm_8c-example.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Mar 1 2021 10:49:59 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:50 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -164,7 +164,7 @@ $(document).ready(function(){initNavTree('rlutil_8h_source.html','');});
 <div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        <span class="keywordtype">int</span> ch;</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        tcgetattr(STDIN_FILENO, &amp;oldt);</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        newt = oldt;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        newt.c_lflag &amp;= ~(ICANON | ECHO);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        newt.c_lflag &amp;= ~(ICANON | <a class="code" href="lexer-filter_8c.html#aad1dc60a04a1d8cfc8b3ded13601e361">ECHO</a>);</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        tcsetattr(STDIN_FILENO, TCSANOW, &amp;newt);</div>
 <div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        ch = getchar();</div>
 <div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        tcsetattr(STDIN_FILENO, TCSANOW, &amp;oldt);</div>
@@ -177,7 +177,7 @@ $(document).ready(function(){initNavTree('rlutil_8h_source.html','');});
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="keywordtype">int</span> cnt = 0;</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        tcgetattr(STDIN_FILENO, &amp;oldt);</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        newt = oldt;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        newt.c_lflag    &amp;= ~(ICANON | ECHO);</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        newt.c_lflag    &amp;= ~(ICANON | <a class="code" href="lexer-filter_8c.html#aad1dc60a04a1d8cfc8b3ded13601e361">ECHO</a>);</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        newt.c_iflag     = 0; <span class="comment">// input mode</span></div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        newt.c_oflag     = 0; <span class="comment">// output mode</span></div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        newt.c_cc[VMIN]  = 1; <span class="comment">// minimum time to wait</span></div>
@@ -382,7 +382,7 @@ $(document).ready(function(){initNavTree('rlutil_8h_source.html','');});
 <div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;        <span class="keywordflow">else</span> <span class="keywordflow">return</span> 0;</div>
 <div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;}</div>
 <div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;<span class="keyword">static</span> <a class="code" href="rlutil_8h.html#aaaf6fa2e3dbf390f52a79435d2221238">RLUTIL_INLINE</a> <a class="code" href="rlutil_8h.html#a28224a3fa2d7adbdc8c23ce04617fe1a">RLUTIL_STRING_T</a> getANSIColor(<span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>) {</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;<span class="keyword">static</span> <a class="code" href="rlutil_8h.html#aaaf6fa2e3dbf390f52a79435d2221238">RLUTIL_INLINE</a> <a class="code" href="rlutil_8h.html#a28224a3fa2d7adbdc8c23ce04617fe1a">RLUTIL_STRING_T</a> getANSIColor(<span class="keyword">const</span> <span class="keywordtype">int</span> c) {</div>
 <div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;        <span class="keywordflow">switch</span> (c) {</div>
 <div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                <span class="keywordflow">case</span> <a class="code" href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06caf77fb67151d0c18d397069ad8c271ba3">BLACK</a> : <span class="keywordflow">return</span> ANSI_BLACK;</div>
 <div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;                <span class="keywordflow">case</span> <a class="code" href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06ca35d6719cb4d7577c031b3d79057a1b79">BLUE</a> : <span class="keywordflow">return</span> ANSI_BLUE; <span class="comment">// non-ANSI</span></div>
@@ -408,7 +408,7 @@ $(document).ready(function(){initNavTree('rlutil_8h_source.html','');});
 <div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;<span class="keyword">static</span> <a class="code" href="rlutil_8h.html#aaaf6fa2e3dbf390f52a79435d2221238">RLUTIL_INLINE</a> <span class="keywordtype">void</span> setColor(<span class="keywordtype">int</span> c) {</div>
 <div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;<span class="preprocessor">#if defined(_WIN32) &amp;&amp; !defined(RLUTIL_USE_ANSI)</span></div>
 <div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;<span class="preprocessor"></span>        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;        SetConsoleTextAttribute(hConsole, (WORD)c);</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;        SetConsoleTextAttribute(hConsole, (<a class="code" href="grammar-filter_8c.html#a4cfc63e05db4883dc4b60a1245a9ffc5">WORD</a>)c);</div>
 <div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;<span class="preprocessor">#else</span></div>
 <div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;<span class="preprocessor"></span>        <a class="code" href="rlutil_8h.html#ac1a426d94eb07b23c20ecd74b763e756">RLUTIL_PRINT</a>(getANSIColor(c));</div>
 <div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;<span class="preprocessor">#endif</span></div>
@@ -563,6 +563,7 @@ $(document).ready(function(){initNavTree('rlutil_8h_source.html','');});
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06cac157bdf0b85a40d2619cbc8bc1ae5fe2"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06cac157bdf0b85a40d2619cbc8bc1ae5fe2">NONE</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:197</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06caf3a6d81d1da6f2134cc3cca6f02b1114"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06caf3a6d81d1da6f2134cc3cca6f02b1114">LIGHTRED</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:193</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06caf77fb67151d0c18d397069ad8c271ba3"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06caf77fb67151d0c18d397069ad8c271ba3">BLACK</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:181</div></div>
+<div class="ttc" id="lexer-filter_8c_html_aad1dc60a04a1d8cfc8b3ded13601e361"><div class="ttname"><a href="lexer-filter_8c.html#aad1dc60a04a1d8cfc8b3ded13601e361">ECHO</a></div><div class="ttdeci">#define ECHO</div><div class="ttdef"><b>Definition:</b> lexer-filter.c:560</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06cac8d7b8737ca95d137a05f3bb8f3d1a17"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06cac8d7b8737ca95d137a05f3bb8f3d1a17">LIGHTCYAN</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:192</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06caafe71cad474c15ce63b300c470eef8cc"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06caafe71cad474c15ce63b300c470eef8cc">CYAN</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:184</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06cae19b6d1fedca830c608811b77bd0affc"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06cae19b6d1fedca830c608811b77bd0affc">LIGHTMAGENTA</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:194</div></div>
@@ -573,10 +574,10 @@ $(document).ready(function(){initNavTree('rlutil_8h_source.html','');});
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06cae735a848bf82163a19236ead1c3ef2d2"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06cae735a848bf82163a19236ead1c3ef2d2">YELLOW</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:195</div></div>
 <div class="ttc" id="rlutil_8h_html_ac1a426d94eb07b23c20ecd74b763e756"><div class="ttname"><a href="rlutil_8h.html#ac1a426d94eb07b23c20ecd74b763e756">RLUTIL_PRINT</a></div><div class="ttdeci">#define RLUTIL_PRINT(st)</div><div class="ttdef"><b>Definition:</b> rlutil.h:157</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06caf80f9a890089d211842d59625e561f88"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06caf80f9a890089d211842d59625e561f88">RED</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:185</div></div>
+<div class="ttc" id="grammar-filter_8c_html_a4cfc63e05db4883dc4b60a1245a9ffc5"><div class="ttname"><a href="grammar-filter_8c.html#a4cfc63e05db4883dc4b60a1245a9ffc5">WORD</a></div><div class="ttdeci">#define WORD</div><div class="ttdef"><b>Definition:</b> grammar-filter.c:140</div></div>
 <div class="ttc" id="rlutil_8h_html_a54ff9db5d5ac886ff2ae355db0268b1f"><div class="ttname"><a href="rlutil_8h.html#a54ff9db5d5ac886ff2ae355db0268b1f">usleep</a></div><div class="ttdeci">int usleep(__useconds_t __useconds)</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06cac15679b70dbe759192da6f3f85b6b16d"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06cac15679b70dbe759192da6f3f85b6b16d">DARKGREY</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:189</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06ca272b71e84bc2640b193e9fe3c72cb3de"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06ca272b71e84bc2640b193e9fe3c72cb3de">LIGHTBLUE</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:190</div></div>
-<div class="ttc" id="ChangeLog_html_af6d3e7ec7eb5c3bbcc7598a15a116c9f"><div class="ttname"><a href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a></div><div class="ttdeci">Version remove duplicate move include to the beginning of the file Set empty type in extended arp table if type of a peer is not known double free fix l0 server c</div><div class="ttdef"><b>Definition:</b> ChangeLog:2</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06ca38566822dbd9408c447abfd3ed4a85d2"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06ca38566822dbd9408c447abfd3ed4a85d2">GREY</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:188</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06ca35d6719cb4d7577c031b3d79057a1b79"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06ca35d6719cb4d7577c031b3d79057a1b79">BLUE</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:182</div></div>
 <div class="ttc" id="rlutil_8h_html_adc29c2ff13d900c2f185ee95427fb06ca56926c820ad72d0977e7ee44d9916e62"><div class="ttname"><a href="rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06ca56926c820ad72d0977e7ee44d9916e62">MAGENTA</a></div><div class="ttdef"><b>Definition:</b> rlutil.h:186</div></div>
@@ -591,7 +592,7 @@ $(document).ready(function(){initNavTree('rlutil_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_313caf1132e152dd9b58bea13a4052ca.html">utils</a></li><li class="navelem"><a class="el" href="rlutil_8h.html">rlutil.h</a></li>
-    <li class="footer">Generated on Mon Mar 1 2021 10:50:00 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:50 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

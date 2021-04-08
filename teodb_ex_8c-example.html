@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -103,7 +103,7 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 </div><!--header-->
 <div class="contents">
 <h2>Using the Teonet DB function</h2>
-<p>Module: teodb.c and teodb_com.c This is example application to test connection to teo-db application set and get DB data.</p>
+<p>Module: teodb.c and <a class="el" href="teodb__com_8c.html">teodb_com.c</a> This is example application to test connection to teo-db application set and get DB data.</p>
 <p>Created on February 15, 2016, 2:11 AM</p>
 <div class="fragment"><div class="line"></div>
 <div class="line"><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
@@ -116,7 +116,7 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line"><span class="preprocessor">#define TDB_VERSION &quot;0.0.1&quot;</span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor">#define APPNAME _ANSI_MAGENTA &quot;teodb_ex&quot; _ANSI_NONE</span></div>
 <div class="line"><span class="preprocessor"></span></div>
-<div class="line"><span class="preprocessor">#define TEODB_PEER ke-&gt;ksn_cfg.app_argv[1]</span></div>
+<div class="line"><span class="preprocessor">#define TEODB_PEER ke-&gt;teo_cfg.app_argv[1]</span></div>
 <div class="line"><span class="preprocessor"></span></div>
 <div class="line"><span class="preprocessor">#define TEODB_EX_KEY &quot;teo_db_ex&quot;</span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor">#define TEST_KEY &quot;test&quot;</span></div>
@@ -158,13 +158,13 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line">    </div>
 <div class="line">    printf(<span class="stringliteral">&quot;Test finished ...\n&quot;</span>);</div>
 <div class="line">    </div>
-<div class="line">    free(cqd);</div>
+<div class="line">    <a name="a7"></a><a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(cqd);</div>
 <div class="line">    </div>
 <div class="line"><span class="preprocessor">    #undef NUM_RECORDS_TO_SHOW</span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor">    #undef ke</span></div>
 <div class="line"><span class="preprocessor"></span>}</div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> <a name="a7"></a><a class="code" href="teodb__ex_8c.html#aa78e30b6527e5e5f5c99eed137028603">get_cb</a>(uint32_t <span class="keywordtype">id</span>, <span class="keywordtype">int</span> type, <span class="keywordtype">void</span> *data) {</div>
+<div class="line"><span class="keywordtype">void</span> <a name="a8"></a><a class="code" href="teodb__ex_8c.html#aa78e30b6527e5e5f5c99eed137028603">get_cb</a>(uint32_t <span class="keywordtype">id</span>, <span class="keywordtype">int</span> type, <span class="keywordtype">void</span> *data) {</div>
 <div class="line">    </div>
 <div class="line">    <a class="code" href="teodb__ex_8c.html#aefccf1d2242ffaafbdc6cc90ed9ba22d">get_cq_data</a> *cqd = <a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>;</div>
 <div class="line"><span class="preprocessor">    #define ke cqd-&gt;ke</span></div>
@@ -178,40 +178,40 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line">    printf(<span class="stringliteral">&quot;6) Send LIST request to the TeoDB using cQueue\n&quot;</span>);</div>
 <div class="line"></div>
 <div class="line">    <span class="comment">// Add callback to queue and wait timeout after 5 sec ...    </span></div>
-<div class="line">    <a name="_a8"></a><a class="code" href="structksnCQueData.html">ksnCQueData</a> *<a name="a9"></a><a class="code" href="cque_8c.html#a8b001891593d09a10b16896898507688">cq</a> = <a name="a10"></a><a class="code" href="cque_8c.html#a4052d270f1b245a76d88a78ec60d324c">ksnCQueAdd</a>(<a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>-&gt;kq, <a class="code" href="teodb__ex_8c.html#a7bce25af3c9932df20ade341d645865c">list_cb</a>, 5.000, <a name="a11"></a><a class="code" href="utils_8c.html#a43b2b8a2451e4017b41e218b04d9f323">memdup</a>(cqd, <span class="keyword">sizeof</span>(*cqd)));</div>
-<div class="line">    printf(<span class="stringliteral">&quot;6.1) Register callback id %o\n&quot;</span>, cq-&gt;<a name="a12"></a><a class="code" href="structksnCQueData.html#a5141bcaf98d5b35144ee205d3fa4e581">id</a>);</div>
+<div class="line">    <a name="_a9"></a><a class="code" href="structksnCQueData.html">ksnCQueData</a> *<a name="a10"></a><a class="code" href="cque_8c.html#a8b001891593d09a10b16896898507688">cq</a> = <a name="a11"></a><a class="code" href="cque_8c.html#a4052d270f1b245a76d88a78ec60d324c">ksnCQueAdd</a>(<a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>-&gt;kq, <a class="code" href="teodb__ex_8c.html#a7bce25af3c9932df20ade341d645865c">list_cb</a>, 5.000, <a name="a12"></a><a class="code" href="utils_8c.html#a43b2b8a2451e4017b41e218b04d9f323">memdup</a>(cqd, <span class="keyword">sizeof</span>(*cqd)));</div>
+<div class="line">    printf(<span class="stringliteral">&quot;6.1) Register callback id %o\n&quot;</span>, cq-&gt;<a name="a13"></a><a class="code" href="structksnCQueData.html#a5141bcaf98d5b35144ee205d3fa4e581">id</a>);</div>
 <div class="line"></div>
 <div class="line">    <span class="comment">// Prepare data</span></div>
 <div class="line">    <span class="keywordtype">size_t</span> tdd_len;</div>
 <div class="line"><span class="preprocessor">    #define KEY &quot;teo_db_ex.&quot;</span></div>
-<div class="line"><span class="preprocessor"></span>    <a class="code" href="structteo__db__data.html">teo_db_data</a> *tdd = <a name="a13"></a><a class="code" href="teodb__com_8c.html#ac6cc8f1938202c0f4434c8d8e0bae2bd">prepare_request_data</a>(<a name="a14"></a><a class="code" href="teodb__ex_8c.html#a8ae9d53f33f46cfcfcb9736e6351452a">KEY</a>, <span class="keyword">sizeof</span>(<a class="code" href="teodb__ex_8c.html#a8ae9d53f33f46cfcfcb9736e6351452a">KEY</a>), NULL, 0, cq-&gt;<a class="code" href="structksnCQueData.html#a5141bcaf98d5b35144ee205d3fa4e581">id</a>, &amp;tdd_len);</div>
+<div class="line"><span class="preprocessor"></span>    <a class="code" href="structteo__db__data.html">teo_db_data</a> *tdd = <a name="a14"></a><a class="code" href="teodb__com_8c.html#ac6cc8f1938202c0f4434c8d8e0bae2bd">prepare_request_data</a>(<a name="a15"></a><a class="code" href="teodb__ex_8c.html#a8ae9d53f33f46cfcfcb9736e6351452a">KEY</a>, <span class="keyword">sizeof</span>(<a class="code" href="teodb__ex_8c.html#a8ae9d53f33f46cfcfcb9736e6351452a">KEY</a>), NULL, 0, cq-&gt;<a class="code" href="structksnCQueData.html#a5141bcaf98d5b35144ee205d3fa4e581">id</a>, &amp;tdd_len);</div>
 <div class="line"></div>
 <div class="line">    <span class="comment">// Send CMD_D_LIST command to DB peer</span></div>
-<div class="line">    <a name="a15"></a><a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(<a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>-&gt;kc, <a name="a16"></a><a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>, <a name="a17"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a3c243881408ea973307b4f81c0eded7e">CMD_D_LIST</a>, tdd, tdd_len);  </div>
-<div class="line">    free(tdd);</div>
+<div class="line">    <a name="a16"></a><a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(<a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>-&gt;kc, <a name="a17"></a><a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>, <a name="a18"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a3c243881408ea973307b4f81c0eded7e">CMD_D_LIST</a>, tdd, tdd_len);  </div>
+<div class="line">    <a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(tdd);</div>
 <div class="line">    </div>
-<div class="line">    free(cqd);</div>
+<div class="line">    <a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(cqd);</div>
 <div class="line">    </div>
 <div class="line"><span class="preprocessor">    #undef ke</span></div>
 <div class="line"><span class="preprocessor"></span>}</div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> <a name="a18"></a><a class="code" href="teodb__ex_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb</a>(<a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *<a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>, <a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fe">ksnetEvMgrEvents</a> event, <span class="keywordtype">void</span> *data,</div>
+<div class="line"><span class="keywordtype">void</span> <a name="a19"></a><a class="code" href="teodb__ex_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb</a>(<a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *<a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>, <a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fe">ksnetEvMgrEvents</a> event, <span class="keywordtype">void</span> *data,</div>
 <div class="line">              <span class="keywordtype">size_t</span> data_len, <span class="keywordtype">void</span> *user_data) {</div>
 <div class="line"></div>
 <div class="line">    <span class="comment">// Check teonet event</span></div>
 <div class="line">    <span class="keywordflow">switch</span>(event) {</div>
 <div class="line">        </div>
-<div class="line">        <span class="keywordflow">case</span> <a name="a19"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea7f55c6fa4a2caafa70c2db18d61d953d">EV_K_CONNECTED</a>:</div>
+<div class="line">        <span class="keywordflow">case</span> <a name="a20"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea7f55c6fa4a2caafa70c2db18d61d953d">EV_K_CONNECTED</a>:</div>
 <div class="line">        {</div>
 <div class="line">            <span class="comment">// Client send subscribe command to server                </span></div>
-<div class="line">            <span class="keywordtype">char</span> *peer = ((<a name="_a20"></a><a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a>*)data)-&gt;from;</div>
+<div class="line">            <span class="keywordtype">char</span> *peer = ((<a name="_a21"></a><a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a>*)data)-&gt;from;</div>
 <div class="line">            <span class="keywordflow">if</span>(!strcmp(peer, <a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>)) {</div>
 <div class="line"></div>
 <div class="line">                printf(<span class="stringliteral">&quot;The TeoDB peer: \&quot;%s\&quot; was connected\n&quot;</span>,</div>
 <div class="line">                       <a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>);</div>
 <div class="line">                </div>
-<div class="line">                <span class="keyword">const</span> <span class="keywordtype">char</span> *key = <a name="a21"></a><a class="code" href="teodb__ex_8c.html#af012c81fefed62d0aa66a90678b825d7">TEODB_EX_KEY</a> <span class="stringliteral">&quot;.&quot;</span> <a name="a22"></a><a class="code" href="teodb__ex_8c.html#a6ea25351f096e8106c85b033b3c2396e">TEST_KEY</a>;</div>
-<div class="line">                <span class="keyword">const</span> <span class="keywordtype">char</span> *value = <a name="a23"></a><a class="code" href="teodb__ex_8c.html#a84f2f3d7579dc281bafedcdc6954a490">TEST_VALUE</a>;</div>
+<div class="line">                <span class="keyword">const</span> <span class="keywordtype">char</span> *key = <a name="a22"></a><a class="code" href="teodb__ex_8c.html#af012c81fefed62d0aa66a90678b825d7">TEODB_EX_KEY</a> <span class="stringliteral">&quot;.&quot;</span> <a name="a23"></a><a class="code" href="teodb__ex_8c.html#a6ea25351f096e8106c85b033b3c2396e">TEST_KEY</a>;</div>
+<div class="line">                <span class="keyword">const</span> <span class="keywordtype">char</span> *value = <a name="a24"></a><a class="code" href="teodb__ex_8c.html#a84f2f3d7579dc281bafedcdc6954a490">TEST_VALUE</a>;</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// 1) Add test key to the TeoDB</span></div>
 <div class="line">                printf(<span class="stringliteral">&quot;1) Add test key to the TeoDB, key: \&quot;%s\&quot;, value: \&quot;%s\&quot;\n&quot;</span>, </div>
@@ -223,8 +223,8 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line">                <a class="code" href="structteo__db__data.html">teo_db_data</a> *tdd = <a class="code" href="teodb__com_8c.html#ac6cc8f1938202c0f4434c8d8e0bae2bd">prepare_request_data</a>(key, key_len, value, strlen(value) + 1, 0, &amp;tdd_len);</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// Send SET command to DB peer</span></div>
-<div class="line">                <a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(ke-&gt;<a name="a24"></a><a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>, <a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>, <a name="a25"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a99a7b02ca54fc795adbd87e0eb52cd54">CMD_D_SET</a>, tdd, tdd_len);  </div>
-<div class="line">                free(tdd);</div>
+<div class="line">                <a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(ke-&gt;<a name="a25"></a><a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>, <a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>, <a name="a26"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a99a7b02ca54fc795adbd87e0eb52cd54">CMD_D_SET</a>, tdd, tdd_len);  </div>
+<div class="line">                <a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(tdd);</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// 2) Send GET request to the TeoDB</span></div>
 <div class="line">                printf(<span class="stringliteral">&quot;2) Send GET request to the TeoDB, key: \&quot;%s\&quot;\n&quot;</span>, </div>
@@ -234,29 +234,29 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line">                tdd = <a class="code" href="teodb__com_8c.html#ac6cc8f1938202c0f4434c8d8e0bae2bd">prepare_request_data</a>(key, key_len, NULL, 0, 0, &amp;tdd_len);</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// Send GET command to DB peer</span></div>
-<div class="line">                <a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>, <a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>, <a name="a26"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a6b80eed27192b7b5b31dcbbbeca79236">CMD_D_GET</a>, tdd, tdd_len);  </div>
-<div class="line">                free(tdd);</div>
+<div class="line">                <a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>, <a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>, <a name="a27"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a6b80eed27192b7b5b31dcbbbeca79236">CMD_D_GET</a>, tdd, tdd_len);  </div>
+<div class="line">                <a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(tdd);</div>
 <div class="line">            }</div>
 <div class="line">        }</div>
 <div class="line">        <span class="keywordflow">break</span>;</div>
 <div class="line">        </div>
-<div class="line">        <span class="keywordflow">case</span> <a name="a27"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea1b81a2f6285f921944de12733076a25b">EV_K_RECEIVED</a>:</div>
+<div class="line">        <span class="keywordflow">case</span> <a name="a28"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea1b81a2f6285f921944de12733076a25b">EV_K_RECEIVED</a>:</div>
 <div class="line">        {</div>
 <div class="line">            <span class="comment">// DATA event</span></div>
-<div class="line">            <a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a> *<a name="a28"></a><a class="code" href="net__core_8c.html#a2b916b583d6a51b414c74ecaf5b7bc72">rd</a> = <a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>;</div>
+<div class="line">            <a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a> *<a name="a29"></a><a class="code" href="net__core_8c.html#a2b916b583d6a51b414c74ecaf5b7bc72">rd</a> = <a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>;</div>
 <div class="line">            <span class="keyword">static</span> <a class="code" href="structteo__db__data.html">teo_db_data</a> *tdd;</div>
 <div class="line"></div>
-<div class="line">            <span class="keywordflow">switch</span>(rd-&gt;<a name="a29"></a><a class="code" href="structksnCorePacketData.html#a8eb43740395e420d2b5b575678c4b6ea">cmd</a>) {</div>
+<div class="line">            <span class="keywordflow">switch</span>(rd-&gt;<a name="a30"></a><a class="code" href="structksnCorePacketData.html#a8eb43740395e420d2b5b575678c4b6ea">cmd</a>) {</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// Get data response #132</span></div>
-<div class="line">                <span class="keywordflow">case</span> <a name="a30"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a9f2997a14c7609a85b429ffa4812cc5b">CMD_D_GET_ANSWER</a>:</div>
+<div class="line">                <span class="keywordflow">case</span> <a name="a31"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a9f2997a14c7609a85b429ffa4812cc5b">CMD_D_GET_ANSWER</a>:</div>
 <div class="line">                {</div>
-<div class="line">                    tdd = rd-&gt;<a name="a31"></a><a class="code" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">data</a>;</div>
+<div class="line">                    tdd = rd-&gt;<a name="a32"></a><a class="code" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">data</a>;</div>
 <div class="line">                            </div>
-<div class="line">                    <span class="keywordtype">char</span> *key = tdd-&gt;<a name="a32"></a><a class="code" href="structteo__db__data.html#a438db0f08a746a79fe44fe033921f795">key_data</a>;</div>
-<div class="line">                    <span class="keywordtype">char</span> *value = tdd-&gt;<a class="code" href="structteo__db__data.html#a438db0f08a746a79fe44fe033921f795">key_data</a> + tdd-&gt;<a name="a33"></a><a class="code" href="structteo__db__data.html#afbcb5526fed600d8f9ab852507382c9f">key_length</a>;</div>
+<div class="line">                    <span class="keywordtype">char</span> *key = tdd-&gt;<a name="a33"></a><a class="code" href="structteo__db__data.html#a438db0f08a746a79fe44fe033921f795">key_data</a>;</div>
+<div class="line">                    <span class="keywordtype">char</span> *value = tdd-&gt;<a class="code" href="structteo__db__data.html#a438db0f08a746a79fe44fe033921f795">key_data</a> + tdd-&gt;<a name="a34"></a><a class="code" href="structteo__db__data.html#afbcb5526fed600d8f9ab852507382c9f">key_length</a>;</div>
 <div class="line">                    </div>
-<div class="line">                    <span class="keywordflow">if</span>(!tdd-&gt;<a name="a34"></a><a class="code" href="structteo__db__data.html#a390eea21cbc84695d9ea69c27c846ca6">id</a>) {</div>
+<div class="line">                    <span class="keywordflow">if</span>(!tdd-&gt;<a name="a35"></a><a class="code" href="structteo__db__data.html#a390eea21cbc84695d9ea69c27c846ca6">id</a>) {</div>
 <div class="line">                        </div>
 <div class="line">                        <span class="comment">// 3) Got test key value from the TeoDB</span></div>
 <div class="line">                        printf(<span class="stringliteral">&quot;3) Got test key value from the TeoDB, &quot;</span></div>
@@ -269,10 +269,10 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line">                               key);</div>
 <div class="line"></div>
 <div class="line">                        <span class="comment">// Add callback to queue and wait timeout after 5 sec ...</span></div>
-<div class="line">                        <a class="code" href="teodb__ex_8c.html#aefccf1d2242ffaafbdc6cc90ed9ba22d">get_cq_data</a> *cqd = malloc(<span class="keyword">sizeof</span>(<a class="code" href="teodb__ex_8c.html#aefccf1d2242ffaafbdc6cc90ed9ba22d">get_cq_data</a>));</div>
+<div class="line">                        <a class="code" href="teodb__ex_8c.html#aefccf1d2242ffaafbdc6cc90ed9ba22d">get_cq_data</a> *cqd = <a name="a36"></a><a class="code" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc</a>(<span class="keyword">sizeof</span>(<a class="code" href="teodb__ex_8c.html#aefccf1d2242ffaafbdc6cc90ed9ba22d">get_cq_data</a>));</div>
 <div class="line">                        cqd-&gt;ke = <a class="code" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>;</div>
 <div class="line">                        cqd-&gt;tdd = &amp;tdd;</div>
-<div class="line">                        <a class="code" href="structksnCQueData.html">ksnCQueData</a> *cq = <a class="code" href="cque_8c.html#a4052d270f1b245a76d88a78ec60d324c">ksnCQueAdd</a>(ke-&gt;<a name="a35"></a><a class="code" href="structksnetEvMgrClass.html#a0d3d46c949c59617daeb5e22eeffb93b">kq</a>, <a class="code" href="teodb__ex_8c.html#aa78e30b6527e5e5f5c99eed137028603">get_cb</a>, 5.000, cqd);</div>
+<div class="line">                        <a class="code" href="structksnCQueData.html">ksnCQueData</a> *cq = <a class="code" href="cque_8c.html#a4052d270f1b245a76d88a78ec60d324c">ksnCQueAdd</a>(ke-&gt;<a name="a37"></a><a class="code" href="structksnetEvMgrClass.html#a0d3d46c949c59617daeb5e22eeffb93b">kq</a>, <a class="code" href="teodb__ex_8c.html#aa78e30b6527e5e5f5c99eed137028603">get_cb</a>, 5.000, cqd);</div>
 <div class="line">                        printf(<span class="stringliteral">&quot;4.1) Register callback id %d\n&quot;</span>, cq-&gt;<a class="code" href="structksnCQueData.html#a5141bcaf98d5b35144ee205d3fa4e581">id</a>);</div>
 <div class="line"></div>
 <div class="line">                        <span class="comment">// Prepare data</span></div>
@@ -281,17 +281,17 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line"></div>
 <div class="line">                        <span class="comment">// Send GET command to DB peer</span></div>
 <div class="line">                        <a class="code" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto</a>(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a01a9647233d01f6d43102bb7d1e92d3a">kc</a>, <a class="code" href="teodb__ex_8c.html#ad3b262fea4bfb761d98064ad3b81c03a">TEODB_PEER</a>, <a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2a6b80eed27192b7b5b31dcbbbeca79236">CMD_D_GET</a>, tdd, tdd_len);  </div>
-<div class="line">                        free(tdd);</div>
+<div class="line">                        <a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(tdd);</div>
 <div class="line">                    }</div>
 <div class="line">                    <span class="keywordflow">else</span> {</div>
 <div class="line">                        <span class="comment">// Execute callback queue to make success result</span></div>
-<div class="line">                        <a name="a36"></a><a class="code" href="cque_8c.html#a1ff7d23b2c84dd9aced0c323900477ce">ksnCQueExec</a>(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a0d3d46c949c59617daeb5e22eeffb93b">kq</a>, tdd-&gt;<a class="code" href="structteo__db__data.html#a390eea21cbc84695d9ea69c27c846ca6">id</a>);</div>
+<div class="line">                        <a name="a38"></a><a class="code" href="cque_8c.html#a1ff7d23b2c84dd9aced0c323900477ce">ksnCQueExec</a>(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a0d3d46c949c59617daeb5e22eeffb93b">kq</a>, tdd-&gt;<a class="code" href="structteo__db__data.html#a390eea21cbc84695d9ea69c27c846ca6">id</a>);</div>
 <div class="line">                    }</div>
 <div class="line">                }</div>
 <div class="line">                <span class="keywordflow">break</span>;</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// Get list response #133</span></div>
-<div class="line">                <span class="keywordflow">case</span> <a name="a37"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2ad0c906ca99c4e664b9081973c11fdf42">CMD_D_LIST_ANSWER</a>:</div>
+<div class="line">                <span class="keywordflow">case</span> <a name="a39"></a><a class="code" href="teodb__com_8h.html#ac235b36230aceecb1064dd80fc3323d2ad0c906ca99c4e664b9081973c11fdf42">CMD_D_LIST_ANSWER</a>:</div>
 <div class="line">                {</div>
 <div class="line">                    <span class="comment">// Parse response</span></div>
 <div class="line">                    tdd = rd-&gt;<a class="code" href="structksnCorePacketData.html#aeb2722af1e8785611f53a7ccda79ecd5">data</a>;</div>
@@ -312,30 +312,30 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="line">        </div>
-<div class="line"><span class="keywordtype">int</span> <a name="a38"></a><a class="code" href="teodb__ex_8c.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv) {</div>
+<div class="line"><span class="keywordtype">int</span> <a name="a40"></a><a class="code" href="teodb__ex_8c.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>** argv) {</div>
 <div class="line"></div>
-<div class="line">    printf(<span class="stringliteral">&quot;Teodb example ver &quot;</span> <a name="a39"></a><a class="code" href="teodb__ex_8c.html#aded15397547d6e4259ecdc4e9d77fce9">TDB_VERSION</a> <span class="stringliteral">&quot;, &quot;</span></div>
-<div class="line">           <span class="stringliteral">&quot;based on teonet ver. &quot;</span> <a name="a40"></a><a class="code" href="config_8h.html#a1c6d5de492ac61ad29aec7aa9a436bbf">VERSION</a> <span class="stringliteral">&quot;\n&quot;</span>);</div>
+<div class="line">    printf(<span class="stringliteral">&quot;Teodb example ver &quot;</span> <a name="a41"></a><a class="code" href="teodb__ex_8c.html#aded15397547d6e4259ecdc4e9d77fce9">TDB_VERSION</a> <span class="stringliteral">&quot;, &quot;</span></div>
+<div class="line">           <span class="stringliteral">&quot;based on teonet ver. &quot;</span> <a name="a42"></a><a class="code" href="config_8h.html#a1c6d5de492ac61ad29aec7aa9a436bbf">VERSION</a> <span class="stringliteral">&quot;\n&quot;</span>);</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Application parameters</span></div>
 <div class="line">    <span class="keyword">const</span> <span class="keywordtype">char</span> *app_argv[] = { <span class="stringliteral">&quot;&quot;</span>, <span class="stringliteral">&quot;teodb_peer&quot;</span> }; </div>
-<div class="line">    <a name="_a41"></a><a class="code" href="structksnetEvMgrAppParam.html">ksnetEvMgrAppParam</a> app_param;</div>
-<div class="line">    app_param.<a name="a42"></a><a class="code" href="structksnetEvMgrAppParam.html#a80df19a75dfa72153c6a4714b5900a33">app_argc</a> = 2;</div>
-<div class="line">    app_param.<a name="a43"></a><a class="code" href="structksnetEvMgrAppParam.html#a2c40aad4d1d21f64176bc09bae4433dd">app_argv</a> = app_argv;</div>
-<div class="line">    app_param.<a name="a44"></a><a class="code" href="structksnetEvMgrAppParam.html#ae30aef8a198fba67cca98f6bbda47912">app_descr</a> = NULL;</div>
+<div class="line">    <a name="_a43"></a><a class="code" href="structksnetEvMgrAppParam.html">ksnetEvMgrAppParam</a> app_param;</div>
+<div class="line">    app_param.<a name="a44"></a><a class="code" href="structksnetEvMgrAppParam.html#a80df19a75dfa72153c6a4714b5900a33">app_argc</a> = 2;</div>
+<div class="line">    app_param.<a name="a45"></a><a class="code" href="structksnetEvMgrAppParam.html#a2c40aad4d1d21f64176bc09bae4433dd">app_argv</a> = app_argv;</div>
+<div class="line">    app_param.<a name="a46"></a><a class="code" href="structksnetEvMgrAppParam.html#ae30aef8a198fba67cca98f6bbda47912">app_descr</a> = NULL;</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Initialize teonet event manager and Read configuration</span></div>
-<div class="line">    <a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *ke = <a name="a45"></a><a class="code" href="ev__mgr_8c.html#a58b76ddf87caaa144dea07253c0093e1">ksnetEvMgrInitPort</a>(argc, argv, <a class="code" href="teodb__ex_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb</a>,</div>
-<div class="line">            <a name="a46"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a38be3912a5e6ee901b88e30578767495">READ_OPTIONS</a>|<a name="a47"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a1e7b07122cfca9e3416d778e0d0e53a7">READ_CONFIGURATION</a>|<a name="a48"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a614fc57f814388d30e4a646c0ccdea2c">APP_PARAM</a>, 0, &amp;app_param);   </div>
+<div class="line">    <a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *ke = <a name="a47"></a><a class="code" href="ev__mgr_8c.html#a58b76ddf87caaa144dea07253c0093e1">ksnetEvMgrInitPort</a>(argc, argv, <a class="code" href="teodb__ex_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb</a>,</div>
+<div class="line">            <a name="a48"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a38be3912a5e6ee901b88e30578767495">READ_OPTIONS</a>|<a name="a49"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a1e7b07122cfca9e3416d778e0d0e53a7">READ_CONFIGURATION</a>|<a name="a50"></a><a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a614fc57f814388d30e4a646c0ccdea2c">APP_PARAM</a>, 0, &amp;app_param);   </div>
 <div class="line"></div>
 <div class="line">    <span class="comment">// Set application type</span></div>
-<div class="line">    <a name="a49"></a><a class="code" href="ev__mgr_8c.html#a56c2bdbc850ae5a17066f36ee21dcecd">teoSetAppType</a>(ke, <span class="stringliteral">&quot;teo-db-ex&quot;</span>);</div>
+<div class="line">    <a name="a51"></a><a class="code" href="ev__mgr_8c.html#a56c2bdbc850ae5a17066f36ee21dcecd">teoSetAppType</a>(ke, <span class="stringliteral">&quot;teo-db-ex&quot;</span>);</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Show Hello message</span></div>
-<div class="line">    <a name="a50"></a><a class="code" href="src_2utils_2utils_8h.html#a1d4bfc4aa271c99a29c2790777fe5125">ksn_puts</a>(ke, <a name="a51"></a><a class="code" href="teodb__ex_8c.html#a237e4d19d7046d08c4cc00a45808feaf">APPNAME</a>, <a name="a52"></a><a class="code" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbdab3e6d7e18839259526a01001f558200f">MESSAGE</a>, <span class="stringliteral">&quot;started ...\n&quot;</span>);</div>
+<div class="line">    <a name="a52"></a><a class="code" href="src_2utils_2utils_8h.html#a1d4bfc4aa271c99a29c2790777fe5125">ksn_puts</a>(ke, <a name="a53"></a><a class="code" href="teodb__ex_8c.html#a237e4d19d7046d08c4cc00a45808feaf">APPNAME</a>, <a name="a54"></a><a class="code" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbdab3e6d7e18839259526a01001f558200f">MESSAGE</a>, <span class="stringliteral">&quot;started ...\n&quot;</span>);</div>
 <div class="line"></div>
 <div class="line">    <span class="comment">// Start teonet</span></div>
-<div class="line">    <a name="a53"></a><a class="code" href="ev__mgr_8c.html#a8ffac4000b1d506c83b333b7c5a34bd7">ksnetEvMgrRun</a>(ke);    </div>
+<div class="line">    <a name="a55"></a><a class="code" href="ev__mgr_8c.html#a8ffac4000b1d506c83b333b7c5a34bd7">ksnetEvMgrRun</a>(ke);    </div>
 <div class="line">    </div>
 <div class="line">    </div>
 <div class="line">    <span class="keywordflow">return</span> (EXIT_SUCCESS);</div>
@@ -346,7 +346,7 @@ $(document).ready(function(){initNavTree('teodb_ex_8c-example.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Mar 1 2021 10:49:59 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:50 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

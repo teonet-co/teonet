@@ -17,7 +17,7 @@ var searchData=
   ['getdatapath',['getDataPath',['../utils_8c.html#a8ceb2b20b672a16a6579cdef1f71bc59',1,'getDataPath(void):&#160;utils.c'],['../src_2utils_2utils_8h.html#a8ceb2b20b672a16a6579cdef1f71bc59',1,'getDataPath(void):&#160;utils.c']]],
   ['gethostname',['getHostName',['../classteo_1_1Teonet.html#aa54862a7593b3b2856fe9e7fab08886c',1,'teo::Teonet']]],
   ['getid',['getId',['../classteo_1_1Teonet_1_1CQue.html#ac201281d1483de8751b86747048779d0',1,'teo::Teonet::CQue::getId()'],['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#af0337aab36a0e819369d40792f1edd48',1,'teo::Teonet::TeoDB::teoDbCQueData::getId()']]],
-  ['getips',['getIPs',['../utils_8c.html#ad6ff8bba1952fddc43fdcb47aeeea05a',1,'getIPs(ksnet_cfg *conf):&#160;utils.c'],['../src_2utils_2utils_8h.html#ad6ff8bba1952fddc43fdcb47aeeea05a',1,'getIPs(ksnet_cfg *conf):&#160;utils.c']]],
+  ['getips',['getIPs',['../utils_8c.html#a72a2a34cb1838a31bb6c96b215b443b0',1,'getIPs(teonet_cfg *conf):&#160;utils.c'],['../src_2utils_2utils_8h.html#a72a2a34cb1838a31bb6c96b215b443b0',1,'getIPs(teonet_cfg *conf):&#160;utils.c']]],
   ['getke',['getKe',['../classteo_1_1Teonet.html#adbe69af49d012272c8594dabde2654f7',1,'teo::Teonet::getKe()'],['../classteo_1_1Teonet_1_1TeoDB.html#aa977e05bbbed568258a38f0f089243bd',1,'teo::Teonet::TeoDB::getKe()']]],
   ['getkey',['getKey',['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#ad0175d66d944cf8bbea169f1d42272ee',1,'teo::Teonet::TeoDB::teoDbCQueData']]],
   ['getkeystr',['getKeyStr',['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#a23887d564183d8dcf6af460437c13268',1,'teo::Teonet::TeoDB::teoDbCQueData']]],
@@ -34,6 +34,8 @@ var searchData=
   ['getvalue',['getValue',['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#ae3c79845c78f6f6560f70fbd99215f78',1,'teo::Teonet::TeoDB::teoDbCQueData']]],
   ['getvaluestr',['getValueStr',['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#a00d9984f2d75dd798b545bcea0797f11',1,'teo::Teonet::TeoDB::teoDbCQueData']]],
   ['global_5fauth_5ffile',['global_auth_file',['../structmg__serve__http__opts.html#a1b9e509dd66423542acb98d449c1c90b',1,'mg_serve_http_opts']]],
+  ['grammar_2dfilter_2ec',['grammar-filter.c',['../grammar-filter_8c.html',1,'']]],
+  ['grammar_2dfilter_2eh',['grammar-filter.h',['../grammar-filter_8h.html',1,'']]],
   ['green',['GREEN',['../rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06caa60bd322f93178d68184e30e162571ca',1,'rlutil.h']]],
   ['grey',['GREY',['../rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06ca38566822dbd9408c447abfd3ed4a85d2',1,'rlutil.h']]]
 ];

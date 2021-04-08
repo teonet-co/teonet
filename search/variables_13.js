@@ -5,14 +5,15 @@ var searchData=
   ['t_5fid',['t_id',['../structteoAsyncClass.html#a8f1ad54055e7b0ede4f4f93f24e7c03f',1,'teoAsyncClass']]],
   ['t_5fport',['t_port',['../structksnLNullData.html#a9a809857375bf308c0f398ed0a49cf31',1,'ksnLNullData']]],
   ['ta',['ta',['../structksnHTTPClass.html#a97cc7ca995a15e91099e7ca9c54d3361',1,'ksnHTTPClass::ta()'],['../structksnetEvMgrClass.html#a99fc6b3d419734359786fa69e951020f',1,'ksnetEvMgrClass::ta()']]],
-  ['tcp_5fallow_5ff',['tcp_allow_f',['../structksnet__cfg.html#aa7cfe2d1941e115025b09f619518332f',1,'ksnet_cfg']]],
-  ['tcp_5fport',['tcp_port',['../structksnet__cfg.html#a43cdffc904347d014417b21d06515f94',1,'ksnet_cfg']]],
+  ['tcp_5fallow_5ff',['tcp_allow_f',['../structteonet__cfg.html#a146298fcf4c961fd3be37d82ccf65358',1,'teonet_cfg']]],
+  ['tcp_5fport',['tcp_port',['../structteonet__cfg.html#a1a572d8298f413da81f6a0869f7fceb8',1,'teonet_cfg']]],
   ['tcp_5fproxy_5ffd',['tcp_proxy_fd',['../structksnTCPProxyData.html#a64f4dd5e8fbdcee8d5d392c8e1e9a0b2',1,'ksnTCPProxyData']]],
   ['tcpserveraccept_5fcb',['tcpServerAccept_cb',['../structev__ksnet__io.html#a001ea42e33f328c4f054aed0a670d47f',1,'ev_ksnet_io']]],
   ['tdd',['tdd',['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#a36166316f99ea82bb2732e69bb081f4d',1,'teo::Teonet::TeoDB::teoDbCQueData']]],
   ['telnet_5fprotocol',['telnet_protocol',['../structcli__def.html#a221a9a4e7d4be0256dd03036fc4d0303',1,'cli_def']]],
   ['teo_5fargc',['teo_argc',['../ev__mgr_8c.html#af94ef1b643645bc5e99a67b17e2a1ef1',1,'ev_mgr.c']]],
   ['teo_5fargv',['teo_argv',['../ev__mgr_8c.html#aa047ef563f844e81c1bd699d01245cc4',1,'ev_mgr.c']]],
+  ['teo_5fcfg',['teo_cfg',['../structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095',1,'ksnetEvMgrClass']]],
   ['teo_5fclass',['teo_class',['../structksnetEvMgrClass.html#a0d926cbceef68e7df91c2554438fe372',1,'ksnetEvMgrClass']]],
   ['teodb',['teodb',['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#ab4b25b6bdd943469de154784877ecb8a',1,'teo::Teonet::TeoDB::teoDbCQueData']]],
   ['teonet_5fnames',['TEONET_NAMES',['../teogw_8c.html#ad8241cc5b79f571ecdd9004ca2dc3470',1,'TEONET_NAMES():&#160;teogw.c'],['../teomulti_8c.html#ad8241cc5b79f571ecdd9004ca2dc3470',1,'TEONET_NAMES():&#160;teomulti.c'],['../teomulti__t_8c.html#addb5ba5503a87bd86e5a1956089c14fb',1,'TEONET_NAMES():&#160;teomulti_t.c']]],
@@ -46,5 +47,5 @@ var searchData=
   ['tuntap_5flog',['tuntap_log',['../tuntap_8h.html#a13c81f6ad725b5802f250b7ca5aa2ea7',1,'tuntap.h']]],
   ['tuntap_5fname',['tuntap_name',['../structksnVpnClass.html#aa3eb2e3265be539f9025226cc6f5516b',1,'ksnVpnClass']]],
   ['tw',['tw',['../structtr__udp__timer__data.html#a39e1cd6f6278ddf330014ec7215e04bc',1,'tr_udp_timer_data::tw()'],['../structpeer__timer__data.html#abb7851470884919bd99c7c9c7571863d',1,'peer_timer_data::tw()']]],
-  ['type',['type',['../structjsmntok__t.html#ac03dbd6b83cbcd979eb64702d5b9943e',1,'jsmntok_t::type()'],['../structjson__token.html#a887277dca69b6162be38807ebfa568c9',1,'json_token::type()'],['../structteo_1_1HostInfo.html#a47a815a338ce04171c8c8eff80aee937',1,'teo::HostInfo::type()']]]
+  ['type',['type',['../structjsmntok__t.html#ac03dbd6b83cbcd979eb64702d5b9943e',1,'jsmntok_t::type()'],['../structjson__token.html#a887277dca69b6162be38807ebfa568c9',1,'json_token::type()'],['../structconnect__r__packet.html#a8ebb959a9a36c7568aa2e5f07f7476fc',1,'connect_r_packet::type()'],['../structteo_1_1HostInfo.html#a47a815a338ce04171c8c8eff80aee937',1,'teo::HostInfo::type()']]]
 ];

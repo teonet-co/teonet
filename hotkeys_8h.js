@@ -19,6 +19,7 @@ var hotkeys_8h =
     [ "ksnetHotkeysDestroy", "hotkeys_8h.html#a73b3ae7b67f540835a09458cd607e178", null ],
     [ "ksnetHotkeysInit", "hotkeys_8h.html#a02f8dad9c57d93157d89b9aebe8475ac", null ],
     [ "teoFilterFlagCheck", "hotkeys_8h.html#a018f1ad2695f431293203129be2d8e01", null ],
+    [ "teoHotkeySetFilter", "hotkeys_8h.html#af9084250b7ec9c9d204fd3383386c840", null ],
     [ "teoLogCheck", "hotkeys_8h.html#ad498144d14cf8a03072de8b374358355", null ],
     [ "MONITOR", "hotkeys_8h.html#aafd26904371b4b0c66098ec83fc60fc9", null ],
     [ "PING", "hotkeys_8h.html#a4ff96c0010774d40275b0fb21dded525", null ],

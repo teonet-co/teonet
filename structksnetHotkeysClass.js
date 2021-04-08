@@ -1,6 +1,6 @@
 var structksnetHotkeysClass =
 [
-    [ "filter_arr", "structksnetHotkeysClass.html#a5b327fae4f78cec5810f5765afa3dedc", null ],
+    [ "filter", "structksnetHotkeysClass.html#a1613cb8356c05a464a9649e6652efa00", null ],
     [ "filter_f", "structksnetHotkeysClass.html#a2717331e2c0c210801aa5b7572ff88a0", null ],
     [ "idle_stdin_w", "structksnetHotkeysClass.html#a4c8f9159bde4611340c2449045ff608e", null ],
     [ "ke", "structksnetHotkeysClass.html#ae31d67ac464d7e9bf5f72c61ee69cde5", null ],

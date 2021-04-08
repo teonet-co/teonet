@@ -6,7 +6,6 @@ var searchData=
   ['ksncqueclass',['ksnCQueClass',['../structksnCQueClass.html',1,'']]],
   ['ksncquedata',['ksnCQueData',['../structksnCQueData.html',1,'']]],
   ['ksncryptclass',['ksnCryptClass',['../structksnCryptClass.html',1,'']]],
-  ['ksnet_5fcfg',['ksnet_cfg',['../structksnet__cfg.html',1,'']]],
   ['ksnetarpclass',['ksnetArpClass',['../structksnetArpClass.html',1,'']]],
   ['ksnetevmgrappparam',['ksnetEvMgrAppParam',['../structksnetEvMgrAppParam.html',1,'']]],
   ['ksnetevmgrclass',['ksnetEvMgrClass',['../structksnetEvMgrClass.html',1,'']]],

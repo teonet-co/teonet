@@ -17,7 +17,7 @@ var searchData=
   ['events',['events',['../structev__ksnet__io.html#a84950544c0c7910df17b20168f3839e0',1,'ev_ksnet_io']]],
   ['exit_5fvalue',['exit_value',['../test37_8c.html#ae5d48258293507d454f571a9a9cd7a5c',1,'test37.c']]],
   ['ext_5flen',['ext_len',['../mongoose_8c.html#a267ce87a2a38d9f1e99d345dbde97c28',1,'mongoose.c']]],
-  ['extended_5fl0_5flog_5ff',['extended_l0_log_f',['../structksnet__cfg.html#acdafbfeb123141d22e822527d17a8b5b',1,'ksnet_cfg']]],
+  ['extended_5fl0_5flog_5ff',['extended_l0_log_f',['../structteonet__cfg.html#af4b4f9bce2ce5934184ac0ab718a3099',1,'teonet_cfg']]],
   ['extension',['extension',['../mongoose_8c.html#a3a21b674a056eab8a11436300ae02d00',1,'mongoose.c']]],
   ['extra_5fheaders',['extra_headers',['../structmg__serve__http__opts.html#a2ceb4e92e6965918149c238ae9979310',1,'mg_serve_http_opts']]]
 ];

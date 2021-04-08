@@ -9,10 +9,10 @@ var searchData=
   ['hexdump_5ffile',['hexdump_file',['../structmg__mgr.html#a010041366e665854c3bca2295efe481f',1,'mg_mgr']]],
   ['hidden_5ffile_5fpattern',['hidden_file_pattern',['../structmg__serve__http__opts.html#ab9bf54bf13d81fd15eecddffe10b202b',1,'mg_serve_http_opts']]],
   ['history',['history',['../structcli__def.html#aab8bde2a4c42d7ff6d73df3833262aef',1,'cli_def']]],
-  ['host_5fname',['host_name',['../structksnet__cfg.html#a241bcee2b7ca3905fbeae7556fefe908',1,'ksnet_cfg']]],
+  ['host_5fname',['host_name',['../structteonet__cfg.html#aaeb50fc2aff60fba1bec319b06aae949',1,'teonet_cfg']]],
   ['host_5fw',['host_w',['../structksnCoreClass.html#a164f57b12e8a9cd9aa8564afdd0eb1af',1,'ksnCoreClass']]],
   ['hostname',['hostname',['../structcli__def.html#a5d4e874a267612399497a3b416f750c9',1,'cli_def']]],
-  ['hot_5fkeys_5ff',['hot_keys_f',['../structksnet__cfg.html#a5bfdf041fad461964a4080d6a436c95d',1,'ksnet_cfg']]],
+  ['hot_5fkeys_5ff',['hot_keys_f',['../structteonet__cfg.html#a122f8687640a12b8189c0acad76506d8',1,'teonet_cfg']]],
   ['http_5fport',['http_port',['../structteoweb__config.html#abfc10068ce1c6841709907c5fe79783e',1,'teoweb_config']]],
   ['hwaddr',['hwaddr',['../structdevice.html#a2da099e7d3ed863baf5fcb08fe93886d',1,'device']]]
 ];

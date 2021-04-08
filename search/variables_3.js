@@ -10,7 +10,7 @@ var searchData=
   ['debug_5fregular',['debug_regular',['../structcli__def.html#abd001e72b6a84b8e4fc7add44d22c52a',1,'cli_def']]],
   ['defnamespace',['defNameSpace',['../structksnTDBClass.html#a138144afbd2d4ecd3e221950b05565e1',1,'ksnTDBClass']]],
   ['destroy',['destroy',['../structteoWSClass.html#ab4173aaf910ee30a4fc7bd061ec9fa32',1,'teoWSClass::destroy()'],['../structksnReconnectClass.html#a65e1edb62e28054faf21fa7b33cd0623',1,'ksnReconnectClass::destroy()'],['../structksnModuleElement.html#abaf74ad321237eed1981a6de56f59f8d',1,'ksnModuleElement::destroy()']]],
-  ['dflag',['dflag',['../structksnet__cfg.html#a8037e3d95913fda8b24e5be08a6d4ab5',1,'ksnet_cfg']]],
+  ['dflag',['dflag',['../structteonet__cfg.html#a7b235fcc4852f7fd3b9608a4b9fb068d',1,'teonet_cfg']]],
   ['document_5froot',['document_root',['../structmg__serve__http__opts.html#ac0cc1c435a0eff10416dab5dc72bb286',1,'mg_serve_http_opts::document_root()'],['../structteoweb__config.html#ae8761582b7c4f9a56412f4203c1d3342',1,'teoweb_config::document_root()']]],
   ['dont_5fshow',['DONT_SHOW',['../hotkeys_8c.html#af866412101b2f4f37f6124f3777fec91',1,'hotkeys.c']]]
 ];

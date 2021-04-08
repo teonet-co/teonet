@@ -7,6 +7,7 @@ var subscribe_8c =
     [ "cmd_subscribe_cb", "subscribe_8c.html#a3bab2ced44d64762cedd68ae06cb1363", null ],
     [ "teoSScrDestroy", "subscribe_8c.html#ac4a7ae09dc173716b7d4df02dce1c195", null ],
     [ "teoSScrInit", "subscribe_8c.html#a72e0c79038d1e3992c83b114aa53d046", null ],
+    [ "teoSScrNumberOfEventSubscribers", "subscribe_8c.html#a441a3d37a0b9237ca4f946d4b89cc33e", null ],
     [ "teoSScrNumberOfSubscribers", "subscribe_8c.html#a62ba3e33ddac32e715a33a1619617387", null ],
     [ "teoSScrSend", "subscribe_8c.html#ab1e743bb5814a9219a3e0708006ff854", null ],
     [ "teoSScrSubscribe", "subscribe_8c.html#a255fc49a46bee7916aae796325221420", null ],

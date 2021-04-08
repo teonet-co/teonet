@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -122,9 +122,9 @@ $(document).ready(function(){initNavTree('structev__ksnet__io.html','');});
 Data Fields</h2></td></tr>
 <tr class="memitem:a2b31e6ca87db51fc5662dff9ff2f734c"><td class="memItemLeft" align="right" valign="top">ev_io&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structev__ksnet__io.html#a2b31e6ca87db51fc5662dff9ff2f734c">io</a></td></tr>
 <tr class="separator:a2b31e6ca87db51fc5662dff9ff2f734c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa589ecdaca710b55c494d30e7185b4d"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structev__ksnet__io.html#afa589ecdaca710b55c494d30e7185b4d">ksnet_cb</a> )(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="structev__ksnet__io.html#ade3c94b1d796ab37a4ac4726e2522d0b">fd</a>)</td></tr>
+<tr class="memitem:afa589ecdaca710b55c494d30e7185b4d"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structev__ksnet__io.html#afa589ecdaca710b55c494d30e7185b4d">ksnet_cb</a> )(struct ev_loop *loop, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="structev__ksnet__io.html#ade3c94b1d796ab37a4ac4726e2522d0b">fd</a>)</td></tr>
 <tr class="separator:afa589ecdaca710b55c494d30e7185b4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a001ea42e33f328c4f054aed0a670d47f"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structev__ksnet__io.html#a001ea42e33f328c4f054aed0a670d47f">tcpServerAccept_cb</a> )(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, ev_io *<a class="el" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, int revents)</td></tr>
+<tr class="memitem:a001ea42e33f328c4f054aed0a670d47f"><td class="memItemLeft" align="right" valign="top">void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structev__ksnet__io.html#a001ea42e33f328c4f054aed0a670d47f">tcpServerAccept_cb</a> )(struct ev_loop *loop, ev_io *<a class="el" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, int revents)</td></tr>
 <tr class="separator:a001ea42e33f328c4f054aed0a670d47f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade3c94b1d796ab37a4ac4726e2522d0b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structev__ksnet__io.html#ade3c94b1d796ab37a4ac4726e2522d0b">fd</a></td></tr>
 <tr class="separator:ade3c94b1d796ab37a4ac4726e2522d0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -212,7 +212,7 @@ Data Fields</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* ev_ksnet_io::ksnet_cb)(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="structev__ksnet__io.html#ade3c94b1d796ab37a4ac4726e2522d0b">fd</a>)</td>
+          <td class="memname">void(* ev_ksnet_io::ksnet_cb)(struct ev_loop *loop, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="structev__ksnet__io.html#ade3c94b1d796ab37a4ac4726e2522d0b">fd</a>)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -224,7 +224,7 @@ Data Fields</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void(* ev_ksnet_io::tcpServerAccept_cb)(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, ev_io *<a class="el" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, int revents)</td>
+          <td class="memname">void(* ev_ksnet_io::tcpServerAccept_cb)(struct ev_loop *loop, ev_io *<a class="el" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, int revents)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -240,7 +240,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a></li>
-    <li class="footer">Generated on Mon Mar 1 2021 10:50:00 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:51 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

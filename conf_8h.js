@@ -1,6 +1,6 @@
 var conf_8h =
 [
-    [ "ksnet_cfg", "structksnet__cfg.html", "structksnet__cfg" ],
+    [ "teonet_cfg", "structteonet__cfg.html", "structteonet__cfg" ],
     [ "DEBUG_KSNET", "conf_8h.html#a97cfcea66bdc2ee8abaabc45009b2e69", null ],
     [ "FALSE", "conf_8h.html#aa93f0eb578d23995850d61f7d61c55c1", null ],
     [ "KSN_BUFFER_32_SIZE", "conf_8h.html#a62df1b594527c24fe3e80f3f9d8ddb69", null ],
@@ -28,8 +28,8 @@ var conf_8h =
     [ "M_ENAMBE_VPN", "conf_8h.html#a9e6c9b09078d84ea4f159b9a8cf168e9", null ],
     [ "NUMBER_TRY_PORTS", "conf_8h.html#a8fb21ffe6533192c5dcf264584aed326", null ],
     [ "TRUE", "conf_8h.html#aa8cecfc5c5c054d2875c03e77b7be15d", null ],
-    [ "ksnet_cfg", "conf_8h.html#aaff2e57818bdb81f0848936f2a9a909c", null ],
-    [ "ksnet_addHWAddrConfig", "conf_8h.html#a9ee24fbb883387cb32566b047e7ea59d", null ],
-    [ "ksnet_configInit", "conf_8h.html#afbfa921eaca3d6ead446315ccf332fe7", null ],
-    [ "read_config", "conf_8h.html#a946b31f664331db23ed0522cdc0c474e", null ]
+    [ "teonet_cfg", "conf_8h.html#a731c4e729ad38bf659efec6919e99091", null ],
+    [ "ksnet_addHWAddrConfig", "conf_8h.html#a79580bd11f1a3fef477be8ad613f5f09", null ],
+    [ "ksnet_configInit", "conf_8h.html#a505b598d1861fec77ba4116ccc1bb91b", null ],
+    [ "read_config", "conf_8h.html#a03063cedc9f13d884b66687aa4c1e1d3", null ]
 ];

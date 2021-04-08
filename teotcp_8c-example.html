@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -116,10 +116,10 @@ $(document).ready(function(){initNavTree('teotcp_8c-example.html','');});
 <div class="line"><span class="preprocessor">#define TTCP_VERSION &quot;0.0.1&quot;    </span></div>
 <div class="line"><span class="preprocessor"></span><span class="preprocessor">#define SERVER_PORT 9050</span></div>
 <div class="line"><span class="preprocessor"></span>    </div>
-<div class="line"><span class="keywordtype">void</span> <a name="a0"></a><a class="code" href="teotcp_8c.html#aebeb8ea36ec1fc4d14dc31930046613e">tcp_server_receive_cb</a>(<span class="keyword">struct</span> ev_loop *<a name="a1"></a><a class="code" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, ev_io *<a name="a2"></a><a class="code" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, <span class="keywordtype">int</span> revents) {</div>
+<div class="line"><span class="keywordtype">void</span> <a name="a0"></a><a class="code" href="teotcp_8c.html#aebeb8ea36ec1fc4d14dc31930046613e">tcp_server_receive_cb</a>(<span class="keyword">struct</span> ev_loop *loop, ev_io *<a name="a1"></a><a class="code" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, <span class="keywordtype">int</span> revents) {</div>
 <div class="line">    </div>
 <div class="line"><span class="preprocessor">    #define BUF_LEN 1024</span></div>
-<div class="line"><span class="preprocessor"></span>    <span class="keywordtype">char</span> buffer[<a name="a3"></a><a class="code" href="teotcp_8c.html#a8b5839f71a3b6e7d64b2d5e9967e3dd1">BUF_LEN</a>];</div>
+<div class="line"><span class="preprocessor"></span>    <span class="keywordtype">char</span> buffer[<a name="a2"></a><a class="code" href="teotcp_8c.html#a8b5839f71a3b6e7d64b2d5e9967e3dd1">BUF_LEN</a>];</div>
 <div class="line">    <span class="keywordtype">int</span> close_flg = 0;</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Read data</span></div>
@@ -155,15 +155,15 @@ $(document).ready(function(){initNavTree('teotcp_8c-example.html','');});
 <div class="line">        <span class="comment">// Check destroy server command</span></div>
 <div class="line">        <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!strcmp(d,<span class="stringliteral">&quot;destroy&quot;</span>)) {            </div>
 <div class="line">            printf(<span class="stringliteral">&quot;The TCP server %d was destroyed\n&quot;</span>, w-&gt;fd);</div>
-<div class="line">            <a name="a4"></a><a class="code" href="net__tcp_8h.html#a649fe99294823ce15312ee21f2aaae98">ksnTcpServerStopAll</a>(((<a name="_a5"></a><a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *)w-&gt;data)-&gt;kt);</div>
+<div class="line">            <a name="a3"></a><a class="code" href="net__tcp_8h.html#a649fe99294823ce15312ee21f2aaae98">ksnTcpServerStopAll</a>(((<a name="_a4"></a><a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *)w-&gt;data)-&gt;kt);</div>
 <div class="line">        }</div>
 <div class="line"></div>
 <div class="line">        <span class="comment">// Check destroy server command</span></div>
 <div class="line">        <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!strcmp(d,<span class="stringliteral">&quot;close_all&quot;</span>)) {            </div>
-<div class="line">            <span class="keywordtype">int</span> <a name="a6"></a><a class="code" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a> = <a name="a7"></a><a class="code" href="net__tcp_8h.html#a32267b38116b7af23fc3bf247b5cd860">ksnTcpGetServer</a>(((<a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *)w-&gt;data)-&gt;kt, w-&gt;fd);</div>
+<div class="line">            <span class="keywordtype">int</span> <a name="a5"></a><a class="code" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a> = <a name="a6"></a><a class="code" href="net__tcp_8h.html#a32267b38116b7af23fc3bf247b5cd860">ksnTcpGetServer</a>(((<a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *)w-&gt;data)-&gt;kt, w-&gt;fd);</div>
 <div class="line">            <span class="keywordflow">if</span>(fd) {</div>
 <div class="line">                printf(<span class="stringliteral">&quot;Close all TCP server %d clients\n&quot;</span>, fd);            </div>
-<div class="line">                <a name="a8"></a><a class="code" href="net__tcp_8h.html#a63af28bb0b493500384e01f445cbe51b">ksnTcpServerStopAllClients</a>(((<a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *)w-&gt;data)-&gt;kt, fd);</div>
+<div class="line">                <a name="a7"></a><a class="code" href="net__tcp_8h.html#a63af28bb0b493500384e01f445cbe51b">ksnTcpServerStopAllClients</a>(((<a class="code" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a> *)w-&gt;data)-&gt;kt, fd);</div>
 <div class="line">            }</div>
 <div class="line">            <span class="keywordflow">else</span> {</div>
 <div class="line">                printf(<span class="stringliteral">&quot;Can&#39;t find server of %d client\n&quot;</span>, w-&gt;fd);</div>
@@ -176,7 +176,7 @@ $(document).ready(function(){initNavTree('teotcp_8c-example.html','');});
 <div class="line">        }</div>
 <div class="line">        </div>
 <div class="line">        <span class="comment">// Free temporary buffer</span></div>
-<div class="line">        free(d);</div>
+<div class="line">        <a name="a8"></a><a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(d);</div>
 <div class="line">    }</div>
 <div class="line">    </div>
 <div class="line">    <span class="comment">// Client has disconnected - stop this watcher</span></div>
@@ -191,7 +191,7 @@ $(document).ready(function(){initNavTree('teotcp_8c-example.html','');});
 <div class="line">    }</div>
 <div class="line">}</div>
 <div class="line"></div>
-<div class="line"><span class="keywordtype">void</span> <a name="a10"></a><a class="code" href="teotcp_8c.html#aa948f71e5ccbeef9a474c79d04631c9f">tcp_server_accept_cb</a>(<span class="keyword">struct</span> ev_loop *<a class="code" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, <a name="_a11"></a><a class="code" href="structev__ksnet__io.html">ev_ksnet_io</a> *<a class="code" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>,</div>
+<div class="line"><span class="keywordtype">void</span> <a name="a10"></a><a class="code" href="teotcp_8c.html#aa948f71e5ccbeef9a474c79d04631c9f">tcp_server_accept_cb</a>(<span class="keyword">struct</span> ev_loop *loop, <a name="_a11"></a><a class="code" href="structev__ksnet__io.html">ev_ksnet_io</a> *<a class="code" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>,</div>
 <div class="line">                       <span class="keywordtype">int</span> revents, <span class="keywordtype">int</span> <a class="code" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a>) {</div>
 <div class="line">    </div>
 <div class="line">    printf(<span class="stringliteral">&quot;Client %d connected\n&quot;</span>, fd);</div>
@@ -210,10 +210,10 @@ $(document).ready(function(){initNavTree('teotcp_8c-example.html','');});
 <div class="line">        <span class="keywordflow">case</span> <a name="a17"></a><a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21feaad43ebeb94977d70e828a03fd054fce4">EV_K_STARTED</a>:</div>
 <div class="line">        {</div>
 <div class="line">            <span class="comment">// Type of application (client or server)</span></div>
-<div class="line">            printf(<span class="stringliteral">&quot;Type of application: %s\n&quot;</span>,  ke-&gt;<a name="a18"></a><a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a name="a19"></a><a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[1]); </div>
+<div class="line">            printf(<span class="stringliteral">&quot;Type of application: %s\n&quot;</span>,  ke-&gt;<a name="a18"></a><a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a name="a19"></a><a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[1]); </div>
 <div class="line">            </div>
 <div class="line">            <span class="comment">// Server</span></div>
-<div class="line">            <span class="keywordflow">if</span>(!strcmp(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[1], <span class="stringliteral">&quot;server&quot;</span>)) {</div>
+<div class="line">            <span class="keywordflow">if</span>(!strcmp(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[1], <span class="stringliteral">&quot;server&quot;</span>)) {</div>
 <div class="line">                </div>
 <div class="line">                <span class="comment">// Start TCP server</span></div>
 <div class="line">                <span class="keywordtype">int</span> port_created;</div>
@@ -222,12 +222,12 @@ $(document).ready(function(){initNavTree('teotcp_8c-example.html','');});
 <div class="line">            }</div>
 <div class="line">            </div>
 <div class="line">            <span class="comment">//Client</span></div>
-<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!strcmp(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[1], <span class="stringliteral">&quot;client&quot;</span>)) {</div>
+<div class="line">            <span class="keywordflow">else</span> <span class="keywordflow">if</span>(!strcmp(ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[1], <span class="stringliteral">&quot;client&quot;</span>)) {</div>
 <div class="line">                printf(<span class="stringliteral">&quot;Client mode example is under construction yet,\n&quot;</span></div>
 <div class="line">                       <span class="stringliteral">&quot;trying system telnet application ...\n&quot;</span>); </div>
 <div class="line">                <span class="keywordtype">char</span> *buffer = <a name="a23"></a><a class="code" href="utils_8c.html#a2867b1f632e7b37625ed2090fc1abe70">ksnet_formatMessage</a>(<span class="stringliteral">&quot;telnet 0 %d&quot;</span>, <a class="code" href="teotcp_8c.html#ac42367fe5c999ec6650de83e9d72fe8c">SERVER_PORT</a>);</div>
 <div class="line">                <span class="keywordflow">if</span>(system(buffer) == -1); <span class="comment">// \todo check system call error</span></div>
-<div class="line">                free(buffer);</div>
+<div class="line">                <a class="code" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free</a>(buffer);</div>
 <div class="line">                <a name="a24"></a><a class="code" href="ev__mgr_8c.html#afd6122ec632b4b000c7f30a0cde78eef">ksnetEvMgrStop</a>(ke);</div>
 <div class="line">            }</div>
 <div class="line">        }</div>
@@ -264,7 +264,7 @@ $(document).ready(function(){initNavTree('teotcp_8c-example.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Mar 1 2021 10:49:59 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:50 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -129,16 +129,16 @@ $(document).ready(function(){initNavTree('teostream_8c-example.html','');});
 <div class="line">        {</div>
 <div class="line">            <span class="keywordflow">if</span>(data != NULL) {</div>
 <div class="line">                </div>
-<div class="line">                <span class="keywordflow">if</span>(!strcmp(((<a name="_a6"></a><a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a>*)data)-&gt;from, ke-&gt;<a name="a7"></a><a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a name="a8"></a><a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[1])) {</div>
+<div class="line">                <span class="keywordflow">if</span>(!strcmp(((<a name="_a6"></a><a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a>*)data)-&gt;from, ke-&gt;<a name="a7"></a><a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a name="a8"></a><a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[1])) {</div>
 <div class="line">                    </div>
 <div class="line">                    printf(<span class="stringliteral">&quot;Peer \&quot;%s\&quot; was connected\n&quot;</span>, ((<a class="code" href="structksnCorePacketData.html">ksnCorePacketData</a>*)data)-&gt;from);</div>
 <div class="line"></div>
 <div class="line">                    printf(<span class="stringliteral">&quot;Create stream name \&quot;%s\&quot; with peer \&quot;%s\&quot; ...\n&quot;</span>,  </div>
-<div class="line">                        ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[2], ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[1]); </div>
+<div class="line">                        ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[2], ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[1]); </div>
 <div class="line"></div>
 <div class="line">                    <span class="comment">// Send create stream request</span></div>
-<div class="line">                    <a name="a9"></a><a class="code" href="stream_8c.html#a983f26574f746eec076adbff7a6e29f7">ksnStreamCreate</a>(ke-&gt;<a name="a10"></a><a class="code" href="structksnetEvMgrClass.html#a1de756b5d197432116c438b4511d3348">ks</a>, ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[1], </div>
-<div class="line">                        ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a507499903cbe9d112b25dc2ddfa6aa86">ksn_cfg</a>.<a class="code" href="structksnet__cfg.html#a59f3af28ca68a931ac15b5691455f9bb">app_argv</a>[2],  <a name="a11"></a><a class="code" href="stream_8h.html#ace8fdb5727b492f5d9d47379bf13f6aaafa44b776e514e77919557ac6457e8d3b">CMD_ST_CREATE</a>);</div>
+<div class="line">                    <a name="a9"></a><a class="code" href="stream_8c.html#a983f26574f746eec076adbff7a6e29f7">ksnStreamCreate</a>(ke-&gt;<a name="a10"></a><a class="code" href="structksnetEvMgrClass.html#a1de756b5d197432116c438b4511d3348">ks</a>, ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[1], </div>
+<div class="line">                        ke-&gt;<a class="code" href="structksnetEvMgrClass.html#a6739fd9cd4cf0373abe617f953d60095">teo_cfg</a>.<a class="code" href="structteonet__cfg.html#a5b963f3069161e6365a02c365104f238">app_argv</a>[2],  <a name="a11"></a><a class="code" href="stream_8h.html#ace8fdb5727b492f5d9d47379bf13f6aaafa44b776e514e77919557ac6457e8d3b">CMD_ST_CREATE</a>);</div>
 <div class="line">                }</div>
 <div class="line">            </div>
 <div class="line">            }</div>
@@ -239,7 +239,7 @@ $(document).ready(function(){initNavTree('teostream_8c-example.html','');});
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Mar 1 2021 10:49:59 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:50 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

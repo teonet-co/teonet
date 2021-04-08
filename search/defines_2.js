@@ -4,6 +4,7 @@ var searchData=
   ['base64_5fflush',['BASE64_FLUSH',['../mongoose_8c.html#a103627f6cd2847e4e443faca779fdfd2',1,'BASE64_FLUSH():&#160;mongoose.c'],['../mongoose_8c.html#a103627f6cd2847e4e443faca779fdfd2',1,'BASE64_FLUSH():&#160;mongoose.c']]],
   ['base64_5fh_5fincluded',['BASE64_H_INCLUDED',['../mongoose_8h.html#ad8672ce5ad22cd90d241b23859ce345c',1,'mongoose.h']]],
   ['base64_5fout',['BASE64_OUT',['../mongoose_8c.html#a00cd3d48a9e74bd9ac1cb387d1b66e83',1,'BASE64_OUT():&#160;mongoose.c'],['../mongoose_8c.html#a00cd3d48a9e74bd9ac1cb387d1b66e83',1,'BASE64_OUT():&#160;mongoose.c']]],
+  ['begin',['BEGIN',['../lexer-filter_8c.html#ab766bbbee08d04b67e3fe599d6900873',1,'lexer-filter.c']]],
   ['big_5fendian',['BIG_ENDIAN',['../mongoose_8h.html#a23eb5e058a210efdde3d64e69679fafa',1,'mongoose.h']]],
   ['binary',['BINARY',['../app_2teodb_8c.html#acc166508d5cfbf4100f8622ce97f4985',1,'teodb.c']]],
   ['blk',['blk',['../mongoose_8c.html#abd06ff24e9f6f5f0a9c32a1cba4b0f9c',1,'mongoose.c']]],

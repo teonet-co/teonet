@@ -9,5 +9,6 @@ var searchData=
   ['ll_5ferror',['LL_ERROR',['../mongoose_8h.html#a2414cce0e1e579caf96bef027f2396b9a50717458baf49c204bb0645418e0da15',1,'mongoose.h']]],
   ['ll_5finfo',['LL_INFO',['../mongoose_8h.html#a2414cce0e1e579caf96bef027f2396b9a3d0aabc1a000a1668922ab44aeca5771',1,'mongoose.h']]],
   ['ll_5fnone',['LL_NONE',['../mongoose_8h.html#a2414cce0e1e579caf96bef027f2396b9a6d981d7d88e5e7ae982e5514e0a6ceac',1,'mongoose.h']]],
-  ['ll_5fwarn',['LL_WARN',['../mongoose_8h.html#a2414cce0e1e579caf96bef027f2396b9a7413c537cbbee6447b4d2a2fd90bd1c9',1,'mongoose.h']]]
+  ['ll_5fwarn',['LL_WARN',['../mongoose_8h.html#a2414cce0e1e579caf96bef027f2396b9a7413c537cbbee6447b4d2a2fd90bd1c9',1,'mongoose.h']]],
+  ['logvar',['LOGVAR',['../grammar-filter_8c.html#a15c9f7bd2f0e9686df5d9df4f3314aa9a2506968630bfda30a14351ef982d8197',1,'LOGVAR():&#160;grammar-filter.c'],['../grammar-filter_8h.html#a15c9f7bd2f0e9686df5d9df4f3314aa9a2506968630bfda30a14351ef982d8197',1,'LOGVAR():&#160;grammar-filter.h']]]
 ];

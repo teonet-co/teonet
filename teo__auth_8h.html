@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -133,7 +133,7 @@ Typedefs</h2></td></tr>
 <tr class="memitem:ad299b11c9129c182d10832698b74b8cd"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structteoAuthClass.html">teoAuthClass</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="teo__auth_8h.html#ad299b11c9129c182d10832698b74b8cd">teoAuthClass</a></td></tr>
 <tr class="memdesc:ad299b11c9129c182d10832698b74b8cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">File: <a class="el" href="teo__auth_8h.html">teo_auth.h</a> Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a>  <a href="#ad299b11c9129c182d10832698b74b8cd">More...</a><br/></td></tr>
 <tr class="separator:ad299b11c9129c182d10832698b74b8cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae090f8fe08bb75df1b08ec3c59f19c74"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="teo__auth_8h.html#ae090f8fe08bb75df1b08ec3c59f19c74">command_callback</a> )(void *nc_p, char *<a class="el" href="test38_8c.html#a6ce68847c12434f60d1b2654a3dc3409">err</a>, char *result)</td></tr>
+<tr class="memitem:ae090f8fe08bb75df1b08ec3c59f19c74"><td class="memItemLeft" align="right" valign="top">typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="teo__auth_8h.html#ae090f8fe08bb75df1b08ec3c59f19c74">command_callback</a> )(void *nc_p, char *<a class="el" href="test38_8c.html#a6ce68847c12434f60d1b2654a3dc3409">err</a>, char *<a class="el" href="grammar-filter_8c.html#a8b2e13c78efca330f06b6ddcd7464b41">result</a>)</td></tr>
 <tr class="separator:ae090f8fe08bb75df1b08ec3c59f19c74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb2846a2f57585ca19ee49a167d18451"><td class="memItemLeft" align="right" valign="top">typedef struct <a class="el" href="structteoAuthData.html">teoAuthData</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="teo__auth_8h.html#afb2846a2f57585ca19ee49a167d18451">teoAuthData</a></td></tr>
 <tr class="memdesc:afb2846a2f57585ca19ee49a167d18451"><td class="mdescLeft">&#160;</td><td class="mdescRight">Teonet authentication request list data structure.  <a href="#afb2846a2f57585ca19ee49a167d18451">More...</a><br/></td></tr>
@@ -157,7 +157,7 @@ Functions</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">typedef void(* command_callback)(void *nc_p, char *<a class="el" href="test38_8c.html#a6ce68847c12434f60d1b2654a3dc3409">err</a>, char *result)</td>
+          <td class="memname">typedef void(* command_callback)(void *nc_p, char *<a class="el" href="test38_8c.html#a6ce68847c12434f60d1b2654a3dc3409">err</a>, char *<a class="el" href="grammar-filter_8c.html#a8b2e13c78efca330f06b6ddcd7464b41">result</a>)</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -217,7 +217,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>References <a class="el" href="structteoAuthClass.html#a036c78695c1b94ccf2db2a2ff3ae3803">teoAuthClass::async_mutex</a>, <a class="el" href="structteoAuthClass.html#ac8d8b821ea0440d4c8e82e5e488b3b80">teoAuthClass::cv_mutex</a>, <a class="el" href="structteoAuthClass.html#a2d28f8ab11bbe191d02ad1a082485a74">teoAuthClass::cv_threshold</a>, <a class="el" href="structteoAuthClass.html#ad0f5c56a975c25b62411f5afc7a3cea7">teoAuthClass::list</a>, <a class="el" href="structteoAuthClass.html#a9238d85dc4cf0d453f67100d121426e2">teoAuthClass::stop</a>, <a class="el" href="structteoAuthClass.html#a5a34bca8920217d9c99450b11f2e575b">teoAuthClass::stopped</a>, and <a class="el" href="rlutil_8h.html#a54ff9db5d5ac886ff2ae355db0268b1f">usleep()</a>.</p>
+<p>References <a class="el" href="structteoAuthClass.html#a036c78695c1b94ccf2db2a2ff3ae3803">teoAuthClass::async_mutex</a>, <a class="el" href="structteoAuthClass.html#ac8d8b821ea0440d4c8e82e5e488b3b80">teoAuthClass::cv_mutex</a>, <a class="el" href="structteoAuthClass.html#a2d28f8ab11bbe191d02ad1a082485a74">teoAuthClass::cv_threshold</a>, <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, <a class="el" href="structteoAuthClass.html#ad0f5c56a975c25b62411f5afc7a3cea7">teoAuthClass::list</a>, <a class="el" href="structteoAuthClass.html#a9238d85dc4cf0d453f67100d121426e2">teoAuthClass::stop</a>, <a class="el" href="structteoAuthClass.html#a5a34bca8920217d9c99450b11f2e575b">teoAuthClass::stopped</a>, and <a class="el" href="rlutil_8h.html#a54ff9db5d5ac886ff2ae355db0268b1f">usleep()</a>.</p>
 
 <p>Referenced by <a class="el" href="teo__web_8h.html#adcac01466968c88fe124eb93e4771cd7">ksnHTTPDestroy()</a>.</p>
 
@@ -240,7 +240,7 @@ Functions</h2></td></tr>
 <p>Initialize Teonet authenticate module. </p>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p>References <a class="el" href="structteoAuthClass.html#a036c78695c1b94ccf2db2a2ff3ae3803">teoAuthClass::async_mutex</a>, <a class="el" href="structteoAuthClass.html#ac8d8b821ea0440d4c8e82e5e488b3b80">teoAuthClass::cv_mutex</a>, <a class="el" href="structteoAuthClass.html#a2d28f8ab11bbe191d02ad1a082485a74">teoAuthClass::cv_threshold</a>, <a class="el" href="test38_8c.html#a6ce68847c12434f60d1b2654a3dc3409">err</a>, <a class="el" href="structteoAuthClass.html#a48b779fd2a4eb02292f6a64d591c81c6">teoAuthClass::kh</a>, <a class="el" href="structteoAuthClass.html#ad0f5c56a975c25b62411f5afc7a3cea7">teoAuthClass::list</a>, and <a class="el" href="structteoAuthClass.html#a633155fbea8dac99b86c426dda270327">teoAuthClass::tid</a>.</p>
+<p>References <a class="el" href="structteoAuthClass.html#a036c78695c1b94ccf2db2a2ff3ae3803">teoAuthClass::async_mutex</a>, <a class="el" href="structteoAuthClass.html#ac8d8b821ea0440d4c8e82e5e488b3b80">teoAuthClass::cv_mutex</a>, <a class="el" href="structteoAuthClass.html#a2d28f8ab11bbe191d02ad1a082485a74">teoAuthClass::cv_threshold</a>, <a class="el" href="test38_8c.html#a6ce68847c12434f60d1b2654a3dc3409">err</a>, <a class="el" href="structteoAuthClass.html#a48b779fd2a4eb02292f6a64d591c81c6">teoAuthClass::kh</a>, <a class="el" href="structteoAuthClass.html#ad0f5c56a975c25b62411f5afc7a3cea7">teoAuthClass::list</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, and <a class="el" href="structteoAuthClass.html#a633155fbea8dac99b86c426dda270327">teoAuthClass::tid</a>.</p>
 
 <p>Referenced by <a class="el" href="teo__web_8h.html#a8e53e66ce7da6f4f9aec20c1122b7fc7">ksnHTTPInit()</a>.</p>
 
@@ -315,7 +315,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p>References <a class="el" href="structteoAuthClass.html#a036c78695c1b94ccf2db2a2ff3ae3803">teoAuthClass::async_mutex</a>, <a class="el" href="structteoAuthData.html#a8c68d5bfe3a6b2d43de9aab9b2080157">teoAuthData::callback</a>, <a class="el" href="structteoAuthData.html#af3139df4f1eab482a765dcfc98c57f1e">teoAuthData::data</a>, <a class="el" href="structteoAuthData.html#aa76f6a744959cb3472c01e31e3866443">teoAuthData::headers</a>, <a class="el" href="structteoAuthClass.html#ad0f5c56a975c25b62411f5afc7a3cea7">teoAuthClass::list</a>, <a class="el" href="structteoAuthData.html#a623fef8ad9018c4f2a430b9ff5344f00">teoAuthData::method</a>, <a class="el" href="structteoAuthData.html#ad9210bcff5a54370761588185ee8bb8b">teoAuthData::nc_p</a>, and <a class="el" href="structteoAuthData.html#ac7e8144eea1c3a22d1afb33bb131d67b">teoAuthData::url</a>.</p>
+<p>References <a class="el" href="structteoAuthClass.html#a036c78695c1b94ccf2db2a2ff3ae3803">teoAuthClass::async_mutex</a>, <a class="el" href="structteoAuthData.html#a8c68d5bfe3a6b2d43de9aab9b2080157">teoAuthData::callback</a>, <a class="el" href="structteoAuthData.html#af3139df4f1eab482a765dcfc98c57f1e">teoAuthData::data</a>, <a class="el" href="structteoAuthData.html#aa76f6a744959cb3472c01e31e3866443">teoAuthData::headers</a>, <a class="el" href="structteoAuthClass.html#ad0f5c56a975c25b62411f5afc7a3cea7">teoAuthClass::list</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, <a class="el" href="structteoAuthData.html#a623fef8ad9018c4f2a430b9ff5344f00">teoAuthData::method</a>, <a class="el" href="structteoAuthData.html#ad9210bcff5a54370761588185ee8bb8b">teoAuthData::nc_p</a>, and <a class="el" href="structteoAuthData.html#ac7e8144eea1c3a22d1afb33bb131d67b">teoAuthData::url</a>.</p>
 
 </div>
 </div>
@@ -325,7 +325,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d422163b96683743ed3963d4aac17747.html">app</a></li><li class="navelem"><a class="el" href="dir_5271bff3c5a06a3249a041c6437a62cf.html">modules</a></li><li class="navelem"><a class="el" href="dir_2c41bf6b55208dfee5a4d5be95bc05f9.html">teo_auth</a></li><li class="navelem"><a class="el" href="teo__auth_8h.html">teo_auth.h</a></li>
-    <li class="footer">Generated on Mon Mar 1 2021 10:50:00 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:51 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

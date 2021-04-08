@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -168,6 +168,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a62ba3e33ddac32e715a33a1619617387"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="subscribe_8h.html#a62ba3e33ddac32e715a33a1619617387">teoSScrNumberOfSubscribers</a> (<a class="el" href="structteoSScrClass.html">teoSScrClass</a> *sscr)</td></tr>
 <tr class="memdesc:a62ba3e33ddac32e715a33a1619617387"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate number of subscriptions.  <a href="#a62ba3e33ddac32e715a33a1619617387">More...</a><br/></td></tr>
 <tr class="separator:a62ba3e33ddac32e715a33a1619617387"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a441a3d37a0b9237ca4f946d4b89cc33e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="subscribe_8h.html#a441a3d37a0b9237ca4f946d4b89cc33e">teoSScrNumberOfEventSubscribers</a> (<a class="el" href="structteoSScrClass.html">teoSScrClass</a> *sscr, uint16_t event)</td></tr>
+<tr class="memdesc:a441a3d37a0b9237ca4f946d4b89cc33e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate number of subscribers to particular event.  <a href="#a441a3d37a0b9237ca4f946d4b89cc33e">More...</a><br/></td></tr>
+<tr class="separator:a441a3d37a0b9237ca4f946d4b89cc33e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Typedef Documentation</h2>
 <a class="anchor" id="a35d0a69c227bae189a58bd1818754907"></a>
@@ -222,7 +225,7 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>References <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>.</p>
+<p>References <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, and <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>.</p>
 
 <p>Referenced by <a class="el" href="net__com_8h.html#a405fed5ebd9da8bd9b294f129fc024be">ksnCommandDestroy()</a>, <a class="el" href="test__subscribe_8c.html#a642590fb03a7170a5e597fe4a858e567">test_6_1()</a>, and <a class="el" href="test__subscribe_8c.html#a88f9aa89a4ccbdb7121bcf8c488a48b1">test_6_2()</a>.</p>
 
@@ -251,9 +254,46 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to created <a class="el" href="structteoSScrClass.html" title="File: subscribe.h Author: Kirill Scherba kirill@scherba.ru ">teoSScrClass</a> or NULL if error occurred </dd></dl>
 
-<p>References <a class="el" href="structteoSScrClass.html#afcb6d77101f182233455242ae4047895">teoSScrClass::ke</a>, <a class="el" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>, and <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>.</p>
+<p>References <a class="el" href="structteoSScrClass.html#afcb6d77101f182233455242ae4047895">teoSScrClass::ke</a>, <a class="el" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, and <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>.</p>
 
 <p>Referenced by <a class="el" href="net__com_8h.html#aa43243a970ede43d8ba08b97faec4414">ksnCommandInit()</a>, <a class="el" href="test__subscribe_8c.html#a642590fb03a7170a5e597fe4a858e567">test_6_1()</a>, and <a class="el" href="test__subscribe_8c.html#a88f9aa89a4ccbdb7121bcf8c488a48b1">test_6_2()</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a441a3d37a0b9237ca4f946d4b89cc33e"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int teoSScrNumberOfEventSubscribers </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structteoSScrClass.html">teoSScrClass</a> *&#160;</td>
+          <td class="paramname"><em>sscr</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>event</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate number of subscribers to particular event. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sscr</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd></dd></dl>
+
+<p>References <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>.</p>
 
 </div>
 </div>
@@ -336,9 +376,9 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>References <a class="el" href="structteoSScrListData.html#ad7f38a230f8d679d140c3fa881e77b13">teoSScrListData::addr</a>, <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20daeafd51b9946cab1e3b1e0dfc7b76e615">CMD_SUBSCRIBE_ANSWER</a>, <a class="el" href="structteoSScrListData.html#a44f1af73ba5c148a80c2448bceb214a1">teoSScrListData::data</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda0593585da9181e972974c1274d8f2b4f">DEBUG</a>, <a class="el" href="structteoSScrClass.html#afcb6d77101f182233455242ae4047895">teoSScrClass::ke</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>, <a class="el" href="l0-server_8c.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>, <a class="el" href="structteoSScrListData.html#aeeecf9f8f8770ce20a3435754b74f54e">teoSScrListData::l0_f</a>, <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>, <a class="el" href="subscribe_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, and <a class="el" href="structteoSScrListData.html#aca00798d61a04d0316e0531d62352d76">teoSScrListData::port</a>.</p>
+<p>References <a class="el" href="structteoSScrListData.html#ad7f38a230f8d679d140c3fa881e77b13">teoSScrListData::addr</a>, <a class="el" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20daeafd51b9946cab1e3b1e0dfc7b76e615">CMD_SUBSCRIBE_ANSWER</a>, <a class="el" href="structteoSScrListData.html#a44f1af73ba5c148a80c2448bceb214a1">teoSScrListData::data</a>, <a class="el" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda0593585da9181e972974c1274d8f2b4f">DEBUG</a>, <a class="el" href="grammar-filter_8c.html#af07d89f5ceaea0c7c8252cc41fd75f37">free()</a>, <a class="el" href="structteoSScrClass.html#afcb6d77101f182233455242ae4047895">teoSScrClass::ke</a>, <a class="el" href="src_2utils_2utils_8h.html#a7606b8f89a95a337e5ed4ac107390549">ksn_printf</a>, <a class="el" href="net__core_8c.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>, <a class="el" href="l0-server_8c.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>, <a class="el" href="structteoSScrListData.html#aeeecf9f8f8770ce20a3435754b74f54e">teoSScrListData::l0_f</a>, <a class="el" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc()</a>, <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>, <a class="el" href="subscribe_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>, and <a class="el" href="structteoSScrListData.html#aca00798d61a04d0316e0531d62352d76">teoSScrListData::port</a>.</p>
 
-<p>Referenced by <a class="el" href="l0-server_8c.html#a755e3d017fb1f6ed59d357f8567bca53">_send_subscribe_event_connected()</a>, <a class="el" href="l0-server_8c.html#a6b89975497519feaf094f16e895980af">_send_subscribe_event_disconnected()</a>, <a class="el" href="l0-server_8c.html#ae3d373da8721d831076a6b0e72c8c848">_send_subscribe_event_newvisit()</a>, <a class="el" href="net__com_8h.html#af3662e6097c5fc9f51c103111092202c">cmd_disconnected_cb()</a>, <a class="el" href="app_2teodb_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb()</a>, <a class="el" href="teosscr_8c.html#afbc71bef3b6b918aadb11df55bd5a61a">event_cb_server()</a>, <a class="el" href="classteo_1_1Teonet.html#a75a0256108ef131b66a2b7546b2487f5">teo::Teonet::sendToSscr()</a>, and <a class="el" href="async__calls_8h.html#a3e39d69c76bd3161b2737108d0d5cbbb">teoSScrSendA()</a>.</p>
+<p>Referenced by <a class="el" href="l0-server_8c.html#a56bbced4903041e604383da7cafe174a">_send_subscribe_event_connected()</a>, <a class="el" href="l0-server_8c.html#a2d12160f8c5f4b22b117055fd006d1e9">_send_subscribe_event_disconnected()</a>, <a class="el" href="l0-server_8c.html#ae3d373da8721d831076a6b0e72c8c848">_send_subscribe_event_newvisit()</a>, <a class="el" href="net__com_8h.html#af3662e6097c5fc9f51c103111092202c">cmd_disconnected_cb()</a>, <a class="el" href="app_2teodb_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb()</a>, <a class="el" href="teosscr_8c.html#afbc71bef3b6b918aadb11df55bd5a61a">event_cb_server()</a>, <a class="el" href="classteo_1_1Teonet.html#a75a0256108ef131b66a2b7546b2487f5">teo::Teonet::sendToSscr()</a>, and <a class="el" href="async__calls_8h.html#a3e39d69c76bd3161b2737108d0d5cbbb">teoSScrSendA()</a>.</p>
 
 </div>
 </div>
@@ -467,7 +507,7 @@ Functions</h2></td></tr>
 
 <p>References <a class="el" href="structteoSScrListData.html#ad7f38a230f8d679d140c3fa881e77b13">teoSScrListData::addr</a>, <a class="el" href="structteoSScrListData.html#ac3531f87318f840a2749e25cda7eb9f8">teoSScrListData::cmd</a>, <a class="el" href="structteoSScrListData.html#a44f1af73ba5c148a80c2448bceb214a1">teoSScrListData::data</a>, <a class="el" href="structteoSScrListData.html#ad2dbfcc1e14e217b766462e8a0ebb1a7">teoSScrListData::ev</a>, <a class="el" href="structteoSScrListData.html#aeeecf9f8f8770ce20a3435754b74f54e">teoSScrListData::l0_f</a>, <a class="el" href="structteoSScrClass.html#aabe7d270a18b51926e89f7b45062c3d3">teoSScrClass::map</a>, and <a class="el" href="structteoSScrListData.html#aca00798d61a04d0316e0531d62352d76">teoSScrListData::port</a>.</p>
 
-<p>Referenced by <a class="el" href="hotkeys_8c.html#ae7fe8ed317a2611ac0efa9f8a23fc39c">hotkeys_cb()</a>, and <a class="el" href="subscribe_8h.html#a16080724da1c4e580602ed9d0e3faca7">teoSScrSubscription()</a>.</p>
+<p>Referenced by <a class="el" href="hotkeys_8c.html#abdc782885e864c22fb43c62c6e4a70c7">hotkeys_cb()</a>, and <a class="el" href="subscribe_8h.html#a16080724da1c4e580602ed9d0e3faca7">teoSScrSubscription()</a>.</p>
 
 </div>
 </div>
@@ -608,7 +648,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_ddb4d7e95cc2d6c8e1ade10a20d7247d.html">modules</a></li><li class="navelem"><a class="el" href="subscribe_8h.html">subscribe.h</a></li>
-    <li class="footer">Generated on Mon Mar 1 2021 10:50:00 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:51 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -4,7 +4,7 @@ var searchData=
   ['banner',['banner',['../structcli__def.html#a9d155a436222b4c1bc7fb1cd8fe47382',1,'cli_def']]],
   ['binary',['BINARY',['../net__com_8c.html#aaeaf5d04a6afdd003a47fb6bdfdd465d',1,'net_com.c']]],
   ['bits',['bits',['../structMD5Context.html#a48f837fb64afd013f832e3cdab68e5de',1,'MD5Context']]],
-  ['block_5fcli_5finput_5ff',['block_cli_input_f',['../structksnet__cfg.html#a83df76b3c5d49240c676b8eef086f9f5',1,'ksnet_cfg']]],
+  ['block_5fcli_5finput_5ff',['block_cli_input_f',['../structteonet__cfg.html#a77082148b9ff00a829f683747504b107',1,'teonet_cfg']]],
   ['blocksize',['blocksize',['../structksnCryptClass.html#aa33f2133b43a14eafcab560396d13036',1,'ksnCryptClass']]],
   ['body',['body',['../structhttp__message.html#ab2e0f6d6abe3879d9f85238ae9c10fd5',1,'http_message']]],
   ['buf',['buf',['../structmbuf.html#ae2a6e23a4997e9aea0908628db2b23d0',1,'mbuf::buf()'],['../structMD5Context.html#a6129b10b90387e1cb1d4cd92e4605c33',1,'MD5Context::buf()']]],

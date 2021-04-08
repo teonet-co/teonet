@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -107,337 +107,350 @@ $(document).ready(function(){initNavTree('index.html','');});
  </p>
 <h3>See the latest news from library ChangeLog: <br/>
 </h3>
-<div class="fragment"><div class="line"><a class="code" href="ChangeLog.html#a38d4fcd6e00c994fd24584936d869adc">Version</a> <a class="code" href="ChangeLog.html#a90cdc42e519d15a45a00e192bb941170">v0</a>.4.6</div>
+<div class="fragment"><div class="line">Version v0.4.7</div>
 <div class="line">==============</div>
 <div class="line"></div>
-<div class="line">  - src/modules/l0-server.c: fix memleak</div>
-<div class="line">  - l0-server.c: change <span class="keywordflow">return</span> type and value of json_eq <span class="keyword">function</span></div>
-<div class="line">  - Merge pull request #112 from <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a>-co/fix/<span class="keyword">remove</span>-invalid-callback</div>
-<div class="line">  - fix reconnect (#175)</div>
-<div class="line">  - Merge pull request #170 from <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a>-co/fix/dns-names</div>
-<div class="line">  - Update src/config/opt.c</div>
-<div class="line">  - opt.c: fix dns names</div>
-<div class="line">  - Merge pull request #169 from <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a>-co/fix/unknown_type_arp_table</div>
-<div class="line">  - Add special argument <span class="keywordflow">for</span> passing auth secret.</div>
-<div class="line">  - Check signature length before other stuff.</div>
-<div class="line">  - Merge fixes.</div>
-<div class="line">  - Remove almost all allocations from auth <a class="code" href="test_8h.html#a9b7ee5bbb263671ca310a70e0d1526e9">check</a> process.</div>
-<div class="line">  - Add more logging to auth verification errors.</div>
-<div class="line">  - Fix result client name building</div>
-<div class="line">  - Remove old <a class="code" href="test_8h.html#a9b7ee5bbb263671ca310a70e0d1526e9">check</a> <span class="keyword">function</span>.</div>
-<div class="line">  - Fix authdata <span class="keywordtype">string</span> building.</div>
-<div class="line">  - Add <span class="keyword">new</span> auth <a class="code" href="test_8h.html#a9b7ee5bbb263671ca310a70e0d1526e9">check</a> scheme.</div>
-<div class="line">  - Fix tab indentation, <span class="keyword">remove</span> duplicate <a class="code" href="ChangeLog.html#a70936d1a1fc4aef018da25cae1f5a37d">include</a>, move include to the beginning of the file.</div>
-<div class="line">  - Set empty type in extended arp table <span class="keywordflow">if</span> type of a peer is not known.</div>
-<div class="line">  - <span class="keywordtype">double</span> free fix</div>
-<div class="line">  - l0-server.c: <span class="keyword">new</span> auth </div>
-<div class="line">  - Merge pull request #167 from <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a>-co/feature/packetsize-increase</div>
-<div class="line">  - net_split.h: increase <a class="code" href="rlutil_8h.html#affe776513b24d84b39af8ab0930fef7f">max</a> packet size to 5MB</div>
-<div class="line">  - update regular exp and libtuntap</div>
-<div class="line">  - Feature/package (#163)</div>
-<div class="line">  - Remove PROCESS_RECEIVE_NO_TRUDP callback that was never called.</div>
-<div class="line"></div>
-<div class="line">Version <a class="code" href="ChangeLog.html#a90cdc42e519d15a45a00e192bb941170">v0</a>.4.5</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - IpV6</div>
-<div class="line">  - tcp fixed</div>
-<div class="line">  - <span class="keyword">new</span> <span class="keyword">interface </span>for node wrapper</div>
-<div class="line"></div>
-<div class="line"><a class="code" href="ChangeLog.html#a38d4fcd6e00c994fd24584936d869adc">Version</a> 0.1.74</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - the <a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21feaa0df71d7aa1713f560d49d3d88bc4cb1">EV_A_INTERVAL</a> <span class="keyword">event</span> added, <span class="keyword">this</span> <span class="keyword">event</span> used in <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a>-node-angular </div>
-<div class="line">    application to tick angular interval timer in custom <span class="keyword">event</span> <a class="code" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>;</div>
-<div class="line">  - option <a class="code" href="ChangeLog.html#a5edd1ee74d3be86b709b893238b00db5">block_cli_input_f</a> (block CLI input) added, configuration parameter </div>
-<div class="line">    <a class="code" href="opt_8h.html#a58bddb20a24cd2ff78726ae910628a52ad682c4f8adc313c3c6416b3b7cb47107">BLOCK_CLI_INPUT</a> can be added to the Teonet initialize functions as option.</div>
-<div class="line"></div>
-<div class="line">Version 0.1.73</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - teodb binary list request always <span class="keywordflow">return</span> all keys fixed</div>
-<div class="line"></div>
-<div class="line">Version 0.1.72</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - the teodb_com file added to the <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a> <a class="code" href="ChangeLog.html#af97ebea6586e537a1fe0aaa17bd31c92">library</a>; </div>
-<div class="line">  - the teodb_ex added to the <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a> <a class="code" href="ChangeLog.html#af97ebea6586e537a1fe0aaa17bd31c92">library</a>;</div>
-<div class="line"></div>
-<div class="line">Version 0.1.71</div>
-<div class="line">==============</div>
-<div class="line">  </div>
-<div class="line">  - <span class="stringliteral">&quot;check received id = 0 from existing connection to fix RESET error&quot;</span> updated</div>
-<div class="line"></div>
-<div class="line">Version 0.1.70</div>
-<div class="line">==============</div>
-<div class="line">  </div>
-<div class="line">  - vvv <a class="code" href="test38_8c.html#ac3e1795766a80ec63b157951b4b9a7d4">debug</a> level terminal command to filter log list <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a></div>
-<div class="line"></div>
-<div class="line">Version 0.1.69</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - move <a class="code" href="net__core_8h.html#a122aece373dffc52963679217cc4eb2a">sendCmdAnswerTo</a> <span class="keyword">function</span> from room controller to the libteonet core</div>
-<div class="line"></div>
-<div class="line">Version 0.1.68</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - send networks parameter in L0 client login answer</div>
-<div class="line"></div>
-<div class="line">Version 0.1.67</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - <span class="keyword">auto</span> reset TR-UDP <span class="keywordflow">if</span> host receive packet with <span class="keywordtype">id</span> = 0 from existing peer and </div>
-<div class="line">    hosts expected <span class="keywordtype">id</span> != 0</div>
-<div class="line"></div>
-<div class="line">Version 0.1.66</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - set separate version number to teovpn application</div>
-<div class="line">  - don<span class="stringliteral">&#39;t split the VPN packets (and don&#39;</span>t send it <span class="keyword">using</span> tr-udp)</div>
-<div class="line"></div>
-<div class="line">Version 0.1.65 at 2016-05-05 13:05</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - subscribe event <a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea600b5830c6f75ec4c91acebf12992ae5">EV_D_SET</a> (database updated) added </div>
-<div class="line">  - teo-db applications send <span class="keyword">event</span> <a class="code" href="ev__mgr_8h.html#ad7b9bff24cb809ad64c305b3ec3a21fea600b5830c6f75ec4c91acebf12992ae5">EV_D_SET</a> when database updated</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.63 at 2016-04-22 12:18</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - authorization algorithm  debugging</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.62 at 2016-04-22 15:26</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - authorization algorithm updated</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.60 at 2016-04-22 15:39</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - Create &amp; Send websocket allow message</div>
-<div class="line">  - L0 server <a class="code" href="test_8h.html#a9b7ee5bbb263671ca310a70e0d1526e9">check</a> connected clients accessToken at teo-auth peer</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.59 at 2016-04-20 18:34</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - Check l0 clients login in authentication application</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.58 at 2016-04-11 12:06</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - TR-UDP controller added</div>
-<div class="line">  - commands <a class="code" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20dadb99c5547aa28ee638036116909275c6">CMD_TRUDP_INFO</a> &amp; <a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>-&gt;cmd == <a class="code" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20da3e41231158e34448af422ebd8f9d0c92">CMD_HOST_INFO_ANSWER</a> <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a> to <span class="keyword">get</span> </div>
-<div class="line">    host TR-UDP statistic</div>
-<div class="line">  - TR-UDP: receive speed and receive total statistic added</div>
-<div class="line">  - TR-UDP: add comments and rename variables in send statistic</div>
-<div class="line">  - TR-UDP send total in megabytes statistic <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a></div>
-<div class="line">  - TR-UDP send speed statistic <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a></div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.57 at 2016-04-04 02:33</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - TR-UDP Write Queue <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a></div>
-<div class="line">  - the teotru_load test <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a> (loading test)</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.56 at 2016-04-04 13:23</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - <a class="code" href="net__com_8c.html#af775d881943fb6078e71857c7e8e04b5">JSON</a> format added to the peers_answer command</div>
-<div class="line">  - the <a class="code" href="net__arp_8c.html#ab9f194d672eebd4b76c3d59c7930f4df">ksnetArpShowDataJson</a>() function was <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a> to the ARP module to convert </div>
-<div class="line">    peers answer to <a class="code" href="net__com_8c.html#af775d881943fb6078e71857c7e8e04b5">JSON</a> format</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.55,</div>
-<div class="line">Version 0.1.54</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - TR-UDP statistic updates</div>
-<div class="line">  - fix logical TR-UDP error in Check Received message Heap</div>
-<div class="line">  - TR-UDP set MAX_MAX_ACK_WAIT up to 10 second</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.53</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - change TR-UDP send list timeout</div>
-<div class="line">  - add non_block mode to UDP sockets</div>
-<div class="line">  - set idle activity interval to 11.5/8 sec to quick reconnect to r-host </div>
-<div class="line">  - fix an error in cque test</div>
-<div class="line">  - reset TR-UDP if max_count = max_value (2.000 sec) and attempt &gt; max_attempts</div>
-<div class="line">    (5) or attempt &gt; 5*10  </div>
-<div class="line">  - set core minimal and maximal delay to reconnect TR-UDP peers</div>
-<div class="line">  - submodules definition changed</div>
-<div class="line">  - README.md updated</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.52</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - TR-UDP delay corrected</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.51</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - the <a class="code" href="src_2modules_2teodb_8c.html#a0557a76bb02241d3e57d63b4d58a6cbf">ksnTDBflush</a> function added to the teodb module</div>
-<div class="line">  - function to create package for multi network was <a class="code" href="test_8h.html#a4c29258cb6b467ba162cfe09d50a6ad7">done</a></div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.50</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - add networks to net_multi module</div>
-<div class="line">  - <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a> gateway application <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a></div>
-<div class="line">  - fix &quot;can&#39;t show database <a class="code" href="net__com_8c.html#af775d881943fb6078e71857c7e8e04b5">JSON</a> strings with quotas without slash&quot;</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.49 at 2016-03-24</div>
-<div class="line">============== </div>
-<div class="line"></div>
-<div class="line">  - the error: &quot;The application does not receive any response from a GET request </div>
-<div class="line">    if the requested key is missing in the database&quot; was fixed</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.48</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - net command <a class="code" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20dae22c79852c9db7be93eb47e4992817d4">CMD_L0_INFO</a> (<a class="code" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20daf4283fbf9d0cedcdbfa349d96c7156e0">CMD_L0_INFO_ANSWER</a>) implemented</div>
-<div class="line">  - application configuration parameter l0_remote_tcp_ip was added</div>
-<div class="line">  - reset r-host when connection to it is down </div>
-<div class="line">    *Note:* After host break with general protection failure and than restarted </div>
-<div class="line">    the r-host does not reconnect to this host. In this case the triptime == 0.0. </div>
-<div class="line">    To fix it we <a class="code" href="test_8h.html#a9b7ee5bbb263671ca310a70e0d1526e9">check</a> r-hosts triptime and send disconnect command to it;</div>
-<div class="line">  - when a peer is dead - does not answer to <a class="code" href="ChangeLog.html#a4da007d31c09aaa85bfb4c882cd8149c">ping</a>: we send disconnect command to </div>
-<div class="line">    it and disconnect this peer from host;</div>
-<div class="line">  - default r-host <a class="code" href="ChangeLog.html#ac8445b368ba4a17d33d2c944924e5a4f">address</a> <a class="code" href="ChangeLog.html#aa19bfeb6b40c7a6d5de8d1bdee6d264b">removed</a>: set default r-host to null <span class="keywordtype">string</span>, so if </div>
-<div class="line">    r-host parameter is empty than <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a> application will not connect to </div>
-<div class="line">    default r-host <a class="code" href="ChangeLog.html#ac8445b368ba4a17d33d2c944924e5a4f">address</a> (it was <a class="code" href="conf_8c.html#ace02f6f25d948a472864a9824dde6c59">localhost</a>)</div>
-<div class="line">  - tinc Dockerfile <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a></div>
-<div class="line">  - <a class="code" href="teomulti__t_8c.html#a9c7a6a1d6b4dbec20b005db23b53633b">teonet</a> C dispatcher application <a class="code" href="ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576">created</a>, - reading/writing UNIX socket </div>
-<div class="line">    module &quot;usock&quot; created, &quot;<a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a> received from UNIX socket&quot; event was added</div>
-<div class="line">  - teodb applications return ID from request in DB response</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.47</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - peers view updated, Docker Registry view connected to registry item</div>
-<div class="line">  - the Teogo example application updated</div>
-<div class="line">  - the app version was added to the teovpn and teoweb applications</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.46</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - version of teodb changed to 0.0.2 and added to application <a class="code" href="test38_8c.html#a29045c997670516117cd2d1cac1069ed">info</a></div>
-<div class="line">  - core reconnect timeout changed from 11.5 second to 1.15 second</div>
-<div class="line">  - send disconnect to peer if it send messages without registration </div>
-<div class="line">    (see: tr-udp: ignore message)</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.45</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - number of hotkeys buffer strings increased to 4</div>
-<div class="line">  - facilities to get strings from stdin in applications hotkeys menu added</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.44</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - <a class="code" href="ev__mgr_8c.html#aaee8c7252a0ab90109cdeb4172521548">teoSetAppVersion</a>() function added to set application version</div>
-<div class="line">  - send application version host <a class="code" href="test38_8c.html#a29045c997670516117cd2d1cac1069ed">info</a></div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.43</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - allow reset command from l0 clients to peers</div>
-<div class="line">  - base64 encode/decode functions added to utils module</div>
-<div class="line">  - Merge origin/teo-hws into teo-hws</div>
-<div class="line">  - event for teoHSW module added</div>
-<div class="line">  - show <a class="code" href="test38_8c.html#ac3e1795766a80ec63b157951b4b9a7d4">debug</a> message &quot;event loop initialized&quot;</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.42</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - fix length of got echo answer message <a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>, type the message set to <a class="code" href="src_2utils_2utils_8h.html#a6d93baaf331232d95d6693f2fc3e6cbda275f992601832b227b6738e3caa9fec0">DEBUG_VV</a></div>
-<div class="line">  - filebeat docker image updated</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.41</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - The <a class="code" href="net__com_8h.html#a4ca8274fa2ecfb9eac528f4e5bcde20dae71f12b62f9fca54c98ef9630f8fcad1">CMD_RESET</a> added</div>
-<div class="line">  - The .gitlab-ci updated</div>
-<div class="line">  - Change_log shell script updated</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.39</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - CI deploy only changed to master. Database example added to documentation</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.1.38</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - The wiki.go test added. The minore changes in teogo.go <a class="code" href="test_8h.html#a4c29258cb6b467ba162cfe09d50a6ad7">done</a>.</div>
-<div class="line"></div>
-<div class="line">  - Teonet event callback was added to the go example</div>
-<div class="line"></div>
-<div class="line">  - Go examples started. Main library makefile updated</div>
-<div class="line"></div>
-<div class="line">  - Go examples added</div>
-<div class="line"></div>
-<div class="line">  - README file updated</div>
-<div class="line"></div>
-<div class="line">  - Merge origin/master into teo-log</div>
-<div class="line"></div>
-<div class="line">  - The filebeat and syslog Dockerfiles updated</div>
-<div class="line"></div>
-<div class="line">  - Install filebeat and rsyslog (2)</div>
-<div class="line"></div>
-<div class="line">  - Dockerfile updated</div>
-<div class="line"></div>
-<div class="line">  - Install filebeat and create Dockerfile_log for teonet_log image</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.0.9</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">  - the QUEUE Callback module, cUnit test and example added</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.0.8</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">Protocol not compatible with previous versions</div>
-<div class="line"></div>
-<div class="line">  - the TR-UDP module, cUnit test and examples added</div>
-<div class="line"></div>
-<div class="line"></div>
-<div class="line">Version 0.0.7</div>
-<div class="line">==============</div>
-<div class="line"></div>
-<div class="line">First stable release</div>
-<div class="line"></div>
-<div class="line">  - master build system created </div>
-<div class="line"></div>
+<div class="line">  - Sunset of bintray :(</div>
+<div class="line">  - Return processed command <a class="code" href="grammar-filter_8c.html#a8b2e13c78efca330f06b6ddcd7464b41">result</a> from kick and auth callbacks. Check userId presence in uth confirmation command. If we have any connected <span class="keyword">event</span> subs,</div>
+<div class="line">  don<span class="stringliteral">&#39;t confirm auth instantly.</span></div>
+<div class="line"><span class="stringliteral">  - text-filter module for parsing server logs.</span></div>
+<div class="line"><span class="stringliteral">  - Additional payload was add to CMD_CONNECT_R and CMD_CONNECT.</span></div>
+<div class="line"><span class="stringliteral">  - Resolve dns name after reconnect.</span></div>
+<div class="line"><span class="stringliteral">  - Skip packets for non-existent peer.</span></div>
+<div class="line"><span class="stringliteral">  - Update README.md(added some badges).</span></div>
+<div class="line"><span class="stringliteral">  - Add few utility functions.</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version v0.4.6</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - src/modules/l0-server.c: fix memleak</span></div>
+<div class="line"><span class="stringliteral">  - l0-server.c: change return type and value of json_eq function</span></div>
+<div class="line"><span class="stringliteral">  - Merge pull request #112 from teonet-co/fix/remove-invalid-callback</span></div>
+<div class="line"><span class="stringliteral">  - fix reconnect (#175)</span></div>
+<div class="line"><span class="stringliteral">  - Merge pull request #170 from teonet-co/fix/dns-names</span></div>
+<div class="line"><span class="stringliteral">  - Update src/config/opt.c</span></div>
+<div class="line"><span class="stringliteral">  - opt.c: fix dns names</span></div>
+<div class="line"><span class="stringliteral">  - Merge pull request #169 from teonet-co/fix/unknown_type_arp_table</span></div>
+<div class="line"><span class="stringliteral">  - Add special argument for passing auth secret.</span></div>
+<div class="line"><span class="stringliteral">  - Check signature length before other stuff.</span></div>
+<div class="line"><span class="stringliteral">  - Merge fixes.</span></div>
+<div class="line"><span class="stringliteral">  - Remove almost all allocations from auth check process.</span></div>
+<div class="line"><span class="stringliteral">  - Add more logging to auth verification errors.</span></div>
+<div class="line"><span class="stringliteral">  - Fix result client name building</span></div>
+<div class="line"><span class="stringliteral">  - Remove old check function.</span></div>
+<div class="line"><span class="stringliteral">  - Fix authdata string building.</span></div>
+<div class="line"><span class="stringliteral">  - Add new auth check scheme.</span></div>
+<div class="line"><span class="stringliteral">  - Fix tab indentation, remove duplicate include, move include to the beginning of the file.</span></div>
+<div class="line"><span class="stringliteral">  - Set empty type in extended arp table if type of a peer is not known.</span></div>
+<div class="line"><span class="stringliteral">  - double free fix</span></div>
+<div class="line"><span class="stringliteral">  - l0-server.c: new auth </span></div>
+<div class="line"><span class="stringliteral">  - Merge pull request #167 from teonet-co/feature/packetsize-increase</span></div>
+<div class="line"><span class="stringliteral">  - net_split.h: increase max packet size to 5MB</span></div>
+<div class="line"><span class="stringliteral">  - update regular exp and libtuntap</span></div>
+<div class="line"><span class="stringliteral">  - Feature/package (#163)</span></div>
+<div class="line"><span class="stringliteral">  - Remove PROCESS_RECEIVE_NO_TRUDP callback that was never called.</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version v0.4.5</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - IpV6</span></div>
+<div class="line"><span class="stringliteral">  - tcp fixed</span></div>
+<div class="line"><span class="stringliteral">  - new interface for node wrapper</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.74</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - the EV_A_INTERVAL event added, this event used in teonet-node-angular </span></div>
+<div class="line"><span class="stringliteral">    application to tick angular interval timer in custom event loop;</span></div>
+<div class="line"><span class="stringliteral">  - option block_cli_input_f (block CLI input) added, configuration parameter </span></div>
+<div class="line"><span class="stringliteral">    BLOCK_CLI_INPUT can be added to the Teonet initialize functions as option.</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.73</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - teodb binary list request always return all keys fixed</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.72</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - the teodb_com file added to the teonet library; </span></div>
+<div class="line"><span class="stringliteral">  - the teodb_ex added to the teonet library;</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.71</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral">  </span></div>
+<div class="line"><span class="stringliteral">  - &quot;check received id = 0 from existing connection to fix RESET error&quot; updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.70</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral">  </span></div>
+<div class="line"><span class="stringliteral">  - vvv debug level terminal command to filter log list created</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.69</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - move sendCmdAnswerTo function from room controller to the libteonet core</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.68</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - send networks parameter in L0 client login answer</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.67</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - auto reset TR-UDP if host receive packet with id = 0 from existing peer and </span></div>
+<div class="line"><span class="stringliteral">    hosts expected id != 0</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.66</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - set separate version number to teovpn application</span></div>
+<div class="line"><span class="stringliteral">  - don&#39;</span>t split the VPN packets (and don<span class="stringliteral">&#39;t send it using tr-udp)</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.65 at 2016-05-05 13:05</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - subscribe event EV_D_SET (database updated) added </span></div>
+<div class="line"><span class="stringliteral">  - teo-db applications send event EV_D_SET when database updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.63 at 2016-04-22 12:18</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - authorization algorithm  debugging</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.62 at 2016-04-22 15:26</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - authorization algorithm updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.60 at 2016-04-22 15:39</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Create &amp; Send websocket allow message</span></div>
+<div class="line"><span class="stringliteral">  - L0 server check connected clients accessToken at teo-auth peer</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.59 at 2016-04-20 18:34</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Check l0 clients login in authentication application</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.58 at 2016-04-11 12:06</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP controller added</span></div>
+<div class="line"><span class="stringliteral">  - commands CMD_TRUDP_INFO &amp; data-&gt;cmd == CMD_HOST_INFO_ANSWER created to get </span></div>
+<div class="line"><span class="stringliteral">    host TR-UDP statistic</span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP: receive speed and receive total statistic added</span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP: add comments and rename variables in send statistic</span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP send total in megabytes statistic created</span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP send speed statistic created</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.57 at 2016-04-04 02:33</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP Write Queue created</span></div>
+<div class="line"><span class="stringliteral">  - the teotru_load test created (loading test)</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.56 at 2016-04-04 13:23</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - JSON format added to the peers_answer command</span></div>
+<div class="line"><span class="stringliteral">  - the ksnetArpShowDataJson() function was created to the ARP module to convert </span></div>
+<div class="line"><span class="stringliteral">    peers answer to JSON format</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.55,</span></div>
+<div class="line"><span class="stringliteral">Version 0.1.54</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP statistic updates</span></div>
+<div class="line"><span class="stringliteral">  - fix logical TR-UDP error in Check Received message Heap</span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP set MAX_MAX_ACK_WAIT up to 10 second</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.53</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - change TR-UDP send list timeout</span></div>
+<div class="line"><span class="stringliteral">  - add non_block mode to UDP sockets</span></div>
+<div class="line"><span class="stringliteral">  - set idle activity interval to 11.5/8 sec to quick reconnect to r-host </span></div>
+<div class="line"><span class="stringliteral">  - fix an error in cque test</span></div>
+<div class="line"><span class="stringliteral">  - reset TR-UDP if max_count = max_value (2.000 sec) and attempt &gt; max_attempts</span></div>
+<div class="line"><span class="stringliteral">    (5) or attempt &gt; 5*10  </span></div>
+<div class="line"><span class="stringliteral">  - set core minimal and maximal delay to reconnect TR-UDP peers</span></div>
+<div class="line"><span class="stringliteral">  - submodules definition changed</span></div>
+<div class="line"><span class="stringliteral">  - README.md updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.52</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - TR-UDP delay corrected</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.51</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - the ksnTDBflush function added to the teodb module</span></div>
+<div class="line"><span class="stringliteral">  - function to create package for multi network was done</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.50</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - add networks to net_multi module</span></div>
+<div class="line"><span class="stringliteral">  - teonet gateway application created</span></div>
+<div class="line"><span class="stringliteral">  - fix &quot;can&#39;</span>t show database <a class="code" href="net__com_8c.html#af775d881943fb6078e71857c7e8e04b5">JSON</a> strings with quotas without slash<span class="stringliteral">&quot;</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.49 at 2016-03-24</span></div>
+<div class="line"><span class="stringliteral">============== </span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - the error: &quot;</span>The application does not receive any response from a GET request </div>
+<div class="line">    <span class="keywordflow">if</span> the requested key is missing in the database<span class="stringliteral">&quot; was fixed</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.48</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - net command CMD_L0_INFO (CMD_L0_INFO_ANSWER) implemented</span></div>
+<div class="line"><span class="stringliteral">  - application configuration parameter l0_remote_tcp_ip was added</span></div>
+<div class="line"><span class="stringliteral">  - reset r-host when connection to it is down </span></div>
+<div class="line"><span class="stringliteral">    *Note:* After host break with general protection failure and than restarted </span></div>
+<div class="line"><span class="stringliteral">    the r-host does not reconnect to this host. In this case the triptime == 0.0. </span></div>
+<div class="line"><span class="stringliteral">    To fix it we check r-hosts triptime and send disconnect command to it;</span></div>
+<div class="line"><span class="stringliteral">  - when a peer is dead - does not answer to ping: we send disconnect command to </span></div>
+<div class="line"><span class="stringliteral">    it and disconnect this peer from host;</span></div>
+<div class="line"><span class="stringliteral">  - default r-host address removed: set default r-host to null string, so if </span></div>
+<div class="line"><span class="stringliteral">    r-host parameter is empty than teonet application will not connect to </span></div>
+<div class="line"><span class="stringliteral">    default r-host address (it was localhost)</span></div>
+<div class="line"><span class="stringliteral">  - tinc Dockerfile created</span></div>
+<div class="line"><span class="stringliteral">  - teonet C dispatcher application created, - reading/writing UNIX socket </span></div>
+<div class="line"><span class="stringliteral">    module &quot;</span>usock<span class="stringliteral">&quot; created, &quot;</span><a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a> received from UNIX socket<span class="stringliteral">&quot; event was added</span></div>
+<div class="line"><span class="stringliteral">  - teodb applications return ID from request in DB response</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.47</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - peers view updated, Docker Registry view connected to registry item</span></div>
+<div class="line"><span class="stringliteral">  - the Teogo example application updated</span></div>
+<div class="line"><span class="stringliteral">  - the app version was added to the teovpn and teoweb applications</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.46</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - version of teodb changed to 0.0.2 and added to application info</span></div>
+<div class="line"><span class="stringliteral">  - core reconnect timeout changed from 11.5 second to 1.15 second</span></div>
+<div class="line"><span class="stringliteral">  - send disconnect to peer if it send messages without registration </span></div>
+<div class="line"><span class="stringliteral">    (see: tr-udp: ignore message)</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.45</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - number of hotkeys buffer strings increased to 4</span></div>
+<div class="line"><span class="stringliteral">  - facilities to get strings from stdin in applications hotkeys menu added</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.44</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - teoSetAppVersion() function added to set application version</span></div>
+<div class="line"><span class="stringliteral">  - send application version host info</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.43</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - allow reset command from l0 clients to peers</span></div>
+<div class="line"><span class="stringliteral">  - base64 encode/decode functions added to utils module</span></div>
+<div class="line"><span class="stringliteral">  - Merge origin/teo-hws into teo-hws</span></div>
+<div class="line"><span class="stringliteral">  - event for teoHSW module added</span></div>
+<div class="line"><span class="stringliteral">  - show debug message &quot;</span>event loop initialized<span class="stringliteral">&quot;</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.42</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - fix length of got echo answer message data, type the message set to DEBUG_VV</span></div>
+<div class="line"><span class="stringliteral">  - filebeat docker image updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.41</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - The CMD_RESET added</span></div>
+<div class="line"><span class="stringliteral">  - The .gitlab-ci updated</span></div>
+<div class="line"><span class="stringliteral">  - Change_log shell script updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.39</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - CI deploy only changed to master. Database example added to documentation</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.1.38</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - The wiki.go test added. The minore changes in teogo.go done.</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Teonet event callback was added to the go example</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Go examples started. Main library makefile updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Go examples added</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - README file updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Merge origin/master into teo-log</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - The filebeat and syslog Dockerfiles updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Install filebeat and rsyslog (2)</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Dockerfile updated</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - Install filebeat and create Dockerfile_log for teonet_log image</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.0.9</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - the QUEUE Callback module, cUnit test and example added</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.0.8</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Protocol not compatible with previous versions</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - the TR-UDP module, cUnit test and examples added</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">Version 0.0.7</span></div>
+<div class="line"><span class="stringliteral">==============</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">First stable release</span></div>
+<div class="line"><span class="stringliteral"></span></div>
+<div class="line"><span class="stringliteral">  - master build system created </span></div>
+<div class="line"><span class="stringliteral"></span></div>
 </div><!-- fragment --> </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Mon Mar 1 2021 10:50:01 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:51 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

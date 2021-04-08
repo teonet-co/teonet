@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -121,21 +121,37 @@ $(document).ready(function(){initNavTree('structksnLNullSPacket.html','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
 <tr class="memitem:a2ae993b4e9e063d9cc63929da101a59a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structksnLNullSPacket.html#a2ae993b4e9e063d9cc63929da101a59a">cmd</a></td></tr>
-<tr class="memdesc:a2ae993b4e9e063d9cc63929da101a59a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command.  <a href="#a2ae993b4e9e063d9cc63929da101a59a">More...</a><br/></td></tr>
+<tr class="memdesc:a2ae993b4e9e063d9cc63929da101a59a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command number.  <a href="#a2ae993b4e9e063d9cc63929da101a59a">More...</a><br/></td></tr>
 <tr class="separator:a2ae993b4e9e063d9cc63929da101a59a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab89ee3c1b098942165305b41efaa5c81"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structksnLNullSPacket.html#ab89ee3c1b098942165305b41efaa5c81">from_length</a></td></tr>
-<tr class="memdesc:ab89ee3c1b098942165305b41efaa5c81"><td class="mdescLeft">&#160;</td><td class="mdescRight">From client name length (include leading zero)  <a href="#ab89ee3c1b098942165305b41efaa5c81">More...</a><br/></td></tr>
-<tr class="separator:ab89ee3c1b098942165305b41efaa5c81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff1a71872e1eeba00020fac1b7a3c571"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structksnLNullSPacket.html#aff1a71872e1eeba00020fac1b7a3c571">client_name_length</a></td></tr>
+<tr class="memdesc:aff1a71872e1eeba00020fac1b7a3c571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Client name length (includes null terminated)  <a href="#aff1a71872e1eeba00020fac1b7a3c571">More...</a><br/></td></tr>
+<tr class="separator:aff1a71872e1eeba00020fac1b7a3c571"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cb09115e08d5ff60bece1edc364b4d9"><td class="memItemLeft" align="right" valign="top">uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structksnLNullSPacket.html#a1cb09115e08d5ff60bece1edc364b4d9">data_length</a></td></tr>
 <tr class="memdesc:a1cb09115e08d5ff60bece1edc364b4d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Packet data length.  <a href="#a1cb09115e08d5ff60bece1edc364b4d9">More...</a><br/></td></tr>
 <tr class="separator:a1cb09115e08d5ff60bece1edc364b4d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a923acec5f277efc9b19c177db1c76b49"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structksnLNullSPacket.html#a923acec5f277efc9b19c177db1c76b49">from</a> []</td></tr>
-<tr class="memdesc:a923acec5f277efc9b19c177db1c76b49"><td class="mdescLeft">&#160;</td><td class="mdescRight">From client name (include leading zero) + packet data.  <a href="#a923acec5f277efc9b19c177db1c76b49">More...</a><br/></td></tr>
-<tr class="separator:a923acec5f277efc9b19c177db1c76b49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa13861fd9d9f4a7d9c3a83b4b0479081"><td class="memItemLeft" align="right" valign="top">char&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structksnLNullSPacket.html#aa13861fd9d9f4a7d9c3a83b4b0479081">payload</a> []</td></tr>
+<tr class="memdesc:aa13861fd9d9f4a7d9c3a83b4b0479081"><td class="mdescLeft">&#160;</td><td class="mdescRight">Сlient name (includes null terminated) + packet data.  <a href="#aa13861fd9d9f4a7d9c3a83b4b0479081">More...</a><br/></td></tr>
+<tr class="separator:aa13861fd9d9f4a7d9c3a83b4b0479081"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>L0 Server resend to peer packet data structure. </p>
 </div><h2 class="groupheader">Field Documentation</h2>
+<a class="anchor" id="aff1a71872e1eeba00020fac1b7a3c571"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t ksnLNullSPacket::client_name_length</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Client name length (includes null terminated) </p>
+
+<p>Referenced by <a class="el" href="net__com_8c.html#a1058011b31157f448884a0f5d7aadb06">cmd_l0_cb()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>, and <a class="el" href="l0-server_8h.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>.</p>
+
+</div>
+</div>
 <a class="anchor" id="a2ae993b4e9e063d9cc63929da101a59a"></a>
 <div class="memitem">
 <div class="memproto">
@@ -146,7 +162,7 @@ Data Fields</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Command. </p>
+<p>Command number. </p>
 
 <p>Referenced by <a class="el" href="net__com_8c.html#a1058011b31157f448884a0f5d7aadb06">cmd_l0_cb()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>, and <a class="el" href="l0-server_8h.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>.</p>
 
@@ -168,33 +184,17 @@ Data Fields</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="a923acec5f277efc9b19c177db1c76b49"></a>
+<a class="anchor" id="aa13861fd9d9f4a7d9c3a83b4b0479081"></a>
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">char ksnLNullSPacket::from[]</td>
+          <td class="memname">char ksnLNullSPacket::payload[]</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>From client name (include leading zero) + packet data. </p>
-
-<p>Referenced by <a class="el" href="net__com_8c.html#a1058011b31157f448884a0f5d7aadb06">cmd_l0_cb()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>, and <a class="el" href="l0-server_8h.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>.</p>
-
-</div>
-</div>
-<a class="anchor" id="ab89ee3c1b098942165305b41efaa5c81"></a>
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">uint8_t ksnLNullSPacket::from_length</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>From client name length (include leading zero) </p>
+<p>Сlient name (includes null terminated) + packet data. </p>
 
 <p>Referenced by <a class="el" href="net__com_8c.html#a1058011b31157f448884a0f5d7aadb06">cmd_l0_cb()</a>, <a class="el" href="net__com_8c.html#aea5fa88ba909a09b341a307bce62c915">cmd_l0_to_cb()</a>, <a class="el" href="net__core_8h.html#ae24582e52c3c12652d7456ffcc71c5fe">ksnCoreSendCmdto()</a>, and <a class="el" href="l0-server_8h.html#a5b035fdc826ce27225fd07b8d8826005">ksnLNullSendToL0()</a>.</p>
 
@@ -209,7 +209,7 @@ Data Fields</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="structksnLNullSPacket.html">ksnLNullSPacket</a></li>
-    <li class="footer">Generated on Mon Mar 1 2021 10:50:00 for Teonet library by
+    <li class="footer">Generated on Thu Apr 8 2021 12:29:51 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>
