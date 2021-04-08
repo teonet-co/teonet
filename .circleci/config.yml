@@ -86,10 +86,6 @@ jobs:
             go get github.com/tcnksm/ghr
             ghr -t "${GITHUB_API_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" -c "${CIRCLE_SHA1}" -body "$(cat ./misc/RELEASE_BODY)" ${CIRCLE_TAG} ./dist/
       - run:
-          name: "publish to Bintray"
-          command: |
-            BINTRAY_USER=${CI_BINTRAY_USER} BINTRAY_PASS=${CI_BINTRAY_API_KEY} BINTRAY_COMPONENT=release BINTRAY_ORG=teonet-co python ./misc/bintray/bintray.py publish ./dist
-      - run:
           name: "publish docs to GitHub"
           command: |
             ./autogen.sh
