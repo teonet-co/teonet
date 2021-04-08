@@ -353,7 +353,7 @@ static inline int _check_thread(void *ke) {
 // retval NO_MULTITHREAD (2) - if multi thread run incorrectly (no multi thread, like in nodejs);
 static int _check_multi_thread(void *ke) {
 
-    if(!kev->ksn_cfg.no_multi_thread_f && kev->ta->f_multi_thread != MULTITHREAD && check_retrives < CHECK_RETRIVES) {
+    if(!kev->teo_cfg.no_multi_thread_f && kev->ta->f_multi_thread != MULTITHREAD && check_retrives < CHECK_RETRIVES) {
         kev->ta->f_multi_thread = MULTITHREAD;
         kev->ta->f_multi_thread = SEND_ASYNC(NULL, 0) == 0 ? MULTITHREAD : NO_MULTITHREAD;
         ksn_printf(kev, MODULE, DEBUG, "Set MULTITHREAD mode: %s\n",

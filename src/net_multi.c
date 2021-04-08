@@ -48,12 +48,12 @@ ksnMultiClass *ksnMultiInit(ksnMultiData *md, void *user_data) {
             ke->km = km; // Pointer to multi net module
             ke->net_idx = i; // Set network number
             ke->net_count = md->num; // Set number of networks
-            strncpy(ke->ksn_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - strlen(ke->ksn_cfg.host_name)); // Host name
-            strncpy(ke->ksn_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - strlen(ke->ksn_cfg.network)); // Network name
-            read_config(&ke->ksn_cfg, ke->ksn_cfg.port); // Read configuration file parameters
+            strncpy(ke->teo_cfg.host_name, md->names[i], KSN_MAX_HOST_NAME - strlen(ke->teo_cfg.host_name)); // Host name
+            strncpy(ke->teo_cfg.network, md->networks[i], KSN_BUFFER_SM_SIZE/2 - strlen(ke->teo_cfg.network)); // Network name
+            read_config(&ke->teo_cfg, ke->teo_cfg.port); // Read configuration file parameters
 
             // Add to network list
-            pblMapAdd(km->list, (void *)ke->ksn_cfg.network, strlen(ke->ksn_cfg.network)+1,
+            pblMapAdd(km->list, (void *)ke->teo_cfg.network, strlen(ke->teo_cfg.network)+1,
                     &ke, sizeof(ke));
             
             // Start network
@@ -93,7 +93,7 @@ void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host,
 
     // If port is 0 use port+2 from last network
     if(!port) {
-        port = ke_last->ksn_cfg.port+2;
+        port = ke_last->teo_cfg.port+2;
     }
 
     ksnetEvMgrClass *ke_new = ksnetEvMgrInitPort(ke_last->argc, ke_last->argv,
@@ -103,12 +103,12 @@ void teoMultiAddNet(ksnMultiClass *km, ksn_event_cb_type e_cb, const char *host,
     ke_new->km = km; // Pointer to multi net module
     ke_new->net_idx = km->last_net_idx; // Set network number
     ke_new->net_count = km->net_count; // Set number of networks
-    strncpy(ke_new->ksn_cfg.host_name, host, KSN_MAX_HOST_NAME - 1); // Host name
-    strncpy(ke_new->ksn_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - 1); // Network name
-    read_config(&ke_new->ksn_cfg, ke_new->ksn_cfg.port); // Read configuration file parameters
+    strncpy(ke_new->teo_cfg.host_name, host, KSN_MAX_HOST_NAME - 1); // Host name
+    strncpy(ke_new->teo_cfg.network, network, KSN_BUFFER_SM_SIZE/2 - 1); // Network name
+    read_config(&ke_new->teo_cfg, ke_new->teo_cfg.port); // Read configuration file parameters
 
     // Add to network list
-    pblMapAdd(km->list, (void *)ke_new->ksn_cfg.network, strlen(ke_new->ksn_cfg.network) + 1,
+    pblMapAdd(km->list, (void *)ke_new->teo_cfg.network, strlen(ke_new->teo_cfg.network) + 1,
             &ke_new, sizeof(ke_new));
 
     // Start network
@@ -319,10 +319,10 @@ char *ksnMultiShowListStr(ksnMultiClass *km) {
                 // Number
                 (*ke)->net_idx+1,
                 // Peer name
-                getANSIColor(LIGHTGREEN), (*ke)->ksn_cfg.host_name, getANSIColor(NONE),
+                getANSIColor(LIGHTGREEN), (*ke)->teo_cfg.host_name, getANSIColor(NONE),
                 getANSIColor(LIGHTCYAN), network_name, getANSIColor(NONE),
                 // Port
-                (*ke)->ksn_cfg.port
+                (*ke)->teo_cfg.port
         );
     }
 

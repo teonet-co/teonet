@@ -137,7 +137,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
 // Logging client initialize
 teoLoggingClientClass *teoLoggingClientInit(void *ke) {
-    if(kev->ksn_cfg.log_disable_f) {
+    if(kev->teo_cfg.log_disable_f) {
         #ifdef DEBUG_KSNET
         ksn_puts(kev, MODULE, DEBUG, "disable send logs to logging servers");
         #endif
@@ -176,8 +176,8 @@ void teoLoggingClientDestroy(teoLoggingClientClass *lc) {
 
 // Send log data to logging servers
 void teoLoggingClientSend(void *ke, const char *message) {
-    if(!kev->ksn_cfg.log_disable_f) {
-        if(kev->ksn_cfg.send_all_logs_f || message[0] == '#' || strstr(message,": ### "))
+    if(!kev->teo_cfg.log_disable_f) {
+        if(kev->teo_cfg.send_all_logs_f || message[0] == '#' || strstr(message,": ### "))
             ksnetEvMgrAsync(ke, (void*)message, strlen(message)+1, 
                     (void*)&ASYNC_LABEL);
     }

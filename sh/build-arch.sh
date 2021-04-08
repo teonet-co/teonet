@@ -1,28 +1,30 @@
-sudo pacman -Sy --noconfirm base-devel
+#!/bin/sh
+
+# system dependencies
+sudo pacman -Sy --noconfirm base-devel cmake
 sudo pacman -S --noconfirm intltool doxygen
-sudo pacman -S --noconfirm libev confuse 
+sudo pacman -S --noconfirm libev confuse cunit
+
 # cpputest
-cd embedded
-wget https://github.com/cpputest/cpputest/releases/download/v3.8/cpputest-3.8.tar.gz
-tar xvzf cpputest-3.8.tar.gz
-cd cpputest-3.8/
-autoreconf -i
-./configure
-make
-sudo make install
-cd ..
-rm -rf cpputest-3.8*
-cd ../
+cd distr/arch/cpputest
+makepkg -si --noconfirm
+rm -rf pkg src cpputest-3.8*
+cd ../../..
+
 # tuntap
-sudo pacman -S --noconfirm cmake unzip
-cd distr
-unzip libtuntap.zip
-cd libtuntap-master
+#
+# package
+cd distr/arch/libtuntap
+cp ../../libtuntap.zip ./
+makepkg -si --noconfirm
+rm -rf pkg src libtuntap*
+cd ../../..
+#
+# local source code
+cd libs/libtuntap
+patch < ../../distr/arch/libtuntap/CMakeLists.txt-2.patch
 cmake ./
-make
-sudo make install
-cd ..
-rm -fr libtuntap-master
+cd ../..
 
 #export TEONET_HOME=`pwd`
 

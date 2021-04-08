@@ -47,14 +47,14 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_STARTED:
             
             ksn_printf(ke, "", DEBUG, "Host '%s' started at network '%s'...\n", 
-                    ksnetEvMgrGetHostName(ke), ke->ksn_cfg.network);
+                    ksnetEvMgrGetHostName(ke), ke->teo_cfg.network);
                     
             // Set application type
             teoSetAppType(ke, "teo-gw");
             teoSetAppVersion(ke, TGW_VERSION);
 
             // start new network
-            if(!strcmp(ke->ksn_cfg.network,"local")) {
+            if(!strcmp(ke->teo_cfg.network,"local")) {
                 const char* net = "NEW_NET";
                 ksn_printf(ke, "", DEBUG, "Dynamically add new network %s\n", net);
                 teoMultiAddNet(ke->km, event_cb, "NEW_HOST", 0, net, NULL);
@@ -66,14 +66,14 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         case EV_K_CONNECTED: {
             // const ksnCorePacketData *rd = (ksnCorePacketData *) data;
             ksn_printf(ke, "", DEBUG, "Peer '%s' connected at network '%s'...\n", 
-                    rd->from, ke->ksn_cfg.network);
+                    rd->from, ke->teo_cfg.network);
         } break;    
             
         // Show disconnected peers
         case EV_K_DISCONNECTED: {
             // const ksnCorePacketData *rd = (ksnCorePacketData *) data;
             ksn_printf(ke, "", DEBUG, "Peer '%s' disconnected at network '%s'...\n", 
-                    rd->from, ke->ksn_cfg.network);
+                    rd->from, ke->teo_cfg.network);
         } break;
 
 

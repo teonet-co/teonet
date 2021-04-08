@@ -94,6 +94,7 @@ nobase_teonetinclude_HEADERS = \
     net_multi.h \
     net_recon.h \
     net_split.h \
+    commands_creator.h \
     tr-udp.h \
     tr-udp_stat.h \
     pidfile.h \
@@ -122,6 +123,7 @@ nobase_teonetinclude_HEADERS = \
     utils/string_arr.h \
     utils/utils.h \
     utils/rlutil.h \
+    text-filter/text-filter.h \
     # end of nobase_teonetinclude_HEADERS
 
 teonetinclude_HEADERS = \
@@ -199,6 +201,7 @@ libteonet_la_SOURCES = \
     net_multi.c \
     net_recon.c \
     net_split.c \
+    commands_creator.c \
     tr-udp.c \
     tr-udp_stat.c \
     pidfile.c \
@@ -225,6 +228,8 @@ libteonet_la_SOURCES = \
     utils/string_arr.c \
     utils/utils.c \
     utils/base64.c \
+    text-filter/grammar-filter.c \
+    text-filter/lexer-filter.c \
     ../embedded/teocli/libteol0/teonet_l0_client.c \
     ../embedded/teocli/libteol0/teonet_l0_client_options.c \
     ../embedded/teocli/libteol0/teonet_l0_client_crypt.c \

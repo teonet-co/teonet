@@ -1,0 +1,10 @@
+--- CMakeLists.txt	2021-03-13 11:38:29.154461135 +0300
++++ CMakeLists_new.txt	2021-03-13 11:38:11.040924341 +0300
+@@ -47,6 +47,7 @@
+     # Unix specific definitions
+     # -------------------------
+     add_definitions(-DUnix)
++    add_definitions(-fcommon)
+     
+     # Unix specific source files
+     # --------------------------

@@ -21,6 +21,7 @@
 #include "utils/utils.h"
 #include "tr-udp_stat.h"
 #include "utils/teo_memory.h"
+#include "text-filter/text-filter.h"
 
 #undef MODULE
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
@@ -70,13 +71,20 @@ const char
 #define khv  kev->kh   // Hotkeys class
 #define kc  kev->kc   // Net core class
 
-void teoHotkeySetFilter(void *ke, void *filter) {
-    if (khv->filter_arr != NULL) {
-        ksnet_stringArrFree(&khv->filter_arr);
+void hotkeysResetFilter(ksnetHotkeysClass *hotkeys) {
+    if (hotkeys->filter != NULL) {
+        free(hotkeys->filter);
+        hotkeys->filter = NULL;
     }
-    khv->filter_arr = ksnet_stringArrSplit((char *)filter, "|", 0, 0);
-}
+ }
 
+void teoHotkeySetFilter(ksnetHotkeysClass *hotkeys, char *filter) {
+    hotkeysResetFilter(hotkeys);
+    hotkeys->filter = malloc(strlen(filter) + 1);
+    strncpy(hotkeys->filter, filter, strlen(filter) + 1);
+ }
+
+ 
 unsigned char teoFilterFlagCheck(void *ke) {
     if (khv != NULL) {
         if (khv->filter_f) {
@@ -90,13 +98,8 @@ unsigned char teoFilterFlagCheck(void *ke) {
 
 unsigned char teoLogCheck(void *ke, void *log) {
 
-    if ((log != NULL) && (khv != NULL) && (khv->filter_arr != NULL)) {
-        unsigned i = 0;
-        for (i = 0; khv->filter_arr[i] != NULL; ++i) {
-            if (strstr((char *)log, khv->filter_arr[i]) != NULL) {
-                return 1;
-            }
-        }
+    if ((log != NULL) && (khv != NULL) && (khv->filter != NULL)) {
+        if (log_string_match((char *)log, khv->filter)) return 1;
     } else return 1;
     return 0;
 }
@@ -104,7 +107,7 @@ unsigned char teoLogCheck(void *ke, void *log) {
 /**
  * Callback procedure which called by event manager when STDIN FD has any data
  */
-int hotkeys_cb(void *ke, void *data, ev_idle *w) {
+int hotkeys_cb(ksnetEvMgrClass *ke, void *data, ev_idle *w) {
 
     int hotkey;
 
@@ -152,9 +155,9 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             , ""
             #endif
             #ifdef DEBUG_KSNET
-            , (kev->ksn_cfg.show_debug_f ? SHOW : DONT_SHOW)
-            , (kev->ksn_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
-            , (kev->ksn_cfg.show_debug_vvv_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_vvv_f ? SHOW : DONT_SHOW)
             #endif
             , (khv->pt != NULL ? "(running now, press i to stop)" : "")
             , (khv->mt != NULL ? "(running now, press M to stop)" : "")
@@ -247,31 +250,31 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
         // Show debug
         case 'd':
-            if(kev->ksn_cfg.show_debug_vv_f || kev->ksn_cfg.show_debug_vvv_f)
-                kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f = 0;
+            if(kev->teo_cfg.show_debug_vv_f || kev->teo_cfg.show_debug_vvv_f)
+                kev->teo_cfg.show_debug_vv_f = kev->teo_cfg.show_debug_vvv_f = 0;
             else {
-                kev->ksn_cfg.show_debug_f = !kev->ksn_cfg.show_debug_f;
+                kev->teo_cfg.show_debug_f = !kev->teo_cfg.show_debug_f;
                 printf("Show debug messages switch %s\n",
-                     (kev->ksn_cfg.show_debug_f ? ON :OFF));
+                     (kev->teo_cfg.show_debug_f ? ON :OFF));
             }  
             break;
 
         // Show debug_vv
         case 'w':
-            if(!kev->ksn_cfg.show_debug_vvv_f) {
-              kev->ksn_cfg.show_debug_vv_f = !kev->ksn_cfg.show_debug_vv_f;
+            if(!kev->teo_cfg.show_debug_vvv_f) {
+              kev->teo_cfg.show_debug_vv_f = !kev->teo_cfg.show_debug_vv_f;
             }  
-            kev->ksn_cfg.show_debug_vvv_f = 0;
+            kev->teo_cfg.show_debug_vvv_f = 0;
             printf("Show debug_vv messages switch %s\n",
-                   (kev->ksn_cfg.show_debug_vv_f ? ON :OFF));
+                   (kev->teo_cfg.show_debug_vv_f ? ON :OFF));
             break;
 
         // Show debug_vvv
         case 'c':
-            kev->ksn_cfg.show_debug_vvv_f = !kev->ksn_cfg.show_debug_vvv_f;
-            kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f;
+            kev->teo_cfg.show_debug_vvv_f = !kev->teo_cfg.show_debug_vvv_f;
+            kev->teo_cfg.show_debug_vv_f = kev->teo_cfg.show_debug_vvv_f;
             printf("Show debug_vvv messages switch %s\n",
-                   (kev->ksn_cfg.show_debug_vvv_f ? ON :OFF));
+                   (kev->teo_cfg.show_debug_vvv_f ? ON :OFF));
             break;
 
         // Send message
@@ -496,9 +499,6 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                 // Got hot key
             if(khv->non_blocking) {
                 khv->str_number = 0;
-                if(khv->filter_arr) {
-                    printf("Current filter: %s\n",ksnet_stringArrCombine(khv->filter_arr, "|"));
-                }
                 printf("Enter word filter: ");
                 fflush(stdout);
                 _keys_non_blocking_stop(khv); // Switch STDIN to string
@@ -512,10 +512,10 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                     trimlf((char*)data);
                     if(((char*)data)[0]) {
                         printf("FILTER '%s'\n", (char*)data);
-                        teoHotkeySetFilter(ke, data);
+                        teoHotkeySetFilter(ke->kh, (char*)data);
                     } else {
                         printf("FILTER was reset\n");
-                        teoHotkeySetFilter(ke, " ");
+                        hotkeysResetFilter(ke->kh);
                     }
                     _keys_non_blocking_start(khv); // Switch STDIN to hot key
                 }
@@ -616,7 +616,7 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->mt = NULL;
     kh->pet = NULL;
     kh->put = NULL;
-    kh->filter_arr = NULL;
+    kh->filter = NULL;
     kh->filter_f = 1;
     kh->ke = ke;
 
@@ -630,13 +630,13 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     ev_idle_init (&kh->idle_stdin_w, idle_stdin_cb);
 
     // Start show peer
-    if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_peers_f) {
+    if(((ksnetEvMgrClass*)ke)->teo_cfg.show_peers_f) {
         kh->pet = peer_timer_init( ((ksnetEvMgrClass*)ke)->kc );
         kh->peer_m = 1;
     }
     // Start show TR-UDP statistic
     else
-    if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_tr_udp_f) {
+    if(((ksnetEvMgrClass*)ke)->teo_cfg.show_tr_udp_f) {
         kh->put = tr_udp_timer_init( ((ksnetEvMgrClass*)ke)->kc );
         kh->tr_udp_m = 1;
     }
@@ -659,7 +659,6 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
         
         ev_io_stop (ke->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
-        ksnet_stringArrFree(&kh->filter_arr);
         free(kh);
         ke->kh = NULL;
     }
@@ -738,7 +737,7 @@ void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
     #endif
 
     // Call the hot keys module callback
-    if(!hotkeys_cb(idata->ke, idata->data, w)) {
+    if(!hotkeys_cb((ksnetEvMgrClass*)idata->ke, idata->data, w)) {
     
         // Start STDIN watcher
         ev_io_start(EV_A_ idata->stdin_w);

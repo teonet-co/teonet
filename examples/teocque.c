@@ -157,7 +157,7 @@ int main(int argc, char** argv) {
     ksnetEvMgrSetCustomTimer(ke, 2.00);
     
     // Show Hello message
-    ksnet_printf(&ke->ksn_cfg, MESSAGE, "Example started...\n\n");
+    ksnet_printf(&ke->teo_cfg, MESSAGE, "Example started...\n\n");
 
     // Start teonet
     ksnetEvMgrRun(ke);    

@@ -21,6 +21,7 @@
 #include "utils.h"
 #include "ev_mgr.h"
 
+
 #define ADDRSTRLEN 128
 
 //double ksnetEvMgrGetTime(void *ke);
@@ -44,7 +45,7 @@ inline int KSN_GET_TEST_MODE() {
  * function has type parameter which define type of print. It should be used
  * this function instead of standard printf function.
  *
- * @param ksn_cfg Pointer to ksnet_cfg
+ * @param teo_cfg Pointer to teonet_cfg
  * @param type MESSAGE -- print always;
  *             CONNECT -- print if connect show flag  connect is set;
  *             DEBUG -- print if debug show flag is set on;
@@ -55,7 +56,7 @@ inline int KSN_GET_TEST_MODE() {
  *
  * @return Number of byte printed
  */
-int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
+int ksnet_printf(teonet_cfg *teo_cfg, int type, const char* format, ...) {
 
     static int log_opened = 0;
     int show_it = 0,
@@ -66,32 +67,32 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
     // Skip execution in tests
     if(KSN_GET_TEST_MODE()) return ret_val;
 
-    pthread_mutex_lock(&((ksnetEvMgrClass*)(ksn_cfg->ke))->printf_mutex);
+    pthread_mutex_lock(&((ksnetEvMgrClass*)(teo_cfg->ke))->printf_mutex);
 
     // Check type
     switch(type) {
 
         case CONNECT:
 
-            if(ksn_cfg->show_connect_f) show_it = 1;
+            if(teo_cfg->show_connect_f) show_it = 1;
             priority = LOG_NOTICE; //LOG_AUTH;
             break;
 
         case DEBUG:
 
-            if(ksn_cfg->show_debug_f || ksn_cfg->show_debug_vv_f || ksn_cfg->show_debug_vvv_f) show_it = 1;
+            if(teo_cfg->show_debug_f || teo_cfg->show_debug_vv_f || teo_cfg->show_debug_vvv_f) show_it = 1;
             priority = LOG_INFO;
             break;
 
         case DEBUG_VV:
 
-            if(ksn_cfg->show_debug_vv_f || ksn_cfg->show_debug_vvv_f) show_it = 1;
+            if(teo_cfg->show_debug_vv_f || teo_cfg->show_debug_vvv_f) show_it = 1;
             priority = LOG_DEBUG;
             break;
 
         case DEBUG_VVV:
 
-            if(ksn_cfg->show_debug_vvv_f) show_it = 1;
+            if(teo_cfg->show_debug_vvv_f) show_it = 1;
             priority = LOG_DEBUG;
             break;
 
@@ -117,7 +118,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             break;
     }
 
-    show_log = show_log && (ksn_cfg->log_priority >= type);
+    show_log = show_log && (teo_cfg->log_priority >= type);
 
     if(show_it || show_log) {
 
@@ -128,33 +129,33 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
         // Filter
         if(show_it) {
-            if(teoFilterFlagCheck(ksn_cfg->ke))
-                if(teoLogCheck(ksn_cfg->ke, p)) show_it = 1; else show_it = 0;
+            if(teoFilterFlagCheck(teo_cfg->ke))
+                if(teoLogCheck(teo_cfg->ke, p)) show_it = 1; else show_it = 0;
             else show_it = 0;
         }
 
         // Show message
         if(show_it) {
-            double ct = ksnetEvMgrGetTime(ksn_cfg->ke);
+            double ct = ksnetEvMgrGetTime(teo_cfg->ke);
             uint64_t raw_time = ct * 1000;
             time_t e_time = raw_time / 1000;
             unsigned ms_time = raw_time % 1000;
             struct tm tm = *localtime(&e_time);
 
             char t[64];
-            strftime(t, sizeof t, "[%F %T", &tm);
+            strftime(t, sizeof(t), "[%F %T", &tm);
 
-            char timestamp[64];
+            char timestamp[128];
             snprintf(timestamp, sizeof timestamp, "%s:%03u]", t, ms_time);
 
             if(type != DISPLAY_M && ct != 0.00)
                 printf("%s%s%s ",
-                       ksn_cfg->color_output_disable_f ? "" : _ANSI_DARKGREY, 
+                       teo_cfg->color_output_disable_f ? "" : _ANSI_NONE,
                        timestamp,
-                       ksn_cfg->color_output_disable_f ? "" : _ANSI_NONE
+                       teo_cfg->color_output_disable_f ? "" : _ANSI_NONE
                 );
                 
-            if(ksn_cfg->color_output_disable_f) {
+            if(teo_cfg->color_output_disable_f) {
                 trimlf(removeTEsc(p));
                 printf("%s\n", p);
             }
@@ -169,7 +170,7 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
             if(!log_opened) {
                 // Open log
                 setlogmask (LOG_UPTO (LOG_INFO));
-                openlog (ksn_cfg->log_prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
+                openlog (teo_cfg->log_prefix, LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
                 log_opened = 1;
             }
 
@@ -181,22 +182,22 @@ int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...) {
 
             // Send async event to teonet event loop (which processing in
             // logging client module) to send log to logging server
-            teoLoggingClientSend(ksn_cfg->ke, data);
+            teoLoggingClientSend(teo_cfg->ke, data);
         }
         free(p);
     }
 
-    pthread_mutex_unlock(&((ksnetEvMgrClass*)(ksn_cfg->ke))->printf_mutex);
+    pthread_mutex_unlock(&((ksnetEvMgrClass*)(teo_cfg->ke))->printf_mutex);
 
     return ret_val;
 }
 
 
-int teoLogPuts(ksnet_cfg *ksn_cfg, const char* module , int type, const char* message) {
-    return ksnet_printf(ksn_cfg, type,
+int teoLogPuts(teonet_cfg *teo_cfg, const char* module , int type, const char* message) {
+    return ksnet_printf(teo_cfg, type,
         "%s %s: " /*_ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": "*/ _ANSI_GREEN "%s" _ANSI_NONE "\n",
         _ksn_printf_type_(type),
-        module == NULL || module[0] == 0 ? ksn_cfg->app_name : module,
+        module == NULL || module[0] == 0 ? teo_cfg->app_name : module,
         /*"", "", "",*/ message);
 }
 
@@ -542,17 +543,6 @@ char *getExecPath (char *path, size_t dest_len, char *argv0) {
 #endif
 
 #ifndef HAVE_MINGW
-// Moved to teonet_lo_client.c
-///**
-// * Set socket or FD to non blocking mode
-// */
-//void set_nonblock(int fd) {
-//
-//    int flags;
-//
-//    flags = fcntl(fd, F_GETFL, 0);
-//    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-//}
 
 /**
  * Make socket reusable
@@ -620,7 +610,7 @@ int inarray(int val, const int *arr, int size) {
  *
  * @return Pointer to ksnet_stringArr
  */
-ksnet_stringArr getIPs(ksnet_cfg *conf) {
+ksnet_stringArr getIPs(teonet_cfg *conf) {
 
     ksnet_stringArr arr = ksnet_stringArrCreate();
 
@@ -667,31 +657,6 @@ ksnet_stringArr getIPs(ksnet_cfg *conf) {
     #endif
 
     return arr;
-}
-
-int ip_type(const char *ip_ch) {
-    struct addrinfo hint, *res = NULL;
-    int ret_type = -1;
-
-    memset(&hint, '\0', sizeof hint);
-
-    hint.ai_family = PF_UNSPEC;
-    hint.ai_flags = AI_NUMERICHOST;
-
-    int ret = getaddrinfo(ip_ch, NULL, &hint, &res);
-    if (ret) {
-        fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
-        exit(1);
-    }
-
-    if(res->ai_family == AF_INET) {
-        ret_type = 1;// TODO: enum need
-    } else if (res->ai_family == AF_INET6) {
-        ret_type = 2;
-    }
-
-   freeaddrinfo(res);
-   return ret_type;
 }
 
 int addr_port_equal(addr_port_t *ap_obj, char *addr, uint16_t port) {
@@ -790,6 +755,89 @@ int ip_to_array(char* ip, uint8_t *arr) {
     return i;
 }
 
+
+/*
+    Example of output printHexDump function for connect_r_packet_t struct
+
+  0000  8a 1b 00 00 04 22 74 65   6f 2d 76 70 6e 22 2c 20    ....."teo-vpn", 
+  0010  22 74 65 6f 2d 6c 30 22   00 00 00 00 00 00 00 00    "teo-l0"........
+  0020  00 00 00 00 00 00 00 00   00 00 00 00 00 00 00 00    ................
+  0030  00 00 00 00 00 00 00 00   00 00 00 00 00 00 00 00    ................
+  0040  00 00 00 00 00 31 39 32   2e 31 36 38 2e 31 2e 36    .....192.168.1.6
+  0050  39 00 31 39 32 2e 31 36   38 2e 31 32 32 2e 31 00    9.192.168.122.1.
+  0060  31 37 32 2e 31 37 2e 30   2e 31 00 31 30 2e 31 33    172.17.0.1.10.13
+  0070  35 2e 31 34 32 2e 38 33   00 00 00 00 00 00 00 00    5.142.83........
+  0080  00 00 00 00 00 00 00 00   00 00 00 00 00 00 00 00    ................
+  0090  00 00 00 00 00                                       .....
+*/
+void printHexDump(void *addr, size_t len)  {
+    unsigned char buf[17];
+    unsigned char *pc = addr;
+    size_t i = 0;
+    for (i = 0; i < len; i++) {
+        if ((i % 16) == 0) {
+            if (i != 0) {
+                printf("  %s\n", buf);
+            }
+
+            // print offset.
+            printf("  %04lx ", i);
+        }
+
+        // Now the hex code for the specific character.
+        printf(" %02x", pc[i]);
+        if (((i+1) % 8) == 0) {
+            printf("  ");
+        }
+
+        // And store a printable ASCII character for later.
+        if ((pc[i] < 0x20) || (pc[i] > 0x7e)) {
+            buf[i % 16] = '.';
+        } else {
+            buf[i % 16] = pc[i];
+        }
+
+        buf[(i % 16) + 1] = '\0';
+    }
+
+
+    while ((i % 16) != 0) {
+        if (((i+1) % 8) == 0) {
+            printf("  ");
+        }
+        printf("   ");
+        i++;
+    }
+
+    printf("  %s\n", buf);
+}
+
+void resolveDnsName(teonet_cfg *conf) {
+    memset(conf->r_host_addr, '\0', sizeof(conf->r_host_addr));
+
+    const char *localhost_str = "localhost";
+    if (!strncmp(localhost_str, conf->r_host_addr_opt, strlen(localhost_str))) {
+        const char *localhost_num = "::1";
+        strncpy((char*)conf->r_host_addr, localhost_num, strlen(localhost_num));
+    } else {
+        struct addrinfo hint;
+        struct addrinfo *res = NULL;
+        memset(&hint, '\0', sizeof hint);
+
+        hint.ai_family = PF_UNSPEC;
+
+        int ret = getaddrinfo(conf->r_host_addr_opt, NULL, &hint, &res);
+        if (ret) {
+            fprintf(stderr, "Invalid address. %s\n", gai_strerror(ret));
+            exit(1);
+        }
+
+        addr_port_t *ap_obj = wrap_inet_ntop(res->ai_addr);
+        strncpy((char*)conf->r_host_addr, ap_obj->addr, KSN_BUFFER_SM_SIZE/2);
+        addr_port_free(ap_obj);
+        freeaddrinfo(res);
+    }
+}
 /**
  * Detect if input IP address is private
  *

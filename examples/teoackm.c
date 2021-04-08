@@ -56,7 +56,7 @@ int app_state = STATE_NONE; ///< Application state
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
     
-    char *peer_to = ke->ksn_cfg.app_argv[1]; 
+    char *peer_to = ke->teo_cfg.app_argv[1]; 
     
     switch(event) {
         
@@ -270,11 +270,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Show DATA - stop TR-UDP statistic
                         if(show_data_or_statistic_at_server) {
                             
-                            ke->ksn_cfg.show_tr_udp_f = 0;
+                            ke->teo_cfg.show_tr_udp_f = 0;
                         }
                         //Show Statistic - start TR-UDP statistic
                         else {
-                            ke->ksn_cfg.show_tr_udp_f = 1;
+                            ke->teo_cfg.show_tr_udp_f = 1;
                         }
                     }
                 }    

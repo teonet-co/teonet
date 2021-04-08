@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 jobs:
   testing:
     machine:
@@ -15,9 +15,9 @@ jobs:
   compile:
     docker:
       - image: ubuntu:20.04
-        working_directory: ~/teonet
         environment:
           CI_FORCE_TEST: 1
+    working_directory: ~/teonet
     steps:
       - run:
           command: |
@@ -64,7 +64,7 @@ jobs:
     steps:
       - run: sudo apt-get update && sudo apt-get install -y openssh-client git
       - run: DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" sudo apt-get -y install tzdata
-      - run: sudo apt install -y make pkg-config libtool autoconf intltool doxygen gcc g++ libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev cpputest libcurl4-openssl-dev 
+      - run: sudo apt install -y make pkg-config libtool autoconf intltool doxygen gcc g++ libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev cpputest libcurl4-openssl-dev
       - checkout
       - run: git submodule update --init --recursive
       - run:
@@ -86,20 +86,16 @@ jobs:
             go get github.com/tcnksm/ghr
             ghr -t "${GITHUB_API_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" -c "${CIRCLE_SHA1}" -body "$(cat ./misc/RELEASE_BODY)" ${CIRCLE_TAG} ./dist/
       - run:
-          name: "publish to Bintray"
-          command: |
-            BINTRAY_USER=${CI_BINTRAY_USER} BINTRAY_PASS=${CI_BINTRAY_API_KEY} BINTRAY_COMPONENT=release BINTRAY_ORG=teonet-co python ./misc/bintray/bintray.py publish ./dist
-      - run:
           name: "publish docs to GitHub"
           command: |
             ./autogen.sh
             ./configure
-            ./misc/make_remote_doc_upload.sh teonet   
+            ./misc/make_remote_doc_upload.sh teonet 
 
 workflows:
-  version: 2
+  version: 2.1
   untagged:
-    jobs: 
+    jobs:
      - testing
      - compile
   tagged-build:
@@ -108,13 +104,13 @@ workflows:
           context: CI_BUILD
           filters:
             tags:
-              only: /^v.*/
+              only: /^v\d+\.\d+\.\d+/
             branches:
               ignore: /.*/
       - tagged-build:
+          context: CI_BUILD
           filters:
             branches:
               ignore: /.*/
             tags:
               only: /^v.*/
-          

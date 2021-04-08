@@ -146,7 +146,7 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
     
     int retval = 0;
     
-    char *r_host = kev->ksn_cfg.r_host_name;
+    char *r_host = kev->teo_cfg.r_host_name;
     ksnet_arp_data *arp_data;
 
     // If connected to r-host

@@ -45,15 +45,15 @@ ksnCryptClass *ksnCryptInit(void *ke) {
 
     // Create unique network IV
     strncpy((char*)kcr->iv, iv, BLOCK_SIZE);
-    if(kev != NULL && kev->ksn_cfg.net_key[0])
-        strncpy((char*)kcr->iv, kev->ksn_cfg.net_key, BLOCK_SIZE);
+    if(kev != NULL && kev->teo_cfg.net_key[0])
+        strncpy((char*)kcr->iv, kev->teo_cfg.net_key, BLOCK_SIZE);
 
     // Create unique network key
     kcr->key = (unsigned char *)strdup((char*)key);
-    if(kev != NULL && kev->ksn_cfg.net_key[0])
-        strncpy((char*)kcr->key, kev->ksn_cfg.net_key, KEY_SIZE);
-    if(kev != NULL && kev->ksn_cfg.network[0])
-        strncpy((char*)kcr->key, kev->ksn_cfg.network, KEY_SIZE);
+    if(kev != NULL && kev->teo_cfg.net_key[0])
+        strncpy((char*)kcr->key, kev->teo_cfg.net_key, KEY_SIZE);
+    if(kev != NULL && kev->teo_cfg.network[0])
+        strncpy((char*)kcr->key, kev->teo_cfg.network, KEY_SIZE);
     kcr->key_len = strlen((char*)kcr->key); // 32 - 256 bits
     kcr->blocksize = BLOCK_SIZE;
 

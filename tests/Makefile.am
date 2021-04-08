@@ -47,6 +47,7 @@ test_teonet_SOURCES = \
 	test_teodb.c \
 	test_tcp_proxy.c \
 	test_subscribe.c \
+	test_filter.c \
 	# end of test_teonet_SOURCES
 
 # test_teonet_LDFLAGS = ../embedded/teocli/linux/libteocli.la

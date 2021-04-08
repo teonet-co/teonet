@@ -42,7 +42,7 @@
 #define INTERVAL 0.25
 #define BUFFER_SIZE 128
 #define NUM_TO_SHOW 10000
-#define SERVER_PEER ke->ksn_cfg.app_argv[1]
+#define SERVER_PEER ke->teo_cfg.app_argv[1]
 
 /**
  * Simple load test data structure

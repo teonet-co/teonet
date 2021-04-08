@@ -258,7 +258,7 @@ typedef struct ksnetEvMgrClass {
     ksnTDBClass *kf; ///< PBL KeyFile class
     ksnStreamClass *ks; ///< Stream class
 
-    ksnet_cfg ksn_cfg; ///< KSNet configuration
+    teonet_cfg teo_cfg; ///< KSNet configuration
 
     teoLoggingServerClass *ls; ///< Logging server class // \TODO move it up after testing
     teoLoggingClientClass *lc; ///< Logging client class // \TODO move it up after testing
@@ -322,12 +322,14 @@ typedef struct ksnetEvMgrClass {
 } ksnetEvMgrClass;
 
 ksnetEvMgrClass* __ke_from_command_class(ksnCommandClass *X);
+ksnetEvMgrClass* __ke_from_L0_class(ksnLNullClass *X);
 ksnetArpClass* __arp_from_command_class(ksnCommandClass *X);
 
-#define EVENT_MANAGER_CLASS(X) _Generic((X), \
-      ksnCommandClass* : __ke_from_command_class) (X)
+#define EVENT_MANAGER_OBJECT(X) _Generic((X), \
+      ksnCommandClass* : __ke_from_command_class, \
+      ksnLNullClass *  : __ke_from_L0_class) (X)
 
-#define ARP_TABLE_CLASS(X) _Generic((X), \
+#define ARP_TABLE_OBJECT(X) _Generic((X), \
       ksnCommandClass* : __arp_from_command_class) (X)
 
 /**

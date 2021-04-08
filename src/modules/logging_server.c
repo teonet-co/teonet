@@ -48,9 +48,9 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
             if(rd->cmd == CMD_LOGGING && rd->data_len) {
                 
                 // Show log message
-                if (teoFilterFlagCheck(kev))
-                    if (teoLogCheck(ke, rd->data))
-                        printf("%s: %s\n", rd->from, (char*)rd->data);
+                if (teoFilterFlagCheck(kev) &&  teoLogCheck(ke, rd->data)) {
+                    printf("%s: %s\n", rd->from, (char*)rd->data);
+                }
                 
                 // Add log to syslog
                 syslog(LOG_INFO, "TEO_LOGGING: %s: %s", rd->from, (char*)rd->data);
@@ -74,7 +74,7 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event,
 
 // Logging server initialize
 teoLoggingServerClass *teoLoggingServerInit(void *ke) {
-    if(!kev->ksn_cfg.logging_f) return NULL;
+    if(!kev->teo_cfg.logging_f) return NULL;
 
     teoLoggingServerClass *ls = malloc(sizeof(teoLoggingServerClass));
     ls->ke = ke;

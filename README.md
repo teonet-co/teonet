@@ -1,6 +1,20 @@
 # Build Teonet library from sources
 
-[![CircleCI](https://circleci.com/gh/teonet-co/teonet.svg?style=svg&circle-token=d8827ba514cdb37c75565c8e8d7ebd275a0bc167)](https://circleci.com/gh/teonet-co/teonet)
+<p align="center">
+<a href="https://www.codacy.com/gh/teonet-co/teonet/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=teonet-co/teonet&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/e33f91daebdb4df39dd908402dbf37d9"/></a>
+<a href="https://www.codefactor.io/repository/github/teonet-co/teonet"><img src="https://www.codefactor.io/repository/github/teonet-co/teonet/badge" alt="CodeFactor" /></a>
+<a href="https://github.com/teonet-co/teonet/blob/develop/COPYING"><img src="https://img.shields.io/badge/license-GPLv3-green" alt="License" /></a>
+</p>
+
+<p align="center">
+<a href="https://circleci.com/gh/teonet-co/workflows/teonet"><img src="https://img.shields.io/circleci/build/github/teonet-co/teonet.svg?label=circleci" alt="CircleCI Status" /></a>
+<a href="https://teonet-co.github.io/teonet/"><img src="https://codedocs.xyz/teonet-co/teonet.svg" alt="Docs Status" /></a>
+<a href="https://github.com/teonet-co/teonet/releases/latest"><img src="https://img.shields.io/github/release/teonet-co/teonet.svg?maxAge=600" alt="Latest release" /></a>
+</p>
+<p align="center">
+<a href="https://github.com/teonet-co/teonet/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/teonet-co/teonet"></a>
+<a href="https://github.com/teonet-co/teonet/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/teonet-co/teonet"></a>
+</p>
 
 ## Clone git repository  to get code
 

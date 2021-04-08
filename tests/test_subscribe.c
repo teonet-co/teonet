@@ -23,7 +23,7 @@ int teoSScrNumberOfSubscribers(teoSScrClass *sscr);
   ksnetEvMgrClass ke_obj; \
   ksnetEvMgrClass *ke = &ke_obj; \
   ke->ev_loop = ev_loop_new (0); \
-  memset(&ke_obj.ksn_cfg, 0 , sizeof(ke_obj.ksn_cfg))
+  memset(&ke_obj.teo_cfg, 0 , sizeof(ke_obj.teo_cfg))
 
 /*
  * CUnit Test Suite
