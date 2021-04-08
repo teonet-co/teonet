@@ -304,8 +304,9 @@ static void cmd_l0_read_cb(struct ev_loop *loop, struct ev_io *w, int revents) {
                         // Resend data to teonet or drop wrong packet
                         else {
                             // Resend data to teonet
-                            if(kld->name)
+                            if(kld->name) {
                                 ksnLNullSendFromL0(kl, packet, kld->name, kld->name_length);
+                            }
                             // Drop wrong packet
                             else {
                                 #ifdef DEBUG_KSNET
@@ -433,15 +434,15 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         size_t pkg_len;
         void *pkg = ksnCoreCreatePacket(kev->kc, CMD_L0, spacket, out_data_len,
                     &pkg_len);
-        struct sockaddr_in addr;             // address structure
-        socklen_t addrlen = sizeof(addr);    // address structure length
+        struct sockaddr_storage addr;             // address structure
+        socklen_t addrlen = sizeof(addr); // length of addresses
 
-        int fd = ksnLNullClientIsConnected(kl, cname);
+        int fd = ksnLNullClientIsConnected(kl, spacket->from);
         if (fd == 0) {
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, extendedLog(kl),
                 "client \"%s\" is not connected\n",
-                cname);
+                spacket->from);
             #endif
         } else {
             ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
@@ -449,16 +450,15 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, extendedLog(kl),
                     "client \"%s\", fd: %d connection data not found\n",
-                    cname, fd);
+                    spacket->from, fd);
                 #endif
             } else if(!make_addr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &addr,
                     &addrlen)) {
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, extendedLog(kl),
                     "repacked packet from client \"%s\" to CMD_L0 from %s:%d\n",
-                    cname, kld->t_addr, kld->t_port);
+                    spacket->from, kld->t_addr, kld->t_port);
                 #endif
-                //trudpGetChannelCreate(kev->kc->ku, &addr, 0);
                 ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
                 arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
             }
