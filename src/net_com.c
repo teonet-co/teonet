@@ -88,7 +88,6 @@ void ksnCommandDestroy(ksnCommandClass *kco) {
  * @return True if command processed
  */
 int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd) {
- 
     ksnetEvMgrClass *ke = EVENT_MANAGER_CLASS(kco);
 
     int processed = 0;
