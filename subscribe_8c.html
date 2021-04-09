@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.7</span>
+   &#160;<span id="projectnumber">0.4.6</span>
    </div>
   </td>
  </tr>
@@ -122,9 +122,9 @@ $(document).ready(function(){initNavTree('subscribe_8c.html','');});
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="subscribe_8c.html#a2c63ae95fe7c6106ae1ec9c283afa486">MODULE</a>&#160;&#160;&#160;<a class="el" href="rlutil_8h.html#a795ce6f7a34373d637ce9e452fcc10d7">_ANSI_LIGHTGREEN</a> &quot;subscribe&quot; _ANSI_NONE</td></tr>
-<tr class="memdesc:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="mdescLeft">&#160;</td><td class="mdescRight">File: <a class="el" href="subscribe_8c.html">subscribe.c</a> Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a>  <a href="#a2c63ae95fe7c6106ae1ec9c283afa486">More...</a><br/></td></tr>
+<tr class="memdesc:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="mdescLeft">&#160;</td><td class="mdescRight">File: subscribe.c Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a>  <a href="#a2c63ae95fe7c6106ae1ec9c283afa486">More...</a><br/></td></tr>
 <tr class="separator:a2c63ae95fe7c6106ae1ec9c283afa486"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9d04401c75752caa1328840ae6acd47"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="subscribe_8c.html#aa9d04401c75752caa1328840ae6acd47">add_data_to_list</a>(sscr_list, peer_name, e, c)</td></tr>
+<tr class="memitem:aa9d04401c75752caa1328840ae6acd47"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="subscribe_8c.html#aa9d04401c75752caa1328840ae6acd47">add_data_to_list</a>(sscr_list, peer_name, e, <a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>)</td></tr>
 <tr class="separator:aa9d04401c75752caa1328840ae6acd47"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55ab7585b0d009e2560407590c060ef6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="subscribe_8c.html#a55ab7585b0d009e2560407590c060ef6">kev</a>&#160;&#160;&#160;((<a class="el" href="structksnetEvMgrClass.html">ksnetEvMgrClass</a>*) ((<a class="el" href="structksnCoreClass.html">ksnCoreClass</a> *) kco-&gt;<a class="el" href="hotkeys_8c.html#a988a7f8f7bd16c1a203757c49e876668">kc</a>)-&gt;<a class="el" href="teodb__ex_8c.html#aff908732c133f4031a1f4e8e4dbeeb2c">ke</a>)</td></tr>
 <tr class="separator:a55ab7585b0d009e2560407590c060ef6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -200,7 +200,7 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname">c&#160;</td>
+          <td class="paramname"><a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -212,7 +212,7 @@ Functions</h2></td></tr>
 <b>Value:</b><div class="fragment"><div class="line"><a class="code" href="structteoSScrListData.html">teoSScrListData</a> *sscr_list_data = <a class="code" href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc</a>(<span class="keyword">sizeof</span>(<a class="code" href="structteoSScrListData.html">teoSScrListData</a>) + \</div>
 <div class="line">            strlen(peer_name) + 1); \</div>
 <div class="line">        strcpy(sscr_list_data-&gt;<a class="code" href="structteoSScrListData.html#a44f1af73ba5c148a80c2448bceb214a1">data</a>, peer_name); \</div>
-<div class="line">        sscr_list_data-&gt;cmd = c; \</div>
+<div class="line">        sscr_list_data-&gt;cmd = <a class="code" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>; \</div>
 <div class="line">        sscr_list_data-&gt;ev = e; <a class="code" href="lexer-filter_8c.html#ad4a65b873df5c05570846b5413b41dfd">\</a></div>
 <div class="line"><a class="code" href="lexer-filter_8c.html#ad4a65b873df5c05570846b5413b41dfd">        if</a>(arp_data == NULL) { \</div>
 <div class="line">            sscr_list_data-&gt;l0_f = 0; \</div>
@@ -228,6 +228,7 @@ Functions</h2></td></tr>
 <div class="ttc" id="lexer-filter_8c_html_ad4a65b873df5c05570846b5413b41dfd"><div class="ttname"><a href="lexer-filter_8c.html#ad4a65b873df5c05570846b5413b41dfd">if</a></div><div class="ttdeci">if(!(yy_init))</div><div class="ttdef"><b>Definition:</b> lexer-filter.c:653</div></div>
 <div class="ttc" id="structteoSScrListData_html"><div class="ttname"><a href="structteoSScrListData.html">teoSScrListData</a></div><div class="ttdoc">teoSScr class list or CMD_SUBSCRIBE_ANSWER data </div><div class="ttdef"><b>Definition:</b> subscribe.h:29</div></div>
 <div class="ttc" id="grammar-filter_8c_html_a5faf6a2d99f50a4655dd390199a8db7b"><div class="ttname"><a href="grammar-filter_8c.html#a5faf6a2d99f50a4655dd390199a8db7b">malloc</a></div><div class="ttdeci">void * malloc(YYSIZE_T)</div></div>
+<div class="ttc" id="ChangeLog_html_af6d3e7ec7eb5c3bbcc7598a15a116c9f"><div class="ttname"><a href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a></div><div class="ttdeci">Version remove duplicate move include to the beginning of the file Set empty type in extended arp table if type of a peer is not known double free fix l0 server c</div><div class="ttdef"><b>Definition:</b> ChangeLog:2</div></div>
 <div class="ttc" id="structteoSScrListData_html_a44f1af73ba5c148a80c2448bceb214a1"><div class="ttname"><a href="structteoSScrListData.html#a44f1af73ba5c148a80c2448bceb214a1">teoSScrListData::data</a></div><div class="ttdeci">char data[]</div><div class="ttdoc">Remote peer name in list or data in CMD_SUBSCRIBE_ANSWER. </div><div class="ttdef"><b>Definition:</b> subscribe.h:36</div></div>
 <div class="ttc" id="structteoSScrListData_html_ad7f38a230f8d679d140c3fa881e77b13"><div class="ttname"><a href="structteoSScrListData.html#ad7f38a230f8d679d140c3fa881e77b13">teoSScrListData::addr</a></div><div class="ttdeci">char addr[ARP_TABLE_IP_SIZE]</div><div class="ttdoc">L0 peer IP address. </div><div class="ttdef"><b>Definition:</b> subscribe.h:35</div></div>
 </div><!-- fragment -->
@@ -259,7 +260,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>File: <a class="el" href="subscribe_8c.html">subscribe.c</a> Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a> </p>
+<p>File: subscribe.c Author: Kirill Scherba <a href="#" onclick="location.href='mai'+'lto:'+'kir'+'il'+'l@s'+'ch'+'erb'+'a.'+'ru'; return false;">kiril<span style="display: none;">.nosp@m.</span>l@sc<span style="display: none;">.nosp@m.</span>herba<span style="display: none;">.nosp@m.</span>.ru</a> </p>
 <p>Created on December 28, 2015, 1:31 PM Subscribe module</p>
 <p>Subscribe remote peers to host events events </p>
 
@@ -773,7 +774,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_ddb4d7e95cc2d6c8e1ade10a20d7247d.html">modules</a></li><li class="navelem"><a class="el" href="subscribe_8c.html">subscribe.c</a></li>
-    <li class="footer">Generated on Thu Apr 8 2021 12:29:51 for Teonet library by
+    <li class="footer">Generated on Fri Apr 9 2021 10:36:41 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

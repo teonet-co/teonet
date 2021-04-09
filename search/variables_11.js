@@ -18,6 +18,7 @@ var searchData=
   ['regular_5fcallback',['regular_callback',['../structcli__def.html#a0991b282d6e61ff785d5866d785b320a',1,'cli_def']]],
   ['regular_5fcount',['regular_count',['../structcli__def.html#ac7733a282343b527128d3cad060a3d4b',1,'cli_def']]],
   ['remove',['remove',['../structteoWSClass.html#ac81d441ba9c490df7a960876cf76cd02',1,'teoWSClass']]],
+  ['removed',['removed',['../ChangeLog.html#aa19bfeb6b40c7a6d5de8d1bdee6d264b',1,'ChangeLog']]],
   ['resp_5fcode',['resp_code',['../structhttp__message.html#a1c4e12c873f1e4d9711d470e2e32fa65',1,'http_message']]],
   ['resp_5fstatus_5fmsg',['resp_status_msg',['../structhttp__message.html#ae819bf6100f781e15515c01bf03f5a76',1,'http_message']]],
   ['result',['result',['../structmg__rpc__reply.html#a73991ea608b8e0f06f6b46dc49ce47d8',1,'mg_rpc_reply::result()'],['../grammar-filter_8c.html#a8b2e13c78efca330f06b6ddcd7464b41',1,'result():&#160;grammar-filter.c']]],

@@ -1,5 +1,16 @@
 var NAVTREEINDEX9 =
 {
+"opt_8c.html#a0c25205394e9d3797411881fdbaf67c8":[12,0,76,2],
+"opt_8c.html#a85cf3f2dcff2ac6bafe3228e8db23dc4":[12,0,76,0],
+"opt_8h.html":[12,0,77],
+"opt_8h.html#a0003916316cbd1fc914c8a21f7f4bb18":[12,0,77,3],
+"opt_8h.html#a4cbb19df3014862142b29d50e87392b5":[12,0,77,2],
+"opt_8h.html#a58bddb20a24cd2ff78726ae910628a52":[12,0,77,1],
+"opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a07d3884af44683f7748a2837f9152c40":[12,0,77,1,2],
+"opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a1e7b07122cfca9e3416d778e0d0e53a7":[12,0,77,1,1],
+"opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a38be3912a5e6ee901b88e30578767495":[12,0,77,1,0],
+"opt_8h.html#a58bddb20a24cd2ff78726ae910628a52a614fc57f814388d30e4a646c0ccdea2c":[12,0,77,1,3],
+"opt_8h.html#a58bddb20a24cd2ff78726ae910628a52ad682c4f8adc313c3c6416b3b7cb47107":[12,0,77,1,4],
 "opt_8h.html#ac45af497af962e305b504ca7f77ac489":[12,0,77,0],
 "opt_8h_source.html":[12,0,77],
 "pages.html":[],
@@ -238,16 +249,5 @@ var NAVTREEINDEX9 =
 "structcli__def.html#a3fffcee449aad84d13e30a61f4c09421":[11,0,3,20],
 "structcli__def.html#a469de02b71b818ed0425d2de7d15e170":[11,0,3,30],
 "structcli__def.html#a4c18b68fa5b98d1d48eeaba4278a903f":[11,0,3,10],
-"structcli__def.html#a4df6722721e5c56d74819e969379757c":[11,0,3,4],
-"structcli__def.html#a4e4ffbea7c3e48753dbccd6df32b0d04":[11,0,3,2],
-"structcli__def.html#a5d4e874a267612399497a3b416f750c9":[11,0,3,14],
-"structcli__def.html#a6dbab8d5aa9b919da4de6670fc7c653a":[11,0,3,6],
-"structcli__def.html#a73fdbb886c4b5ae9f888382591fd625b":[11,0,3,26],
-"structcli__def.html#a78dc12f5349042047da2c74544f82eb5":[11,0,3,31],
-"structcli__def.html#a825bafe3510819c4eff642d38a60ebda":[11,0,3,16],
-"structcli__def.html#a9c55b81dc4b2e09c0d7a7dbcaebf1541":[11,0,3,32],
-"structcli__def.html#a9d155a436222b4c1bc7fb1cd8fe47382":[11,0,3,1],
-"structcli__def.html#a9dc524400a8c4e6ea7c758b7b0039109":[11,0,3,11],
-"structcli__def.html#aab8bde2a4c42d7ff6d73df3833262aef":[11,0,3,13],
-"structcli__def.html#abd001e72b6a84b8e4fc7add44d22c52a":[11,0,3,9]
+"structcli__def.html#a4df6722721e5c56d74819e969379757c":[11,0,3,4]
 };

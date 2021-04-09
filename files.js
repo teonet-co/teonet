@@ -4,7 +4,7 @@ var files =
     [ "async_calls.h", "async__calls_8h.html", "async__calls_8h" ],
     [ "attributes.h", "attributes_8h.html", "attributes_8h" ],
     [ "base64.c", "base64_8c.html", "base64_8c" ],
-    [ "ChangeLog", "ChangeLog.html", null ],
+    [ "ChangeLog", "ChangeLog.html", "ChangeLog" ],
     [ "tests/load_test/async_c/ChangeLog", "tests_2load__test_2async__c_2ChangeLog.html", null ],
     [ "tests/load_test/async_c/po/ChangeLog", "tests_2load__test_2async__c_2po_2ChangeLog.html", null ],
     [ "tests/load_test/teoloadsi/ChangeLog", "tests_2load__test_2teoloadsi_2ChangeLog.html", null ],

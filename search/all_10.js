@@ -43,7 +43,7 @@ var searchData=
   ['pidfile_2eh',['pidfile.h',['../pidfile_8h.html',1,'']]],
   ['pidfile_5fex',['PIDFILE_EX',['../pidfile_8c.html#a96ffdaf8700cd104eda54349b56c3694',1,'pidfile.c']]],
   ['pidfile_5fname_5flen',['PIDFILE_NAME_LEN',['../pidfile_8c.html#a93796dcf961230bedad4ca4e23153b49',1,'pidfile.c']]],
-  ['ping',['PING',['../hotkeys_8c.html#ab6f5a0e1c0394acd9ea0a9b66ebe905b',1,'PING():&#160;hotkeys.c'],['../hotkeys_8h.html#a4ff96c0010774d40275b0fb21dded525',1,'PING():&#160;hotkeys.c']]],
+  ['ping',['ping',['../ChangeLog.html#a4da007d31c09aaa85bfb4c882cd8149c',1,'ping():&#160;ChangeLog'],['../hotkeys_8c.html#ab6f5a0e1c0394acd9ea0a9b66ebe905b',1,'PING():&#160;hotkeys.c'],['../hotkeys_8h.html#a4ff96c0010774d40275b0fb21dded525',1,'PING():&#160;hotkeys.c']]],
   ['ping_5flen',['PING_LEN',['../hotkeys_8h.html#a2eccf4ff76b33f65fd102fbc76b37dc9',1,'hotkeys.h']]],
   ['ping_5ftimer_5fcb',['ping_timer_cb',['../hotkeys_8c.html#a7e664c35c93857f99eae816170fa3873',1,'hotkeys.c']]],
   ['ping_5ftimer_5fdata',['ping_timer_data',['../structping__timer__data.html',1,'ping_timer_data'],['../hotkeys_8h.html#a0a13385b242c02353a9fbc88c67dd20d',1,'ping_timer_data():&#160;hotkeys.h']]],

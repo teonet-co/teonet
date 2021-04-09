@@ -1,5 +1,6 @@
 var searchData=
 [
+  ['c',['c',['../ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f',1,'ChangeLog']]],
   ['c_5fsnprintf',['c_snprintf',['../mongoose_8c.html#ae4734131cbe11bd6c058ddb8fc1bff5f',1,'c_snprintf(char *buf, size_t buf_size, const char *fmt,...):&#160;mongoose.c'],['../mongoose_8h.html#abaea0687eb05744ac151ae014cb20046',1,'c_snprintf(char *buf, size_t buf_size, const char *format,...):&#160;mongoose.c']]],
   ['c_5fsnprintf_5fappend_5fchar',['C_SNPRINTF_APPEND_CHAR',['../mongoose_8c.html#af362f9835397a95e89c09d620a56b228',1,'mongoose.c']]],
   ['c_5fsnprintf_5fflag_5fzero',['C_SNPRINTF_FLAG_ZERO',['../mongoose_8c.html#abe0356dc9779eb6bce76b870a328a5d6',1,'mongoose.c']]],
@@ -234,8 +235,8 @@ var searchData=
   ['count',['count',['../structcs__sha1__ctx.html#af6258c6cb812c334f1a287e2d6b9ea09',1,'cs_sha1_ctx']]],
   ['cq',['cq',['../structksnStreamMapData.html#af13983c2691499b8de5b835afdb4f552',1,'ksnStreamMapData::cq()'],['../cque_8c.html#a8b001891593d09a10b16896898507688',1,'cq():&#160;cque.c']]],
   ['cq_5ftimer_5fcb',['cq_timer_cb',['../cque_8c.html#ada0ba9a5b4a26ca10ee383b50a7e7e50',1,'cque.c']]],
-  ['cque',['CQue',['../classteo_1_1Teonet_1_1CQue.html',1,'teo::Teonet']]],
   ['cque',['CQue',['../classteo_1_1Teonet_1_1CQue.html#a0a57090e23d09d3f9ddadfe477e23a08',1,'teo::Teonet::CQue::CQue(Teonet *t, bool send_event=false)'],['../classteo_1_1Teonet_1_1CQue.html#ae67a98690ffcf9f5b06df0cd1a629903',1,'teo::Teonet::CQue::CQue(const CQue &amp;obj)'],['../structksnLNullClass.html#ad724d5e155081dcc18a9c27532d8f324',1,'ksnLNullClass::cque()']]],
+  ['cque',['CQue',['../classteo_1_1Teonet_1_1CQue.html',1,'teo::Teonet']]],
   ['cque_2ec',['cque.c',['../cque_8c.html',1,'']]],
   ['cque_2eh',['cque.h',['../cque_8h.html',1,'']]],
   ['cque_5fmap',['cque_map',['../structksnCQueClass.html#a3411b86e4a2e59bd23d0de33d99c0e20',1,'ksnCQueClass']]],
@@ -250,7 +251,7 @@ var searchData=
   ['createcmdconnectrpackettcp',['createCmdConnectRPacketTcp',['../commands__creator_8c.html#a33ae8b7e96371bf93bb11b7103600ff8',1,'createCmdConnectRPacketTcp(ksnetEvMgrClass *event_manager, size_t *size_out):&#160;commands_creator.c'],['../commands__creator_8h.html#a33ae8b7e96371bf93bb11b7103600ff8',1,'createCmdConnectRPacketTcp(ksnetEvMgrClass *event_manager, size_t *size_out):&#160;commands_creator.c']]],
   ['createcmdconnectrpacketudp',['createCmdConnectRPacketUdp',['../commands__creator_8c.html#a825edc37e9a5917b5319eea8d34c1fff',1,'createCmdConnectRPacketUdp(ksnetEvMgrClass *event_manager, size_t *size_out):&#160;commands_creator.c'],['../commands__creator_8h.html#a825edc37e9a5917b5319eea8d34c1fff',1,'createCmdConnectRPacketUdp(ksnetEvMgrClass *event_manager, size_t *size_out):&#160;commands_creator.c']]],
   ['createcmdresendpacket',['createCmdResendPacket',['../commands__creator_8c.html#a28dbacf94a38ae89b22469a93a1bb597',1,'createCmdResendPacket(char *to, uint8_t cmd, void *data, size_t data_len, size_t *size_out):&#160;commands_creator.c'],['../commands__creator_8h.html#a28dbacf94a38ae89b22469a93a1bb597',1,'createCmdResendPacket(char *to, uint8_t cmd, void *data, size_t data_len, size_t *size_out):&#160;commands_creator.c']]],
-  ['created',['created',['../structksnStreamMapData.html#a1291cf179ce5c3007a63451d76f3773c',1,'ksnStreamMapData']]],
+  ['created',['created',['../structksnStreamMapData.html#a1291cf179ce5c3007a63451d76f3773c',1,'ksnStreamMapData::created()'],['../ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576',1,'created():&#160;ChangeLog']]],
   ['crypt_2ec',['crypt.c',['../crypt_8c.html',1,'']]],
   ['crypt_2eh',['crypt.h',['../crypt_8h.html',1,'']]],
   ['crypt_5ff',['crypt_f',['../structteonet__cfg.html#a9a8a43630ee87a8ae2ab09ea085cf531',1,'teonet_cfg']]],

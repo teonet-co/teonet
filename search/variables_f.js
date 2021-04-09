@@ -14,7 +14,7 @@ var searchData=
   ['peer_5fname_5flen',['peer_name_len',['../structping__timer__data.html#a593fb1a44cc5f8bffa3abcebfb14b705',1,'ping_timer_data']]],
   ['per_5fdirectory_5fauth_5ffile',['per_directory_auth_file',['../structmg__serve__http__opts.html#ac8fe82b68741c2b4dd605786450a31cd',1,'mg_serve_http_opts']]],
   ['pet',['pet',['../structksnetHotkeysClass.html#a7983ae9916ec64414ec08c7a45d4c9d9',1,'ksnetHotkeysClass']]],
-  ['ping',['PING',['../hotkeys_8c.html#ab6f5a0e1c0394acd9ea0a9b66ebe905b',1,'PING():&#160;hotkeys.c'],['../hotkeys_8h.html#a4ff96c0010774d40275b0fb21dded525',1,'PING():&#160;hotkeys.c']]],
+  ['ping',['ping',['../ChangeLog.html#a4da007d31c09aaa85bfb4c882cd8149c',1,'ping():&#160;ChangeLog'],['../hotkeys_8c.html#ab6f5a0e1c0394acd9ea0a9b66ebe905b',1,'PING():&#160;hotkeys.c'],['../hotkeys_8h.html#a4ff96c0010774d40275b0fb21dded525',1,'PING():&#160;hotkeys.c']]],
   ['pipe_5fin',['pipe_in',['../structksnStreamMapData.html#a663f9bdfd411dbf0bcf97dd21dd5050b',1,'ksnStreamMapData']]],
   ['pipe_5fout',['pipe_out',['../structksnStreamMapData.html#ad80814d342d4a0e26950814a10958436',1,'ksnStreamMapData']]],
   ['pkt',['pkt',['../structmg__dns__message.html#ae8543b2a3044c785b4bf0dc4fc39beff',1,'mg_dns_message']]],

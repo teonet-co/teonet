@@ -16,7 +16,7 @@ var searchData=
   ['black',['BLACK',['../rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06caf77fb67151d0c18d397069ad8c271ba3',1,'rlutil.h']]],
   ['blk',['blk',['../mongoose_8c.html#abd06ff24e9f6f5f0a9c32a1cba4b0f9c',1,'mongoose.c']]],
   ['block_5fcli_5finput',['BLOCK_CLI_INPUT',['../opt_8h.html#a58bddb20a24cd2ff78726ae910628a52ad682c4f8adc313c3c6416b3b7cb47107',1,'opt.h']]],
-  ['block_5fcli_5finput_5ff',['block_cli_input_f',['../structteonet__cfg.html#a77082148b9ff00a829f683747504b107',1,'teonet_cfg']]],
+  ['block_5fcli_5finput_5ff',['block_cli_input_f',['../structteonet__cfg.html#a77082148b9ff00a829f683747504b107',1,'teonet_cfg::block_cli_input_f()'],['../ChangeLog.html#a5edd1ee74d3be86b709b893238b00db5',1,'block_cli_input_f():&#160;ChangeLog']]],
   ['block_5fsize',['BLOCK_SIZE',['../crypt_8h.html#ad51ded0bbd705f02f73fc60c0b721ced',1,'crypt.h']]],
   ['blocksize',['blocksize',['../structksnCryptClass.html#aa33f2133b43a14eafcab560396d13036',1,'ksnCryptClass']]],
   ['blue',['BLUE',['../rlutil_8h.html#adc29c2ff13d900c2f185ee95427fb06ca35d6719cb4d7577c031b3d79057a1b79',1,'rlutil.h']]],
