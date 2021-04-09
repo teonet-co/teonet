@@ -31,7 +31,6 @@ var searchData=
   ['libcli_5fverison_5frevision',['LIBCLI_VERISON_REVISION',['../net__cli_8h.html#a625908fbc0429f872fadb945cd5dd690',1,'net_cli.h']]],
   ['libcli_5fversion',['LIBCLI_VERSION',['../net__cli_8h.html#a7fa807ca5258d9987c7f5061c2506726',1,'net_cli.h']]],
   ['libcli_5fversion_5fmajor',['LIBCLI_VERSION_MAJOR',['../net__cli_8h.html#a3d8b81c28050ff75725a2e462a9f653d',1,'net_cli.h']]],
-  ['library',['library',['../ChangeLog.html#af97ebea6586e537a1fe0aaa17bd31c92',1,'ChangeLog']]],
   ['library_5fage',['LIBRARY_AGE',['../config_8h.html#aa001016c3baf1ed0f0572120717f66ae',1,'config.h']]],
   ['library_5fcurrent',['LIBRARY_CURRENT',['../config_8h.html#a93720535bc57373c4a07b8cb110ca536',1,'config.h']]],
   ['library_5fmajor_5fversion',['LIBRARY_MAJOR_VERSION',['../make__package_8c.html#a63e07f53f6ca25e38a78579772405591',1,'make_package.c']]],
@@ -72,7 +71,7 @@ var searchData=
   ['logreader',['LogReader',['../classteo_1_1Teonet_1_1LogReader.html',1,'teo::Teonet']]],
   ['logreader',['LogReader',['../classteo_1_1Teonet_1_1LogReader.html#a9e8b4cb9d6968e4fd6c698202d23fac8',1,'teo::Teonet::LogReader::LogReader(Teonet &amp;teo)'],['../classteo_1_1Teonet_1_1LogReader.html#a7cbe3f03d5e4e7d9229267e843806183',1,'teo::Teonet::LogReader::LogReader(Teonet *teo)']]],
   ['logvar',['LOGVAR',['../grammar-filter_8c.html#abb0859bb7b11285f9256d3b0ce4f8368',1,'LOGVAR():&#160;grammar-filter.c'],['../grammar-filter_8h.html#abb0859bb7b11285f9256d3b0ce4f8368',1,'LOGVAR():&#160;grammar-filter.h'],['../grammar-filter_8c.html#a15c9f7bd2f0e9686df5d9df4f3314aa9a2506968630bfda30a14351ef982d8197',1,'LOGVAR():&#160;grammar-filter.c'],['../grammar-filter_8h.html#a15c9f7bd2f0e9686df5d9df4f3314aa9a2506968630bfda30a14351ef982d8197',1,'LOGVAR():&#160;grammar-filter.h']]],
-  ['loop',['loop',['../structping__timer__data.html#a5c079bd9e1115b42a0a2dae68348d24a',1,'ping_timer_data::loop()'],['../structmonitor__timer__data.html#a39f5e89c46cb9f82d243bf448055f896',1,'monitor_timer_data::loop()'],['../structtr__udp__timer__data.html#a38a7a8038e72045154527a904562e017',1,'tr_udp_timer_data::loop()'],['../structpeer__timer__data.html#a15fd91d5618dca68bf68560c9cae314c',1,'peer_timer_data::loop()'],['../ChangeLog.html#a4091af9fd908a83ad8826f25410928cf',1,'loop():&#160;ChangeLog']]],
+  ['loop',['loop',['../structping__timer__data.html#a5c079bd9e1115b42a0a2dae68348d24a',1,'ping_timer_data::loop()'],['../structmonitor__timer__data.html#a39f5e89c46cb9f82d243bf448055f896',1,'monitor_timer_data::loop()'],['../structtr__udp__timer__data.html#a38a7a8038e72045154527a904562e017',1,'tr_udp_timer_data::loop()'],['../structpeer__timer__data.html#a15fd91d5618dca68bf68560c9cae314c',1,'peer_timer_data::loop()']]],
   ['lr',['lr',['../structksnetEvMgrClass.html#a7a008a19e46b8eb7a5b54d3446197265',1,'ksnetEvMgrClass::lr()'],['../structteoLogReaderWatcher.html#a7b3a3403f562047475f0b6267a15e793',1,'teoLogReaderWatcher::lr()']]],
   ['ls',['ls',['../structksnetEvMgrClass.html#aa41eb9a403350530bf62ab9158315d2d',1,'ksnetEvMgrClass']]],
   ['lt_5fobjdir',['LT_OBJDIR',['../config_8h.html#ac2d5925d76379847dd9fc4747b061659',1,'config.h']]]

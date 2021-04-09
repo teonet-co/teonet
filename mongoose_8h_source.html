@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -551,9 +551,9 @@ $(document).ready(function(){initNavTree('mongoose_8h_source.html','');});
 <div class="line"><a name="l00441"></a><span class="lineno"><a class="line" href="structMD5Context.html#ae8be45f236e5cb12b0ae79da77e5f929">  441</a></span>&#160;  <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> <a class="code" href="structMD5Context.html#ae8be45f236e5cb12b0ae79da77e5f929">in</a>[64];</div>
 <div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;} <a class="code" href="mongoose_8h.html#aa609b405aae4cde7d315cdb8bf57f6e4">MD5_CTX</a>;</div>
 <div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;</div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a006d30ea62bf6f28c602a38e57964901">MD5_Init</a>(<a class="code" href="structMD5Context.html">MD5_CTX</a> *<a class="code" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>);</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a92e9438235c2a5df150b1a3016590d71">MD5_Update</a>(<a class="code" href="structMD5Context.html">MD5_CTX</a> *<a class="code" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>, <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *<a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>, <span class="keywordtype">size_t</span> len);</div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a1c433c792b8af5d4659c344b7c3c0e5f">MD5_Final</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *md, <a class="code" href="structMD5Context.html">MD5_CTX</a> *<a class="code" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>);</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a006d30ea62bf6f28c602a38e57964901">MD5_Init</a>(<a class="code" href="structMD5Context.html">MD5_CTX</a> *c);</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a92e9438235c2a5df150b1a3016590d71">MD5_Update</a>(<a class="code" href="structMD5Context.html">MD5_CTX</a> *c, <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *<a class="code" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>, <span class="keywordtype">size_t</span> len);</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a1c433c792b8af5d4659c344b7c3c0e5f">MD5_Final</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">char</span> *md, <a class="code" href="structMD5Context.html">MD5_CTX</a> *c);</div>
 <div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;</div>
 <div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;<span class="comment">/*</span></div>
 <div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;<span class="comment"> * Return stringified MD5 hash for NULL terminated list of strings.</span></div>
@@ -1659,7 +1659,7 @@ $(document).ready(function(){initNavTree('mongoose_8h_source.html','');});
 <div class="line"><a name="l01549"></a><span class="lineno"> 1549</span>&#160;<span class="comment"> *      HTTP/1.1 200 OK\r\n</span></div>
 <div class="line"><a name="l01550"></a><span class="lineno"> 1550</span>&#160;<span class="comment"> *      Access-Control-Allow-Origin: *\r\n</span></div>
 <div class="line"><a name="l01551"></a><span class="lineno"> 1551</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l01552"></a><span class="lineno"> 1552</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a3852f826f08df15bb775fd3d4ccaff4a">mg_send_response_line</a>(<span class="keyword">struct</span> <a class="code" href="structmg__connection.html">mg_connection</a> *<a class="code" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>, <span class="keywordtype">int</span> status_code,</div>
+<div class="line"><a name="l01552"></a><span class="lineno"> 1552</span>&#160;<span class="keywordtype">void</span> <a class="code" href="mongoose_8h.html#a3852f826f08df15bb775fd3d4ccaff4a">mg_send_response_line</a>(<span class="keyword">struct</span> <a class="code" href="structmg__connection.html">mg_connection</a> *c, <span class="keywordtype">int</span> status_code,</div>
 <div class="line"><a name="l01553"></a><span class="lineno"> 1553</span>&#160;                           <span class="keyword">const</span> <span class="keywordtype">char</span> *extra_headers);</div>
 <div class="line"><a name="l01554"></a><span class="lineno"> 1554</span>&#160;</div>
 <div class="line"><a name="l01555"></a><span class="lineno"> 1555</span>&#160;<span class="comment">/*</span></div>
@@ -3124,7 +3124,6 @@ $(document).ready(function(){initNavTree('mongoose_8h_source.html','');});
 <div class="ttc" id="mongoose_8h_html_a8b314b9753d45adb4dd62438576e6a1c"><div class="ttname"><a href="mongoose_8h.html#a8b314b9753d45adb4dd62438576e6a1c">mg_next_comma_list_entry</a></div><div class="ttdeci">const char * mg_next_comma_list_entry(const char *list, struct mg_str *val, struct mg_str *eq_val)</div><div class="ttdef"><b>Definition:</b> mongoose.c:6561</div></div>
 <div class="ttc" id="structmg__send__mqtt__handshake__opts_html_a39a20b37f0de09f81c6de35690f7d98f"><div class="ttname"><a href="structmg__send__mqtt__handshake__opts.html#a39a20b37f0de09f81c6de35690f7d98f">mg_send_mqtt_handshake_opts::keep_alive</a></div><div class="ttdeci">uint16_t keep_alive</div><div class="ttdef"><b>Definition:</b> mongoose.h:2013</div></div>
 <div class="ttc" id="structhttp__message_html_a1c4e12c873f1e4d9711d470e2e32fa65"><div class="ttname"><a href="structhttp__message.html#a1c4e12c873f1e4d9711d470e2e32fa65">http_message::resp_code</a></div><div class="ttdeci">int resp_code</div><div class="ttdef"><b>Definition:</b> mongoose.h:1396</div></div>
-<div class="ttc" id="ChangeLog_html_af6d3e7ec7eb5c3bbcc7598a15a116c9f"><div class="ttname"><a href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a></div><div class="ttdeci">Version remove duplicate move include to the beginning of the file Set empty type in extended arp table if type of a peer is not known double free fix l0 server c</div><div class="ttdef"><b>Definition:</b> ChangeLog:2</div></div>
 <div class="ttc" id="mongoose_8h_html_aca1cd2ba96080ba65d20b9b4532203fd"><div class="ttname"><a href="mongoose_8h.html#aca1cd2ba96080ba65d20b9b4532203fd">mg_dns_copy_body</a></div><div class="ttdeci">int mg_dns_copy_body(struct mbuf *, struct mg_dns_message *)</div><div class="ttdef"><b>Definition:</b> mongoose.c:7345</div></div>
 <div class="ttc" id="mongoose_8h_html_af5a9f88e257dc0a0b0dd7990d2b474e7"><div class="ttname"><a href="mongoose_8h.html#af5a9f88e257dc0a0b0dd7990d2b474e7">mg_rpc_create_reply</a></div><div class="ttdeci">int mg_rpc_create_reply(char *buf, int len, const struct mg_rpc_request *req, const char *result_fmt,...)</div><div class="ttdef"><b>Definition:</b> mongoose.c:6642</div></div>
 <div class="ttc" id="structwebsocket__message_html_aeb8922c34831455b764d83083ae39968"><div class="ttname"><a href="structwebsocket__message.html#aeb8922c34831455b764d83083ae39968">websocket_message::data</a></div><div class="ttdeci">unsigned char * data</div><div class="ttdef"><b>Definition:</b> mongoose.h:1418</div></div>
@@ -3183,7 +3182,7 @@ $(document).ready(function(){initNavTree('mongoose_8h_source.html','');});
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_d422163b96683743ed3963d4aac17747.html">app</a></li><li class="navelem"><a class="el" href="dir_be1c401a5b5ffbffd4338b2ce7f6ec51.html">embedded</a></li><li class="navelem"><a class="el" href="dir_252cbbdcafcc6c28ed8d5c8e4a03d49b.html">mongoose</a></li><li class="navelem"><a class="el" href="mongoose_8h.html">mongoose.h</a></li>
-    <li class="footer">Generated on Fri Apr 9 2021 10:36:41 for Teonet library by
+    <li class="footer">Generated on Fri Apr 9 2021 15:05:14 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

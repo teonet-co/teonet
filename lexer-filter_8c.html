@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -162,7 +162,7 @@ Macros</h2></td></tr>
 <tr class="separator:a452d0647f1848fea42589793f3e2d1f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e0bcf8f8a5b613ea583347f8bc31cbf"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#a8e0bcf8f8a5b613ea583347f8bc31cbf">YY_NULL</a>&#160;&#160;&#160;0</td></tr>
 <tr class="separator:a8e0bcf8f8a5b613ea583347f8bc31cbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af1185350b7a92cf8aa5324c68850c8a6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#af1185350b7a92cf8aa5324c68850c8a6">YY_SC_TO_UI</a>(<a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>)&#160;&#160;&#160;((<a class="el" href="lexer-filter_8c.html#acc1e625a829554ffed5e4307d4a5f6b7">YY_CHAR</a>) (<a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>))</td></tr>
+<tr class="memitem:af1185350b7a92cf8aa5324c68850c8a6"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#af1185350b7a92cf8aa5324c68850c8a6">YY_SC_TO_UI</a>(c)&#160;&#160;&#160;((<a class="el" href="lexer-filter_8c.html#acc1e625a829554ffed5e4307d4a5f6b7">YY_CHAR</a>) (c))</td></tr>
 <tr class="separator:af1185350b7a92cf8aa5324c68850c8a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab766bbbee08d04b67e3fe599d6900873"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#ab766bbbee08d04b67e3fe599d6900873">BEGIN</a>&#160;&#160;&#160;(yy_start) = 1 + 2 *</td></tr>
 <tr class="separator:ab766bbbee08d04b67e3fe599d6900873"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -196,7 +196,7 @@ Macros</h2></td></tr>
 <tr class="separator:a5206f64af3a299a0dc820c385cf0c489"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae65cb72d09db0abdc4b8e8c4d533ab14"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#ae65cb72d09db0abdc4b8e8c4d533ab14">yyless</a>(n)</td></tr>
 <tr class="separator:ae65cb72d09db0abdc4b8e8c4d533ab14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a448a4e9041a09588332733c6846c770c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#a448a4e9041a09588332733c6846c770c">unput</a>(<a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>)&#160;&#160;&#160;yyunput( <a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>, (<a class="el" href="lexer-filter_8c.html#a790a191a93ef4d3b8c0bb43fd7480052">yytext_ptr</a>)  )</td></tr>
+<tr class="memitem:a448a4e9041a09588332733c6846c770c"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#a448a4e9041a09588332733c6846c770c">unput</a>(c)&#160;&#160;&#160;yyunput( c, (<a class="el" href="lexer-filter_8c.html#a790a191a93ef4d3b8c0bb43fd7480052">yytext_ptr</a>)  )</td></tr>
 <tr class="separator:a448a4e9041a09588332733c6846c770c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8aaa9e1fa7f13d6954d045ef973a9c84"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="lexer-filter_8c.html#a8aaa9e1fa7f13d6954d045ef973a9c84">YY_STRUCT_YY_BUFFER_STATE</a></td></tr>
 <tr class="separator:a8aaa9e1fa7f13d6954d045ef973a9c84"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -636,8 +636,8 @@ Variables</h2></td></tr>
           <td class="memname">#define unput</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a></td><td>)</td>
-          <td>&#160;&#160;&#160;yyunput( <a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>, (<a class="el" href="lexer-filter_8c.html#a790a191a93ef4d3b8c0bb43fd7480052">yytext_ptr</a>)  )</td>
+          <td class="paramname">c</td><td>)</td>
+          <td>&#160;&#160;&#160;yyunput( c, (<a class="el" href="lexer-filter_8c.html#a790a191a93ef4d3b8c0bb43fd7480052">yytext_ptr</a>)  )</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -940,7 +940,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span> ( <a class="code" href="lexer-filter_8c.html#a817a6a24af62508b5a35f4bed5f56a2e">YY_CURRENT_BUFFER_LVALUE</a>-&gt;yy_is_interactive ) \</div>
 <div class="line">                { \</div>
-<div class="line">                int <a class="code" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a> = <span class="charliteral">&#39;*&#39;</span>; \</div>
+<div class="line">                int c = <span class="charliteral">&#39;*&#39;</span>; \</div>
 <div class="line">                int n; \</div>
 <div class="line">                for ( n = 0; n &lt; max_size &amp;&amp; \</div>
 <div class="line">                             (c = getc( <a class="code" href="lexer-filter_8c.html#a87a127afa8f6c307fbfba10390675406">yyin</a> )) != EOF &amp;&amp; c != <span class="charliteral">&#39;\n&#39;</span>; ++n ) \</div>
@@ -971,7 +971,6 @@ Variables</h2></td></tr>
 <div class="ttc" id="lexer-filter_8c_html_ac0586b8b0b092d02f4ba7d45abe328f2"><div class="ttname"><a href="lexer-filter_8c.html#ac0586b8b0b092d02f4ba7d45abe328f2">YY_FATAL_ERROR</a></div><div class="ttdeci">#define YY_FATAL_ERROR(msg)</div><div class="ttdef"><b>Definition:</b> lexer-filter.c:614</div></div>
 <div class="ttc" id="grammar-filter_8c_html_a8b2e13c78efca330f06b6ddcd7464b41"><div class="ttname"><a href="grammar-filter_8c.html#a8b2e13c78efca330f06b6ddcd7464b41">result</a></div><div class="ttdeci">int result</div><div class="ttdef"><b>Definition:</b> grammar-filter.c:79</div></div>
 <div class="ttc" id="lexer-filter_8c_html_a817a6a24af62508b5a35f4bed5f56a2e"><div class="ttname"><a href="lexer-filter_8c.html#a817a6a24af62508b5a35f4bed5f56a2e">YY_CURRENT_BUFFER_LVALUE</a></div><div class="ttdeci">#define YY_CURRENT_BUFFER_LVALUE</div><div class="ttdef"><b>Definition:</b> lexer-filter.c:266</div></div>
-<div class="ttc" id="ChangeLog_html_af6d3e7ec7eb5c3bbcc7598a15a116c9f"><div class="ttname"><a href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a></div><div class="ttdeci">Version remove duplicate move include to the beginning of the file Set empty type in extended arp table if type of a peer is not known double free fix l0 server c</div><div class="ttdef"><b>Definition:</b> ChangeLog:2</div></div>
 <div class="ttc" id="lexer-filter_8c_html_a87a127afa8f6c307fbfba10390675406"><div class="ttname"><a href="lexer-filter_8c.html#a87a127afa8f6c307fbfba10390675406">yyin</a></div><div class="ttdeci">FILE * yyin</div><div class="ttdef"><b>Definition:</b> lexer-filter.c:331</div></div>
 </div><!-- fragment -->
 </div>
@@ -1136,8 +1135,8 @@ Variables</h2></td></tr>
           <td class="memname">#define YY_SC_TO_UI</td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
-          <td class="paramname"><a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a></td><td>)</td>
-          <td>&#160;&#160;&#160;((<a class="el" href="lexer-filter_8c.html#acc1e625a829554ffed5e4307d4a5f6b7">YY_CHAR</a>) (<a class="el" href="ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f">c</a>))</td>
+          <td class="paramname">c</td><td>)</td>
+          <td>&#160;&#160;&#160;((<a class="el" href="lexer-filter_8c.html#acc1e625a829554ffed5e4307d4a5f6b7">YY_CHAR</a>) (c))</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -2257,7 +2256,7 @@ Variables</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_fe3f2546db0c82bf4937a5bc37ee91df.html">text-filter</a></li><li class="navelem"><a class="el" href="lexer-filter_8c.html">lexer-filter.c</a></li>
-    <li class="footer">Generated on Fri Apr 9 2021 10:36:41 for Teonet library by
+    <li class="footer">Generated on Fri Apr 9 2021 15:05:15 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

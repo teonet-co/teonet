@@ -30,7 +30,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">Teonet library
-   &#160;<span id="projectnumber">0.4.6</span>
+   &#160;<span id="projectnumber">0.4.7</span>
    </div>
   </td>
  </tr>
@@ -140,11 +140,11 @@ Functions</h2></td></tr>
 <tr class="separator:af7d4392c56a723e267555de85aaf041b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1871b38c336e1e9e33b433345cc40318"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#a1871b38c336e1e9e33b433345cc40318">ksnTcpDestroy</a> (<a class="el" href="structksnTcpClass.html">ksnTcpClass</a> *kt)</td></tr>
 <tr class="separator:a1871b38c336e1e9e33b433345cc40318"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaeefbad266a0eedf8d05099cedaff62e"><td class="memItemLeft" align="right" valign="top">struct ev_io *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#aaeefbad266a0eedf8d05099cedaff62e">ksnTcpCb</a> (struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *<a class="el" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, int <a class="el" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a>, void(*ksnet_read_cb)(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, ev_io *watcher, int revents), void *<a class="el" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>)</td></tr>
+<tr class="memitem:aaeefbad266a0eedf8d05099cedaff62e"><td class="memItemLeft" align="right" valign="top">struct ev_io *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#aaeefbad266a0eedf8d05099cedaff62e">ksnTcpCb</a> (struct ev_loop *loop, <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *<a class="el" href="teol0cli_8c.html#a9fbb1ad141db88ec0cea75cea4fcec22">w</a>, int <a class="el" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a>, void(*ksnet_read_cb)(struct ev_loop *loop, ev_io *watcher, int revents), void *<a class="el" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>)</td></tr>
 <tr class="separator:aaeefbad266a0eedf8d05099cedaff62e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae501f48bc6b9b83ac3c1195c60fb1a2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#ae501f48bc6b9b83ac3c1195c60fb1a2c">ksnTcpCbStop</a> (struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, ev_io *watcher, int close_flg, int remove_flg)</td></tr>
+<tr class="memitem:ae501f48bc6b9b83ac3c1195c60fb1a2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#ae501f48bc6b9b83ac3c1195c60fb1a2c">ksnTcpCbStop</a> (struct ev_loop *loop, ev_io *watcher, int close_flg, int remove_flg)</td></tr>
 <tr class="separator:ae501f48bc6b9b83ac3c1195c60fb1a2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae81215b9d6f3a8288bd44d8bef3a5ae7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#ae81215b9d6f3a8288bd44d8bef3a5ae7">ksnTcpServerCreate</a> (<a class="el" href="structksnTcpClass.html">ksnTcpClass</a> *kt, int port, void(*ksnet_cb)(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a>), void *<a class="el" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>, int *port_created)</td></tr>
+<tr class="memitem:ae81215b9d6f3a8288bd44d8bef3a5ae7"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#ae81215b9d6f3a8288bd44d8bef3a5ae7">ksnTcpServerCreate</a> (<a class="el" href="structksnTcpClass.html">ksnTcpClass</a> *kt, int port, void(*ksnet_cb)(struct ev_loop *loop, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a>), void *<a class="el" href="post-callback_8c.html#ac89b5786f65419c30c7a97e2d5c40fe9">data</a>, int *port_created)</td></tr>
 <tr class="separator:ae81215b9d6f3a8288bd44d8bef3a5ae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abafd85b78ac47de5aa879bb10fdfd17f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="net__tcp_8h.html#abafd85b78ac47de5aa879bb10fdfd17f">ksnTcpServerStop</a> (<a class="el" href="structksnTcpClass.html">ksnTcpClass</a> *kt, int sd)</td></tr>
 <tr class="separator:abafd85b78ac47de5aa879bb10fdfd17f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -213,7 +213,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void(*)(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, ev_io *watcher, int revents)&#160;</td>
+          <td class="paramtype">void(*)(struct ev_loop *loop, ev_io *watcher, int revents)&#160;</td>
           <td class="paramname"><em>ksnet_read_cb</em>, </td>
         </tr>
         <tr>
@@ -229,7 +229,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a13">teotcp.c</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a12">teotcp.c</a>.</dd>
 </dl>
 <p>Referenced by <a class="el" href="teotcp_8c.html#aa948f71e5ccbeef9a474c79d04631c9f">tcp_server_accept_cb()</a>.</p>
 
@@ -270,7 +270,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a10">teotcp.c</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a9">teotcp.c</a>.</dd>
 </dl>
 <p>Referenced by <a class="el" href="teotcp_8c.html#aebeb8ea36ec1fc4d14dc31930046613e">tcp_server_receive_cb()</a>.</p>
 
@@ -305,7 +305,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teol0cli_8c-example.html#a18">teol0cli.c</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teol0cli_8c-example.html#a17">teol0cli.c</a>.</dd>
 </dl>
 <p>Referenced by <a class="el" href="teol0cli_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb()</a>, and <a class="el" href="tcp__proxy_8h.html#a715c8ee0f33fddbd33404c1d1688e53d">ksnTCPProxyClientConnect()</a>.</p>
 
@@ -352,7 +352,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a7">teotcp.c</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a6">teotcp.c</a>.</dd>
 </dl>
 <p>Referenced by <a class="el" href="teotcp_8c.html#aebeb8ea36ec1fc4d14dc31930046613e">tcp_server_receive_cb()</a>.</p>
 
@@ -395,7 +395,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">void(*)(struct ev_loop *<a class="el" href="ChangeLog.html#a4091af9fd908a83ad8826f25410928cf">loop</a>, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a>)&#160;</td>
+          <td class="paramtype">void(*)(struct ev_loop *loop, struct <a class="el" href="structev__ksnet__io.html">ev_ksnet_io</a> *watcher, int revents, int <a class="el" href="teol0cli_8c.html#a6f8059414f0228f0256115e024eeed4b">fd</a>)&#160;</td>
           <td class="paramname"><em>ksnet_cb</em>, </td>
         </tr>
         <tr>
@@ -417,7 +417,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a21">teotcp.c</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a20">teotcp.c</a>.</dd>
 </dl>
 <p>Referenced by <a class="el" href="teotcp_8c.html#a40839a5b178477dbf2c488c6109a9979">event_cb()</a>, and <a class="el" href="tcp__proxy_8c.html#a0467f88507cd83d3c0c5ef203f6391a5">ksnTCPProxyServerStart()</a>.</p>
 
@@ -464,7 +464,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a4">teotcp.c</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a3">teotcp.c</a>.</dd>
 </dl>
 <p>Referenced by <a class="el" href="teotcp_8c.html#aebeb8ea36ec1fc4d14dc31930046613e">tcp_server_receive_cb()</a>.</p>
 
@@ -493,7 +493,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a8">teotcp.c</a>.</dd>
+<dl><dt><b>Examples: </b></dt><dd><a class="el" href="teotcp_8c-example.html#a7">teotcp.c</a>.</dd>
 </dl>
 <p>Referenced by <a class="el" href="teotcp_8c.html#aebeb8ea36ec1fc4d14dc31930046613e">tcp_server_receive_cb()</a>.</p>
 
@@ -505,7 +505,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a class="el" href="dir_ddb4d7e95cc2d6c8e1ade10a20d7247d.html">modules</a></li><li class="navelem"><a class="el" href="net__tcp_8h.html">net_tcp.h</a></li>
-    <li class="footer">Generated on Fri Apr 9 2021 10:36:41 for Teonet library by
+    <li class="footer">Generated on Fri Apr 9 2021 15:05:15 for Teonet library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.6 </li>
   </ul>

@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['c',['c',['../ChangeLog.html#af6d3e7ec7eb5c3bbcc7598a15a116c9f',1,'ChangeLog']]],
   ['callback',['callback',['../structteoAuthData.html#a8c68d5bfe3a6b2d43de9aab9b2080157',1,'teoAuthData::callback()'],['../structcli__command.html#a8153493a9e6321bde49bf02963205a3f',1,'cli_command::callback()'],['../structksnReconnectClass.html#a239eda7a2d0567dae4c99424423477d3',1,'ksnReconnectClass::callback()']]],
   ['cb',['cb',['../structksnCQueData.html#aec9835e28ff75a0f9a2c6106defa1450',1,'ksnCQueData::cb()'],['../structteoLogReaderWatcher.html#af70a6dad458b920592bf98ebe01e8138',1,'teoLogReaderWatcher::cb()']]],
   ['cb_5ftype',['cb_type',['../structteo_1_1Teonet_1_1TeoDB_1_1teoDbCQueData.html#a7e85ca4d31ac34d0a48a6755567da305',1,'teo::Teonet::TeoDB::teoDbCQueData']]],
@@ -28,7 +27,7 @@ var searchData=
   ['cq',['cq',['../structksnStreamMapData.html#af13983c2691499b8de5b835afdb4f552',1,'ksnStreamMapData']]],
   ['cque',['cque',['../structksnLNullClass.html#ad724d5e155081dcc18a9c27532d8f324',1,'ksnLNullClass']]],
   ['cque_5fmap',['cque_map',['../structksnCQueClass.html#a3411b86e4a2e59bd23d0de33d99c0e20',1,'ksnCQueClass']]],
-  ['created',['created',['../structksnStreamMapData.html#a1291cf179ce5c3007a63451d76f3773c',1,'ksnStreamMapData::created()'],['../ChangeLog.html#a1d5ac11930e30d96ffcf4e0df635a576',1,'created():&#160;ChangeLog']]],
+  ['created',['created',['../structksnStreamMapData.html#a1291cf179ce5c3007a63451d76f3773c',1,'ksnStreamMapData']]],
   ['crypt_5ff',['crypt_f',['../structteonet__cfg.html#a9a8a43630ee87a8ae2ab09ea085cf531',1,'teonet_cfg']]],
   ['ctl',['ctl',['../structmg__mgr.html#a80810246498c0939bfe26919623ec9e9',1,'mg_mgr']]],
   ['ctrl_5fsock',['ctrl_sock',['../structdevice.html#a445ebe5036588fef6422c5e1e7f4dcb4',1,'device']]],
