@@ -728,9 +728,6 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
             // Add type to arp-table
             rd->arp->type = type_str;
             printf("notype... Peername %s, Type: %s\n", rd->from, rd->arp->type);
-        } else {
-            printf("Peername %s, Type: %s\n", rd->from, rd->arp->type);
-        }
             // Metrics
             char *met = ksnet_formatMessage("CON.%s", rd->from);
             teoMetricGauge(ke->tm, met, 1);
@@ -751,6 +748,9 @@ static int cmd_host_info_answer_cb(ksnCommandClass *kco, ksnCorePacketData *rd) 
                 rd->cmd, rd->from, rd->addr, rd->port, rd->arp->data.addr, rd->arp->data.port, rd->arp->type);
             #endif
             retval = 1;
+        } else {
+            printf("Peername %s, Type: %s\n", rd->from, rd->arp->type);
+        }
     }
 
     return retval; // Command send to user level
