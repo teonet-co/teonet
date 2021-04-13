@@ -316,7 +316,7 @@ int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name,
     uint8_t *packet = createCmdConnectPacket(event_manager, name, addr, port, &packet_size);
 
     #ifdef DEBUG_KSNET
-    ksn_printf(event_manager, MODULE, DEBUG, "send CMD_CONNECT = %u to peer by name %s. (Connect to peer: %s, addr: %s:%d)\n",
+    ksn_printf(event_manager, MODULE, DEBUG_VV, "send CMD_CONNECT = %u to peer by name %s. (Connect to peer: %s, addr: %s:%d)\n",
         CMD_CONNECT, to, name, addr, port);
     #endif
 
@@ -1185,6 +1185,16 @@ static int cmd_connect_r_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
             ksnetArpGetAll(arp_obj, send_cmd_connect_cb, &lrd);
         }
 
+        //the r-host immediately knows the type of peer,
+        //therefore we immediately send this event
+        // Send event callback
+        if(ke->event_cb != NULL) {
+            ke->event_cb(ke, EV_K_CONNECTED, (void*)rd, sizeof(*rd), NULL);
+        }
+
+        // Send event to subscribers
+        teoSScrSend(kco->ksscr, EV_K_CONNECTED, rd->from, rd->from_len, 0);
+
         ksnet_stringArrFree(&ips);
 
         // Send main peer address to child
@@ -1254,10 +1264,10 @@ static int cmd_connect_cb(ksnCommandClass *kco, ksnCorePacketData *rd) {
     pd.full_type = rd->data + ptr; ptr += strlen(pd.full_type) + 1;
     pd.port = *((uint32_t *)(rd->data + ptr));
 
-    // #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG, "process CMD_CONNECT = %u from %s (%s:%d). (Connect to %s (%s:%d), peer type = %s)\n",
+    #ifdef DEBUG_KSNET
+    ksn_printf(ke, MODULE, DEBUG_VV, "process CMD_CONNECT = %u from %s (%s:%d). (Connect to %s (%s:%d), peer type = %s)\n",
             rd->cmd, rd->from, rd->addr, rd->port, pd.name, pd.addr, pd.port, pd.full_type);
-    // #endif
+    #endif
 
     // Check ARP
     if(ksnetArpGet(arp_class, pd.name) == NULL) {
