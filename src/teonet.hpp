@@ -390,7 +390,7 @@ public:
    * Set custom timer interval
    *
    * @param time_interval
-   /
+   */
   inline void setCustomTimer(double time_interval = 2.00) {
     ksnetEvMgrSetCustomTimer(event_manager, time_interval);
   }
