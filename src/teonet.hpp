@@ -214,11 +214,10 @@ public:
   /**
    * Sent teonet command to peer or l0 client depend of input rd
    *
-   * @param event_manager Pointer to ksnetEvMgrClass
-   * @param rd Pointer to rd
-   * @param name Name to send to
-   * @param data
-   * @param data_len
+   * @param rd teonet packet
+   * @param name name of destination peer
+   * @param data payload of packet
+   * @param data_len length of payload
    *
    * @return
    */
