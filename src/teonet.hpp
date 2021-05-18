@@ -152,7 +152,7 @@ public:
    *
    * @return authenticated secret
    */
-  std::string authSecret() {
+  std::string authSecret() const noexcept {
     return eventManager()->teo_cfg.auth_secret;
   }
   /**
