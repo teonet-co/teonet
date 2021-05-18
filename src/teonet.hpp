@@ -232,8 +232,8 @@ public:
   /**
    * Sent teonet command to peer or l0 client depend of input rd (asynchronously)
    *
-   * @param event_manager Pointer to ksnetEvMgrClass
    * @param rd Pointer to rd
+   * @param cmd command(or event) code 
    * @param name Name to send to
    * @param data
    * @param data_len
