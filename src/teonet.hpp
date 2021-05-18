@@ -105,12 +105,9 @@ public:
                               void* user_data);
 
 private:
-  ksnetEvMgrClass* ke;                //! Pointer to ksnetEvMgrClass
+  ksnetEvMgrClass* event_manager;     //! Pointer to ksnetEvMgrClass
   teoEventsCb event_cb;               //! Pointer to c++ callback function
   const char* classVersion = "0.0.4"; //! Teonet class version
-
-public:
-  inline ksnetEvMgrClass* getKe() const { return ke; }
 
 public:
   /**
@@ -132,42 +129,52 @@ public:
          void* user_data = NULL) {
 
     this->event_cb = event_cb;
-    ke = ksnetEvMgrInitPort(
+    event_manager = ksnetEvMgrInitPort(
         argc, argv,
-        [](ksnetEvMgrClass* ke, teoEvents e, void* data, size_t data_len, void* user_data) {
-          auto teonet_ptr = static_cast<Teonet*>(ke->teo_class);
+        [](ksnetEvMgrClass* event_manager, teoEvents e, void* data, size_t data_len, void* user_data) {
+          auto teonet_ptr = static_cast<Teonet*>(event_manager->teo_class);
           teonet_ptr->eventCb(e, data, data_len, user_data);
         },
         options, port, user_data);
-    if(ke) ke->teo_class = this;
+    if(event_manager) event_manager->teo_class = this;
   }
 
   /**
    * Teonet simple destructor
    */
-  virtual ~Teonet() { /*std::cout << "Destructor Teonet\n";*/
-  }
+  virtual ~Teonet() = default;
 
+
+  inline ksnetEvMgrClass* eventManager() const { return event_manager; }
+
+  /**
+   * @brief Return auth secret
+   *
+   * @return authenticated secret
+   */
+  std::string authSecret() {
+    return teoGetAuthSecret(event_manager);
+  }
   /**
    * Set Teonet application type
    *
    * @param type Application type string
    */
-  inline void setAppType(const char* type) { teoSetAppType(ke, (char*)type); }
+  inline void setAppType(const char* type) { teoSetAppType(event_manager, (char*)type); }
 
   /**
    * Set Teonet application version
    *
    * @param version Application version string
    */
-  inline void setAppVersion(const char* version) { teoSetAppVersion(ke, (char*)version); }
+  inline void setAppVersion(const char* version) { teoSetAppVersion(event_manager, (char*)version); }
 
   /**
    * Start Teonet Event Manager and network communication
    *
    * @return Always 0
    */
-  inline int run() { return ksnetEvMgrRun(ke); }
+  inline int run() { return ksnetEvMgrRun(event_manager); }
 
   /**
    * Send command by name to peer
@@ -180,10 +187,10 @@ public:
    * @return Pointer to ksnet_arp_data or NULL if to peer is absent
    */
   void BroadcastSend(const char* to, uint8_t cmd, void* data, size_t data_len) const {
-    teoBroadcastSend(ke->kc, (char*)to, cmd, data, data_len);
+    teoBroadcastSend(event_manager->kc, (char*)to, cmd, data, data_len);
   }
   inline ksnet_arp_data* sendTo(const char* to, uint8_t cmd, void* data, size_t data_len) const {
-    return ksnCoreSendCmdto(ke->kc, (char*)to, cmd, data, data_len);
+    return ksnCoreSendCmdto(event_manager->kc, (char*)to, cmd, data, data_len);
   }
   inline ksnet_arp_data* sendTo(const char* to, uint8_t cmd, const std::string& data) const {
     return sendTo((char*)to, cmd, (void*)data.c_str(), data.size() + 1);
@@ -198,7 +205,7 @@ public:
    * @param data_len Commands data length
    */
   inline void sendToA(const char* to, uint8_t cmd, void* data, size_t data_len) const {
-    ksnCoreSendCmdtoA((void*)ke, to, cmd, data, data_len);
+    ksnCoreSendCmdtoA((void*)event_manager, to, cmd, data, data_len);
   }
   inline void sendToA(const char* to, uint8_t cmd, const std::string& data) const {
     sendToA(to, cmd, (void*)data.c_str(), data.size() + 1);
@@ -207,17 +214,16 @@ public:
   /**
    * Sent teonet command to peer or l0 client depend of input rd
    *
-   * @param ke Pointer to ksnetEvMgrClass
-   * @param rd Pointer to rd
-   * @param name Name to send to
-   * @param data
-   * @param data_len
+   * @param rd teonet packet
+   * @param name name of destination peer
+   * @param data payload of packet
+   * @param data_len length of payload
    *
    * @return
    */
   inline void sendAnswerTo(teo::teoPacket* rd, const char* name, void* data,
                            size_t data_len) const {
-    sendCmdAnswerTo(ke, rd, (char*)name, data, data_len);
+    sendCmdAnswerTo(event_manager, rd, (char*)name, data, data_len);
   }
   inline void sendAnswerTo(teo::teoPacket* rd, const char* name, const std::string& data) const {
     sendAnswerTo(rd, (char*)name, (void*)data.c_str(), data.size() + 1);
@@ -225,8 +231,8 @@ public:
   /**
    * Sent teonet command to peer or l0 client depend of input rd (asynchronously)
    *
-   * @param ke Pointer to ksnetEvMgrClass
    * @param rd Pointer to rd
+   * @param cmd command(or event) code 
    * @param name Name to send to
    * @param data
    * @param data_len
@@ -234,10 +240,10 @@ public:
    * @return
    */
   inline void sendAnswerToA(teo::teoPacket* rd, uint8_t cmd, void* data, size_t data_len) const {
-    sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)data, data_len);
+    sendCmdAnswerToBinaryA(event_manager, rd, cmd, (void*)data, data_len);
   }
   inline void sendAnswerToA(teo::teoPacket* rd, uint8_t cmd, const std::string& data) const {
-    sendCmdAnswerToBinaryA(ke, rd, cmd, (void*)data.c_str(), data.size() + 1);
+    sendCmdAnswerToBinaryA(event_manager, rd, cmd, (void*)data.c_str(), data.size() + 1);
   }
 
   /**
@@ -254,7 +260,7 @@ public:
       data = (void*)"Hello Teonet!";
       data_len = std::strlen((char*)data) + 1;
     }
-    return ksnCommandSendCmdEcho(ke->kc->kco, (char*)to, data, data_len);
+    return ksnCommandSendCmdEcho(event_manager->kc->kco, (char*)to, data, data_len);
   }
 
   /**
@@ -272,7 +278,7 @@ public:
    */
   inline int sendToL0(const char* addr, int port, const char* cname, size_t cname_length,
                       uint8_t cmd, void* data, size_t data_len) const {
-    return ksnLNullSendToL0(ke, (char*)addr, port, (char*)cname, cname_length, cmd, data, data_len);
+    return ksnLNullSendToL0(event_manager, (char*)addr, port, (char*)cname, cname_length, cmd, data, data_len);
   }
   inline int sendToL0(const char* addr, int port, const std::string& cname, uint8_t cmd, void* data,
                       size_t data_len) const {
@@ -319,7 +325,7 @@ public:
     rd.addr = (char*)addr;
     rd.port = port;
     rd.l0_f = 1;
-    sendCmdAnswerToBinaryA((void*)ke, &rd, cmd, data, data_len);
+    sendCmdAnswerToBinaryA((void*)event_manager, &rd, cmd, data, data_len);
   }
 
   /**
@@ -338,13 +344,13 @@ public:
   inline int sendEchoToL0(const char* addr, int port, const char* cname, size_t cname_length,
                           void* data, size_t data_len) const {
 
-    return ksnLNullSendEchoToL0(ke, (char*)addr, port, (char*)cname, cname_length, data, data_len);
+    return ksnLNullSendEchoToL0(event_manager, (char*)addr, port, (char*)cname, cname_length, data, data_len);
   }
 
   inline int sendEchoToL0A(const char* addr, int port, const char* cname, size_t cname_length,
                            void* data, size_t data_len) const {
 
-    return ksnLNullSendEchoToL0A(ke, (char*)addr, port, (char*)cname, cname_length, data, data_len);
+    return ksnLNullSendEchoToL0A(event_manager, (char*)addr, port, (char*)cname, cname_length, data, data_len);
   }
 
   /**
@@ -364,20 +370,20 @@ public:
   }
 
   inline void subscribe(const char* peer_name, uint16_t ev) const {
-    teoSScrSubscribe((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
+    teoSScrSubscribe((teoSScrClass*)event_manager->kc->kco->ksscr, (char*)peer_name, ev);
   }
   inline void subscribeA(const char* peer_name, uint16_t ev) const {
-    teoSScrSubscribeA((teoSScrClass*)ke->kc->kco->ksscr, (char*)peer_name, ev);
+    teoSScrSubscribeA((teoSScrClass*)event_manager->kc->kco->ksscr, (char*)peer_name, ev);
   }
 
   inline void sendToSscr(uint16_t ev, void* data, size_t data_length, uint8_t cmd = 0) const {
-    teoSScrSend((teoSScrClass*)ke->kc->kco->ksscr, ev, data, data_length, cmd);
+    teoSScrSend((teoSScrClass*)event_manager->kc->kco->ksscr, ev, data, data_length, cmd);
   }
   inline void sendToSscr(uint16_t ev, const std::string& data, uint8_t cmd = 0) const {
     sendToSscr(ev, (void*)data.c_str(), data.size() + 1, cmd);
   }
   inline void sendToSscrA(uint16_t ev, const std::string& data, uint8_t cmd = 0) const {
-    teoSScrSendA(ke, ev, (void*)data.c_str(), data.size() + 1, cmd);
+    teoSScrSendA(event_manager, ev, (void*)data.c_str(), data.size() + 1, cmd);
   }
 
   /**
@@ -386,7 +392,7 @@ public:
    * @param time_interval
    */
   inline void setCustomTimer(double time_interval = 2.00) {
-    ksnetEvMgrSetCustomTimer(ke, time_interval);
+    ksnetEvMgrSetCustomTimer(event_manager, time_interval);
   }
 
   /**
@@ -408,7 +414,7 @@ public:
    *
    * @return
    */
-  inline const char* getHostName() const { return ksnetEvMgrGetHostName(ke); }
+  inline const char* getHostName() const { return ksnetEvMgrGetHostName(event_manager); }
 
   /**
    * Create Application parameters
@@ -437,17 +443,17 @@ public:
    * @return
    */
   inline const char* getParam(int parm_number) const {
-    return getKe()->teo_cfg.app_argv[parm_number];
+    return eventManager()->teo_cfg.app_argv[parm_number];
   }
 
   /**
    * Get KSNet event manager time
    *
-   * @param ke Pointer to ksnetEvMgrClass
+   * @param event_manager Pointer to ksnetEvMgrClass
    *
    * @return
    */
-  inline double getTime() const { return ksnetEvMgrGetTime(ke); }
+  inline double getTime() const { return ksnetEvMgrGetTime(event_manager); }
 
   /**
    * Get path to teonet data folder
@@ -465,7 +471,7 @@ public:
    * Stop Teonet event manager
    *
    */
-  inline void stop() { ksnetEvMgrStop(ke); }
+  inline void stop() { ksnetEvMgrStop(event_manager); }
 
   /**
    * Cast data to teo::teoPacket
@@ -482,7 +488,7 @@ public:
    * @param value Metric counter value 
    */
   inline void metricCounter(const std::string &name, int value) {
-    teoMetricCounter(ke->tm, name.c_str(), value);
+    teoMetricCounter(event_manager->tm, name.c_str(), value);
   }
 
   /**
@@ -492,7 +498,7 @@ public:
    * @param value Metric counter value 
    */
   inline void metricCounter(const std::string &name, double value) {
-    teoMetricCounterf(ke->tm, name.c_str(), value);
+    teoMetricCounterf(event_manager->tm, name.c_str(), value);
   }
 
   /**
@@ -502,7 +508,7 @@ public:
    * @param value Metric ms value 
    */
   inline void metricMs(const std::string &name, double value) {
-    teoMetricMs(ke->tm, name.c_str(), value);
+    teoMetricMs(event_manager->tm, name.c_str(), value);
   }
 
   /**
@@ -512,7 +518,7 @@ public:
    * @param value Metric gauge value 
    */
   inline void metricGauge(const std::string &name, int value) {
-    teoMetricGauge(ke->tm, name.c_str(), value);
+    teoMetricGauge(event_manager->tm, name.c_str(), value);
   }
 
   /**
@@ -522,7 +528,7 @@ public:
    * @param value Metric gauge value 
    */
   inline void metricGauge(const std::string &name, double value) {
-    teoMetricGaugef(ke->tm, name.c_str(), value);
+    teoMetricGaugef(event_manager->tm, name.c_str(), value);
   }
 
   /**
@@ -542,20 +548,20 @@ public:
 
 #ifdef DEBUG_KSNET
 #define teo_printf(module, type, format, ...)                                                      \
-  ksnet_printf(&((getKe())->teo_cfg), type,                                                        \
+  ksnet_printf(&((eventManager())->teo_cfg), type,                                                        \
                type != DISPLAY_M ? _ksn_printf_format_(format)                                     \
                                  : _ksn_printf_format_display_m(format),                           \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->teo_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (eventManager())->teo_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0, __VA_ARGS__)
 
 #define teo_puts(module, type, format)                                                             \
-  ksnet_printf(&((getKe())->teo_cfg), type,                                                        \
+  ksnet_printf(&((eventManager())->teo_cfg), type,                                                        \
                type != DISPLAY_M ? _ksn_printf_format_(format) "\n"                                \
                                  : _ksn_printf_format_display_m(format) "\n",                      \
                type != DISPLAY_M ? _ksn_printf_type_(type) : "",                                   \
-               type != DISPLAY_M ? (module[0] == '\0' ? (getKe())->teo_cfg.app_name : module) : "",   \
+               type != DISPLAY_M ? (module[0] == '\0' ? (eventManager())->teo_cfg.app_name : module) : "",   \
                type != DISPLAY_M ? __func__ : "", type != DISPLAY_M ? __FILE__ : "",               \
                type != DISPLAY_M ? __LINE__ : 0)
 
@@ -589,7 +595,7 @@ public:
 
   public:
     explicit CQue(Teonet* t, bool send_event = false)
-        : teo(t), kq(ksnCQueInit(t->getKe(), send_event)) { /*std::cout << "CQue::CQue\n";*/
+        : teo(t), kq(ksnCQueInit(t->eventManager(), send_event)) { /*std::cout << "CQue::CQue\n";*/
     }
     CQue(const CQue& obj) : teo(obj.teo), kq(obj.kq) { /*std::cout << "CQue::CQue copy\n";*/
     }
@@ -800,7 +806,7 @@ public:
      */
     inline Teonet* getTeonet() const { return teo; }
 
-    inline ksnetEvMgrClass* getKe() const { return getTeonet()->getKe(); }
+    inline ksnetEvMgrClass* eventManager() const { return getTeonet()->eventManager(); }
 
     inline CQue* getCQue() { return &cque; }
 
@@ -951,7 +957,7 @@ public:
         virtual ~UserData() { std::cout << "~UserData" << std::endl; }
       };
       auto ud = new UserData(cb);
-      return teoLogReaderOpenCbPP(teo.getKe()->lr, name, file_name, flags,
+      return teoLogReaderOpenCbPP(teo.eventManager()->lr, name, file_name, flags,
                                   [](void* data, size_t data_length, Watcher* wd) {
                                     auto ud = static_cast<UserData*>(wd->user_data);
                                     ud->cb(data, data_length, wd);
