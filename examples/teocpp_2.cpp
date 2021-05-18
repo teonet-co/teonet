@@ -95,12 +95,12 @@ public:
             
             showMessage(DEBUG, "Event: EV_K_TIMER\n");
             
-//            char *arp_txt = ksnetArpShowStr(getKe()->kc->ka);
+//            char *arp_txt = ksnetArpShowStr(eventManager()->kc->ka);
 //            std::cout << "Peers:\n" << arp_txt << "\n";
 //            free(arp_txt);
             
             // Get peers data
-            ksnet_arp_data_ar *peers_data = ksnetArpShowData(getKe()->kc->ka);
+            ksnet_arp_data_ar *peers_data = ksnetArpShowData(eventManager()->kc->ka);
             //size_t peers_data_length = ksnetArpShowDataLength(peers_data);
             for(int i=0; i < (int)peers_data->length; i++) {
               std::cout << peers_data->arp_data[i].name << "\n";
