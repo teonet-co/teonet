@@ -152,8 +152,8 @@ public:
    *
    * @return authenticated secret
    */
-  std::string authSecret() const noexcept {
-    return eventManager()->teo_cfg.auth_secret;
+  std::string authSecret() {
+    return teoGetAuthSecret(event_manager);
   }
   /**
    * Set Teonet application type
@@ -391,7 +391,7 @@ public:
    * Set custom timer interval
    *
    * @param time_interval
-   */
+   /
   inline void setCustomTimer(double time_interval = 2.00) {
     ksnetEvMgrSetCustomTimer(event_manager, time_interval);
   }

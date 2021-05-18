@@ -1420,3 +1420,7 @@ void modules_destroy(ksnetEvMgrClass *ke) {
     ksnTcpDestroy(ke->kt);
     #endif
 }
+
+const char* teoGetAuthSecret(ksnetEvMgrClass *event_manager) {
+    return (const char*)event_manager->teo_cfg.auth_secret;
+}
