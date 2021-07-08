@@ -437,12 +437,12 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
         struct sockaddr_storage addr;             // address structure
         socklen_t addrlen = sizeof(addr); // length of addresses
 
-        int fd = ksnLNullClientIsConnected(kl, spacket->from);
+        int fd = ksnLNullClientIsConnected(kl, cname);
         if (fd == 0) {
             #ifdef DEBUG_KSNET
             ksn_printf(kev, MODULE, extendedLog(kl),
                 "client \"%s\" is not connected\n",
-                spacket->from);
+                cname);
             #endif
         } else {
             ksnLNullData *kld = ksnLNullGetClientConnection(kl, fd);
@@ -450,14 +450,14 @@ static ksnet_arp_data *ksnLNullSendFromL0(ksnLNullClass *kl, teoLNullCPacket *pa
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, extendedLog(kl),
                     "client \"%s\", fd: %d connection data not found\n",
-                    spacket->from, fd);
+                    cname, fd);
                 #endif
             } else if(!make_addr(kld->t_addr, kld->t_port, (__SOCKADDR_ARG) &addr,
                     &addrlen)) {
                 #ifdef DEBUG_KSNET
                 ksn_printf(kev, MODULE, extendedLog(kl),
                     "repacked packet from client \"%s\" to CMD_L0 from %s:%d\n",
-                    spacket->from, kld->t_addr, kld->t_port);
+                    cname, kld->t_addr, kld->t_port);
                 #endif
                 ksnCoreProcessPacket(kev->kc, pkg, pkg_len, (__SOCKADDR_ARG) &addr);
                 arp_data = (ksnet_arp_data *)ksnetArpGet(kev->kc->ka, (char*)packet->peer_name);
@@ -496,7 +496,7 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
     int rv = -1;
 
     ksnLNullClass *kl = ((ksnetEvMgrClass*)ke)->kl;
-    if (((ksnetEvMgrClass*)ke)->ksn_cfg.l0_allow_f) {
+    if (((ksnetEvMgrClass*)ke)->teo_cfg.l0_allow_f) {
         fd = ksnLNullClientIsConnected(kl, cname);
     }
 
@@ -511,10 +511,10 @@ int ksnLNullSendToL0(void *ke, char *addr, int port, char *cname,
 
         // Create teonet L0 packet
         spacket->cmd = cmd;
-        spacket->from_length = cname_length;
-        memcpy(spacket->from, cname, cname_length);
+        spacket->client_name_length = cname_length;
+        memcpy(spacket->payload, cname, cname_length);
         spacket->data_length = data_len;
-        memcpy(spacket->from + spacket->from_length, data, data_len);
+        memcpy(spacket->payload + spacket->client_name_length, data, data_len);
 
         // Send command to client of L0 server
         #ifdef DEBUG_KSNET
