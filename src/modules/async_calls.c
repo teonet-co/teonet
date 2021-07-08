@@ -189,9 +189,6 @@ static void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
 
                             //async_data *ud = user_data;
                             ud->rv = _check_send_queue(ke, NULL, addr, port);
-                            ksn_printf(kev, MODULE, DEBUG_VV,
-                                        "addr: %s, port: %d, rd: %d\n",
-                                        addr, (int)port, ud->rv);
 
                             if(!MULTITHREADED() || SEND_CONDITION()) {
                                 if(kev->ta->test)
