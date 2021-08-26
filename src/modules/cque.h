@@ -20,6 +20,7 @@ typedef struct ksnCQueClass {
     void *ke; ///< Pointer to ksnEvMgrClass
     uint32_t id; ///< New callback queue ID
     PblMap *cque_map; ///< Pointer to the callback queue pblMap
+    uint8_t event_f; ///< Send cque event if true
     
 } ksnCQueClass;
 
@@ -47,12 +48,17 @@ typedef struct ksnCQueData {
     
 } ksnCQueData;
 
+/**
+ * Find data in CQueue callback function
+ */
+typedef int (*ksnCQueCompare) (void *find, void *data);
+
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-ksnCQueClass *ksnCQueInit(void *ke);
+ksnCQueClass *ksnCQueInit(void *ke, uint8_t send_event);
 void ksnCQueDestroy(ksnCQueClass *kq);
 
 int ksnCQueExec(ksnCQueClass *kq, uint32_t id);
@@ -61,6 +67,7 @@ int ksnCQueSetData(ksnCQueClass *kq, uint32_t id, void *data);
 ksnCQueData *ksnCQueAdd(ksnCQueClass *kq, ksnCQueCallback cb, double timeout, 
         void *data);
 int ksnCQueRemove(ksnCQueClass *kq, uint32_t id);
+void *ksnCQueFindData(ksnCQueClass *kq, void* find, ksnCQueCompare compare, size_t *key_length);
 
 void *pblMapRemoveFree(PblMap * map, void * key, size_t keyLength, 
         size_t * valueLengthPtr );

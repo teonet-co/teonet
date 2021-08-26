@@ -43,7 +43,7 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             static int idx = 0;
             char buffer[KSN_BUFFER_DB_SIZE];
 
-            char *peer_to = ke->ksn_cfg.app_argv[1]; //"tr-udp-11";
+            char *peer_to = ke->teo_cfg.app_argv[1]; //"tr-udp-11";
             if(strcmp(peer_to, ksnetEvMgrGetHostName(ke))) {
 
                 // If peer_to is connected

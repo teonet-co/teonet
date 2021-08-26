@@ -58,9 +58,9 @@ void* teonet_t(void *teo) {
             teonet->event_cb, teonet->options, teonet->port, NULL);
     
     // Set network parameters
-    ke->n_num = teonet->n_num; // Set network number
-    ke->num_nets = teonet->num_nets; // Set number of networks
-    strcpy(ke->ksn_cfg.host_name, teonet->name); // Set host name
+    ke->net_idx = teonet->n_num; // Set network number
+    ke->net_count = teonet->num_nets; // Set number of networks
+    strcpy(ke->teo_cfg.host_name, teonet->name); // Set host name
     ke->n_prev = teonet->n_prev; // Pointer to previous network
     ke->n_next = teonet->n_next; // Pointer to next network
     teonet->ke = ke; // Set pointer to event manager

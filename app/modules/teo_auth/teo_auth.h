@@ -21,7 +21,6 @@
  * Teonet authentication module class structure
  */
 typedef struct teoAuthClass {
-    
     ksnHTTPClass *kh; ///< Pointer to ksnHTTPClass
     PblList* list; ///< Commands list
     pthread_mutex_t async_mutex; ///< Command list mutex    
@@ -32,7 +31,6 @@ typedef struct teoAuthClass {
     int stop; ///< Stop Authentication module thread server flag
     int stopped; ///< Authentication module thread is stopped
     int running; ///< Authentication module thread running state: 1 - running; 0 - waiting
-    
 } teoAuthClass;
 
 //typedef void (*command_callback)(void *error, void *success);
@@ -42,7 +40,6 @@ typedef void (*command_callback)(void *nc_p, char* err, char *result);
  * Teonet authentication request list data structure
  */
 typedef struct teoAuthData {
-    
     char *method;
     char *url;
     char *data; 
@@ -50,7 +47,6 @@ typedef struct teoAuthData {
     
     void *nc_p;
     command_callback callback;
-    
 } teoAuthData;
 
 

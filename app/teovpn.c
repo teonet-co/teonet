@@ -13,6 +13,8 @@
 
 #include "ev_mgr.h"
 
+#include <malloc.h>
+
 #define TVPN_VERSION "0.0.2"
 
 #ifdef TEO_THREAD
@@ -32,34 +34,32 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
 
     switch(event) {
-
         // Calls after event manager stopped
         case EV_K_STOPPED:
             #ifdef TEO_THREAD
             teonet_run = 0;
             #endif
             break;
-            
+
         default:
             break;
     }
 }
 
 /*
- * 
+ *
  */
 int main(int argc, char** argv) {
 
     printf("Teovpn ver " TVPN_VERSION ", based on teonet ver "
             "%s" "\n", teoGetLibteonetVersion());
-    
+
     // Initialize teonet event manager and Read configuration
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /*NULL*/, READ_ALL);
-    
     // Set application type
     teoSetAppType(ke, "teo-vpn");
     teoSetAppVersion(ke, TVPN_VERSION);
-    
+
     // To run teonet as thread change AM_CONDITIONAL(TEO_THREAD, false) in configure.ac to true
     #ifdef TEO_THREAD
     ksnetEvMgrRunThread(ke);
@@ -70,6 +70,6 @@ int main(int argc, char** argv) {
     // Start teonet
     ksnetEvMgrRun(ke);
     #endif
-    
+
     return (EXIT_SUCCESS);
 }

@@ -1,0 +1,10 @@
+Changes:
+    - Sunset of bintray :(
+    - Return processed command result from kick and auth callbacks. Check userId presence in uth confirmation command. If we have any connected event subs, don't confirm auth instantly.
+    - text-filter module for parsing server logs.
+    - Additional payload was add to CMD_CONNECT_R and CMD_CONNECT.
+    - Resolve dns name after reconnect.
+    - Skip packets for non-existent peer.
+    - Update README.md(added some badges).
+    - Add few utility functions.
+

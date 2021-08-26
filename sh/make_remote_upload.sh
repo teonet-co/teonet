@@ -45,9 +45,9 @@ echo $ANSI_BROWN"Upload local repository to remote host:"$ANSI_NONE
 echo ""
 lftp -c "
 set ftp:list-options -a;
-open ftp://repo:$CI_TEONET_REPO_FTP_PWD@repo.ksproject.org; 
+open ftp://$REPO_USER:$REPO_PASSWORD@repo2.ksproject.org; 
 lcd $REPO/$SUBFOLDER;
-cd /$SUBFOLDER;
+cd repo/$SUBFOLDER;
 mirror --reverse --delete --use-cache --verbose --allow-chown
 "
 echo ""

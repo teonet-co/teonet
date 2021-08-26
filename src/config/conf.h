@@ -38,28 +38,39 @@
 #define M_ENAMBE_TCP_P 1
 #define M_ENAMBE_TUN 1
 #define M_ENAMBE_TERM 1
+#define M_ENAMBE_ASYNC 1
+#define M_ENAMBE_METRIC 1
+#define M_ENAMBE_LOGGING_SERVER 1
+#define M_ENAMBE_LOGGING_CLIENT 1
+#define M_ENAMBE_LOG_READER 1
 
 // TRUE & FALSE define
 #define TRUE  1
 #define FALSE 0
 
-typedef struct ksnet_cfg {
+typedef struct teonet_cfg {
 
     void *ke; ///< Poiner to ksnetEventManager
 
     // Flags
-    int show_connect_f,    ///< Show connection message
-        show_debug_f,     ///< Show debug messages
-        show_debug_vv_f, ///< Show debug vv messages
-        show_debug_vvv_f, ///< Show debug vvv messages
-        show_peers_f,   ///< Show peers at start up
-        hot_keys_f,    ///< Show hotkeys when press h
-        crypt_f,      ///< Encrypt/Decrypt packets
-        vpn_connect_f,  ///< Start VPN flag
-        show_tr_udp_f, ///< Show TR-UDP statistic at start up 
-        send_ack_event_f, ///< Send TR-UDP ACK event (EV_K_RECEIVED_ACK) to the teonet event loop
-        sig_segv_f, ///< SIGSEGV processing
-        block_cli_input_f; ///< Block teonet CLI input (for using in GUI application)
+    int show_connect_f,         ///< Show connection message
+        show_debug_f,           ///< Show debug messages
+        show_debug_vv_f,        ///< Show debug vv messages
+        show_debug_vvv_f,       ///< Show debug vvv messages
+        show_peers_f,           ///< Show peers at start up
+        hot_keys_f,             ///< Show hotkeys when press h
+        crypt_f,                ///< Encrypt/Decrypt packets
+        vpn_connect_f,          ///< Start VPN flag
+        show_tr_udp_f,          ///< Show TR-UDP statistic at start up 
+        send_ack_event_f,       ///< Send TR-UDP ACK event (EV_K_RECEIVED_ACK) to the teonet event loop
+        sig_segv_f,             ///< SIGSEGV processing
+        block_cli_input_f,      ///< Block teonet CLI input (for using in GUI application)
+        logging_f,              ///< Start logging server
+        log_disable_f,          ///< Disable send log to logging server 
+        send_all_logs_f,        ///< Send all logs to logging server (by default only ###)
+        color_output_disable_f, ///< Disable color output flag
+        extended_l0_log_f,      ///< Extended L0 log output flag
+        no_multi_thread_f;      ///< Don't try multi thread mode in async calls 
     
     // Daemon mode flags
     int dflag,  ///< Start application in Daemon mode
@@ -68,6 +79,7 @@ typedef struct ksnet_cfg {
     // Network
     char network[KSN_BUFFER_SM_SIZE/2];     ///< Network
     char net_key[KSN_BUFFER_SM_SIZE/2];     ///< Network key
+    char auth_secret[KSN_BUFFER_SM_SIZE/2];     ///< Auth secret
 
     // Application name
     char app_prompt[KSN_BUFFER_SM_SIZE/2];      ///< Application prompt
@@ -91,12 +103,20 @@ typedef struct ksnet_cfg {
     int  l0_allow_f;                             ///< Allow L0 Server and l0 client connections to this host
     char l0_tcp_ip_remote[KSN_BUFFER_SM_SIZE/2]; ///< L0 Server remote IP address (send clients to connect to server)
     long l0_tcp_port;                            ///< L0 Server TCP port number
+    
+    // Display log filter
+    char filter[KSN_BUFFER_SM_SIZE/2];      ///<  Display log filter
 
     // R-Host
+    char r_host_addr_opt[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address or dns name derived from options
     char r_host_addr[KSN_BUFFER_SM_SIZE/2]; ///< Remote host internet address
     long r_port;                            ///< Remote host port
     long r_tcp_port;                        ///< Remote host tcp port
-    int r_tcp_f;            ///< Connect to TCP Proxy R-Host  
+    int r_tcp_f;                            ///< Connect to TCP Proxy R-Host
+
+    //public ips
+    char l0_public_ipv4[KSN_BUFFER_SM_SIZE/2]; ///< L0 Server public IPv4 address (send clients to connect to server)
+    char l0_public_ipv6[KSN_BUFFER_SM_SIZE/2]; ///< L0 Server public IPv6 address (send clients to connect to server)
 
     // VPN
     char vpn_dev_name[KSN_MAX_HOST_NAME];   ///< VPN Interface device name
@@ -111,21 +131,26 @@ typedef struct ksnet_cfg {
     
     // Syslog options
     long log_priority;                       ///< Syslog priority 
+    char log_prefix[KSN_BUFFER_SM_SIZE];
+    // StatsD address
+    char statsd_ip[KSN_BUFFER_SM_SIZE/2];
+    long statsd_port;
+    int statsd_peers_f;
     
     // Helpers
     int pp;
     char pn[KSN_BUFFER_SM_SIZE];
     char r_host_name[KSN_MAX_HOST_NAME];    ///< Remote host name (if connected)
 
-} ksnet_cfg;
+} teonet_cfg;
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
-void ksnet_addHWAddrConfig(ksnet_cfg *conf, char *hwaddr);
-void read_config(ksnet_cfg *conf, int port_param);
-void ksnet_configInit(ksnet_cfg *ksn_cfg, void *ke);
+void ksnet_addHWAddrConfig(teonet_cfg *conf, char *hwaddr);
+void read_config(teonet_cfg *conf, int port_param);
+void ksnet_configInit(teonet_cfg *teo_cfg, void *ke);
 
 #ifdef	__cplusplus
 }

@@ -13,6 +13,10 @@
 
 //#include "net_recon.h"
 
+
+#include "net_arp.h"
+#include "teonet_l0_client.h"
+#include <stdint.h>
 enum ksnCMD {
 
     // Core level not TR-UDP mode: 0...63
@@ -61,18 +65,29 @@ enum ksnCMD {
     CMD_TRUDP_INFO_ANSWER,  ///< #95 TR-UDP info answer
     
     CMD_L0_AUTH,            ///< #96 L0 server auth request answer command
+    CMD_AM,                 ///< #97 AM application command 
+    CMD_LOGGING,            ///< #98 LOGGING command
+    CMD_L0_CLIENT_RESET,    ///< #99 L0 client reset command
+    CMD_SUBSCRIBE_RND,      ///< #100 Subscribe command extension. (Send answer for one random peer by type)
+    CMD_L0_CLIENT_BROADCAST,///< #101 Send data to all L0 clients
+
+    CMD_GET_PUBLIC_IP,         ///< #102 Request public IPs, which set by l0_public_ipv4, l0_public_ipv6 parameters
+    CMD_GET_PUBLIC_IP_ANSWER,  ///< #103 Public IPs answer
 
     // Application level TR-UDP mode: 128...191
     CMD_128_RESERVED = 128, ///< #128 Reserver for future use
     CMD_USER,               ///< #129 User command
+    CMD_CONFIRM_AUTH = 147, ///< #147 Confirm auth
 
     // Application level not TR-UDP mode: 192...254
     CMD_192_RESERVED = 192, ///< #192 Reserver for future use
     CMD_USER_NR,            ///< #193 User command
+    CMD_ECHO_UNRELIABLE = 195,           ///< #195
+    CMD_ECHO_UNRELIABLE_ANSWER = 196,    ///< #196
     CMD_LAST = 255          ///< #255 Last command Reserved for future use
 };
 
-#define CMD_TRUDP_CHECK(CMD) (CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED)
+#define CMD_TRUDP_CHECK(CMD) (!CMD || CMD == CMD_CONNECT || (CMD >= CMD_64_RESERVED && CMD < CMD_192_RESERVED))
 
 /**
  * KSNet command class data
@@ -105,7 +120,7 @@ typedef struct ksnCorePacketData {
     void *raw_data;         ///< Received packet data
     size_t raw_data_len;    ///< Received packet length
 
-    ksnet_arp_data *arp;    ///< Pointer to ARP Table data
+    ksnet_arp_data_ext *arp;///< Pointer to extended ARP Table data
 
     int l0_f;               ///< L0 command flag (from set to l0 client name)
 
@@ -120,14 +135,17 @@ ksnCommandClass *ksnCommandInit(void *kc);
 void ksnCommandDestroy(ksnCommandClass *kco);
 int ksnCommandCheck(ksnCommandClass *kco, ksnCorePacketData *rd);
 int ksnCommandSendCmdEcho(ksnCommandClass *kco, char *to, void *data, 
-  size_t data_len);
+    size_t data_len);
 void *ksnCommandEchoBuffer(ksnCommandClass *kco, void *data, size_t data_len, 
-        size_t *data_t_len);
+    size_t *data_t_len);
 int ksnCommandSendCmdConnect(ksnCommandClass *kco, char *to, char *name, 
-  char *addr, uint32_t port);
+    char *addr, uint32_t port);
 
 int cmd_disconnected_cb(ksnCommandClass *kco, ksnCorePacketData *rd);
-
+int send_cmd_connect_cb_b(ksnetArpClass *ka, char *peer_name,
+    ksnet_arp_data_ext *arp, void *data);
+int send_cmd_connect_cb(ksnetArpClass *ka, char *peer_name,
+    ksnet_arp_data_ext *arp, void *data);
 #ifdef	__cplusplus
 }
 #endif

@@ -80,7 +80,7 @@ ksnetEvMgrClass *ksnetEvMgrInitP(int argc, char** argv,
     else SvSetSV(callback, pFcn);
 
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb, READ_ALL);
-    //ke->n_num = 1;
+    //ke->net_idx = 1;
     return ke;
 }
 

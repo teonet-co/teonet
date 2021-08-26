@@ -21,6 +21,7 @@
 #include "config/conf.h"
 #include "net_core.h"
 
+#include "utils/string_arr.h"
 /**
  * Ping timer data
  */
@@ -94,6 +95,9 @@ typedef struct ksnetHotkeysClass  {
     int str_number; ///< Nuber of current string
     char str[4][KSN_BUFFER_SM_SIZE]; ///< Strings
 
+    unsigned filter_f;
+    char *filter;
+
     ping_timer_data *pt; ///< Hotkey Pinger timer data
     monitor_timer_data *mt; ///< Hotkey Monitor timer data
     peer_timer_data *pet; ///< Hotkey Peer timer data
@@ -117,6 +121,10 @@ extern "C" {
 
 ksnetHotkeysClass *ksnetHotkeysInit(void *ke);
 void ksnetHotkeysDestroy(ksnetHotkeysClass *kh);
+
+void teoHotkeySetFilter(ksnetHotkeysClass *hotkeys, char *filter);
+unsigned char teoFilterFlagCheck(void *ke);
+unsigned char teoLogCheck(void *ke, void *log);
 
 void _keys_non_blocking_start(ksnetHotkeysClass *kh);
 /**

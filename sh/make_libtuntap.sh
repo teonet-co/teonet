@@ -144,5 +144,6 @@ else
 fi
 
 cd ..
+cp libtuntap-master/*.deb ./
 rm -fr libtuntap-master
 echo ""

@@ -56,7 +56,7 @@ int app_state = STATE_NONE; ///< Application state
 void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
               size_t data_len, void *user_data) {
     
-    char *peer_to = ke->ksn_cfg.app_argv[1]; 
+    char *peer_to = ke->teo_cfg.app_argv[1]; 
     
     switch(event) {
         
@@ -140,40 +140,19 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     // Send reset
                     case '4':
                     {
-                        ksnet_arp_data *arp = ksnetArpGet(ke->kc->ka, peer_to);
+                        ksnet_arp_data *arp = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, peer_to);
                         if(arp != NULL) {
-                            
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
-                            socklen_t addrlen = sizeof(remaddr); // length of addresses
-//                            memset((char *) &remaddr, 0, addrlen);
-//                            remaddr.sin_family = AF_INET;
-//                            remaddr.sin_port = htons(arp->port);
-//                            #ifndef HAVE_MINGW
-//                            if(inet_aton(arp->addr, &remaddr.sin_addr) == 0) {
-//                                //return(-2);
-//                            }
-//                            #else
-//                            remaddr.sin_addr.s_addr = inet_addr(addr);
-//                            #endif
-                            if(!make_addr(arp->addr, arp->port, 
-                                    (__SOCKADDR_ARG) &remaddr, &addrlen)) {
-                                
-                                #if TRUDP_VERSION == 1
-                                ksnTRUDPresetSend(ke->kc->ku, ke->kc->fd, 
-                                        (__CONST_SOCKADDR_ARG) &remaddr);
-                                ksnTRUDPreset(ke->kc->ku, 
-                                        (__CONST_SOCKADDR_ARG) &remaddr, 0);
-                                ksnTRUDPstatReset(ke->kc->ku);
-                                #else
-                                trudpChannelData *tcd;
-                                if((tcd = trudpGetChannel(
-                                    ke->kc->ku, (__CONST_SOCKADDR_ARG)&remaddr, 0)) != (void*)-1)
-                                        trudp_ChannelSendReset(tcd);
-                                #endif
+                            socklen_t addrlen = sizeof(remaddr);
+                            if(!make_addr(arp->addr, arp->port, (__SOCKADDR_ARG) &remaddr, &addrlen)) {
+                                trudpChannelData *tcd = trudpGetChannel(ke->kc->ku, (__CONST_SOCKADDR_ARG)&remaddr, addrlen, 0);
+                                if((tcd != (void*)-1) && (tcd != NULL)) {
+                                    trudp_ChannelSendReset(tcd);
+                                }
                             }
                         }
-                        
+
                         // Show menu
                         ke->event_cb(ke, EV_K_USER , NULL, 0, NULL);
                     }
@@ -183,13 +162,12 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                     case '5':
                     {
                         show_data_or_statistic_at_server = !show_data_or_statistic_at_server;
-                        ksnet_arp_data *arp = ksnetArpGet(ke->kc->ka, peer_to);
-                        if(arp != NULL) {
+                        ksnet_arp_data *arp_data = (ksnet_arp_data *)ksnetArpGet(ke->kc->ka, peer_to);
+                        if(arp_data != NULL) {
                             // Make address from string
                             struct sockaddr_in remaddr; // remote address
                             socklen_t addrlen = sizeof(remaddr); // length of addresses
-                            if(!make_addr(arp->addr, arp->port, 
-                                    (__SOCKADDR_ARG) &remaddr, &addrlen)) {
+                            if(!make_addr(arp_data->addr, arp_data->port, (__SOCKADDR_ARG) &remaddr, &addrlen)) {
                                 
                                 //Make command string
                                 char *command = ksnet_formatMessage("%s %d", 
@@ -292,11 +270,11 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
                         // Show DATA - stop TR-UDP statistic
                         if(show_data_or_statistic_at_server) {
                             
-                            ke->ksn_cfg.show_tr_udp_f = 0;
+                            ke->teo_cfg.show_tr_udp_f = 0;
                         }
                         //Show Statistic - start TR-UDP statistic
                         else {
-                            ke->ksn_cfg.show_tr_udp_f = 1;
+                            ke->teo_cfg.show_tr_udp_f = 1;
                         }
                     }
                 }    

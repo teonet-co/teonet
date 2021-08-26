@@ -11,19 +11,34 @@ AC_SUBST([$1], ['$2'])
 ])
 # END
 
+m4_define([package_major], [0])
+m4_define([package_minor], [4])
+m4_define([package_patch], [7])
+m4_define([package_version], [package_major[.]package_minor[.]package_patch])
+
 AC_PREREQ([2.69])
-AC_INIT([teonet], [0.2.17], [kirill@scherba.ru])
-AC_DEFINE_SUBST(LIBRARY_MAJOR_VERSION, 113, [Teonet dynamic library version])
-AC_DEFINE(COPYRIGHT, ["(c) Kirsoft Inc., 1996-2018"], [Teonet library copyright])
+
+AC_INIT([teonet], [package_version], [Kirill Scherba <kirill@scherba.ru>, Max Ponka <mpano91@gmail.com>])
+
+AC_DEFINE_SUBST(LIBRARY_CURRENT,  3, [teonet dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_REVISION, 7, [teonet dynamic library version])
+AC_DEFINE_SUBST(LIBRARY_AGE,      0, [teonet dynamic library version])
+
+AC_DEFINE_SUBST(PACKAGE_MAJOR_VERSION, [package_major], [pack ver])
+AC_DEFINE_SUBST(PACKAGE_MINOR_VERSION, [package_minor], [pack ver])
+AC_DEFINE_SUBST(PACKAGE_PATCH_VERSION, [package_patch], [pack ver])
+
+AC_DEFINE(COPYRIGHT, ["(c) Teonet co., 1996-2020"], [Teonet library copyright])
 
 AC_CONFIG_HEADERS([src/config/config.h])
-AC_CONFIG_SRCDIR([src/teonet.c])
-
-AM_INIT_AUTOMAKE
-AM_INIT_AUTOMAKE([subdir-objects])
-AM_SILENT_RULES([yes])
+AC_CONFIG_SRCDIR([src/teonet.hpp])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_AUX_DIR([build-aux])
 
 AC_USE_SYSTEM_EXTENSIONS
+# AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+AM_SILENT_RULES([yes])
 
 m4_include([libev.m4])
 
@@ -35,7 +50,7 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_RANLIB
+# AC_PROG_RANLIB
 
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lconfuse':
@@ -216,16 +231,22 @@ AM_CONDITIONAL(TEO_THREAD, false)
 
 AC_CACHE_SAVE
 
-dnl ***************************************************************************
-dnl Internationalization
-dnl ***************************************************************************
-IT_PROG_INTLTOOL([0.35.0])
-
 GETTEXT_PACKAGE=teonet
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
 
 AM_GLIB_GNU_GETTEXT
+
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
+
+# ***************************************************************************
+# Internatinalization
+# ***************************************************************************
+GETTEXT_PACKAGE=teousr
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [GETTEXT package name])
+AM_GLIB_GNU_GETTEXT
+IT_PROG_INTLTOOL([0.35.0])
 
 dnl ***************************************************************************
 dnl Documentation
@@ -238,7 +259,8 @@ if test $HAVE_DOXYGEN = "false"; then
     AC_MSG_WARN([*** doxygen not found, docs will not be built])
 else
 
-DX_HTML_FEATURE(OFF)
+DX_DOXYGEN_FEATURE(ON)
+DX_HTML_FEATURE(ON)
 DX_CHM_FEATURE(OFF)
 DX_CHI_FEATURE(OFF)
 DX_MAN_FEATURE(OFF)
@@ -260,23 +282,19 @@ AM_CONDITIONAL(RELEASE_TEONET, test "$release_teonet" = true)
 
 AC_CACHE_SAVE
 
+LT_PREREQ([2.4])
 LT_INIT
 
 AC_CONFIG_FILES([
     Makefile
     po/Makefile.in
-    src/libteonet.pc
+    src/libteonet.pc:src/libteonet.pc.in
     src/Makefile
-    examples/Makefile
-    examples/fossa/Makefile
-    tests/Makefile
     app/Makefile
+    tests/Makefile
+    examples/fossa/Makefile
+    examples/Makefile
     sh/Makefile
-    embedded/Makefile
-    embedded/teocli/linux/Makefile
 ])
-
-# Call libtrudp's ./configure script recursively.
-AC_CONFIG_SUBDIRS([embedded/libtrudp])
 
 AC_OUTPUT

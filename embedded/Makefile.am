@@ -1,4 +1,1 @@
-EXTRA_DIST = libpbl teocli libtrudp
-
-#SUBDIRS = libteol0
-
+EXTRA_DIST = libpbl teocli

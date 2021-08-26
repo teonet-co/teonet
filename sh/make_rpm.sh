@@ -78,29 +78,12 @@ make_install $PWD/$PACKAGE_NAME
 build_rpm_tarball $PACKAGE_NAME
 
 # Copy tarball to the sources folder and create spec file
-RPM_FILES="/usr/bin/teovpn
-   /usr/bin/teodb
-   /usr/bin/teogw
-   /usr/bin/teoweb
-   /usr/bin/teodsp
-   /usr/doc/teonet/
-   /usr/doc/libtrudp/
-   /usr/etc/teonet/teonet.conf.default
-   /usr/include/teonet/
-   /usr/include/trudp.h
-   /usr/lib/libteonet.a
-   /usr/lib/libteonet.la
-   /usr/lib/libteonet.so
-   /usr/lib/libteonet.so.$LIBRARY_HI_VERSION
-   /usr/lib/libteonet.so.$LIBRARY_VERSION
-   /usr/lib/libtrudp.a
-   /usr/lib/libtrudp.la
-   /usr/lib/libtrudp.so
-   /usr/lib/libtrudp.so.3
-   /usr/lib/libtrudp.so.3.0.0
-   /usr/share/doc/teonet/examples/
-   /usr/share/doc/libtrudp/
-"
+cp sh/rpm_files.txt sh/rpm_files_tmp.txt
+sed -i "s/LIBRARY_HI_VERSION/$LIBRARY_HI_VERSION/g" sh/rpm_files_tmp.txt
+sed -i "s/LIBRARY_VERSION/$LIBRARY_VERSION/g" sh/rpm_files_tmp.txt
+RPM_FILES=`cat sh/rpm_files_tmp.txt`
+rm sh/rpm_files_tmp.txt
+
 create_rpm_control $RPMBUILD $PACKAGE_NAME $PACKET_NAME $VER $RELEASE "${PACKET_SUMMARY}" "${RPM_FILES}"
 
 # Build the source and the binary RPM
@@ -120,6 +103,15 @@ if [ $RPM_SUBTYPE = 'zyp' ]; then
 else
     SUBFOLDER="rhel"
 fi
+
+# Download existing repository to local host -----------------------------------
+if [ ! -z "$CI_BUILD_REF" ]; then
+
+    # Download repository from remote host by ftp:
+    sh/make_remote_download.sh $RPM_SUBTYPE "$INST"
+
+fi
+
 create_rpm_repo $RPMBUILD $REPO/$SUBFOLDER $ARCH "${INST}"
 
 # Upload repository to remote host and Test Install and run application

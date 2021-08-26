@@ -40,17 +40,21 @@ else
     fi
 fi
 
-mkdir $REPO
-mkdir $REPO/$SUBFOLDER
+if [ ! -d "$REPO" ]; then
+    mkdir $REPO
+    if [ ! -d "$REPO/$SUBFOLDER" ]; then
+        mkdir $REPO/$SUBFOLDER
+    fi
+fi
 
 # Upload local repository to remote host
 echo $ANSI_BROWN"Download remote host to local repository:"$ANSI_NONE
 echo ""
 lftp -c "
 set ftp:list-options -a;
-open ftp://repo:$CI_TEONET_REPO_FTP_PWD@repo.ksproject.org; 
+open ftp://$REPO_USER:$REPO_PASSWORD@repo2.ksproject.org;
 lcd $REPO/$SUBFOLDER;
-cd /$SUBFOLDER;
+cd repo/$SUBFOLDER;
 mirror --delete --use-cache --verbose --allow-chown
 "
 echo ""

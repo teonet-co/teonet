@@ -171,7 +171,7 @@ int ksnTcpServerCreate(
     int *port_created) {
 
     #ifdef DEBUG_KSNET
-    ksn_printf(((ksnetEvMgrClass*)kt->ke), MODULE, DEBUG,
+    ksn_printf(((ksnetEvMgrClass*)kt->ke), MODULE, DEBUG_VV,
             "try create TCP server at port %d ...\n", port);
     #endif
 
@@ -338,7 +338,7 @@ void ksnTcpServerStopAll(ksnTcpClass *kt) {
  * @return
  */
 int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
-
+    /*IPV6_later*/
     int sd = 0;
 
     #ifdef KSNET_IPV6_ENABLE
@@ -391,7 +391,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
 
         // Bind socket to address
         if (bind(sd, (struct sockaddr*) &addr, sizeof(addr)) != 0) {
-            ksn_printf(kev, MODULE, DEBUG,
+            ksn_printf(kev, MODULE, DEBUG_VV,
                     "%s""can't bind on port %d, trying next port number ...%s\n", 
                     ANSI_DARKGREY, *port, ANSI_NONE);
             close(sd);
@@ -407,11 +407,11 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
     }
         
     // Set non block mode
-    set_nonblock(sd);
+    teosockSetBlockingMode(sd, TEOSOCK_NON_BLOCKING_MODE);
 
     // Server welcome message
     #ifdef DEBUG_KSNET
-    ksn_printf(kev, MODULE, DEBUG,
+    ksn_printf(kev, MODULE, DEBUG_VV,
             "start listen at port %d, socket fd %d\n", *port, sd);
     #endif
 
@@ -426,7 +426,7 @@ int ksnTcpServerStart(ksnTcpClass *kt, int *port) {
  * @param revents
  */
 void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
-
+    /*IPV6_later*/
     ev_ksnet_io *watcher = (ev_ksnet_io *) w;
     ksnetEvMgrClass *ke = (ksnetEvMgrClass *) watcher->io.data;
 
@@ -475,7 +475,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
 //    total_clients ++;
 
     // Get Client IPv4 & port number
-    int client_family = AF_INET;
+    //int client_family = AF_INET;
     char client_ip[100];
     struct sockaddr_in *addr = (struct sockaddr_in*) &client_addr;
     #ifndef KSNET_IPV6_ENABLE
@@ -484,7 +484,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
     #endif
     int client_port = (int) ntohs(addr->sin_port);
     #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG, "client port is: %d\n", client_port);
+    ksn_printf(ke, MODULE, DEBUG_VV, "client port is: %d\n", client_port);
     #endif
 
     // Sockets Layer Call: inet_ntop()
@@ -496,21 +496,14 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
         memmove(client_ip, client_ip + sizeof(IPV4_PREF) - 1,
                 strlen(client_ip) - (sizeof(IPV4_PREF) - 1) + 1 );
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG, "client IP address is: %s\n", client_ip);
+        ksn_printf(ke, MODULE, DEBUG_VV, "client IP address is: %s\n", client_ip);
         #endif
     } else {
-        client_family = AF_INET6;
+        //client_family = AF_INET6;
         #ifdef DEBUG_KSNET
-        ksn_printf(ke, MODULE, DEBUG, "client IPv6 address is: %s\n", client_ip);
+        ksn_printf(ke, MODULE, DEBUG_VV, "client IPv6 address is: %s\n", client_ip);
         #endif
     }
-    #endif
-
-    #ifdef DEBUG_KSNET
-    ksn_printf(ke, MODULE, DEBUG,
-        "successfully connected with client (%d), from IP%s: %s\n",
-        client_sd, client_family == AF_INET6 ? "v6" : "" , client_ip
-    );
     #endif
 
     // Execute ksnet callback (to Initialize and start watcher to read Servers client requests)
@@ -545,7 +538,7 @@ void ksnTcpServerAccept(struct ev_loop *loop, ev_io *w, int revents) {
  * @return Socket description: > 0 - success connection
  */
 int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
-
+    /*IPV6_later*/
     /* Variable and structure definitions. */
     int sd, rc;
     struct sockaddr_in serveraddr;
@@ -572,7 +565,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
 
     #ifdef DEBUG_KSNET
     ksn_printf(kev, MODULE, DEBUG,
-            "connecting to the f***ing %s, port %d ...\n", server, port);
+            "connecting to the %s, port %d ...\n", server, port);
     #endif
 
     memset(&serveraddr, 0x00, sizeof(struct sockaddr_in));
@@ -617,7 +610,7 @@ int ksnTcpClientCreate(ksnTcpClass *kt, int port, const char *server) {
     }
 
     // Set non block mode
-    set_nonblock(sd);
+    teosockSetBlockingMode(sd, TEOSOCK_NON_BLOCKING_MODE);
 
     return sd;
 }

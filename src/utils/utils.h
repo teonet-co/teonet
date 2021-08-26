@@ -16,6 +16,15 @@
 #include "string_arr.h"
 #include "config/conf.h"
 
+typedef struct addr_port {
+    char *addr;
+    uint16_t port;
+    int (*equal)(struct addr_port *, char*, uint16_t);
+} addr_port_t;
+
+addr_port_t *wrap_inet_ntop(const struct sockaddr *sa);
+void addr_port_free(addr_port_t *ap_obj);
+
 /**
  * KSNet printf messages types
  */
@@ -41,27 +50,29 @@ typedef enum ksnet_printf_type {
     type == CONNECT ? "CONNECT" : "DISPLAY")
 
 #define _ksn_printf_format_(format) "%s %s: " _ANSI_GREY "%s:(%s:%d)" _ANSI_NONE ": " _ANSI_GREEN format _ANSI_NONE
+#define _ksn_printf_format_display_m(format) "%s%s%s%s%d\b" format
 
 #define ksn_printf(ke, module, type, format, ...) \
-    ksnet_printf(&((ke)->ksn_cfg), type, \
+    ksnet_printf(&((ke)->teo_cfg), type, \
         _ksn_printf_format_(format), \
         _ksn_printf_type_(type), \
-        module == NULL ? (ke)->ksn_cfg.app_name : module, \
+        module[0] == '\0' ? (ke)->teo_cfg.app_name : module, \
         __func__, __FILE__, __LINE__, __VA_ARGS__)
 
 #define ksn_puts(ke, module, type, format) \
-    ksnet_printf(&((ke)->ksn_cfg), type, \
+    ksnet_printf(&((ke)->teo_cfg), type, \
         _ksn_printf_format_(format) "\n", \
         _ksn_printf_type_(type), \
-        module == NULL ? (ke)->ksn_cfg.app_name : module, \
+        module[0] == '\0' ? (ke)->teo_cfg.app_name : module, \
         __func__, __FILE__, __LINE__)
 
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
-    
-int ksnet_printf(ksnet_cfg *ksn_cfg, int type, const char* format, ...);
+
+int teoLogPuts(teonet_cfg *teo_cfg, const char* module , int type, const char* message);        
+int ksnet_printf(teonet_cfg *teo_cfg, int type, const char* format, ...);       
 char *ksnet_formatMessage(const char *fmt, ...);
 char *ksnet_sformatMessage(char *str_to_free, const char *fmt, ...);
 char *ksnet_vformatMessage(const char *fmt, va_list ap);
@@ -76,13 +87,12 @@ char *removeTEsc(char *str);
 int calculate_lines(char *str);
 int inarray(int val, const int *arr, int size);
 
-void set_nonblock(int sd);
 int set_reuseaddr(int sd);
 
-const char* getDataPath(void);
-const char *ksnet_getSysConfigDir(void);
+char* getDataPath(void);
+char *ksnet_getSysConfigDir(void);
 
-ksnet_stringArr getIPs(ksnet_cfg *conf);
+ksnet_stringArr getIPs(teonet_cfg *conf);
 int ip_is_private(char *ip);
 int ip_to_array(char* ip, uint8_t *arr);
 
@@ -100,6 +110,10 @@ unsigned char *ksn_base64_decode(const char *data,
                              size_t input_length,
                              size_t *output_length);
 
+void dump_bytes(char *buffer, int buffer_len, uint8_t* data, int data_len);
+
+void printHexDump(void *addr, size_t len);
+void resolveDnsName(teonet_cfg *conf);
 #ifdef	__cplusplus
 }
 #endif

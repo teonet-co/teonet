@@ -510,6 +510,8 @@ static RLUTIL_INLINE void showcursor(void) {
 #endif // _WIN32 || USE_ANSI
 }
 
+extern int usleep (__useconds_t __useconds);
+
 /// Function: msleep
 /// Waits given number of milliseconds before continuing.
 static RLUTIL_INLINE void msleep(unsigned int ms) {
@@ -519,9 +521,9 @@ static RLUTIL_INLINE void msleep(unsigned int ms) {
 	// usleep argument must be under 1 000 000
 	if (ms > 1000) sleep(ms/1000000);
         #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
+        //#pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
 	usleep((ms % 1000000) * 1000);
-        #pragma GCC diagnostic pop
+        //#pragma GCC diagnostic pop
 #endif
 }
 

@@ -80,7 +80,7 @@ void test2(int argc, char** argv) {
     ksnetEvMgrClass *ke = ksnetEvMgrInit(argc, argv, event_cb /* NULL */, READ_OPTIONS|READ_CONFIGURATION);
 
     // Hello message
-    ksnet_printf(&ke->ksn_cfg, DISPLAY_M,
+    ksnet_printf(&ke->teo_cfg, DISPLAY_M,
             "KSMesh UDP Client Server test ver. " VERSION "\n\n");
 
     // Start teonet

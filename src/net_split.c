@@ -12,6 +12,7 @@
 
 #include "net_split.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 
 #define MODULE _ANSI_BLUE "net_split" _ANSI_NONE
 
@@ -25,7 +26,7 @@
  */
 ksnSplitClass *ksnSplitInit(ksnCommandClass *kco) {
 
-    ksnSplitClass *ks = malloc(sizeof(ksnSplitClass));
+    ksnSplitClass *ks = teo_malloc(sizeof(ksnSplitClass));
     ks->kco = kco;
     ks->map = pblMapNewHashMap();
     ks->packet_number = 0;
@@ -103,8 +104,8 @@ void **ksnSplitPacket(ksnSplitClass *ks, uint8_t cmd, void *packet, size_t packe
  *
  * @param ks Pointer to ksnSplitClass
  * @param rd Pointer to ksnCorePacketData
- * 
- * @return Pointer to combined packet ksnCorePacketData or NULL if not combined 
+ *
+ * @return Pointer to combined packet ksnCorePacketData or NULL if not combined
  *         or error
  */
 ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
@@ -115,8 +116,8 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     // Parse command
     size_t ptr_d = 0;
     uint16_t packet_num = *(uint16_t*)rd->data; ptr_d += sizeof(uint16_t); // Packet number
-    int last_packet = (*(uint16_t*)(rd->data + ptr_d)) & (MAX_PACKET_LEN + 1); // Is this last packet
-    uint16_t subpacket_num = (*(uint16_t*)(rd->data + ptr_d)) & MAX_PACKET_LEN; ptr_d += sizeof(uint16_t); // Subpacket number
+    int last_packet = (*(uint16_t*)(rd->data + ptr_d)) & LAST_PACKET_FLAG; // Is this last packet
+    uint16_t subpacket_num = (*(uint16_t*)(rd->data + ptr_d)) & (LAST_PACKET_FLAG-1); ptr_d += sizeof(uint16_t); // Subpacket number
 
     /* Map key structure:
      *
@@ -129,7 +130,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     // Create maps key macros
     #define create_key(subpacket_num) \
     size_t key_len = sizeof(uint8_t) + rd->from_len + sizeof(uint16_t)*2; \
-    void *key = malloc(key_len); \
+    void *key = teo_malloc(key_len); \
     size_t ptr = 0; \
     *(uint8_t*)key = rd->from_len; ptr += sizeof(uint8_t); \
     memcpy(key + ptr, rd->from, rd->from_len); ptr += rd->from_len; \
@@ -145,7 +146,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
     create_key(subpacket_num);
     pblMapAdd(ks->map, key, key_len, rd->data + ptr_d, rd->data_len - ptr_d);
     free(key);
-    
+
     // Save current time when record was added to map
     ks->last_added = current_time;
 
@@ -157,8 +158,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
         void *data = malloc(data_len_alloc);
 
         // Create new rds
-        rds = malloc(sizeof(ksnCorePacketData));
-        memset(rds, 0, sizeof(ksnCorePacketData));
+        rds = teo_calloc(sizeof(ksnCorePacketData));
 
         // Get subpackets from map and add it to combined block
         int i;
@@ -170,9 +170,13 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             void *data_s = pblMapGet(ks->map, key, key_len, &data_s_len);
 
             // Check error (the subpacket has not received or added to the map)
-            if(data_s == NULL) {                 
-                free(key); 
-                return NULL; 
+            if(data_s == NULL) {
+                #ifdef DEBUG_KSNET
+                ksn_puts(kev, MODULE, ERROR_M,
+                    "the subpacket has not received or added to the map\n");
+                free(key);
+                #endif
+                return NULL;
             }
 
             // Get command from first subpacket
@@ -184,7 +188,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
             // Reallocate memory
             if(data_len_alloc < data_len + data_s_len) {
                 data_len_alloc = data_len + data_s_len;
-                data = realloc(data, data_len_alloc);
+                data = teo_realloc(data, data_len_alloc);
             }
 
             // Combine data
@@ -206,6 +210,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
         rds->addr = rd->addr;
         rds->arp = rd->arp;
         rds->data = data;
+        ks->data_save = data;
         rds->data_len = data_len;
         rds->from = rd->from;
         rds->from_len = rd->from_len;
@@ -227,8 +232,7 @@ ksnCorePacketData *ksnSplitCombine(ksnSplitClass *ks, ksnCorePacketData *rd) {
 void ksnSplitFreeRds(ksnSplitClass *ks, ksnCorePacketData *rd) {
 
     if(rd != NULL) {
-
-        free(rd->data);
+        free(ks->data_save);
         free(rd);
     }
 }

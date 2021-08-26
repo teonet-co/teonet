@@ -47,16 +47,16 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
         {
             if(data != NULL) {
                 
-                if(!strcmp(((ksnCorePacketData*)data)->from, ke->ksn_cfg.app_argv[1])) {
+                if(!strcmp(((ksnCorePacketData*)data)->from, ke->teo_cfg.app_argv[1])) {
                     
                     printf("Peer \"%s\" was connected\n", ((ksnCorePacketData*)data)->from);
 
                     printf("Create stream name \"%s\" with peer \"%s\" ...\n",  
-                        ke->ksn_cfg.app_argv[2], ke->ksn_cfg.app_argv[1]); 
+                        ke->teo_cfg.app_argv[2], ke->teo_cfg.app_argv[1]); 
 
                     // Send create stream request
-                    ksnStreamCreate(ke->ks, ke->ksn_cfg.app_argv[1], 
-                        ke->ksn_cfg.app_argv[2],  CMD_ST_CREATE);
+                    ksnStreamCreate(ke->ks, ke->teo_cfg.app_argv[1], 
+                        ke->teo_cfg.app_argv[2],  CMD_ST_CREATE);
                 }
             
             }
@@ -106,8 +106,10 @@ void event_cb(ksnetEvMgrClass *ke, ksnetEvMgrEvents event, void *data,
             if((rc = read(sd.fd_in, read_buf, KSN_BUFFER_SM_SIZE)) >= 0) {
                 
                 printf("Read %d bytes from stream name \"%s\" of peer \"%s\": "
-                       "\"%s\"\n", 
-                       (int) rc, sd.stream_name, sd.peer_name, read_buf);
+                        "\"%s\"\n", 
+                        (int) rc, sd.stream_name, sd.peer_name, read_buf);
+
+                //if(write(sd.fd_out, read_buf, rc) >= 0);
             }
 
         } break;

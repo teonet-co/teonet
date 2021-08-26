@@ -20,6 +20,8 @@
 #include "utils/rlutil.h"
 #include "utils/utils.h"
 #include "tr-udp_stat.h"
+#include "utils/teo_memory.h"
+#include "text-filter/text-filter.h"
 
 #undef MODULE
 #define MODULE _ANSI_CYAN "event_manager" _ANSI_NONE
@@ -65,15 +67,47 @@ const char
 /* Hot keys functions                                                         */
 /*                                                                            */
 /******************************************************************************/
+#define kev ((ksnetEvMgrClass*)ke) // Event manager
+#define khv  kev->kh   // Hotkeys class
+#define kc  kev->kc   // Net core class
+
+void hotkeysResetFilter(ksnetHotkeysClass *hotkeys) {
+    if (hotkeys->filter != NULL) {
+        free(hotkeys->filter);
+        hotkeys->filter = NULL;
+    }
+ }
+
+void teoHotkeySetFilter(ksnetHotkeysClass *hotkeys, char *filter) {
+    hotkeysResetFilter(hotkeys);
+    hotkeys->filter = malloc(strlen(filter) + 1);
+    strncpy(hotkeys->filter, filter, strlen(filter) + 1);
+ }
+
+ 
+unsigned char teoFilterFlagCheck(void *ke) {
+    if (khv != NULL) {
+        if (khv->filter_f) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+unsigned char teoLogCheck(void *ke, void *log) {
+
+    if ((log != NULL) && (khv != NULL) && (khv->filter != NULL)) {
+        if (log_string_match((char *)log, khv->filter)) return 1;
+    } else return 1;
+    return 0;
+}
 
 /**
  * Callback procedure which called by event manager when STDIN FD has any data
  */
-int hotkeys_cb(void *ke, void *data, ev_idle *w) {
-
-    #define kev ((ksnetEvMgrClass*)ke) // Event manager
-    #define khv  kev->kh   // Hotkeys class
-    #define kc  kev->kc   // Net core class
+int hotkeys_cb(ksnetEvMgrClass *ke, void *data, ev_idle *w) {
 
     int hotkey;
 
@@ -109,7 +143,9 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             "%s"
             " "COLOR_DW"u"COLOR_END" - TR-UDP statistics\n"
             " "COLOR_DW"Q"COLOR_END" - TR-UDP queues\n"
+            " "COLOR_DW"s"COLOR_END" - show subscribers\n"
             " "COLOR_DW"a"COLOR_END" - show application menu\n"
+            " "COLOR_DW"f"COLOR_END" - set filter\n"
             " "COLOR_DW"r"COLOR_END" - restart application\n"
             " "COLOR_DW"q"COLOR_END" - quit from application\n"
             "--------------------------------------------------------------------\n"
@@ -119,13 +155,13 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             , ""
             #endif
             #ifdef DEBUG_KSNET
-            , (kev->ksn_cfg.show_debug_f ? SHOW : DONT_SHOW)
-            , (kev->ksn_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
-            , (kev->ksn_cfg.show_debug_vvv_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_vv_f ? SHOW : DONT_SHOW)
+            , (kev->teo_cfg.show_debug_vvv_f ? SHOW : DONT_SHOW)
             #endif
             , (khv->pt != NULL ? "(running now, press i to stop)" : "")
             , (khv->mt != NULL ? "(running now, press M to stop)" : "")
-            , kev->num_nets > 1 ? " "COLOR_DW"n"COLOR_END" - switch to other network\n" : ""
+            , kev->net_count > 1 ? " "COLOR_DW"n"COLOR_END" - switch to other network\n" : ""
             );
             break;
 
@@ -172,6 +208,11 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                    (khv->tr_udp_queues_m ? STOP : START));
             
         } break;
+        
+        // Show subscribers
+        case 's':
+            teoSScrSubscriptionList(kc->kco->ksscr);
+            break;
             
         // Send User event to Application
         case 'a':
@@ -209,31 +250,31 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
         // Show debug
         case 'd':
-            if(kev->ksn_cfg.show_debug_vv_f || kev->ksn_cfg.show_debug_vvv_f)
-                kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f = 0;
+            if(kev->teo_cfg.show_debug_vv_f || kev->teo_cfg.show_debug_vvv_f)
+                kev->teo_cfg.show_debug_vv_f = kev->teo_cfg.show_debug_vvv_f = 0;
             else {
-                kev->ksn_cfg.show_debug_f = !kev->ksn_cfg.show_debug_f;
+                kev->teo_cfg.show_debug_f = !kev->teo_cfg.show_debug_f;
                 printf("Show debug messages switch %s\n",
-                     (kev->ksn_cfg.show_debug_f ? ON :OFF));
+                     (kev->teo_cfg.show_debug_f ? ON :OFF));
             }  
             break;
 
         // Show debug_vv
         case 'w':
-            if(!kev->ksn_cfg.show_debug_vvv_f) {
-              kev->ksn_cfg.show_debug_vv_f = !kev->ksn_cfg.show_debug_vv_f;
+            if(!kev->teo_cfg.show_debug_vvv_f) {
+              kev->teo_cfg.show_debug_vv_f = !kev->teo_cfg.show_debug_vv_f;
             }  
-            kev->ksn_cfg.show_debug_vvv_f = 0;
+            kev->teo_cfg.show_debug_vvv_f = 0;
             printf("Show debug_vv messages switch %s\n",
-                   (kev->ksn_cfg.show_debug_vv_f ? ON :OFF));
+                   (kev->teo_cfg.show_debug_vv_f ? ON :OFF));
             break;
 
         // Show debug_vvv
         case 'c':
-            kev->ksn_cfg.show_debug_vvv_f = !kev->ksn_cfg.show_debug_vvv_f;
-            kev->ksn_cfg.show_debug_vv_f = kev->ksn_cfg.show_debug_vvv_f;
+            kev->teo_cfg.show_debug_vvv_f = !kev->teo_cfg.show_debug_vvv_f;
+            kev->teo_cfg.show_debug_vv_f = kev->teo_cfg.show_debug_vvv_f;
             printf("Show debug_vvv messages switch %s\n",
-                   (kev->ksn_cfg.show_debug_vvv_f ? ON :OFF));
+                   (kev->teo_cfg.show_debug_vvv_f ? ON :OFF));
             break;
 
         // Send message
@@ -279,7 +320,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
 
         // Switch network
         case 'n':
-            if(kev->num_nets > 1) {
+            if(kev->net_count > 1) {
                 
                 if(khv->non_blocking) {
                     
@@ -292,9 +333,7 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                     
                     // Request string with new network number
                     khv->str_number = 0;
-                    printf("Enter new network number "
-                           "(from 1 to %d, current net is %d): ",  
-                           (int)kev->num_nets, (int)kev->n_num + 1);
+                    printf("Enter new network number :");
                     fflush(stdout);
                     
                     // Switch STDIN to receive string
@@ -318,11 +357,12 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     (char*)data, KSN_BUFFER_SM_SIZE);
                             
                             // Switch to entered network number 
-                            int n_num = atoi(khv->str[khv->str_number]);
-                            if(n_num >= 1 && n_num <= kev->num_nets) {
+                            int net_idx = atoi(khv->str[khv->str_number]);
+
+                            if(teoMultiIsNetworkExist(((ksnMultiClass *)kev->km), net_idx-1)) {
                                 
-                                n_num--;
-                                if(n_num != kev->n_num) {
+                                net_idx--;
+                                if(net_idx != kev->net_idx) {
                                     
                                     ksnetEvMgrClass *p_ke = ke;
                                     
@@ -333,13 +373,13 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     // Switch to new network (thread theme)
                                     if(p_ke->km == NULL) {
                                         for(;;) {
-                                            if(n_num < p_ke->n_num) p_ke = p_ke->n_prev;
-                                            else if(n_num > p_ke->n_num) p_ke = p_ke->n_next;
+                                            if(net_idx < p_ke->net_idx) p_ke = p_ke->n_prev;
+                                            else if(net_idx > p_ke->net_idx) p_ke = p_ke->n_next;
                                             else {
                                                 // Initialize hotkeys module
                                                 #define switch_to_net(p_ke) \
                                                 p_ke->kh = ksnetHotkeysInit(p_ke); \
-                                                printf("Switched to network #%d\n", n_num + 1); \
+                                                printf("Switched to network #%d\n", net_idx + 1); \
                                                 return 1
 
                                                 switch_to_net(p_ke);
@@ -348,13 +388,13 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
                                     }
                                     // Switch to new network (multi net module theme)
                                     else {
-                                        p_ke = (ksnetEvMgrClass *)ksnMultiGet(p_ke->km, n_num);
+                                        p_ke = (ksnetEvMgrClass *)ksnMultiGet(p_ke->km, net_idx);
                                         switch_to_net(p_ke);
                                     }
                                 }
-                                else printf("Already in network #%d\n", n_num + 1);
+                                else printf("Already in network #%d\n", net_idx + 1);
                             }
-                            else printf("Wrong network number #%d\n", n_num);
+                            else printf("Wrong network number #%d\n", net_idx);
                         }
                         break;
                     }
@@ -452,6 +492,36 @@ int hotkeys_cb(void *ke, void *data, ev_idle *w) {
             }
             break;
 
+        // Filter
+        case 'f':
+        {
+            khv->filter_f = !khv->filter_f;
+                // Got hot key
+            if(khv->non_blocking) {
+                khv->str_number = 0;
+                printf("Enter word filter: ");
+                fflush(stdout);
+                _keys_non_blocking_stop(khv); // Switch STDIN to string
+            }
+            // Got requested strings
+            else switch(khv->str_number) {
+                
+                // Got 'filter' string
+                case 0:
+                {
+                    trimlf((char*)data);
+                    if(((char*)data)[0]) {
+                        printf("FILTER '%s'\n", (char*)data);
+                        teoHotkeySetFilter(ke->kh, (char*)data);
+                    } else {
+                        printf("FILTER was reset\n");
+                        hotkeysResetFilter(ke->kh);
+                    }
+                    _keys_non_blocking_start(khv); // Switch STDIN to hot key
+                }
+                break;
+            }
+        } break;
         // Quit
         case 'q':
             puts("Press y to quit application");
@@ -534,7 +604,8 @@ void _keys_non_blocking_start(ksnetHotkeysClass *kh) {
 ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
 
     ksnetHotkeysClass *kh = malloc(sizeof(ksnetHotkeysClass));
-
+    memset(kh, 0, sizeof(ksnetHotkeysClass));
+    
     tcgetattr(0, &kh->initial_settings);
     _keys_non_blocking_start(kh);
     kh->wait_y = Y_NONE;
@@ -545,6 +616,8 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     kh->mt = NULL;
     kh->pet = NULL;
     kh->put = NULL;
+    kh->filter = NULL;
+    kh->filter_f = 1;
     kh->ke = ke;
 
     // Initialize and start STDIN keyboard input watcher
@@ -557,13 +630,13 @@ ksnetHotkeysClass *ksnetHotkeysInit(void *ke) {
     ev_idle_init (&kh->idle_stdin_w, idle_stdin_cb);
 
     // Start show peer
-    if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_peers_f) {
+    if(((ksnetEvMgrClass*)ke)->teo_cfg.show_peers_f) {
         kh->pet = peer_timer_init( ((ksnetEvMgrClass*)ke)->kc );
         kh->peer_m = 1;
     }
     // Start show TR-UDP statistic
     else
-    if(((ksnetEvMgrClass*)ke)->ksn_cfg.show_tr_udp_f) {
+    if(((ksnetEvMgrClass*)ke)->teo_cfg.show_tr_udp_f) {
         kh->put = tr_udp_timer_init( ((ksnetEvMgrClass*)ke)->kc );
         kh->tr_udp_m = 1;
     }
@@ -586,7 +659,6 @@ void ksnetHotkeysDestroy(ksnetHotkeysClass *kh) {
         
         ev_io_stop (ke->ev_loop, &kh->stdin_w);
         _keys_non_blocking_stop(kh);
-        
         free(kh);
         ke->kh = NULL;
     }
@@ -622,12 +694,12 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
         int ch = getchar();
         putchar(ch);
         putchar('\n');
-        data = malloc(sizeof(int));
+        data = teo_malloc(sizeof(int));
         *(int*)data = ch;
     }
 
     // Create STDIN idle watcher data
-    stdin_idle_data *id = malloc(sizeof(stdin_idle_data));
+    stdin_idle_data *id = teo_malloc(sizeof(stdin_idle_data));
     id->ke = ((ksnetEvMgrClass *)w->data);
     id->data = data;
     id->stdin_w = w;
@@ -649,27 +721,32 @@ void stdin_cb (EV_P_ ev_io *w, int revents) {
  */
 void idle_stdin_cb(EV_P_ ev_idle *w, int revents) {
 
-    #ifdef DEBUG_KSNET
-    ksn_printf(((stdin_idle_data *)w->data)->ke, MODULE, DEBUG_VV,
-                "STDIN idle (process data) callback (%c)\n", 
-                *((int*)((stdin_idle_data *)w->data)->data));
-    #endif
-
+    stdin_idle_data *idata = ((stdin_idle_data *)w->data);
+    
     // Stop this watcher
     ev_idle_stop(EV_A_ w);
 
+    if (!idata) {
+        return;
+    }
+
+    #ifdef DEBUG_KSNET
+    ksn_printf(idata->ke, MODULE, DEBUG_VV,
+                "STDIN idle (process data) callback (%c)\n", 
+                *((int*)idata->data));
+    #endif
+
     // Call the hot keys module callback
-    if(!hotkeys_cb(((stdin_idle_data *)w->data)->ke,
-               ((stdin_idle_data *)w->data)->data,
-               w)) {
+    if(!hotkeys_cb((ksnetEvMgrClass*)idata->ke, idata->data, w)) {
     
         // Start STDIN watcher
-        ev_io_start(EV_A_ ((stdin_idle_data *)w->data)->stdin_w);
+        ev_io_start(EV_A_ idata->stdin_w);
     }
 
     // Free watchers data
-    free(((stdin_idle_data *)w->data)->data);
+    free(idata->data);
     free(w->data);
+    w->data = NULL;
 }
 
 /******************************************************************************/
@@ -709,9 +786,9 @@ void ping_timer_cb(EV_P_ ev_timer *w, int revents) {
  */
 ping_timer_data *ping_timer_init(ksnCoreClass *kn, char *peer) {
 
-    ping_timer_data *pt = malloc(sizeof(ping_timer_data));
+    ping_timer_data *pt = teo_malloc(sizeof(ping_timer_data));
     pt->peer_name_len = strlen(peer) + 1;
-    pt->peer_name = malloc(pt->peer_name_len);
+    pt->peer_name = teo_malloc(pt->peer_name_len);
     strcpy(pt->peer_name, peer);
     pt->kn = kn;
 
@@ -755,20 +832,19 @@ void ping_timer_stop(ping_timer_data **pt) {
  * @param data
  */
 int monitor_timer_one_cb(ksnetArpClass *ka, char *peer_name, 
-        ksnet_arp_data *arp_data, void *data) {
+        ksnet_arp_data_ext *arp, void *data) {
 
 
     // Reset monitor time
     //ksnet_arp_data *arp_data = ksnetArpGet(ka, peer_name);
     printf("%s%s: %.3f ms %s \n",
-            arp_data->monitor_time == 0.0 ? 
+            arp->data.monitor_time == 0.0 ? 
                 getANSIColor(LIGHTRED) : getANSIColor(LIGHTGREEN),
-            peer_name, arp_data->monitor_time * 1000.0,
+            peer_name, arp->data.monitor_time * 1000.0,
             getANSIColor(NONE));
-    arp_data->monitor_time = 0;
-    ksnetArpAdd(ka, peer_name, arp_data);
+    arp->data.monitor_time = 0;
+    ksnetArpAdd(ka, peer_name, arp);
 
-    //peer_send_cmd_echo(kn, peer_name, (void*)MONITOR, MONITOR_LEN, 1);
     ksnCommandSendCmdEcho(((ksnetEvMgrClass*)(ka->ke))->kc->kco, peer_name,
                           (void*)MONITOR, MONITOR_LEN);
 
@@ -803,7 +879,7 @@ void monitor_timer_cb(EV_P_ ev_timer *w, int revents) {
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 monitor_timer_data *monitor_timer_init(ksnCoreClass *kn) {
 
-    monitor_timer_data *mt = malloc(sizeof(monitor_timer_data));
+    monitor_timer_data *mt = teo_malloc(sizeof(monitor_timer_data));
     mt->kn = kn;
 
     // Initialize and start main timer watcher, it is a repeated timer
@@ -893,7 +969,7 @@ void peer_timer_cb(EV_P_ ev_timer *tw, int revents) {
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 peer_timer_data *peer_timer_init(ksnCoreClass *kn) {
 
-    peer_timer_data *pet = malloc(sizeof(peer_timer_data));
+    peer_timer_data *pet = teo_malloc(sizeof(peer_timer_data));
     pet->kn = kn;
 
     // Initialize and start main timer watcher, it is a repeated timer
@@ -993,7 +1069,7 @@ void tr_udp_timer_cb(EV_P_ ev_timer *tw, int revents) {
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 tr_udp_timer_data *tr_udp_timer_init(ksnCoreClass *kn) {
 
-    tr_udp_timer_data *pet = malloc(sizeof(tr_udp_timer_data));
+    tr_udp_timer_data *pet = teo_malloc(sizeof(tr_udp_timer_data));
     pet->kc = kn;
     pet->num = 0;
 

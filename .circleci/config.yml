@@ -1,132 +1,114 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
-
-#workflows:
-version: 2
+version: 2.1
 jobs:
-
-  un-tagged-build:
-    #machine: true
-    docker: # run the steps with Docker
-      - image: gitlab.ksproject.org:5000/ci/ubuntu_teonet
+  testing:
+    machine:
+      docker_layer_caching: false
+    environment:
+      AWS_REGION: eu-west-1
+      AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
     steps:
       - checkout
       - run: git submodule update --init --recursive
+      - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
+      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
 
-      # show current variables
-      - run: echo $CIRCLE_PROJECT_REPONAME
-      - run: echo $CIRCLE_BRANCH
-      - run: echo $CIRCLE_TAG
-
-      # Install dependences
-      - run: sh/build-ubuntu.sh
-      # Make
-      - run: ./autogen.sh --prefix=/usr
-      - run: make
-      # Test
-      - run: app/teovpn -?
-      - run: make test
-
-#      # build the application image
-#      - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f docker/Dockerfile .
-#
-#      # Check created image
-#      - run: docker run -it --rm --name $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME node . -?
-#
-#      # This is place for run unit tests from docker container
-
+  compile:
+    docker:
+      - image: ubuntu:20.04
+        environment:
+          CI_FORCE_TEST: 1
+    working_directory: ~/teonet
+    steps:
+      - run:
+          command: |
+            apt update -qq
+            DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt-get -y install tzdata
+            apt install -y --no-install-recommends software-properties-common wget gpg-agent shellcheck
+            apt install -y --no-install-recommends git make pkg-config libtool autoconf intltool
+            apt install -y --no-install-recommends gcc gcc-7 gcc-8 gcc-10
+            apt install -y --no-install-recommends g++ g++-7 g++-8 g++-10
+            apt install -y --no-install-recommends libglib2.0-dev doxygen checkinstall libcunit1-dev libcpputest-dev libssl-dev libev-dev libconfuse-dev uuid-dev cpputest libcurl4-openssl-dev
+      - checkout
+      - run: git submodule update --init --recursive
+      - run: ./autogen.sh
+      - run: ./configure --prefix=/usr
+      - run: CC=gcc-10 CXX=g++-10 make
+      - run: CC=gcc-10 CXX=g++-10 make test
+      - run: make clean
 
   tagged-build:
-    machine: true
+    machine:
+      docker_layer_caching: false
+    environment:
+      AWS_REGION: eu-west-1
+      AWS_ECR_REPONAME: 932815733038.dkr.ecr.eu-west-1.amazonaws.com/teonet
+      YC_YCR_REPONAME: cr.yandex/crp8ph86e05bgnsgjbb8/teonet
     steps:
       - checkout
       - run: git submodule update --init --recursive
+      - run: docker build -t $CIRCLE_PROJECT_REPONAME -f sh/Dockerfile .
+      - run: docker run --rm $CIRCLE_PROJECT_REPONAME teovpn -h
 
-      # show current variables
-      - run: echo $CIRCLE_PROJECT_REPONAME
-      - run: echo $CIRCLE_BRANCH
-      - run: echo $CIRCLE_TAG
+      # login to ECR
+      - run: $(aws --region $AWS_REGION ecr get-login --no-include-email)
 
-      # Install dependences
-      - run: sh/build-ubuntu.sh
-      # Make
-      - run: ./autogen.sh --prefix=/usr
-      - run: make
-      # Test
-      - run: app/teovpn -?
-      - run: make test
+      # push image to ECR
+      - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:$CIRCLE_TAG
+      - run: docker push ${AWS_ECR_REPONAME}:$CIRCLE_TAG
+      - run: docker tag $CIRCLE_PROJECT_REPONAME ${AWS_ECR_REPONAME}:latest
+      - run: docker push ${AWS_ECR_REPONAME}:latest
 
-      # Build DEB package and upload it to repository
-      - run: sh/make_package deb
-
-      # build the application image
-      - run: sudo sysctl -w net.ipv4.ip_forward=1
-      - run: docker build --no-cache -t $CIRCLE_PROJECT_REPONAME -f ci-build-data/Dockerfile .
-
-      # Check created image
-      - run: docker run -it --rm --name $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME $CIRCLE_PROJECT_REPONAME -?
-
-      # deploy the image
-      - run: docker tag $CIRCLE_PROJECT_REPONAME gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-      - run: docker push gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-      #
-      - run: docker tag $CIRCLE_PROJECT_REPONAME gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:latest
-      - run: docker push gitlab.ksproject.org:5000/teonet/$CIRCLE_PROJECT_REPONAME:latest
-
-
-  testing: # runs not using Workflows must have a `build` job as entry point
-    working_directory: ~/mern-starter # directory where steps will run
-    docker: # run the steps with Docker
-      - image: circleci/node # ...with this image as the primary container; this is where all `steps` will run
-    steps: # a collection of executable commands
-       - run: echo Run tests of $CIRCLE_PROJECT_REPONAME project
-#      - checkout # special step to check out source code to working directory
-#      - run:
-#          name: update-npm
-#          command: 'sudo npm install -g npm@latest'
-#      - restore_cache: # special step to restore the dependency cache
-#          key: dependency-cache-{{ checksum "package.json" }}
-#      - run:
-#          name: install-npm-wee
-#          command: npm install
-#      - save_cache: # special step to save the dependency cache
-#          key: dependency-cache-{{ checksum "package.json" }}
-#          paths:
-#            - ./node_modules
-#      - run: # run tests
-#          name: test
-#          command: npm test
+  package-and-publish-release:
+    machine: true
+    working_directory: ~/teonet
+    steps:
+      - run: sudo apt-get update && sudo apt-get install -y openssh-client git
+      - run: DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" sudo apt-get -y install tzdata
+      - run: sudo apt install -y make pkg-config libtool autoconf intltool doxygen gcc g++ libssl-dev libev-dev libconfuse-dev uuid-dev libcunit1-dev cpputest libcurl4-openssl-dev
+      - checkout
+      - run: git submodule update --init --recursive
+      - run:
+          name: "package with packagecore"
+          command: |
+            # Clean up
+            rm -rf ./dist/*
+            # Pack source
+            git archive -o ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz --format tar.gz --prefix=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG#v}/ ${CIRCLE_TAG}
+            # Use latest installed python3 from pyenv
+            export PYENV_VERSION="$(pyenv versions | grep -Po '\b3\.\d+\.\d+' | tail -1)"
+            pip install packagecore
+            packagecore -c misc/packagecore/packagecore.yaml -o ./dist/ ${CIRCLE_TAG#v} ${CIRCLE_BUILD_NUM}
+            # Move source pack to dist
+            mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz dist/
+      - run:
+          name: "publish to GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t "${GITHUB_API_TOKEN}" -u "${CIRCLE_PROJECT_USERNAME}" -r "${CIRCLE_PROJECT_REPONAME}" -c "${CIRCLE_SHA1}" -body "$(cat ./misc/RELEASE_BODY)" ${CIRCLE_TAG} ./dist/
+      - run:
+          name: "publish docs to GitHub"
+          command: |
+            ./autogen.sh
+            ./configure
+            ./misc/make_remote_doc_upload.sh teonet 
 
 workflows:
-  version: 2
-  un-tagged:
+  version: 2.1
+  untagged:
     jobs:
-      - testing:
+     - testing
+     - compile
+  tagged-build:
+    jobs:
+      - package-and-publish-release:
+          context: CI_BUILD
           filters:
             tags:
-              ignore: /^v.*/
-
-      - un-tagged-build:
-          requires:
-            - testing
-          filters:
-            tags:
-              ignore: /^v.*/
-
-  tagged:
-    jobs:
-      - testing:
-          filters:
+              only: /^v\d+\.\d+\.\d+/
             branches:
               ignore: /.*/
-            tags:
-              only: /^v.*/
-
       - tagged-build:
-          requires:
-            - testing
+          context: CI_BUILD
           filters:
             branches:
               ignore: /.*/

@@ -18,13 +18,11 @@
 
 // Modules functions
 int add_suite_1_tests(void);
-#if TRUDP_VERSION == 1
-int add_suite_2_tests(void);
-#endif
 int add_suite_3_tests(void);
 int add_suite_4_tests(void);
 int add_suite_5_tests(void);
 int add_suite_6_tests(void);
+int add_suite_filter_tests(void);
 
 // Global variables
 CU_pSuite pSuite = NULL;
@@ -70,9 +68,6 @@ int main() {
         CU_cleanup_registry();
         return CU_get_error();
     }
-    #if TRUDP_VERSION == 1
-    add_suite_2_tests();
-    #endif
     
     // Add a suite to the registry
     pSuite = CU_add_suite("Teonet DB based at PBL KeyFile module functions", init_suite, clean_suite);
@@ -105,6 +100,14 @@ int main() {
         return CU_get_error();
     }
     add_suite_6_tests();
+
+    // Add a suite to the registry
+    pSuite = CU_add_suite("Text-filter module functions", init_suite, clean_suite);
+    if (NULL == pSuite) {
+        CU_cleanup_registry();
+        return CU_get_error();
+    }
+    add_suite_filter_tests();
 
     /* Run all tests using the CUnit Basic interface */
     CU_basic_set_mode(CU_BRM_VERBOSE);

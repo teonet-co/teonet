@@ -25,6 +25,7 @@
 #include "ev_mgr.h"
 #include "net_recon.h"
 #include "utils/rlutil.h"
+#include "utils/teo_memory.h"
 
 #define MODULE _ANSI_GREEN "net_reconnect" _ANSI_NONE
 
@@ -85,8 +86,8 @@ static void ksnReconnectCQueCallback(uint32_t id, int type, void *data) {
             #endif
             
             // If connected
-            ksnet_arp_data *arp;
-            if((arp = ksnetArpGet(karp, map_data->peer)) != NULL) {
+            //ksnet_arp_data *arp;
+            if((/*arp =*/ ksnetArpGet(karp, map_data->peer)) != NULL) {
                 
                 // ... do nothing ...
                 #ifdef DEBUG_KSNET
@@ -145,11 +146,11 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
     
     int retval = 0;
     
-    char *r_host = kev->ksn_cfg.r_host_name;
-    ksnet_arp_data *arp;
+    char *r_host = kev->teo_cfg.r_host_name;
+    ksnet_arp_data *arp_data;
 
     // If connected to r-host
-    if(r_host[0] && (arp = ksnetArpGet(kcor->ka, r_host)) != NULL) {
+    if(r_host[0] && (arp_data = (ksnet_arp_data *)ksnetArpGet(kcor->ka, r_host)) != NULL) {
 
         int rc = 0;
         reconnect_map_data md;
@@ -171,11 +172,11 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
             #endif
             
             // Send command reconnect to r-host
-            arp = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, r_host, 
+            arp_data = ksnCoreSendCmdto(((ksnCommandClass*)this->kco)->kc, r_host, 
                     CMD_RECONNECT, (void*)peer, peer_len);
 
             // Has not connected to r-host
-            if(arp == NULL) {
+            if(arp_data == NULL) {
                 
                 retval = -1; 
                 size_t vl;
@@ -195,7 +196,7 @@ static int ksnReconnectSend(ksnReconnectClass *this, const char *peer) {
                     
                     // Add callback to queue and wait timeout after ~5 sec ...
                     map_data->cq = ksnCQueAdd(((ksnetEvMgrClass*)kcor->ke)->kq, 
-                            this->callback, CHECK_EVENTS_AFTER / 2.0, map_data);
+                        this->callback, 5.0/*CHECK_EVENTS_AFTER / 2.0*/, map_data);
                 }
                 
                 // PBL error
@@ -277,10 +278,10 @@ static int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
     );
     #endif
     
-    ksnet_arp_data *arp;
+    ksnet_arp_data *arp_data;
             
     // Send reconnect answer command if requested peer is disconnected    
-    if((arp = ksnetArpGet(karp, rd->data)) == NULL)  
+    if((arp_data = (ksnet_arp_data *)ksnetArpGet(karp, rd->data)) == NULL)  
         
             this->sendAnswer(this, rd->from, rd->data);
 
@@ -294,7 +295,7 @@ static int ksnReconnectProcess(ksnReconnectClass *this, ksnCorePacketData *rd) {
 //        ksnCommandSendCmdConnect(kcom, rd->from, rd->data, arp->addr, arp->port);   
         
         // Send connect command request to peers
-        send_cmd_connected_cb(karp, rd->data, arp, rd);
+        send_cmd_connected_cb(karp, rd->data, arp_data, rd);
     }
     
     return 1;
@@ -357,7 +358,7 @@ ksnReconnectClass *ksnReconnectInit(void *kco) {
 
     #undef kev_
     
-    ksnReconnectClass *this = malloc(sizeof(ksnReconnectClass));
+    ksnReconnectClass *this = teo_malloc(sizeof(ksnReconnectClass));
     
     this->map = pblMapNewHashMap();
     this->this = this;

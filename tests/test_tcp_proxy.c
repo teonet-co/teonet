@@ -25,7 +25,7 @@ extern CU_pSuite pSuite;
 
 size_t ksnTCPProxyPackageCreate(void *buffer, size_t buffer_len, 
         const char *addr, int port, int cmd, const void *data, size_t data_len);
-uint8_t get_byte_checksum(void *data, size_t data_len);
+uint8_t get_byte_checksum(const uint8_t *data, size_t data_len);
 int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data, 
         size_t data_length);
 
@@ -35,8 +35,8 @@ int ksnTCPProxyPackageProcess(ksnTCPProxyPacketData *packet, void *data,
 #define ke_emul() \
   ksnetEvMgrClass ke_obj; \
   ksnetEvMgrClass *ke = &ke_obj; \
-  ke->ksn_cfg.tcp_allow_f = 0; \
-  ke->ksn_cfg.r_tcp_f = 0
+  ke->teo_cfg.tcp_allow_f = 0; \
+  ke->teo_cfg.r_tcp_f = 0
 
 //! Initialize/Destroy TCP Proxy module
 void test_5_1() {

@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "string_arr.h"
+#include "teo_memory.h"
 
 // Local functions
 static char *remove_extras(char *str, const char *extras);
@@ -32,10 +33,10 @@ ksnet_stringArr ksnet_stringArrCreate() {
 ksnet_stringArr ksnet_stringArrAdd(ksnet_stringArr *arr, const char* str) {
 
     int i = ksnet_stringArrLength(*arr);
-    if(!i) *arr = malloc(sizeof(ksnet_stringArr) * 2);
-    else *arr = realloc(*arr, sizeof(ksnet_stringArr) * (i+2) );
+    if(!i) *arr = teo_malloc(sizeof(ksnet_stringArr) * 2);
+    else *arr = teo_realloc(*arr, sizeof(ksnet_stringArr) * (i+2) );
 
-    (*arr)[i] = malloc(strlen(str) + 1);
+    (*arr)[i] = teo_malloc(strlen(str) + 1);
     strcpy((*arr)[i], str);
     (*arr)[i+1] = NULL;
 
@@ -112,7 +113,7 @@ ksnet_stringArr ksnet_stringArrFree(ksnet_stringArr *arr) {
 
         int i;
 
-        for(i = 0; (*arr)[i] != NULL; i++) free((*arr)[i]);
+        for(i = 0; (*arr)[i] != NULL; ++i) free((*arr)[i]);
         free(*arr);
 
         *arr = NULL;
@@ -140,7 +141,7 @@ ksnet_stringArr ksnet_stringArrSplit(const char* string, const char* separators,
 
     #define arr_realloc(_len_) \
         result_len = _len_; \
-        result = realloc(result, sizeof(char*) * result_len)
+        result = teo_realloc(result, sizeof(char*) * result_len)
 
     #define arr_inc_size(_pos_) \
         if(_pos_ >= result_len) { \

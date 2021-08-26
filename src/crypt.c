@@ -30,26 +30,30 @@ int num_crypt_module = 0;
 ksnCryptClass *ksnCryptInit(void *ke) {
 
     #define kev ((ksnetEvMgrClass*)ke)
-    
+
     ksnCryptClass *kcr = malloc(sizeof(ksnCryptClass));
+    if (kcr == NULL) {
+        fprintf(stderr, "Insufficient memory");
+        exit(EXIT_FAILURE);
+    }
     kcr->ke = ke;
 
     // A 128 bit IV
     const char *iv = "0123456789012345";
     static const char *key = "01234567890123456789012345678901";
     // Network key example: c7931346-add1-4945-b229-b52468f5d1d3
-    
+
     // Create unique network IV
-    strncpy((char*)kcr->iv, iv, BLOCK_SIZE);    
-    if(kev != NULL && kev->ksn_cfg.net_key[0]) 
-        strncpy((char*)kcr->iv, kev->ksn_cfg.net_key, BLOCK_SIZE);
-    
+    strncpy((char*)kcr->iv, iv, BLOCK_SIZE);
+    if(kev != NULL && kev->teo_cfg.net_key[0])
+        strncpy((char*)kcr->iv, kev->teo_cfg.net_key, BLOCK_SIZE);
+
     // Create unique network key
-    kcr->key = (unsigned char *)strdup((char*)key); 
-    if(kev != NULL && kev->ksn_cfg.net_key[0]) 
-        strncpy((char*)kcr->key, kev->ksn_cfg.net_key, KEY_SIZE);
-    if(kev != NULL && kev->ksn_cfg.network[0])
-        strncpy((char*)kcr->key, kev->ksn_cfg.network, KEY_SIZE);            
+    kcr->key = (unsigned char *)strdup((char*)key);
+    if(kev != NULL && kev->teo_cfg.net_key[0])
+        strncpy((char*)kcr->key, kev->teo_cfg.net_key, KEY_SIZE);
+    if(kev != NULL && kev->teo_cfg.network[0])
+        strncpy((char*)kcr->key, kev->teo_cfg.network, KEY_SIZE);
     kcr->key_len = strlen((char*)kcr->key); // 32 - 256 bits
     kcr->blocksize = BLOCK_SIZE;
 
@@ -57,12 +61,12 @@ ksnCryptClass *ksnCryptInit(void *ke) {
     if(!num_crypt_module) {
         ERR_load_crypto_strings();
         OpenSSL_add_all_algorithms();
-        OPENSSL_config(NULL);
+        //OPENSSL_config(NULL);
     }
     num_crypt_module++;
 
     return kcr;
-    
+
     #undef kev
 }
 
@@ -111,7 +115,7 @@ size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
    * IV size for *most* modes is the same as the block size. For AES this
    * is 128 bits */
   if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
-      
+
     handleErrors();
     return 0;
   }
@@ -120,7 +124,7 @@ size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
    * EVP_EncryptUpdate can be called multiple times if necessary
    */
   if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len)) {
-      
+
     handleErrors();
     return 0;
   }
@@ -130,7 +134,7 @@ size_t _encrypt(unsigned char *plaintext, size_t plaintext_len,
    * this stage.
    */
   if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) {
-      
+
       handleErrors();
       return 0;
   }
@@ -165,7 +169,7 @@ int _decrypt(ksnCryptClass *kcr, unsigned char *ciphertext, int ciphertext_len, 
 
   /* Create and initialize the context */
   if(!(ctx = EVP_CIPHER_CTX_new())) {
-      
+
       handleErrors();
       return 0;
   }
@@ -176,7 +180,7 @@ int _decrypt(ksnCryptClass *kcr, unsigned char *ciphertext, int ciphertext_len, 
    * IV size for *most* modes is the same as the block size. For AES this
    * is 128 bits */
   if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv)) {
-      
+
     handleErrors();
     return 0;
   }
@@ -185,7 +189,7 @@ int _decrypt(ksnCryptClass *kcr, unsigned char *ciphertext, int ciphertext_len, 
    * EVP_DecryptUpdate can be called multiple times if necessary
    */
   if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len)) {
-      
+
     handleErrors();
     return 0;
   }
@@ -195,7 +199,7 @@ int _decrypt(ksnCryptClass *kcr, unsigned char *ciphertext, int ciphertext_len, 
    * this stage.
    */
   if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) {
-      
+
         #ifdef DEBUG_KSNET
         ksn_printf(((ksnetEvMgrClass*)kcr->ke), MODULE, DEBUG,
                     "can't decrypt %d bytes package ...\n",
@@ -231,8 +235,8 @@ void *ksnEncryptPackage(ksnCryptClass *kcr, void *package,
     size_t ptr = 0;
 
     // Calculate encrypted length
-    *encrypt_len = ( ((package_len + 1) / kcr->blocksize) +
-                     ((package_len + 1) % kcr->blocksize ? 1 : 0) ) * kcr->blocksize;
+    *encrypt_len = (((package_len + 1) / kcr->blocksize) +
+                   (((package_len + 1) % kcr->blocksize) ? 1 : 0) ) * kcr->blocksize;
 
     // Create buffer if it NULL
     if(buffer == NULL) {
@@ -287,9 +291,9 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
     #endif
     *decrypt_len = _decrypt(kcr, package + ptr, package_len - ptr, kcr->key, kcr->iv,
         decrypted);
-    
-    // Copy decrypted data (if decrypted, or 
-    if(*decrypt_len) { 
+
+    // Copy decrypted data (if decrypted, or
+    if(*decrypt_len) {
 
         // Add a NULL terminator. We are expecting printable text
         decrypted[*decrypt_len] = '\0';
@@ -297,13 +301,13 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
         // Copy and free decrypted buffer
         memcpy(package + ptr, decrypted, *decrypt_len + 1);
     }
-    
+
     // If data not decrypted - return input package with package len
     else {
         ptr = 0;
         *decrypt_len = package_len;
     }
-    
+
     free(decrypted);
 
     return package + ptr;
@@ -311,15 +315,15 @@ void *ksnDecryptPackage(ksnCryptClass *kcr, void* package,
 
 /**
  * Simple check if the packet is encrypted
- * 
+ *
  * @param package Pointer to package
  * @param package_len Package length
- * @return 
+ * @return
  */
 int ksnCheckEncrypted(void *package, size_t package_len) {
-    
+
     size_t ptr = 0;
-    size_t decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);  
-    
+    size_t decrypt_len = *((uint16_t*)package); ptr += sizeof(uint16_t);
+
     return decrypt_len  && decrypt_len < package_len && !((package_len - ptr) % BLOCK_SIZE);
 }
